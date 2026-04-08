@@ -25,11 +25,19 @@ export default function AdminLoginPage() {
 
       if (res.ok) {
         router.push('/admin')
+        router.refresh()
       } else {
-        setErro('Senha incorreta. Tente novamente.')
+        let msg = 'Senha incorreta. Tente novamente.'
+        try {
+          const data = await res.json()
+          if (data?.error) msg = data.error
+        } catch { /* ignora */ }
+        console.error('[admin login] erro:', res.status, msg)
+        setErro(msg)
       }
-    } catch {
-      setErro('Erro de conexão. Tente novamente.')
+    } catch (err) {
+      console.error('[admin login] fetch error:', err)
+      setErro('Erro de conexão. Verifique sua internet e tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -85,8 +93,9 @@ export default function AdminLoginPage() {
             </div>
 
             {erro && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">
-                {erro}
+              <div className="bg-red-500/20 border border-red-500/50 rounded-xl px-4 py-3 text-red-300 text-sm font-medium flex items-start gap-2">
+                <span className="mt-0.5">&#9888;</span>
+                <span>{erro}</span>
               </div>
             )}
 
