@@ -8,6 +8,31 @@ export type FormaPagamento = 'pix' | 'cartao' | 'boleto'
 
 // ─── Produto ─────────────────────────────────────────────────────────────────
 
+/**
+ * Tipo completo do modelo Produto — espelha o schema Prisma.
+ * Decimal fields tipados como number | string para compatibilidade com
+ * Prisma.Decimal (serializa como string) e com valores numéricos nativos.
+ * imagens é Json no Prisma; usar `produto.imagens as string[]` no consumo.
+ */
+export interface Produto {
+  id:               string
+  erpProdutoId:     string
+  nome:             string
+  slug:             string
+  descricao:        string | null
+  // Prisma Decimal não é string | number — usar any para compatibilidade
+  // em runtime: sempre acessar via Number(produto.preco)
+  preco:            any
+  precoPromocional: any
+  // Json do Prisma — usar `produto.imagens as string[]` no consumo
+  imagens:          any
+  estoque:          number
+  categoria:        string
+  modelo:           string | null
+  ativo:            boolean
+  createdAt:        Date
+}
+
 /** Shape mínima usada em cards e listas (sem campos pesados como descricao) */
 export interface ProdutoCard {
   id: string

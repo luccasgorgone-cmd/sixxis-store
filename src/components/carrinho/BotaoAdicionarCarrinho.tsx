@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
-import type { Produto } from '@prisma/client'
+import type { Produto } from '@/types'
 
 interface Props {
   produto: Produto
