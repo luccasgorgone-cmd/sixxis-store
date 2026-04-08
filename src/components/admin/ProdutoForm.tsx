@@ -11,7 +11,17 @@ import {
   Trash2,
   ImageIcon,
   ChevronLeft,
+  Plus,
 } from 'lucide-react'
+
+interface VariacaoInput {
+  id?: string
+  nome: string
+  sku: string
+  preco: string
+  estoque: string
+  ativo: boolean
+}
 
 interface ProdutoFormData {
   sku: string
@@ -27,7 +37,11 @@ interface ProdutoFormData {
 }
 
 interface ProdutoFormProps {
-  initialData?: Partial<ProdutoFormData> & { imagens?: string[] }
+  initialData?: Partial<ProdutoFormData> & {
+    imagens?: string[]
+    temVariacoes?: boolean
+    variacoes?: VariacaoInput[]
+  }
   produtoId?: string
   mode: 'novo' | 'editar'
 }
@@ -48,6 +62,10 @@ function slugify(str: string) {
     .replace(/^-|-$/g, '')
 }
 
+function novaVariacao(): VariacaoInput {
+  return { nome: '', sku: '', preco: '', estoque: '0', ativo: true }
+}
+
 export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFormProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -66,12 +84,20 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     ativo: initialData?.ativo !== false,
   })
 
+  const [temVariacoes, setTemVariacoes] = useState(initialData?.temVariacoes ?? false)
+  const [variacoes, setVariacoes] = useState<VariacaoInput[]>(
+    initialData?.variacoes ?? [],
+  )
+
   const [imagens, setImagens] = useState<string[]>(initialData?.imagens ?? [])
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [erro, setErro] = useState('')
   const [deleting, setDeleting] = useState(false)
+
+  // Estoque calculado automaticamente quando temVariacoes
+  const estoqueCalculado = variacoes.reduce((s, v) => s + Number(v.estoque || 0), 0)
 
   function handleNomeChange(e: React.ChangeEvent<HTMLInputElement>) {
     const nome = e.target.value
@@ -86,28 +112,43 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }))
   }
 
-  const uploadFiles = useCallback(
-    async (files: FileList) => {
-      setUploading(true)
-      const newUrls: string[] = []
+  // ─── Variações ───────────────────────────────────────────────────────────────
 
-      for (const file of Array.from(files)) {
-        setUploadProgress((p) => [...p, `Enviando ${file.name}...`])
-        const fd = new FormData()
-        fd.append('file', file)
-        const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-        if (res.ok) {
-          const { url } = await res.json()
-          newUrls.push(url)
-        }
-        setUploadProgress((p) => p.filter((m) => m !== `Enviando ${file.name}...`))
+  function addVariacao() {
+    setVariacoes((prev) => [...prev, novaVariacao()])
+  }
+
+  function removeVariacao(index: number) {
+    setVariacoes((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  function updateVariacao(index: number, field: keyof VariacaoInput, value: string | boolean) {
+    setVariacoes((prev) =>
+      prev.map((v, i) => (i === index ? { ...v, [field]: value } : v)),
+    )
+  }
+
+  // ─── Imagens ─────────────────────────────────────────────────────────────────
+
+  const uploadFiles = useCallback(async (files: FileList) => {
+    setUploading(true)
+    const newUrls: string[] = []
+
+    for (const file of Array.from(files)) {
+      setUploadProgress((p) => [...p, `Enviando ${file.name}...`])
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      if (res.ok) {
+        const { url } = await res.json()
+        newUrls.push(url)
       }
+      setUploadProgress((p) => p.filter((m) => m !== `Enviando ${file.name}...`))
+    }
 
-      setImagens((prev) => [...prev, ...newUrls])
-      setUploading(false)
-    },
-    [],
-  )
+    setImagens((prev) => [...prev, ...newUrls])
+    setUploading(false)
+  }, [])
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files?.length) uploadFiles(e.target.files)
@@ -123,13 +164,34 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     setImagens((prev) => prev.filter((u) => u !== url))
   }
 
+  // ─── Submit ──────────────────────────────────────────────────────────────────
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setErro('')
 
-    if (!form.sku || !form.nome || !form.slug || !form.categoria || !form.preco) {
-      setErro('Preencha os campos obrigatórios: SKU, Nome, Slug, Categoria e Preço.')
+    if (!form.nome || !form.slug || !form.categoria || !form.preco) {
+      setErro('Preencha os campos obrigatórios: Nome, Slug, Categoria e Preço.')
       return
+    }
+
+    if (!temVariacoes && !form.sku) {
+      setErro('Preencha o SKU (obrigatório quando não há variações).')
+      return
+    }
+
+    if (temVariacoes && variacoes.length === 0) {
+      setErro('Adicione pelo menos uma variação.')
+      return
+    }
+
+    if (temVariacoes) {
+      for (const v of variacoes) {
+        if (!v.nome || !v.sku) {
+          setErro('Todas as variações precisam de nome e SKU.')
+          return
+        }
+      }
     }
 
     setSaving(true)
@@ -139,8 +201,10 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
       sku: form.sku || null,
       preco: Number(form.preco),
       precoPromocional: form.precoPromocional ? Number(form.precoPromocional) : null,
-      estoque: Number(form.estoque),
+      estoque: temVariacoes ? estoqueCalculado : Number(form.estoque),
       imagens,
+      temVariacoes,
+      variacoes: temVariacoes ? variacoes : [],
     }
 
     const url = mode === 'novo' ? '/api/admin/produtos' : `/api/admin/produtos/${produtoId}`
@@ -171,6 +235,8 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     router.push('/admin/produtos')
     router.refresh()
   }
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <form onSubmit={handleSubmit}>
@@ -231,25 +297,27 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               Informações básicas
             </h2>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  SKU <span className="text-red-500">*</span>
-                  <span
-                    title="O SKU é o código único do produto, usado para vincular ao ERP e abater estoque automaticamente."
-                    className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold cursor-help"
-                  >
-                    ?
-                  </span>
-                </label>
-                <input
-                  name="sku"
-                  value={form.sku}
-                  onChange={handleChange}
-                  placeholder="Ex: SX40-TREND-45L"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
-                />
-                <p className="text-xs text-gray-400 mt-1">Código único — vincula ao ERP e controla estoque</p>
-              </div>
+              {!temVariacoes && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    SKU <span className="text-red-500">*</span>
+                    <span
+                      title="O SKU é o código único do produto, usado para vincular ao ERP e abater estoque automaticamente."
+                      className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold cursor-help"
+                    >
+                      ?
+                    </span>
+                  </label>
+                  <input
+                    name="sku"
+                    value={form.sku}
+                    onChange={handleChange}
+                    placeholder="Ex: SX40-TREND-45L"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Código único — vincula ao ERP e controla estoque</p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -332,7 +400,8 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Preço (R$) <span className="text-red-500">*</span>
+                  {temVariacoes ? 'Preço base (referência)' : 'Preço (R$)'}{' '}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   name="preco"
@@ -345,6 +414,9 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
                   placeholder="0,00"
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
                 />
+                {temVariacoes && (
+                  <p className="text-xs text-gray-400 mt-1">Usado quando a variação não tem preço próprio</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -363,17 +435,150 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Estoque</label>
-                <input
-                  name="estoque"
-                  type="number"
-                  value={form.estoque}
-                  onChange={handleChange}
-                  min="0"
-                  placeholder="0"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
-                />
+                {temVariacoes ? (
+                  <div className="w-full border border-gray-100 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-gray-500 flex items-center">
+                    {estoqueCalculado} <span className="ml-1 text-xs">(soma das variações)</span>
+                  </div>
+                ) : (
+                  <input
+                    name="estoque"
+                    type="number"
+                    value={form.estoque}
+                    onChange={handleChange}
+                    min="0"
+                    placeholder="0"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                  />
+                )}
               </div>
             </div>
+          </div>
+
+          {/* Variações */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                Variações
+              </h2>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <span className="text-sm text-gray-500">
+                  {temVariacoes ? 'Ativado' : 'Desativado'}
+                </span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={temVariacoes}
+                    onChange={(e) => {
+                      setTemVariacoes(e.target.checked)
+                      if (e.target.checked && variacoes.length === 0) {
+                        setVariacoes([novaVariacao()])
+                      }
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-checked:bg-[#3cbfb3] rounded-full transition" />
+                  <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition peer-checked:translate-x-5" />
+                </div>
+              </label>
+            </div>
+
+            {!temVariacoes && (
+              <p className="text-sm text-gray-400">
+                Ative para cadastrar variações por voltagem, tamanho, cor, etc.
+              </p>
+            )}
+
+            {temVariacoes && (
+              <div>
+                <p className="text-xs text-gray-500 mb-3">
+                  Ex: 110V, 220V, Bivolt — cada variação tem SKU e estoque independentes.
+                </p>
+
+                {/* Tabela de variações */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2 pr-3">Nome</th>
+                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2 pr-3">SKU</th>
+                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2 pr-3">Preço (R$)</th>
+                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2 pr-3">Estoque</th>
+                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2 pr-3">Ativo</th>
+                        <th className="pb-2" />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {variacoes.map((v, i) => (
+                        <tr key={i}>
+                          <td className="py-2 pr-3">
+                            <input
+                              value={v.nome}
+                              onChange={(e) => updateVariacao(i, 'nome', e.target.value)}
+                              placeholder="110V"
+                              className="w-24 border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                            />
+                          </td>
+                          <td className="py-2 pr-3">
+                            <input
+                              value={v.sku}
+                              onChange={(e) => updateVariacao(i, 'sku', e.target.value)}
+                              placeholder="SX40-110V"
+                              className="w-36 border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                            />
+                          </td>
+                          <td className="py-2 pr-3">
+                            <input
+                              type="number"
+                              value={v.preco}
+                              onChange={(e) => updateVariacao(i, 'preco', e.target.value)}
+                              placeholder="Base"
+                              min="0"
+                              step="0.01"
+                              className="w-28 border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                            />
+                          </td>
+                          <td className="py-2 pr-3">
+                            <input
+                              type="number"
+                              value={v.estoque}
+                              onChange={(e) => updateVariacao(i, 'estoque', e.target.value)}
+                              min="0"
+                              className="w-20 border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                            />
+                          </td>
+                          <td className="py-2 pr-3">
+                            <input
+                              type="checkbox"
+                              checked={v.ativo}
+                              onChange={(e) => updateVariacao(i, 'ativo', e.target.checked)}
+                              className="w-4 h-4 accent-[#3cbfb3]"
+                            />
+                          </td>
+                          <td className="py-2">
+                            <button
+                              type="button"
+                              onClick={() => removeVariacao(i)}
+                              className="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-red-400 transition rounded-lg hover:bg-red-50"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={addVariacao}
+                  className="mt-3 flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar variação
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Fotos */}
@@ -457,7 +662,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
           </div>
         </div>
 
-        {/* Sidebar — Status */}
+        {/* Sidebar */}
         <div className="space-y-5">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider">
@@ -497,8 +702,16 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Estoque</dt>
-                <dd className="font-medium text-gray-700">{form.estoque || 0}</dd>
+                <dd className="font-medium text-gray-700">
+                  {temVariacoes ? estoqueCalculado : form.estoque || 0}
+                </dd>
               </div>
+              {temVariacoes && (
+                <div className="flex justify-between">
+                  <dt className="text-gray-500">Variações</dt>
+                  <dd className="font-medium text-gray-700">{variacoes.length}</dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-gray-500">Status</dt>
                 <dd className={`font-semibold ${form.ativo ? 'text-green-600' : 'text-gray-400'}`}>

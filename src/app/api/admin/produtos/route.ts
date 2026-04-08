@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
       OR: [
         { nome: { contains: q } },
         { modelo: { contains: q } },
+        { sku: { contains: q } },
       ],
     }),
     ...(categoria && { categoria }),
@@ -24,11 +25,21 @@ export async function GET(request: NextRequest) {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: 'desc' },
+      include: { variacoes: { orderBy: { createdAt: 'asc' } } },
     }),
     prisma.produto.count({ where }),
   ])
 
   return NextResponse.json({ produtos, total, page, limit })
+}
+
+interface VariacaoInput {
+  id?: string
+  nome: string
+  sku: string
+  preco?: string | number | null
+  estoque: string | number
+  ativo: boolean
 }
 
 export async function POST(request: NextRequest) {
@@ -46,6 +57,8 @@ export async function POST(request: NextRequest) {
     estoque,
     ativo,
     imagens,
+    temVariacoes,
+    variacoes,
   } = body
 
   if (!nome || !slug || !categoria || preco == null) {
@@ -53,6 +66,18 @@ export async function POST(request: NextRequest) {
   }
 
   const erpProdutoId = `ADMIN-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+
+  // Validar SKUs únicos das variações
+  const variacoesInput: VariacaoInput[] = temVariacoes ? (variacoes ?? []) : []
+  const skusVariacoes = variacoesInput.map((v) => v.sku).filter(Boolean)
+  if (new Set(skusVariacoes).size !== skusVariacoes.length) {
+    return NextResponse.json({ error: 'SKUs das variações devem ser únicos' }, { status: 400 })
+  }
+
+  // Estoque pai = soma das variações quando temVariacoes
+  const estoqueTotal = temVariacoes
+    ? variacoesInput.reduce((s, v) => s + Number(v.estoque || 0), 0)
+    : Number(estoque) || 0
 
   const produto = await prisma.produto.create({
     data: {
@@ -65,10 +90,23 @@ export async function POST(request: NextRequest) {
       modelo: modelo || null,
       preco: Number(preco),
       precoPromocional: precoPromocional ? Number(precoPromocional) : null,
-      estoque: Number(estoque) || 0,
+      estoque: estoqueTotal,
       ativo: ativo !== false,
       imagens: imagens ?? [],
+      temVariacoes: Boolean(temVariacoes),
+      variacoes: temVariacoes && variacoesInput.length > 0
+        ? {
+            create: variacoesInput.map((v) => ({
+              nome: v.nome,
+              sku: v.sku,
+              preco: v.preco ? Number(v.preco) : null,
+              estoque: Number(v.estoque || 0),
+              ativo: v.ativo !== false,
+            })),
+          }
+        : undefined,
     },
+    include: { variacoes: true },
   })
 
   return NextResponse.json({ produto }, { status: 201 })

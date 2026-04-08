@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import axios from 'axios'
+import { useCarrinho } from '@/hooks/useCarrinho'
 
 interface Props {
   enderecoId: string
@@ -12,6 +13,7 @@ interface Props {
 type FormaPagamento = 'pix' | 'cartao' | 'boleto'
 
 export default function FormPagamento({ enderecoId, frete, onPedidoCriado }: Props) {
+  const { itens } = useCarrinho()
   const [forma, setForma] = useState<FormaPagamento>('pix')
   const [erro, setErro] = useState('')
   const [carregando, setCarregando] = useState(false)
@@ -24,6 +26,12 @@ export default function FormPagamento({ enderecoId, frete, onPedidoCriado }: Pro
         enderecoId,
         formaPagamento: forma,
         frete,
+        itens: itens.map((i) => ({
+          produtoId:    i.produtoId,
+          quantidade:   i.quantidade,
+          variacaoId:   i.variacaoId,
+          variacaoNome: i.variacaoNome,
+        })),
       })
 
       if (forma !== 'cartao') {

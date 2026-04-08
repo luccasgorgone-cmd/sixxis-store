@@ -10,7 +10,10 @@ export default async function EditarProdutoPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const produto = await prisma.produto.findUnique({ where: { id } })
+  const produto = await prisma.produto.findUnique({
+    where: { id },
+    include: { variacoes: { orderBy: { createdAt: 'asc' } } },
+  })
 
   if (!produto) notFound()
 
@@ -30,6 +33,15 @@ export default async function EditarProdutoPage({
         estoque: String(produto.estoque),
         ativo: produto.ativo,
         imagens: (produto.imagens as string[]) ?? [],
+        temVariacoes: produto.temVariacoes,
+        variacoes: produto.variacoes.map((v) => ({
+          id: v.id,
+          nome: v.nome,
+          sku: v.sku,
+          preco: v.preco != null ? String(v.preco) : '',
+          estoque: String(v.estoque),
+          ativo: v.ativo,
+        })),
       }}
     />
   )

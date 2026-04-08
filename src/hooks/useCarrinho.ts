@@ -3,18 +3,25 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface ItemCarrinho {
-  produtoId: string
-  nome: string
-  preco: number
-  quantidade: number
+export interface ItemCarrinho {
+  produtoId:    string
+  nome:         string
+  preco:        number
+  quantidade:   number
+  variacaoId?:  string
+  variacaoNome?: string
+}
+
+// Chave única por produto + variação
+function itemKey(produtoId: string, variacaoId?: string) {
+  return produtoId + '::' + (variacaoId ?? '')
 }
 
 interface CarrinhoStore {
   itens: ItemCarrinho[]
   adicionarItem: (item: ItemCarrinho) => void
-  removerItem: (produtoId: string) => void
-  atualizarQuantidade: (produtoId: string, quantidade: number) => void
+  removerItem: (produtoId: string, variacaoId?: string) => void
+  atualizarQuantidade: (produtoId: string, quantidade: number, variacaoId?: string) => void
   limparCarrinho: () => void
   total: number
   totalItens: number
@@ -31,12 +38,15 @@ export const useCarrinho = create<CarrinhoStore>()(
         return get().itens.reduce((acc, item) => acc + item.quantidade, 0)
       },
       adicionarItem(item) {
+        const key = itemKey(item.produtoId, item.variacaoId)
         set((state) => {
-          const existente = state.itens.find((i) => i.produtoId === item.produtoId)
+          const existente = state.itens.find(
+            (i) => itemKey(i.produtoId, i.variacaoId) === key,
+          )
           if (existente) {
             return {
               itens: state.itens.map((i) =>
-                i.produtoId === item.produtoId
+                itemKey(i.produtoId, i.variacaoId) === key
                   ? { ...i, quantidade: i.quantidade + item.quantidade }
                   : i,
               ),
@@ -45,19 +55,23 @@ export const useCarrinho = create<CarrinhoStore>()(
           return { itens: [...state.itens, item] }
         })
       },
-      removerItem(produtoId) {
+      removerItem(produtoId, variacaoId) {
+        const key = itemKey(produtoId, variacaoId)
         set((state) => ({
-          itens: state.itens.filter((i) => i.produtoId !== produtoId),
+          itens: state.itens.filter(
+            (i) => itemKey(i.produtoId, i.variacaoId) !== key,
+          ),
         }))
       },
-      atualizarQuantidade(produtoId, quantidade) {
+      atualizarQuantidade(produtoId, quantidade, variacaoId) {
+        const key = itemKey(produtoId, variacaoId)
         if (quantidade <= 0) {
-          get().removerItem(produtoId)
+          get().removerItem(produtoId, variacaoId)
           return
         }
         set((state) => ({
           itens: state.itens.map((i) =>
-            i.produtoId === produtoId ? { ...i, quantidade } : i,
+            itemKey(i.produtoId, i.variacaoId) === key ? { ...i, quantidade } : i,
           ),
         }))
       },

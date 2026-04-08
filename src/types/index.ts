@@ -14,6 +14,17 @@ export type FormaPagamento = 'pix' | 'cartao' | 'boleto'
  * Prisma.Decimal (serializa como string) e com valores numéricos nativos.
  * imagens é Json no Prisma; usar `produto.imagens as string[]` no consumo.
  */
+export interface VariacaoProduto {
+  id:        string
+  produtoId: string
+  nome:      string
+  sku:       string
+  preco:     any
+  estoque:   number
+  ativo:     boolean
+  createdAt: Date
+}
+
 export interface Produto {
   id:               string
   erpProdutoId:     string
@@ -29,8 +40,11 @@ export interface Produto {
   estoque:          number
   categoria:        string
   modelo:           string | null
+  sku:              string | null
   ativo:            boolean
+  temVariacoes:     boolean
   createdAt:        Date
+  variacoes?:       VariacaoProduto[]
 }
 
 /** Shape mínima usada em cards e listas (sem campos pesados como descricao) */
@@ -50,10 +64,12 @@ export interface ProdutoCard {
 // ─── Carrinho ────────────────────────────────────────────────────────────────
 
 export interface ItemCarrinho {
-  produtoId: string
-  nome: string
-  preco: number
-  quantidade: number
+  produtoId:    string
+  nome:         string
+  preco:        number
+  quantidade:   number
+  variacaoId?:  string
+  variacaoNome?: string
 }
 
 // ─── Endereço ────────────────────────────────────────────────────────────────

@@ -31,43 +31,49 @@ export default function CarrinhoPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Itens */}
         <div className="lg:col-span-2 space-y-3">
-          {itens.map((item) => (
-            <div key={item.produtoId} className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4">
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-[#0a0a0a] truncate">{item.nome}</p>
-                <p className="text-sm text-[#3cbfb3] font-medium mt-0.5">R$ {item.preco.toFixed(2)}</p>
-              </div>
+          {itens.map((item) => {
+            const key = item.produtoId + (item.variacaoId ?? '')
+            return (
+              <div key={key} className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-[#0a0a0a] truncate">{item.nome}</p>
+                  {item.variacaoNome && (
+                    <p className="text-xs text-[#3cbfb3] font-medium mt-0.5">{item.variacaoNome}</p>
+                  )}
+                  <p className="text-sm text-[#3cbfb3] font-medium mt-0.5">R$ {item.preco.toFixed(2)}</p>
+                </div>
 
-              {/* Quantidade */}
-              <div className="flex items-center gap-1 border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                {/* Quantidade */}
+                <div className="flex items-center gap-1 border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                  <button
+                    onClick={() => atualizarQuantidade(item.produtoId, item.quantidade - 1, item.variacaoId)}
+                    className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg leading-none"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold">{item.quantidade}</span>
+                  <button
+                    onClick={() => atualizarQuantidade(item.produtoId, item.quantidade + 1, item.variacaoId)}
+                    className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg leading-none"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <p className="font-bold text-sm w-20 text-right shrink-0">
+                  R$ {(item.preco * item.quantidade).toFixed(2)}
+                </p>
+
                 <button
-                  onClick={() => atualizarQuantidade(item.produtoId, item.quantidade - 1)}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg leading-none"
+                  onClick={() => removerItem(item.produtoId, item.variacaoId)}
+                  className="text-gray-300 hover:text-red-400 transition shrink-0"
+                  aria-label="Remover item"
                 >
-                  −
-                </button>
-                <span className="w-8 text-center text-sm font-semibold">{item.quantidade}</span>
-                <button
-                  onClick={() => atualizarQuantidade(item.produtoId, item.quantidade + 1)}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg leading-none"
-                >
-                  +
+                  <Trash2 size={16} />
                 </button>
               </div>
-
-              <p className="font-bold text-sm w-20 text-right shrink-0">
-                R$ {(item.preco * item.quantidade).toFixed(2)}
-              </p>
-
-              <button
-                onClick={() => removerItem(item.produtoId)}
-                className="text-gray-300 hover:text-red-400 transition shrink-0"
-                aria-label="Remover item"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Resumo */}

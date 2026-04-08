@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import GaleriaProduto from '@/components/produto/GaleriaProduto'
 import BotaoAdicionarCarrinho from '@/components/carrinho/BotaoAdicionarCarrinho'
+import SeletorVariacao from '@/components/produto/SeletorVariacao'
 
 interface Params {
   slug: string
@@ -14,7 +15,15 @@ function formatBRL(value: number) {
 export default async function ProdutoPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
 
-  const produto = await prisma.produto.findUnique({ where: { slug } })
+  const produto = await prisma.produto.findUnique({
+    where: { slug },
+    include: {
+      variacoes: {
+        where: { ativo: true },
+        orderBy: { createdAt: 'asc' },
+      },
+    },
+  })
   if (!produto || !produto.ativo) notFound()
 
   const imagens    = produto.imagens as string[]
@@ -23,6 +32,15 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   const precoFinal  = promocional ?? preco
   const precoAtVista = precoFinal * 0.97
   const parcelamento = precoFinal / 12
+
+  const variacoes = produto.variacoes.map((v) => ({
+    id:      v.id,
+    nome:    v.nome,
+    sku:     v.sku,
+    preco:   v.preco != null ? Number(v.preco) : null,
+    estoque: v.estoque,
+    ativo:   v.ativo,
+  }))
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
@@ -46,27 +64,56 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             {produto.nome}
           </h1>
 
-          {/* Preços */}
-          <div className="mb-6 space-y-1">
-            {promocional && (
-              <p className="text-gray-400 line-through text-lg">
-                R$ {formatBRL(preco)}
+          {/* Preços — só mostrar se não tem variações (variações controlam preço) */}
+          {!produto.temVariacoes && (
+            <div className="mb-6 space-y-1">
+              {promocional && (
+                <p className="text-gray-400 line-through text-lg">
+                  R$ {formatBRL(preco)}
+                </p>
+              )}
+              <p className="text-4xl font-extrabold text-[#3cbfb3]">
+                R$ {formatBRL(precoFinal)}
               </p>
-            )}
-            <p className="text-4xl font-extrabold text-[#3cbfb3]">
-              R$ {formatBRL(precoFinal)}
-            </p>
-            <p className="text-sm text-[#2a9d8f] font-medium">
-              R$ {formatBRL(precoAtVista)} à vista no PIX (-3%)
-            </p>
-            <p className="text-sm text-gray-500">
-              ou 12x de R$ {formatBRL(parcelamento)} no cartão
-            </p>
-          </div>
+              <p className="text-sm text-[#2a9d8f] font-medium">
+                R$ {formatBRL(precoAtVista)} à vista no PIX (-3%)
+              </p>
+              <p className="text-sm text-gray-500">
+                ou 12x de R$ {formatBRL(parcelamento)} no cartão
+              </p>
+            </div>
+          )}
 
-          <p className="text-gray-700 mb-8 whitespace-pre-line leading-relaxed">{produto.descricao}</p>
+          {/* Preço base para produto COM variações (antes de selecionar) */}
+          {produto.temVariacoes && (
+            <div className="mb-6 space-y-1">
+              <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">A partir de</p>
+              {promocional && (
+                <p className="text-gray-400 line-through text-base">
+                  R$ {formatBRL(preco)}
+                </p>
+              )}
+              <p className="text-3xl font-extrabold text-[#3cbfb3]">
+                R$ {formatBRL(precoFinal)}
+              </p>
+            </div>
+          )}
 
-          {produto.estoque > 0 ? (
+          <p className="text-gray-700 mb-6 whitespace-pre-line leading-relaxed">{produto.descricao}</p>
+
+          {/* Seletor de variação OU botão direto */}
+          {produto.temVariacoes ? (
+            <SeletorVariacao
+              produto={{
+                id:               produto.id,
+                nome:             produto.nome,
+                preco,
+                precoPromocional: promocional,
+                estoque:          produto.estoque,
+              }}
+              variacoes={variacoes}
+            />
+          ) : produto.estoque > 0 ? (
             <>
               <BotaoAdicionarCarrinho produto={produto} />
               <p className="text-xs text-gray-400 mt-3">

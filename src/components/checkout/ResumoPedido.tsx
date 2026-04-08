@@ -1,8 +1,10 @@
 interface ItemResumo {
-  produtoId: string
-  nome: string
-  preco: number
-  quantidade: number
+  produtoId:    string
+  nome:         string
+  preco:        number
+  quantidade:   number
+  variacaoId?:  string
+  variacaoNome?: string
 }
 
 interface Props {
@@ -17,9 +19,12 @@ export default function ResumoPedido({ itens, total, frete }: Props) {
       <h3 className="font-bold text-base text-[#0a0a0a] mb-5">Resumo do Pedido</h3>
       <ul className="space-y-2.5 mb-5">
         {itens.map((item) => (
-          <li key={item.produtoId} className="flex justify-between text-sm">
+          <li key={item.produtoId + (item.variacaoId ?? '')} className="flex justify-between text-sm">
             <span className="text-gray-700">
-              {item.nome}{' '}
+              {item.nome}
+              {item.variacaoNome && (
+                <span className="text-[#3cbfb3] font-semibold"> ({item.variacaoNome})</span>
+              )}{' '}
               <span className="text-gray-400 text-xs">x{item.quantidade}</span>
             </span>
             <span className="font-medium">R$ {(item.preco * item.quantidade).toFixed(2)}</span>

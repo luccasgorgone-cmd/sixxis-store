@@ -53,14 +53,30 @@ model Produto {
   modelo           String?
   sku              String?  @unique
   ativo            Boolean  @default(true)
+  temVariacoes     Boolean  @default(false)
   createdAt        DateTime @default(now())
 
   itensPedido   ItemPedido[]
   itensCarrinho ItemCarrinho[]
+  variacoes     VariacaoProduto[]
 
   @@index([categoria])
   @@index([slug])
   @@index([ativo])
+}
+
+model VariacaoProduto {
+  id        String   @id @default(uuid())
+  produtoId String
+  produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  nome      String
+  sku       String   @unique
+  preco     Decimal? @db.Decimal(10, 2)
+  estoque   Int      @default(0)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([produtoId])
 }
 
 model Pedido {
@@ -90,6 +106,8 @@ model ItemPedido {
   produtoId      String
   quantidade     Int
   precoUnitario  Decimal  @db.Decimal(10, 2)
+  variacaoId     String?
+  variacaoNome   String?
 
   pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   produto        Produto  @relation(fields: [produtoId], references: [id])

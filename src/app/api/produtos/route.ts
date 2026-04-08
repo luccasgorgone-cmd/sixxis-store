@@ -25,6 +25,12 @@ export async function GET(request: NextRequest) {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { nome: 'asc' },
+      include: {
+        variacoes: {
+          where: { ativo: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     }),
     prisma.produto.count({ where }),
   ])

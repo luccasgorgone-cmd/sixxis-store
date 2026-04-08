@@ -19,7 +19,9 @@ interface Endereco {
 interface Produto { nome: string; sku: string | null; imagens: string[] }
 
 interface ItemPedido {
-  id: string; quantidade: number; precoUnitario: number; produto: Produto
+  id: string; quantidade: number; precoUnitario: number
+  variacaoId: string | null; variacaoNome: string | null
+  produto: Produto
 }
 
 interface Cliente { nome: string; email: string; telefone?: string | null }
@@ -161,7 +163,14 @@ function PedidoDetalhe({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{item.produto.nome}</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {item.produto.nome}
+                        {item.variacaoNome && (
+                          <span className="ml-1.5 text-xs font-semibold text-[#3cbfb3] bg-[#e8f8f7] px-1.5 py-0.5 rounded-md">
+                            {item.variacaoNome}
+                          </span>
+                        )}
+                      </p>
                       {item.produto.sku && <p className="text-xs font-mono text-gray-400">{item.produto.sku}</p>}
                     </div>
                     <div className="text-right shrink-0">
