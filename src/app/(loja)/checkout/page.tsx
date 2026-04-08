@@ -1,0 +1,121 @@
+'use client'
+
+import { useState } from 'react'
+import { useCarrinho } from '@/hooks/useCarrinho'
+import FormEndereco from '@/components/checkout/FormEndereco'
+import FormPagamento from '@/components/checkout/FormPagamento'
+import ResumoPedido from '@/components/checkout/ResumoPedido'
+import Link from 'next/link'
+import { CheckCircle } from 'lucide-react'
+
+type Etapa = 'endereco' | 'pagamento' | 'confirmacao'
+
+const etapaLabels: Record<Etapa, string> = {
+  endereco:    'Endereço',
+  pagamento:   'Pagamento',
+  confirmacao: 'Confirmação',
+}
+
+export default function CheckoutPage() {
+  const { itens, total, limparCarrinho } = useCarrinho()
+  const [etapa, setEtapa] = useState<Etapa>('endereco')
+  const [enderecoId, setEnderecoId] = useState<string | null>(null)
+  const [frete, setFrete] = useState(0)
+  const [pedidoId, setPedidoId] = useState<string | null>(null)
+
+  if (itens.length === 0 && etapa !== 'confirmacao') {
+    return (
+      <main className="max-w-2xl mx-auto px-6 py-20 text-center">
+        <p className="text-gray-500 mb-4">Adicione produtos ao carrinho antes de finalizar.</p>
+        <Link href="/produtos" className="btn-primary inline-flex">Ver Produtos</Link>
+      </main>
+    )
+  }
+
+  const etapas: Etapa[] = ['endereco', 'pagamento', 'confirmacao']
+
+  return (
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+      <h1 className="text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-8">Checkout</h1>
+
+      {/* Progresso */}
+      <div className="flex items-center gap-2 mb-10">
+        {etapas.map((e, i) => (
+          <div key={e} className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                  etapa === e
+                    ? 'bg-[#3cbfb3] text-white'
+                    : etapas.indexOf(etapa) > i
+                      ? 'bg-[#2a9d8f] text-white'
+                      : 'bg-gray-100 text-gray-500'
+                }`}
+              >
+                {i + 1}
+              </span>
+              <span className={`text-sm font-medium capitalize hidden sm:inline ${
+                etapa === e ? 'text-[#3cbfb3]' : 'text-gray-400'
+              }`}>
+                {etapaLabels[e]}
+              </span>
+            </div>
+            {i < 2 && (
+              <div className={`w-8 sm:w-16 h-0.5 ${
+                etapas.indexOf(etapa) > i ? 'bg-[#3cbfb3]' : 'bg-gray-200'
+              }`} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+          {etapa === 'endereco' && (
+            <FormEndereco
+              onProximo={(id, valorFrete) => {
+                setEnderecoId(id)
+                setFrete(valorFrete)
+                setEtapa('pagamento')
+              }}
+            />
+          )}
+          {etapa === 'pagamento' && enderecoId && (
+            <FormPagamento
+              enderecoId={enderecoId}
+              frete={frete}
+              onPedidoCriado={(id) => {
+                setPedidoId(id)
+                limparCarrinho()
+                setEtapa('confirmacao')
+              }}
+            />
+          )}
+          {etapa === 'confirmacao' && (
+            <div className="text-center py-16 bg-white border border-gray-200 rounded-xl">
+              <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-5">
+                <CheckCircle size={32} className="text-[#3cbfb3]" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-[#0a0a0a] mb-2">Pedido realizado!</h2>
+              <p className="text-gray-500 text-sm mb-1">
+                Seu pedido #{pedidoId?.slice(-8).toUpperCase()} foi confirmado.
+              </p>
+              <p className="text-gray-400 text-xs mb-8">
+                Você receberá atualizações por e-mail.
+              </p>
+              <Link href="/pedidos" className="btn-primary inline-flex">
+                Ver Meus Pedidos
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {etapa !== 'confirmacao' && (
+          <aside>
+            <ResumoPedido itens={itens} total={total} frete={frete} />
+          </aside>
+        )}
+      </div>
+    </main>
+  )
+}

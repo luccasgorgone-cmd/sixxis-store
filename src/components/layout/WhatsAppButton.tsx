@@ -10,9 +10,11 @@ export default function WhatsAppButton() {
     <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
       {/* Tooltip */}
       {hovered && (
-        <div className="bg-[#0a0a0a] text-white text-sm font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap animate-fade-in">
+        <div
+          className="bg-[#0a0a0a] text-white text-sm font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap"
+          style={{ position: 'relative' }}
+        >
           Fale conosco
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1.5 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-[#0a0a0a]" />
         </div>
       )}
 
@@ -21,11 +23,12 @@ export default function WhatsAppButton() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Falar no WhatsApp"
-        className="wa-pulse w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+        className="wa-pulse w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+        style={{ background: '#25D366' }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <MessageCircle size={28} className="text-white fill-white" />
+        <MessageCircle size={28} className="text-white" style={{ fill: 'white' }} />
       </a>
     </div>
   )

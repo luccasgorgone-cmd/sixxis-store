@@ -85,7 +85,8 @@ export default function SobrePage() {
             ].map(({ icon: Icon, title, text }) => (
               <div
                 key={title}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 border-t-4 border-t-[#3cbfb3]"
+                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
+                style={{ borderTop: '4px solid #3cbfb3' }}
               >
                 <div className="w-12 h-12 rounded-xl bg-[#e8f8f7] flex items-center justify-center mb-4">
                   <Icon size={22} className="text-[#3cbfb3]" />
@@ -103,23 +104,9 @@ export default function SobrePage() {
         <h2 className="section-title mb-10">Localização e Contato</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
-            {
-              icon:  MapPin,
-              title: 'Endereço',
-              info:  'Araçatuba, São Paulo — Brasil',
-            },
-            {
-              icon:  Phone,
-              title: 'Telefone / WhatsApp',
-              info:  '(18) 99999-9999',
-              href:  'https://wa.me/5518999999999',
-            },
-            {
-              icon:  Mail,
-              title: 'E-mail',
-              info:  'brasil.sixxis@gmail.com',
-              href:  'mailto:brasil.sixxis@gmail.com',
-            },
+            { icon: MapPin, title: 'Endereço',             info: 'Araçatuba, São Paulo — Brasil' },
+            { icon: Phone,  title: 'Telefone / WhatsApp',  info: '(18) 99999-9999',           href: 'https://wa.me/5518999999999' },
+            { icon: Mail,   title: 'E-mail',               info: 'brasil.sixxis@gmail.com',   href: 'mailto:brasil.sixxis@gmail.com' },
           ].map(({ icon: Icon, title, info, href }) => (
             <div key={title} className="bg-[#f8f9fa] rounded-xl p-6 flex items-start gap-4">
               <div className="w-10 h-10 rounded-full bg-[#e8f8f7] flex items-center justify-center shrink-0">
@@ -138,7 +125,7 @@ export default function SobrePage() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link href="/contato" className="btn-primary">
+          <Link href="/contato" className="btn-primary inline-flex">
             Fale Conosco
           </Link>
         </div>
