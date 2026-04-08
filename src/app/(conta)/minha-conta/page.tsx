@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { User, MapPin, ShoppingBag } from 'lucide-react'
-import type { Endereco } from '@prisma/client'
 
 export default async function MinhaContaPage() {
   const session = await auth()
@@ -56,7 +55,7 @@ export default async function MinhaContaPage() {
           <p className="text-gray-500 text-sm">Nenhum endereço cadastrado.</p>
         ) : (
           <ul className="space-y-3">
-            {cliente.enderecos.map((end: Endereco) => (
+            {cliente.enderecos.map((end: { id: string; logradouro: string; numero: string; complemento: string | null; bairro: string; cidade: string; estado: string; cep: string; principal: boolean }) => (
               <li key={end.id} className="text-sm border border-gray-200 rounded-lg p-3 bg-gray-50">
                 {end.logradouro}, {end.numero}
                 {end.complemento ? `, ${end.complemento}` : ''} — {end.bairro},{' '}
