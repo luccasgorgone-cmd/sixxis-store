@@ -14,10 +14,14 @@ import {
   Eye,
   EyeOff,
   Upload,
+  Globe,
+  LayoutTemplate,
 } from 'lucide-react'
 import { Toast } from '@/components/admin/Toast'
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
+
+const ESTADOS_BR = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
 const DEFAULTS: Record<string, string> = {
   loja_nome: 'Sixxis Store',
@@ -52,13 +56,55 @@ const DEFAULTS: Record<string, string> = {
   seo_description: 'Loja oficial Sixxis. Climatizadores, aspiradores, spinning e peças de reposição originais com entrega rápida para todo o Brasil.',
   seo_ga_id: '',
   seo_pixel_id: '',
+  // Transportadoras
+  melhorenvio_sandbox_token: '',
+  melhorenvio_prod_token: '',
+  melhorenvio_ambiente: 'sandbox',
+  melhorenvio_cep_origem: '16020355',
+  pacote_altura: '30',
+  pacote_largura: '30',
+  pacote_comprimento: '40',
+  pacote_peso: '5',
+  correios_ativo: 'false',
+  correios_contrato: '',
+  correios_pac: 'true',
+  correios_sedex: 'true',
+  correios_sedex10: 'false',
+  jadlog_ativo: 'false',
+  jadlog_token: '',
+  jadlog_contrato: '',
+  totalexpress_ativo: 'false',
+  totalexpress_token: '',
+  prazo_adicional: '1',
+  peso_divisor: '6000',
+  frete_gratis_estados: '[]',
+  // Editor do site
+  hero_imagem_url: '',
+  hero_titulo: 'Climatizadores, Aspiradores e Spinning',
+  hero_subtitulo: 'Produtos originais Sixxis com entrega rápida para todo o Brasil.',
+  hero_cta_texto: 'Ver Produtos',
+  hero_cta_link: '/produtos',
+  pq_sixxis_1_titulo: 'Qualidade Original',
+  pq_sixxis_1_texto: 'Todos os produtos são 100% originais Sixxis com garantia de fábrica.',
+  pq_sixxis_2_titulo: 'Entrega Rápida',
+  pq_sixxis_2_texto: 'Enviamos para todo o Brasil com Correios e transportadoras parceiras.',
+  pq_sixxis_3_titulo: 'Suporte Especializado',
+  pq_sixxis_3_texto: 'Equipe técnica pronta para ajudar com instalação e manutenção.',
+  newsletter_ativo: 'true',
+  newsletter_titulo: 'Fique por dentro das novidades',
+  newsletter_subtitulo: 'Receba ofertas exclusivas e lançamentos diretamente no seu email.',
+  whatsapp_banner_titulo: 'Precisa de ajuda?',
+  whatsapp_banner_subtitulo: 'Nossa equipe está pronta para te atender via WhatsApp.',
+  rodape_tagline: 'Tecnologia e qualidade para seu conforto e bem-estar.',
 }
 
 const TABS = [
   { id: 'loja', label: 'Informações da Loja', icon: Store },
   { id: 'aparencia', label: 'Aparência', icon: Palette },
   { id: 'frete', label: 'Frete e Pagamento', icon: Truck },
+  { id: 'transportadoras', label: 'Transportadoras', icon: Globe },
   { id: 'integracoes', label: 'Integrações', icon: Plug },
+  { id: 'editor', label: 'Editor do Site', icon: LayoutTemplate },
   { id: 'seo', label: 'SEO', icon: Search },
   { id: 'seguranca', label: 'Segurança', icon: Shield },
 ]
@@ -699,11 +745,246 @@ export default function ConfiguracoesPage() {
     )
   }
 
+  function renderTransportadoras() {
+    const keys = [
+      'melhorenvio_sandbox_token','melhorenvio_prod_token','melhorenvio_ambiente',
+      'melhorenvio_cep_origem','pacote_altura','pacote_largura','pacote_comprimento','pacote_peso',
+      'correios_ativo','correios_contrato','correios_pac','correios_sedex','correios_sedex10',
+      'jadlog_ativo','jadlog_token','jadlog_contrato',
+      'totalexpress_ativo','totalexpress_token',
+      'prazo_adicional','peso_divisor','frete_gratis_estados',
+    ]
+    const estadosSelecionados: string[] = (() => { try { return JSON.parse(configs.frete_gratis_estados || '[]') } catch { return [] } })()
+    function toggleEstado(uf: string) {
+      const next = estadosSelecionados.includes(uf)
+        ? estadosSelecionados.filter((e) => e !== uf)
+        : [...estadosSelecionados, uf]
+      set('frete_gratis_estados', JSON.stringify(next))
+    }
+    return (
+      <div className="space-y-5">
+        <Card title="Melhor Envio">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Ambiente">
+                <select value={configs.melhorenvio_ambiente} onChange={(e) => set('melhorenvio_ambiente', e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white">
+                  <option value="sandbox">Sandbox (testes)</option>
+                  <option value="producao">Produção</option>
+                </select>
+              </Field>
+              <Field label="CEP de origem">
+                <Input value={configs.melhorenvio_cep_origem} onChange={(v) => set('melhorenvio_cep_origem', v)} placeholder="00000000" />
+              </Field>
+            </div>
+            <Field label="Token Sandbox">
+              <MaskedInput value={configs.melhorenvio_sandbox_token} onChange={(v) => set('melhorenvio_sandbox_token', v)} placeholder="eyJ..." />
+            </Field>
+            <Field label="Token Produção">
+              <MaskedInput value={configs.melhorenvio_prod_token} onChange={(v) => set('melhorenvio_prod_token', v)} placeholder="eyJ..." />
+            </Field>
+          </div>
+        </Card>
+
+        <Card title="Dimensões padrão dos pacotes">
+          <div className="grid grid-cols-4 gap-4">
+            {[['pacote_altura','Altura (cm)'],['pacote_largura','Largura (cm)'],['pacote_comprimento','Comprimento (cm)'],['pacote_peso','Peso (kg)']].map(([key, label]) => (
+              <Field key={key} label={label}>
+                <Input type="number" value={configs[key]} onChange={(v) => set(key, v)} placeholder="0" />
+              </Field>
+            ))}
+          </div>
+        </Card>
+
+        <Card title="Correios">
+          <Toggle checked={configs.correios_ativo === 'true'} onChange={(v) => set('correios_ativo', v ? 'true' : 'false')} label="Ativar Correios" />
+          <div className="mt-4 space-y-3">
+            <Field label="Código de contrato (opcional)">
+              <Input value={configs.correios_contrato} onChange={(v) => set('correios_contrato', v)} placeholder="Contrato Correios" />
+            </Field>
+            <p className="text-xs font-medium text-gray-500">Serviços habilitados:</p>
+            <div className="flex gap-4">
+              {[['correios_pac','PAC'],['correios_sedex','SEDEX'],['correios_sedex10','SEDEX 10']].map(([key, label]) => (
+                <label key={key} className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={configs[key] === 'true'}
+                    onChange={(e) => set(key, e.target.checked ? 'true' : 'false')}
+                    className="w-4 h-4 accent-[#3cbfb3]" />
+                  <span className="text-sm text-gray-700">{label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        <div className="grid grid-cols-2 gap-5">
+          <Card title="Jadlog">
+            <Toggle checked={configs.jadlog_ativo === 'true'} onChange={(v) => set('jadlog_ativo', v ? 'true' : 'false')} label="Ativar Jadlog" />
+            <div className="mt-4 space-y-3">
+              <Field label="Token API"><MaskedInput value={configs.jadlog_token} onChange={(v) => set('jadlog_token', v)} placeholder="Token..." /></Field>
+              <Field label="Conta / Contrato"><Input value={configs.jadlog_contrato} onChange={(v) => set('jadlog_contrato', v)} /></Field>
+            </div>
+          </Card>
+          <Card title="Total Express">
+            <Toggle checked={configs.totalexpress_ativo === 'true'} onChange={(v) => set('totalexpress_ativo', v ? 'true' : 'false')} label="Ativar Total Express" />
+            <div className="mt-4">
+              <Field label="Token API"><MaskedInput value={configs.totalexpress_token} onChange={(v) => set('totalexpress_token', v)} placeholder="Token..." /></Field>
+            </div>
+          </Card>
+        </div>
+
+        <Card title="Configurações gerais de frete">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Prazo adicional (dias)" hint="Tempo de handling antes do despacho">
+                <Input type="number" value={configs.prazo_adicional} onChange={(v) => set('prazo_adicional', v)} placeholder="1" />
+              </Field>
+              <Field label="Divisor peso volumétrico" hint="Padrão: 6000">
+                <Input type="number" value={configs.peso_divisor} onChange={(v) => set('peso_divisor', v)} placeholder="6000" />
+              </Field>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Frete grátis por estado</p>
+              <div className="flex flex-wrap gap-2">
+                {ESTADOS_BR.map((uf) => {
+                  const selected = estadosSelecionados.includes(uf)
+                  return (
+                    <button key={uf} type="button" onClick={() => toggleEstado(uf)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                        selected ? 'bg-[#3cbfb3] text-white border-[#3cbfb3]' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      }`}>{uf}</button>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-gray-400 mt-2">{estadosSelecionados.length} estado{estadosSelecionados.length !== 1 ? 's' : ''} selecionado{estadosSelecionados.length !== 1 ? 's' : ''}</p>
+            </div>
+          </div>
+        </Card>
+
+        <SaveButton loading={saving} onClick={() => save(keys)} />
+      </div>
+    )
+  }
+
+  function renderEditor() {
+    const heroInputRef = useRef<HTMLInputElement>(null)
+    const [uploadingHero, setUploadingHero] = useState(false)
+
+    async function handleHeroUpload(e: React.ChangeEvent<HTMLInputElement>) {
+      const file = e.target.files?.[0]; if (!file) return
+      setUploadingHero(true)
+      const fd = new FormData(); fd.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      if (res.ok) {
+        const { url } = await res.json()
+        set('hero_imagem_url', url)
+        await fetch('/api/admin/configuracoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chave: 'hero_imagem_url', valor: url }) })
+        showToast('Banner atualizado!')
+      } else showToast('Erro no upload.', 'error')
+      setUploadingHero(false); e.target.value = ''
+    }
+
+    const keys = [
+      'hero_imagem_url','hero_titulo','hero_subtitulo','hero_cta_texto','hero_cta_link',
+      'pq_sixxis_1_titulo','pq_sixxis_1_texto','pq_sixxis_2_titulo','pq_sixxis_2_texto','pq_sixxis_3_titulo','pq_sixxis_3_texto',
+      'newsletter_ativo','newsletter_titulo','newsletter_subtitulo',
+      'whatsapp_banner_titulo','whatsapp_banner_subtitulo','rodape_tagline',
+    ]
+    return (
+      <div className="space-y-5">
+        <Card title="Banner principal (Hero)">
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Imagem do banner</p>
+              <div className="flex items-center gap-4">
+                {configs.hero_imagem_url && (
+                  <div className="w-32 h-16 rounded-xl overflow-hidden border border-gray-200">
+                    <Image src={configs.hero_imagem_url} alt="Hero" width={128} height={64} className="object-cover w-full h-full" unoptimized />
+                  </div>
+                )}
+                <button type="button" onClick={() => heroInputRef.current?.click()} disabled={uploadingHero}
+                  className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50">
+                  {uploadingHero ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {configs.hero_imagem_url ? 'Trocar imagem' : 'Fazer upload'}
+                </button>
+                <input ref={heroInputRef} type="file" accept="image/*" onChange={handleHeroUpload} className="hidden" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Título">
+                <Input value={configs.hero_titulo} onChange={(v) => set('hero_titulo', v)} placeholder="Título principal" />
+              </Field>
+              <Field label="Subtítulo">
+                <Input value={configs.hero_subtitulo} onChange={(v) => set('hero_subtitulo', v)} placeholder="Descrição" />
+              </Field>
+              <Field label="Texto do botão CTA">
+                <Input value={configs.hero_cta_texto} onChange={(v) => set('hero_cta_texto', v)} placeholder="Ver Produtos" />
+              </Field>
+              <Field label="Link do botão">
+                <Input value={configs.hero_cta_link} onChange={(v) => set('hero_cta_link', v)} placeholder="/produtos" />
+              </Field>
+            </div>
+          </div>
+        </Card>
+
+        <Card title='Seção "Por que Sixxis?"'>
+          <div className="space-y-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="border border-gray-100 rounded-xl p-4 space-y-3">
+                <p className="text-xs font-semibold text-gray-400 uppercase">Card {n}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Título">
+                    <Input value={configs[`pq_sixxis_${n}_titulo`]} onChange={(v) => set(`pq_sixxis_${n}_titulo`, v)} placeholder={`Título ${n}`} />
+                  </Field>
+                  <Field label="Texto">
+                    <Input value={configs[`pq_sixxis_${n}_texto`]} onChange={(v) => set(`pq_sixxis_${n}_texto`, v)} placeholder="Descrição..." />
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card title="Newsletter">
+          <Toggle checked={configs.newsletter_ativo === 'true'} onChange={(v) => set('newsletter_ativo', v ? 'true' : 'false')} label="Exibir seção newsletter" />
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <Field label="Título">
+              <Input value={configs.newsletter_titulo} onChange={(v) => set('newsletter_titulo', v)} />
+            </Field>
+            <Field label="Subtítulo">
+              <Input value={configs.newsletter_subtitulo} onChange={(v) => set('newsletter_subtitulo', v)} />
+            </Field>
+          </div>
+        </Card>
+
+        <Card title="Banner WhatsApp">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Título">
+              <Input value={configs.whatsapp_banner_titulo} onChange={(v) => set('whatsapp_banner_titulo', v)} />
+            </Field>
+            <Field label="Subtítulo">
+              <Input value={configs.whatsapp_banner_subtitulo} onChange={(v) => set('whatsapp_banner_subtitulo', v)} />
+            </Field>
+          </div>
+        </Card>
+
+        <Card title="Rodapé">
+          <Field label="Tagline da empresa">
+            <Input value={configs.rodape_tagline} onChange={(v) => set('rodape_tagline', v)} placeholder="Tecnologia e qualidade..." />
+          </Field>
+        </Card>
+
+        <SaveButton loading={saving} onClick={() => save(keys)} />
+      </div>
+    )
+  }
+
   const TAB_RENDERERS: Record<string, () => React.ReactNode> = {
     loja: renderLoja,
     aparencia: renderAparencia,
     frete: renderFrete,
+    transportadoras: renderTransportadoras,
     integracoes: renderIntegracoes,
+    editor: renderEditor,
     seo: renderSeo,
     seguranca: renderSeguranca,
   }

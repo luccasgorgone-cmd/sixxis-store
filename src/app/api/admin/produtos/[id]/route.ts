@@ -25,6 +25,7 @@ export async function PUT(
   const body = await request.json()
 
   const {
+    sku,
     nome,
     slug,
     descricao,
@@ -40,6 +41,7 @@ export async function PUT(
   const produto = await prisma.produto.update({
     where: { id },
     data: {
+      sku: sku || null,
       nome,
       slug,
       descricao: descricao || null,

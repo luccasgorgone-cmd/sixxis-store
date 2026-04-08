@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 
 export default function AdminLoginPage() {
@@ -48,11 +49,16 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm px-4">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-baseline">
-            <span className="text-3xl font-black tracking-tight text-white">SIXXIS</span>
-            <span className="text-3xl font-black tracking-tight text-[#3cbfb3]">.store</span>
+          <div className="flex justify-center mb-3">
+            <Image
+              src="/logo-sixxis.png"
+              alt="Sixxis"
+              width={130}
+              height={44}
+              className="object-contain brightness-0 invert"
+            />
           </div>
-          <p className="text-[#3cbfb3]/60 text-sm mt-2 uppercase tracking-widest font-medium">
+          <p className="text-[#3cbfb3]/60 text-sm uppercase tracking-widest font-medium">
             Painel Admin
           </p>
         </div>

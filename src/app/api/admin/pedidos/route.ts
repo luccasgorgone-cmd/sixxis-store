@@ -4,11 +4,31 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const status = searchParams.get('status') ?? ''
+  const q = searchParams.get('q') ?? ''
+  const pagamento = searchParams.get('pagamento') ?? ''
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'))
   const limit = 20
 
   const where = {
     ...(status && { status }),
+    ...(pagamento && { formaPagamento: pagamento }),
+    ...(from || to
+      ? {
+          createdAt: {
+            ...(from ? { gte: new Date(from + 'T00:00:00') } : {}),
+            ...(to ? { lte: new Date(to + 'T23:59:59') } : {}),
+          },
+        }
+      : {}),
+    ...(q && {
+      OR: [
+        { id: { contains: q } },
+        { cliente: { nome: { contains: q } } },
+        { cliente: { email: { contains: q } } },
+      ],
+    }),
   }
 
   const [pedidos, total] = await Promise.all([
@@ -18,10 +38,11 @@ export async function GET(request: NextRequest) {
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
-        cliente: { select: { nome: true, email: true } },
+        cliente: { select: { nome: true, email: true, telefone: true } },
+        endereco: true,
         itens: {
           include: {
-            produto: { select: { nome: true, imagens: true } },
+            produto: { select: { nome: true, sku: true, imagens: true } },
           },
         },
       },

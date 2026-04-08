@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut } from 'lucide-react'
 import { useState } from 'react'
 
@@ -30,12 +31,17 @@ export default function AdminSidebar() {
   return (
     <aside className="w-60 shrink-0 bg-[#0f1f1e] flex flex-col h-full">
       {/* Logo */}
-      <div className="px-6 py-6 border-b border-white/10">
-        <Link href="/admin" className="inline-flex items-baseline">
-          <span className="text-xl font-black tracking-tight text-white">SIXXIS</span>
-          <span className="text-xl font-black tracking-tight text-[#3cbfb3]">.store</span>
+      <div className="px-6 py-5 border-b border-white/10">
+        <Link href="/admin" className="block">
+          <Image
+            src="/logo-sixxis.png"
+            alt="Sixxis"
+            width={130}
+            height={44}
+            className="object-contain brightness-0 invert"
+          />
         </Link>
-        <p className="text-white/30 text-xs mt-1 uppercase tracking-widest">Admin</p>
+        <p className="text-white/30 text-xs mt-2 uppercase tracking-widest">Admin</p>
       </div>
 
       {/* Navigation */}

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 
 interface ProdutoFormData {
+  sku: string
   nome: string
   slug: string
   descricao: string
@@ -53,6 +54,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
   const [dragging, setDragging] = useState(false)
 
   const [form, setForm] = useState<ProdutoFormData>({
+    sku: initialData?.sku ?? '',
     nome: initialData?.nome ?? '',
     slug: initialData?.slug ?? '',
     descricao: initialData?.descricao ?? '',
@@ -125,8 +127,8 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     e.preventDefault()
     setErro('')
 
-    if (!form.nome || !form.slug || !form.categoria || !form.preco) {
-      setErro('Preencha os campos obrigatórios: Nome, Slug, Categoria e Preço.')
+    if (!form.sku || !form.nome || !form.slug || !form.categoria || !form.preco) {
+      setErro('Preencha os campos obrigatórios: SKU, Nome, Slug, Categoria e Preço.')
       return
     }
 
@@ -134,6 +136,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
 
     const body = {
       ...form,
+      sku: form.sku || null,
       preco: Number(form.preco),
       precoPromocional: form.precoPromocional ? Number(form.precoPromocional) : null,
       estoque: Number(form.estoque),
@@ -228,6 +231,26 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               Informações básicas
             </h2>
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  SKU <span className="text-red-500">*</span>
+                  <span
+                    title="O SKU é o código único do produto, usado para vincular ao ERP e abater estoque automaticamente."
+                    className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold cursor-help"
+                  >
+                    ?
+                  </span>
+                </label>
+                <input
+                  name="sku"
+                  value={form.sku}
+                  onChange={handleChange}
+                  placeholder="Ex: SX40-TREND-45L"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+                <p className="text-xs text-gray-400 mt-1">Código único — vincula ao ERP e controla estoque</p>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Nome <span className="text-red-500">*</span>

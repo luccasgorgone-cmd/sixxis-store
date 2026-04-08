@@ -51,6 +51,7 @@ model Produto {
   estoque          Int      @default(0)
   categoria        String
   modelo           String?
+  sku              String?  @unique
   ativo            Boolean  @default(true)
   createdAt        DateTime @default(now())
 
@@ -69,9 +70,10 @@ model Pedido {
   total          Decimal    @db.Decimal(10, 2)
   frete          Decimal    @db.Decimal(10, 2)
   formaPagamento String
-  mpPaymentId    String?
-  enderecoId     String
-  erpPedidoId    String?    @unique
+  mpPaymentId      String?
+  codigoRastreio   String?
+  enderecoId       String
+  erpPedidoId      String?    @unique
   createdAt      DateTime   @default(now())
 
   cliente        Cliente    @relation(fields: [clienteId], references: [id])

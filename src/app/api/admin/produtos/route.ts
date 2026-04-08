@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
 
   const {
+    sku,
     nome,
     slug,
     descricao,
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
   const produto = await prisma.produto.create({
     data: {
       erpProdutoId,
+      sku: sku || null,
       nome,
       slug,
       descricao: descricao || null,

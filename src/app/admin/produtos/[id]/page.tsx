@@ -19,6 +19,7 @@ export default async function EditarProdutoPage({
       mode="editar"
       produtoId={produto.id}
       initialData={{
+        sku: produto.sku ?? '',
         nome: produto.nome,
         slug: produto.slug,
         descricao: produto.descricao ?? '',
