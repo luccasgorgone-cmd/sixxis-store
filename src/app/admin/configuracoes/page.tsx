@@ -247,6 +247,8 @@ export default function ConfiguracoesPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const heroInputRef = useRef<HTMLInputElement>(null)
+  const [uploadingHero, setUploadingHero] = useState(false)
 
   // Password change state
   const [senhaAtual, setSenhaAtual] = useState('')
@@ -865,24 +867,30 @@ export default function ConfiguracoesPage() {
     )
   }
 
-  function renderEditor() {
-    const heroInputRef = useRef<HTMLInputElement>(null)
-    const [uploadingHero, setUploadingHero] = useState(false)
-
-    async function handleHeroUpload(e: React.ChangeEvent<HTMLInputElement>) {
-      const file = e.target.files?.[0]; if (!file) return
-      setUploadingHero(true)
-      const fd = new FormData(); fd.append('file', file)
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-      if (res.ok) {
-        const { url } = await res.json()
-        set('hero_imagem_url', url)
-        await fetch('/api/admin/configuracoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chave: 'hero_imagem_url', valor: url }) })
-        showToast('Banner atualizado!')
-      } else showToast('Erro no upload.', 'error')
-      setUploadingHero(false); e.target.value = ''
+  async function handleHeroUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingHero(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    if (res.ok) {
+      const { url } = await res.json()
+      set('hero_imagem_url', url)
+      await fetch('/api/admin/configuracoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chave: 'hero_imagem_url', valor: url }),
+      })
+      showToast('Banner atualizado!')
+    } else {
+      showToast('Erro no upload.', 'error')
     }
+    setUploadingHero(false)
+    e.target.value = ''
+  }
 
+  function renderEditor() {
     const keys = [
       'hero_imagem_url','hero_titulo','hero_subtitulo','hero_cta_texto','hero_cta_link',
       'pq_sixxis_1_titulo','pq_sixxis_1_texto','pq_sixxis_2_titulo','pq_sixxis_2_texto','pq_sixxis_3_titulo','pq_sixxis_3_texto',
