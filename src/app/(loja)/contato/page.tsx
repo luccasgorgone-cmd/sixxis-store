@@ -12,8 +12,8 @@ const infos = [
   {
     icon:  MessageCircle,
     title: 'WhatsApp',
-    lines: ['(18) 99999-9999', 'Resposta rápida'],
-    href:  'https://wa.me/5518999999999',
+    lines: ['(18) 99747-4701', 'Resposta rápida'],
+    href:  'https://wa.me/5518997474701',
   },
   {
     icon:  Mail,
@@ -24,7 +24,7 @@ const infos = [
   {
     icon:  MapPin,
     title: 'Localização',
-    lines: ['Araçatuba, São Paulo', 'Brasil'],
+    lines: ['R. Anhanguera, 1711 - Icaray', 'Araçatuba - SP, 16020-355'],
   },
   {
     icon:  Clock,
@@ -34,8 +34,8 @@ const infos = [
   {
     icon:  Phone,
     title: 'Telefone',
-    lines: ['(18) 99999-9999'],
-    href:  'tel:+5518999999999',
+    lines: ['(18) 99747-4701'],
+    href:  'tel:+5518997474701',
   },
 ]
 
@@ -99,17 +99,25 @@ export default function ContatoPage() {
               ))}
             </div>
 
-            {/* Mapa OpenStreetMap */}
+            {/* Mapa OpenStreetMap — R. Anhanguera, 1711, Araçatuba-SP */}
             <div className="mt-8 rounded-xl overflow-hidden border border-gray-200">
               <iframe
-                title="Localização Sixxis — Araçatuba, SP"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=-50.5247,-21.2178,-50.4247,-21.1478&layer=mapnik&marker=-21.1828,-50.4747"
+                title="Localização Sixxis — R. Anhanguera, 1711, Araçatuba-SP"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=-50.4567%2C-21.2043%2C-50.4367%2C-21.1843&layer=mapnik&marker=-21.1943%2C-50.4467"
                 width="100%"
-                height="200"
+                height="220"
                 style={{ border: 0, display: 'block' }}
                 loading="lazy"
               />
             </div>
+            <a
+              href="https://www.openstreetmap.org/?mlat=-21.1943&mlon=-50.4467#map=16/-21.1943/-50.4467"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mt-2 text-xs text-[#3cbfb3] hover:underline"
+            >
+              <MapPin size={11} /> Ver mapa maior
+            </a>
           </div>
         </div>
       </section>

@@ -41,7 +41,7 @@ export default async function PecasPage() {
               Entre em contato para verificar disponibilidade de peças específicas.
             </p>
             <a
-              href="https://wa.me/5518999999999"
+              href="https://wa.me/5518997474701"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary mt-6 inline-flex"

@@ -12,7 +12,7 @@ import MobileMenu from './MobileMenu'
 const announcements = [
   '🚚 Frete grátis acima de R$\u00a0500 para todo o Brasil',
   '💳 Parcele em até 12x sem juros no cartão',
-  '📦 Produtos originais com garantia Sixxis',
+  '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
 ]
 
 function AnnouncementBar() {
@@ -65,7 +65,7 @@ export default function Header() {
       <AnnouncementBar />
 
       {/* ── Header principal ─────────────────────────────────────────── */}
-      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+      <header className="bg-[#0f1f1e] border-b border-[#3cbfb3]/20 shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
           {/* Logo */}
@@ -75,23 +75,23 @@ export default function Header() {
               alt="Sixxis"
               width={120}
               height={40}
-              className="object-contain"
+              className="object-contain brightness-0 invert"
               priority
             />
           </Link>
 
           {/* Busca desktop */}
           <div className="flex-1 max-w-sm hidden lg:block mx-4">
-            <SearchBar />
+            <SearchBar dark />
           </div>
 
           {/* Nav desktop */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-700 ml-auto">
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium ml-auto">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className="relative py-1 hover:text-[#3cbfb3] transition group"
+                className="relative py-1 text-white/80 hover:text-[#3cbfb3] transition group"
               >
                 {label}
                 <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-[#3cbfb3] group-hover:w-full transition-all duration-200" />
@@ -104,7 +104,7 @@ export default function Header() {
             {/* Carrinho */}
             <Link
               href="/carrinho"
-              className="relative p-2 text-gray-700 hover:text-[#3cbfb3] transition"
+              className="relative p-2 text-white hover:text-[#3cbfb3] transition"
               aria-label="Carrinho"
             >
               <ShoppingCart size={22} />
@@ -120,14 +120,14 @@ export default function Header() {
               <div className="hidden lg:flex items-center gap-2">
                 <Link
                   href="/minha-conta"
-                  className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#3cbfb3] transition"
+                  className="flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-[#3cbfb3] transition"
                 >
                   <User size={18} />
                   Conta
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-xs text-gray-400 hover:text-red-500 transition"
+                  className="text-xs text-white/40 hover:text-red-400 transition"
                 >
                   Sair
                 </button>
@@ -136,13 +136,13 @@ export default function Header() {
               <div className="hidden lg:flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="btn-outline py-2 px-4 text-sm"
+                  className="text-sm font-medium px-4 py-1.5 rounded-full border border-white/30 text-white hover:border-[#3cbfb3] hover:text-[#3cbfb3] transition"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="btn-primary py-2 px-4 text-sm"
+                  className="text-sm font-bold px-4 py-1.5 rounded-full bg-[#3cbfb3] text-white hover:bg-[#2a9d8f] transition"
                 >
                   Cadastrar
                 </Link>
@@ -151,13 +151,13 @@ export default function Header() {
 
             {/* Hambúrguer mobile */}
             <button
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
             >
               {menuOpen
-                ? <X size={22} className="text-gray-700" />
-                : <Menu size={22} className="text-gray-700" />
+                ? <X size={22} className="text-white" />
+                : <Menu size={22} className="text-white" />
               }
             </button>
           </div>
@@ -165,7 +165,7 @@ export default function Header() {
 
         {/* Busca mobile */}
         <div className="lg:hidden px-4 pb-3">
-          <SearchBar />
+          <SearchBar dark />
         </div>
       </header>
 

@@ -105,7 +105,7 @@ export default function SobrePage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
             { icon: MapPin, title: 'Endereço',             info: 'Araçatuba, São Paulo — Brasil' },
-            { icon: Phone,  title: 'Telefone / WhatsApp',  info: '(18) 99999-9999',           href: 'https://wa.me/5518999999999' },
+            { icon: Phone,  title: 'Telefone / WhatsApp',  info: '(18) 99747-4701',           href: 'https://wa.me/5518997474701' },
             { icon: Mail,   title: 'E-mail',               info: 'brasil.sixxis@gmail.com',   href: 'mailto:brasil.sixxis@gmail.com' },
           ].map(({ icon: Icon, title, info, href }) => (
             <div key={title} className="bg-[#f8f9fa] rounded-xl p-6 flex items-start gap-4">

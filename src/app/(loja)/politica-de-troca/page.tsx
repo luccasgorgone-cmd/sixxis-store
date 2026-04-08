@@ -114,7 +114,7 @@ export default function PoliticaDeTrocaPage() {
                 {
                   step: '01',
                   title: 'Entre em contato',
-                  text:  'Envie uma mensagem via WhatsApp (18) 99999-9999 ou e-mail brasil.sixxis@gmail.com informando o número do pedido e o motivo da solicitação.',
+                  text:  'Envie uma mensagem via WhatsApp (18) 99747-4701 ou e-mail brasil.sixxis@gmail.com informando o número do pedido e o motivo da solicitação.',
                 },
                 {
                   step: '02',
@@ -170,8 +170,8 @@ export default function PoliticaDeTrocaPage() {
               Para qualquer dúvida ou para iniciar o processo de troca, entre em contato com nossa equipe:
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <a href="https://wa.me/5518999999999" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm">
-                WhatsApp (18) 99999-9999
+              <a href="https://wa.me/5518997474701" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm">
+                WhatsApp (18) 99747-4701
               </a>
               <a href="mailto:brasil.sixxis@gmail.com" className="btn-outline text-sm">
                 brasil.sixxis@gmail.com

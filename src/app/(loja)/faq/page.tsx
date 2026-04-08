@@ -39,7 +39,7 @@ const faqs = [
   },
   {
     q: 'Vocês têm assistência técnica?',
-    a: 'Sim. Contamos com uma equipe de suporte técnico especializado para auxiliar em dúvidas de instalação, uso e manutenção. Para atendimento técnico, entre em contato via WhatsApp (18) 99999-9999 ou pelo e-mail brasil.sixxis@gmail.com.',
+    a: 'Sim. Contamos com uma equipe de suporte técnico especializado para auxiliar em dúvidas de instalação, uso e manutenção. Para atendimento técnico, entre em contato via WhatsApp (18) 99747-4701 ou pelo e-mail brasil.sixxis@gmail.com.',
   },
   {
     q: 'Como funciona o parcelamento no cartão?',
@@ -86,7 +86,7 @@ export default function FaqPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="https://wa.me/5518999999999"
+              href="https://wa.me/5518997474701"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary"
