@@ -189,7 +189,7 @@ export default async function HomePage() {
           <h2 className="section-title mb-10">Por que Sixxis?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {porqueSixxis.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="bg-white border border-gray-200 rounded-xl p-6 border-t-4 border-t-[#3cbfb3]">
+              <div key={title} className="bg-white border border-gray-200 rounded-xl p-6" style={{ borderTop: '4px solid #3cbfb3' }}>
                 <div className="w-12 h-12 rounded-xl bg-[#e8f8f7] flex items-center justify-center mb-4">
                   <Icon size={22} className="text-[#3cbfb3]" />
                 </div>
