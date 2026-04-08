@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
-  const secret = process.env.ADMIN_SECRET
+  // Busca senha salva no banco (via painel de configurações); fallback para env var
+  const dbConfig = await prisma.configuracao.findUnique({ where: { chave: 'admin_secret' } })
+  const secret = dbConfig?.valor ?? process.env.ADMIN_SECRET
 
   // Debug — visível nos logs do Railway
+  console.log('[admin/auth] secret source:', dbConfig ? 'banco' : 'env')
   console.log('[admin/auth] ADMIN_SECRET:', secret ? `definido (${secret.length} chars)` : 'NÃO DEFINIDO')
 
   if (!secret) {

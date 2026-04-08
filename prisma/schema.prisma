@@ -118,3 +118,10 @@ model ItemCarrinho {
 
   @@unique([carrinhoId, produtoId])
 }
+
+model Configuracao {
+  id        String   @id @default(uuid())
+  chave     String   @unique
+  valor     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
