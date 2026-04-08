@@ -8,14 +8,15 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import type { Produto } from '@/types'
 
 interface Props {
-  produto: Produto
+  produto:      Produto
+  showDesconto?: boolean
 }
 
 function formatBRL(value: number) {
   return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-export default function CardProduto({ produto }: Props) {
+export default function CardProduto({ produto, showDesconto }: Props) {
   const { adicionarItem } = useCarrinho()
   const [adicionado, setAdicionado] = useState(false)
 
@@ -60,10 +61,13 @@ export default function CardProduto({ produto }: Props) {
           </div>
         )}
 
-        {/* Badge OFERTA */}
+        {/* Badge OFERTA / % de desconto */}
         {promocional && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
-            OFERTA
+            {showDesconto && preco > 0
+              ? `-${Math.round(((preco - promocional) / preco) * 100)}%`
+              : 'OFERTA'
+            }
           </span>
         )}
 

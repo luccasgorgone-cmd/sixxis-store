@@ -5,14 +5,16 @@ import axios from 'axios'
 import { useCarrinho } from '@/hooks/useCarrinho'
 
 interface Props {
-  enderecoId: string
-  frete: number
+  enderecoId:     string
+  frete:          number
+  cupomCodigo:    string | null
+  desconto:       number
   onPedidoCriado: (pedidoId: string) => void
 }
 
 type FormaPagamento = 'pix' | 'cartao' | 'boleto'
 
-export default function FormPagamento({ enderecoId, frete, onPedidoCriado }: Props) {
+export default function FormPagamento({ enderecoId, frete, cupomCodigo, desconto, onPedidoCriado }: Props) {
   const { itens } = useCarrinho()
   const [forma, setForma] = useState<FormaPagamento>('pix')
   const [erro, setErro] = useState('')
@@ -32,6 +34,8 @@ export default function FormPagamento({ enderecoId, frete, onPedidoCriado }: Pro
           variacaoId:   i.variacaoId,
           variacaoNome: i.variacaoNome,
         })),
+        cupomCodigo: cupomCodigo ?? undefined,
+        desconto:    desconto ?? 0,
       })
 
       if (forma !== 'cartao') {

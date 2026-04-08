@@ -50,6 +50,7 @@ const navLinks = [
   { href: '/produtos?categoria=aspiradores',    label: 'Aspiradores' },
   { href: '/produtos?categoria=spinning',       label: 'Spinning' },
   { href: '/pecas',                             label: 'Peças' },
+  { href: '/ofertas',                           label: 'Ofertas', destaque: true },
   { href: '/sobre',                             label: 'Sobre' },
   { href: '/contato',                           label: 'Contato' },
 ]
@@ -87,13 +88,14 @@ export default function Header() {
 
           {/* Nav desktop */}
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium ml-auto">
-            {navLinks.map(({ href, label }) => (
+            {navLinks.map(({ href, label, destaque }) => (
               <Link
                 key={href}
                 href={href}
-                className="relative py-1 text-white/80 hover:text-[#3cbfb3] transition group"
+                className={`relative py-1 transition group ${destaque ? 'text-[#3cbfb3] font-bold' : 'text-white/80 hover:text-[#3cbfb3]'}`}
               >
                 {label}
+                {destaque && <span className="ml-1 text-[10px] bg-red-500 text-white font-bold px-1.5 py-0.5 rounded-full align-middle">HOT</span>}
                 <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-[#3cbfb3] group-hover:w-full transition-all duration-200" />
               </Link>
             ))}

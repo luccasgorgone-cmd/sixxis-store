@@ -15,6 +15,8 @@ const criarPedidoSchema = z.object({
   formaPagamento: z.string(),
   frete:          z.number().nonnegative(),
   itens:          z.array(itemSchema).min(1),
+  cupomCodigo:    z.string().optional(),
+  desconto:       z.number().nonnegative().optional(),
 })
 
 export async function GET() {
@@ -48,7 +50,8 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { enderecoId, formaPagamento, frete, itens } = parsed.data
+  const { enderecoId, formaPagamento, frete, itens, cupomCodigo, desconto: descontoReq } = parsed.data
+  const desconto = descontoReq ?? 0
 
   // Buscar produtos e variações para calcular preços
   const produtoIds = [...new Set(itens.map((i) => i.produtoId))]
@@ -102,7 +105,9 @@ export async function POST(request: NextRequest) {
       enderecoId,
       formaPagamento,
       frete,
-      total:          subtotal + frete,
+      desconto,
+      cupomCodigo:    cupomCodigo ?? null,
+      total:          Math.max(0, subtotal + frete - desconto),
       status:         'pendente',
       itens: {
         create: itensPedido.map((item) => ({

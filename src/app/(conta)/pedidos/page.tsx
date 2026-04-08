@@ -85,9 +85,17 @@ export default async function PedidosPage() {
 
               <div className="flex justify-between items-center border-t border-gray-100 pt-3">
                 <p className="text-sm text-gray-500">Total do pedido</p>
-                <p className="font-bold text-[#3cbfb3]">
-                  R$ {Number(pedido.total).toFixed(2)}
-                </p>
+                <div className="flex items-center gap-4">
+                  <p className="font-bold text-[#3cbfb3]">
+                    R$ {Number(pedido.total).toFixed(2)}
+                  </p>
+                  <Link
+                    href={`/pedidos/${pedido.id}`}
+                    className="text-xs font-semibold text-[#3cbfb3] hover:text-[#2a9d8f] border border-[#3cbfb3]/30 hover:border-[#3cbfb3] rounded-lg px-3 py-1.5 transition"
+                  >
+                    Ver detalhes →
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

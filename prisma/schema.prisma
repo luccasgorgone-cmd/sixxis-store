@@ -16,9 +16,12 @@ model Cliente {
   erpClienteId  String?    @unique
   createdAt     DateTime   @default(now())
 
-  enderecos     Endereco[]
-  pedidos       Pedido[]
-  carrinho      Carrinho?
+  enderecos       Endereco[]
+  pedidos         Pedido[]
+  carrinho        Carrinho?
+  avaliacoes      Avaliacao[]
+  pontos          PontosCliente?
+  historicoPontos HistoricoPontos[]
 }
 
 model Endereco {
@@ -59,6 +62,9 @@ model Produto {
   itensPedido   ItemPedido[]
   itensCarrinho ItemCarrinho[]
   variacoes     VariacaoProduto[]
+  destaques     ProdutoDestaque[]
+  avaliacoes    Avaliacao[]
+  listaEspera   ListaEspera[]
 
   @@index([categoria])
   @@index([slug])
@@ -85,16 +91,18 @@ model Pedido {
   status         String     @default("pendente")
   total          Decimal    @db.Decimal(10, 2)
   frete          Decimal    @db.Decimal(10, 2)
+  desconto       Decimal    @default(0) @db.Decimal(10, 2)
+  cupomCodigo    String?
   formaPagamento String
-  mpPaymentId      String?
-  codigoRastreio   String?
-  enderecoId       String
-  erpPedidoId      String?    @unique
+  mpPaymentId    String?
+  codigoRastreio String?
+  enderecoId     String
+  erpPedidoId    String?    @unique
   createdAt      DateTime   @default(now())
 
-  cliente        Cliente    @relation(fields: [clienteId], references: [id])
-  endereco       Endereco   @relation(fields: [enderecoId], references: [id])
-  itens          ItemPedido[]
+  cliente  Cliente    @relation(fields: [clienteId], references: [id])
+  endereco Endereco   @relation(fields: [enderecoId], references: [id])
+  itens    ItemPedido[]
 
   @@index([clienteId])
   @@index([status])
@@ -144,4 +152,87 @@ model Configuracao {
   chave     String   @unique
   valor     String   @db.Text
   updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id        String   @id @default(uuid())
+  imagem    String
+  titulo    String?
+  subtitulo String?
+  link      String?
+  ordem     Int      @default(0)
+  ativo     Boolean  @default(true)
+  tempoCads Int      @default(5)
+  createdAt DateTime @default(now())
+}
+
+model ProdutoDestaque {
+  id        String   @id @default(uuid())
+  produtoId String
+  produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  ordem     Int      @default(0)
+  secao     String   @default("mais-vendidos")
+  createdAt DateTime @default(now())
+
+  @@index([secao])
+}
+
+model Avaliacao {
+  id         String   @id @default(uuid())
+  produtoId  String
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  clienteId  String
+  cliente    Cliente  @relation(fields: [clienteId], references: [id])
+  nota       Int
+  titulo     String?
+  comentario String?  @db.Text
+  aprovada   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([produtoId, aprovada])
+}
+
+model Cupom {
+  id          String    @id @default(uuid())
+  codigo      String    @unique
+  tipo        String    @default("percentual")
+  valor       Decimal   @db.Decimal(10, 2)
+  usoMaximo   Int?
+  usoAtual    Int       @default(0)
+  valorMinimo Decimal?  @db.Decimal(10, 2)
+  expiresAt   DateTime?
+  ativo       Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+}
+
+model PontosCliente {
+  id        String   @id @default(uuid())
+  clienteId String   @unique
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  pontos    Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model HistoricoPontos {
+  id        String   @id @default(uuid())
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  pontos    Int
+  tipo      String
+  descricao String?
+  pedidoId  String?
+  createdAt DateTime @default(now())
+
+  @@index([clienteId])
+}
+
+model ListaEspera {
+  id         String   @id @default(uuid())
+  produtoId  String
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  email      String
+  notificado Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([produtoId, notificado])
 }

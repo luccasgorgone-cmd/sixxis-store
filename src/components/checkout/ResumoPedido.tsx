@@ -8,12 +8,16 @@ interface ItemResumo {
 }
 
 interface Props {
-  itens: ItemResumo[]
-  total: number
-  frete: number
+  itens:       ItemResumo[]
+  total:       number
+  frete:       number
+  desconto?:   number
+  cupomCodigo?: string | null
 }
 
-export default function ResumoPedido({ itens, total, frete }: Props) {
+export default function ResumoPedido({ itens, total, frete, desconto = 0, cupomCodigo }: Props) {
+  const subtotal = total + desconto - frete
+
   return (
     <div className="bg-[#f8f9fa] border border-gray-200 rounded-xl p-6 sticky top-24">
       <h3 className="font-bold text-base text-[#0a0a0a] mb-5">Resumo do Pedido</h3>
@@ -35,7 +39,7 @@ export default function ResumoPedido({ itens, total, frete }: Props) {
       <div className="border-t border-gray-200 pt-4 space-y-2 text-sm">
         <div className="flex justify-between text-gray-600">
           <span>Subtotal</span>
-          <span>R$ {(total - frete).toFixed(2)}</span>
+          <span>R$ {subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-gray-600">
           <span>Frete</span>
@@ -43,6 +47,12 @@ export default function ResumoPedido({ itens, total, frete }: Props) {
             {frete === 0 ? 'A calcular' : `R$ ${frete.toFixed(2)}`}
           </span>
         </div>
+        {desconto > 0 && (
+          <div className="flex justify-between text-green-600">
+            <span>Cupom{cupomCodigo ? ` (${cupomCodigo})` : ''}</span>
+            <span className="font-semibold">-R$ {desconto.toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between font-bold text-base border-t border-gray-200 pt-3 mt-1">
           <span>Total</span>
           <span className="text-[#3cbfb3]">R$ {total.toFixed(2)}</span>

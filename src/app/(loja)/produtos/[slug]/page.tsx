@@ -1,8 +1,12 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 import GaleriaProduto from '@/components/produto/GaleriaProduto'
 import BotaoAdicionarCarrinho from '@/components/carrinho/BotaoAdicionarCarrinho'
 import SeletorVariacao from '@/components/produto/SeletorVariacao'
+import AvaliacoesProduto from '@/components/produto/AvaliacoesProduto'
+import FormAvaliacao from '@/components/produto/FormAvaliacao'
+import ListaEsperaForm from '@/components/produto/ListaEsperaForm'
 
 interface Params {
   slug: string
@@ -15,6 +19,9 @@ function formatBRL(value: number) {
 export default async function ProdutoPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
 
+  const session = await auth()
+  const clienteEmail = session?.user?.email
+
   const produto = await prisma.produto.findUnique({
     where: { slug },
     include: {
@@ -25,6 +32,18 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     },
   })
   if (!produto || !produto.ativo) notFound()
+
+  // Check if logged-in customer purchased this product
+  let comprouProduto = false
+  if (clienteEmail) {
+    const compra = await prisma.itemPedido.findFirst({
+      where: {
+        produtoId: produto.id,
+        pedido: { cliente: { email: clienteEmail }, status: { not: 'cancelado' } },
+      },
+    })
+    comprouProduto = !!compra
+  }
 
   const imagens    = produto.imagens as string[]
   const preco      = Number(produto.preco)
@@ -121,11 +140,14 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
               </p>
             </>
           ) : (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-500 font-medium text-sm">Produto fora de estoque</p>
-              <p className="text-xs text-red-400 mt-1">
-                Entre em contato para informações sobre disponibilidade.
-              </p>
+            <div className="space-y-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-500 font-medium text-sm">Produto fora de estoque</p>
+                <p className="text-xs text-red-400 mt-1">
+                  Cadastre seu e-mail e avise quando voltar ao estoque.
+                </p>
+              </div>
+              <ListaEsperaForm produtoId={produto.id} />
             </div>
           )}
 
@@ -145,6 +167,16 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           </div>
         </div>
       </div>
+      {/* ── Avaliações ────────────────────────────────────────────────────────── */}
+      <section className="mt-16 border-t border-gray-100 pt-12">
+        <div className="grid md:grid-cols-2 gap-10">
+          <AvaliacoesProduto produtoId={produto.id} />
+          <FormAvaliacao
+            produtoId={produto.id}
+            comprouProduto={comprouProduto}
+          />
+        </div>
+      </section>
     </main>
   )
 }

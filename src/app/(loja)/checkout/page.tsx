@@ -5,6 +5,7 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import FormEndereco from '@/components/checkout/FormEndereco'
 import FormPagamento from '@/components/checkout/FormPagamento'
 import ResumoPedido from '@/components/checkout/ResumoPedido'
+import CampoCupom from '@/components/checkout/CampoCupom'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
 
@@ -22,6 +23,8 @@ export default function CheckoutPage() {
   const [enderecoId, setEnderecoId] = useState<string | null>(null)
   const [frete, setFrete] = useState(0)
   const [pedidoId, setPedidoId] = useState<string | null>(null)
+  const [cupomCodigo, setCupomCodigo] = useState<string | null>(null)
+  const [desconto, setDesconto] = useState(0)
 
   if (itens.length === 0 && etapa !== 'confirmacao') {
     return (
@@ -33,6 +36,7 @@ export default function CheckoutPage() {
   }
 
   const etapas: Etapa[] = ['endereco', 'pagamento', 'confirmacao']
+  const totalFinal = Math.max(0, total + frete - desconto)
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
@@ -84,6 +88,8 @@ export default function CheckoutPage() {
             <FormPagamento
               enderecoId={enderecoId}
               frete={frete}
+              cupomCodigo={cupomCodigo}
+              desconto={desconto}
               onPedidoCriado={(id) => {
                 setPedidoId(id)
                 limparCarrinho()
@@ -100,19 +106,35 @@ export default function CheckoutPage() {
               <p className="text-gray-500 text-sm mb-1">
                 Seu pedido #{pedidoId?.slice(-8).toUpperCase()} foi confirmado.
               </p>
-              <p className="text-gray-400 text-xs mb-8">
-                Você receberá atualizações por e-mail.
-              </p>
-              <Link href="/pedidos" className="btn-primary inline-flex">
-                Ver Meus Pedidos
-              </Link>
+              <p className="text-gray-400 text-xs mb-8">Você receberá atualizações por e-mail.</p>
+              <Link href="/pedidos" className="btn-primary inline-flex">Ver Meus Pedidos</Link>
             </div>
           )}
         </div>
 
         {etapa !== 'confirmacao' && (
-          <aside>
-            <ResumoPedido itens={itens} total={total} frete={frete} />
+          <aside className="space-y-4">
+            {/* Campo cupom — apenas na etapa pagamento */}
+            {etapa === 'pagamento' && (
+              <CampoCupom
+                total={total + frete}
+                onAplicar={(codigo, valor) => {
+                  setCupomCodigo(codigo)
+                  setDesconto(valor)
+                }}
+                onRemover={() => {
+                  setCupomCodigo(null)
+                  setDesconto(0)
+                }}
+              />
+            )}
+            <ResumoPedido
+              itens={itens}
+              total={totalFinal}
+              frete={frete}
+              desconto={desconto}
+              cupomCodigo={cupomCodigo}
+            />
           </aside>
         )}
       </div>

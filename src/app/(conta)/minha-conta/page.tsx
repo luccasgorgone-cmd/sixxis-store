@@ -2,7 +2,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { User, MapPin, ShoppingBag } from 'lucide-react'
+import { User, MapPin, ShoppingBag, Trophy } from 'lucide-react'
 
 export default async function MinhaContaPage() {
   const session = await auth()
@@ -10,7 +10,7 @@ export default async function MinhaContaPage() {
 
   const cliente = await prisma.cliente.findUnique({
     where:   { email: session.user.email! },
-    include: { enderecos: true },
+    include: { enderecos: true, pontos: true },
   })
 
   if (!cliente) redirect('/login')
@@ -71,19 +71,36 @@ export default async function MinhaContaPage() {
         )}
       </section>
 
-      {/* Link para pedidos */}
-      <Link
-        href="/pedidos"
-        className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-5 hover:border-[#3cbfb3] hover:bg-[#e8f8f7] transition group"
-      >
-        <div className="w-10 h-10 rounded-full bg-[#e8f8f7] group-hover:bg-white flex items-center justify-center">
-          <ShoppingBag size={18} className="text-[#3cbfb3]" />
-        </div>
-        <div>
-          <p className="font-bold text-sm text-[#0a0a0a]">Meus Pedidos</p>
-          <p className="text-xs text-gray-500">Ver histórico de compras</p>
-        </div>
-      </Link>
+      {/* Quick-access cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link
+          href="/pedidos"
+          className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-5 hover:border-[#3cbfb3] hover:bg-[#e8f8f7] transition group"
+        >
+          <div className="w-10 h-10 rounded-full bg-[#e8f8f7] group-hover:bg-white flex items-center justify-center">
+            <ShoppingBag size={18} className="text-[#3cbfb3]" />
+          </div>
+          <div>
+            <p className="font-bold text-sm text-[#0a0a0a]">Meus Pedidos</p>
+            <p className="text-xs text-gray-500">Ver histórico de compras</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/fidelidade"
+          className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-5 hover:border-[#3cbfb3] hover:bg-[#e8f8f7] transition group"
+        >
+          <div className="w-10 h-10 rounded-full bg-[#e8f8f7] group-hover:bg-white flex items-center justify-center">
+            <Trophy size={18} className="text-[#3cbfb3]" />
+          </div>
+          <div>
+            <p className="font-bold text-sm text-[#0a0a0a]">Programa Fidelidade</p>
+            <p className="text-xs text-gray-500">
+              {cliente.pontos ? `${cliente.pontos.pontos} pontos disponíveis` : 'Acumule e troque pontos'}
+            </p>
+          </div>
+        </Link>
+      </div>
     </main>
   )
 }

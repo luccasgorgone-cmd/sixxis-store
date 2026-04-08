@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
+import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck, Star } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
+import BannerCarousel from '@/components/layout/BannerCarousel'
 
 const categorias = [
   {
@@ -51,67 +52,25 @@ const porqueSixxis = [
 ]
 
 export default async function HomePage() {
-  const destaques = await prisma.produto.findMany({
-    where:   { ativo: true },
-    orderBy: { createdAt: 'desc' },
-    take:    8,
-  })
+  const [destaques, maisVendidos] = await Promise.all([
+    prisma.produto.findMany({
+      where:   { ativo: true },
+      orderBy: { createdAt: 'desc' },
+      take:    8,
+    }),
+    prisma.produtoDestaque.findMany({
+      where:   { secao: 'mais-vendidos' },
+      orderBy: { ordem: 'asc' },
+      include: { produto: true },
+      take:    8,
+    }),
+  ])
 
   return (
     <main className="bg-white">
 
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
-      <section
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }}
-      >
-        {/* Decoração de fundo */}
-        <div
-          className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5"
-          style={{ background: '#3cbfb3', filter: 'blur(80px)', transform: 'translate(30%, -30%)' }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-5"
-          style={{ background: '#3cbfb3', filter: 'blur(60px)', transform: 'translate(-30%, 30%)' }}
-        />
-
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-24 md:py-32 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-full border border-white/20 mb-8">
-            <span>🏆</span>
-            Loja Oficial Sixxis — Araçatuba, SP
-          </div>
-
-          {/* Título */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
-            Alta Performance para o<br className="hidden sm:block" /> seu Conforto e Bem-Estar
-          </h1>
-
-          {/* Subtítulo */}
-          <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Climatizadores, aspiradores e equipamentos fitness com qualidade Sixxis e garantia total — entrega para todo o Brasil.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/produtos" className="btn-primary text-base">
-              Explorar Produtos <ArrowRight size={18} />
-            </Link>
-            <Link href="/pecas" className="btn-outline-white text-base">
-              Peças de Reposição
-            </Link>
-          </div>
-
-          {/* Credenciais */}
-          <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-white/60">
-            {['Garantia Sixxis', 'Frete Grátis acima R$500', 'Pagamento Seguro', 'Suporte Técnico'].map(c => (
-              <span key={c} className="flex items-center gap-1.5">
-                <span className="text-[#3cbfb3] font-bold">✓</span> {c}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── Banner Carousel ──────────────────────────────────────────────────── */}
+      <BannerCarousel />
 
       {/* ── Stats ───────────────────────────────────────────────────────────── */}
       <section className="bg-[#3cbfb3]">
@@ -225,6 +184,30 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* ── Mais Vendidos ───────────────────────────────────────────────────── */}
+      {maisVendidos.length > 0 && (
+        <section className="bg-[#f8f9fa] py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#3cbfb3] flex items-center justify-center">
+                  <Star size={18} className="text-white fill-white" />
+                </div>
+                <h2 className="section-title">Mais Vendidos</h2>
+              </div>
+              <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
+                Ver todos <ArrowRight size={14} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {maisVendidos.map(({ produto }) => (
+                <CardProduto key={produto.id} produto={produto} showDesconto />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Por que Sixxis? ──────────────────────────────────────────────────── */}
       <section className="bg-[#f8f9fa] py-16">
