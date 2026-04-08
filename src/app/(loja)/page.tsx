@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
+import PagamentosBar from '@/components/layout/PagamentosBar'
+import NewsletterForm from '@/components/layout/NewsletterForm'
 
 const categorias = [
   {
@@ -152,6 +154,47 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Banners duplos ──────────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Banner 1 — Climatizadores */}
+          <Link
+            href="/produtos?categoria=climatizadores"
+            className="group relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 transition-transform duration-300 hover:scale-[1.02]"
+            style={{ background: 'linear-gradient(135deg, #0d4a47 0%, #1a7a74 50%, #3cbfb3 100%)' }}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_80%_20%,#fff,transparent)]" />
+            <div className="relative z-10">
+              <p className="text-[#a8ede9] text-xs font-semibold uppercase tracking-widest mb-1">Linha Residencial e Comercial</p>
+              <h3 className="text-white text-xl font-extrabold leading-tight mb-3">
+                Climatizadores<br />Sixxis
+              </h3>
+              <span className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full transition">
+                Ver modelos <ArrowRight size={12} />
+              </span>
+            </div>
+          </Link>
+
+          {/* Banner 2 — Fitness */}
+          <Link
+            href="/produtos?categoria=spinning"
+            className="group relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 transition-transform duration-300 hover:scale-[1.02]"
+            style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 60%, #2a2a2a 100%)' }}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_80%,#3cbfb3,transparent)]" />
+            <div className="relative z-10">
+              <p className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-1">Spinning & Acessórios</p>
+              <h3 className="text-white text-xl font-extrabold leading-tight mb-3">
+                Equipamentos<br />Fitness
+              </h3>
+              <span className="inline-flex items-center gap-1.5 bg-[#3cbfb3]/20 hover:bg-[#3cbfb3]/30 text-[#3cbfb3] text-xs font-bold px-3 py-1.5 rounded-full transition border border-[#3cbfb3]/40">
+                Ver produtos <ArrowRight size={12} />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* ── Produtos em Destaque ─────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
         <div className="flex items-center justify-between mb-10">
@@ -201,6 +244,17 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Newsletter ───────────────────────────────────────────────────────── */}
+      <section className="bg-[#f8f9fa] border-t border-b border-gray-200 py-12">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl font-extrabold text-[#0a0a0a] mb-1">
+            Receba novidades e promoções exclusivas
+          </h2>
+          <p className="text-gray-500 text-sm mb-6">Sem spam. Cancele quando quiser.</p>
+          <NewsletterForm />
+        </div>
+      </section>
+
       {/* ── Banner WhatsApp ──────────────────────────────────────────────────── */}
       <section className="bg-[#0a0a0a] py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
@@ -222,21 +276,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Formas de Pagamento ──────────────────────────────────────────────── */}
-      <section className="bg-white border-t border-gray-200 py-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-sm text-gray-500 font-medium mb-5">Pagamento 100% seguro:</p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm font-semibold text-gray-700">
-            {['PIX', 'Visa', 'Mastercard', 'Boleto', 'Parcelamos em até 12x'].map((m) => (
-              <span
-                key={m}
-                className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 hover:border-[#3cbfb3] transition"
-              >
-                {m}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PagamentosBar />
     </main>
   )
 }

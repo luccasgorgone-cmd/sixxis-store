@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react'
+import { Mail, Phone, MapPin, ExternalLink, ShieldCheck } from 'lucide-react'
+import PagamentosBar from './PagamentosBar'
 
 export default function Footer() {
   return (
@@ -99,22 +100,43 @@ export default function Footer() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Pagamentos */}
-        <div className="mt-10 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-500">
-            Aceitamos&nbsp;
-            <span className="text-gray-300 font-medium">PIX</span>
-            &nbsp;•&nbsp;
-            <span className="text-gray-300 font-medium">Visa</span>
-            &nbsp;•&nbsp;
-            <span className="text-gray-300 font-medium">Mastercard</span>
-            &nbsp;•&nbsp;
-            <span className="text-gray-300 font-medium">Boleto</span>
-            &nbsp;•&nbsp;
-            <span className="text-gray-300 font-medium">Parcelamos em até 12x</span>
-          </p>
-          <p className="text-xs text-gray-600">Pagamento 100% seguro</p>
+      {/* Ícones de pagamento */}
+      <div className="border-t border-gray-800 bg-[#111]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <PagamentosBar />
+        </div>
+      </div>
+
+      {/* Selos de segurança */}
+      <div className="bg-[#111] border-t border-gray-800 py-5 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-500 font-medium shrink-0">Certificados e Segurança:</p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+
+            {/* Google Safe */}
+            <div className="flex items-center gap-1.5 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5">
+              <ShieldCheck size={14} color="#34A853" strokeWidth={2.5} />
+              <span className="text-xs text-gray-300 font-medium">Google Safe</span>
+            </div>
+
+            {/* Mercado Pago */}
+            <div className="flex items-center gap-1.5 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="11" fill="#009EE3"/>
+                <ellipse cx="12" cy="12" rx="6" ry="4" fill="white"/>
+                <circle cx="12" cy="12" r="2" fill="#009EE3"/>
+              </svg>
+              <span className="text-xs text-gray-300 font-medium">Mercado Pago</span>
+            </div>
+
+            {/* Loja Verificada */}
+            <div className="flex items-center gap-1.5 bg-gray-800 border border-[#3cbfb3]/40 rounded-lg px-3 py-1.5">
+              <ShieldCheck size={14} color="#3cbfb3" strokeWidth={2.5} />
+              <span className="text-xs text-[#3cbfb3] font-medium">Loja Verificada</span>
+            </div>
+          </div>
         </div>
       </div>
 

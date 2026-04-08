@@ -1,12 +1,48 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, Menu, X, User, UserPlus } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import SearchBar from './SearchBar'
 import MobileMenu from './MobileMenu'
+
+const announcements = [
+  '🚚 Frete grátis acima de R$\u00a0500 para todo o Brasil',
+  '💳 Parcele em até 12x sem juros no cartão',
+  '📦 Produtos originais com garantia Sixxis',
+]
+
+function AnnouncementBar() {
+  const [index, setIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % announcements.length)
+        setVisible(true)
+      }, 400)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="bg-[#0a0a0a] text-white text-xs text-center py-2 px-4 h-8 flex items-center justify-center overflow-hidden">
+      <span
+        style={{
+          opacity: visible ? 1 : 0,
+          transition: 'opacity 0.4s ease',
+          display: 'inline-block',
+        }}
+      >
+        {announcements[index]}
+      </span>
+    </div>
+  )
+}
 
 const navLinks = [
   { href: '/produtos?categoria=climatizadores', label: 'Climatizadores' },
@@ -24,17 +60,8 @@ export default function Header() {
 
   return (
     <>
-      {/* ── Banner topo ───────────────────────────────────────────────── */}
-      <div className="bg-[#0a0a0a] text-white text-xs text-center py-2 px-4">
-        <span className="hidden sm:inline">
-          Frete grátis acima de R$&nbsp;500 &nbsp;|&nbsp; Entrega para todo o Brasil &nbsp;|&nbsp;
-          WhatsApp:&nbsp;
-          <a href="https://wa.me/5518999999999" className="underline hover:text-[#3cbfb3] transition">
-            (18) 99999-9999
-          </a>
-        </span>
-        <span className="sm:hidden">Frete grátis acima de R$&nbsp;500</span>
-      </div>
+      {/* ── Banner topo animado ───────────────────────────────────────── */}
+      <AnnouncementBar />
 
       {/* ── Header principal ─────────────────────────────────────────── */}
       <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
