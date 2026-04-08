@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-gray-50 font-[family-name:var(--font-inter)]">
+      <body className="min-h-full flex flex-col bg-white font-[family-name:var(--font-inter)]">
         <SessionProvider>
           <Header />
           <div className="flex-1">{children}</div>

@@ -1,3 +1,8 @@
-// A home page real está em src/app/(loja)/page.tsx
-// Next.js 16 usa o arquivo dentro do route group (loja) para a rota /
-export { default } from '@/app/(loja)/page'
+/**
+ * Esta rota (/) é servida por src/app/(loja)/page.tsx
+ * O route group (loja) toma precedência no Next.js 16.
+ * Este arquivo existe apenas para satisfazer o resolver de módulos.
+ */
+export default function RootPage() {
+  return null
+}

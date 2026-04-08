@@ -1,7 +1,12 @@
-'use client'
+import type { Metadata } from 'next'
+import { HelpCircle } from 'lucide-react'
+import FaqAccordion from '@/components/faq/FaqAccordion'
 
-import { useState } from 'react'
-import { ChevronDown, HelpCircle } from 'lucide-react'
+export const metadata: Metadata = {
+  title: 'Perguntas Frequentes',
+  description:
+    'Tire suas dúvidas sobre entrega, pagamento, troca, garantia e produtos Sixxis. Central de ajuda completa.',
+}
 
 const faqs = [
   {
@@ -10,7 +15,7 @@ const faqs = [
   },
   {
     q: 'Quais são as formas de pagamento aceitas?',
-    a: 'Aceitamos PIX (com 3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x, cartão de débito e boleto bancário. Todos os pagamentos são processados com segurança.',
+    a: 'Aceitamos PIX (com 3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x, cartão de débito e boleto bancário. Todos os pagamentos são processados com segurança via MercadoPago.',
   },
   {
     q: 'O frete é gratuito?',
@@ -46,30 +51,6 @@ const faqs = [
   },
 ]
 
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-[#f8f9fa] transition-colors"
-      >
-        <span className="font-semibold text-[#0a0a0a] text-sm sm:text-base">{q}</span>
-        <ChevronDown
-          size={18}
-          className={`shrink-0 text-[#3cbfb3] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
-      {open && (
-        <div className="px-6 pb-5 pt-1 text-sm text-gray-600 leading-relaxed border-t border-gray-100 bg-[#fafafa]">
-          {a}
-        </div>
-      )}
-    </div>
-  )
-}
-
 export default function FaqPage() {
   return (
     <main className="bg-white">
@@ -84,29 +65,32 @@ export default function FaqPage() {
             <HelpCircle size={14} />
             Central de Ajuda
           </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight">Perguntas Frequentes</h1>
+          <h1 className="text-4xl font-extrabold text-white tracking-tight">
+            Perguntas Frequentes
+          </h1>
           <p className="mt-4 text-white/70">
             Respondemos as principais dúvidas sobre entrega, pagamento, troca, garantia e produtos.
           </p>
         </div>
       </section>
 
-      {/* FAQs */}
+      {/* Accordion */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
-        <div className="space-y-3">
-          {faqs.map(({ q, a }) => (
-            <FaqItem key={q} q={q} a={a} />
-          ))}
-        </div>
+        <FaqAccordion items={faqs} />
 
         {/* CTA */}
-        <div className="mt-12 bg-[#f8f9fa] rounded-2xl p-8 text-center">
+        <div className="mt-12 bg-[#f8f9fa] rounded-2xl p-8 text-center border border-gray-200">
           <h2 className="text-xl font-bold text-[#0a0a0a] mb-2">Não encontrou sua resposta?</h2>
           <p className="text-gray-600 text-sm mb-6">
-            Nossa equipe está pronta para te ajudar. Entre em contato via WhatsApp ou pelo formulário de contato.
+            Nossa equipe está pronta para te ajudar via WhatsApp ou pelo formulário de contato.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="https://wa.me/5518999999999" target="_blank" rel="noopener noreferrer" className="btn-primary">
+            <a
+              href="https://wa.me/5518999999999"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
+            >
               WhatsApp
             </a>
             <a href="/contato" className="btn-outline">
