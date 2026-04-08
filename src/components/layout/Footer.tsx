@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { Mail, Phone, MapPin, ExternalLink, ShieldCheck } from 'lucide-react'
 import PagamentosBar from './PagamentosBar'
@@ -10,9 +11,14 @@ export default function Footer() {
 
           {/* Col 1 — Marca */}
           <div>
-            <Link href="/" className="inline-flex items-baseline gap-0 mb-4 block">
-              <span className="text-2xl font-black text-white tracking-tight">SIXXIS</span>
-              <span className="text-2xl font-black text-[#3cbfb3] tracking-tight">.store</span>
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/logo-sixxis.png"
+                alt="Sixxis"
+                width={100}
+                height={34}
+                className="object-contain brightness-0 invert"
+              />
             </Link>
             <p className="text-sm leading-relaxed mb-3">
               Importação, Exportação e Comércio de produtos de alta qualidade para o seu lar e bem-estar.

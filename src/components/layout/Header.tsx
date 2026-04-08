@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingCart, Menu, X, User, UserPlus } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
@@ -68,9 +69,15 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
           {/* Logo */}
-          <Link href="/" className="shrink-0 flex items-baseline gap-0.5">
-            <span className="text-2xl font-black tracking-tight text-[#0a0a0a]">SIXXIS</span>
-            <span className="text-2xl font-black tracking-tight text-[#3cbfb3]">.store</span>
+          <Link href="/" className="shrink-0 flex items-center">
+            <Image
+              src="/logo-sixxis.png"
+              alt="Sixxis"
+              width={120}
+              height={40}
+              className="object-contain"
+              priority
+            />
           </Link>
 
           {/* Busca desktop */}
