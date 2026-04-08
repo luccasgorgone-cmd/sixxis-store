@@ -23,10 +23,26 @@ export default function FormContato() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState('')
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    // TODO: integrar com API de e-mail / WhatsApp
-    setEnviado(true)
+    setErro('')
+    setEnviando(true)
+    try {
+      const r = await fetch('/api/contato', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(form),
+      })
+      if (!r.ok) throw new Error()
+      setEnviado(true)
+    } catch {
+      setErro('Erro ao enviar mensagem. Tente novamente ou entre em contato pelo WhatsApp.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   if (enviado) {
@@ -117,9 +133,11 @@ export default function FormContato() {
         />
       </div>
 
-      <button type="submit" className="btn-primary w-full sm:w-auto">
+      {erro && <p className="text-red-500 text-sm">{erro}</p>}
+
+      <button type="submit" disabled={enviando} className="btn-primary w-full sm:w-auto disabled:opacity-50">
         <Send size={16} />
-        Enviar Mensagem
+        {enviando ? 'Enviando...' : 'Enviar Mensagem'}
       </button>
     </form>
   )

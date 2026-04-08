@@ -33,11 +33,9 @@ export default function AdminLoginPage() {
           const data = await res.json()
           if (data?.error) msg = data.error
         } catch { /* ignora */ }
-        console.error('[admin login] erro:', res.status, msg)
         setErro(msg)
       }
-    } catch (err) {
-      console.error('[admin login] fetch error:', err)
+    } catch {
       setErro('Erro de conexão. Verifique sua internet e tente novamente.')
     } finally {
       setLoading(false)

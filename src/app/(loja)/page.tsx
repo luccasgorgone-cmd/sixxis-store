@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck, Star } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Sixxis Store — Climatizadores, Aspiradores e Spinning',
+  description: 'Loja oficial Sixxis em Araçatuba-SP. Climatizadores, aspiradores, bikes spinning e peças originais. Garantia Sixxis, frete para todo o Brasil.',
+}
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'

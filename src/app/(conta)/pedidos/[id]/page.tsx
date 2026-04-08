@@ -1,8 +1,11 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Image from 'next/image'
+
+export const metadata: Metadata = { title: 'Detalhes do Pedido' }
 import { CheckCircle, Clock, Package, Truck, Home, ArrowLeft } from 'lucide-react'
 
 const STATUS_STEPS = [

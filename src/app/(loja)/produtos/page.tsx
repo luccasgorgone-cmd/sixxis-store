@@ -1,6 +1,12 @@
+import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import FiltrosProduto from '@/components/produto/FiltrosProduto'
+
+export const metadata: Metadata = {
+  title: 'Produtos — Sixxis Store',
+  description: 'Explore nossa linha completa de climatizadores, aspiradores, equipamentos fitness e peças originais Sixxis.',
+}
 
 interface SearchParams {
   categoria?: string

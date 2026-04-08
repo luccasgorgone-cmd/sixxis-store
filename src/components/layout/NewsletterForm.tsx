@@ -6,13 +6,19 @@ export default function NewsletterForm() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email.includes('@')) {
       setStatus('error')
       return
     }
-    // TODO: integrar com serviço de e-mail marketing
+    try {
+      await fetch('/api/newsletter', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email }),
+      })
+    } catch { /* silent */ }
     setStatus('ok')
     setEmail('')
   }

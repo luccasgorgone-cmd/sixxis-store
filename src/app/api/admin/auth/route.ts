@@ -6,10 +6,6 @@ export async function POST(request: NextRequest) {
   const dbConfig = await prisma.configuracao.findUnique({ where: { chave: 'admin_secret' } })
   const secret = dbConfig?.valor ?? process.env.ADMIN_SECRET
 
-  // Debug — visível nos logs do Railway
-  console.log('[admin/auth] secret source:', dbConfig ? 'banco' : 'env')
-  console.log('[admin/auth] ADMIN_SECRET:', secret ? `definido (${secret.length} chars)` : 'NÃO DEFINIDO')
-
   if (!secret) {
     return NextResponse.json(
       { error: 'ADMIN_SECRET não configurado no servidor' },
@@ -27,14 +23,9 @@ export async function POST(request: NextRequest) {
   // Aceita { senha } ou { password }
   const senha = body.senha ?? body.password ?? ''
 
-  console.log('[admin/auth] tentativa de login, senha recebida:', senha ? `${senha.length} chars` : 'vazia')
-
   if (!senha || senha !== secret) {
-    console.log('[admin/auth] senha incorreta')
     return NextResponse.json({ error: 'Senha incorreta' }, { status: 401 })
   }
-
-  console.log('[admin/auth] login bem-sucedido, setando cookie')
 
   const isProduction = process.env.NODE_ENV === 'production'
 

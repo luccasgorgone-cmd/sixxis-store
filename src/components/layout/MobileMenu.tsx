@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { X, Wind, Fan, Bike, Wrench, HelpCircle, Info, Phone, User, UserPlus } from 'lucide-react'
+import { X, Wind, Fan, Bike, Wrench, HelpCircle, Info, Phone, User, UserPlus, Tag } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 
 interface Props {
@@ -10,13 +10,14 @@ interface Props {
 }
 
 const links = [
-  { href: '/produtos?categoria=climatizadores', label: 'Climatizadores', icon: Wind },
-  { href: '/produtos?categoria=aspiradores',    label: 'Aspiradores',    icon: Fan },
-  { href: '/produtos?categoria=spinning',       label: 'Spinning',       icon: Bike },
-  { href: '/pecas',                             label: 'Peças',           icon: Wrench },
-  { href: '/sobre',                             label: 'Sobre',           icon: Info },
-  { href: '/contato',                           label: 'Contato',         icon: Phone },
-  { href: '/faq',                               label: 'FAQ',             icon: HelpCircle },
+  { href: '/produtos?categoria=climatizadores', label: 'Climatizadores', icon: Wind,        destaque: false },
+  { href: '/produtos?categoria=aspiradores',    label: 'Aspiradores',    icon: Fan,         destaque: false },
+  { href: '/produtos?categoria=spinning',       label: 'Spinning',       icon: Bike,        destaque: false },
+  { href: '/pecas',                             label: 'Peças',           icon: Wrench,      destaque: false },
+  { href: '/ofertas',                           label: 'Ofertas',         icon: Tag,         destaque: true  },
+  { href: '/sobre',                             label: 'Sobre',           icon: Info,        destaque: false },
+  { href: '/contato',                           label: 'Contato',         icon: Phone,       destaque: false },
+  { href: '/faq',                               label: 'FAQ',             icon: HelpCircle,  destaque: false },
 ]
 
 export default function MobileMenu({ isOpen, onClose }: Props) {
@@ -56,15 +57,20 @@ export default function MobileMenu({ isOpen, onClose }: Props) {
 
         {/* Links */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          {links.map(({ href, label, icon: Icon }) => (
+          {links.map(({ href, label, icon: Icon, destaque }) => (
             <Link
               key={href}
               href={href}
               onClick={onClose}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#e8f8f7] hover:text-[#3cbfb3] transition group"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition group ${
+                destaque
+                  ? 'text-[#3cbfb3] bg-[#e8f8f7] hover:bg-[#d0f0ed]'
+                  : 'text-gray-700 hover:bg-[#e8f8f7] hover:text-[#3cbfb3]'
+              }`}
             >
-              <Icon size={18} className="text-[#3cbfb3] group-hover:text-[#2a9d8f]" />
+              <Icon size={18} className={destaque ? 'text-[#3cbfb3]' : 'text-[#3cbfb3] group-hover:text-[#2a9d8f]'} />
               {label}
+              {destaque && <span className="ml-auto text-[10px] bg-red-500 text-white font-bold px-1.5 py-0.5 rounded-full">HOT</span>}
             </Link>
           ))}
         </nav>

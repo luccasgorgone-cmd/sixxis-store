@@ -1,8 +1,11 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
+
+export const metadata: Metadata = { title: 'Meus Pedidos' }
 
 const statusLabel: Record<string, string> = {
   pendente:  'Pendente',

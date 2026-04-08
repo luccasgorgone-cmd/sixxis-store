@@ -1,8 +1,11 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { User, MapPin, ShoppingBag, Trophy } from 'lucide-react'
+
+export const metadata: Metadata = { title: 'Minha Conta' }
 
 export default async function MinhaContaPage() {
   const session = await auth()
