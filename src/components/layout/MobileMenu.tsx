@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { X, Wind, Fan, Bike, Wrench, HelpCircle, Info, Phone, User, UserPlus, Tag, Mail, Clock } from 'lucide-react'
+import { X, Wind, Fan, Bike, HelpCircle, Info, Phone, User, UserPlus, Tag, Mail, Clock } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 
 interface Props {
@@ -15,8 +15,7 @@ const links = [
   { href: '/produtos?categoria=climatizadores', label: 'Climatizadores', icon: Wind,       destaque: false },
   { href: '/produtos?categoria=aspiradores',    label: 'Aspiradores',    icon: Fan,        destaque: false },
   { href: '/produtos?categoria=spinning',       label: 'Spinning',       icon: Bike,       destaque: false },
-  { href: '/pecas',                             label: 'Peças',           icon: Wrench,     destaque: false },
-  { href: '/ofertas',                           label: 'Ofertas',         icon: Tag,        destaque: true  },
+{ href: '/ofertas',                           label: 'Ofertas',         icon: Tag,        destaque: true  },
   { href: '/sobre',                             label: 'Sobre',           icon: Info,       destaque: false },
   { href: '/contato',                           label: 'Contato',         icon: Phone,      destaque: false },
   { href: '/faq',                               label: 'FAQ',             icon: HelpCircle, destaque: false },

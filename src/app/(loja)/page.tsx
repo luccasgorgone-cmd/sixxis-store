@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck, Users, ShieldCheck, Truck, Zap } from 'lucide-react'
+import { Wind, Fan, Bike, ArrowRight, Cpu, Headphones, BadgeCheck, Users, ShieldCheck, Truck, Zap } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
@@ -15,7 +15,7 @@ export const fetchCache = 'force-no-store'
 
 export const metadata: Metadata = {
   title: 'Sixxis Store — Climatizadores, Aspiradores e Spinning',
-  description: 'Loja oficial Sixxis em Araçatuba-SP. Climatizadores, aspiradores, bikes spinning e peças originais. Garantia Sixxis, frete para todo o Brasil.',
+  description: 'Loja oficial Sixxis em Araçatuba-SP. Climatizadores, aspiradores e bikes spinning com qualidade premium. Garantia Sixxis, frete para todo o Brasil.',
 }
 
 export default async function HomePage() {
@@ -74,8 +74,8 @@ export default async function HomePage() {
               <Link href={cfg.hero_cta_link || '/produtos'} style={{ background: '#3cbfb3' }} className="text-white font-bold px-8 py-4 rounded-xl hover:opacity-90 transition">
                 {cfg.hero_cta_texto || 'Ver Produtos'} →
               </Link>
-              <Link href="/pecas" className="text-white font-bold px-8 py-4 rounded-xl border border-white/30 hover:border-white/60 transition">
-                Peças de Reposição
+              <Link href="/ofertas" className="text-white font-bold px-8 py-4 rounded-xl border border-white/30 hover:border-white/60 transition">
+                Ver Ofertas
               </Link>
             </div>
           </div>
@@ -85,16 +85,16 @@ export default async function HomePage() {
       {/* 2. TrustBar inline */}
       <TrustBar />
 
-      {/* 3. Mais Vendidos / Produtos em Destaque */}
+      {/* 3. Produtos em Destaque */}
       {produtosMostrar.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="section-title">Mais Vendidos</h2>
+            <h2 className="section-title">Produtos em Destaque</h2>
             <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
               Ver todos <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {produtosMostrar.map((produto) => (
               <CardProduto key={produto.id} produto={produto} />
             ))}
@@ -106,12 +106,11 @@ export default async function HomePage() {
       <section className="py-10" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-8">Nossas Categorias</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
             {[
-              { label: 'Climatizadores', desc: 'Conforto térmico para sua casa',  href: '/produtos?categoria=climatizadores', Icon: Wind   },
-              { label: 'Aspiradores',    desc: 'Limpeza eficiente e prática',      href: '/produtos?categoria=aspiradores',    Icon: Fan    },
-              { label: 'Spinning',       desc: 'Desempenho fitness profissional',  href: '/produtos?categoria=spinning',       Icon: Bike   },
-              { label: 'Peças',          desc: 'Reposição original garantida',     href: '/pecas',                            Icon: Wrench },
+              { label: 'Climatizadores', desc: 'Conforto térmico para sua casa',  href: '/produtos?categoria=climatizadores', Icon: Wind },
+              { label: 'Aspiradores',    desc: 'Limpeza eficiente e prática',      href: '/produtos?categoria=aspiradores',    Icon: Fan  },
+              { label: 'Spinning',       desc: 'Desempenho fitness profissional',  href: '/produtos?categoria=spinning',       Icon: Bike },
             ].map(({ label, desc, href, Icon }) => (
               <Link
                 key={label}

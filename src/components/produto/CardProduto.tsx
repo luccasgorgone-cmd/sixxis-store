@@ -48,16 +48,16 @@ export default function CardProduto({ produto }: Props) {
   }
 
   return (
-    <div className="group bg-white rounded-2xl border border-gray-100 hover:border-[#3cbfb3]/40 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
+    <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-[#3cbfb3]/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
 
       {/* ── Imagem ── */}
-      <Link href={`/produtos/${produto.slug}`} className="block relative aspect-square bg-[#f9fafb] overflow-hidden">
+      <Link href={`/produtos/${produto.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden p-4">
         {imagemCapa ? (
           <Image
             src={imagemCapa}
             alt={produto.nome}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-contain transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 50vw, 25vw"
           />
         ) : (

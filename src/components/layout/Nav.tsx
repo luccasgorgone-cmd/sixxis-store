@@ -14,8 +14,7 @@ export default function Nav() {
       <Link href="/produtos?categoria=climatizadores" className="hover:text-[#3cbfb3] transition">Climatizadores</Link>
       <Link href="/produtos?categoria=aspiradores" className="hover:text-[#3cbfb3] transition">Aspiradores</Link>
       <Link href="/produtos?categoria=spinning" className="hover:text-[#3cbfb3] transition">Spinning</Link>
-      <Link href="/pecas" className="hover:text-[#3cbfb3] transition">Peças</Link>
-      <Link href="/sobre" className="hover:text-[#3cbfb3] transition">Sobre</Link>
+<Link href="/sobre" className="hover:text-[#3cbfb3] transition">Sobre</Link>
       <Link href="/contato" className="hover:text-[#3cbfb3] transition">Contato</Link>
       <Link href="/faq" className="hover:text-[#3cbfb3] transition">FAQ</Link>
 
