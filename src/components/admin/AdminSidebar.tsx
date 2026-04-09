@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Image as ImageIcon, Tag, Star, Trophy, LayoutTemplate } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const navItems = [
   { href: '/admin',               label: 'Dashboard',    icon: LayoutDashboard, exact: true },
@@ -22,6 +22,16 @@ export default function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
+  const [logoUrl, setLogoUrl] = useState('/logo-sixxis.png')
+
+  useEffect(() => {
+    fetch('/api/admin/configuracoes')
+      .then((r) => r.json())
+      .then((data: Record<string, string>) => {
+        if (data?.logo_url) setLogoUrl(data.logo_url)
+      })
+      .catch(() => {})
+  }, [])
 
   function isActive(href: string, exact: boolean) {
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
@@ -39,11 +49,12 @@ export default function AdminSidebar() {
       <div className="px-6 py-5 border-b border-white/10">
         <Link href="/admin" className="block">
           <Image
-            src="/logo-sixxis.png"
+            src={logoUrl}
             alt="Sixxis"
             width={130}
             height={44}
             className="object-contain brightness-0 invert"
+            unoptimized
           />
         </Link>
         <p className="text-white/30 text-xs mt-2 uppercase tracking-widest">Admin</p>

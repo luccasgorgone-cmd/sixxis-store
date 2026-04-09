@@ -28,6 +28,9 @@ export default function CardProduto({ produto, showDesconto }: Props) {
   const precoAtVista = precoFinal * 0.97
   const parcelamento = precoFinal / 6
   const desconto = (promocional && preco > 0) ? Math.round(((preco - promocional) / preco) * 100) : 0
+  const isNovo = produto.createdAt
+    ? (Date.now() - new Date(produto.createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000
+    : false
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
@@ -66,6 +69,13 @@ export default function CardProduto({ produto, showDesconto }: Props) {
         {promocional && desconto > 0 && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
             -{desconto}%
+          </span>
+        )}
+
+        {/* Badge Novo */}
+        {isNovo && !promocional && (
+          <span className="absolute top-2 left-2 bg-[#3cbfb3] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+            Novo
           </span>
         )}
 
