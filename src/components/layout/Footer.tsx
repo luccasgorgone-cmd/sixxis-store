@@ -124,8 +124,8 @@ export default async function Footer() {
     <footer className="text-gray-400" style={{ backgroundColor: 'var(--color-footer, #111827)' }}>
 
       {/* ── Bloco principal ──────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-8 xl:gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-8 xl:gap-6">
 
           {/* Col 1 — Marca + Contato */}
           <div className="col-span-2 md:col-span-3 xl:col-span-2">
@@ -328,7 +328,7 @@ export default async function Footer() {
 
       {/* ── Rodapé legal ─────────────────────────────────────────────────── */}
       <div className="border-t border-[#3cbfb3]/40 bg-black/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div className="text-xs text-gray-500 space-y-0.5">
             <p>© {new Date().getFullYear()} Sixxis — SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA</p>
             <p>CNPJ: 54.978.947/0001-09&nbsp;&nbsp;|&nbsp;&nbsp;IE: 117.633.347.114</p>

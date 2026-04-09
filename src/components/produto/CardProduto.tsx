@@ -62,7 +62,7 @@ export default function CardProduto({ produto }: Props) {
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-300">
-            <Package size={48} strokeWidth={1.5} />
+            <Package size={40} strokeWidth={1.5} />
             <span className="text-xs text-gray-400">Sem imagem</span>
           </div>
         )}
@@ -92,29 +92,29 @@ export default function CardProduto({ produto }: Props) {
       </Link>
 
       {/* ── Infos ── */}
-      <div className="p-4 sm:p-5 flex flex-col flex-1">
+      <div className="p-3 sm:p-5 flex flex-col flex-1">
 
         {/* Nome */}
-        <Link href={`/produtos/${produto.slug}`} className="block flex-1 mb-3">
+        <Link href={`/produtos/${produto.slug}`} className="block flex-1 mb-2.5">
           <p className="font-semibold text-sm text-[#1f2937] line-clamp-2 leading-snug group-hover:text-[#3cbfb3] transition-colors duration-200">
             {produto.nome}
           </p>
         </Link>
 
         {/* Preços */}
-        <div className="mb-4 space-y-0.5">
+        <div className="mb-3 space-y-0.5">
           {promocional && (
             <p className="text-xs text-gray-400 line-through">
               R$ {formatBRL(preco)}
             </p>
           )}
-          <p className={`text-xl font-black leading-none ${promocional ? 'text-[#3cbfb3]' : 'text-[#1f2937]'}`}>
+          <p className={`text-lg sm:text-xl font-black leading-none ${promocional ? 'text-[#3cbfb3]' : 'text-[#1f2937]'}`}>
             R$ {formatBRL(precoFinal)}
           </p>
-          <p className="text-[11px] text-[#3cbfb3] font-semibold">
+          <p className="text-[10px] sm:text-[11px] text-[#3cbfb3] font-semibold">
             💠 PIX: R$ {formatBRL(precoAtVista)}
           </p>
-          <p className="text-[11px] text-gray-500">
+          <p className="text-[10px] sm:text-[11px] text-gray-500">
             ou 6x de R$ {formatBRL(parcelamento)}
           </p>
         </div>
@@ -123,14 +123,15 @@ export default function CardProduto({ produto }: Props) {
         <button
           onClick={handleAddToCart}
           disabled={produto.estoque === 0}
-          className={`w-full flex items-center justify-center gap-2 text-sm font-bold py-3 rounded-xl transition-all duration-200 ${
+          className={`w-full flex items-center justify-center gap-2 text-sm font-bold py-2.5 sm:py-3 rounded-xl transition-all duration-200 ${
             adicionado
               ? 'bg-[#22c55e] text-white scale-[0.98]'
               : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none'
           }`}
         >
-          {adicionado ? <Check size={16} /> : <ShoppingCart size={16} />}
-          {adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+          {adicionado ? <Check size={15} /> : <ShoppingCart size={15} />}
+          <span className="hidden sm:inline">{adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}</span>
+          <span className="sm:hidden">{adicionado ? 'Adicionado!' : 'Adicionar'}</span>
         </button>
       </div>
     </div>

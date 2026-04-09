@@ -39,11 +39,13 @@ export default function CheckoutPage() {
   const totalFinal = Math.max(0, total + frete - desconto)
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      <h1 className="text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-8">Checkout</h1>
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-6 sm:mb-8">
+        Checkout
+      </h1>
 
       {/* Progresso */}
-      <div className="flex items-center gap-2 mb-10">
+      <div className="flex items-center gap-2 mb-8 sm:mb-10">
         {etapas.map((e, i) => (
           <div key={e} className="flex items-center gap-2">
             <div className="flex items-center gap-2">
@@ -73,7 +75,8 @@ export default function CheckoutPage() {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      {/* Layout: flex-col em mobile, grid em md */}
+      <div className="flex flex-col md:grid md:grid-cols-3 gap-6 sm:gap-8">
         <div className="md:col-span-2">
           {etapa === 'endereco' && (
             <FormEndereco
@@ -114,7 +117,6 @@ export default function CheckoutPage() {
 
         {etapa !== 'confirmacao' && (
           <aside className="space-y-4">
-            {/* Campo cupom — apenas na etapa pagamento */}
             {etapa === 'pagamento' && (
               <CampoCupom
                 total={total + frete}

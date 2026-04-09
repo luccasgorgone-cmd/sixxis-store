@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingCart, Menu, X, User } from 'lucide-react'
+import { ShoppingCart, Menu, User } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import SearchBar from './SearchBar'
@@ -74,15 +74,72 @@ export default function Header({
 
   return (
     <>
-      {/* ── Camada 1 — Announcement bar (não sticky) ── */}
+      {/* ── Announcement bar ── */}
       <AnnouncementBar items={anuncios} />
 
-      {/* ── Camadas 2 + 3 — Sticky ── */}
+      {/* ── Sticky wrapper ── */}
       <div className="sticky top-0 z-40">
 
-        {/* ── Camada 2 — Header principal ── */}
+        {/* ═══════════════════════════════════════════════════════
+            MOBILE HEADER (< lg)
+        ═══════════════════════════════════════════════════════ */}
+        <div
+          className="lg:hidden shadow-md border-b border-white/10"
+          style={{ backgroundColor: 'var(--color-header, #1a4f4a)' }}
+        >
+          {/* Linha única: [Menu] [Logo centralizada] [Carrinho] */}
+          <div className="h-14 px-4 flex items-center relative">
+
+            {/* Hambúrguer — esquerda */}
+            <button
+              className="absolute left-4 z-10 p-2 rounded-lg hover:bg-white/20 transition"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Abrir menu"
+            >
+              <Menu size={24} className="text-white" />
+            </button>
+
+            {/* Logo — centralizada absolutamente */}
+            <Link
+              href="/"
+              className="absolute left-1/2 -translate-x-1/2 flex items-center"
+            >
+              <Image
+                src={logoUrl}
+                alt="Sixxis"
+                width={110}
+                height={36}
+                className="object-contain"
+                priority
+              />
+            </Link>
+
+            {/* Carrinho — direita */}
+            <Link
+              href="/carrinho"
+              className="absolute right-4 z-10 p-2 text-white hover:text-white/80 transition"
+              aria-label="Carrinho"
+            >
+              <ShoppingCart size={24} />
+              {totalItens > 0 && (
+                <span className="absolute -top-0 -right-0 bg-red-500 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                  {totalItens > 9 ? '9+' : totalItens}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          {/* Busca mobile — full-width abaixo do header */}
+          <div className="px-3 pb-2.5">
+            <SearchBar dark />
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════
+            DESKTOP HEADER (>= lg)
+        ═══════════════════════════════════════════════════════ */}
         <header
-          className="shadow-md border-b border-white/10"
+          className="hidden lg:block shadow-md border-b border-white/10"
           style={{ backgroundColor: 'var(--color-header, #1a4f4a)' }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
@@ -99,8 +156,8 @@ export default function Header({
               />
             </Link>
 
-            {/* Busca centralizada — desktop */}
-            <div className="hidden lg:flex flex-1 max-w-2xl mx-4">
+            {/* Busca centralizada */}
+            <div className="flex flex-1 max-w-2xl mx-4">
               <SearchBar dark />
             </div>
 
@@ -123,7 +180,7 @@ export default function Header({
 
               {/* Auth — desktop */}
               {session ? (
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Link
                     href="/minha-conta"
                     className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition"
@@ -139,7 +196,7 @@ export default function Header({
                   </button>
                 </div>
               ) : (
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Link
                     href="/login"
                     className="text-sm font-medium px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition"
@@ -154,28 +211,11 @@ export default function Header({
                   </Link>
                 </div>
               )}
-
-              {/* Hambúrguer — mobile */}
-              <button
-                className="lg:hidden p-2 rounded-lg hover:bg-white/20 transition"
-                onClick={() => setMenuOpen(!menuOpen)}
-                aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-              >
-                {menuOpen
-                  ? <X    size={22} className="text-white" />
-                  : <Menu size={22} className="text-white" />
-                }
-              </button>
             </div>
-          </div>
-
-          {/* Busca — mobile */}
-          <div className="lg:hidden px-4 pb-3">
-            <SearchBar dark />
           </div>
         </header>
 
-        {/* ── Camada 3 — Nav de categorias (desktop) ── */}
+        {/* ── Nav de categorias (desktop) ── */}
         <nav className="hidden lg:block bg-[#0f2e2b] border-b border-white/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex items-center">
@@ -202,8 +242,8 @@ export default function Header({
         </nav>
       </div>
 
-      {/* Menu mobile (drawer) */}
-      <MobileMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+      {/* Menu mobile drawer */}
+      <MobileMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} logoUrl={logoUrl} />
     </>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Trash2, ShoppingCart, ArrowRight } from 'lucide-react'
+import { Trash2, ShoppingCart, ArrowRight, Minus, Plus } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 
 export default function CarrinhoPage() {
@@ -25,38 +25,46 @@ export default function CarrinhoPage() {
   const frete = total >= 500 ? 0 : null
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      <h1 className="text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-8">Carrinho</h1>
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-6 sm:mb-8">
+        Carrinho
+      </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Itens */}
+      {/* Layout: flex-col em mobile, grid em lg */}
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 sm:gap-8">
+
+        {/* ── Itens ── */}
         <div className="lg:col-span-2 space-y-3">
           {itens.map((item) => {
             const key = item.produtoId + (item.variacaoId ?? '')
             return (
-              <div key={key} className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4">
+              <div key={key} className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-3 sm:p-4">
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-[#0a0a0a] truncate">{item.nome}</p>
+                  <p className="font-semibold text-sm text-[#0a0a0a] line-clamp-2 leading-snug">{item.nome}</p>
                   {item.variacaoNome && (
                     <p className="text-xs text-[#3cbfb3] font-medium mt-0.5">{item.variacaoNome}</p>
                   )}
-                  <p className="text-sm text-[#3cbfb3] font-medium mt-0.5">R$ {item.preco.toFixed(2)}</p>
+                  <p className="text-sm text-[#3cbfb3] font-semibold mt-1">
+                    R$ {item.preco.toFixed(2)}
+                  </p>
                 </div>
 
-                {/* Quantidade */}
-                <div className="flex items-center gap-1 border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                {/* Quantidade — botões grandes para toque */}
+                <div className="flex items-center gap-0 border border-gray-200 rounded-xl overflow-hidden shrink-0">
                   <button
                     onClick={() => atualizarQuantidade(item.produtoId, item.quantidade - 1, item.variacaoId)}
-                    className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg leading-none"
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition"
+                    aria-label="Diminuir quantidade"
                   >
-                    −
+                    <Minus size={14} />
                   </button>
-                  <span className="w-8 text-center text-sm font-semibold">{item.quantidade}</span>
+                  <span className="w-10 text-center text-sm font-semibold">{item.quantidade}</span>
                   <button
                     onClick={() => atualizarQuantidade(item.produtoId, item.quantidade + 1, item.variacaoId)}
-                    className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg leading-none"
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition"
+                    aria-label="Aumentar quantidade"
                   >
-                    +
+                    <Plus size={14} />
                   </button>
                 </div>
 
@@ -66,7 +74,7 @@ export default function CarrinhoPage() {
 
                 <button
                   onClick={() => removerItem(item.produtoId, item.variacaoId)}
-                  className="text-gray-300 hover:text-red-400 transition shrink-0"
+                  className="text-gray-300 hover:text-red-400 transition shrink-0 p-1"
                   aria-label="Remover item"
                 >
                   <Trash2 size={16} />
@@ -76,8 +84,8 @@ export default function CarrinhoPage() {
           })}
         </div>
 
-        {/* Resumo */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 h-fit sticky top-24">
+        {/* ── Resumo ── */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 sm:p-6 h-fit lg:sticky lg:top-24">
           <h2 className="font-bold text-lg text-[#0a0a0a] mb-5">Resumo</h2>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between text-gray-600">

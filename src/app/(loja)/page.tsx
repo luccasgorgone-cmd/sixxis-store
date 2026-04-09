@@ -137,36 +137,36 @@ export default async function HomePage() {
           {/* Banner 1 — Climatizadores */}
           <Link
             href="/produtos?categoria=climatizadores"
-            className="group relative overflow-hidden rounded-2xl min-h-[180px] flex flex-col justify-end p-8"
+            className="group relative overflow-hidden rounded-2xl h-[140px] sm:h-auto sm:min-h-[180px] flex flex-col justify-end p-5 sm:p-8"
             style={{ background: 'linear-gradient(135deg, #1a4f4a 0%, #3cbfb3 100%)' }}
           >
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_70%_50%,white,transparent_60%)]" />
-            <span className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-2">
+            <span className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1.5">
               Climatizadores
             </span>
-            <h3 className="text-white text-2xl font-extrabold leading-tight mb-3">
+            <h3 className="text-white text-lg sm:text-2xl font-extrabold leading-tight mb-2 sm:mb-3">
               Fresquinho em<br />qualquer ambiente
             </h3>
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl transition-colors w-fit">
-              Ver linha <ArrowRight size={14} />
+            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white bg-white/20 hover:bg-white/30 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-colors w-fit">
+              Ver linha <ArrowRight size={12} />
             </span>
           </Link>
 
           {/* Banner 2 — Spinning & Fitness */}
           <Link
             href="/produtos?categoria=spinning"
-            className="group relative overflow-hidden rounded-2xl min-h-[180px] flex flex-col justify-end p-8"
+            className="group relative overflow-hidden rounded-2xl h-[140px] sm:h-auto sm:min-h-[180px] flex flex-col justify-end p-5 sm:p-8"
             style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
           >
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_50%,#3cbfb3,transparent_60%)]" />
-            <span className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-2">
+            <span className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-1.5">
               Fitness
             </span>
-            <h3 className="text-white text-2xl font-extrabold leading-tight mb-3">
+            <h3 className="text-white text-lg sm:text-2xl font-extrabold leading-tight mb-2 sm:mb-3">
               Bikes Spinning<br />Alta Performance
             </h3>
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white bg-[#3cbfb3]/30 hover:bg-[#3cbfb3]/50 px-4 py-2 rounded-xl transition-colors w-fit">
-              Ver linha <ArrowRight size={14} />
+            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white bg-[#3cbfb3]/30 hover:bg-[#3cbfb3]/50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-colors w-fit">
+              Ver linha <ArrowRight size={12} />
             </span>
           </Link>
         </div>

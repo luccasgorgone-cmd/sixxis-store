@@ -37,9 +37,10 @@ const FONT_MAP: Record<string, { variable: string; className: string }> = {
 }
 
 export const viewport: Viewport = {
-  themeColor:    '#3cbfb3',
+  themeColor:    '#1a4f4a',
   width:         'device-width',
   initialScale:  1,
+  maximumScale:  5,
 }
 
 export const metadata: Metadata = {
@@ -140,6 +141,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${allFontVars} h-full antialiased`}
       style={cssVars}
     >
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Sixxis Store" />
+      </head>
       <body
         className="min-h-full flex flex-col bg-white"
         style={{ fontFamily: `var(${fontObj.variable}), system-ui, sans-serif` }}

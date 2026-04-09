@@ -46,7 +46,11 @@ export default function BannerCarousel({ banners }: Props) {
   const banner = banners[atual]
 
   return (
-    <div className="relative w-full overflow-hidden bg-[#0f1f1e]" style={{ height: 'clamp(280px, 50vw, 560px)' }}>
+    /* Mobile: 260px | Desktop: clamp(280px, 50vw, 560px) */
+    <div
+      className="relative w-full overflow-hidden bg-[#0f1f1e]"
+      style={{ height: 'clamp(260px, 50vw, 560px)' }}
+    >
       {/* Imagem */}
       <div className="absolute inset-0">
         {banner.imagem && (
@@ -64,22 +68,22 @@ export default function BannerCarousel({ banners }: Props) {
 
       {/* Conteúdo */}
       <div className="relative h-full flex items-center">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 w-full">
+        <div className="max-w-7xl mx-auto px-5 sm:px-10 w-full">
           <div className="max-w-xl">
             {banner.titulo && (
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-3 sm:mb-4">
                 {banner.titulo}
               </h2>
             )}
             {banner.subtitulo && (
-              <p className="text-white/80 text-base sm:text-lg mb-8 leading-relaxed">
+              <p className="text-white/80 text-sm sm:text-lg mb-5 sm:mb-8 leading-relaxed hidden sm:block">
                 {banner.subtitulo}
               </p>
             )}
             {banner.link && (
               <Link
                 href={banner.link}
-                className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-[#3cbfb3]/40 hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-5 py-3 sm:px-8 sm:py-4 text-sm sm:text-base rounded-xl transition-all shadow-lg hover:shadow-[#3cbfb3]/40 hover:-translate-y-0.5"
               >
                 Ver produto →
               </Link>
@@ -88,26 +92,26 @@ export default function BannerCarousel({ banners }: Props) {
         </div>
       </div>
 
-      {/* Setas — só se tiver mais de 1 banner */}
+      {/* Setas */}
       {banners.length > 1 && (
         <>
           <button
             onClick={anterior}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
             aria-label="Anterior"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
           <button
             onClick={proximo}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
             aria-label="Próximo"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={18} />
           </button>
 
           {/* Indicadores */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+          <div className="absolute bottom-3 sm:bottom-4 left-0 right-0 flex justify-center gap-2">
             {banners.map((_, i) => (
               <button
                 key={i}

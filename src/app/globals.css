@@ -208,4 +208,38 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 16px rgba(60, 191, 179, 0.4);
   }
+
+  /* ── Scrollbar hide (carrosséis) ── */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Mobile — iOS zoom prevention ────────────────────────────────────────── */
+@media (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+@media (min-width: 768px) {
+  input, select, textarea {
+    font-size: 14px !important;
+  }
+}
+
+/* ── Touch targets mínimos ────────────────────────────────────────────────── */
+button {
+  min-height: 44px;
+}
+.btn-sm {
+  min-height: 36px !important;
+}
+
+/* ── Safe area (iPhone home indicator) ───────────────────────────────────── */
+.safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
