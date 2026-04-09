@@ -63,39 +63,47 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Lê configs de aparência do banco — nunca quebra o layout em caso de falha no DB
-  let cfg: Record<string, string> = {}
+  // Defaults seguros — nunca vai quebrar o layout
+  let logoUrl       = '/logo-sixxis.png'
+  let corPrincipal  = '#3cbfb3'
+  let corHeader     = '#0f1f1e'
+  let corBotoes     = '#3cbfb3'
+  let corTextos     = '#0a0a0a'
+  let corFundo      = '#ffffff'
+  let fontePrincipal = 'Inter'
+
   try {
-    const configRows = await prisma.configuracao.findMany({
+    const configs = await prisma.configuracao.findMany({
       where: {
         chave: {
-          in: ['fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'logo_url'],
+          in: ['logo_url', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'fonte_principal'],
         },
       },
     })
-    cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
-  } catch (e) {
-    console.error('[LAYOUT] DB error — usando defaults visuais', e)
+    const cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
+    if (cfg.logo_url)       logoUrl       = cfg.logo_url
+    if (cfg.cor_principal)  corPrincipal  = cfg.cor_principal
+    if (cfg.cor_header)     corHeader     = cfg.cor_header
+    if (cfg.cor_botoes)     corBotoes     = cfg.cor_botoes
+    if (cfg.cor_textos)     corTextos     = cfg.cor_textos
+    if (cfg.cor_fundo)      corFundo      = cfg.cor_fundo
+    if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
+    console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', corPrincipal)
+  } catch (error) {
+    console.error('[LAYOUT ERROR — usando defaults]', error)
+    // Continua com os defaults — NUNCA quebra o layout
   }
 
   // Fonte selecionada (fallback: Inter)
-  const fonteName  = cfg.fonte_principal ?? 'Inter'
-  const fontObj    = FONT_MAP[fonteName] ?? inter
+  const fontObj    = FONT_MAP[fontePrincipal] ?? inter
   const allFontVars = [
     inter.variable, poppins.variable, roboto.variable,
     montserrat.variable, nunito.variable, raleway.variable, openSans.variable,
   ].join(' ')
 
-  const corPrincipal = cfg.cor_principal || '#3cbfb3'
-  const corHeader    = cfg.cor_header    || '#0f1f1e'
-  const corBotoes    = cfg.cor_botoes    || corPrincipal
-  const corTextos    = cfg.cor_textos    || '#0a0a0a'
-  const corFundo     = cfg.cor_fundo     || '#ffffff'
-  const logoUrl      = cfg.logo_url      || '/logo-sixxis.png'
-
   const cssVars = {
     '--color-tiffany':      corPrincipal,
-    '--color-tiffany-dark': corPrincipal,
+    '--color-tiffany-dark': corBotoes,
     '--tiffany':            corPrincipal,
     '--tiffany-dark':       corBotoes,
     '--color-header':       corHeader,

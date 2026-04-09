@@ -66,7 +66,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       <AnnouncementBar />
 
       {/* ── Header principal ─────────────────────────────────────────── */}
-      <header className="bg-[#2a9d8f] border-b border-white/20 shadow-md sticky top-0 z-40">
+      <header className="bg-[#2a9d8f] border-b border-[#3cbfb3]/30 shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
           {/* Logo */}
@@ -144,7 +144,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="text-sm font-bold px-4 py-1.5 rounded-full bg-[#0f1f1e] text-white hover:bg-[#1a3330] transition"
+                  className="text-sm font-bold px-4 py-1.5 rounded-full bg-white text-[#2a9d8f] hover:bg-white/90 transition"
                 >
                   Cadastrar
                 </Link>
