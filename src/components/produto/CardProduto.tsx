@@ -43,16 +43,16 @@ export default function CardProduto({ produto, showDesconto }: Props) {
   }
 
   return (
-    <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-gray-300 flex flex-col h-full" style={{ boxShadow: 'var(--shadow-sm)' }}>
+    <div className="group bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 hover:border-[#3cbfb3]/40 flex flex-col h-full">
 
       {/* Imagem — clicável para o produto */}
-      <Link href={`/produtos/${produto.slug}`} className="block relative aspect-square bg-[#f8f9fa]">
+      <Link href={`/produtos/${produto.slug}`} className="block relative aspect-square bg-[#f8f9fa] overflow-hidden">
         {imagemCapa ? (
           <Image
             src={imagemCapa}
             alt={produto.nome}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
             sizes="(max-width: 768px) 50vw, 25vw"
           />
         ) : (
@@ -64,43 +64,43 @@ export default function CardProduto({ produto, showDesconto }: Props) {
 
         {/* Badge desconto */}
         {promocional && desconto > 0 && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md">
+          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
             -{desconto}%
           </span>
         )}
 
         {/* Fora de estoque */}
         {produto.estoque === 0 && (
-          <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-            <span className="text-sm font-semibold text-gray-400">Fora de estoque</span>
+          <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
+            <span className="text-sm font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">Fora de estoque</span>
           </div>
         )}
       </Link>
 
       {/* Infos */}
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
         {/* Nome — clicável */}
         <Link href={`/produtos/${produto.slug}`} className="block flex-1 mb-3">
-          <p className="font-semibold text-sm text-[#0a0a0a] line-clamp-2 leading-snug hover:text-[#3cbfb3] transition-colors duration-200">
+          <p className="font-semibold text-sm text-[#0a0a0a] line-clamp-2 leading-snug group-hover:text-[#3cbfb3] transition-colors duration-200">
             {produto.nome}
           </p>
         </Link>
 
         {/* Preços */}
-        <div className="space-y-0.5 mb-4">
+        <div className="mb-4">
           {promocional && (
-            <p className="text-xs text-gray-400 line-through">
+            <p className="text-xs text-gray-400 line-through mb-0.5">
               R$ {formatBRL(preco)}
             </p>
           )}
-          <p className="text-xl font-black text-[#3cbfb3] leading-none">
+          <p className="text-xl font-black text-[#3cbfb3] leading-none mb-1">
             R$ {formatBRL(precoFinal)}
           </p>
-          <p className="text-xs text-[#2a9d8f] font-medium">
-            R$ {formatBRL(precoAtVista)} à vista no PIX (-3%)
+          <p className="text-[11px] text-[#2a9d8f] font-semibold">
+            R$ {formatBRL(precoAtVista)} no PIX <span className="text-gray-400 font-normal">(-3%)</span>
           </p>
-          <p className="text-xs text-gray-500">
-            ou 6x de R$ {formatBRL(parcelamento)} sem juros
+          <p className="text-[11px] text-gray-400 mt-0.5">
+            6x de R$ {formatBRL(parcelamento)} s/ juros
           </p>
         </div>
 
@@ -108,14 +108,14 @@ export default function CardProduto({ produto, showDesconto }: Props) {
         <button
           onClick={handleAddToCart}
           disabled={produto.estoque === 0}
-          className={`w-full flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition-all duration-200 ${
+          className={`w-full flex items-center justify-center gap-2 text-sm font-bold py-3 rounded-xl transition-all duration-200 ${
             adicionado
-              ? 'bg-green-500 text-white'
-              : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white disabled:opacity-50 disabled:cursor-not-allowed'
+              ? 'bg-green-500 text-white scale-95'
+              : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
           }`}
         >
           {adicionado ? <Check size={16} /> : <ShoppingCart size={16} />}
-          {adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+          {adicionado ? 'Adicionado!' : 'Adicionar'}
         </button>
       </div>
     </div>

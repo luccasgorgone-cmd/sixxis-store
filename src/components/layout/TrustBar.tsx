@@ -2,38 +2,47 @@ import { Truck, ShieldCheck, CreditCard, Star } from 'lucide-react'
 
 const items = [
   {
-    icon: Truck,
+    icon:  Truck,
+    color: '#3cbfb3',
     title: 'Entrega para todo o Brasil',
-    sub: 'Frete grátis acima de R$\u00a0500',
+    sub:   'Frete grátis acima de R$\u00a0500',
   },
   {
-    icon: ShieldCheck,
+    icon:  ShieldCheck,
+    color: '#22c55e',
     title: 'Compra 100% Segura',
-    sub: 'Seus dados protegidos',
+    sub:   'Seus dados protegidos',
   },
   {
-    icon: CreditCard,
+    icon:  CreditCard,
+    color: '#6366f1',
     title: '6x sem juros no cartão',
-    sub: 'Débito, crédito e PIX',
+    sub:   'Débito, crédito e PIX',
   },
   {
-    icon: Star,
+    icon:  Star,
+    color: '#f59e0b',
     title: 'Produtos Originais',
-    sub: 'Garantia Sixxis',
+    sub:   'Garantia Sixxis',
   },
 ]
 
 export default function TrustBar() {
   return (
-    <div className="bg-white border-b border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,.04)]">
+    <div className="bg-white border-b border-gray-100 shadow-[0_1px_4px_rgba(0,0,0,.06)]">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-4 divide-x divide-gray-100">
-          {items.map(({ icon: Icon, title, sub }) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
+          {items.map(({ icon: Icon, color, title, sub }) => (
             <div
               key={title}
-              className="flex items-center justify-center gap-3 py-4 px-2 transition-colors hover:bg-[#f8f9fa]"
+              className="flex items-center justify-center gap-3 py-4 px-3 transition-colors hover:bg-[#f8f9fa]"
             >
-              <Icon size={22} color="#3cbfb3" strokeWidth={2} className="shrink-0" />
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: `${color}18` }}
+              >
+                <Icon size={20} color={color} strokeWidth={2} />
+              </div>
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm font-bold text-gray-900 leading-tight truncate">
                   {title}
