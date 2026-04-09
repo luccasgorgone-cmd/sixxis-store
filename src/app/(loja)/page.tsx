@@ -25,6 +25,8 @@ const categorias = [
 
 const ICON_MAP: Record<number, typeof Cpu> = { 1: Cpu, 2: Headphones, 3: BadgeCheck }
 
+const DEFAULT_ORDER = ['banners', 'stats', 'categorias', 'mais-vendidos', 'por-que-sixxis', 'banners-duplos', 'newsletter', 'whatsapp']
+
 export default async function HomePage() {
   const [banners, destaques, produtosGerais, configRows] = await Promise.all([
     prisma.banner.findMany({
@@ -47,7 +49,14 @@ export default async function HomePage() {
 
   const cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
 
-  console.log('[HOME RENDER]', new Date().toISOString(), 'banners:', banners.length, 'configs:', configRows.length)
+  console.log('[HOME]', {
+    banners:      banners.length,
+    destaques:    destaques.length,
+    produtos:     produtosGerais.length,
+    configs:      configRows.length,
+    logoUrl:      cfg.logo_url,
+    corPrincipal: cfg.cor_principal,
+  })
 
   // Mais vendidos: curados primeiro, fallback para produtos gerais
   const produtosMaisVendidos = destaques.length > 0
@@ -66,8 +75,8 @@ export default async function HomePage() {
   const whatsappSubtitulo = cfg.whatsapp_banner_subtitulo || 'Nossa equipe especializada está pronta para te orientar e encontrar o produto ideal para suas necessidades.'
 
   const newsletterAtivo     = cfg.newsletter_ativo     !== 'false'
-  const newsletterTitulo    = cfg.newsletter_titulo     || 'Receba novidades e promoções exclusivas'
-  const newsletterSubtitulo = cfg.newsletter_subtitulo  || 'Sem spam. Cancele quando quiser.'
+  const newsletterTitulo    = cfg.newsletter_titulo    || 'Receba novidades e promoções exclusivas'
+  const newsletterSubtitulo = cfg.newsletter_subtitulo || 'Sem spam. Cancele quando quiser.'
 
   const porqueSixxis = [1, 2, 3].map((n) => ({
     icon:  ICON_MAP[n],
@@ -79,42 +88,48 @@ export default async function HomePage() {
     ][n - 1],
   }))
 
-  return (
-    <main className="bg-white">
+  let ordemSecoes: string[]
+  try {
+    ordemSecoes = cfg.home_secoes_ordem ? JSON.parse(cfg.home_secoes_ordem) : DEFAULT_ORDER
+  } catch {
+    ordemSecoes = DEFAULT_ORDER
+  }
 
-      {/* ── Banner Carousel ou Hero Estático ────────────────────────────────── */}
-      {banners.length > 0 ? (
-        <BannerCarousel banners={banners} />
-      ) : (
-        <section
-          className="relative overflow-hidden"
-          style={
-            heroImagemUrl
-              ? { backgroundImage: `url(${heroImagemUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-              : { background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }
-          }
-        >
-          {heroImagemUrl && <div className="absolute inset-0 bg-black/50" />}
-          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-24 md:py-32 text-center">
-            <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-full border border-white/20 mb-8">
-              <span>🏆</span> Loja Oficial Sixxis — Araçatuba, SP
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
-              {heroTitulo}
-            </h1>
-            <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-              {heroSubtitulo}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href={heroCtaLink} className="btn-primary text-base">{heroCtaTexto} →</Link>
-              <Link href="/pecas" className="btn-outline-white text-base">Peças de Reposição</Link>
-            </div>
+  // ── Seções ────────────────────────────────────────────────────────────────
+  const SECOES: Record<string, React.ReactNode> = {
+    banners: banners.length > 0 ? (
+      <BannerCarousel key="banners" banners={banners} />
+    ) : (
+      <section
+        key="banners"
+        className="relative overflow-hidden"
+        style={
+          heroImagemUrl
+            ? { backgroundImage: `url(${heroImagemUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+            : { background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }
+        }
+      >
+        {heroImagemUrl && <div className="absolute inset-0 bg-black/50" />}
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-24 md:py-32 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-full border border-white/20 mb-8">
+            <span>🏆</span> Loja Oficial Sixxis — Araçatuba, SP
           </div>
-        </section>
-      )}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
+            {heroTitulo}
+          </h1>
+          <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
+            {heroSubtitulo}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href={heroCtaLink} className="btn-primary text-base">{heroCtaTexto} →</Link>
+            <Link href="/pecas" className="btn-outline-white text-base">Peças de Reposição</Link>
+          </div>
+        </div>
+      </section>
+    ),
 
-      {/* ── Stats ───────────────────────────────────────────────────────────── */}
-      <section className="bg-[#3cbfb3]">
+    stats: (
+      <section key="stats" className="bg-[#3cbfb3]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
             {[
@@ -137,9 +152,10 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+    ),
 
-      {/* ── Categorias ──────────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+    categorias: (
+      <section key="categorias" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
         <h2 className="section-title mb-10">Categorias</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {categorias.map(({ label, desc, href, icon: Icon }) => (
@@ -160,51 +176,39 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+    ),
 
-      {/* ── Banners duplos ──────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link
-            href="/produtos?categoria=climatizadores"
-            className="group relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 transition-transform duration-300 hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(135deg, #0d4a47 0%, #1a7a74 50%, #3cbfb3 100%)' }}
-          >
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_80%_20%,#fff,transparent)]" />
-            <div className="relative z-10">
-              <p className="text-[#a8ede9] text-xs font-semibold uppercase tracking-widest mb-1">Linha Residencial e Comercial</p>
-              <h3 className="text-white text-xl font-extrabold leading-tight mb-3">Climatizadores<br />Sixxis</h3>
-              <span className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full transition">
-                Ver modelos <ArrowRight size={12} />
-              </span>
+    'mais-vendidos': produtosMaisVendidos.length > 0 ? (
+      <section key="mais-vendidos" className="bg-[#f8f9fa] py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#3cbfb3] flex items-center justify-center">
+                <Star size={18} className="text-white fill-white" />
+              </div>
+              <h2 className="section-title">Mais Vendidos</h2>
             </div>
-          </Link>
-
-          <Link
-            href="/produtos?categoria=spinning"
-            className="group relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 transition-transform duration-300 hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 60%, #2a2a2a 100%)' }}
-          >
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_80%,#3cbfb3,transparent)]" />
-            <div className="relative z-10">
-              <p className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-1">Spinning & Acessórios</p>
-              <h3 className="text-white text-xl font-extrabold leading-tight mb-3">Equipamentos<br />Fitness</h3>
-              <span className="inline-flex items-center gap-1.5 bg-[#3cbfb3]/20 hover:bg-[#3cbfb3]/30 text-[#3cbfb3] text-xs font-bold px-3 py-1.5 rounded-full transition border border-[#3cbfb3]/40">
-                Ver produtos <ArrowRight size={12} />
-              </span>
-            </div>
-          </Link>
+            <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition group">
+              Ver todos <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-200" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {produtosMaisVendidos.map((produto) => (
+              <CardProduto key={produto.id} produto={produto} showDesconto />
+            ))}
+          </div>
         </div>
       </section>
+    ) : null,
 
-      {/* ── Produtos em Destaque ─────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+    'produtos-destaque': (
+      <section key="produtos-destaque" className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
         <div className="flex items-center justify-between mb-10">
           <h2 className="section-title">Produtos em Destaque</h2>
           <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
             Ver todos <ArrowRight size={14} />
           </Link>
         </div>
-
         {produtosGerais.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-gray-200 rounded-2xl">
             <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
@@ -221,33 +225,10 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+    ),
 
-      {/* ── Mais Vendidos ───────────────────────────────────────────────────── */}
-      {produtosMaisVendidos.length > 0 && (
-        <section className="bg-[#f8f9fa] py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="flex items-center justify-between mb-10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#3cbfb3] flex items-center justify-center">
-                  <Star size={18} className="text-white fill-white" />
-                </div>
-                <h2 className="section-title">Mais Vendidos</h2>
-              </div>
-              <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition group">
-                Ver todos <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-200" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {produtosMaisVendidos.map((produto) => (
-                <CardProduto key={produto.id} produto={produto} showDesconto />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Por que Sixxis? ──────────────────────────────────────────────────── */}
-      <section className="bg-[#f8f9fa] py-16">
+    'por-que-sixxis': (
+      <section key="por-que-sixxis" className="bg-[#f8f9fa] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-10">Por que Sixxis?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -267,20 +248,55 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+    ),
 
-      {/* ── Newsletter ───────────────────────────────────────────────────────── */}
-      {newsletterAtivo && (
-        <section className="bg-[#f8f9fa] border-t border-b border-gray-200 py-12">
-          <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-2xl font-extrabold text-[#0a0a0a] mb-1">{newsletterTitulo}</h2>
-            <p className="text-gray-500 text-sm mb-6">{newsletterSubtitulo}</p>
-            <NewsletterForm />
-          </div>
-        </section>
-      )}
+    'banners-duplos': (
+      <section key="banners-duplos" className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link
+            href="/produtos?categoria=climatizadores"
+            className="group relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 transition-transform duration-300 hover:scale-[1.02]"
+            style={{ background: 'linear-gradient(135deg, #0d4a47 0%, #1a7a74 50%, #3cbfb3 100%)' }}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_80%_20%,#fff,transparent)]" />
+            <div className="relative z-10">
+              <p className="text-[#a8ede9] text-xs font-semibold uppercase tracking-widest mb-1">Linha Residencial e Comercial</p>
+              <h3 className="text-white text-xl font-extrabold leading-tight mb-3">Climatizadores<br />Sixxis</h3>
+              <span className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full transition">
+                Ver modelos <ArrowRight size={12} />
+              </span>
+            </div>
+          </Link>
+          <Link
+            href="/produtos?categoria=spinning"
+            className="group relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 transition-transform duration-300 hover:scale-[1.02]"
+            style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 60%, #2a2a2a 100%)' }}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_80%,#3cbfb3,transparent)]" />
+            <div className="relative z-10">
+              <p className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-1">Spinning & Acessórios</p>
+              <h3 className="text-white text-xl font-extrabold leading-tight mb-3">Equipamentos<br />Fitness</h3>
+              <span className="inline-flex items-center gap-1.5 bg-[#3cbfb3]/20 hover:bg-[#3cbfb3]/30 text-[#3cbfb3] text-xs font-bold px-3 py-1.5 rounded-full transition border border-[#3cbfb3]/40">
+                Ver produtos <ArrowRight size={12} />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </section>
+    ),
 
-      {/* ── Banner WhatsApp ──────────────────────────────────────────────────── */}
-      <section className="bg-[#0a0a0a] py-20">
+    newsletter: newsletterAtivo ? (
+      <section key="newsletter" className="bg-[#f8f9fa] border-t border-b border-gray-200 py-12">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl font-extrabold text-[#0a0a0a] mb-1">{newsletterTitulo}</h2>
+          <p className="text-gray-500 text-sm mb-6">{newsletterSubtitulo}</p>
+          <NewsletterForm />
+        </div>
+      </section>
+    ) : null,
+
+    whatsapp: (
+      <section key="whatsapp" className="bg-[#0a0a0a] py-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             {whatsappTitulo}
@@ -301,8 +317,12 @@ export default async function HomePage() {
           </a>
         </div>
       </section>
+    ),
+  }
 
-      {/* ── Formas de Pagamento ──────────────────────────────────────────────── */}
+  return (
+    <main className="bg-white">
+      {ordemSecoes.map((id) => SECOES[id] ?? null)}
       <PagamentosBar />
     </main>
   )

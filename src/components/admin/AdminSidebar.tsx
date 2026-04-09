@@ -3,13 +3,14 @@
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Image as ImageIcon, Tag, Star, Trophy } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Image as ImageIcon, Tag, Star, Trophy, LayoutTemplate } from 'lucide-react'
 import { useState } from 'react'
 
 const navItems = [
   { href: '/admin',               label: 'Dashboard',    icon: LayoutDashboard, exact: true },
   { href: '/admin/produtos',      label: 'Produtos',     icon: Package,         exact: false },
   { href: '/admin/pedidos',       label: 'Pedidos',      icon: ShoppingCart,    exact: false },
+  { href: '/admin/editor-home',    label: 'Editor da Home', icon: LayoutTemplate,  exact: false },
   { href: '/admin/banners',       label: 'Banners',      icon: ImageIcon,       exact: false },
   { href: '/admin/cupons',        label: 'Cupons',       icon: Tag,             exact: false },
   { href: '/admin/avaliacoes',    label: 'Avaliações',   icon: Star,            exact: false },
