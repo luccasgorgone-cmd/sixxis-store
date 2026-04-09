@@ -47,8 +47,8 @@ export default async function HomePage() {
       {banners.length > 0 ? (
         <Suspense fallback={
           <div
-            className="w-full bg-[#0f1f1e] flex items-center justify-center"
-            style={{ height: 'clamp(280px, 50vw, 560px)' }}
+            className="w-full flex items-center justify-center"
+            style={{ height: 'clamp(280px, 50vw, 560px)', backgroundColor: '#0f2e2b' }}
           >
             <div className="text-[#3cbfb3] text-xl font-bold">Sixxis Store</div>
           </div>
@@ -172,7 +172,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 5. Stats */}
+      {/* 6. Stats */}
       <section className="py-12" style={{ backgroundColor: 'var(--color-stats, #3cbfb3)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
@@ -194,8 +194,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7. Por que Sixxis? */}
-      <section className="py-16" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
+      {/* 6. Por que Sixxis? */}
+      <section className="py-16" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-10">Por que Sixxis?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -235,8 +235,8 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 8. Banner WhatsApp */}
-      <section className="py-20" style={{ backgroundColor: 'var(--color-wa, #0a0a0a)' }}>
+      {/* 9. Banner WhatsApp */}
+      <section className="py-20" style={{ backgroundColor: 'var(--color-wa, #111827)' }}>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             {cfg.whatsapp_banner_titulo || 'Precisa de ajuda para escolher?'}
