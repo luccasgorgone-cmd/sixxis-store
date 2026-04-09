@@ -232,7 +232,7 @@
 }
 
 /* ── Touch targets mínimos ────────────────────────────────────────────────── */
-button {
+button, a {
   min-height: 44px;
 }
 .btn-sm {

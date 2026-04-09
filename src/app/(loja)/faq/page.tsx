@@ -65,7 +65,7 @@ export default function FaqPage() {
             <HelpCircle size={14} />
             Central de Ajuda
           </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
             Perguntas Frequentes
           </h1>
           <p className="mt-4 text-white/70">

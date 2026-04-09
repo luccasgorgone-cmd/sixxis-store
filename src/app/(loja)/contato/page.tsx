@@ -52,7 +52,7 @@ export default function ContatoPage() {
           <p className="text-[#3cbfb3] text-sm font-semibold uppercase tracking-widest mb-3">
             Fale com a gente
           </p>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight">Contato</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Contato</h1>
           <p className="mt-4 text-white/70 max-w-xl mx-auto">
             Nossa equipe está disponível para tirar dúvidas, dar suporte técnico e ajudar no que precisar.
           </p>

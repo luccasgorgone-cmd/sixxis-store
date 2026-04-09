@@ -64,13 +64,15 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar
+          - Mobile: fixed, desliza da esquerda com overlay
+          - Desktop (lg+): static, parte do flex layout normal
+      */}
       <aside
         className={`
           w-60 shrink-0 bg-[#111827] flex flex-col h-full
-          lg:relative lg:translate-x-0
-          fixed top-0 left-0 z-50
-          transition-transform duration-300
+          fixed lg:static top-0 left-0 z-50
+          transition-transform duration-300 lg:transition-none
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
@@ -86,7 +88,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
               unoptimized
             />
           </Link>
-          {/* Botão fechar no mobile */}
+          {/* Fechar no mobile */}
           <button
             onClick={onMobileClose}
             className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 transition"

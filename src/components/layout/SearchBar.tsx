@@ -15,9 +15,12 @@ interface Sugestao {
 
 interface Props {
   dark?: boolean
+  /** 'mobile' usa rounded-xl e bg-white/15 em vez dos padrões dark */
+  variant?: 'default' | 'mobile'
 }
 
-export default function SearchBar({ dark = false }: Props) {
+export default function SearchBar({ dark = false, variant = 'default' }: Props) {
+  const isMobile = variant === 'mobile'
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [sugestoes, setSugestoes] = useState<Sugestao[]>([])
@@ -94,9 +97,11 @@ export default function SearchBar({ dark = false }: Props) {
           onFocus={() => sugestoes.length > 0 && setAberto(true)}
           placeholder="Buscar produtos..."
           autoComplete="off"
-          className={`w-full pl-9 pr-8 py-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] transition ${
+          className={`w-full pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] transition ${
+            isMobile ? 'rounded-xl' : 'rounded-full'
+          } ${
             dark
-              ? 'bg-white/10 text-white placeholder-white/50 border border-white/20 focus:bg-white/15 focus:border-[#3cbfb3]'
+              ? `border border-white/20 ${isMobile ? 'bg-white/15' : 'bg-white/10'} text-white placeholder-white/60 focus:bg-white/20 focus:border-[#3cbfb3]`
               : 'border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#3cbfb3]'
           }`}
         />

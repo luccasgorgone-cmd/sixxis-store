@@ -94,7 +94,7 @@ export default async function HomePage() {
               Ver todos <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {produtosMostrar.map((produto) => (
               <CardProduto key={produto.id} produto={produto} />
             ))}

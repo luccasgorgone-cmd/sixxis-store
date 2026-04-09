@@ -81,16 +81,16 @@ export default function Header({
       <div className="sticky top-0 z-40">
 
         {/* ═══════════════════════════════════════════════════════
-            MOBILE HEADER (< lg)
+            MOBILE HEADER (< md / < 768px)
         ═══════════════════════════════════════════════════════ */}
         <div
-          className="lg:hidden shadow-md border-b border-white/10"
+          className="md:hidden shadow-md border-b border-white/10"
           style={{ backgroundColor: 'var(--color-header, #1a4f4a)' }}
         >
-          {/* Linha única: [Menu] [Logo centralizada] [Carrinho] */}
+          {/* Linha única h-14: [Hambúrguer] [Logo center] [Carrinho] */}
           <div className="h-14 px-4 flex items-center relative">
 
-            {/* Hambúrguer — esquerda */}
+            {/* Hambúrguer — esquerda absoluta */}
             <button
               className="absolute left-4 z-10 p-2 rounded-lg hover:bg-white/20 transition"
               onClick={() => setMenuOpen(true)}
@@ -114,32 +114,32 @@ export default function Header({
               />
             </Link>
 
-            {/* Carrinho — direita */}
+            {/* Carrinho — direita absoluta */}
             <Link
               href="/carrinho"
-              className="absolute right-4 z-10 p-2 text-white hover:text-white/80 transition"
+              className="absolute right-4 z-10 relative p-2 text-white hover:text-white/80 transition"
               aria-label="Carrinho"
             >
               <ShoppingCart size={24} />
               {totalItens > 0 && (
-                <span className="absolute -top-0 -right-0 bg-red-500 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] font-black rounded-full w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center leading-none px-0.5">
                   {totalItens > 9 ? '9+' : totalItens}
                 </span>
               )}
             </Link>
           </div>
 
-          {/* Busca mobile — full-width abaixo do header */}
-          <div className="px-3 pb-2.5">
-            <SearchBar dark />
+          {/* Busca mobile — full-width, glass style */}
+          <div className="px-3 pb-3">
+            <SearchBar dark variant="mobile" />
           </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════
-            DESKTOP HEADER (>= lg)
+            DESKTOP HEADER (≥ md / ≥ 768px)
         ═══════════════════════════════════════════════════════ */}
         <header
-          className="hidden lg:block shadow-md border-b border-white/10"
+          className="hidden md:block shadow-md border-b border-white/10"
           style={{ backgroundColor: 'var(--color-header, #1a4f4a)' }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
@@ -162,7 +162,7 @@ export default function Header({
             </div>
 
             {/* Ações direita */}
-            <div className="flex items-center gap-3 ml-auto lg:ml-0">
+            <div className="flex items-center gap-3 ml-auto md:ml-0">
 
               {/* Carrinho */}
               <Link
@@ -178,7 +178,7 @@ export default function Header({
                 )}
               </Link>
 
-              {/* Auth — desktop */}
+              {/* Auth */}
               {session ? (
                 <div className="flex items-center gap-2">
                   <Link
@@ -215,8 +215,8 @@ export default function Header({
           </div>
         </header>
 
-        {/* ── Nav de categorias (desktop) ── */}
-        <nav className="hidden lg:block bg-[#0f2e2b] border-b border-white/5">
+        {/* ── Nav de categorias — desktop only ── */}
+        <nav className="hidden md:block bg-[#0f2e2b] border-b border-white/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex items-center">
               {navLinks.map(({ href, label, destaque }) => (
@@ -242,7 +242,7 @@ export default function Header({
         </nav>
       </div>
 
-      {/* Menu mobile drawer */}
+      {/* Menu mobile drawer — da esquerda */}
       <MobileMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} logoUrl={logoUrl} />
     </>
   )

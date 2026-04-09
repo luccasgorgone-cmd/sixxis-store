@@ -18,7 +18,7 @@ export default function SobrePage() {
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-[#3cbfb3] text-sm font-semibold uppercase tracking-widest mb-4">Quem somos</p>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-5">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-5">
             Conheça a Sixxis
           </h1>
           <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">

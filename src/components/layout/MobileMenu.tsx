@@ -159,6 +159,37 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
               brasil.sixxis@gmail.com
             </a>
           </div>
+
+          {/* Redes sociais */}
+          <div className="flex items-center gap-3 pt-1">
+            <a
+              href="https://instagram.com/sixxisoficial"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-white/60 hover:text-[#3cbfb3] transition"
+              aria-label="Instagram Sixxis"
+            >
+              {/* Instagram icon */}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="4.5"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+              </svg>
+              @sixxisoficial
+            </a>
+            <a
+              href="https://www.facebook.com/profile.php?id=100090936724453"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center w-7 h-7 rounded-full border border-white/20 hover:border-[#3cbfb3] text-white/60 hover:text-[#3cbfb3] transition"
+              aria-label="Facebook Sixxis"
+            >
+              {/* Facebook icon */}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </>
