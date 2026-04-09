@@ -11,7 +11,7 @@ import MobileMenu from './MobileMenu'
 
 const announcements = [
   '🚚 Frete grátis acima de R$\u00a0500 para todo o Brasil',
-  '💳 Parcele em até 12x sem juros no cartão',
+  '💳 Parcele em até 6x sem juros no cartão',
   '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
 ]
 
@@ -66,7 +66,7 @@ export default function Header() {
       <AnnouncementBar />
 
       {/* ── Header principal ─────────────────────────────────────────── */}
-      <header className="bg-[#0f1f1e] border-b border-[#3cbfb3]/20 shadow-sm sticky top-0 z-40">
+      <header className="bg-[#0f1f1e] border-b border-[#3cbfb3]/20 shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
           {/* Logo */}
@@ -74,8 +74,8 @@ export default function Header() {
             <Image
               src="/logo-sixxis.png"
               alt="Sixxis"
-              width={120}
-              height={40}
+              width={130}
+              height={44}
               className="object-contain brightness-0 invert"
               priority
             />

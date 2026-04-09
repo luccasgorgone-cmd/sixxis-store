@@ -25,11 +25,17 @@ export default function PagamentosBar() {
           <svg width="36" height="22" viewBox="0 0 36 22" fill="none" aria-label="Mastercard">
             <circle cx="13" cy="11" r="11" fill="#EB001B" />
             <circle cx="23" cy="11" r="11" fill="#F79E1B" />
-            <path
-              d="M18 4.2a11 11 0 0 1 0 13.6A11 11 0 0 1 18 4.2z"
-              fill="#FF5F00"
-            />
+            <path d="M18 4.2a11 11 0 0 1 0 13.6A11 11 0 0 1 18 4.2z" fill="#FF5F00" />
           </svg>
+        </span>
+
+        {/* Débito */}
+        <span className="inline-flex items-center gap-1.5 bg-[#2196F3] text-white text-xs font-bold px-2.5 py-1.5 rounded-md">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="5" width="20" height="14" rx="2" stroke="white" strokeWidth="2"/>
+            <path d="M2 10h20" stroke="white" strokeWidth="2"/>
+          </svg>
+          Débito
         </span>
 
         {/* Boleto */}
@@ -47,6 +53,11 @@ export default function PagamentosBar() {
         {/* Elo */}
         <span className="inline-flex items-center justify-center bg-[#FFD100] text-black text-xs font-black px-3 py-1.5 rounded-md tracking-wide w-12">
           elo
+        </span>
+
+        {/* Parcelas */}
+        <span className="text-xs text-gray-400 font-medium ml-1 hidden sm:inline">
+          Parcele em até <strong className="text-gray-600">6x sem juros</strong>
         </span>
       </div>
     </div>

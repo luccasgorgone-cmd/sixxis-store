@@ -26,7 +26,8 @@ export default function CardProduto({ produto, showDesconto }: Props) {
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
   const precoFinal  = promocional ?? preco
   const precoAtVista = precoFinal * 0.97
-  const parcelamento = precoFinal / 12
+  const parcelamento = precoFinal / 6
+  const desconto = (promocional && preco > 0) ? Math.round(((preco - promocional) / preco) * 100) : 0
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
@@ -42,7 +43,7 @@ export default function CardProduto({ produto, showDesconto }: Props) {
   }
 
   return (
-    <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 flex flex-col h-full">
+    <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-gray-300 flex flex-col h-full" style={{ boxShadow: 'var(--shadow-sm)' }}>
 
       {/* Imagem — clicável para o produto */}
       <Link href={`/produtos/${produto.slug}`} className="block relative aspect-square bg-[#f8f9fa]">
@@ -61,13 +62,10 @@ export default function CardProduto({ produto, showDesconto }: Props) {
           </div>
         )}
 
-        {/* Badge OFERTA / % de desconto */}
-        {promocional && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
-            {showDesconto && preco > 0
-              ? `-${Math.round(((preco - promocional) / preco) * 100)}%`
-              : 'OFERTA'
-            }
+        {/* Badge desconto */}
+        {promocional && desconto > 0 && (
+          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md">
+            -{desconto}%
           </span>
         )}
 
@@ -80,29 +78,29 @@ export default function CardProduto({ produto, showDesconto }: Props) {
       </Link>
 
       {/* Infos */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="p-5 flex flex-col flex-1">
         {/* Nome — clicável */}
         <Link href={`/produtos/${produto.slug}`} className="block flex-1 mb-3">
-          <p className="font-semibold text-sm text-[#0a0a0a] line-clamp-2 leading-snug hover:text-[#3cbfb3] transition-colors">
+          <p className="font-semibold text-sm text-[#0a0a0a] line-clamp-2 leading-snug hover:text-[#3cbfb3] transition-colors duration-200">
             {produto.nome}
           </p>
         </Link>
 
         {/* Preços */}
-        <div className="space-y-0.5 mb-3">
+        <div className="space-y-0.5 mb-4">
           {promocional && (
             <p className="text-xs text-gray-400 line-through">
               R$ {formatBRL(preco)}
             </p>
           )}
-          <p className="text-lg font-bold text-[#3cbfb3]">
+          <p className="text-xl font-black text-[#3cbfb3] leading-none">
             R$ {formatBRL(precoFinal)}
           </p>
           <p className="text-xs text-[#2a9d8f] font-medium">
             R$ {formatBRL(precoAtVista)} à vista no PIX (-3%)
           </p>
           <p className="text-xs text-gray-500">
-            ou 12x de R$ {formatBRL(parcelamento)}
+            ou 6x de R$ {formatBRL(parcelamento)} sem juros
           </p>
         </div>
 

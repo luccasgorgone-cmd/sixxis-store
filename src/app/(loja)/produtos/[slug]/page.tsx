@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import GaleriaProduto from '@/components/produto/GaleriaProduto'
@@ -7,6 +9,7 @@ import SeletorVariacao from '@/components/produto/SeletorVariacao'
 import AvaliacoesProduto from '@/components/produto/AvaliacoesProduto'
 import FormAvaliacao from '@/components/produto/FormAvaliacao'
 import ListaEsperaForm from '@/components/produto/ListaEsperaForm'
+import CardProduto from '@/components/produto/CardProduto'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,12 +50,23 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     comprouProduto = !!compra
   }
 
-  const imagens    = produto.imagens as string[]
-  const preco      = Number(produto.preco)
+  // Produtos relacionados (mesma categoria, exceto o atual)
+  const relacionados = await prisma.produto.findMany({
+    where: {
+      ativo:     true,
+      categoria: produto.categoria,
+      id:        { not: produto.id },
+    },
+    take:    4,
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const imagens     = produto.imagens as string[]
+  const preco       = Number(produto.preco)
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
   const precoFinal  = promocional ?? preco
   const precoAtVista = precoFinal * 0.97
-  const parcelamento = precoFinal / 12
+  const parcelamento = precoFinal / 6
 
   const variacoes = produto.variacoes.map((v) => ({
     id:      v.id,
@@ -63,8 +77,27 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     ativo:   v.ativo,
   }))
 
+  const categoriaLabel = produto.categoria
+    ? produto.categoria.charAt(0).toUpperCase() + produto.categoria.slice(1)
+    : 'Produtos'
+
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-8" aria-label="Breadcrumb">
+        <Link href="/" className="hover:text-[#3cbfb3] transition-colors">Home</Link>
+        <ChevronRight size={12} />
+        <Link
+          href={`/produtos?categoria=${produto.categoria}`}
+          className="hover:text-[#3cbfb3] transition-colors capitalize"
+        >
+          {categoriaLabel}
+        </Link>
+        <ChevronRight size={12} />
+        <span className="text-gray-600 truncate max-w-[200px]">{produto.nome}</span>
+      </nav>
+
       <div className="grid md:grid-cols-2 gap-12">
         <GaleriaProduto imagens={imagens} nome={produto.nome} />
 
@@ -72,9 +105,12 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           {/* Categoria / Modelo */}
           <div className="flex items-center gap-2 mb-3">
             {produto.categoria && (
-              <span className="text-xs font-semibold text-[#3cbfb3] bg-[#e8f8f7] px-3 py-1 rounded-full capitalize">
+              <Link
+                href={`/produtos?categoria=${produto.categoria}`}
+                className="text-xs font-semibold text-[#3cbfb3] bg-[#e8f8f7] hover:bg-[#3cbfb3] hover:text-white px-3 py-1 rounded-full capitalize transition-colors duration-200"
+              >
                 {produto.categoria}
-              </span>
+              </Link>
             )}
             {produto.modelo && (
               <span className="text-xs text-gray-500">Modelo: {produto.modelo}</span>
@@ -85,29 +121,29 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             {produto.nome}
           </h1>
 
-          {/* Preços — só mostrar se não tem variações (variações controlam preço) */}
+          {/* Preços — só mostrar se não tem variações */}
           {!produto.temVariacoes && (
-            <div className="mb-6 space-y-1">
+            <div className="mb-6 p-5 bg-[#f8f9fa] rounded-xl border border-gray-100 space-y-1.5">
               {promocional && (
                 <p className="text-gray-400 line-through text-lg">
                   R$ {formatBRL(preco)}
                 </p>
               )}
-              <p className="text-4xl font-extrabold text-[#3cbfb3]">
+              <p className="text-4xl font-extrabold text-[#3cbfb3] leading-none">
                 R$ {formatBRL(precoFinal)}
               </p>
               <p className="text-sm text-[#2a9d8f] font-medium">
                 R$ {formatBRL(precoAtVista)} à vista no PIX (-3%)
               </p>
               <p className="text-sm text-gray-500">
-                ou 12x de R$ {formatBRL(parcelamento)} no cartão
+                ou 6x de R$ {formatBRL(parcelamento)} sem juros no cartão
               </p>
             </div>
           )}
 
-          {/* Preço base para produto COM variações (antes de selecionar) */}
+          {/* Preço base para produto COM variações */}
           {produto.temVariacoes && (
-            <div className="mb-6 space-y-1">
+            <div className="mb-6 p-5 bg-[#f8f9fa] rounded-xl border border-gray-100 space-y-1">
               <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">A partir de</p>
               {promocional && (
                 <p className="text-gray-400 line-through text-base">
@@ -120,7 +156,9 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             </div>
           )}
 
-          <p className="text-gray-700 mb-6 whitespace-pre-line leading-relaxed">{produto.descricao}</p>
+          <p className="text-gray-700 mb-6 whitespace-pre-line leading-relaxed text-sm">
+            {produto.descricao}
+          </p>
 
           {/* Seletor de variação OU botão direto */}
           {produto.temVariacoes ? (
@@ -143,7 +181,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             </>
           ) : (
             <div className="space-y-4">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                 <p className="text-red-500 font-medium text-sm">Produto fora de estoque</p>
                 <p className="text-xs text-red-400 mt-1">
                   Cadastre seu e-mail e avise quando voltar ao estoque.
@@ -160,15 +198,16 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
               'Produto Original',
               'Entrega para todo Brasil',
               'Pagamento Seguro',
-            ].map(s => (
-              <div key={s} className="flex items-center gap-2 text-xs text-gray-600">
-                <span className="text-[#3cbfb3] font-bold">✓</span>
+            ].map((s) => (
+              <div key={s} className="flex items-center gap-2 text-xs text-gray-600 bg-[#f8f9fa] rounded-lg px-3 py-2">
+                <span className="text-[#3cbfb3] font-bold text-base leading-none">✓</span>
                 {s}
               </div>
             ))}
           </div>
         </div>
       </div>
+
       {/* ── Avaliações ────────────────────────────────────────────────────────── */}
       <section className="mt-16 border-t border-gray-100 pt-12">
         <div className="grid md:grid-cols-2 gap-10">
@@ -179,6 +218,26 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           />
         </div>
       </section>
+
+      {/* ── Você também pode gostar ───────────────────────────────────────────── */}
+      {relacionados.length > 0 && (
+        <section className="mt-16 border-t border-gray-100 pt-12">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="section-title">Você também pode gostar</h2>
+            <Link
+              href={`/produtos?categoria=${produto.categoria}`}
+              className="text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-medium transition-colors flex items-center gap-1"
+            >
+              Ver categoria <ChevronRight size={14} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {relacionados.map((p) => (
+              <CardProduto key={p.id} produto={p} showDesconto />
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   )
 }
