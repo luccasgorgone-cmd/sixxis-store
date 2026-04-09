@@ -5,7 +5,7 @@ import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
-import BannerCarousel from '@/components/layout/BannerCarousel'
+// import BannerCarousel from '@/components/layout/BannerCarousel' // temporariamente desabilitado para diagnóstico
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -47,7 +47,11 @@ export default async function HomePage() {
 
       {/* ── HERO / BANNER ────────────────────────────────────────────────── */}
       {banners.length > 0 ? (
-        <BannerCarousel banners={banners} />
+        /* TESTE: BannerCarousel substituído por div simples para diagnóstico */
+        <div className="bg-[#3cbfb3] py-20 text-center">
+          <p className="text-white/70 text-sm uppercase tracking-widest mb-2">Banner ativo</p>
+          <h2 className="text-white text-4xl font-bold">{banners[0].titulo || 'Sixxis Store'}</h2>
+        </div>
       ) : (
         <section
           className="relative py-24 md:py-32"
