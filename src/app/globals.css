@@ -5,44 +5,46 @@
   --font-sans: var(--font-inter);
 
   /* Verde Tiffany */
-  --color-tiffany:       #3cbfb3;
-  --color-tiffany-dark:  #2a9d8f;
-  --color-tiffany-light: #e8f8f7;
+  --color-tiffany:        #3cbfb3;
+  --color-tiffany-dark:   #2a9d8f;
+  --color-tiffany-medium: #1a4f4a;
+  --color-tiffany-deep:   #0f2e2b;
+  --color-tiffany-light:  #e8f8f7;
+  --color-tiffany-soft:   #d0f0ed;
 
   /* Brand */
   --color-brand-black:  #0a0a0a;
-  --color-brand-gray:   #f8f9fa;
+  --color-brand-gray:   #f9fafb;
   --color-brand-gray2:  #f1f3f4;
-  --color-brand-muted:  #6b7280;
+  --color-brand-muted:  #4b5563;
 }
 
 /* ── Variáveis CSS (para uso em calc, var(), etc.) ────────────────────────── */
 :root {
-  /* Cores base */
+  /* Verde Tiffany — paleta completa */
   --tiffany:             #3cbfb3;
   --tiffany-dark:        #2a9d8f;
+  --tiffany-medium:      #1a4f4a;
+  --tiffany-deep:        #0f2e2b;
   --tiffany-light:       #e8f8f7;
-  --black:               #0a0a0a;
-  --gray-50:             #f8f9fa;
-  --gray-100:            #f1f3f4;
-  --gray-600:            #6b7280;
+  --tiffany-soft:        #d0f0ed;
 
   /* Cores principais (configuráveis pelo admin) */
   --color-tiffany:       #3cbfb3;
-  --color-destaque:      #3cbfb3;
+  --color-destaque:      #f59e0b;
 
   /* Header e barra de anúncios */
-  --color-header:        #2a9d8f;
+  --color-header:        #1a4f4a;
   --color-header-texto:  #ffffff;
-  --color-anuncio-fundo: #0a0a0a;
+  --color-anuncio-fundo: #0f2e2b;
   --color-anuncio-texto: #ffffff;
 
   /* Fundos */
   --color-fundo:         #ffffff;
-  --color-fundo-alt:     #f8f9fa;
+  --color-fundo-alt:     #f9fafb;
   --color-stats:         #3cbfb3;
-  --color-wa:            #0a0a0a;
-  --color-footer:        #0a0a0a;
+  --color-wa:            #111827;
+  --color-footer:        #111827;
 
   /* Botões */
   --color-botoes:        #3cbfb3;
@@ -50,8 +52,8 @@
   --color-botoes-hover:  #2a9d8f;
 
   /* Textos */
-  --color-textos:        #0a0a0a;
-  --color-textos-sec:    #6b7280;
+  --color-textos:        #1f2937;
+  --color-textos-sec:    #4b5563;
   --color-titulos:       #0a0a0a;
 
   /* Sombras padronizadas */
@@ -70,7 +72,7 @@
 @layer base {
   body {
     background: #ffffff;
-    color: #0a0a0a;
+    color: #1f2937;
     font-family: var(--font-inter), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -82,84 +84,82 @@
 
 /* ── Utilitários ──────────────────────────────────────────────────────────── */
 @layer utilities {
+
+  /* ── Botão primário ── */
   .btn-primary {
-    background-color: var(--color-botoes, #3cbfb3) !important;
-    color: var(--color-botoes-texto, #ffffff) !important;
-    padding: 0.75rem 2rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    transition: all 0.2s;
+    background-color: var(--color-botoes, #3cbfb3);
+    color: var(--color-botoes-texto, #ffffff);
+    font-weight: 700;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
   }
-
   .btn-primary:hover {
-    background-color: var(--color-botoes-hover, #2a9d8f) !important;
+    background-color: var(--color-botoes-hover, #2a9d8f);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(60, 191, 179, 0.4);
   }
 
+  /* ── Botão outline tiffany ── */
   .btn-outline {
-    border: 2px solid var(--tiffany, #3cbfb3);
-    color: var(--tiffany, #3cbfb3);
-    padding: 0.75rem 2rem;
-    border-radius: 0.5rem;
+    border: 2px solid var(--color-botoes, #3cbfb3);
+    color: var(--color-botoes, #3cbfb3);
+    background: transparent;
     font-weight: 600;
-    transition: all 0.2s;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: transparent;
   }
-
   .btn-outline:hover {
-    background: var(--tiffany, #3cbfb3);
+    background-color: var(--color-botoes, #3cbfb3);
     color: white;
   }
 
+  /* ── Botão outline branco ── */
   .btn-outline-white {
-    border: 2px solid rgba(255, 255, 255, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.5);
     color: white;
-    padding: 0.75rem 2rem;
-    border-radius: 0.5rem;
+    background: transparent;
     font-weight: 600;
-    transition: all 0.2s;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: transparent;
   }
-
   .btn-outline-white:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     border-color: white;
   }
 
+  /* ── Título de seção com sublinhado tiffany ── */
   .section-title {
-    position: relative;
-    padding-left: 1rem;
     font-size: 1.5rem;
     font-weight: 800;
-    color: #0a0a0a;
+    color: var(--color-titulos, #0a0a0a);
     letter-spacing: -0.025em;
   }
-
-  .section-title::before {
+  .section-title::after {
     content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
+    display: block;
+    width: 3rem;
+    height: 3px;
     background: var(--tiffany, #3cbfb3);
-    border-radius: 2px;
+    margin-top: 0.5rem;
+    border-radius: 9999px;
   }
 
-  /* Fade-in suave para seções */
+  /* ── Fade-in suave ── */
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -168,44 +168,28 @@
     animation: fadeInUp 0.5s ease both;
   }
 
-  /* Accordion height transition helper */
+  /* ── Accordion ── */
   .accordion-content {
     overflow: hidden;
     transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
                 opacity 0.25s ease;
   }
 
-  /* WhatsApp pulse animation */
+  /* ── WhatsApp pulse ── */
   @keyframes wa-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
     50%       { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
   }
-
   .wa-pulse {
     animation: wa-pulse 2s infinite;
   }
 
-  /* ── Classes dinâmicas — usam CSS custom properties injetadas pelo layout ── */
-
-  .bg-brand {
-    background: var(--tiffany, #3cbfb3);
-  }
-
-  .bg-brand-dark {
-    background: var(--tiffany-dark, #2a9d8f);
-  }
-
-  .bg-header {
-    background: var(--color-header, #2a9d8f);
-  }
-
-  .text-brand {
-    color: var(--tiffany, #3cbfb3);
-  }
-
-  .border-brand {
-    border-color: var(--tiffany, #3cbfb3);
-  }
+  /* ── Classes dinâmicas via CSS custom properties ── */
+  .bg-brand       { background: var(--tiffany, #3cbfb3); }
+  .bg-brand-dark  { background: var(--tiffany-dark, #2a9d8f); }
+  .bg-header      { background: var(--color-header, #1a4f4a); }
+  .text-brand     { color: var(--tiffany, #3cbfb3); }
+  .border-brand   { border-color: var(--tiffany, #3cbfb3); }
 
   .btn-brand {
     background: var(--tiffany, #3cbfb3);
@@ -219,7 +203,6 @@
     justify-content: center;
     gap: 0.5rem;
   }
-
   .btn-brand:hover {
     background: var(--tiffany-dark, #2a9d8f);
     transform: translateY(-1px);

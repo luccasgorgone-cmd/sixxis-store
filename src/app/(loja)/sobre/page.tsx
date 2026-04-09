@@ -14,7 +14,7 @@ export default function SobrePage() {
       {/* Hero */}
       <section
         className="relative overflow-hidden py-20 md:py-28"
-        style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }}
+        style={{ backgroundColor: '#1a4f4a' }}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-[#3cbfb3] text-sm font-semibold uppercase tracking-widest mb-4">Quem somos</p>
@@ -62,7 +62,7 @@ export default function SobrePage() {
       </section>
 
       {/* Missão, Visão e Valores */}
-      <section className="bg-[#f8f9fa] py-16">
+      <section className="bg-[#f9fafb] py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-10">Missão, Visão e Valores</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

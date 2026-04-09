@@ -57,7 +57,7 @@ export default async function HomePage() {
         </Suspense>
       ) : (
         <section
-          style={{ background: 'linear-gradient(135deg, #0f1f1e 0%, #1a3a38 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
           className="py-28"
         >
           <div className="max-w-5xl mx-auto px-4 text-center">
@@ -87,9 +87,9 @@ export default async function HomePage() {
 
       {/* 3. Mais Vendidos / Produtos em Destaque */}
       {produtosMostrar.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
           <div className="flex items-center justify-between mb-10">
-            <h2 className="section-title">Produtos em Destaque</h2>
+            <h2 className="section-title">Mais Vendidos</h2>
             <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
               Ver todos <ArrowRight size={14} />
             </Link>
@@ -102,30 +102,73 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 4. Categorias */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <h2 className="section-title mb-10">Categorias</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {[
-            { label: 'Climatizadores', desc: 'Conforto térmico para sua casa',  href: '/produtos?categoria=climatizadores', Icon: Wind   },
-            { label: 'Aspiradores',    desc: 'Limpeza eficiente e prática',      href: '/produtos?categoria=aspiradores',    Icon: Fan    },
-            { label: 'Spinning',       desc: 'Desempenho fitness profissional',  href: '/produtos?categoria=spinning',       Icon: Bike   },
-            { label: 'Peças',          desc: 'Reposição original garantida',     href: '/pecas',                            Icon: Wrench },
-          ].map(({ label, desc, href, Icon }) => (
-            <Link
-              key={label}
-              href={href}
-              className="group bg-white border border-gray-200 hover:border-[#3cbfb3] rounded-xl p-6 text-center flex flex-col items-center gap-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            >
-              <div className="w-16 h-16 rounded-full bg-[#e8f8f7] group-hover:bg-[#3cbfb3] flex items-center justify-center transition-all duration-300">
-                <Icon size={28} className="text-[#3cbfb3] group-hover:text-white transition-colors duration-300" />
-              </div>
-              <div>
-                <p className="font-bold text-[#0a0a0a] text-sm">{label}</p>
-                <p className="text-xs text-gray-500 mt-0.5 leading-snug">{desc}</p>
-              </div>
-            </Link>
-          ))}
+      {/* 4. Nossas Categorias */}
+      <section className="py-14" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="section-title mb-10">Nossas Categorias</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {[
+              { label: 'Climatizadores', desc: 'Conforto térmico para sua casa',  href: '/produtos?categoria=climatizadores', Icon: Wind   },
+              { label: 'Aspiradores',    desc: 'Limpeza eficiente e prática',      href: '/produtos?categoria=aspiradores',    Icon: Fan    },
+              { label: 'Spinning',       desc: 'Desempenho fitness profissional',  href: '/produtos?categoria=spinning',       Icon: Bike   },
+              { label: 'Peças',          desc: 'Reposição original garantida',     href: '/pecas',                            Icon: Wrench },
+            ].map(({ label, desc, href, Icon }) => (
+              <Link
+                key={label}
+                href={href}
+                className="group bg-white border border-gray-100 hover:border-[#3cbfb3] rounded-2xl p-6 text-center flex flex-col items-center gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              >
+                <div className="w-16 h-16 rounded-full bg-[#e8f8f7] group-hover:bg-[#3cbfb3] flex items-center justify-center transition-all duration-300">
+                  <Icon size={28} className="text-[#3cbfb3] group-hover:text-white transition-colors duration-300" />
+                </div>
+                <div>
+                  <p className="font-bold text-[#1f2937] text-sm">{label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 leading-snug">{desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Banners duplos */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Banner 1 — Climatizadores */}
+          <Link
+            href="/produtos?categoria=climatizadores"
+            className="group relative overflow-hidden rounded-2xl min-h-[180px] flex flex-col justify-end p-8"
+            style={{ background: 'linear-gradient(135deg, #1a4f4a 0%, #3cbfb3 100%)' }}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_70%_50%,white,transparent_60%)]" />
+            <span className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-2">
+              Climatizadores
+            </span>
+            <h3 className="text-white text-2xl font-extrabold leading-tight mb-3">
+              Fresquinho em<br />qualquer ambiente
+            </h3>
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl transition-colors w-fit">
+              Ver linha <ArrowRight size={14} />
+            </span>
+          </Link>
+
+          {/* Banner 2 — Spinning & Fitness */}
+          <Link
+            href="/produtos?categoria=spinning"
+            className="group relative overflow-hidden rounded-2xl min-h-[180px] flex flex-col justify-end p-8"
+            style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_50%,#3cbfb3,transparent_60%)]" />
+            <span className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-2">
+              Fitness
+            </span>
+            <h3 className="text-white text-2xl font-extrabold leading-tight mb-3">
+              Bikes Spinning<br />Alta Performance
+            </h3>
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white bg-[#3cbfb3]/30 hover:bg-[#3cbfb3]/50 px-4 py-2 rounded-xl transition-colors w-fit">
+              Ver linha <ArrowRight size={14} />
+            </span>
+          </Link>
         </div>
       </section>
 
@@ -151,7 +194,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Por que Sixxis? */}
+      {/* 7. Por que Sixxis? */}
       <section className="py-16" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-10">Por que Sixxis?</h2>
@@ -177,14 +220,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7. Newsletter */}
+      {/* 8. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="border-t border-b border-gray-200 py-12" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
+        <section className="py-14 bg-[#1a4f4a]">
           <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-2xl font-extrabold text-[#0a0a0a] mb-1">
+            <h2 className="text-2xl font-extrabold text-white mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
             </h2>
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-white/70 text-sm mb-6">
               {cfg.newsletter_subtitulo || 'Sem spam. Cancele quando quiser.'}
             </p>
             <NewsletterForm />

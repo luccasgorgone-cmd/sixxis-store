@@ -44,7 +44,7 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="w-60 shrink-0 bg-[#0f1f1e] flex flex-col h-full">
+    <aside className="w-60 shrink-0 bg-[#111827] flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-white/10">
         <Link href="/admin" className="block">
@@ -70,8 +70,8 @@ export default function AdminSidebar() {
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 active
-                  ? 'bg-[#3cbfb3]/20 text-[#3cbfb3]'
-                  : 'text-white/50 hover:text-white/90 hover:bg-white/5'
+                  ? 'bg-[#3cbfb3]/20 text-[#3cbfb3] border-l-2 border-[#3cbfb3]'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <Icon className="w-4.5 h-4.5 shrink-0" />
