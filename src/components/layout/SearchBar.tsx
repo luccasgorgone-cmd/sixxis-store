@@ -98,7 +98,7 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
           placeholder="Buscar produtos..."
           autoComplete="off"
           className={`w-full pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] transition ${
-            isMobile ? 'rounded-xl backdrop-blur-sm' : 'rounded-full'
+            isMobile ? 'rounded-xl' : 'rounded-full'
           } ${
             dark
               ? 'border border-white/30 bg-white text-gray-800 placeholder-gray-500 focus:bg-white focus:border-[#3cbfb3]'
