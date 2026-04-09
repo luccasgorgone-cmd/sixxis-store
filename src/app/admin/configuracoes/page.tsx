@@ -399,7 +399,6 @@ export default function ConfiguracoesPage() {
   function renderAparencia() {
     const keys = [
       'aparencia_cor_primaria', 'aparencia_cor_secundaria',
-      'aparencia_banner_titulo', 'aparencia_banner_subtitulo', 'aparencia_banner_cta',
       'fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo',
     ]
 
@@ -503,17 +502,17 @@ export default function ConfiguracoesPage() {
           </div>
         </Card>
 
-        <Card title="Banner principal (Hero)">
-          <div className="space-y-4">
-            <Field label="Título">
-              <Input value={configs.aparencia_banner_titulo} onChange={(v) => set('aparencia_banner_titulo', v)} placeholder="Climatizadores, Aspiradores e Spinning" />
-            </Field>
-            <Field label="Subtítulo">
-              <Input value={configs.aparencia_banner_subtitulo} onChange={(v) => set('aparencia_banner_subtitulo', v)} placeholder="Produtos originais com entrega rápida..." />
-            </Field>
-            <Field label="Texto do botão CTA">
-              <Input value={configs.aparencia_banner_cta} onChange={(v) => set('aparencia_banner_cta', v)} placeholder="Ver Produtos" />
-            </Field>
+        <Card title="Banners do carrossel">
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-gray-500 flex-1">
+              Gerencie os banners do carrossel da home (imagens, ordem, links) em uma página dedicada.
+            </p>
+            <a
+              href="/admin/banners"
+              className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition"
+            >
+              Gerenciar Banners →
+            </a>
           </div>
         </Card>
 

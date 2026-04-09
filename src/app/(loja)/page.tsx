@@ -47,8 +47,7 @@ export default async function HomePage() {
 
   const cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
 
-  // Log para confirmar que os dados chegam frescos do banco (visível nos logs do Railway)
-  console.log('[HOME] banners:', banners.length, '| destaques:', destaques.length, '| produtos:', produtosGerais.length, '| configs:', configRows.length)
+  console.log('[HOME RENDER]', new Date().toISOString(), 'banners:', banners.length, 'configs:', configRows.length)
 
   // Mais vendidos: curados primeiro, fallback para produtos gerais
   const produtosMaisVendidos = destaques.length > 0
