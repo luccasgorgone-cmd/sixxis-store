@@ -111,7 +111,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncios = DEFAUL
             >
               <ShoppingCart size={22} />
               {totalItens > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#0f1f1e] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
                   {totalItens > 9 ? '9+' : totalItens}
                 </span>
               )}

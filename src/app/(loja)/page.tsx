@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
+import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck, Users, ShieldCheck, Truck, Zap } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
@@ -129,7 +129,29 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 5. Por que Sixxis? */}
+      {/* 5. Stats */}
+      <section className="py-12" style={{ backgroundColor: 'var(--color-stats, #3cbfb3)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
+            {[
+              { Icon: Users,       numero: '5.000+',   label: 'Clientes Satisfeitos' },
+              { Icon: ShieldCheck, numero: '12 meses', label: 'Garantia Sixxis'       },
+              { Icon: Truck,       numero: '100%',     label: 'Entrega para o Brasil' },
+              { Icon: Zap,         numero: '48h',      label: 'Entrega Expressa'      },
+            ].map(({ Icon, numero, label }) => (
+              <div key={label} className="flex flex-col items-center gap-2">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-1">
+                  <Icon size={22} className="text-white" />
+                </div>
+                <p className="text-2xl md:text-3xl font-extrabold leading-none">{numero}</p>
+                <p className="text-sm text-white/80 leading-snug">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Por que Sixxis? */}
       <section className="py-16" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-10">Por que Sixxis?</h2>
@@ -155,7 +177,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Newsletter */}
+      {/* 7. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
         <section className="border-t border-b border-gray-200 py-12" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
@@ -170,7 +192,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 7. Banner WhatsApp */}
+      {/* 8. Banner WhatsApp */}
       <section className="py-20" style={{ backgroundColor: 'var(--color-wa, #0a0a0a)' }}>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
@@ -194,7 +216,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 8. PagamentosBar */}
+      {/* 9. PagamentosBar */}
       <PagamentosBar />
     </main>
   )

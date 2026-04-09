@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Share2 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import GaleriaProduto from '@/components/produto/GaleriaProduto'
@@ -205,6 +205,19 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
               </div>
             ))}
           </div>
+
+          {/* Compartilhar via WhatsApp */}
+          <div className="mt-5">
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`Olha esse produto na Sixxis Store: ${produto.nome} — https://sixxisstore.com.br/produtos/${produto.slug}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#25D366] border border-gray-200 hover:border-[#25D366] rounded-lg px-3 py-2 transition-colors duration-200"
+            >
+              <Share2 size={13} />
+              Compartilhar via WhatsApp
+            </a>
+          </div>
         </div>
       </div>
 
@@ -221,20 +234,33 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
       {/* ── Você também pode gostar ───────────────────────────────────────────── */}
       {relacionados.length > 0 && (
-        <section className="mt-16 border-t border-gray-100 pt-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="section-title">Você também pode gostar</h2>
-            <Link
-              href={`/produtos?categoria=${produto.categoria}`}
-              className="text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-medium transition-colors flex items-center gap-1"
-            >
-              Ver categoria <ChevronRight size={14} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {relacionados.map((p) => (
-              <CardProduto key={p.id} produto={p} showDesconto />
-            ))}
+        <section className="mt-16 -mx-4 sm:-mx-6 px-4 sm:px-6 py-14" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <p className="text-xs font-semibold text-[#3cbfb3] uppercase tracking-wider mb-1">Da mesma categoria</p>
+                <h2 className="section-title">Você também pode gostar</h2>
+              </div>
+              <Link
+                href={`/produtos?categoria=${produto.categoria}`}
+                className="hidden sm:flex items-center gap-1 text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-medium transition-colors"
+              >
+                Ver todos <ChevronRight size={14} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {relacionados.map((p) => (
+                <CardProduto key={p.id} produto={p} showDesconto />
+              ))}
+            </div>
+            <div className="mt-6 sm:hidden text-center">
+              <Link
+                href={`/produtos?categoria=${produto.categoria}`}
+                className="text-sm text-[#3cbfb3] font-medium"
+              >
+                Ver toda a categoria →
+              </Link>
+            </div>
           </div>
         </section>
       )}
