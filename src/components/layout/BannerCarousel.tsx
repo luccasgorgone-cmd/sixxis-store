@@ -19,6 +19,7 @@ interface Props {
 }
 
 export default function BannerCarousel({ banners }: Props) {
+  console.log('[BANNER CAROUSEL] banners recebidos:', banners.length)
   const [current, setCurrent] = useState(0)
   const [visible, setVisible] = useState(true)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)

@@ -55,7 +55,7 @@
 /* ── Utilitários ──────────────────────────────────────────────────────────── */
 @layer utilities {
   .btn-primary {
-    background: #3cbfb3;
+    background: var(--tiffany, #3cbfb3);
     color: white;
     padding: 0.75rem 2rem;
     border-radius: 0.5rem;
@@ -68,14 +68,14 @@
   }
 
   .btn-primary:hover {
-    background: #2a9d8f;
+    background: var(--tiffany-dark, #2a9d8f);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(60, 191, 179, 0.4);
   }
 
   .btn-outline {
-    border: 2px solid #3cbfb3;
-    color: #3cbfb3;
+    border: 2px solid var(--tiffany, #3cbfb3);
+    color: var(--tiffany, #3cbfb3);
     padding: 0.75rem 2rem;
     border-radius: 0.5rem;
     font-weight: 600;
@@ -88,7 +88,7 @@
   }
 
   .btn-outline:hover {
-    background: #3cbfb3;
+    background: var(--tiffany, #3cbfb3);
     color: white;
   }
 
@@ -127,7 +127,7 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: #3cbfb3;
+    background: var(--tiffany, #3cbfb3);
     border-radius: 2px;
   }
 

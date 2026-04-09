@@ -66,8 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const configRows = await prisma.configuracao.findMany({
     where: {
       chave: {
-        in: ['fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo',
-             'aparencia_cor_primaria', 'aparencia_cor_secundaria'],
+        in: ['fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'logo_url'],
       },
     },
   })
@@ -81,12 +80,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     montserrat.variable, nunito.variable, raleway.variable, openSans.variable,
   ].join(' ')
 
-  // Cores (prioridade: chaves novas → chaves legadas → default)
-  const corPrincipal = cfg.cor_principal        || cfg.aparencia_cor_primaria    || '#3cbfb3'
-  const corHeader    = cfg.cor_header           || cfg.aparencia_cor_secundaria  || '#0f1f1e'
-  const corBotoes    = cfg.cor_botoes           || corPrincipal
-  const corTextos    = cfg.cor_textos           || '#0a0a0a'
-  const corFundo     = cfg.cor_fundo            || '#ffffff'
+  const corPrincipal = cfg.cor_principal || '#3cbfb3'
+  const corHeader    = cfg.cor_header    || '#0f1f1e'
+  const corBotoes    = cfg.cor_botoes    || corPrincipal
+  const corTextos    = cfg.cor_textos    || '#0a0a0a'
+  const corFundo     = cfg.cor_fundo     || '#ffffff'
+  const logoUrl      = cfg.logo_url      || '/logo-sixxis.png'
 
   const cssVars = {
     '--color-tiffany':      corPrincipal,
@@ -111,7 +110,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={{ fontFamily: `var(${fontObj.variable}), system-ui, sans-serif` }}
       >
         <SessionProvider>
-          <Header />
+          <Header logoUrl={logoUrl} />
           <div className="flex-1">{children}</div>
           <Footer />
         </SessionProvider>

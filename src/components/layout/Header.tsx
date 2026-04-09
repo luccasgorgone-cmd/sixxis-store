@@ -55,7 +55,7 @@ const navLinks = [
   { href: '/contato',                           label: 'Contato' },
 ]
 
-export default function Header() {
+export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: string }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { data: session } = useSession()
   const { totalItens } = useCarrinho()
@@ -72,7 +72,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="shrink-0 flex items-center">
             <Image
-              src="/logo-sixxis.png"
+              src={logoUrl}
               alt="Sixxis"
               width={130}
               height={44}

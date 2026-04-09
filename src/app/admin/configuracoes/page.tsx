@@ -31,11 +31,6 @@ const DEFAULTS: Record<string, string> = {
   loja_endereco: 'R. Anhanguera, 1711 - Icaray, Araçatuba - SP',
   loja_cnpj: '54.978.947/0001-09',
   loja_horario: 'Seg-Sex 8h às 18h | Sáb 8h às 12h',
-  aparencia_cor_primaria: '#3cbfb3',
-  aparencia_cor_secundaria: '#0f1f1e',
-  aparencia_banner_titulo: 'Climatizadores, Aspiradores e Spinning',
-  aparencia_banner_subtitulo: 'Produtos originais Sixxis com entrega rápida para todo o Brasil.',
-  aparencia_banner_cta: 'Ver Produtos',
   // Personalização avançada
   fonte_principal: 'Inter',
   cor_principal: '#3cbfb3',
