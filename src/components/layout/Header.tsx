@@ -74,11 +74,11 @@ export default function Header({
 
   return (
     <>
-      {/* ── Announcement bar ── */}
-      <AnnouncementBar items={anuncios} />
-
-      {/* ── Sticky wrapper ── */}
+      {/* ── Sticky wrapper — inclui announcement bar ── */}
       <div className="sticky top-0 z-40">
+
+        {/* Announcement bar dentro do sticky */}
+        <AnnouncementBar items={anuncios} />
 
         {/* ═══════════════════════════════════════════════════════
             MOBILE HEADER (< md / < 768px)

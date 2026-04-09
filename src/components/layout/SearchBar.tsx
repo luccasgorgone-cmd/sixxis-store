@@ -87,7 +87,7 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
         <Search
           size={16}
           className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-            dark ? 'text-white/50' : 'text-gray-400'
+            dark ? 'text-gray-400' : 'text-gray-400'
           }`}
         />
         <input
@@ -101,7 +101,7 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
             isMobile ? 'rounded-xl backdrop-blur-sm' : 'rounded-full'
           } ${
             dark
-              ? `border border-white/20 ${isMobile ? 'bg-white/15' : 'bg-white/10'} text-white placeholder-white/60 focus:bg-white/20 focus:border-[#3cbfb3]`
+              ? 'border border-white/30 bg-white text-gray-800 placeholder-gray-500 focus:bg-white focus:border-[#3cbfb3]'
               : 'border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#3cbfb3]'
           }`}
         />
@@ -109,7 +109,7 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
           <button
             type="button"
             onClick={limpar}
-            className={`absolute right-3 top-1/2 -translate-y-1/2 ${dark ? 'text-white/50 hover:text-white' : 'text-gray-400 hover:text-gray-600'} transition`}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
             aria-label="Limpar busca"
           >
             <X size={14} />

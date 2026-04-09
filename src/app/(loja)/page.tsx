@@ -87,14 +87,14 @@ export default async function HomePage() {
 
       {/* 3. Mais Vendidos / Produtos em Destaque */}
       {produtosMostrar.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-          <div className="flex items-center justify-between mb-10">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+          <div className="flex items-center justify-between mb-8">
             <h2 className="section-title">Mais Vendidos</h2>
             <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
               Ver todos <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
             {produtosMostrar.map((produto) => (
               <CardProduto key={produto.id} produto={produto} />
             ))}
@@ -103,9 +103,9 @@ export default async function HomePage() {
       )}
 
       {/* 4. Nossas Categorias */}
-      <section className="py-14" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
+      <section className="py-10" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="section-title mb-10">Nossas Categorias</h2>
+          <h2 className="section-title mb-8">Nossas Categorias</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {[
               { label: 'Climatizadores', desc: 'Conforto térmico para sua casa',  href: '/produtos?categoria=climatizadores', Icon: Wind   },
@@ -132,7 +132,7 @@ export default async function HomePage() {
       </section>
 
       {/* 5. Banners duplos */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Banner 1 — Climatizadores */}
           <Link
@@ -195,9 +195,9 @@ export default async function HomePage() {
       </section>
 
       {/* 6. Por que Sixxis? */}
-      <section className="py-16" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
+      <section className="py-10" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="section-title mb-10">Por que Sixxis?</h2>
+          <h2 className="section-title mb-8">Por que Sixxis?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { titulo: cfg.pq_sixxis_1_titulo || 'Tecnologia de Ponta',    texto: cfg.pq_sixxis_1_texto || 'Produtos desenvolvidos com engenharia avançada para máxima eficiência e durabilidade.', Icon: Cpu       },
@@ -222,7 +222,7 @@ export default async function HomePage() {
 
       {/* 8. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="py-14 bg-[#1a4f4a]">
+        <section className="py-10 bg-[#1a4f4a]">
           <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl font-extrabold text-white mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
@@ -236,12 +236,12 @@ export default async function HomePage() {
       )}
 
       {/* 9. Banner WhatsApp */}
-      <section className="py-20" style={{ backgroundColor: 'var(--color-wa, #111827)' }}>
+      <section className="py-14" style={{ backgroundColor: 'var(--color-wa, #111827)' }}>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             {cfg.whatsapp_banner_titulo || 'Precisa de ajuda para escolher?'}
           </h2>
-          <p className="text-white/60 mb-10 text-base leading-relaxed">
+          <p className="text-white/60 mb-8 text-base leading-relaxed">
             {cfg.whatsapp_banner_subtitulo || 'Nossa equipe especializada está pronta para te orientar.'}
           </p>
           <a
