@@ -36,8 +36,8 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
   const [quantidade, setQuantidade] = useState(1)
   const [adicionado, setAdicionado] = useState(false)
 
-  const precoBase = produto.precoPromocional ?? produto.preco
-  const precoAtual = selecionada?.preco ?? precoBase
+  const precoBase    = produto.precoPromocional ?? produto.preco
+  const precoAtual   = selecionada?.preco ?? precoBase
   const precoAtVista = precoAtual * 0.97
   const parcelamento = precoAtual / 12
   const estoqueAtual = selecionada?.estoque ?? 0
@@ -66,10 +66,10 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
   return (
     <div>
       {/* Seletor de variações */}
-      <p className="text-sm font-semibold text-gray-700 mb-2">Selecione a variação:</p>
+      <p className="text-sm font-semibold text-gray-700 mb-3">Selecione a variação:</p>
       <div className="flex flex-wrap gap-2 mb-4">
         {variacoesAtivas.map((v) => {
-          const semEstoque = v.estoque === 0
+          const semEstoque  = v.estoque === 0
           const isSelecionada = selecionada?.id === v.id
           return (
             <button
@@ -77,7 +77,7 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
               type="button"
               disabled={semEstoque}
               onClick={() => handleSelecionar(v)}
-              className={`px-5 py-2 rounded-full text-sm font-semibold border transition-all duration-150 ${
+              className={`px-5 py-3 rounded-xl text-sm font-semibold border transition-all duration-150 ${
                 isSelecionada
                   ? 'bg-[#3cbfb3] border-[#3cbfb3] text-white shadow-md'
                   : semEstoque
@@ -95,7 +95,7 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
       {/* Preço atualizado pela variação */}
       {selecionada && (
         <div className="mb-5 space-y-1">
-          <p className="text-4xl font-extrabold text-[#3cbfb3]">R$ {fmt(precoAtual)}</p>
+          <p className="text-3xl sm:text-4xl font-extrabold text-[#3cbfb3]">R$ {fmt(precoAtual)}</p>
           <p className="text-sm text-[#2a9d8f] font-medium">
             R$ {fmt(precoAtVista)} à vista no PIX (-3%)
           </p>
@@ -120,39 +120,39 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
       {/* Botão adicionar */}
       {selecionada && estoqueAtual > 0 ? (
         <>
-          <div className="flex items-center gap-3">
+          {/* Quantidade + botão: column no mobile, row no desktop */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Seletor de quantidade */}
-            <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+            <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => setQuantidade((q) => Math.max(1, q - 1))}
-                className="px-3 py-2.5 hover:bg-gray-100 text-gray-600 font-bold transition"
+                className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg"
               >
                 −
               </button>
-              <span className="px-4 py-2.5 font-semibold text-sm min-w-[2.5rem] text-center">
-                {quantidade}
-              </span>
+              <span className="px-4 font-semibold text-sm min-w-[2.5rem] text-center">{quantidade}</span>
               <button
                 type="button"
                 onClick={() => setQuantidade((q) => Math.min(estoqueAtual, q + 1))}
-                className="px-3 py-2.5 hover:bg-gray-100 text-gray-600 font-bold transition"
+                className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition text-lg"
               >
                 +
               </button>
             </div>
 
+            {/* Botão — full-width em mobile, auto em desktop */}
             <button
               type="button"
               onClick={handleAdicionar}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
+              className={`flex-1 flex items-center justify-center gap-2 py-3 sm:py-2.5 px-6 rounded-xl font-bold text-sm transition-all duration-200 ${
                 adicionado
                   ? 'bg-green-500 text-white scale-95'
                   : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white hover:shadow-lg hover:-translate-y-0.5'
               }`}
             >
               {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}
-              {adicionado ? 'Adicionado!' : 'Adicionar ao carrinho'}
+              {adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
             </button>
           </div>
           <p className="text-xs text-gray-400 mt-3">
@@ -164,14 +164,14 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
           <p className="text-red-500 font-medium text-sm">Variação fora de estoque</p>
         </div>
       ) : (
-        /* Não selecionou ainda — botão desabilitado */
+        /* Não selecionou ainda — botão desabilitado, full-width no mobile */
         <button
           type="button"
           disabled
-          className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm bg-gray-200 text-gray-400 cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-sm bg-gray-200 text-gray-400 cursor-not-allowed"
         >
           <ShoppingCart size={18} />
-          Adicionar ao carrinho
+          Adicionar ao Carrinho
         </button>
       )}
     </div>

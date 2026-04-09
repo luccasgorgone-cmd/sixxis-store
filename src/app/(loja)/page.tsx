@@ -116,7 +116,7 @@ export default async function HomePage() {
               <Link
                 key={label}
                 href={href}
-                className="group bg-white border border-gray-100 hover:border-[#3cbfb3] rounded-2xl p-6 text-center flex flex-col items-center gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                className="group bg-white border border-gray-100 hover:border-[#3cbfb3] rounded-2xl p-4 sm:p-6 text-center flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               >
                 <div className="w-16 h-16 rounded-full bg-[#e8f8f7] group-hover:bg-[#3cbfb3] flex items-center justify-center transition-all duration-300">
                   <Icon size={28} className="text-[#3cbfb3] group-hover:text-white transition-colors duration-300" />
