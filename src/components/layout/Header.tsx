@@ -66,7 +66,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       <AnnouncementBar />
 
       {/* ── Header principal ─────────────────────────────────────────── */}
-      <header className="bg-[#0f1f1e] border-b border-[#3cbfb3]/20 shadow-md sticky top-0 z-40">
+      <header className="bg-[#2a9d8f] border-b border-white/20 shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
           {/* Logo */}
@@ -76,7 +76,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               alt="Sixxis"
               width={130}
               height={44}
-              className="object-contain brightness-0 invert"
+              className="object-contain"
               priority
             />
           </Link>
@@ -92,11 +92,11 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <Link
                 key={href}
                 href={href}
-                className={`relative py-1 transition group ${destaque ? 'text-[#3cbfb3] font-bold' : 'text-white/80 hover:text-[#3cbfb3]'}`}
+                className={`relative py-1 transition group ${destaque ? 'text-yellow-300 font-bold' : 'text-white/90 hover:text-white'}`}
               >
                 {label}
                 {destaque && <span className="ml-1 text-[10px] bg-red-500 text-white font-bold px-1.5 py-0.5 rounded-full align-middle">HOT</span>}
-                <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-[#3cbfb3] group-hover:w-full transition-all duration-200" />
+                <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-white group-hover:w-full transition-all duration-200" />
               </Link>
             ))}
           </nav>
@@ -106,12 +106,12 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             {/* Carrinho */}
             <Link
               href="/carrinho"
-              className="relative p-2 text-white hover:text-[#3cbfb3] transition"
+              className="relative p-2 text-white hover:text-white/80 transition"
               aria-label="Carrinho"
             >
               <ShoppingCart size={22} />
               {totalItens > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#3cbfb3] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                <span className="absolute -top-1 -right-1 bg-[#0f1f1e] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
                   {totalItens > 9 ? '9+' : totalItens}
                 </span>
               )}
@@ -122,14 +122,14 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <div className="hidden lg:flex items-center gap-2">
                 <Link
                   href="/minha-conta"
-                  className="flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-[#3cbfb3] transition"
+                  className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition"
                 >
                   <User size={18} />
                   Conta
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-xs text-white/40 hover:text-red-400 transition"
+                  className="text-xs text-white/60 hover:text-red-300 transition"
                 >
                   Sair
                 </button>
@@ -138,13 +138,13 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <div className="hidden lg:flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="text-sm font-medium px-4 py-1.5 rounded-full border border-white/30 text-white hover:border-[#3cbfb3] hover:text-[#3cbfb3] transition"
+                  className="text-sm font-medium px-4 py-1.5 rounded-full border border-white/40 text-white hover:border-white hover:bg-white/10 transition"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="text-sm font-bold px-4 py-1.5 rounded-full bg-[#3cbfb3] text-white hover:bg-[#2a9d8f] transition"
+                  className="text-sm font-bold px-4 py-1.5 rounded-full bg-[#0f1f1e] text-white hover:bg-[#1a3330] transition"
                 >
                   Cadastrar
                 </Link>
@@ -153,7 +153,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
             {/* Hambúrguer mobile */}
             <button
-              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/20 transition"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
             >

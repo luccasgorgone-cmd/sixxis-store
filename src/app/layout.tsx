@@ -63,15 +63,20 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Lê configs de aparência do banco
-  const configRows = await prisma.configuracao.findMany({
-    where: {
-      chave: {
-        in: ['fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'logo_url'],
+  // Lê configs de aparência do banco — nunca quebra o layout em caso de falha no DB
+  let cfg: Record<string, string> = {}
+  try {
+    const configRows = await prisma.configuracao.findMany({
+      where: {
+        chave: {
+          in: ['fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'logo_url'],
+        },
       },
-    },
-  })
-  const cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
+    })
+    cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
+  } catch (e) {
+    console.error('[LAYOUT] DB error — usando defaults visuais', e)
+  }
 
   // Fonte selecionada (fallback: Inter)
   const fonteName  = cfg.fonte_principal ?? 'Inter'

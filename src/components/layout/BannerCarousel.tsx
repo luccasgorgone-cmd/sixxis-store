@@ -19,9 +19,9 @@ interface Props {
 }
 
 export default function BannerCarousel({ banners }: Props) {
-  console.log('[BANNER CAROUSEL] banners recebidos:', banners.length)
   const [current, setCurrent] = useState(0)
   const [visible, setVisible] = useState(true)
+  const [paused, setPaused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const goTo = useCallback((index: number) => {
@@ -29,7 +29,7 @@ export default function BannerCarousel({ banners }: Props) {
     setTimeout(() => {
       setCurrent(index)
       setVisible(true)
-    }, 300)
+    }, 500)
   }, [])
 
   const next = useCallback(() => {
@@ -40,13 +40,13 @@ export default function BannerCarousel({ banners }: Props) {
     goTo((current - 1 + banners.length) % banners.length)
   }, [current, banners.length, goTo])
 
-  // Auto-play
+  // Auto-play — pausa quando usuário passa o mouse
   useEffect(() => {
-    if (banners.length <= 1) return
+    if (banners.length <= 1 || paused) return
     const ms = (banners[current]?.tempoCads ?? 5) * 1000
     timerRef.current = setTimeout(next, ms)
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [current, banners, next])
+  }, [current, banners, next, paused])
 
   if (banners.length === 0) return null
 
@@ -55,16 +55,23 @@ export default function BannerCarousel({ banners }: Props) {
   const Inner = (
     <div
       className="relative w-full h-[280px] md:h-[500px] overflow-hidden"
-      style={{ transition: 'opacity 0.3s ease', opacity: visible ? 1 : 0 }}
+      style={{ transition: 'opacity 0.5s ease', opacity: visible ? 1 : 0 }}
     >
-      <Image
-        src={banner.imagem}
-        alt={banner.titulo ?? 'Banner'}
-        fill
-        className="object-cover"
-        priority
-        sizes="100vw"
-      />
+      {banner.imagem ? (
+        <Image
+          src={banner.imagem}
+          alt={banner.titulo ?? 'Banner'}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+        />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #0d4a47 50%, #3cbfb3 100%)' }}
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
       {(banner.titulo || banner.subtitulo) && (
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 md:px-16 md:pb-14 text-white">
@@ -82,7 +89,11 @@ export default function BannerCarousel({ banners }: Props) {
   )
 
   return (
-    <section className="relative group select-none">
+    <section
+      className="relative group select-none"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       {banner.link ? (
         <Link href={banner.link} className="block">{Inner}</Link>
       ) : (
