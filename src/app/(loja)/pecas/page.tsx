@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import { Wrench } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Peças de Reposição — Sixxis Store',
   description: 'Peças originais de reposição para produtos Sixxis. Climatizadores, aspiradores e equipamentos fitness.',

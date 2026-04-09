@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { deleteFromR2 } from '@/lib/r2'
 
@@ -127,6 +128,11 @@ export async function PUT(
     include: { variacoes: { orderBy: { createdAt: 'asc' } } },
   })
 
+  revalidatePath('/')
+  revalidatePath('/produtos')
+  revalidatePath('/pecas')
+  revalidatePath('/ofertas')
+
   return NextResponse.json({ produto })
 }
 
@@ -154,6 +160,11 @@ export async function DELETE(
   )
 
   await prisma.produto.delete({ where: { id } })
+
+  revalidatePath('/')
+  revalidatePath('/produtos')
+  revalidatePath('/pecas')
+  revalidatePath('/ofertas')
 
   return NextResponse.json({ ok: true })
 }

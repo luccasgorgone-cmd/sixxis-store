@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
@@ -26,6 +27,8 @@ export async function POST(request: NextRequest) {
     data: { produtoId, secao: secao ?? 'mais-vendidos', ordem: Number(ordem) || 0 },
   })
 
+  revalidatePath('/')
+
   return NextResponse.json({ destaque }, { status: 201 })
 }
 
@@ -35,5 +38,6 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
 
   await prisma.produtoDestaque.delete({ where: { id } })
+  revalidatePath('/')
   return NextResponse.json({ ok: true })
 }

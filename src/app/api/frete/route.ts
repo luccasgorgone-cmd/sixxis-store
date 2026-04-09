@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server'
 import { calcularFrete } from '@/lib/melhorenvio'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const freteSchema = z.object({
   cepDestino: z.string().regex(/^\d{8}$/, 'CEP inválido'),
   produtos: z.array(

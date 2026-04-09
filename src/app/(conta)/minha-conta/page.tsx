@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { User, MapPin, ShoppingBag, Trophy } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = { title: 'Minha Conta' }
 
 export default async function MinhaContaPage() {

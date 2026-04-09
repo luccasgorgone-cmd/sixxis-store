@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import FiltrosProduto from '@/components/produto/FiltrosProduto'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Produtos — Sixxis Store',
   description: 'Explore nossa linha completa de climatizadores, aspiradores, equipamentos fitness e peças originais Sixxis.',

@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import CountdownTimer from '@/components/layout/CountdownTimer'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = { title: 'Ofertas — Sixxis Store' }
 
 export default async function OfertasPage() {

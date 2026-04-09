@@ -12,6 +12,8 @@ import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 
+export const dynamic = 'force-dynamic'
+
 const categorias = [
   {
     label:    'Climatizadores',

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
@@ -108,6 +109,11 @@ export async function POST(request: NextRequest) {
     },
     include: { variacoes: true },
   })
+
+  revalidatePath('/')
+  revalidatePath('/produtos')
+  revalidatePath('/pecas')
+  revalidatePath('/ofertas')
 
   return NextResponse.json({ produto }, { status: 201 })
 }

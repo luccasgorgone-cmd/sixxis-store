@@ -8,6 +8,8 @@ import AvaliacoesProduto from '@/components/produto/AvaliacoesProduto'
 import FormAvaliacao from '@/components/produto/FormAvaliacao'
 import ListaEsperaForm from '@/components/produto/ListaEsperaForm'
 
+export const dynamic = 'force-dynamic'
+
 interface Params {
   slug: string
 }

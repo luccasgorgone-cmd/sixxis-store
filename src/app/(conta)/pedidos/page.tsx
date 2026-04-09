@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = { title: 'Meus Pedidos' }
 
 const statusLabel: Record<string, string> = {

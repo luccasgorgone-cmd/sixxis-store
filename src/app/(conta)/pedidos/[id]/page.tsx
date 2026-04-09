@@ -8,6 +8,8 @@ import Image from 'next/image'
 export const metadata: Metadata = { title: 'Detalhes do Pedido' }
 import { CheckCircle, Clock, Package, Truck, Home, ArrowLeft } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 const STATUS_STEPS = [
   { key: 'pendente',  label: 'Pedido realizado', icon: Clock },
   { key: 'pago',      label: 'Pagamento confirmado', icon: CheckCircle },

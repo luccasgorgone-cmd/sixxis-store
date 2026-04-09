@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
 export async function PUT(
@@ -22,6 +23,8 @@ export async function PUT(
     },
   })
 
+  revalidatePath('/')
+
   return NextResponse.json({ banner })
 }
 
@@ -37,6 +40,8 @@ export async function PATCH(
     data: body,
   })
 
+  revalidatePath('/')
+
   return NextResponse.json({ banner })
 }
 
@@ -46,5 +51,6 @@ export async function DELETE(
 ) {
   const { id } = await params
   await prisma.banner.delete({ where: { id } })
+  revalidatePath('/')
   return NextResponse.json({ ok: true })
 }
