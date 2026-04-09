@@ -42,10 +42,14 @@ export default function SobrePage() {
         {/* Stats bar */}
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 mt-14">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map(({ Icon, numero, label }) => (
+            {stats.map(({ Icon, numero, label }, i) => (
               <div
                 key={label}
                 className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-5 text-center"
+                style={{
+                  animation: `fadeInUp 0.5s ease both`,
+                  animationDelay: `${i * 0.1}s`,
+                }}
               >
                 <div className="w-10 h-10 rounded-full bg-[#3cbfb3]/20 flex items-center justify-center mx-auto mb-3">
                   <Icon size={18} className="text-[#3cbfb3]" />
@@ -56,6 +60,13 @@ export default function SobrePage() {
             ))}
           </div>
         </div>
+
+        <style>{`
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
       </section>
 
       {/* ── Nossa História ── */}

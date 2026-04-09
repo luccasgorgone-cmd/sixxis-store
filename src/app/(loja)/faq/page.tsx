@@ -47,7 +47,7 @@ const faqs = [
   },
   {
     q: 'Posso comprar peças de reposição avulsas?',
-    a: 'Sim! Temos um catálogo completo de peças de reposição originais para todos os produtos Sixxis. Acesse a seção "Peças" no menu ou entre em contato informando o modelo do equipamento para verificar disponibilidade.',
+    a: 'Sim! Entre em contato com nossa equipe pelo WhatsApp (18) 99747-4701 ou pelo formulário de contato informando o modelo do seu equipamento. Verificamos disponibilidade e enviamos o orçamento diretamente para você.',
   },
 ]
 

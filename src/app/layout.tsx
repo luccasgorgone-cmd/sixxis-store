@@ -49,15 +49,15 @@ export const metadata: Metadata = {
     template: '%s | Sixxis Store',
   },
   description:
-    'Loja oficial Sixxis. Climatizadores, aspiradores, spinning e peças de reposição originais com entrega rápida para todo o Brasil.',
-  keywords: ['climatizador', 'aspirador', 'spinning', 'sixxis', 'peças de reposição'],
+    'Loja oficial Sixxis. Climatizadores, aspiradores e equipamentos de spinning com qualidade premium e entrega rápida para todo o Brasil.',
+  keywords: ['climatizador', 'aspirador', 'spinning', 'sixxis', 'loja sixxis', 'climatizadores sixxis'],
   authors: [{ name: 'Sixxis' }],
   openGraph: {
     type:        'website',
     locale:      'pt_BR',
     siteName:    'Sixxis Store',
     title:       'Sixxis Store — Climatizadores, Aspiradores e Spinning',
-    description: 'Loja oficial Sixxis. Climatizadores, aspiradores, spinning e peças de reposição originais.',
+    description: 'Loja oficial Sixxis. Climatizadores, aspiradores e equipamentos de spinning com qualidade e garantia.',
   },
   robots: { index: true, follow: true },
 }

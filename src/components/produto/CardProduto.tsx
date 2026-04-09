@@ -123,13 +123,13 @@ export default function CardProduto({ produto }: Props) {
         <button
           onClick={handleAddToCart}
           disabled={produto.estoque === 0}
-          className={`w-full flex items-center justify-center gap-2 text-sm font-bold py-2.5 sm:py-3 rounded-xl transition-all duration-200 ${
+          className={`w-full flex items-center justify-center gap-2 text-sm font-bold py-3 rounded-xl transition-all duration-200 ${
             adicionado
               ? 'bg-[#22c55e] text-white scale-[0.98]'
               : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none'
           }`}
         >
-          {adicionado ? <Check size={15} /> : <ShoppingCart size={15} />}
+          {adicionado ? <Check size={16} /> : <ShoppingCart size={16} />}
           <span className="hidden sm:inline">{adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}</span>
           <span className="sm:hidden">{adicionado ? 'Adicionado!' : 'Adicionar'}</span>
         </button>

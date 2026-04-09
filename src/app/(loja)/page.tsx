@@ -86,21 +86,37 @@ export default async function HomePage() {
       <TrustBar />
 
       {/* 3. Produtos em Destaque */}
-      {produtosMostrar.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="section-title">Produtos em Destaque</h2>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="section-title">Produtos em Destaque</h2>
+          {produtosMostrar.length > 0 && (
             <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
               Ver todos <ArrowRight size={14} />
             </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          )}
+        </div>
+        {produtosMostrar.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
             {produtosMostrar.map((produto) => (
               <CardProduto key={produto.id} produto={produto} />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="border-2 border-dashed border-[#3cbfb3]/30 rounded-2xl p-10 text-center bg-[#f9fffe]">
+            <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
+              <ArrowRight size={28} className="text-[#3cbfb3]" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-700 mb-2">Nenhum produto cadastrado ainda</h3>
+            <p className="text-sm text-gray-500 mb-6">Adicione produtos no painel admin para que apareçam aqui.</p>
+            <Link
+              href="/admin/produtos"
+              className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition-all"
+            >
+              Cadastrar Produtos
+            </Link>
+          </div>
+        )}
+      </section>
 
       {/* 4. Nossas Categorias */}
       <section className="py-10" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
