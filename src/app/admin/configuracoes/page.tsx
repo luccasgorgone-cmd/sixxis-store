@@ -928,31 +928,19 @@ export default function ConfiguracoesPage() {
 
   function renderEditor() {
     const keys = [
-      'hero_imagem_url','hero_titulo','hero_subtitulo','hero_cta_texto','hero_cta_link',
+      'hero_titulo','hero_subtitulo','hero_cta_texto','hero_cta_link',
       'pq_sixxis_1_titulo','pq_sixxis_1_texto','pq_sixxis_2_titulo','pq_sixxis_2_texto','pq_sixxis_3_titulo','pq_sixxis_3_texto',
       'newsletter_ativo','newsletter_titulo','newsletter_subtitulo',
       'whatsapp_banner_titulo','whatsapp_banner_subtitulo','rodape_tagline',
     ]
     return (
       <div className="space-y-5">
-        <Card title="Banner principal (Hero)">
+        <Card title="Texto do Hero (exibido quando não há banners)">
+          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+            Estes textos aparecem somente quando não há banners cadastrados.{' '}
+            <a href="/admin/banners" className="font-semibold underline">Gerenciar banners →</a>
+          </p>
           <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Imagem do banner</p>
-              <div className="flex items-center gap-4">
-                {configs.hero_imagem_url && (
-                  <div className="w-32 h-16 rounded-xl overflow-hidden border border-gray-200">
-                    <Image src={configs.hero_imagem_url} alt="Hero" width={128} height={64} className="object-cover w-full h-full" unoptimized />
-                  </div>
-                )}
-                <button type="button" onClick={() => heroInputRef.current?.click()} disabled={uploadingHero}
-                  className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50">
-                  {uploadingHero ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {configs.hero_imagem_url ? 'Trocar imagem' : 'Fazer upload'}
-                </button>
-                <input ref={heroInputRef} type="file" accept="image/*" onChange={handleHeroUpload} className="hidden" />
-              </div>
-            </div>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Título">
                 <Input value={configs.hero_titulo} onChange={(v) => set('hero_titulo', v)} placeholder="Título principal" />

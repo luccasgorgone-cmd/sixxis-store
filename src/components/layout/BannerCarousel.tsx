@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Banner {
-  id:        string
-  imagem:    string
-  titulo:    string | null
+  id: string
+  imagem: string
+  titulo: string | null
   subtitulo: string | null
-  link:      string | null
+  link: string | null
   tempoCads: number
 }
 
@@ -19,120 +19,106 @@ interface Props {
 }
 
 export default function BannerCarousel({ banners }: Props) {
-  const [current, setCurrent] = useState(0)
-  const [visible, setVisible] = useState(true)
-  const [paused, setPaused] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [atual, setAtual] = useState(0)
+  const [montado, setMontado] = useState(false)
 
-  const goTo = useCallback((index: number) => {
-    setVisible(false)
-    setTimeout(() => {
-      setCurrent(index)
-      setVisible(true)
-    }, 500)
+  useEffect(() => {
+    setMontado(true)
   }, [])
 
-  const next = useCallback(() => {
-    goTo((current + 1) % banners.length)
-  }, [current, banners.length, goTo])
+  const proximo = useCallback(() => {
+    setAtual((i) => (i + 1) % banners.length)
+  }, [banners.length])
 
-  const prev = useCallback(() => {
-    goTo((current - 1 + banners.length) % banners.length)
-  }, [current, banners.length, goTo])
+  const anterior = useCallback(() => {
+    setAtual((i) => (i - 1 + banners.length) % banners.length)
+  }, [banners.length])
 
-  // Auto-play — pausa quando usuário passa o mouse
   useEffect(() => {
-    if (banners.length <= 1 || paused) return
-    const ms = (banners[current]?.tempoCads ?? 5) * 1000
-    timerRef.current = setTimeout(next, ms)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [current, banners, next, paused])
+    if (!montado || banners.length <= 1) return
+    const tempo = (banners[atual]?.tempoCads || 5) * 1000
+    const timer = setTimeout(proximo, tempo)
+    return () => clearTimeout(timer)
+  }, [atual, montado, banners, proximo])
 
-  if (banners.length === 0) return null
+  if (!banners.length) return null
 
-  const banner = banners[current]
-
-  const Inner = (
-    <div
-      className="relative w-full h-[280px] md:h-[500px] overflow-hidden"
-      style={{ transition: 'opacity 0.5s ease', opacity: visible ? 1 : 0 }}
-    >
-      {banner.imagem ? (
-        <Image
-          src={banner.imagem}
-          alt={banner.titulo ?? 'Banner'}
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
-      ) : (
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #0d4a47 50%, #3cbfb3 100%)' }}
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-      {(banner.titulo || banner.subtitulo) && (
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 md:px-16 md:pb-14 text-white">
-          {banner.titulo && (
-            <h2 className="text-2xl md:text-5xl font-extrabold leading-tight drop-shadow-lg mb-2">
-              {banner.titulo}
-            </h2>
-          )}
-          {banner.subtitulo && (
-            <p className="text-sm md:text-xl text-white/80 drop-shadow">{banner.subtitulo}</p>
-          )}
-        </div>
-      )}
-    </div>
-  )
+  const banner = banners[atual]
 
   return (
-    <section
-      className="relative group select-none"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      {banner.link ? (
-        <Link href={banner.link} className="block">{Inner}</Link>
-      ) : (
-        Inner
-      )}
+    <div className="relative w-full overflow-hidden bg-[#0f1f1e]" style={{ height: 'clamp(280px, 50vw, 560px)' }}>
+      {/* Imagem */}
+      <div className="absolute inset-0">
+        {banner.imagem && (
+          <Image
+            src={banner.imagem}
+            alt={banner.titulo || 'Banner Sixxis'}
+            fill
+            className="object-cover"
+            priority
+            unoptimized
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+      </div>
 
+      {/* Conteúdo */}
+      <div className="relative h-full flex items-center">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 w-full">
+          <div className="max-w-xl">
+            {banner.titulo && (
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4">
+                {banner.titulo}
+              </h2>
+            )}
+            {banner.subtitulo && (
+              <p className="text-white/80 text-base sm:text-lg mb-8 leading-relaxed">
+                {banner.subtitulo}
+              </p>
+            )}
+            {banner.link && (
+              <Link
+                href={banner.link}
+                className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-[#3cbfb3]/40 hover:-translate-y-0.5"
+              >
+                Ver produto →
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Setas — só se tiver mais de 1 banner */}
       {banners.length > 1 && (
         <>
           <button
-            onClick={(e) => { e.preventDefault(); prev() }}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+            onClick={anterior}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
             aria-label="Anterior"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft size={20} />
           </button>
           <button
-            onClick={(e) => { e.preventDefault(); next() }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+            onClick={proximo}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
             aria-label="Próximo"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight size={20} />
           </button>
+
+          {/* Indicadores */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+            {banners.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setAtual(i)}
+                className={`h-2 rounded-full transition-all ${i === atual ? 'w-8 bg-[#3cbfb3]' : 'w-2 bg-white/50'}`}
+                aria-label={`Banner ${i + 1}`}
+              />
+            ))}
+          </div>
         </>
       )}
-
-      {banners.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          {banners.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              className={`rounded-full transition-all duration-300 ${
-                i === current ? 'w-6 h-2 bg-white' : 'w-2 h-2 bg-white/50 hover:bg-white/80'
-              }`}
-              aria-label={`Banner ${i + 1}`}
-            />
-          ))}
-        </div>
-      )}
-    </section>
+    </div>
   )
 }

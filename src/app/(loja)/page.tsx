@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
@@ -6,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
+import TrustBar from '@/components/layout/TrustBar'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -41,9 +43,18 @@ export default async function HomePage() {
   return (
     <main className="bg-white">
 
-      {/* ── HERO / BANNER ──────────────────────────────────────────────── */}
+      {/* 1. BannerCarousel com Suspense */}
       {banners.length > 0 ? (
-        <BannerCarousel banners={banners} />
+        <Suspense fallback={
+          <div
+            className="w-full bg-[#0f1f1e] flex items-center justify-center"
+            style={{ height: 'clamp(280px, 50vw, 560px)' }}
+          >
+            <div className="text-[#3cbfb3] text-xl font-bold">Sixxis Store</div>
+          </div>
+        }>
+          <BannerCarousel banners={banners} />
+        </Suspense>
       ) : (
         <section
           style={{ background: 'linear-gradient(135deg, #0f1f1e 0%, #1a3a38 100%)' }}
@@ -71,29 +82,27 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── STATS ──────────────────────────────────────────────────────── */}
-      <section className="bg-[#3cbfb3] py-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
-            {[
-              { num: '10+',    label: 'Anos de Mercado'    },
-              { num: '5.000+', label: 'Clientes Atendidos' },
-              { num: '15+',    label: 'Produtos'           },
-              { num: '100%',   label: 'Garantia'           },
-            ].map(({ num, label }, i) => (
-              <div
-                key={label}
-                className={`flex flex-col items-center text-center py-6 px-4 ${i < 3 ? 'md:border-r border-white/20' : ''} ${i === 0 || i === 2 ? 'border-b md:border-b-0 border-white/20' : ''}`}
-              >
-                <p className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">{num}</p>
-                <p className="text-white/80 text-sm font-medium mt-1">{label}</p>
-              </div>
+      {/* 2. TrustBar inline */}
+      <TrustBar />
+
+      {/* 3. Mais Vendidos / Produtos em Destaque */}
+      {produtosMostrar.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+          <div className="flex items-center justify-between mb-10">
+            <h2 className="section-title">Produtos em Destaque</h2>
+            <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
+              Ver todos <ArrowRight size={14} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {produtosMostrar.map((produto) => (
+              <CardProduto key={produto.id} produto={produto} />
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ── CATEGORIAS ─────────────────────────────────────────────────── */}
+      {/* 4. Categorias */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
         <h2 className="section-title mb-10">Categorias</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
@@ -120,52 +129,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── PRODUTOS ───────────────────────────────────────────────────── */}
-      {produtosMostrar.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="section-title">Produtos em Destaque</h2>
-            <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
-              Ver todos <ArrowRight size={14} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {produtosMostrar.map((produto) => (
-              <CardProduto key={produto.id} produto={produto} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── BANNERS DUPLOS ─────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link
-            href="/produtos?categoria=climatizadores"
-            className="relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 hover:scale-[1.02] transition-transform duration-300"
-            style={{ background: 'linear-gradient(135deg, #0d4a47 0%, #1a7a74 50%, #3cbfb3 100%)' }}
-          >
-            <p className="text-[#a8ede9] text-xs font-semibold uppercase tracking-widest mb-1">Linha Residencial e Comercial</p>
-            <h3 className="text-white text-xl font-extrabold leading-tight mb-3">Climatizadores<br />Sixxis</h3>
-            <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-              Ver modelos <ArrowRight size={12} />
-            </span>
-          </Link>
-          <Link
-            href="/produtos?categoria=spinning"
-            className="relative overflow-hidden rounded-2xl h-[180px] flex flex-col justify-end p-6 hover:scale-[1.02] transition-transform duration-300"
-            style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 60%, #2a2a2a 100%)' }}
-          >
-            <p className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-1">Spinning & Acessórios</p>
-            <h3 className="text-white text-xl font-extrabold leading-tight mb-3">Equipamentos<br />Fitness</h3>
-            <span className="inline-flex items-center gap-1.5 bg-[#3cbfb3]/20 text-[#3cbfb3] text-xs font-bold px-3 py-1.5 rounded-full border border-[#3cbfb3]/40">
-              Ver produtos <ArrowRight size={12} />
-            </span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ── POR QUE SIXXIS? ────────────────────────────────────────────── */}
+      {/* 5. Por que Sixxis? */}
       <section className="bg-[#f8f9fa] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-10">Por que Sixxis?</h2>
@@ -191,7 +155,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── NEWSLETTER ─────────────────────────────────────────────────── */}
+      {/* 6. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
         <section className="bg-[#f8f9fa] border-t border-b border-gray-200 py-12">
           <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
@@ -206,7 +170,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── BANNER WHATSAPP ────────────────────────────────────────────── */}
+      {/* 7. Banner WhatsApp */}
       <section className="bg-[#0a0a0a] py-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
@@ -230,6 +194,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* 8. PagamentosBar */}
       <PagamentosBar />
     </main>
   )

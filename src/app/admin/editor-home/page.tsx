@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
-  Save, Loader2, Upload, ChevronUp, ChevronDown,
+  Save, Loader2, ChevronUp, ChevronDown,
   Plus, Trash2, ImageIcon, Search, Check,
 } from 'lucide-react'
 
@@ -273,9 +273,7 @@ export default function EditorHomePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
-  const [uploadingHero, setUploadingHero] = useState(false)
-  const [temBanners, setTemBanners] = useState(false)
-  const heroInputRef = useRef<HTMLInputElement>(null)
+  const [contadorBanners, setContadorBanners] = useState(0)
 
   function showToast(msg: string, type: 'success' | 'error' = 'success') {
     setToast({ msg, type })
@@ -292,7 +290,7 @@ export default function EditorHomePage() {
       const bannerData = await bannerRes.json()
 
       setConfigs(cfgData)
-      setTemBanners((bannerData.banners ?? []).length > 0)
+      setContadorBanners((bannerData.banners ?? []).filter((b: { ativo: boolean }) => b.ativo).length)
 
       if (cfgData.home_secoes_ordem) {
         try { setOrdemSecoes(JSON.parse(cfgData.home_secoes_ordem)) } catch { /* noop */ }
@@ -329,29 +327,6 @@ export default function EditorHomePage() {
     showToast('Ordem das seções salva!')
   }
 
-  async function handleHeroUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploadingHero(true)
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-    if (res.ok) {
-      const { url } = await res.json()
-      set('hero_imagem_url', url)
-      await fetch('/api/admin/configuracoes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chave: 'hero_imagem_url', valor: url }),
-      })
-      showToast('Imagem atualizada!')
-    } else {
-      showToast('Erro no upload.', 'error')
-    }
-    setUploadingHero(false)
-    e.target.value = ''
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -382,81 +357,34 @@ export default function EditorHomePage() {
 
       {/* ── 1. Banner / Hero ─────────────────────────────────────────────────── */}
       <Card title="1. Banner / Hero">
-        {temBanners ? (
-          <div className="flex items-center gap-4 bg-[#e8f8f7] rounded-xl p-4">
-            <ImageIcon size={20} className="text-[#3cbfb3] shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-[#0a0a0a]">Carrossel de banners ativo</p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                A seção usa os banners cadastrados. Gerencie imagens, ordem e links abaixo.
-              </p>
-            </div>
-            <Link
-              href="/admin/banners"
-              className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-xs font-bold px-4 py-2 rounded-xl transition"
-            >
-              Gerenciar banners →
-            </Link>
+        <div className={`flex items-center gap-4 rounded-xl p-4 ${contadorBanners > 0 ? 'bg-[#e8f8f7]' : 'bg-amber-50 border border-amber-200'}`}>
+          <ImageIcon size={20} className={`shrink-0 ${contadorBanners > 0 ? 'text-[#3cbfb3]' : 'text-amber-500'}`} />
+          <div className="flex-1">
+            {contadorBanners > 0 ? (
+              <>
+                <p className="text-sm font-semibold text-[#0a0a0a]">
+                  {contadorBanners} banner{contadorBanners > 1 ? 'es ativos' : ' ativo'}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Gerencie imagens, ordem, títulos e links na página de banners.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-semibold text-amber-700">Nenhum banner ativo</p>
+                <p className="text-xs text-amber-600 mt-0.5">
+                  A home exibe o hero estático (textos configuráveis em Configurações → Editor do Site).
+                </p>
+              </>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-xs text-gray-400 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-              Nenhum banner cadastrado — a home exibe o hero estático abaixo.{' '}
-              <Link href="/admin/banners" className="text-[#3cbfb3] font-semibold hover:underline">
-                Adicionar banners →
-              </Link>
-            </p>
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Imagem de fundo do hero</p>
-              <div className="flex items-center gap-4">
-                {configs.hero_imagem_url && (
-                  <div className="w-32 h-16 rounded-xl overflow-hidden border border-gray-200">
-                    <Image
-                      src={configs.hero_imagem_url}
-                      alt="Hero"
-                      width={128}
-                      height={64}
-                      className="object-cover w-full h-full"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => heroInputRef.current?.click()}
-                  disabled={uploadingHero}
-                  className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
-                >
-                  {uploadingHero ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {configs.hero_imagem_url ? 'Trocar imagem' : 'Fazer upload'}
-                </button>
-                <input ref={heroInputRef} type="file" accept="image/*" onChange={handleHeroUpload} className="hidden" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Título">
-                <Input value={configs.hero_titulo} onChange={(v) => set('hero_titulo', v)} placeholder="Título principal" />
-              </Field>
-              <Field label="Subtítulo">
-                <Input value={configs.hero_subtitulo} onChange={(v) => set('hero_subtitulo', v)} placeholder="Descrição" />
-              </Field>
-              <Field label="Texto do botão">
-                <Input value={configs.hero_cta_texto} onChange={(v) => set('hero_cta_texto', v)} placeholder="Ver Produtos" />
-              </Field>
-              <Field label="Link do botão">
-                <Input value={configs.hero_cta_link} onChange={(v) => set('hero_cta_link', v)} placeholder="/produtos" />
-              </Field>
-            </div>
-            <button
-              onClick={() => save(['hero_imagem_url','hero_titulo','hero_subtitulo','hero_cta_texto','hero_cta_link'])}
-              disabled={saving}
-              className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition disabled:opacity-50"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Salvar hero
-            </button>
-          </div>
-        )}
+          <Link
+            href="/admin/banners"
+            className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+          >
+            {contadorBanners > 0 ? 'Gerenciar banners →' : 'Adicionar banners →'}
+          </Link>
+        </div>
       </Card>
 
       {/* ── 2. Mais Vendidos ─────────────────────────────────────────────────── */}
