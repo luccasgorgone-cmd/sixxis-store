@@ -9,13 +9,13 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import SearchBar from './SearchBar'
 import MobileMenu from './MobileMenu'
 
-const announcements = [
+const DEFAULT_ANNOUNCEMENTS = [
   '🚚 Frete grátis acima de R$\u00a0500 para todo o Brasil',
   '💳 Parcele em até 6x sem juros no cartão',
   '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
 ]
 
-function AnnouncementBar() {
+function AnnouncementBar({ items }: { items: string[] }) {
   const [index, setIndex] = useState(0)
   const [visible, setVisible] = useState(true)
 
@@ -23,12 +23,12 @@ function AnnouncementBar() {
     const interval = setInterval(() => {
       setVisible(false)
       setTimeout(() => {
-        setIndex((i) => (i + 1) % announcements.length)
+        setIndex((i) => (i + 1) % items.length)
         setVisible(true)
       }, 400)
     }, 4000)
     return () => clearInterval(interval)
-  }, [])
+  }, [items.length])
 
   return (
     <div className="bg-[#0a0a0a] text-white text-xs text-center py-2 px-4 h-8 flex items-center justify-center overflow-hidden">
@@ -39,7 +39,7 @@ function AnnouncementBar() {
           display: 'inline-block',
         }}
       >
-        {announcements[index]}
+        {items[index]}
       </span>
     </div>
   )
@@ -55,7 +55,7 @@ const navLinks = [
   { href: '/contato',                           label: 'Contato' },
 ]
 
-export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: string }) {
+export default function Header({ logoUrl = '/logo-sixxis.png', anuncios = DEFAULT_ANNOUNCEMENTS }: { logoUrl?: string; anuncios?: string[] }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { data: session } = useSession()
   const { totalItens } = useCarrinho()
@@ -63,10 +63,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   return (
     <>
       {/* ── Banner topo animado ───────────────────────────────────────── */}
-      <AnnouncementBar />
+      <AnnouncementBar items={anuncios} />
 
       {/* ── Header principal ─────────────────────────────────────────── */}
-      <header className="bg-[#2a9d8f] border-b border-[#3cbfb3]/30 shadow-md sticky top-0 z-40">
+      <header className="bg-header border-b border-brand/30 shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
           {/* Logo */}

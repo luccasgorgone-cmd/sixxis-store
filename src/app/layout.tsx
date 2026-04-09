@@ -66,17 +66,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Defaults seguros — nunca vai quebrar o layout
   let logoUrl       = '/logo-sixxis.png'
   let corPrincipal  = '#3cbfb3'
-  let corHeader     = '#0f1f1e'
+  let corHeader     = '#2a9d8f'
   let corBotoes     = '#3cbfb3'
   let corTextos     = '#0a0a0a'
   let corFundo      = '#ffffff'
   let fontePrincipal = 'Inter'
+  let anuncios = [
+    '🚚 Frete grátis acima de R$\u00a0500 para todo o Brasil',
+    '💳 Parcele em até 6x sem juros no cartão',
+    '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
+  ]
 
   try {
     const configs = await prisma.configuracao.findMany({
       where: {
         chave: {
-          in: ['logo_url', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'fonte_principal'],
+          in: ['logo_url', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'fonte_principal', 'anuncio_1', 'anuncio_2', 'anuncio_3'],
         },
       },
     })
@@ -88,6 +93,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     if (cfg.cor_textos)     corTextos     = cfg.cor_textos
     if (cfg.cor_fundo)      corFundo      = cfg.cor_fundo
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
+    if (cfg.anuncio_1 || cfg.anuncio_2 || cfg.anuncio_3) {
+      anuncios = [
+        cfg.anuncio_1 || anuncios[0],
+        cfg.anuncio_2 || anuncios[1],
+        cfg.anuncio_3 || anuncios[2],
+      ]
+    }
     console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', corPrincipal)
   } catch (error) {
     console.error('[LAYOUT ERROR — usando defaults]', error)
@@ -124,7 +136,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={{ fontFamily: `var(${fontObj.variable}), system-ui, sans-serif` }}
       >
         <SessionProvider>
-          <Header logoUrl={logoUrl} />
+          <Header logoUrl={logoUrl} anuncios={anuncios} />
           <TrustBar />
           <div className="flex-1">{children}</div>
           <Footer />

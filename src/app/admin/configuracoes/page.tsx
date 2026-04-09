@@ -16,6 +16,7 @@ import {
   Upload,
   Globe,
   LayoutTemplate,
+  FileText,
 } from 'lucide-react'
 import { Toast } from '@/components/admin/Toast'
 
@@ -98,11 +99,18 @@ const DEFAULTS: Record<string, string> = {
   whatsapp_banner_titulo: 'Precisa de ajuda?',
   whatsapp_banner_subtitulo: 'Nossa equipe está pronta para te atender via WhatsApp.',
   rodape_tagline: 'Tecnologia e qualidade para seu conforto e bem-estar.',
+  // WhatsApp números
+  social_whatsapp_suporte: '5511934102621',
+  // Barra de anúncios
+  anuncio_1: '🚚 Frete grátis acima de R$ 500 para todo o Brasil',
+  anuncio_2: '💳 Parcele em até 6x sem juros no cartão',
+  anuncio_3: '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
 }
 
 const TABS = [
   { id: 'loja', label: 'Informações da Loja', icon: Store },
   { id: 'aparencia', label: 'Aparência', icon: Palette },
+  { id: 'textos', label: 'Textos do Site', icon: FileText },
   { id: 'frete', label: 'Frete e Pagamento', icon: Truck },
   { id: 'transportadoras', label: 'Transportadoras', icon: Globe },
   { id: 'integracoes', label: 'Integrações', icon: Plug },
@@ -272,6 +280,19 @@ export default function ConfiguracoesPage() {
     setConfigs((c) => ({ ...c, [key]: value }))
   }
 
+  // Preview live de cores — atualiza CSS vars no documento instantaneamente
+  const COR_CSS_MAP: Record<string, string> = {
+    cor_principal: '--tiffany',
+    cor_botoes:    '--tiffany-dark',
+    cor_header:    '--color-header',
+  }
+
+  function setCorComPreview(key: string, value: string) {
+    set(key, value)
+    const cssVar = COR_CSS_MAP[key]
+    if (cssVar) document.documentElement.style.setProperty(cssVar, value)
+  }
+
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type })
   }, [])
@@ -438,6 +459,9 @@ export default function ConfiguracoesPage() {
         </Card>
 
         <Card title="Cores personalizáveis">
+          <p className="text-xs text-[#3cbfb3] bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl px-4 py-2.5 mb-4 font-medium">
+            ✨ Preview ao vivo — as cores atualizam instantaneamente no site enquanto você edita
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {CORES_LABELS.map(([key, label, hint]) => (
               <Field key={key} label={label} hint={hint}>
@@ -445,7 +469,7 @@ export default function ConfiguracoesPage() {
                   <input
                     type="color"
                     value={configs[key] || '#3cbfb3'}
-                    onChange={(e) => set(key, e.target.value)}
+                    onChange={(e) => setCorComPreview(key, e.target.value)}
                     className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-0.5"
                   />
                   <span className="text-sm font-mono text-gray-600">{configs[key]}</span>
@@ -597,7 +621,7 @@ export default function ConfiguracoesPage() {
     const keys = [
       'mp_access_token', 'mp_public_key', 'melhorenvio_token',
       'focusnfe_token', 'focusnfe_env',
-      'social_whatsapp', 'social_instagram', 'social_facebook',
+      'social_whatsapp', 'social_whatsapp_suporte', 'social_instagram', 'social_facebook',
     ]
     return (
       <div className="space-y-5">
@@ -652,11 +676,16 @@ export default function ConfiguracoesPage() {
           </div>
         </Card>
 
-        <Card title="Redes sociais">
+        <Card title="Redes sociais e contato">
           <div className="space-y-4">
-            <Field label="WhatsApp" hint="Número completo com DDI: 5518...">
-              <Input value={configs.social_whatsapp} onChange={(v) => set('social_whatsapp', v)} placeholder="5518997474701" />
-            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="WhatsApp Vendas" hint="Número completo com DDI: 5518...">
+                <Input value={configs.social_whatsapp} onChange={(v) => set('social_whatsapp', v)} placeholder="5518997474701" />
+              </Field>
+              <Field label="WhatsApp Assistência Técnica" hint="Número completo com DDI: 5511...">
+                <Input value={configs.social_whatsapp_suporte} onChange={(v) => set('social_whatsapp_suporte', v)} placeholder="5511934102621" />
+              </Field>
+            </div>
             <Field label="Instagram (URL)">
               <Input value={configs.social_instagram} onChange={(v) => set('social_instagram', v)} placeholder="https://instagram.com/..." />
             </Field>
@@ -1010,9 +1039,45 @@ export default function ConfiguracoesPage() {
     )
   }
 
+  function renderTextos() {
+    const keys = ['anuncio_1', 'anuncio_2', 'anuncio_3']
+    return (
+      <div className="space-y-5">
+        <Card title="Barra de anúncios (topo do site)">
+          <p className="text-xs text-gray-500 mb-5">
+            3 mensagens que alternam automaticamente no topo do site. Suporte a emoji. Exemplo: &ldquo;🚚 Frete grátis acima de R$ 500&rdquo;
+          </p>
+          <div className="space-y-4">
+            {([1, 2, 3] as const).map((n) => (
+              <Field key={n} label={`Anúncio ${n}`}>
+                <Input
+                  value={configs[`anuncio_${n}`] || ''}
+                  onChange={(v) => set(`anuncio_${n}`, v)}
+                  placeholder={`Mensagem ${n} — aparece no topo do site`}
+                />
+              </Field>
+            ))}
+          </div>
+          <div className="mt-4 bg-gray-50 rounded-xl p-4 text-xs text-gray-500">
+            As alterações só aparecem no site após salvar e a página ser recarregada (cache do servidor).
+          </div>
+        </Card>
+
+        <Card title="Rodapé — tagline">
+          <Field label="Tagline da empresa" hint="Texto abaixo do logo no rodapé">
+            <Input value={configs.rodape_tagline} onChange={(v) => set('rodape_tagline', v)} placeholder="Tecnologia e qualidade para seu conforto e bem-estar." />
+          </Field>
+        </Card>
+
+        <SaveButton loading={saving} onClick={() => save([...keys, 'rodape_tagline'])} />
+      </div>
+    )
+  }
+
   const TAB_RENDERERS: Record<string, () => React.ReactNode> = {
     loja: renderLoja,
     aparencia: renderAparencia,
+    textos: renderTextos,
     frete: renderFrete,
     transportadoras: renderTransportadoras,
     integracoes: renderIntegracoes,

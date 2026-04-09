@@ -156,4 +156,45 @@
   .wa-pulse {
     animation: wa-pulse 2s infinite;
   }
+
+  /* ── Classes dinâmicas — usam CSS custom properties injetadas pelo layout ── */
+
+  .bg-brand {
+    background: var(--tiffany, #3cbfb3);
+  }
+
+  .bg-brand-dark {
+    background: var(--tiffany-dark, #2a9d8f);
+  }
+
+  .bg-header {
+    background: var(--color-header, #2a9d8f);
+  }
+
+  .text-brand {
+    color: var(--tiffany, #3cbfb3);
+  }
+
+  .border-brand {
+    border-color: var(--tiffany, #3cbfb3);
+  }
+
+  .btn-brand {
+    background: var(--tiffany, #3cbfb3);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-brand:hover {
+    background: var(--tiffany-dark, #2a9d8f);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(60, 191, 179, 0.4);
+  }
 }
