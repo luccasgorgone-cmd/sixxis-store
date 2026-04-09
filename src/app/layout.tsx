@@ -12,6 +12,7 @@ import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import TrustBar from '@/components/layout/TrustBar'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic    = 'force-dynamic'
@@ -111,6 +112,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       >
         <SessionProvider>
           <Header logoUrl={logoUrl} />
+          <TrustBar />
           <div className="flex-1">{children}</div>
           <Footer />
         </SessionProvider>
