@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
     ),
   )
 
+  revalidatePath('/', 'layout')
   revalidatePath('/')
+  revalidatePath('/produtos')
   revalidatePath('/sobre')
   revalidatePath('/contato')
 

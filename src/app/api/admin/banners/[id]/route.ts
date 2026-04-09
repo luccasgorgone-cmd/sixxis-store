@@ -23,6 +23,7 @@ export async function PUT(
     },
   })
 
+  revalidatePath('/', 'layout')
   revalidatePath('/')
 
   return NextResponse.json({ banner })
@@ -40,6 +41,7 @@ export async function PATCH(
     data: body,
   })
 
+  revalidatePath('/', 'layout')
   revalidatePath('/')
 
   return NextResponse.json({ banner })
@@ -51,6 +53,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   await prisma.banner.delete({ where: { id } })
+  revalidatePath('/', 'layout')
   revalidatePath('/')
   return NextResponse.json({ ok: true })
 }

@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     },
   })
 
+  revalidatePath('/', 'layout')
   revalidatePath('/')
 
   return NextResponse.json({ banner }, { status: 201 })

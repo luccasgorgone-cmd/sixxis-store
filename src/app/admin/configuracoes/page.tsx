@@ -36,6 +36,13 @@ const DEFAULTS: Record<string, string> = {
   aparencia_banner_titulo: 'Climatizadores, Aspiradores e Spinning',
   aparencia_banner_subtitulo: 'Produtos originais Sixxis com entrega rápida para todo o Brasil.',
   aparencia_banner_cta: 'Ver Produtos',
+  // Personalização avançada
+  fonte_principal: 'Inter',
+  cor_principal: '#3cbfb3',
+  cor_header: '#0f1f1e',
+  cor_botoes: '#3cbfb3',
+  cor_textos: '#0a0a0a',
+  cor_fundo: '#ffffff',
   logo_url: '/logo-sixxis.png',
   frete_minimo_gratis: '500',
   frete_cep_origem: '16020355',
@@ -393,9 +400,71 @@ export default function ConfiguracoesPage() {
     const keys = [
       'aparencia_cor_primaria', 'aparencia_cor_secundaria',
       'aparencia_banner_titulo', 'aparencia_banner_subtitulo', 'aparencia_banner_cta',
+      'fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo',
     ]
+
+    const FONTES = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Nunito', 'Raleway', 'Open Sans']
+
+    const CORES_LABELS: [string, string, string][] = [
+      ['cor_principal',  'Cor principal',   'Verde Tiffany — botões, destaques, links'],
+      ['cor_header',     'Cor do header',   'Fundo do cabeçalho e sidebar admin'],
+      ['cor_botoes',     'Cor dos botões',  'Botões CTA em todo o site'],
+      ['cor_textos',     'Cor dos textos',  'Cor principal dos textos'],
+      ['cor_fundo',      'Cor do fundo',    'Fundo geral das páginas'],
+    ]
+
     return (
       <div className="space-y-5">
+        <Card title="Fonte principal">
+          <div className="space-y-3">
+            <p className="text-xs text-gray-500">Selecione a fonte usada em todo o site (Google Fonts)</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {FONTES.map((fonte) => (
+                <button
+                  key={fonte}
+                  type="button"
+                  onClick={() => set('fonte_principal', fonte)}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition text-sm font-semibold ${
+                    configs.fonte_principal === fonte
+                      ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#2a9d8f]'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                  }`}
+                >
+                  <span style={{ fontFamily: fonte }}>{fonte}</span>
+                  <span
+                    className="text-xs font-normal text-gray-400"
+                    style={{ fontFamily: fonte }}
+                  >
+                    Abc 123
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        <Card title="Cores personalizáveis">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {CORES_LABELS.map(([key, label, hint]) => (
+              <Field key={key} label={label} hint={hint}>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={configs[key] || '#3cbfb3'}
+                    onChange={(e) => set(key, e.target.value)}
+                    className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-0.5"
+                  />
+                  <span className="text-sm font-mono text-gray-600">{configs[key]}</span>
+                  <div
+                    className="w-8 h-8 rounded-lg border border-gray-200"
+                    style={{ background: configs[key] || '#3cbfb3' }}
+                  />
+                </div>
+              </Field>
+            ))}
+          </div>
+        </Card>
+
         <Card title="Logo">
           <div className="flex items-center gap-6">
             <div className="w-44 h-16 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
@@ -431,33 +500,6 @@ export default function ConfiguracoesPage() {
                 className="hidden"
               />
             </div>
-          </div>
-        </Card>
-
-        <Card title="Cores da marca">
-          <div className="grid grid-cols-2 gap-6">
-            <Field label="Cor principal" hint="Verde Tiffany — botões, destaques">
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={configs.aparencia_cor_primaria}
-                  onChange={(e) => set('aparencia_cor_primaria', e.target.value)}
-                  className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-0.5"
-                />
-                <span className="text-sm font-mono text-gray-600">{configs.aparencia_cor_primaria}</span>
-              </div>
-            </Field>
-            <Field label="Cor secundária" hint="Verde escuro — sidebar, fundos">
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={configs.aparencia_cor_secundaria}
-                  onChange={(e) => set('aparencia_cor_secundaria', e.target.value)}
-                  className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-0.5"
-                />
-                <span className="text-sm font-mono text-gray-600">{configs.aparencia_cor_secundaria}</span>
-              </div>
-            </Field>
           </div>
         </Card>
 

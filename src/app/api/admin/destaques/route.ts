@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     data: { produtoId, secao: secao ?? 'mais-vendidos', ordem: Number(ordem) || 0 },
   })
 
+  revalidatePath('/', 'layout')
   revalidatePath('/')
 
   return NextResponse.json({ destaque }, { status: 201 })
@@ -38,6 +39,7 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
 
   await prisma.produtoDestaque.delete({ where: { id } })
+  revalidatePath('/', 'layout')
   revalidatePath('/')
   return NextResponse.json({ ok: true })
 }
