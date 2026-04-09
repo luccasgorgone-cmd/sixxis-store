@@ -7,11 +7,16 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
+      { protocol: 'https', hostname: '**' },
     ],
+  },
+  // Desabilita Router Cache (client-side) completamente
+  // Resolve o problema de múltiplas instâncias no Railway
+  experimental: {
+    staleTimes: {
+      dynamic: 0,
+      static:  0,
+    },
   },
 }
 

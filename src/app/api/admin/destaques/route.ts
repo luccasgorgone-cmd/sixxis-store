@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+
+const NO_CACHE = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma':        'no-cache',
+  'Expires':       '0',
+}
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
@@ -12,7 +19,7 @@ export async function GET(request: NextRequest) {
     include: { produto: { select: { id: true, nome: true, imagens: true, preco: true } } },
   })
 
-  return NextResponse.json({ destaques })
+  return NextResponse.json({ destaques }, { headers: NO_CACHE })
 }
 
 export async function POST(request: NextRequest) {
@@ -27,10 +34,9 @@ export async function POST(request: NextRequest) {
     data: { produtoId, secao: secao ?? 'mais-vendidos', ordem: Number(ordem) || 0 },
   })
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/')
+  console.log('[ADMIN] destaque adicionado:', produtoId, 'secao:', secao ?? 'mais-vendidos')
 
-  return NextResponse.json({ destaque }, { status: 201 })
+  return NextResponse.json({ destaque }, { status: 201, headers: NO_CACHE })
 }
 
 export async function DELETE(request: NextRequest) {
@@ -39,7 +45,6 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
 
   await prisma.produtoDestaque.delete({ where: { id } })
-  revalidatePath('/', 'layout')
-  revalidatePath('/')
-  return NextResponse.json({ ok: true })
+  console.log('[ADMIN] destaque removido:', id)
+  return NextResponse.json({ ok: true }, { headers: NO_CACHE })
 }

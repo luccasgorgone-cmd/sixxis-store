@@ -14,7 +14,8 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { prisma } from '@/lib/prisma'
 
-export const dynamic = 'force-dynamic'
+export const dynamic    = 'force-dynamic'
+export const revalidate = 0
 
 // ── Pré-carregamento de todas as fontes disponíveis ───────────────────────────
 const inter      = Inter      ({ subsets: ['latin'], variable: '--font-inter',      display: 'swap' })

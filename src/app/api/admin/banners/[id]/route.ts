@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+
+const NO_CACHE = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma':        'no-cache',
+  'Expires':       '0',
+}
+
+export const dynamic = 'force-dynamic'
 
 export async function PUT(
   request: NextRequest,
@@ -14,19 +21,18 @@ export async function PUT(
     where: { id },
     data: {
       imagem,
-      titulo:    titulo || null,
+      titulo:    titulo    || null,
       subtitulo: subtitulo || null,
-      link:      link || null,
+      link:      link      || null,
       ordem:     Number(ordem) || 0,
       ativo:     ativo !== false,
       tempoCads: Number(tempoCads) || 5,
     },
   })
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/')
+  console.log('[ADMIN] banner atualizado:', id)
 
-  return NextResponse.json({ banner })
+  return NextResponse.json({ banner }, { headers: NO_CACHE })
 }
 
 export async function PATCH(
@@ -41,10 +47,7 @@ export async function PATCH(
     data: body,
   })
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/')
-
-  return NextResponse.json({ banner })
+  return NextResponse.json({ banner }, { headers: NO_CACHE })
 }
 
 export async function DELETE(
@@ -53,7 +56,6 @@ export async function DELETE(
 ) {
   const { id } = await params
   await prisma.banner.delete({ where: { id } })
-  revalidatePath('/', 'layout')
-  revalidatePath('/')
-  return NextResponse.json({ ok: true })
+  console.log('[ADMIN] banner deletado:', id)
+  return NextResponse.json({ ok: true }, { headers: NO_CACHE })
 }

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+
+const NO_CACHE = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma':        'no-cache',
+  'Expires':       '0',
+}
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
@@ -110,10 +117,7 @@ export async function POST(request: NextRequest) {
     include: { variacoes: true },
   })
 
-  revalidatePath('/')
-  revalidatePath('/produtos')
-  revalidatePath('/pecas')
-  revalidatePath('/ofertas')
+  console.log('[ADMIN] produto criado:', produto.id, produto.nome)
 
-  return NextResponse.json({ produto }, { status: 201 })
+  return NextResponse.json({ produto }, { status: 201, headers: NO_CACHE })
 }

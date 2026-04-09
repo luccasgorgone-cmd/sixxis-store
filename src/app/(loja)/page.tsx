@@ -7,7 +7,9 @@ import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 
-export const dynamic = 'force-dynamic'
+export const dynamic    = 'force-dynamic'
+export const revalidate = 0
+export const fetchCache = 'force-no-store'
 
 export const metadata: Metadata = {
   title: 'Sixxis Store — Climatizadores, Aspiradores e Spinning',
@@ -44,6 +46,9 @@ export default async function HomePage() {
   ])
 
   const cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
+
+  // Log para confirmar que os dados chegam frescos do banco (visível nos logs do Railway)
+  console.log('[HOME] banners:', banners.length, '| destaques:', destaques.length, '| produtos:', produtosGerais.length, '| configs:', configRows.length)
 
   // Mais vendidos: curados primeiro, fallback para produtos gerais
   const produtosMaisVendidos = destaques.length > 0
