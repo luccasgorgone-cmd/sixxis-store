@@ -31,7 +31,7 @@ function AnnouncementBar({ items }: { items: string[] }) {
   }, [items.length])
 
   return (
-    <div className="bg-[#0a0a0a] text-white text-xs text-center py-2 px-4 h-8 flex items-center justify-center overflow-hidden">
+    <div className="text-xs text-center py-2 px-4 h-8 flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--color-anuncio-fundo, #0a0a0a)', color: 'var(--color-anuncio-texto, #ffffff)' }}>
       <span
         style={{
           opacity: visible ? 1 : 0,
@@ -66,7 +66,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncios = DEFAUL
       <AnnouncementBar items={anuncios} />
 
       {/* ── Header principal ─────────────────────────────────────────── */}
-      <header className="bg-header border-b border-brand/30 shadow-md sticky top-0 z-40">
+      <header className="border-b shadow-md sticky top-0 z-40" style={{ backgroundColor: 'var(--color-header, #2a9d8f)', borderColor: 'rgba(255,255,255,0.15)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
 
           {/* Logo */}

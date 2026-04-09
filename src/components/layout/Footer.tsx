@@ -121,7 +121,7 @@ export default async function Footer() {
   } catch {}
 
   return (
-    <footer className="bg-[#0a0a0a] text-gray-400">
+    <footer className="text-gray-400" style={{ backgroundColor: 'var(--color-footer, #0a0a0a)' }}>
 
       {/* ── Bloco principal ──────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14">

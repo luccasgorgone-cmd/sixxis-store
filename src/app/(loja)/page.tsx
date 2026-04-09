@@ -130,7 +130,7 @@ export default async function HomePage() {
       </section>
 
       {/* 5. Por que Sixxis? */}
-      <section className="bg-[#f8f9fa] py-16">
+      <section className="py-16" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="section-title mb-10">Por que Sixxis?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -157,7 +157,7 @@ export default async function HomePage() {
 
       {/* 6. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="bg-[#f8f9fa] border-t border-b border-gray-200 py-12">
+        <section className="border-t border-b border-gray-200 py-12" style={{ backgroundColor: 'var(--color-fundo-alt, #f8f9fa)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl font-extrabold text-[#0a0a0a] mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
@@ -171,7 +171,7 @@ export default async function HomePage() {
       )}
 
       {/* 7. Banner WhatsApp */}
-      <section className="bg-[#0a0a0a] py-20">
+      <section className="py-20" style={{ backgroundColor: 'var(--color-wa, #0a0a0a)' }}>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             {cfg.whatsapp_banner_titulo || 'Precisa de ajuda para escolher?'}

@@ -18,6 +18,7 @@ import {
   LayoutTemplate,
   FileText,
 } from 'lucide-react'
+import CampoCor from '@/components/admin/CampoCor'
 import { Toast } from '@/components/admin/Toast'
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -105,6 +106,20 @@ const DEFAULTS: Record<string, string> = {
   anuncio_1: '🚚 Frete grátis acima de R$ 500 para todo o Brasil',
   anuncio_2: '💳 Parcele em até 6x sem juros no cartão',
   anuncio_3: '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
+  // Cores completas
+  cor_principal_dark: '#2a9d8f',
+  cor_destaque: '#3cbfb3',
+  cor_header_texto: '#ffffff',
+  cor_anuncio_fundo: '#0a0a0a',
+  cor_anuncio_texto: '#ffffff',
+  cor_fundo_alt: '#f8f9fa',
+  cor_stats_fundo: '#3cbfb3',
+  cor_wa_fundo: '#0a0a0a',
+  cor_footer_fundo: '#0a0a0a',
+  cor_botoes_texto: '#ffffff',
+  cor_botoes_hover: '#2a9d8f',
+  cor_textos_sec: '#6b7280',
+  cor_titulos: '#0a0a0a',
 }
 
 const TABS = [
@@ -249,9 +264,31 @@ function SaveButton({ loading, onClick }: { loading: boolean; onClick: () => voi
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
+const CORES_DEFAULTS: Record<string, string> = {
+  cor_principal:     '#3cbfb3',
+  cor_principal_dark: '#2a9d8f',
+  cor_destaque:      '#3cbfb3',
+  cor_header:        '#2a9d8f',
+  cor_header_texto:  '#ffffff',
+  cor_anuncio_fundo: '#0a0a0a',
+  cor_anuncio_texto: '#ffffff',
+  cor_fundo:         '#ffffff',
+  cor_fundo_alt:     '#f8f9fa',
+  cor_stats_fundo:   '#3cbfb3',
+  cor_wa_fundo:      '#0a0a0a',
+  cor_footer_fundo:  '#0a0a0a',
+  cor_botoes:        '#3cbfb3',
+  cor_botoes_texto:  '#ffffff',
+  cor_botoes_hover:  '#2a9d8f',
+  cor_textos:        '#0a0a0a',
+  cor_textos_sec:    '#6b7280',
+  cor_titulos:       '#0a0a0a',
+}
+
 export default function ConfiguracoesPage() {
   const [activeTab, setActiveTab] = useState('loja')
   const [configs, setConfigs] = useState<Record<string, string>>(DEFAULTS)
+  const [cores, setCores] = useState<Record<string, string>>(CORES_DEFAULTS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -269,8 +306,15 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     fetch('/api/admin/configuracoes')
       .then((r) => r.json())
-      .then((data) => {
+      .then((data: Record<string, string>) => {
         setConfigs((prev) => ({ ...prev, ...data }))
+        setCores((prev) => {
+          const updated = { ...prev }
+          for (const key of Object.keys(prev)) {
+            if (data[key]) updated[key] = data[key]
+          }
+          return updated
+        })
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -291,6 +335,11 @@ export default function ConfiguracoesPage() {
     set(key, value)
     const cssVar = COR_CSS_MAP[key]
     if (cssVar) document.documentElement.style.setProperty(cssVar, value)
+  }
+
+  function handleCorChange(chave: string, valor: string) {
+    setCores((prev) => ({ ...prev, [chave]: valor }))
+    set(chave, valor)
   }
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
@@ -413,23 +462,13 @@ export default function ConfiguracoesPage() {
   }
 
   function renderAparencia() {
-    const keys = [
-      'aparencia_cor_primaria', 'aparencia_cor_secundaria',
-      'fonte_principal', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo',
-    ]
-
+    const coresKeys = Object.keys(CORES_DEFAULTS)
     const FONTES = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Nunito', 'Raleway', 'Open Sans']
-
-    const CORES_LABELS: [string, string, string][] = [
-      ['cor_principal',  'Cor principal',   'Verde Tiffany — botões, destaques, links'],
-      ['cor_header',     'Cor do header',   'Fundo do cabeçalho e sidebar admin'],
-      ['cor_botoes',     'Cor dos botões',  'Botões CTA em todo o site'],
-      ['cor_textos',     'Cor dos textos',  'Cor principal dos textos'],
-      ['cor_fundo',      'Cor do fundo',    'Fundo geral das páginas'],
-    ]
 
     return (
       <div className="space-y-5">
+
+        {/* Fonte */}
         <Card title="Fonte principal">
           <div className="space-y-3">
             <p className="text-xs text-gray-500">Selecione a fonte usada em todo o site (Google Fonts)</p>
@@ -446,43 +485,76 @@ export default function ConfiguracoesPage() {
                   }`}
                 >
                   <span style={{ fontFamily: fonte }}>{fonte}</span>
-                  <span
-                    className="text-xs font-normal text-gray-400"
-                    style={{ fontFamily: fonte }}
-                  >
-                    Abc 123
-                  </span>
+                  <span className="text-xs font-normal text-gray-400" style={{ fontFamily: fonte }}>Abc 123</span>
                 </button>
               ))}
             </div>
           </div>
         </Card>
 
-        <Card title="Cores personalizáveis">
-          <p className="text-xs text-[#3cbfb3] bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl px-4 py-2.5 mb-4 font-medium">
-            ✨ Preview ao vivo — as cores atualizam instantaneamente no site enquanto você edita
+        {/* Cores */}
+        <Card title="Cores do site">
+          <p className="text-xs text-[#3cbfb3] bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl px-4 py-2.5 mb-6 font-medium">
+            ✨ Preview ao vivo — o site atualiza instantaneamente enquanto você edita. Salve para persistir.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {CORES_LABELS.map(([key, label, hint]) => (
-              <Field key={key} label={label} hint={hint}>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={configs[key] || '#3cbfb3'}
-                    onChange={(e) => setCorComPreview(key, e.target.value)}
-                    className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-0.5"
-                  />
-                  <span className="text-sm font-mono text-gray-600">{configs[key]}</span>
-                  <div
-                    className="w-8 h-8 rounded-lg border border-gray-200"
-                    style={{ background: configs[key] || '#3cbfb3' }}
-                  />
-                </div>
-              </Field>
-            ))}
+
+          <div className="space-y-8">
+            {/* Grupo 1 */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Cores Principais</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Cor Principal" chave="cor_principal" cssVar="--tiffany" valor={cores.cor_principal} onChange={handleCorChange} />
+                <CampoCor label="Cor Hover / Escura" chave="cor_principal_dark" cssVar="--tiffany-dark" valor={cores.cor_principal_dark} onChange={handleCorChange} />
+                <CampoCor label="Cor Destaque" chave="cor_destaque" cssVar="--color-destaque" valor={cores.cor_destaque} onChange={handleCorChange} />
+              </div>
+            </div>
+
+            {/* Grupo 2 */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Header e Topo</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Fundo do Header" chave="cor_header" cssVar="--color-header" valor={cores.cor_header} onChange={handleCorChange} />
+                <CampoCor label="Texto do Header" chave="cor_header_texto" cssVar="--color-header-texto" valor={cores.cor_header_texto} onChange={handleCorChange} />
+                <CampoCor label="Fundo Barra Anúncio" chave="cor_anuncio_fundo" cssVar="--color-anuncio-fundo" valor={cores.cor_anuncio_fundo} onChange={handleCorChange} />
+                <CampoCor label="Texto Barra Anúncio" chave="cor_anuncio_texto" cssVar="--color-anuncio-texto" valor={cores.cor_anuncio_texto} onChange={handleCorChange} />
+              </div>
+            </div>
+
+            {/* Grupo 3 */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Fundos da Página</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Fundo Geral" chave="cor_fundo" cssVar="--color-fundo" valor={cores.cor_fundo} onChange={handleCorChange} />
+                <CampoCor label="Fundo Seções Alternadas" chave="cor_fundo_alt" cssVar="--color-fundo-alt" valor={cores.cor_fundo_alt} onChange={handleCorChange} />
+                <CampoCor label="Fundo Seção Stats" chave="cor_stats_fundo" cssVar="--color-stats" valor={cores.cor_stats_fundo} onChange={handleCorChange} />
+                <CampoCor label="Fundo Banner WhatsApp" chave="cor_wa_fundo" cssVar="--color-wa" valor={cores.cor_wa_fundo} onChange={handleCorChange} />
+                <CampoCor label="Fundo Footer" chave="cor_footer_fundo" cssVar="--color-footer" valor={cores.cor_footer_fundo} onChange={handleCorChange} />
+              </div>
+            </div>
+
+            {/* Grupo 4 */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Botões</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Fundo do Botão" chave="cor_botoes" cssVar="--color-botoes" valor={cores.cor_botoes} onChange={handleCorChange} />
+                <CampoCor label="Texto do Botão" chave="cor_botoes_texto" cssVar="--color-botoes-texto" valor={cores.cor_botoes_texto} onChange={handleCorChange} />
+                <CampoCor label="Hover do Botão" chave="cor_botoes_hover" cssVar="--color-botoes-hover" valor={cores.cor_botoes_hover} onChange={handleCorChange} />
+              </div>
+            </div>
+
+            {/* Grupo 5 */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Textos</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Texto Principal" chave="cor_textos" cssVar="--color-textos" valor={cores.cor_textos} onChange={handleCorChange} />
+                <CampoCor label="Texto Secundário" chave="cor_textos_sec" cssVar="--color-textos-sec" valor={cores.cor_textos_sec} onChange={handleCorChange} />
+                <CampoCor label="Títulos" chave="cor_titulos" cssVar="--color-titulos" valor={cores.cor_titulos} onChange={handleCorChange} />
+              </div>
+            </div>
           </div>
         </Card>
 
+        {/* Logo */}
         <Card title="Logo">
           <div className="flex items-center gap-6">
             <div className="w-44 h-16 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
@@ -502,25 +574,16 @@ export default function ConfiguracoesPage() {
                 disabled={uploadingLogo}
                 className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
               >
-                {uploadingLogo ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Upload className="w-4 h-4" />
-                )}
+                {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                 Trocar Logo
               </button>
               <p className="text-xs text-gray-400 mt-2">PNG ou SVG, fundo transparente recomendado</p>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="hidden"
-              />
+              <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
             </div>
           </div>
         </Card>
 
+        {/* Banners */}
         <Card title="Banners do carrossel">
           <div className="flex items-center gap-4">
             <p className="text-sm text-gray-500 flex-1">
@@ -535,7 +598,7 @@ export default function ConfiguracoesPage() {
           </div>
         </Card>
 
-        <SaveButton loading={saving} onClick={() => save(keys)} />
+        <SaveButton loading={saving} onClick={() => save(['fonte_principal', ...coresKeys])} />
       </div>
     )
   }

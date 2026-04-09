@@ -62,36 +62,32 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
+const COR_KEYS = [
+  'logo_url', 'fonte_principal',
+  'anuncio_1', 'anuncio_2', 'anuncio_3',
+  'cor_principal', 'cor_principal_dark', 'cor_destaque',
+  'cor_header', 'cor_header_texto', 'cor_anuncio_fundo', 'cor_anuncio_texto',
+  'cor_fundo', 'cor_fundo_alt', 'cor_stats_fundo', 'cor_wa_fundo', 'cor_footer_fundo',
+  'cor_botoes', 'cor_botoes_texto', 'cor_botoes_hover',
+  'cor_textos', 'cor_textos_sec', 'cor_titulos',
+] as const
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Defaults seguros — nunca vai quebrar o layout
-  let logoUrl       = '/logo-sixxis.png'
-  let corPrincipal  = '#3cbfb3'
-  let corHeader     = '#2a9d8f'
-  let corBotoes     = '#3cbfb3'
-  let corTextos     = '#0a0a0a'
-  let corFundo      = '#ffffff'
+  let logoUrl        = '/logo-sixxis.png'
   let fontePrincipal = 'Inter'
   let anuncios = [
     '🚚 Frete grátis acima de R$\u00a0500 para todo o Brasil',
     '💳 Parcele em até 6x sem juros no cartão',
     '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
   ]
+  let cfg: Record<string, string> = {}
 
   try {
     const configs = await prisma.configuracao.findMany({
-      where: {
-        chave: {
-          in: ['logo_url', 'cor_principal', 'cor_header', 'cor_botoes', 'cor_textos', 'cor_fundo', 'fonte_principal', 'anuncio_1', 'anuncio_2', 'anuncio_3'],
-        },
-      },
+      where: { chave: { in: [...COR_KEYS] } },
     })
-    const cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
-    if (cfg.logo_url)       logoUrl       = cfg.logo_url
-    if (cfg.cor_principal)  corPrincipal  = cfg.cor_principal
-    if (cfg.cor_header)     corHeader     = cfg.cor_header
-    if (cfg.cor_botoes)     corBotoes     = cfg.cor_botoes
-    if (cfg.cor_textos)     corTextos     = cfg.cor_textos
-    if (cfg.cor_fundo)      corFundo      = cfg.cor_fundo
+    cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
+    if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
     if (cfg.anuncio_1 || cfg.anuncio_2 || cfg.anuncio_3) {
       anuncios = [
@@ -100,10 +96,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         cfg.anuncio_3 || anuncios[2],
       ]
     }
-    console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', corPrincipal)
+    console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', cfg.cor_principal || '#3cbfb3')
   } catch (error) {
     console.error('[LAYOUT ERROR — usando defaults]', error)
-    // Continua com os defaults — NUNCA quebra o layout
   }
 
   // Fonte selecionada (fallback: Inter)
@@ -114,15 +109,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ].join(' ')
 
   const cssVars = {
-    '--color-tiffany':      corPrincipal,
-    '--color-tiffany-dark': corBotoes,
-    '--tiffany':            corPrincipal,
-    '--tiffany-dark':       corBotoes,
-    '--color-header':       corHeader,
-    '--color-botoes':       corBotoes,
-    '--color-textos':       corTextos,
-    '--color-fundo':        corFundo,
-    '--font-active':        `var(${fontObj.variable})`,
+    '--tiffany':             cfg.cor_principal      || '#3cbfb3',
+    '--tiffany-dark':        cfg.cor_principal_dark || '#2a9d8f',
+    '--color-tiffany':       cfg.cor_principal      || '#3cbfb3',
+    '--color-destaque':      cfg.cor_destaque       || '#3cbfb3',
+    '--color-header':        cfg.cor_header         || '#2a9d8f',
+    '--color-header-texto':  cfg.cor_header_texto   || '#ffffff',
+    '--color-anuncio-fundo': cfg.cor_anuncio_fundo  || '#0a0a0a',
+    '--color-anuncio-texto': cfg.cor_anuncio_texto  || '#ffffff',
+    '--color-fundo':         cfg.cor_fundo          || '#ffffff',
+    '--color-fundo-alt':     cfg.cor_fundo_alt      || '#f8f9fa',
+    '--color-stats':         cfg.cor_stats_fundo    || '#3cbfb3',
+    '--color-wa':            cfg.cor_wa_fundo       || '#0a0a0a',
+    '--color-footer':        cfg.cor_footer_fundo   || '#0a0a0a',
+    '--color-botoes':        cfg.cor_botoes         || '#3cbfb3',
+    '--color-botoes-texto':  cfg.cor_botoes_texto   || '#ffffff',
+    '--color-botoes-hover':  cfg.cor_botoes_hover   || '#2a9d8f',
+    '--color-textos':        cfg.cor_textos         || '#0a0a0a',
+    '--color-textos-sec':    cfg.cor_textos_sec     || '#6b7280',
+    '--color-titulos':       cfg.cor_titulos        || '#0a0a0a',
+    '--font-active':         `var(${fontObj.variable})`,
   } as React.CSSProperties
 
   return (
