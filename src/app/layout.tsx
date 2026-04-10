@@ -12,7 +12,6 @@ import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import TrustBar from '@/components/layout/TrustBar'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic    = 'force-dynamic'
@@ -77,27 +76,17 @@ const COR_KEYS = [
   'cor_badge_oferta', 'cor_badge_novo', 'cor_badge_esgotado',
 ] as const
 
-const TRUST_KEYS = [
-  'trust_1_titulo', 'trust_1_sub',
-  'trust_2_titulo', 'trust_2_sub',
-  'trust_3_titulo', 'trust_3_sub',
-  'trust_4_titulo', 'trust_4_sub',
-] as const
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let logoUrl        = '/logo-sixxis.png'
   let fontePrincipal = 'Inter'
   let cfg: Record<string, string> = {}
 
-  let trust: Record<string, string> = {}
-
   try {
-    const [configs, trustRows] = await Promise.all([
-      prisma.configuracao.findMany({ where: { chave: { in: [...COR_KEYS] } } }),
-      prisma.configuracao.findMany({ where: { chave: { in: [...TRUST_KEYS] } } }),
-    ])
-    cfg   = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
-    trust = Object.fromEntries(trustRows.map((r) => [r.chave, r.valor]))
+    const configs = await prisma.configuracao.findMany({
+      where: { chave: { in: [...COR_KEYS] } },
+    })
+    cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
     if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
     console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', cfg.cor_principal || '#3cbfb3')
@@ -170,12 +159,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       >
         <SessionProvider>
           <Header logoUrl={logoUrl} />
-          <TrustBar items={[
-            { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Frete grátis acima de R$ 500' },
-            { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos' },
-            { titulo: trust.trust_3_titulo || '6x sem juros no cartão',     sub: trust.trust_3_sub || 'Débito, crédito e PIX' },
-            { titulo: trust.trust_4_titulo || 'Produtos Originais',         sub: trust.trust_4_sub || 'Garantia Sixxis' },
-          ]} />
           <div className="flex-1">{children}</div>
           <Footer />
         </SessionProvider>

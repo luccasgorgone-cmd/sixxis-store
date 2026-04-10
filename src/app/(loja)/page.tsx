@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
+import TrustBar from '@/components/layout/TrustBar'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -21,17 +22,22 @@ export default async function HomePage() {
   // Dados com defaults — página nunca fica em branco mesmo com erro no banco
   let banners: Awaited<ReturnType<typeof prisma.banner.findMany>> = []
   let produtosMostrar: Awaited<ReturnType<typeof prisma.produto.findMany>> = []
-  let cfg: Record<string, string> = {}
+  let cfg:   Record<string, string> = {}
+  let trust: Record<string, string> = {}
 
   try {
-    const [bannersDb, destaques, produtosGerais, configRows] = await Promise.all([
+    const [bannersDb, destaques, produtosGerais, configRows, trustRows] = await Promise.all([
       prisma.banner.findMany({ where: { ativo: true }, orderBy: { ordem: 'asc' } }),
       prisma.produtoDestaque.findMany({ where: { secao: 'mais-vendidos' }, include: { produto: true }, orderBy: { ordem: 'asc' } }),
       prisma.produto.findMany({ where: { ativo: true }, take: 8, orderBy: { createdAt: 'desc' } }),
       prisma.configuracao.findMany(),
+      prisma.configuracao.findMany({
+        where: { chave: { in: ['trust_1_titulo','trust_1_sub','trust_2_titulo','trust_2_sub','trust_3_titulo','trust_3_sub','trust_4_titulo','trust_4_sub'] } },
+      }),
     ])
     banners = bannersDb
     cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
+    trust = Object.fromEntries(trustRows.map((r) => [r.chave, r.valor]))
     produtosMostrar = destaques.length > 0 ? destaques.map((d) => d.produto) : produtosGerais
     console.log('[HOME OK]', { banners: banners.length, produtos: produtosMostrar.length })
   } catch (error) {
@@ -80,6 +86,14 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* 2. TrustBar — inline, logo após o banner */}
+      <TrustBar items={[
+        { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Frete grátis acima de R$ 500' },
+        { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos' },
+        { titulo: trust.trust_3_titulo || '6x sem juros no cartão',     sub: trust.trust_3_sub || 'Débito, crédito e PIX' },
+        { titulo: trust.trust_4_titulo || 'Produtos Originais',         sub: trust.trust_4_sub || 'Garantia Sixxis' },
+      ]} />
 
       {/* 3. Produtos em Destaque */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -172,7 +186,7 @@ export default async function HomePage() {
             className="group relative overflow-hidden rounded-2xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
             style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0a0a0a 0%, #111827 60%, #1f2937 100%)' }}
           >
-            <div className="absolute inset-0 opacity-15" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #3cbfb3, transparent)' }} />
+            <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #3cbfb3, transparent)' }} />
             <div className="relative z-10">
               <span className="inline-block bg-[#3cbfb3]/20 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide border border-[#3cbfb3]/30">
                 Spinning & Fitness
@@ -249,7 +263,7 @@ export default async function HomePage() {
       )}
 
       {/* 9. Banner WhatsApp */}
-      <section className="py-14" style={{ backgroundColor: 'var(--color-wa, #111827)' }}>
+      <section className="py-10" style={{ backgroundColor: 'var(--color-wa, #111827)' }}>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             {cfg.whatsapp_banner_titulo || 'Precisa de ajuda para escolher?'}

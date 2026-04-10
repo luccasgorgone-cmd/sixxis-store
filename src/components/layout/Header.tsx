@@ -220,7 +220,7 @@ function CampoFrete({ compact = false }: { compact?: boolean }) {
         />
         <button
           onClick={handleOk}
-          disabled={carregando || cep.replace(/\D/g, '').length < 8}
+          disabled={carregando}
           className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white text-xs font-bold px-3 h-full transition"
         >
           {carregando ? '...' : 'OK'}
