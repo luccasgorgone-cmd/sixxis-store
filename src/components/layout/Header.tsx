@@ -93,7 +93,7 @@ function SearchVentisol({ className = '' }: { className?: string }) {
           onFocus={() => sugestoes.length > 0 && setAberto(true)}
           placeholder="O que você está buscando?"
           autoComplete="off"
-          className="flex-1 py-3 px-4 text-gray-700 text-sm outline-none min-w-0"
+          className="flex-1 py-3 px-4 text-gray-700 text-base sm:text-sm outline-none min-w-0"
         />
         <button
           type="submit"
@@ -184,7 +184,7 @@ function CampoFrete({ compact = false }: { compact?: boolean }) {
           <input
             type="text" value={cep} onChange={handleChange}
             placeholder="XXXXX-XXX" maxLength={9}
-            className="flex-1 py-2.5 px-3 text-sm text-gray-700 outline-none"
+            className="flex-1 py-2.5 px-3 text-base sm:text-sm text-gray-700 outline-none"
             onKeyDown={(e) => e.key === 'Enter' && handleOk()}
           />
           <button
@@ -239,19 +239,11 @@ const navLinks = [
   { href: '/contato',                           label: 'Contato',        icon: Phone,      destaque: false },
 ]
 
-const DEFAULT_ANUNCIOS = [
-  '🚚 Frete GRÁTIS acima de R$ 500 para todo o Brasil',
-  '💳 Parcele em até 6x SEM JUROS no cartão',
-  '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
-]
-
 // ── HEADER ────────────────────────────────────────────────────────────────────
 export default function Header({
-  logoUrl  = '/logo-sixxis.png',
-  anuncios = DEFAULT_ANUNCIOS,
+  logoUrl = '/logo-sixxis.png',
 }: {
   logoUrl?: string
-  anuncios?: string[]
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { data: session } = useSession()

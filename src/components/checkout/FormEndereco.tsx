@@ -121,7 +121,7 @@ export default function FormEndereco({ onProximo }: Props) {
               {...register(name)}
               placeholder={placeholder}
               onBlur={() => name === 'cep' && buscarFrete(cep)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition"
             />
             {errors[name] && (
               <p className="text-red-500 text-xs mt-1">{errors[name]?.message}</p>

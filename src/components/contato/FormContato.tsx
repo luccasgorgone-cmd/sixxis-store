@@ -27,7 +27,7 @@ function validate(form: FormState): Errors {
 }
 
 function inputClass(touched: boolean, error?: string) {
-  const base = 'w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 transition'
+  const base = 'w-full border rounded-lg px-4 py-2.5 text-base sm:text-sm focus:outline-none focus:ring-2 transition'
   if (!touched)  return `${base} border-gray-300 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]`
   if (error)     return `${base} border-red-400 bg-red-50/30 focus:ring-red-300 focus:border-red-400`
   return `${base} border-[#3cbfb3] bg-[#f9fffe] focus:ring-[#3cbfb3] focus:border-[#3cbfb3]`

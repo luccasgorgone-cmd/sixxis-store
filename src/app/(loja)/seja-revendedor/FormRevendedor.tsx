@@ -64,7 +64,7 @@ function Field({
 }
 
 const inputCls = (err?: string) =>
-  `w-full border rounded-xl px-4 py-3 text-sm text-gray-800 outline-none transition focus:ring-2 ${
+  `w-full border rounded-xl px-4 py-3 text-base sm:text-sm text-gray-800 outline-none transition focus:ring-2 ${
     err ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 focus:ring-[#3cbfb3]/30 focus:border-[#3cbfb3]'
   }`
 

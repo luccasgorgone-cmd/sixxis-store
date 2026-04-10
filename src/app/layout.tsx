@@ -64,7 +64,6 @@ export const metadata: Metadata = {
 
 const COR_KEYS = [
   'logo_url', 'fonte_principal',
-  'anuncio_1', 'anuncio_2', 'anuncio_3',
   'cor_principal', 'cor_principal_dark', 'cor_destaque',
   'cor_header', 'cor_header_texto', 'cor_anuncio_fundo', 'cor_anuncio_texto',
   'cor_fundo', 'cor_fundo_alt', 'cor_stats_fundo', 'cor_wa_fundo', 'cor_footer_fundo',
@@ -75,11 +74,6 @@ const COR_KEYS = [
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let logoUrl        = '/logo-sixxis.png'
   let fontePrincipal = 'Inter'
-  let anuncios = [
-    '🚚 Frete grátis acima de R$\u00a0500 para todo o Brasil',
-    '💳 Parcele em até 6x sem juros no cartão',
-    '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
-  ]
   let cfg: Record<string, string> = {}
 
   try {
@@ -89,13 +83,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
     if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
-    if (cfg.anuncio_1 || cfg.anuncio_2 || cfg.anuncio_3) {
-      anuncios = [
-        cfg.anuncio_1 || anuncios[0],
-        cfg.anuncio_2 || anuncios[1],
-        cfg.anuncio_3 || anuncios[2],
-      ]
-    }
     console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', cfg.cor_principal || '#3cbfb3')
   } catch (error) {
     console.error('[LAYOUT ERROR — usando defaults]', error)
@@ -151,7 +138,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={{ fontFamily: `var(${fontObj.variable}), system-ui, sans-serif` }}
       >
         <SessionProvider>
-          <Header logoUrl={logoUrl} anuncios={anuncios} />
+          <Header logoUrl={logoUrl} />
           <div className="flex-1">{children}</div>
           <Footer />
         </SessionProvider>

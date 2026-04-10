@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ShieldCheck, Mail } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Termo de Garantia | Sixxis',
@@ -70,11 +71,17 @@ export default function GarantiaPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-700 to-blue-900 text-white py-16 px-4">
+      <section
+        className="text-white py-16 px-4"
+        style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
+      >
         <div className="max-w-4xl mx-auto text-center">
+          <div className="w-16 h-16 rounded-full bg-[#3cbfb3]/20 flex items-center justify-center mx-auto mb-5">
+            <ShieldCheck size={32} className="text-[#3cbfb3]" />
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Termo de Garantia Sixxis</h1>
-          <p className="text-blue-100 text-lg">Produtos de qualidade com suporte técnico especializado</p>
-          <p className="text-blue-200 text-sm mt-2">Válido para compras realizadas em sixxis.com.br a partir de janeiro de 2025</p>
+          <p className="text-white/70 text-lg">Produtos de qualidade com suporte técnico especializado</p>
+          <p className="text-white/50 text-sm mt-2">Válido para compras realizadas na loja oficial Sixxis a partir de janeiro de 2025</p>
         </div>
       </section>
 
@@ -93,16 +100,16 @@ export default function GarantiaPage() {
 
         {/* Prazos por categoria */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-6 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-6 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
             Prazos de garantia por categoria
           </h2>
           <div className="space-y-4">
             {categoriasGarantia.map((item) => (
               <div key={item.categoria} className="border border-gray-100 rounded-xl overflow-hidden">
-                <div className="bg-blue-50 px-5 py-3 flex items-center justify-between">
+                <div className="bg-[#e8f8f7] px-5 py-3 flex items-center justify-between">
                   <h3 className="font-bold text-gray-800">{item.categoria}</h3>
-                  <span className="bg-blue-700 text-white text-sm font-bold px-3 py-1 rounded-full">
+                  <span className="bg-[#3cbfb3] text-white text-sm font-bold px-3 py-1 rounded-full">
                     {item.prazo}
                   </span>
                 </div>
@@ -125,14 +132,14 @@ export default function GarantiaPage() {
 
         {/* Como acionar */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-6 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-6 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
             Como acionar a garantia
           </h2>
           <div className="space-y-4">
             {etapasGarantia.map((etapa) => (
               <div key={etapa.numero} className="flex gap-4">
-                <div className="shrink-0 bg-blue-700 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+                <div className="shrink-0 bg-[#3cbfb3] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
                   {etapa.numero}
                 </div>
                 <div className="pt-1">
@@ -142,16 +149,16 @@ export default function GarantiaPage() {
               </div>
             ))}
           </div>
-          <div className="mt-6 bg-blue-50 rounded-xl p-4 text-sm text-gray-700">
-            <strong>Importante:</strong> O acionamento da garantia deve ser solicitado dentro do prazo vigente.
+          <div className="mt-6 bg-[#e8f8f7] rounded-xl p-4 text-sm text-gray-700">
+            <strong className="text-[#0f2e2b]">Importante:</strong> O acionamento da garantia deve ser solicitado dentro do prazo vigente.
             Guarde sempre sua nota fiscal como comprovante de compra — ela é obrigatória para acionamento.
           </div>
         </section>
 
         {/* O que não cobre */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
             Situações não cobertas pela garantia
           </h2>
           <ul className="space-y-2">
@@ -166,8 +173,8 @@ export default function GarantiaPage() {
 
         {/* Assistência técnica */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">4</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">4</span>
             Assistência técnica autorizada
           </h2>
           <p className="text-gray-600 leading-relaxed mb-4">
@@ -180,6 +187,7 @@ export default function GarantiaPage() {
               <h3 className="font-semibold text-gray-800 mb-2">Central de Suporte</h3>
               <ul className="space-y-1 text-gray-600">
                 <li>E-mail: brasil.sixxis@gmail.com</li>
+                <li>WhatsApp: (11) 93410-2621</li>
                 <li>Horário: Seg–Sex, 8h–18h</li>
                 <li>Resposta em até 2 dias úteis</li>
               </ul>
@@ -198,8 +206,8 @@ export default function GarantiaPage() {
 
         {/* Prazo de resposta / direitos */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">5</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">5</span>
             Seus direitos e prazos legais
           </h2>
           <div className="space-y-3 text-sm text-gray-700">
@@ -208,8 +216,8 @@ export default function GarantiaPage() {
               nos produtos nos seguintes prazos:
             </p>
             <ul className="space-y-2">
-              <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span><span><strong>30 dias</strong> para produtos e serviços não duráveis.</span></li>
-              <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span><span><strong>90 dias</strong> para produtos duráveis (eletrodomésticos, equipamentos).</span></li>
+              <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>30 dias</strong> para produtos e serviços não duráveis.</span></li>
+              <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>90 dias</strong> para produtos duráveis (eletrodomésticos, equipamentos).</span></li>
             </ul>
             <p>
               Se o defeito não for sanado em <strong>30 dias corridos</strong>, você pode exigir, à sua escolha:
@@ -219,21 +227,27 @@ export default function GarantiaPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-gradient-to-br from-blue-700 to-blue-900 text-white rounded-2xl p-8 text-center">
+        <section
+          className="text-white rounded-2xl p-8 text-center"
+          style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
+        >
+          <div className="w-12 h-12 rounded-full bg-[#3cbfb3]/20 flex items-center justify-center mx-auto mb-4">
+            <Mail size={22} className="text-[#3cbfb3]" />
+          </div>
           <h2 className="text-xl font-bold mb-3">Precisa acionar a garantia?</h2>
-          <p className="text-blue-100 mb-6 text-sm leading-relaxed">
+          <p className="text-white/70 mb-6 text-sm leading-relaxed">
             Nossa equipe está pronta para ajudar. Entre em contato informando seu pedido e o defeito encontrado.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
               href="mailto:brasil.sixxis@gmail.com"
-              className="bg-white text-blue-700 font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors"
+              className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition-colors"
             >
               brasil.sixxis@gmail.com
             </a>
             <Link
               href="/pedidos"
-              className="border-2 border-white text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-800 transition-colors"
+              className="border-2 border-white/30 hover:border-white text-white font-bold px-6 py-3 rounded-xl hover:bg-white/10 transition-colors"
             >
               Ver meus pedidos
             </Link>

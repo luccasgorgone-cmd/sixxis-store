@@ -80,7 +80,7 @@ export default function CampoCupom({ total, onAplicar, onRemover }: Props) {
           onChange={(e) => setCodigo(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === 'Enter' && handleAplicar()}
           placeholder="CÓDIGO"
-          className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+          className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
         />
         <button
           onClick={handleAplicar}

@@ -26,7 +26,7 @@ export default function NewsletterForm() {
   if (status === 'ok') {
     return (
       <p className="text-[#3cbfb3] font-semibold text-sm">
-        ✓ Cadastrado com sucesso! Você receberá nossas novidades em breve.
+        ✓ Cadastrado com sucesso! Fique de olho no seu e-mail para nossas novidades.
       </p>
     )
   }
@@ -39,7 +39,7 @@ export default function NewsletterForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="seu@email.com"
-        className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-transparent"
+        className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-transparent"
       />
       <button
         type="submit"

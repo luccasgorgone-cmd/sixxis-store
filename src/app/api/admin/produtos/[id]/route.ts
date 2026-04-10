@@ -130,7 +130,6 @@ export async function PUT(
 
   revalidatePath('/')
   revalidatePath('/produtos')
-  revalidatePath('/pecas')
   revalidatePath('/ofertas')
 
   return NextResponse.json({ produto })
@@ -163,7 +162,6 @@ export async function DELETE(
 
   revalidatePath('/')
   revalidatePath('/produtos')
-  revalidatePath('/pecas')
   revalidatePath('/ofertas')
 
   return NextResponse.json({ ok: true })

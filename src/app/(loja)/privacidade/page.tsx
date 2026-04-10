@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Shield } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Política de Privacidade | Sixxis',
@@ -9,11 +10,17 @@ export default function PrivacidadePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-700 to-blue-900 text-white py-16 px-4">
+      <section
+        className="text-white py-16 px-4"
+        style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
+      >
         <div className="max-w-4xl mx-auto text-center">
+          <div className="w-16 h-16 rounded-full bg-[#3cbfb3]/20 flex items-center justify-center mx-auto mb-5">
+            <Shield size={32} className="text-[#3cbfb3]" />
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Política de Privacidade</h1>
-          <p className="text-blue-100 text-lg">Transparência e respeito à sua privacidade, em conformidade com a LGPD</p>
-          <p className="text-blue-200 text-sm mt-2">Última atualização: abril de 2026</p>
+          <p className="text-white/70 text-lg">Transparência e respeito à sua privacidade, em conformidade com a LGPD</p>
+          <p className="text-white/50 text-sm mt-2">Última atualização: abril de 2026</p>
         </div>
       </section>
 
@@ -23,18 +30,18 @@ export default function PrivacidadePage() {
         {/* Intro */}
         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
           <p className="text-gray-700 leading-relaxed">
-            A <strong>Sixxis</strong> ("nós", "nosso" ou "empresa") está comprometida em proteger a privacidade dos
-            seus dados pessoais. Esta Política de Privacidade descreve como coletamos, utilizamos, armazenamos e
-            compartilhamos suas informações quando você utiliza nosso site e realiza compras em nossa loja virtual,
-            em conformidade com a{' '}
+            A <strong>Sixxis</strong> ("nós", "nosso" ou "empresa"), inscrita no CNPJ 54.978.947/0001-09,
+            está comprometida em proteger a privacidade dos seus dados pessoais. Esta Política de Privacidade
+            descreve como coletamos, utilizamos, armazenamos e compartilhamos suas informações quando você utiliza
+            nosso site e realiza compras em nossa loja virtual, em conformidade com a{' '}
             <strong>Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018)</strong>.
           </p>
         </div>
 
         {/* 1. Dados coletados */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
             Dados que coletamos
           </h2>
           <p className="text-gray-600 mb-4">Coletamos apenas os dados necessários para prestar nossos serviços:</p>
@@ -71,8 +78,8 @@ export default function PrivacidadePage() {
 
         {/* 2. Como usamos */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
             Como utilizamos seus dados
           </h2>
           <p className="text-gray-600 mb-4">Utilizamos seus dados pessoais para as seguintes finalidades:</p>
@@ -85,8 +92,8 @@ export default function PrivacidadePage() {
               { titulo: 'Melhorias no serviço', desc: 'Analisar dados de uso para aprimorar nosso site e catálogo.' },
               { titulo: 'Obrigações legais', desc: 'Cumprir exigências fiscais, contábeis e regulatórias aplicáveis.' },
             ].map((item) => (
-              <div key={item.titulo} className="bg-blue-50 rounded-xl p-4">
-                <h3 className="font-semibold text-gray-800 text-sm mb-1">{item.titulo}</h3>
+              <div key={item.titulo} className="bg-[#e8f8f7] rounded-xl p-4">
+                <h3 className="font-semibold text-[#0f2e2b] text-sm mb-1">{item.titulo}</h3>
                 <p className="text-gray-600 text-sm">{item.desc}</p>
               </div>
             ))}
@@ -95,8 +102,8 @@ export default function PrivacidadePage() {
 
         {/* 3. Base legal */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
             Base legal para o tratamento (LGPD)
           </h2>
           <p className="text-gray-600 mb-4">
@@ -110,7 +117,7 @@ export default function PrivacidadePage() {
               { base: 'Consentimento', desc: 'Para envio de comunicações de marketing, quando aplicável.' },
             ].map((item) => (
               <li key={item.base} className="flex gap-3 text-sm">
-                <span className="text-blue-600 font-bold shrink-0">•</span>
+                <span className="text-[#3cbfb3] font-bold shrink-0">•</span>
                 <span className="text-gray-700">
                   <strong>{item.base}:</strong> {item.desc}
                 </span>
@@ -121,18 +128,18 @@ export default function PrivacidadePage() {
 
         {/* 4. Compartilhamento */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">4</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">4</span>
             Compartilhamento de dados
           </h2>
           <p className="text-gray-600 mb-4">
             Não vendemos seus dados. Compartilhamos apenas quando necessário para a prestação dos serviços:
           </p>
           <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span><span><strong>Transportadoras e serviços de frete</strong> (ex.: Melhor Envio, Correios): para entrega dos pedidos.</span></li>
-            <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span><span><strong>Processadoras de pagamento</strong>: para processar transações com segurança (PCI-DSS).</span></li>
-            <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span><span><strong>Serviços de nuvem e hospedagem</strong>: para armazenamento seguro dos dados.</span></li>
-            <li className="flex gap-2"><span className="text-blue-600 font-bold">•</span><span><strong>Autoridades públicas</strong>: quando exigido por lei, ordem judicial ou regulação aplicável.</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Transportadoras e serviços de frete</strong> (ex.: Melhor Envio, Correios): para entrega dos pedidos.</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Processadoras de pagamento</strong>: para processar transações com segurança (PCI-DSS).</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Serviços de nuvem e hospedagem</strong>: para armazenamento seguro dos dados.</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Autoridades públicas</strong>: quando exigido por lei, ordem judicial ou regulação aplicável.</span></li>
           </ul>
           <p className="mt-4 text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
             Todos os terceiros que acessam seus dados estão obrigados a mantê-los em sigilo e utilizá-los apenas
@@ -142,8 +149,8 @@ export default function PrivacidadePage() {
 
         {/* 5. Cookies */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">5</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">5</span>
             Cookies
           </h2>
           <p className="text-gray-600 mb-4">
@@ -157,7 +164,7 @@ export default function PrivacidadePage() {
             ].map((c) => (
               <div key={c.tipo} className="bg-gray-50 rounded-xl p-4">
                 <h3 className="font-semibold text-gray-800 mb-1">{c.tipo}</h3>
-                <p className="text-gray-500">{c.desc}</p>
+                <p className="text-gray-500 text-sm">{c.desc}</p>
               </div>
             ))}
           </div>
@@ -169,25 +176,25 @@ export default function PrivacidadePage() {
 
         {/* 6. Retenção */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">6</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">6</span>
             Retenção e eliminação dos dados
           </h2>
           <p className="text-gray-600 mb-3">
             Retemos seus dados pelo tempo necessário para cumprir as finalidades descritas nesta política:
           </p>
           <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex gap-2"><span className="text-blue-600">•</span><span>Dados de conta ativa: enquanto a conta existir.</span></li>
-            <li className="flex gap-2"><span className="text-blue-600">•</span><span>Histórico de pedidos: mínimo de 5 anos (obrigação fiscal/tributária).</span></li>
-            <li className="flex gap-2"><span className="text-blue-600">•</span><span>Dados de navegação e cookies: até 2 anos.</span></li>
-            <li className="flex gap-2"><span className="text-blue-600">•</span><span>Após solicitação de exclusão: eliminação em até 15 dias úteis, salvo obrigação legal.</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3]">•</span><span>Dados de conta ativa: enquanto a conta existir.</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3]">•</span><span>Histórico de pedidos: mínimo de 5 anos (obrigação fiscal/tributária).</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3]">•</span><span>Dados de navegação e cookies: até 2 anos.</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3]">•</span><span>Após solicitação de exclusão: eliminação em até 15 dias úteis, salvo obrigação legal.</span></li>
           </ul>
         </section>
 
         {/* 7. Direitos do titular */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">7</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">7</span>
             Seus direitos como titular dos dados (LGPD, Art. 18)
           </h2>
           <p className="text-gray-600 mb-4">
@@ -204,15 +211,15 @@ export default function PrivacidadePage() {
               { direito: 'Oposição', desc: 'Opor-se ao tratamento realizado com base em outras hipóteses legais.' },
               { direito: 'Informação sobre compartilhamento', desc: 'Saber com quem compartilhamos seus dados.' },
             ].map((item) => (
-              <div key={item.direito} className="flex gap-3 bg-blue-50 rounded-xl p-3 text-sm">
-                <span className="text-blue-600 font-bold mt-0.5">✓</span>
+              <div key={item.direito} className="flex gap-3 bg-[#e8f8f7] rounded-xl p-3 text-sm">
+                <span className="text-[#3cbfb3] font-bold mt-0.5">✓</span>
                 <span className="text-gray-700"><strong>{item.direito}:</strong> {item.desc}</span>
               </div>
             ))}
           </div>
           <p className="mt-4 text-sm text-gray-600">
             Para exercer qualquer um desses direitos, entre em contato conosco pelo e-mail{' '}
-            <a href="mailto:brasil.sixxis@gmail.com" className="text-blue-600 font-medium hover:underline">
+            <a href="mailto:brasil.sixxis@gmail.com" className="text-[#3cbfb3] font-medium hover:underline">
               brasil.sixxis@gmail.com
             </a>
             . Responderemos em até <strong>15 dias úteis</strong>.
@@ -221,8 +228,8 @@ export default function PrivacidadePage() {
 
         {/* 8. Segurança */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">8</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">8</span>
             Segurança dos dados
           </h2>
           <p className="text-gray-600 leading-relaxed">
@@ -235,8 +242,8 @@ export default function PrivacidadePage() {
 
         {/* 9. Alterações */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">9</span>
+          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
+            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">9</span>
             Alterações nesta política
           </h2>
           <p className="text-gray-600 leading-relaxed">
@@ -247,19 +254,24 @@ export default function PrivacidadePage() {
         </section>
 
         {/* Contato */}
-        <section className="bg-gradient-to-br from-blue-700 to-blue-900 text-white rounded-2xl p-8 text-center">
+        <section
+          className="text-white rounded-2xl p-8 text-center"
+          style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
+        >
           <h2 className="text-xl font-bold mb-3">Encarregado de Dados (DPO)</h2>
-          <p className="text-blue-100 mb-4 text-sm leading-relaxed">
+          <p className="text-white/70 mb-4 text-sm leading-relaxed">
             Se tiver dúvidas sobre esta Política de Privacidade ou quiser exercer seus direitos como titular,
             entre em contato com nosso responsável pela proteção de dados:
           </p>
           <a
             href="mailto:brasil.sixxis@gmail.com"
-            className="inline-block bg-white text-blue-700 font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors"
+            className="inline-block bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition-colors"
           >
             brasil.sixxis@gmail.com
           </a>
-          <p className="text-blue-200 text-xs mt-4">Sixxis · CNPJ a ser atualizado · Brasil</p>
+          <p className="text-white/40 text-xs mt-4">
+            Sixxis · CNPJ 54.978.947/0001-09 · R. Anhanguera, 1711 - Araçatuba, SP
+          </p>
         </section>
       </div>
     </div>
