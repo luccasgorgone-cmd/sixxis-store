@@ -48,7 +48,10 @@ export default function CardProduto({ produto }: Props) {
   }
 
   return (
-    <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-[#3cbfb3]/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
+    <div
+      className="group rounded-2xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+      style={{ backgroundColor: 'var(--color-card-fundo, #ffffff)', borderColor: 'var(--color-card-borda, #e5e7eb)' }}
+    >
 
       {/* ── Imagem ── */}
       <Link href={`/produtos/${produto.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden p-4">
@@ -69,14 +72,20 @@ export default function CardProduto({ produto }: Props) {
 
         {/* Badge OFERTA */}
         {promocional && desconto > 0 && (
-          <span className="absolute top-2 left-2 bg-[#f59e0b] text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+          <span
+            className="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm"
+            style={{ backgroundColor: 'var(--color-badge-oferta, #f59e0b)' }}
+          >
             -{desconto}%
           </span>
         )}
 
         {/* Badge NOVO */}
         {isNovo && !promocional && (
-          <span className="absolute top-2 left-2 bg-[#3cbfb3] text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+          <span
+            className="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm"
+            style={{ backgroundColor: 'var(--color-badge-novo, #3cbfb3)' }}
+          >
             Novo
           </span>
         )}
@@ -84,7 +93,10 @@ export default function CardProduto({ produto }: Props) {
         {/* ESGOTADO */}
         {produto.estoque === 0 && (
           <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
-            <span className="text-xs font-bold text-white bg-gray-400 px-3 py-1 rounded-md">
+            <span
+              className="text-xs font-bold text-white px-3 py-1 rounded-md"
+              style={{ backgroundColor: 'var(--color-badge-esgotado, #9ca3af)' }}
+            >
               Esgotado
             </span>
           </div>
@@ -108,7 +120,10 @@ export default function CardProduto({ produto }: Props) {
               R$ {formatBRL(preco)}
             </p>
           )}
-          <p className={`text-lg sm:text-xl font-black leading-none ${promocional ? 'text-[#3cbfb3]' : 'text-[#1f2937]'}`}>
+          <p
+            className="text-lg sm:text-xl font-black leading-none"
+            style={{ color: promocional ? 'var(--color-precos-promo, #3cbfb3)' : 'var(--color-precos, #1f2937)' }}
+          >
             R$ {formatBRL(precoFinal)}
           </p>
           <p className="text-[10px] sm:text-[11px] text-[#3cbfb3] font-semibold">
@@ -130,8 +145,7 @@ export default function CardProduto({ produto }: Props) {
           }`}
         >
           {adicionado ? <Check size={16} /> : <ShoppingCart size={16} />}
-          <span className="hidden sm:inline">{adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}</span>
-          <span className="sm:hidden">{adicionado ? 'Adicionado!' : 'Adicionar'}</span>
+          {adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
         </button>
       </div>
     </div>

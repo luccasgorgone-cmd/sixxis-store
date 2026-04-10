@@ -12,6 +12,7 @@ import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import TrustBar from '@/components/layout/TrustBar'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic    = 'force-dynamic'
@@ -69,6 +70,18 @@ const COR_KEYS = [
   'cor_fundo', 'cor_fundo_alt', 'cor_stats_fundo', 'cor_wa_fundo', 'cor_footer_fundo',
   'cor_botoes', 'cor_botoes_texto', 'cor_botoes_hover',
   'cor_textos', 'cor_textos_sec', 'cor_titulos',
+  'cor_titulos_secao', 'cor_descricao', 'cor_precos', 'cor_precos_promo',
+  'cor_links', 'cor_links_hover',
+  'cor_card_fundo', 'cor_card_borda', 'cor_card_hover',
+  'cor_trustbar_fundo', 'cor_trustbar_icones',
+  'cor_badge_oferta', 'cor_badge_novo', 'cor_badge_esgotado',
+] as const
+
+const TRUST_KEYS = [
+  'trust_1_titulo', 'trust_1_sub',
+  'trust_2_titulo', 'trust_2_sub',
+  'trust_3_titulo', 'trust_3_sub',
+  'trust_4_titulo', 'trust_4_sub',
 ] as const
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -76,11 +89,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   let fontePrincipal = 'Inter'
   let cfg: Record<string, string> = {}
 
+  let trust: Record<string, string> = {}
+
   try {
-    const configs = await prisma.configuracao.findMany({
-      where: { chave: { in: [...COR_KEYS] } },
-    })
-    cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
+    const [configs, trustRows] = await Promise.all([
+      prisma.configuracao.findMany({ where: { chave: { in: [...COR_KEYS] } } }),
+      prisma.configuracao.findMany({ where: { chave: { in: [...TRUST_KEYS] } } }),
+    ])
+    cfg   = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
+    trust = Object.fromEntries(trustRows.map((r) => [r.chave, r.valor]))
     if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
     console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', cfg.cor_principal || '#3cbfb3')
@@ -116,10 +133,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--color-botoes':        cfg.cor_botoes         || '#3cbfb3',
     '--color-botoes-texto':  cfg.cor_botoes_texto   || '#ffffff',
     '--color-botoes-hover':  cfg.cor_botoes_hover   || '#2a9d8f',
-    '--color-textos':        cfg.cor_textos         || '#1f2937',
-    '--color-textos-sec':    cfg.cor_textos_sec     || '#4b5563',
-    '--color-titulos':       cfg.cor_titulos        || '#0a0a0a',
-    '--font-active':         `var(${fontObj.variable})`,
+    '--color-textos':           cfg.cor_textos           || '#1f2937',
+    '--color-textos-sec':       cfg.cor_textos_sec       || '#4b5563',
+    '--color-titulos':          cfg.cor_titulos          || '#0a0a0a',
+    '--color-titulos-secao':    cfg.cor_titulos_secao    || '#0a0a0a',
+    '--color-descricao':        cfg.cor_descricao        || '#4b5563',
+    '--color-precos':           cfg.cor_precos           || '#1f2937',
+    '--color-precos-promo':     cfg.cor_precos_promo     || '#3cbfb3',
+    '--color-links':            cfg.cor_links            || '#3cbfb3',
+    '--color-links-hover':      cfg.cor_links_hover      || '#2a9d8f',
+    '--color-card-fundo':       cfg.cor_card_fundo       || '#ffffff',
+    '--color-card-borda':       cfg.cor_card_borda       || '#e5e7eb',
+    '--color-card-hover':       cfg.cor_card_hover       || '#f0fffe',
+    '--color-trustbar-fundo':   cfg.cor_trustbar_fundo   || '#ffffff',
+    '--color-trustbar-icones':  cfg.cor_trustbar_icones  || '#3cbfb3',
+    '--color-badge-oferta':     cfg.cor_badge_oferta     || '#f59e0b',
+    '--color-badge-novo':       cfg.cor_badge_novo       || '#3cbfb3',
+    '--color-badge-esgotado':   cfg.cor_badge_esgotado   || '#9ca3af',
+    '--font-active':            `var(${fontObj.variable})`,
   } as React.CSSProperties
 
   return (
@@ -139,6 +170,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       >
         <SessionProvider>
           <Header logoUrl={logoUrl} />
+          <TrustBar items={[
+            { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Frete grátis acima de R$ 500' },
+            { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos' },
+            { titulo: trust.trust_3_titulo || '6x sem juros no cartão',     sub: trust.trust_3_sub || 'Débito, crédito e PIX' },
+            { titulo: trust.trust_4_titulo || 'Produtos Originais',         sub: trust.trust_4_sub || 'Garantia Sixxis' },
+          ]} />
           <div className="flex-1">{children}</div>
           <Footer />
         </SessionProvider>

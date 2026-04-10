@@ -1,13 +1,12 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Wind, Fan, Bike, ArrowRight, Cpu, Headphones, BadgeCheck, Users, ShieldCheck, Truck, Zap } from 'lucide-react'
+import { Wind, Fan, Bike, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
-import TrustBar from '@/components/layout/TrustBar'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -82,9 +81,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 2. TrustBar inline */}
-      <TrustBar />
-
       {/* 3. Produtos em Destaque */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-8">
@@ -147,62 +143,64 @@ export default async function HomePage() {
       </section>
 
       {/* 5. Banners duplos */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Banner 1 — Climatizadores */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          {/* Banner Climatizadores */}
           <Link
             href="/produtos?categoria=climatizadores"
-            className="group relative overflow-hidden rounded-2xl h-[140px] sm:h-auto sm:min-h-[180px] flex flex-col justify-end p-5 sm:p-8"
-            style={{ background: 'linear-gradient(135deg, #1a4f4a 0%, #3cbfb3 100%)' }}
+            className="group relative overflow-hidden rounded-2xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
+            style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0d3d3a 0%, #1a7a74 60%, #3cbfb3 100%)' }}
           >
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_70%_50%,white,transparent_60%)]" />
-            <span className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1.5">
-              Climatizadores
-            </span>
-            <h3 className="text-white text-lg sm:text-2xl font-extrabold leading-tight mb-2 sm:mb-3">
-              Fresquinho em<br />qualquer ambiente
-            </h3>
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white bg-white/20 hover:bg-white/30 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-colors w-fit">
-              Ver linha <ArrowRight size={12} />
-            </span>
+            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #fff, transparent)' }} />
+            <div className="relative z-10">
+              <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
+                Linha Residencial e Comercial
+              </span>
+              <h3 className="text-white text-2xl font-extrabold leading-tight mb-4">
+                Climatizadores<br />Sixxis
+              </h3>
+              <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-bold px-4 py-2 rounded-xl transition">
+                Ver linha <ArrowRight size={14} />
+              </span>
+            </div>
           </Link>
 
-          {/* Banner 2 — Spinning & Fitness */}
+          {/* Banner Spinning */}
           <Link
             href="/produtos?categoria=spinning"
-            className="group relative overflow-hidden rounded-2xl h-[140px] sm:h-auto sm:min-h-[180px] flex flex-col justify-end p-5 sm:p-8"
-            style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
+            className="group relative overflow-hidden rounded-2xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
+            style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0a0a0a 0%, #111827 60%, #1f2937 100%)' }}
           >
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_50%,#3cbfb3,transparent_60%)]" />
-            <span className="text-[#3cbfb3] text-xs font-semibold uppercase tracking-widest mb-1.5">
-              Fitness
-            </span>
-            <h3 className="text-white text-lg sm:text-2xl font-extrabold leading-tight mb-2 sm:mb-3">
-              Bikes Spinning<br />Alta Performance
-            </h3>
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white bg-[#3cbfb3]/30 hover:bg-[#3cbfb3]/50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-colors w-fit">
-              Ver linha <ArrowRight size={12} />
-            </span>
+            <div className="absolute inset-0 opacity-15" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #3cbfb3, transparent)' }} />
+            <div className="relative z-10">
+              <span className="inline-block bg-[#3cbfb3]/20 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide border border-[#3cbfb3]/30">
+                Spinning & Fitness
+              </span>
+              <h3 className="text-white text-2xl font-extrabold leading-tight mb-4">
+                Equipamentos<br />Fitness
+              </h3>
+              <span className="inline-flex items-center gap-2 bg-[#3cbfb3]/20 hover:bg-[#3cbfb3]/30 text-[#3cbfb3] text-sm font-bold px-4 py-2 rounded-xl transition border border-[#3cbfb3]/40">
+                Ver linha <ArrowRight size={14} />
+              </span>
+            </div>
           </Link>
         </div>
       </section>
 
       {/* 6. Stats */}
-      <section className="py-12" style={{ backgroundColor: 'var(--color-stats, #3cbfb3)' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
+      <section style={{ backgroundColor: 'var(--color-stats, #3cbfb3)' }} className="py-10">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/20">
             {[
-              { Icon: Users,       numero: '5.000+',   label: 'Clientes Satisfeitos' },
-              { Icon: ShieldCheck, numero: '12 meses', label: 'Garantia Sixxis'       },
-              { Icon: Truck,       numero: '100%',     label: 'Entrega para o Brasil' },
-              { Icon: Zap,         numero: '48h',      label: 'Entrega Expressa'      },
-            ].map(({ Icon, numero, label }) => (
-              <div key={label} className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-1">
-                  <Icon size={22} className="text-white" />
-                </div>
-                <p className="text-2xl md:text-3xl font-extrabold leading-none">{numero}</p>
-                <p className="text-sm text-white/80 leading-snug">{label}</p>
+              { num: cfg.stat_1_num   || '5.000+',   label: cfg.stat_1_label || 'Clientes Satisfeitos' },
+              { num: cfg.stat_2_num   || '12 meses', label: cfg.stat_2_label || 'Garantia Sixxis' },
+              { num: cfg.stat_3_num   || '100%',     label: cfg.stat_3_label || 'Entrega para o Brasil' },
+              { num: cfg.stat_4_num   || '48h',      label: cfg.stat_4_label || 'Entrega Expressa SP' },
+            ].map(({ num, label }) => (
+              <div key={label} className="flex flex-col items-center text-center py-4 px-6">
+                <p className="text-2xl md:text-3xl font-extrabold text-white">{num}</p>
+                <p className="text-white/80 text-xs font-medium mt-1">{label}</p>
               </div>
             ))}
           </div>

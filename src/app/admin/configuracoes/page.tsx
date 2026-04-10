@@ -17,6 +17,7 @@ import {
   Globe,
   LayoutTemplate,
   FileText,
+  Type,
 } from 'lucide-react'
 import CampoCor from '@/components/admin/CampoCor'
 import { Toast } from '@/components/admin/Toast'
@@ -106,6 +107,51 @@ const DEFAULTS: Record<string, string> = {
   anuncio_1: '🚚 Frete grátis acima de R$ 500 para todo o Brasil',
   anuncio_2: '💳 Parcele em até 6x sem juros no cartão',
   anuncio_3: '📞 Atendimento: (18) 99747-4701 | Seg-Sex 8h às 18h',
+  // Textos do Site
+  txt_cta_principal: 'Ver Produtos',
+  txt_wa_botao: 'Falar no WhatsApp',
+  txt_frete_gratis: 'Frete grátis acima de R$ 500',
+  txt_parcelamento: '6x sem juros no cartão',
+  txt_atendimento: 'Seg-Sex 8h às 18h',
+  trust_1_titulo: 'Entrega para todo o Brasil',
+  trust_1_sub: 'Frete grátis acima de R$ 500',
+  trust_2_titulo: 'Compra 100% Segura',
+  trust_2_sub: 'Seus dados protegidos',
+  trust_3_titulo: '6x sem juros no cartão',
+  trust_3_sub: 'Débito, crédito e PIX',
+  trust_4_titulo: 'Produtos Originais',
+  trust_4_sub: 'Garantia Sixxis',
+  stat_1_num: '5.000+',
+  stat_1_label: 'Clientes Satisfeitos',
+  stat_2_num: '12 meses',
+  stat_2_label: 'Garantia Sixxis',
+  stat_3_num: '100%',
+  stat_3_label: 'Entrega para o Brasil',
+  stat_4_num: '48h',
+  stat_4_label: 'Entrega Expressa SP',
+  txt_carrinho_vazio: 'Seu carrinho está vazio',
+  txt_sem_produtos: 'Nenhum produto encontrado',
+  txt_confirmar_pedido: 'Finalizar Compra',
+  // Tipografia
+  font_titulo_tamanho: '4xl',
+  font_titulo_peso: 'extrabold',
+  font_preco_tamanho: 'xl',
+  font_titulo_tracking: 'normal',
+  // Novas cores
+  cor_titulos_secao: '#0a0a0a',
+  cor_descricao: '#4b5563',
+  cor_precos: '#1f2937',
+  cor_precos_promo: '#3cbfb3',
+  cor_links: '#3cbfb3',
+  cor_links_hover: '#2a9d8f',
+  cor_card_fundo: '#ffffff',
+  cor_card_borda: '#e5e7eb',
+  cor_card_hover: '#f0fffe',
+  cor_trustbar_fundo: '#ffffff',
+  cor_trustbar_icones: '#3cbfb3',
+  cor_badge_oferta: '#f59e0b',
+  cor_badge_novo: '#3cbfb3',
+  cor_badge_esgotado: '#9ca3af',
   // Cores completas
   cor_principal_dark: '#2a9d8f',
   cor_destaque: '#3cbfb3',
@@ -125,6 +171,7 @@ const DEFAULTS: Record<string, string> = {
 const TABS = [
   { id: 'loja', label: 'Informações da Loja', icon: Store },
   { id: 'aparencia', label: 'Aparência', icon: Palette },
+  { id: 'tipografia', label: 'Tipografia', icon: Type },
   { id: 'textos', label: 'Textos do Site', icon: FileText },
   { id: 'frete', label: 'Frete e Pagamento', icon: Truck },
   { id: 'transportadoras', label: 'Transportadoras', icon: Globe },
@@ -280,9 +327,23 @@ const CORES_DEFAULTS: Record<string, string> = {
   cor_botoes:        '#3cbfb3',
   cor_botoes_texto:  '#ffffff',
   cor_botoes_hover:  '#2a9d8f',
-  cor_textos:        '#0a0a0a',
-  cor_textos_sec:    '#6b7280',
-  cor_titulos:       '#0a0a0a',
+  cor_textos:           '#0a0a0a',
+  cor_textos_sec:       '#6b7280',
+  cor_titulos:          '#0a0a0a',
+  cor_titulos_secao:    '#0a0a0a',
+  cor_descricao:        '#4b5563',
+  cor_precos:           '#1f2937',
+  cor_precos_promo:     '#3cbfb3',
+  cor_links:            '#3cbfb3',
+  cor_links_hover:      '#2a9d8f',
+  cor_card_fundo:       '#ffffff',
+  cor_card_borda:       '#e5e7eb',
+  cor_card_hover:       '#f0fffe',
+  cor_trustbar_fundo:   '#ffffff',
+  cor_trustbar_icones:  '#3cbfb3',
+  cor_badge_oferta:     '#f59e0b',
+  cor_badge_novo:       '#3cbfb3',
+  cor_badge_esgotado:   '#9ca3af',
 }
 
 export default function ConfiguracoesPage() {
@@ -549,6 +610,41 @@ export default function ConfiguracoesPage() {
                 <CampoCor label="Texto Principal" chave="cor_textos" cssVar="--color-textos" valor={cores.cor_textos} onChange={handleCorChange} />
                 <CampoCor label="Texto Secundário" chave="cor_textos_sec" cssVar="--color-textos-sec" valor={cores.cor_textos_sec} onChange={handleCorChange} />
                 <CampoCor label="Títulos" chave="cor_titulos" cssVar="--color-titulos" valor={cores.cor_titulos} onChange={handleCorChange} />
+              </div>
+            </div>
+
+            {/* Grupo 6 — Textos e Tipografia */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Textos e Tipografia</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Títulos das seções" chave="cor_titulos_secao" cssVar="--color-titulos-secao" valor={cores.cor_titulos_secao || '#0a0a0a'} onChange={handleCorChange} />
+                <CampoCor label="Textos de descrição" chave="cor_descricao" cssVar="--color-descricao" valor={cores.cor_descricao || '#4b5563'} onChange={handleCorChange} />
+                <CampoCor label="Preços" chave="cor_precos" cssVar="--color-precos" valor={cores.cor_precos || '#1f2937'} onChange={handleCorChange} />
+                <CampoCor label="Preços promocionais" chave="cor_precos_promo" cssVar="--color-precos-promo" valor={cores.cor_precos_promo || '#3cbfb3'} onChange={handleCorChange} />
+                <CampoCor label="Links" chave="cor_links" cssVar="--color-links" valor={cores.cor_links || '#3cbfb3'} onChange={handleCorChange} />
+                <CampoCor label="Links (hover)" chave="cor_links_hover" cssVar="--color-links-hover" valor={cores.cor_links_hover || '#2a9d8f'} onChange={handleCorChange} />
+              </div>
+            </div>
+
+            {/* Grupo 7 — Cards e Componentes */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Cards e Componentes</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Fundo dos cards" chave="cor_card_fundo" cssVar="--color-card-fundo" valor={cores.cor_card_fundo || '#ffffff'} onChange={handleCorChange} />
+                <CampoCor label="Borda dos cards" chave="cor_card_borda" cssVar="--color-card-borda" valor={cores.cor_card_borda || '#e5e7eb'} onChange={handleCorChange} />
+                <CampoCor label="Hover dos cards" chave="cor_card_hover" cssVar="--color-card-hover" valor={cores.cor_card_hover || '#f0fffe'} onChange={handleCorChange} />
+                <CampoCor label="Fundo da TrustBar" chave="cor_trustbar_fundo" cssVar="--color-trustbar-fundo" valor={cores.cor_trustbar_fundo || '#ffffff'} onChange={handleCorChange} />
+                <CampoCor label="Ícones da TrustBar" chave="cor_trustbar_icones" cssVar="--color-trustbar-icones" valor={cores.cor_trustbar_icones || '#3cbfb3'} onChange={handleCorChange} />
+              </div>
+            </div>
+
+            {/* Grupo 8 — Badges e Etiquetas */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 pb-2 border-b border-gray-100">Badges e Etiquetas</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <CampoCor label="Badge OFERTA" chave="cor_badge_oferta" cssVar="--color-badge-oferta" valor={cores.cor_badge_oferta || '#f59e0b'} onChange={handleCorChange} />
+                <CampoCor label="Badge NOVO" chave="cor_badge_novo" cssVar="--color-badge-novo" valor={cores.cor_badge_novo || '#3cbfb3'} onChange={handleCorChange} />
+                <CampoCor label="Badge ESGOTADO" chave="cor_badge_esgotado" cssVar="--color-badge-esgotado" valor={cores.cor_badge_esgotado || '#9ca3af'} onChange={handleCorChange} />
               </div>
             </div>
           </div>
@@ -1103,39 +1199,178 @@ export default function ConfiguracoesPage() {
   }
 
   function renderTextos() {
-    const keys = ['anuncio_1', 'anuncio_2', 'anuncio_3']
+    const ctaKeys = ['txt_cta_principal', 'txt_wa_botao', 'txt_frete_gratis', 'txt_parcelamento', 'txt_atendimento']
+    const trustKeys = ['trust_1_titulo','trust_1_sub','trust_2_titulo','trust_2_sub','trust_3_titulo','trust_3_sub','trust_4_titulo','trust_4_sub']
+    const statKeys = ['stat_1_num','stat_1_label','stat_2_num','stat_2_label','stat_3_num','stat_3_label','stat_4_num','stat_4_label']
+    const sysKeys = ['txt_carrinho_vazio', 'txt_sem_produtos', 'txt_confirmar_pedido']
+    const allKeys = [...ctaKeys, ...trustKeys, ...statKeys, ...sysKeys, 'rodape_tagline', 'anuncio_1', 'anuncio_2', 'anuncio_3']
+
     return (
       <div className="space-y-5">
-        <Card title="Barra de anúncios (desativada)">
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 text-xs text-amber-700">
-            ⚠️ O header atual usa uma barra informativa estática. Estes campos estão salvos mas não são exibidos no site no momento.
-          </div>
-          <p className="text-xs text-gray-500 mb-5">
-            Reservado para futuras versões com barra de anúncios rotativa.
-          </p>
+
+        <Card title="Mensagens e Chamadas para Ação">
           <div className="space-y-4">
-            {([1, 2, 3] as const).map((n) => (
-              <Field key={n} label={`Anúncio ${n}`}>
-                <Input
-                  value={configs[`anuncio_${n}`] || ''}
-                  onChange={(v) => set(`anuncio_${n}`, v)}
-                  placeholder={`Mensagem ${n} — aparece no topo do site`}
-                />
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Botão CTA principal">
+                <Input value={configs.txt_cta_principal || ''} onChange={(v) => set('txt_cta_principal', v)} placeholder="Ver Produtos" />
               </Field>
+              <Field label="Botão WhatsApp">
+                <Input value={configs.txt_wa_botao || ''} onChange={(v) => set('txt_wa_botao', v)} placeholder="Falar no WhatsApp" />
+              </Field>
+              <Field label="Texto frete grátis">
+                <Input value={configs.txt_frete_gratis || ''} onChange={(v) => set('txt_frete_gratis', v)} placeholder="Frete grátis acima de R$ 500" />
+              </Field>
+              <Field label="Texto parcelamento">
+                <Input value={configs.txt_parcelamento || ''} onChange={(v) => set('txt_parcelamento', v)} placeholder="6x sem juros no cartão" />
+              </Field>
+              <Field label="Horário de atendimento">
+                <Input value={configs.txt_atendimento || ''} onChange={(v) => set('txt_atendimento', v)} placeholder="Seg-Sex 8h às 18h" />
+              </Field>
+            </div>
+          </div>
+        </Card>
+
+        <Card title="TrustBar — Textos">
+          <p className="text-xs text-gray-400 mb-4">Ícones e posições são fixos; personalize os textos de cada item.</p>
+          <div className="space-y-4">
+            {([1,2,3,4] as const).map((n) => (
+              <div key={n} className="border border-gray-100 rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Item {n}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Título">
+                    <Input value={configs[`trust_${n}_titulo`] || ''} onChange={(v) => set(`trust_${n}_titulo`, v)} placeholder={`Título ${n}`} />
+                  </Field>
+                  <Field label="Subtítulo">
+                    <Input value={configs[`trust_${n}_sub`] || ''} onChange={(v) => set(`trust_${n}_sub`, v)} placeholder={`Subtítulo ${n}`} />
+                  </Field>
+                </div>
+              </div>
             ))}
           </div>
-          <div className="mt-4 bg-gray-50 rounded-xl p-4 text-xs text-gray-500">
-            As alterações só aparecem no site após salvar e a página ser recarregada (cache do servidor).
+        </Card>
+
+        <Card title="Stats da Home">
+          <div className="space-y-4">
+            {([1,2,3,4] as const).map((n) => (
+              <div key={n} className="grid grid-cols-2 gap-4">
+                <Field label={`Stat ${n} — Número`}>
+                  <Input value={configs[`stat_${n}_num`] || ''} onChange={(v) => set(`stat_${n}_num`, v)} placeholder="ex: 5.000+" />
+                </Field>
+                <Field label={`Stat ${n} — Label`}>
+                  <Input value={configs[`stat_${n}_label`] || ''} onChange={(v) => set(`stat_${n}_label`, v)} placeholder="ex: Clientes Satisfeitos" />
+                </Field>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card title="Mensagens de Sistema">
+          <div className="space-y-4">
+            <Field label="Texto carrinho vazio">
+              <Input value={configs.txt_carrinho_vazio || ''} onChange={(v) => set('txt_carrinho_vazio', v)} placeholder="Seu carrinho está vazio" />
+            </Field>
+            <Field label="Texto sem produtos">
+              <Input value={configs.txt_sem_produtos || ''} onChange={(v) => set('txt_sem_produtos', v)} placeholder="Nenhum produto encontrado" />
+            </Field>
+            <Field label="Texto confirmar pedido">
+              <Input value={configs.txt_confirmar_pedido || ''} onChange={(v) => set('txt_confirmar_pedido', v)} placeholder="Finalizar Compra" />
+            </Field>
           </div>
         </Card>
 
         <Card title="Rodapé — tagline">
           <Field label="Tagline da empresa" hint="Texto abaixo do logo no rodapé">
-            <Input value={configs.rodape_tagline} onChange={(v) => set('rodape_tagline', v)} placeholder="Tecnologia e qualidade para seu conforto e bem-estar." />
+            <Input value={configs.rodape_tagline || ''} onChange={(v) => set('rodape_tagline', v)} placeholder="Tecnologia e qualidade para seu conforto e bem-estar." />
           </Field>
         </Card>
 
-        <SaveButton loading={saving} onClick={() => save([...keys, 'rodape_tagline'])} />
+        <SaveButton loading={saving} onClick={() => save(allKeys)} />
+      </div>
+    )
+  }
+
+  function renderTipografia() {
+    const FONTES = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Nunito', 'Raleway', 'Open Sans']
+    const keys = ['fonte_principal', 'font_titulo_tamanho', 'font_titulo_peso', 'font_preco_tamanho', 'font_titulo_tracking']
+
+    return (
+      <div className="space-y-5">
+
+        <Card title="Fonte principal">
+          <div className="space-y-3">
+            <p className="text-xs text-gray-500">Selecione a fonte usada em todo o site (Google Fonts)</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {FONTES.map((fonte) => (
+                <button
+                  key={fonte}
+                  type="button"
+                  onClick={() => set('fonte_principal', fonte)}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition text-sm font-semibold ${
+                    configs.fonte_principal === fonte
+                      ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#2a9d8f]'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                  }`}
+                >
+                  <span style={{ fontFamily: fonte }}>{fonte}</span>
+                  <span className="text-xs font-normal text-gray-400" style={{ fontFamily: fonte }}>Abc 123</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        <Card title="Tamanhos e pesos">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Tamanho do título principal (h1)">
+              <select
+                value={configs.font_titulo_tamanho || '4xl'}
+                onChange={(e) => set('font_titulo_tamanho', e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+              >
+                <option value="3xl">3xl — 30px</option>
+                <option value="4xl">4xl — 36px</option>
+                <option value="5xl">5xl — 48px</option>
+                <option value="6xl">6xl — 60px</option>
+              </select>
+            </Field>
+            <Field label="Peso dos títulos">
+              <select
+                value={configs.font_titulo_peso || 'extrabold'}
+                onChange={(e) => set('font_titulo_peso', e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+              >
+                <option value="bold">Bold (700)</option>
+                <option value="extrabold">Extrabold (800)</option>
+                <option value="black">Black (900)</option>
+              </select>
+            </Field>
+            <Field label="Tamanho do texto de preço">
+              <select
+                value={configs.font_preco_tamanho || 'xl'}
+                onChange={(e) => set('font_preco_tamanho', e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+              >
+                <option value="lg">lg — 18px</option>
+                <option value="xl">xl — 20px</option>
+                <option value="2xl">2xl — 24px</option>
+              </select>
+            </Field>
+            <Field label="Espaçamento entre letras (títulos)">
+              <select
+                value={configs.font_titulo_tracking || 'normal'}
+                onChange={(e) => set('font_titulo_tracking', e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+              >
+                <option value="normal">Normal</option>
+                <option value="wide">Wide</option>
+                <option value="wider">Wider</option>
+                <option value="widest">Widest</option>
+              </select>
+            </Field>
+          </div>
+        </Card>
+
+        <SaveButton loading={saving} onClick={() => save(keys)} />
       </div>
     )
   }
@@ -1143,6 +1378,7 @@ export default function ConfiguracoesPage() {
   const TAB_RENDERERS: Record<string, () => React.ReactNode> = {
     loja: renderLoja,
     aparencia: renderAparencia,
+    tipografia: renderTipografia,
     textos: renderTextos,
     frete: renderFrete,
     transportadoras: renderTransportadoras,

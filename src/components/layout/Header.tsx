@@ -204,26 +204,33 @@ function CampoFrete({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="shrink-0">
-      <p className="text-[#3cbfb3] text-[10px] font-bold uppercase tracking-wider mb-1.5">Calcule o Frete</p>
-      <div className="flex items-center bg-white rounded-xl overflow-hidden border border-gray-200 w-48">
+    <div className="shrink-0 flex flex-col gap-1">
+      <label className="text-white/60 text-[10px] font-semibold uppercase tracking-wider">
+        Calcule o Frete
+      </label>
+      <div className="flex items-center bg-white rounded-lg overflow-hidden h-9">
         <input
-          type="text" value={cep} onChange={handleChange}
-          placeholder="Digite seu CEP" maxLength={9}
-          className="flex-1 py-2.5 px-3 text-sm text-gray-700 outline-none"
+          type="text"
+          value={cep}
+          onChange={handleChange}
           onKeyDown={(e) => e.key === 'Enter' && handleOk()}
+          placeholder="00000-000"
+          maxLength={9}
+          className="flex-1 px-3 text-sm text-gray-700 outline-none w-32"
         />
         <button
-          onClick={handleOk} disabled={carregando || cep.replace(/\D/g,'').length < 8}
-          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white px-3 py-2.5 transition text-xs font-bold"
+          onClick={handleOk}
+          disabled={carregando || cep.replace(/\D/g, '').length < 8}
+          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white text-xs font-bold px-3 h-full transition"
         >
           {carregando ? '...' : 'OK'}
         </button>
       </div>
-      {resultado && (
-        <p className={`text-[10px] mt-1 font-medium leading-snug ${resultado.ok ? 'text-[#3cbfb3]' : 'text-red-400'}`}>
-          {resultado.ok ? '✓ ' : '✗ '}{resultado.mensagem}
-        </p>
+      {resultado?.ok && (
+        <p className="text-[10px] text-[#3cbfb3] font-semibold">✓ {resultado.mensagem}</p>
+      )}
+      {resultado && !resultado.ok && (
+        <p className="text-[10px] text-red-400 font-semibold">✗ {resultado.mensagem}</p>
       )}
     </div>
   )
@@ -312,22 +319,103 @@ export default function Header({
           style={{ backgroundColor: 'var(--color-header, #1a4f4a)' }}
         >
 
-          {/* ── MOBILE (< lg) ── */}
-          <div className="lg:hidden">
-            <div className="h-16 px-4 flex items-center relative">
+          <div className="max-w-7xl mx-auto px-4 xl:px-6">
+
+            {/* Linha unificada — mobile e desktop compartilham a mesma row */}
+            <div className="relative flex items-center h-16 lg:h-auto lg:py-3 gap-3">
+
+              {/* Burger — mobile only */}
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="absolute left-4 p-2 rounded-lg hover:bg-white/20 transition"
+                className="lg:hidden shrink-0 p-2 rounded-lg hover:bg-white/20 transition"
                 aria-label="Abrir menu"
               >
                 <Menu size={24} className="text-white" />
               </button>
 
-              <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center">
-                <Image src={logoUrl} alt="Sixxis" width={110} height={36} className="object-contain" priority />
+              {/* ★ LOGO ÚNICA — centralizada no mobile via absolute, estática no desktop */}
+              <Link
+                href="/"
+                className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 shrink-0 flex flex-col items-center lg:items-start lg:mr-2"
+              >
+                <Image
+                  src={logoUrl}
+                  alt="Sixxis"
+                  width={130}
+                  height={44}
+                  className="object-contain h-9 sm:h-11 w-auto"
+                  priority
+                />
+                <p className="hidden lg:block text-[#3cbfb3] text-xs font-semibold tracking-wide mt-0.5">
+                  Qualidade e Inovação
+                </p>
               </Link>
 
-              <Link href="/carrinho" className="absolute right-4 relative p-2 text-white hover:text-white/80 transition" aria-label="Carrinho">
+              {/* Search — desktop only */}
+              <SearchVentisol className="hidden lg:flex flex-1" />
+
+              {/* CEP — desktop only */}
+              <div className="hidden lg:block shrink-0">
+                <CampoFrete />
+              </div>
+
+              {/* Auth + Carrinho — desktop only */}
+              <div className="hidden lg:flex items-center gap-2 shrink-0 ml-2">
+                {session ? (
+                  <>
+                    <Link
+                      href="/minha-conta"
+                      className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10"
+                    >
+                      <User size={16} />
+                      Minha Conta
+                    </Link>
+                    <button
+                      onClick={() => signOut({ callbackUrl: '/' })}
+                      className="text-xs text-white/60 hover:text-red-300 transition px-2 py-1"
+                    >
+                      Sair
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="border border-white/30 text-white text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition whitespace-nowrap"
+                    >
+                      Entrar
+                    </Link>
+                    <Link
+                      href="/cadastro"
+                      className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap"
+                    >
+                      Cadastrar
+                    </Link>
+                  </>
+                )}
+                <Link
+                  href="/carrinho"
+                  className="relative flex items-center gap-1.5 text-white hover:text-white/80 transition ml-1 px-2 py-2 rounded-lg hover:bg-white/10"
+                  aria-label="Carrinho"
+                >
+                  <ShoppingCart size={22} />
+                  <span className="text-sm font-medium hidden xl:block whitespace-nowrap">
+                    Carrinho{totalItens > 0 ? ` (${totalItens})` : ''}
+                  </span>
+                  {totalItens > 0 && (
+                    <span className="absolute -top-1 -right-1 xl:hidden bg-[#3cbfb3] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                      {totalItens > 9 ? '9+' : totalItens}
+                    </span>
+                  )}
+                </Link>
+              </div>
+
+              {/* Carrinho — mobile only */}
+              <Link
+                href="/carrinho"
+                className="lg:hidden relative ml-auto p-2 text-white hover:text-white/80 transition"
+                aria-label="Carrinho"
+              >
                 <ShoppingCart size={24} />
                 {totalItens > 0 && (
                   <span className="absolute top-0.5 right-0.5 bg-[#3cbfb3] text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none px-0.5">
@@ -337,62 +425,11 @@ export default function Header({
               </Link>
             </div>
 
-            {/* Busca mobile */}
-            <div className="px-3 pb-3">
+            {/* Search mobile — row abaixo */}
+            <div className="lg:hidden pb-3">
               <SearchVentisol />
             </div>
-          </div>
 
-          {/* ── DESKTOP (≥ lg): 4 colunas ── */}
-          <div className="hidden lg:flex items-center gap-4 py-3 max-w-7xl mx-auto px-4 xl:px-6">
-
-            {/* Col 1 — Logo + tagline */}
-            <Link href="/" className="shrink-0 flex flex-col items-start mr-2">
-              <Image src={logoUrl} alt="Sixxis" width={130} height={48} className="object-contain" priority />
-              <p className="text-[#3cbfb3] text-xs font-semibold tracking-wide mt-0.5">Qualidade e Inovação</p>
-            </Link>
-
-            {/* Col 2 — SearchBar estilo Ventisol */}
-            <SearchVentisol className="flex-1" />
-
-            {/* Col 3 — Campo CEP */}
-            <CampoFrete />
-
-            {/* Col 4 — Auth + Carrinho */}
-            <div className="flex items-center gap-2 shrink-0 ml-2">
-              {session ? (
-                <>
-                  <Link href="/minha-conta" className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">
-                    <User size={16} />
-                    Minha Conta
-                  </Link>
-                  <button onClick={() => signOut({ callbackUrl: '/' })} className="text-xs text-white/60 hover:text-red-300 transition px-2 py-1">
-                    Sair
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" className="border border-white/30 text-white text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition whitespace-nowrap">
-                    Entrar
-                  </Link>
-                  <Link href="/cadastro" className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap">
-                    Cadastrar
-                  </Link>
-                </>
-              )}
-
-              <Link href="/carrinho" className="relative flex items-center gap-1.5 text-white hover:text-white/80 transition ml-1 px-2 py-2 rounded-lg hover:bg-white/10" aria-label="Carrinho">
-                <ShoppingCart size={22} />
-                <span className="text-sm font-medium hidden xl:block whitespace-nowrap">
-                  Carrinho{totalItens > 0 ? ` (${totalItens})` : ''}
-                </span>
-                {totalItens > 0 && (
-                  <span className="absolute -top-1 -right-1 xl:hidden bg-[#3cbfb3] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
-                    {totalItens > 9 ? '9+' : totalItens}
-                  </span>
-                )}
-              </Link>
-            </div>
           </div>
         </div>
 
