@@ -1106,9 +1106,12 @@ export default function ConfiguracoesPage() {
     const keys = ['anuncio_1', 'anuncio_2', 'anuncio_3']
     return (
       <div className="space-y-5">
-        <Card title="Barra de anúncios (topo do site)">
+        <Card title="Barra de anúncios (desativada)">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 text-xs text-amber-700">
+            ⚠️ O header atual usa uma barra informativa estática. Estes campos estão salvos mas não são exibidos no site no momento.
+          </div>
           <p className="text-xs text-gray-500 mb-5">
-            3 mensagens que alternam automaticamente no topo do site. Suporte a emoji. Exemplo: &ldquo;🚚 Frete grátis acima de R$ 500&rdquo;
+            Reservado para futuras versões com barra de anúncios rotativa.
           </p>
           <div className="space-y-4">
             {([1, 2, 3] as const).map((n) => (

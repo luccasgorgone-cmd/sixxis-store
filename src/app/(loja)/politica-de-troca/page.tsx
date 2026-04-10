@@ -14,7 +14,7 @@ export default function PoliticaDeTrocaPage() {
       {/* Hero */}
       <section
         className="py-16 md:py-20"
-        style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-[#3cbfb3] text-sm font-semibold uppercase tracking-widest mb-3">Seus direitos garantidos</p>

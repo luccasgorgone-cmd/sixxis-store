@@ -73,7 +73,7 @@ export default async function PedidoDetalheContaPage({
         <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
           pedido.status === 'entregue' ? 'bg-green-100 text-green-700' :
           pedido.status === 'enviado'  ? 'bg-purple-100 text-purple-700' :
-          pedido.status === 'pago'     ? 'bg-blue-100 text-blue-700' :
+          pedido.status === 'pago'     ? 'bg-[#e8f8f7] text-[#1a4f4a]' :
           pedido.status === 'cancelado' ? 'bg-red-100 text-red-500' :
           'bg-amber-100 text-amber-700'
         }`}>
