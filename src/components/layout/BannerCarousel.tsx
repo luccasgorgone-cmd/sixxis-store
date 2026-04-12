@@ -44,6 +44,8 @@ export default function BannerCarousel({ banners }: Props) {
   if (!banners.length) return null
 
   const banner = banners[atual]
+  const proximoIdx = (atual + 1) % banners.length
+  const proximoBanner = banners.length > 1 ? banners[proximoIdx] : null
 
   return (
     /* Mobile: 260px | Desktop: clamp(280px, 50vw, 560px) */
@@ -65,6 +67,18 @@ export default function BannerCarousel({ banners }: Props) {
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
       </div>
+
+      {/* Preload do próximo banner */}
+      {proximoBanner?.imagem && (
+        <Image
+          src={proximoBanner.imagem}
+          alt=""
+          fill
+          className="invisible absolute"
+          unoptimized
+          aria-hidden
+        />
+      )}
 
       {/* Conteúdo */}
       <div className="relative h-full flex items-center">

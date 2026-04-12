@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
       dynamic: 0,
       static: 30,
     },
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', 'recharts'],
   },
   async headers() {
     return [
@@ -37,6 +37,12 @@ const nextConfig: NextConfig = {
         source: '/_next/static/(.*)',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/api/banners',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
         ],
       },
       {
