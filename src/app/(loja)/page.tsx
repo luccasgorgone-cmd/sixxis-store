@@ -82,21 +82,18 @@ export default async function HomePage() {
 
           {/* Título */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
-            Alta Performance para o<br className="hidden sm:block" /> seu Conforto e Bem-Estar
+            Climatizadores, Aspiradores e Fitness
           </h1>
 
           {/* Subtítulo */}
           <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Climatizadores, aspiradores e equipamentos fitness com qualidade Sixxis e garantia total — entrega para todo o Brasil.
+            Produtos originais Sixxis com garantia e entrega rápida para todo o Brasil.
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/produtos" className="btn-primary text-base">
               Explorar Produtos <ArrowRight size={18} />
-            </Link>
-            <Link href="/pecas" className="btn-outline-white text-base">
-              Peças de Reposição
             </Link>
           </div>
 
