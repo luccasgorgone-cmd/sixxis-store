@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Target, Eye, Heart, Users, ShieldCheck, Truck, Award } from 'lucide-react'
 
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: 'Sobre a Sixxis — Quem Somos',
   description: 'Conheça a Sixxis — empresa fundada em Araçatuba, SP, especializada em climatizadores, aspiradores e equipamentos de spinning. Qualidade e garantia em cada produto.',

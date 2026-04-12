@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { HelpCircle } from 'lucide-react'
 import FaqAccordion from '@/components/faq/FaqAccordion'
 
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: 'Perguntas Frequentes',
   description:

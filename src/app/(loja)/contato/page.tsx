@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Phone, Mail, MapPin, Clock, MessageCircle } from 'lucide-react'
 import FormContato from '@/components/contato/FormContato'
 
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: 'Contato',
   description:

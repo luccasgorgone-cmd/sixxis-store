@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Clock, CheckCircle, RotateCcw, Phone } from 'lucide-react'
 
+export const revalidate = 86400
+
 export const metadata: Metadata = {
   title: 'Política de Troca e Devolução',
   description: 'Conheça nossa política de trocas e devoluções. Seu direito protegido pela Sixxis.',

@@ -7,128 +7,110 @@ datasource db {
 }
 
 model Cliente {
-  id            String     @id @default(cuid())
-  nome          String
-  email         String     @unique
-  senha         String
-  cpf           String?    @unique
-  telefone      String?
-  erpClienteId  String?    @unique
-  createdAt     DateTime   @default(now())
-
-  enderecos       Endereco[]
-  pedidos         Pedido[]
+  id              String            @id @default(cuid())
+  nome            String
+  email           String            @unique
+  senha           String
+  cpf             String?           @unique
+  telefone        String?
+  erpClienteId    String?           @unique
+  createdAt       DateTime          @default(now())
+  Avaliacao       Avaliacao[]
   carrinho        Carrinho?
-  avaliacoes      Avaliacao[]
-  pontos          PontosCliente?
-  historicoPontos HistoricoPontos[]
+  enderecos       Endereco[]
+  HistoricoPontos HistoricoPontos[]
+  pedidos         Pedido[]
+  PontosCliente   PontosCliente?
 }
 
 model Endereco {
-  id           String   @id @default(cuid())
-  clienteId    String
-  cep          String
-  logradouro   String
-  numero       String
-  complemento  String?
-  bairro       String
-  cidade       String
-  estado       String   @db.Char(2)
-  principal    Boolean  @default(false)
-
-  cliente      Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  pedidos      Pedido[]
+  id          String   @id @default(cuid())
+  clienteId   String
+  cep         String
+  logradouro  String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  estado      String   @db.Char(2)
+  principal   Boolean  @default(false)
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  pedidos     Pedido[]
 
   @@index([clienteId])
 }
 
 model Produto {
-  id               String   @id @default(cuid())
-  erpProdutoId     String   @unique
+  id               String            @id @default(cuid())
+  erpProdutoId     String            @unique
   nome             String
-  slug             String   @unique
-  descricao        String?  @db.Text
-  preco            Decimal  @db.Decimal(10, 2)
-  precoPromocional Decimal? @db.Decimal(10, 2)
-  imagens          Json     @default("[]")
-  estoque          Int      @default(0)
+  slug             String            @unique
+  descricao        String?           @db.Text
+  preco            Decimal           @db.Decimal(10, 2)
+  precoPromocional Decimal?          @db.Decimal(10, 2)
+  imagens          Json
+  estoque          Int               @default(0)
   categoria        String
   modelo           String?
-  sku              String?  @unique
-  ativo            Boolean  @default(true)
-  temVariacoes     Boolean  @default(false)
-  createdAt        DateTime @default(now())
-
-  itensPedido   ItemPedido[]
-  itensCarrinho ItemCarrinho[]
-  variacoes     VariacaoProduto[]
-  destaques     ProdutoDestaque[]
-  avaliacoes    Avaliacao[]
-  listaEspera   ListaEspera[]
+  ativo            Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  sku              String?           @unique
+  temVariacoes     Boolean           @default(false)
+  Avaliacao        Avaliacao[]
+  itensCarrinho    ItemCarrinho[]
+  itensPedido      ItemPedido[]
+  ListaEspera      ListaEspera[]
+  ProdutoDestaque  ProdutoDestaque[]
+  VariacaoProduto  VariacaoProduto[]
 
   @@index([categoria])
   @@index([slug])
   @@index([ativo])
 }
 
-model VariacaoProduto {
-  id        String   @id @default(uuid())
-  produtoId String
-  produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
-  nome      String
-  sku       String   @unique
-  preco     Decimal? @db.Decimal(10, 2)
-  estoque   Int      @default(0)
-  ativo     Boolean  @default(true)
-  createdAt DateTime @default(now())
-
-  @@index([produtoId])
-}
-
 model Pedido {
-  id             String     @id @default(cuid())
+  id             String       @id @default(cuid())
   clienteId      String
-  status         String     @default("pendente")
-  total          Decimal    @db.Decimal(10, 2)
-  frete          Decimal    @db.Decimal(10, 2)
-  desconto       Decimal    @default(0) @db.Decimal(10, 2)
-  cupomCodigo    String?
+  status         String       @default("pendente")
+  total          Decimal      @db.Decimal(10, 2)
+  frete          Decimal      @db.Decimal(10, 2)
   formaPagamento String
   mpPaymentId    String?
-  codigoRastreio String?
   enderecoId     String
-  erpPedidoId    String?    @unique
-  createdAt      DateTime   @default(now())
-
-  cliente  Cliente    @relation(fields: [clienteId], references: [id])
-  endereco Endereco   @relation(fields: [enderecoId], references: [id])
-  itens    ItemPedido[]
+  erpPedidoId    String?      @unique
+  createdAt      DateTime     @default(now())
+  codigoRastreio String?
+  cupomCodigo    String?
+  desconto       Decimal      @default(0.00) @db.Decimal(10, 2)
+  itens          ItemPedido[]
+  cliente        Cliente      @relation(fields: [clienteId], references: [id])
+  endereco       Endereco     @relation(fields: [enderecoId], references: [id])
 
   @@index([clienteId])
   @@index([status])
+  @@index([enderecoId], map: "Pedido_enderecoId_fkey")
 }
 
 model ItemPedido {
-  id             String   @id @default(cuid())
-  pedidoId       String
-  produtoId      String
-  quantidade     Int
-  precoUnitario  Decimal  @db.Decimal(10, 2)
-  variacaoId     String?
-  variacaoNome   String?
-
-  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  produto        Produto  @relation(fields: [produtoId], references: [id])
+  id            String  @id @default(cuid())
+  pedidoId      String
+  produtoId     String
+  quantidade    Int
+  precoUnitario Decimal @db.Decimal(10, 2)
+  variacaoId    String?
+  variacaoNome  String?
+  pedido        Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto       Produto @relation(fields: [produtoId], references: [id])
 
   @@index([pedidoId])
+  @@index([produtoId], map: "ItemPedido_produtoId_fkey")
 }
 
 model Carrinho {
-  id        String   @id @default(cuid())
-  clienteId String?  @unique
-  sessionId String?  @unique
-  createdAt DateTime @default(now())
-
+  id        String         @id @default(cuid())
+  clienteId String?        @unique
+  sessionId String?        @unique
+  createdAt DateTime       @default(now())
   cliente   Cliente?       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   itens     ItemCarrinho[]
 
@@ -136,26 +118,35 @@ model Carrinho {
 }
 
 model ItemCarrinho {
-  id         String  @id @default(cuid())
+  id         String   @id @default(cuid())
   carrinhoId String
   produtoId  String
   quantidade Int
-
   carrinho   Carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
   produto    Produto  @relation(fields: [produtoId], references: [id])
 
   @@unique([carrinhoId, produtoId])
+  @@index([produtoId], map: "ItemCarrinho_produtoId_fkey")
 }
 
-model Configuracao {
-  id        String   @id @default(uuid())
-  chave     String   @unique
-  valor     String   @db.Text
-  updatedAt DateTime @updatedAt
+model Avaliacao {
+  id         String   @id
+  produtoId  String
+  clienteId  String
+  nota       Int
+  titulo     String?
+  comentario String?  @db.Text
+  aprovada   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  Cliente    Cliente  @relation(fields: [clienteId], references: [id])
+  Produto    Produto  @relation(fields: [produtoId], references: [id])
+
+  @@index([clienteId], map: "Avaliacao_clienteId_fkey")
+  @@index([produtoId, aprovada])
 }
 
 model Banner {
-  id        String   @id @default(uuid())
+  id        String   @id
   imagem    String
   titulo    String?
   subtitulo String?
@@ -166,34 +157,15 @@ model Banner {
   createdAt DateTime @default(now())
 }
 
-model ProdutoDestaque {
-  id        String   @id @default(uuid())
-  produtoId String
-  produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
-  ordem     Int      @default(0)
-  secao     String   @default("mais-vendidos")
-  createdAt DateTime @default(now())
-
-  @@index([secao])
-}
-
-model Avaliacao {
-  id         String   @id @default(uuid())
-  produtoId  String
-  produto    Produto  @relation(fields: [produtoId], references: [id])
-  clienteId  String
-  cliente    Cliente  @relation(fields: [clienteId], references: [id])
-  nota       Int
-  titulo     String?
-  comentario String?  @db.Text
-  aprovada   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-
-  @@index([produtoId, aprovada])
+model Configuracao {
+  id        String   @id
+  chave     String   @unique
+  valor     String   @db.Text
+  updatedAt DateTime
 }
 
 model Cupom {
-  id          String    @id @default(uuid())
+  id          String    @id
   codigo      String    @unique
   tipo        String    @default("percentual")
   valor       Decimal   @db.Decimal(10, 2)
@@ -205,34 +177,71 @@ model Cupom {
   createdAt   DateTime  @default(now())
 }
 
-model PontosCliente {
-  id        String   @id @default(uuid())
-  clienteId String   @unique
-  cliente   Cliente  @relation(fields: [clienteId], references: [id])
-  pontos    Int      @default(0)
-  updatedAt DateTime @updatedAt
-}
-
 model HistoricoPontos {
-  id        String   @id @default(uuid())
+  id        String   @id
   clienteId String
-  cliente   Cliente  @relation(fields: [clienteId], references: [id])
   pontos    Int
   tipo      String
   descricao String?
   pedidoId  String?
   createdAt DateTime @default(now())
+  Cliente   Cliente  @relation(fields: [clienteId], references: [id])
 
   @@index([clienteId])
 }
 
 model ListaEspera {
-  id         String   @id @default(uuid())
+  id         String   @id
   produtoId  String
-  produto    Produto  @relation(fields: [produtoId], references: [id])
   email      String
   notificado Boolean  @default(false)
   createdAt  DateTime @default(now())
+  Produto    Produto  @relation(fields: [produtoId], references: [id])
 
   @@index([produtoId, notificado])
+}
+
+model PontosCliente {
+  id        String   @id
+  clienteId String   @unique
+  pontos    Int      @default(0)
+  updatedAt DateTime
+  Cliente   Cliente  @relation(fields: [clienteId], references: [id])
+}
+
+model ProdutoDestaque {
+  id        String   @id
+  produtoId String
+  ordem     Int      @default(0)
+  secao     String   @default("mais-vendidos")
+  createdAt DateTime @default(now())
+  Produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@index([produtoId], map: "ProdutoDestaque_produtoId_fkey")
+  @@index([secao])
+}
+
+model VariacaoProduto {
+  id        String   @id
+  produtoId String
+  nome      String
+  sku       String   @unique
+  preco     Decimal? @db.Decimal(10, 2)
+  estoque   Int      @default(0)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  Produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@index([produtoId])
+}
+
+model EmailTemplate {
+  id           String   @id @default(uuid())
+  tipo         String   @unique
+  ativo        Boolean  @default(true)
+  assunto      String
+  corpo        String   @db.LongText
+  prazo        Int      @default(0)
+  unidadePrazo String   @default("horas")
+  updatedAt    DateTime @updatedAt
 }
