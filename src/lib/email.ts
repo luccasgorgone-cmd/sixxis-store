@@ -318,3 +318,56 @@ export async function enviarEmailFollowUp(para: string, opts: {
     html,
   })
 }
+
+// ─── DB-driven template system (para o admin) ─────────────────────────────────
+
+import { prisma } from '@/lib/prisma'
+
+export function renderTemplate(corpo: string, vars: Record<string, string>): string {
+  return Object.entries(vars).reduce((html, [key, val]) => {
+    return html.replaceAll(`{{${key}}}`, val ?? '')
+  }, corpo)
+}
+
+export async function enviarEmailTeste(tipo: string, emailDestino: string): Promise<void> {
+  const template = await prisma.emailTemplate.findUnique({ where: { tipo } })
+  if (!template) throw new Error(`Template "${tipo}" não encontrado`)
+
+  const dadosFalsos: Record<string, string> = {
+    nome: 'João Silva',
+    pedido_id: 'ABC12345',
+    total: 'R$ 599,90',
+    forma_pagamento: 'Cartão de Crédito',
+    status: 'Confirmado',
+    endereco: 'Rua das Flores, 123 - Araçatuba-SP',
+    codigo_rastreio: 'BR123456789BR',
+    link_rastreio: 'https://www.correios.com.br',
+    previsao_entrega: '5 a 10 dias úteis',
+    produto_nome: 'Climatizador Sixxis Pro',
+    produto_slug: 'climatizador-sixxis-pro',
+    produto_url: `${SITE_URL}/produtos/climatizador-sixxis-pro`,
+    cupom_codigo: 'SIXXIS15',
+    cupom_desconto: '15%',
+    cupom_validade: '31/12/2025',
+    site_url: SITE_URL,
+    ITENS_PEDIDO: `<div style="padding:12px 0;border-bottom:1px solid #e5e7eb;">
+      <p style="margin:0;font-weight:600;">Climatizador Sixxis Pro</p>
+      <p style="margin:4px 0 0;color:#6b7280;font-size:13px;">Qtd: 1 × R$ 599,90</p>
+    </div>`,
+    ITENS_CARRINHO: `<div style="padding:12px;background:#f9fafb;border-radius:8px;margin-bottom:8px;">
+      <p style="margin:0;font-weight:600;">Climatizador Sixxis Pro</p>
+      <p style="margin:4px 0 0;color:#3cbfb3;font-weight:700;">R$ 599,90</p>
+    </div>`,
+    PRODUTO_CARD: `<div style="background:#f9fafb;border-radius:12px;padding:20px;">
+      <p style="margin:0;font-weight:700;font-size:16px;">Climatizador Sixxis Pro</p>
+      <p style="margin:8px 0 0;color:#3cbfb3;font-size:18px;font-weight:700;">R$ 599,90</p>
+    </div>`,
+  }
+
+  await getResend().emails.send({
+    from: `${FROM_NAME} <${FROM}>`,
+    to: emailDestino,
+    subject: `[TESTE] ${renderTemplate(template.assunto, dadosFalsos)}`,
+    html: renderTemplate(template.corpo, dadosFalsos),
+  })
+}

@@ -60,7 +60,7 @@ export default async function OfertasPage() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {ofertas.map((produto) => (
-              <CardProduto key={produto.id} produto={produto} showDesconto />
+              <CardProduto key={produto.id} produto={produto} />
             ))}
           </div>
         </>

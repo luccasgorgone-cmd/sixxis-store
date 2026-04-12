@@ -15,12 +15,12 @@ model Cliente {
   telefone        String?
   erpClienteId    String?           @unique
   createdAt       DateTime          @default(now())
-  Avaliacao       Avaliacao[]
+  avaliacoes      Avaliacao[]
   carrinho        Carrinho?
   enderecos       Endereco[]
-  HistoricoPontos HistoricoPontos[]
+  historicoPontos HistoricoPontos[]
   pedidos         Pedido[]
-  PontosCliente   PontosCliente?
+  pontos          PontosCliente?
 }
 
 model Endereco {
@@ -56,12 +56,12 @@ model Produto {
   createdAt        DateTime          @default(now())
   sku              String?           @unique
   temVariacoes     Boolean           @default(false)
-  Avaliacao        Avaliacao[]
+  avaliacoes       Avaliacao[]
   itensCarrinho    ItemCarrinho[]
   itensPedido      ItemPedido[]
-  ListaEspera      ListaEspera[]
-  ProdutoDestaque  ProdutoDestaque[]
-  VariacaoProduto  VariacaoProduto[]
+  listaEspera      ListaEspera[]
+  destaques        ProdutoDestaque[]
+  variacoes        VariacaoProduto[]
 
   @@index([categoria])
   @@index([slug])
@@ -130,7 +130,7 @@ model ItemCarrinho {
 }
 
 model Avaliacao {
-  id         String   @id
+  id         String   @id @default(cuid())
   produtoId  String
   clienteId  String
   nota       Int
@@ -138,15 +138,15 @@ model Avaliacao {
   comentario String?  @db.Text
   aprovada   Boolean  @default(false)
   createdAt  DateTime @default(now())
-  Cliente    Cliente  @relation(fields: [clienteId], references: [id])
-  Produto    Produto  @relation(fields: [produtoId], references: [id])
+  cliente    Cliente  @relation(fields: [clienteId], references: [id])
+  produto    Produto  @relation(fields: [produtoId], references: [id])
 
   @@index([clienteId], map: "Avaliacao_clienteId_fkey")
   @@index([produtoId, aprovada])
 }
 
 model Banner {
-  id        String   @id
+  id        String   @id @default(cuid())
   imagem    String
   titulo    String?
   subtitulo String?
@@ -158,14 +158,14 @@ model Banner {
 }
 
 model Configuracao {
-  id        String   @id
+  id        String   @id @default(cuid())
   chave     String   @unique
   valor     String   @db.Text
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 model Cupom {
-  id          String    @id
+  id          String    @id @default(cuid())
   codigo      String    @unique
   tipo        String    @default("percentual")
   valor       Decimal   @db.Decimal(10, 2)
@@ -178,51 +178,51 @@ model Cupom {
 }
 
 model HistoricoPontos {
-  id        String   @id
+  id        String   @id @default(cuid())
   clienteId String
   pontos    Int
   tipo      String
   descricao String?
   pedidoId  String?
   createdAt DateTime @default(now())
-  Cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
 
   @@index([clienteId])
 }
 
 model ListaEspera {
-  id         String   @id
+  id         String   @id @default(cuid())
   produtoId  String
   email      String
   notificado Boolean  @default(false)
   createdAt  DateTime @default(now())
-  Produto    Produto  @relation(fields: [produtoId], references: [id])
+  produto    Produto  @relation(fields: [produtoId], references: [id])
 
   @@index([produtoId, notificado])
 }
 
 model PontosCliente {
-  id        String   @id
+  id        String   @id @default(cuid())
   clienteId String   @unique
   pontos    Int      @default(0)
-  updatedAt DateTime
-  Cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  updatedAt DateTime @updatedAt
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
 }
 
 model ProdutoDestaque {
-  id        String   @id
+  id        String   @id @default(cuid())
   produtoId String
   ordem     Int      @default(0)
   secao     String   @default("mais-vendidos")
   createdAt DateTime @default(now())
-  Produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
   @@index([produtoId], map: "ProdutoDestaque_produtoId_fkey")
   @@index([secao])
 }
 
 model VariacaoProduto {
-  id        String   @id
+  id        String   @id @default(cuid())
   produtoId String
   nome      String
   sku       String   @unique
@@ -230,7 +230,7 @@ model VariacaoProduto {
   estoque   Int      @default(0)
   ativo     Boolean  @default(true)
   createdAt DateTime @default(now())
-  Produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
   @@index([produtoId])
 }

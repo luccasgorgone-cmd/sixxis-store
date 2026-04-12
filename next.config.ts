@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,
   },
+  // Desabilita Router Cache (client-side) — resolve problema de múltiplas instâncias no Railway
+  // Habilita otimização de imports de pacotes grandes
   experimental: {
     staleTimes: {
       dynamic: 0,
@@ -44,14 +46,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ]
-  },
-  // Desabilita Router Cache (client-side) completamente
-  // Resolve o problema de múltiplas instâncias no Railway
-  experimental: {
-    staleTimes: {
-      dynamic: 0,
-      static:  30,
-    },
   },
 }
 
