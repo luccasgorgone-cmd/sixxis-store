@@ -264,44 +264,39 @@ export default function Header({
   return (
     <>
       {/* ═══════════════════════════════════════════════════════
-          CAMADA 1 — Barra superior (NÃO sticky, some ao rolar)
-          Desktop only
+          CAMADA 1 — Announcement Bar estilo Casas Bahia (3 colunas)
+          Desktop only — some ao rolar
       ═══════════════════════════════════════════════════════ */}
-      <div className="hidden lg:block bg-[#0f2e2b] py-1.5">
-        <div className="max-w-7xl mx-auto px-4 xl:px-6 flex items-center justify-between">
+      <div className="hidden lg:block bg-[#0f2e2b] py-2">
+        <div className="max-w-7xl mx-auto px-4 xl:px-6 flex items-center justify-between gap-4">
 
-          {/* Esquerda */}
-          <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
-            <span>🏆</span>
-            <span>Bem-vindo à <strong className="text-[#3cbfb3]">Loja Oficial da Sixxis!</strong></span>
+          {/* Bloco 1 — Cupom */}
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-base leading-none">🏷️</span>
+            <span className="text-white/70 text-xs font-medium">CUPOM:</span>
+            <span className="bg-[#2a9d8f] text-white text-xs font-black px-2.5 py-1 rounded tracking-wider">
+              SIXXIS10
+            </span>
+            <span className="text-white/60 text-xs">— 10% OFF na 1ª compra</span>
           </div>
 
-          {/* Direita */}
-          <div className="flex items-center gap-3 text-sm">
-            <Link
-              href="/pedidos"
-              className="flex items-center gap-1.5 text-white/80 hover:text-white font-medium transition-colors"
-            >
-              <Package size={13} />
-              Rastreie seu Pedido
-            </Link>
-            <span className="text-white/20">|</span>
-            <a
-              href="https://wa.me/5511934102621"
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-white/80 hover:text-white font-medium transition-colors"
-            >
-              <Wrench size={13} />
-              Assistência Técnica
-            </a>
-            <span className="text-white/20">|</span>
-            <Link
-              href="/seja-revendedor"
-              className="flex items-center gap-1.5 text-[#3cbfb3] hover:text-[#5ad8cc] font-semibold transition-colors"
-            >
-              <Store size={13} />
-              Seja um Revendedor
-            </Link>
+          {/* Separador */}
+          <span className="text-white/20 text-base">|</span>
+
+          {/* Bloco 2 — Frete grátis */}
+          <div className="flex-1 text-center">
+            <span className="text-white font-bold text-xs tracking-wide">
+              ✨ FRETE GRÁTIS acima de R$&nbsp;500
+            </span>
+          </div>
+
+          {/* Separador */}
+          <span className="text-white/20 text-base">|</span>
+
+          {/* Bloco 3 — Entrega */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-sm leading-none">🚚</span>
+            <span className="text-white text-xs">Entrega para todo o Brasil</span>
           </div>
         </div>
       </div>
@@ -346,7 +341,7 @@ export default function Header({
                   className="object-contain h-9 sm:h-11 w-auto"
                   priority
                 />
-                <p className="hidden lg:block text-[#3cbfb3] text-xs font-semibold tracking-wide mt-0.5">
+                <p className="hidden lg:block text-white text-[11px] font-medium tracking-wide mt-0.5">
                   Qualidade e Inovação
                 </p>
               </Link>
@@ -359,51 +354,44 @@ export default function Header({
                 <CampoFrete />
               </div>
 
-              {/* Auth + Carrinho — desktop only */}
-              <div className="hidden lg:flex items-center gap-2 shrink-0 ml-2">
+              {/* Auth + Carrinho — desktop only (estilo Casas Bahia: ícone + 2 linhas) */}
+              <div className="hidden lg:flex items-center gap-1 shrink-0 ml-2">
                 {session ? (
-                  <>
+                  <div className="flex items-center gap-1">
                     <Link
                       href="/minha-conta"
-                      className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10"
+                      className="flex flex-col items-center gap-0.5 text-white hover:text-[#3cbfb3] transition p-1.5 rounded-lg hover:bg-white/10"
                     >
-                      <User size={16} />
-                      Minha Conta
+                      <User size={22} />
+                      <span className="text-[10px] font-medium whitespace-nowrap">
+                        Olá, {session.user?.name?.split(' ')[0] || 'Você'}
+                      </span>
                     </Link>
                     <button
                       onClick={() => signOut({ callbackUrl: '/' })}
-                      className="text-xs text-white/60 hover:text-red-300 transition px-2 py-1"
+                      className="text-[10px] text-white/50 hover:text-red-300 transition px-1.5 py-1 self-end mb-1"
                     >
                       Sair
                     </button>
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      className="border border-white/30 text-white text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition whitespace-nowrap"
-                    >
-                      Entrar
-                    </Link>
-                    <Link
-                      href="/cadastro"
-                      className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap"
-                    >
-                      Cadastrar
-                    </Link>
-                  </>
+                  <Link
+                    href="/login"
+                    className="flex flex-col items-center gap-0.5 text-white hover:text-[#3cbfb3] transition p-1.5 rounded-lg hover:bg-white/10"
+                  >
+                    <User size={22} />
+                    <span className="text-[10px] font-medium whitespace-nowrap">Acesse sua conta</span>
+                  </Link>
                 )}
                 <Link
                   href="/carrinho"
-                  className="relative flex items-center gap-1.5 text-white hover:text-white/80 transition ml-1 px-2 py-2 rounded-lg hover:bg-white/10"
+                  className="relative flex flex-col items-center gap-0.5 text-white hover:text-[#3cbfb3] transition p-1.5 rounded-lg hover:bg-white/10"
                   aria-label="Carrinho"
                 >
                   <ShoppingCart size={22} />
-                  <span className="text-sm font-medium hidden xl:block whitespace-nowrap">
-                    Carrinho{totalItens > 0 ? ` (${totalItens})` : ''}
-                  </span>
+                  <span className="text-[10px] font-medium">Carrinho</span>
                   {totalItens > 0 && (
-                    <span className="absolute -top-1 -right-1 xl:hidden bg-[#3cbfb3] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                    <span className="absolute -top-0.5 right-0.5 bg-[#f59e0b] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}

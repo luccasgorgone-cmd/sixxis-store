@@ -8,120 +8,99 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 interface Banner {
   id: string
   imagem: string
-  titulo: string | null
-  subtitulo: string | null
-  link: string | null
-  tempoCads: number
+  titulo?: string | null
+  subtitulo?: string | null
+  link?: string | null
+  tempoCads?: number
 }
 
-interface Props {
-  banners: Banner[]
-}
+export default function BannerCarousel({ banners }: { banners: Banner[] }) {
+  const [current, setCurrent] = useState(0)
+  const [paused, setPaused] = useState(false)
 
-export default function BannerCarousel({ banners }: Props) {
-  const [atual, setAtual] = useState(0)
-  const [montado, setMontado] = useState(false)
-
-  useEffect(() => {
-    setMontado(true)
-  }, [])
-
-  const proximo = useCallback(() => {
-    setAtual((i) => (i + 1) % banners.length)
-  }, [banners.length])
-
-  const anterior = useCallback(() => {
-    setAtual((i) => (i - 1 + banners.length) % banners.length)
-  }, [banners.length])
+  const prev = useCallback(() => setCurrent(c => (c - 1 + banners.length) % banners.length), [banners.length])
+  const next = useCallback(() => setCurrent(c => (c + 1) % banners.length), [banners.length])
 
   useEffect(() => {
-    if (!montado || banners.length <= 1) return
-    const tempo = (banners[atual]?.tempoCads || 5) * 1000
-    const timer = setTimeout(proximo, tempo)
-    return () => clearTimeout(timer)
-  }, [atual, montado, banners, proximo])
+    if (paused || banners.length <= 1) return
+    const t = setInterval(next, ((banners[current] as Banner | undefined)?.tempoCads || 5) * 1000)
+    return () => clearInterval(t)
+  }, [current, paused, banners, next])
 
   if (!banners.length) return null
 
-  const banner = banners[atual]
+  const banner = banners[current]
 
   return (
-    /* Mobile: 260px | Desktop: clamp(280px, 50vw, 560px) */
     <div
-      className="relative w-full overflow-hidden bg-[#0f1f1e]"
-      style={{ height: 'clamp(260px, 50vw, 560px)' }}
+      className="relative w-full overflow-hidden bg-[#0f2e2b] select-none"
+      style={{ aspectRatio: '1920/560', maxHeight: '560px' }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
-      {/* Imagem */}
-      <div className="absolute inset-0">
-        {banner.imagem && (
+      {/* Imagem do banner — SEM overlay */}
+      {banner.link ? (
+        <Link href={banner.link} className="block w-full h-full">
           <Image
+            key={banner.id}
             src={banner.imagem}
             alt={banner.titulo || 'Banner Sixxis'}
             fill
-            className="object-cover"
+            className="object-cover w-full h-full"
             priority
             unoptimized
           />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-      </div>
+        </Link>
+      ) : (
+        <Image
+          key={banner.id}
+          src={banner.imagem}
+          alt={banner.titulo || 'Banner Sixxis'}
+          fill
+          className="object-cover w-full h-full"
+          priority
+          unoptimized
+        />
+      )}
 
-      {/* Conteúdo */}
-      <div className="relative h-full flex items-center">
-        <div className="max-w-7xl mx-auto px-5 sm:px-10 w-full">
-          <div className="max-w-xl">
-            {banner.titulo && (
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-3 sm:mb-4">
-                {banner.titulo}
-              </h2>
-            )}
-            {banner.subtitulo && (
-              <p className="text-white/80 text-sm sm:text-lg mb-5 sm:mb-8 leading-relaxed hidden sm:block">
-                {banner.subtitulo}
-              </p>
-            )}
-            {banner.link && (
-              <Link
-                href={banner.link}
-                className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-5 py-3 sm:px-8 sm:py-4 text-sm sm:text-base rounded-xl transition-all shadow-lg hover:shadow-[#3cbfb3]/40 hover:-translate-y-0.5"
-              >
-                Ver produto →
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Setas */}
+      {/* Seta esquerda */}
       {banners.length > 1 && (
-        <>
-          <button
-            onClick={anterior}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
-            aria-label="Anterior"
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <button
-            onClick={proximo}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-black/40 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
-            aria-label="Próximo"
-          >
-            <ChevronRight size={18} />
-          </button>
+        <button
+          onClick={prev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
+          aria-label="Banner anterior"
+        >
+          <ChevronLeft size={22} />
+        </button>
+      )}
 
-          {/* Indicadores */}
-          <div className="absolute bottom-3 sm:bottom-4 left-0 right-0 flex justify-center gap-2">
-            {banners.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setAtual(i)}
-                className={`h-2 rounded-full transition-all ${i === atual ? 'w-8 bg-[#3cbfb3]' : 'w-2 bg-white/50'}`}
-                aria-label={`Banner ${i + 1}`}
-              />
-            ))}
-          </div>
-        </>
+      {/* Seta direita */}
+      {banners.length > 1 && (
+        <button
+          onClick={next}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
+          aria-label="Próximo banner"
+        >
+          <ChevronRight size={22} />
+        </button>
+      )}
+
+      {/* Indicadores estilo Casas Bahia */}
+      {banners.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={`transition-all duration-300 rounded-full ${
+                i === current
+                  ? 'w-6 h-2.5 bg-white'
+                  : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'
+              }`}
+              aria-label={`Ir para banner ${i + 1}`}
+            />
+          ))}
+        </div>
       )}
     </div>
   )

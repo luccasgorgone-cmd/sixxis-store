@@ -1,13 +1,15 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Wind, Fan, Bike, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowRight, Cpu, Headphones, BadgeCheck, Tag, Zap } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 import PagamentosBar from '@/components/layout/PagamentosBar'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
+import OfertaCountdown from '@/components/layout/OfertaCountdown'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -18,8 +20,32 @@ export const metadata: Metadata = {
   description: 'Loja oficial Sixxis em Araçatuba-SP. Climatizadores, aspiradores e bikes spinning com qualidade premium. Garantia Sixxis, frete para todo o Brasil.',
 }
 
+// Categorias com fotos reais do R2 — estilo Casas Bahia
+const categorias = [
+  {
+    nome: 'Climatizadores',
+    href: '/produtos?categoria=climatizadores',
+    imagem: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775737122831-k4d1lc1.jpg',
+  },
+  {
+    nome: 'Aspiradores',
+    href: '/produtos?categoria=aspiradores',
+    imagem: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775743809308-70oi3e0.png',
+  },
+  {
+    nome: 'Spinning',
+    href: '/produtos?categoria=spinning',
+    imagem: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775754930452-4ixi773.png',
+  },
+  {
+    nome: 'Ofertas',
+    href: '/ofertas',
+    imagem: null,
+    badge: 'HOT',
+  },
+]
+
 export default async function HomePage() {
-  // Dados com defaults — página nunca fica em branco mesmo com erro no banco
   let banners: Awaited<ReturnType<typeof prisma.banner.findMany>> = []
   let produtosMostrar: Awaited<ReturnType<typeof prisma.produto.findMany>> = []
   let cfg:   Record<string, string> = {}
@@ -39,16 +65,19 @@ export default async function HomePage() {
     cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
     trust = Object.fromEntries(trustRows.map((r) => [r.chave, r.valor]))
     produtosMostrar = destaques.length > 0 ? destaques.map((d) => d.produto) : produtosGerais
-    console.log('[HOME OK]', { banners: banners.length, produtos: produtosMostrar.length })
   } catch (error) {
     console.error('[HOME DB ERROR]', error)
-    // Continua com os defaults — NUNCA fica em branco
   }
 
-  return (
-    <main className="bg-white">
+  // Target para o countdown: meia-noite de hoje
+  const hoje = new Date()
+  hoje.setHours(23, 59, 59, 0)
+  const countdownTarget = hoje.toISOString()
 
-      {/* 1. BannerCarousel com Suspense */}
+  return (
+    <main className="bg-[#f5f5f5] min-h-screen">
+
+      {/* 1. BannerCarousel */}
       {banners.length > 0 ? (
         <Suspense fallback={
           <div
@@ -87,7 +116,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 2. TrustBar — inline, logo após o banner */}
+      {/* 2. TrustBar */}
       <TrustBar items={[
         { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Frete grátis acima de R$ 500' },
         { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos' },
@@ -95,10 +124,46 @@ export default async function HomePage() {
         { titulo: trust.trust_4_titulo || 'Produtos Originais',         sub: trust.trust_4_sub || 'Garantia Sixxis' },
       ]} />
 
-      {/* 3. Produtos em Destaque */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="section-title">Produtos em Destaque</h2>
+      {/* 3. Categorias com fotos — estilo Casas Bahia */}
+      <section className="bg-white border-b border-gray-100 py-4">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide justify-center">
+            {categorias.map(cat => (
+              <Link key={cat.nome} href={cat.href}
+                className="flex flex-col items-center gap-2 min-w-[80px] group"
+              >
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-[#3cbfb3] transition-all shadow-sm bg-gray-50 flex items-center justify-center">
+                  {cat.imagem ? (
+                    <Image
+                      src={cat.imagem}
+                      alt={cat.nome}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <Tag size={28} className="text-[#f59e0b]" />
+                  )}
+                </div>
+                <span className="text-xs font-semibold text-gray-700 group-hover:text-[#3cbfb3] text-center whitespace-nowrap transition-colors">
+                  {cat.nome}
+                  {cat.badge && (
+                    <span className="ml-1 bg-[#f59e0b] text-white text-[9px] font-black px-1 rounded">
+                      {cat.badge}
+                    </span>
+                  )}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Produtos em Destaque */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold text-gray-900">Produtos em Destaque</h2>
           {produtosMostrar.length > 0 && (
             <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
               Ver todos <ArrowRight size={14} />
@@ -106,13 +171,13 @@ export default async function HomePage() {
           )}
         </div>
         {produtosMostrar.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {produtosMostrar.map((produto) => (
               <CardProduto key={produto.id} produto={produto} />
             ))}
           </div>
         ) : (
-          <div className="border-2 border-dashed border-[#3cbfb3]/30 rounded-2xl p-10 text-center bg-[#f9fffe]">
+          <div className="border-2 border-dashed border-[#3cbfb3]/30 rounded-2xl p-10 text-center bg-white">
             <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
               <ArrowRight size={28} className="text-[#3cbfb3]" />
             </div>
@@ -128,42 +193,37 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* 4. Nossas Categorias */}
-      <section className="py-10" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="section-title mb-8">Nossas Categorias</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
-            {[
-              { label: 'Climatizadores', desc: 'Conforto térmico para sua casa',  href: '/produtos?categoria=climatizadores', Icon: Wind },
-              { label: 'Aspiradores',    desc: 'Limpeza eficiente e prática',      href: '/produtos?categoria=aspiradores',    Icon: Fan  },
-              { label: 'Spinning',       desc: 'Desempenho fitness profissional',  href: '/produtos?categoria=spinning',       Icon: Bike },
-            ].map(({ label, desc, href, Icon }) => (
-              <Link
-                key={label}
-                href={href}
-                className="group bg-white border border-gray-100 hover:border-[#3cbfb3] rounded-2xl p-4 sm:p-6 text-center flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              >
-                <div className="w-16 h-16 rounded-full bg-[#e8f8f7] group-hover:bg-[#3cbfb3] flex items-center justify-center transition-all duration-300">
-                  <Icon size={28} className="text-[#3cbfb3] group-hover:text-white transition-colors duration-300" />
+      {/* 5. Ofertas Relâmpago */}
+      {produtosMostrar.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            {/* Header da seção */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Zap size={22} className="text-[#f59e0b] fill-[#f59e0b]" />
+                <h2 className="text-xl font-bold text-gray-900">Ofertas Relâmpago</h2>
+              </div>
+              {/* Countdown */}
+              <OfertaCountdown targetDate={countdownTarget} />
+            </div>
+            {/* Cards em scroll horizontal */}
+            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+              {produtosMostrar.slice(0, 6).map((produto) => (
+                <div key={produto.id} className="min-w-[180px] max-w-[200px] flex-shrink-0">
+                  <CardProduto produto={produto} ofertaBadge />
                 </div>
-                <div>
-                  <p className="font-bold text-[#1f2937] text-sm">{label}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-snug">{desc}</p>
-                </div>
-              </Link>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* 5. Banners duplos */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+      {/* 6. Banners duplos */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-          {/* Banner Climatizadores */}
           <Link
             href="/produtos?categoria=climatizadores"
-            className="group relative overflow-hidden rounded-2xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
+            className="group relative overflow-hidden rounded-xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
             style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0d3d3a 0%, #1a7a74 60%, #3cbfb3 100%)' }}
           >
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #fff, transparent)' }} />
@@ -180,10 +240,9 @@ export default async function HomePage() {
             </div>
           </Link>
 
-          {/* Banner Spinning */}
           <Link
             href="/produtos?categoria=spinning"
-            className="group relative overflow-hidden rounded-2xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
+            className="group relative overflow-hidden rounded-xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
             style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0a0a0a 0%, #111827 60%, #1f2937 100%)' }}
           >
             <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #3cbfb3, transparent)' }} />
@@ -202,7 +261,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Stats */}
+      {/* 7. Stats */}
       <section style={{ backgroundColor: 'var(--color-stats, #3cbfb3)' }} className="py-10">
         <div className="max-w-5xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/20">
@@ -221,10 +280,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Por que Sixxis? */}
-      <section className="py-10" style={{ backgroundColor: 'var(--color-fundo-alt, #f9fafb)' }}>
+      {/* 8. Por que Sixxis? */}
+      <section className="py-10 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="section-title mb-8">Por que Sixxis?</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-8">Por que Sixxis?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { titulo: cfg.pq_sixxis_1_titulo || 'Tecnologia de Ponta',    texto: cfg.pq_sixxis_1_texto || 'Produtos desenvolvidos com engenharia avançada para máxima eficiência e durabilidade.', Icon: Cpu       },
@@ -247,7 +306,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 8. Newsletter */}
+      {/* 9. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
         <section className="py-10 bg-[#1a4f4a]">
           <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
@@ -262,7 +321,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 9. Banner WhatsApp */}
+      {/* 10. Banner WhatsApp */}
       <section className="py-10" style={{ backgroundColor: 'var(--color-wa, #111827)' }}>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
@@ -286,8 +345,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 9. PagamentosBar */}
+      {/* 11. PagamentosBar */}
       <PagamentosBar />
     </main>
   )
 }
+

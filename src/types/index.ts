@@ -2,7 +2,7 @@
 
 export type StatusPedido = 'pendente' | 'pago' | 'enviado' | 'entregue' | 'cancelado'
 
-export type CategoriaProduto = 'climatizadores' | 'aspiradores' | 'spinning' | 'pecas'
+export type CategoriaProduto = 'climatizadores' | 'aspiradores' | 'spinning'
 
 export type FormaPagamento = 'pix' | 'cartao' | 'boleto'
 
