@@ -59,7 +59,13 @@ function CategoriaItem({ cat }: { cat: typeof CATEGORIAS[0] }) {
         ) : cat.bgColor ? (
           <span className="text-white text-2xl font-black">%</span>
         ) : (
-          <span className="text-gray-400 text-xs font-bold text-center px-1">{cat.nome}</span>
+          /* Fallback tiffany com ícone — aparece quando a imagem quebra */
+          <div className="w-full h-full bg-[#1a4f4a] flex items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="1.5" className="w-8 h-8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4l3 3"/>
+            </svg>
+          </div>
         )}
       </div>
       <div className="text-center">

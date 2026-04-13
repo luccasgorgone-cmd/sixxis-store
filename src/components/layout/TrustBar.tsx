@@ -16,10 +16,7 @@ const DEFAULT_ITEMS: TrustItem[] = [
 
 export default function TrustBar({ items = DEFAULT_ITEMS }: { items?: TrustItem[] }) {
   return (
-    <div
-      className="border-b border-gray-100 shadow-[0_1px_4px_rgba(0,0,0,.04)]"
-      style={{ backgroundColor: 'var(--color-trustbar-fundo, #ffffff)' }}
-    >
+    <div className="bg-white border-b border-gray-100 shadow-[0_1px_4px_rgba(0,0,0,.04)]">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
           {items.map(({ titulo, sub }, i) => {
