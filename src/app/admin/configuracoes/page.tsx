@@ -470,8 +470,8 @@ export default function ConfiguracoesPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (file.size > 3 * 1024 * 1024) {
-      alert('❌ Imagem muito grande. Máximo: 3MB')
+    if (file.size > 10 * 1024 * 1024) {
+      alert('❌ Imagem muito grande. Máximo: 10MB')
       return
     }
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
@@ -1567,7 +1567,7 @@ export default function ConfiguracoesPage() {
                       Clique para fazer upload do wallpaper
                     </p>
                     <p className="text-gray-400 text-xs text-center">
-                      PNG, JPG ou WebP • Recomendado 1920×1080px • Máximo 3MB
+                      PNG, JPG ou WebP • Recomendado 1920×1080px • Máximo 10MB
                     </p>
                     {configs.bg_body_url && (
                       <p className="text-[#3cbfb3] text-xs font-semibold">
@@ -1748,7 +1748,7 @@ export default function ConfiguracoesPage() {
                 <li>Clique em &quot;Salvar Configurações&quot;</li>
               </ol>
               <p className="text-xs text-[#1a4f4a]/60 mt-3">
-                💡 Tamanho recomendado: 1920×1080px • PNG, JPG ou WebP • Máximo 3MB
+                💡 Tamanho recomendado: 1920×1080px • PNG, JPG ou WebP • Máximo 10MB
               </p>
             </div>
 

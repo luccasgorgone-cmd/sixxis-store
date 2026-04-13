@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ erro: 'Nenhum arquivo enviado' }, { status: 400 })
   }
 
-  if (file.size > 3 * 1024 * 1024) {
-    return NextResponse.json({ erro: 'Arquivo muito grande. Máximo: 3MB' }, { status: 400 })
+  if (file.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ erro: 'Arquivo muito grande. Máximo: 10MB' }, { status: 400 })
   }
 
   const allowedTypes = ['image/png', 'image/jpeg', 'image/webp']
