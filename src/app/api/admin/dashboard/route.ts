@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/adminAuth'
 
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
@@ -14,6 +15,9 @@ function formatDate(d: Date) {
 }
 
 export async function GET(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { searchParams } = request.nextUrl
   const fromParam = searchParams.get('from')
   const toParam = searchParams.get('to')

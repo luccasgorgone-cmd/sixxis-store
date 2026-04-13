@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/adminAuth'
 
 const NO_CACHE = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -9,13 +10,19 @@ const NO_CACHE = {
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const rows = await prisma.configuracao.findMany()
   const result = Object.fromEntries(rows.map((r) => [r.chave, r.valor]))
   return NextResponse.json(result, { headers: NO_CACHE })
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const body = await request.json()
 
   // Suporta { chave, valor } ou { configs: { chave: valor } }
@@ -33,8 +40,6 @@ export async function POST(request: NextRequest) {
       }),
     ),
   )
-
-  console.log('[ADMIN] configuracoes salvas:', entries.map(([k]) => k).join(', '))
 
   return NextResponse.json({ ok: true }, { headers: NO_CACHE })
 }

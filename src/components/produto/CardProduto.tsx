@@ -82,7 +82,7 @@ export default function CardProduto({ produto, ofertaBadge = false }: Props) {
             alt={produto.nome}
             fill
             className="object-contain p-3 group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width:640px) 50vw, 25vw"
+            sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-300">

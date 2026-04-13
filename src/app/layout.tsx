@@ -89,9 +89,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
     if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
-    console.log('[LAYOUT OK] logo:', logoUrl, 'cor:', cfg.cor_principal || '#3cbfb3')
-  } catch (error) {
-    console.error('[LAYOUT ERROR — usando defaults]', error)
+  } catch {
+    // silently use defaults
   }
 
   // Fonte selecionada (fallback: Inter)

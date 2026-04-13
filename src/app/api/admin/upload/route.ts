@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadToR2 } from '@/lib/r2'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const formData = await request.formData()
   const file = formData.get('file') as File | null
 

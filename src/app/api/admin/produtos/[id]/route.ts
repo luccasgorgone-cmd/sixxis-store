@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { deleteFromR2 } from '@/lib/r2'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { id } = await params
 
   const produto = await prisma.produto.findUnique({
@@ -34,6 +38,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const body = await request.json()
 
@@ -136,9 +143,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { id } = await params
 
   const produto = await prisma.produto.findUnique({ where: { id } })
