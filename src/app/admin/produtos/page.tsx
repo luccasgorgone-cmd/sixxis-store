@@ -31,7 +31,6 @@ const CATEGORIAS = [
   { value: 'climatizadores', label: 'Climatizadores' },
   { value: 'aspiradores', label: 'Aspiradores' },
   { value: 'spinning', label: 'Spinning' },
-  { value: 'pecas', label: 'Peças' },
 ]
 
 export default function AdminProdutosPage() {

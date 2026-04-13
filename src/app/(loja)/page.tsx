@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { Wind, Fan, Bike, Wrench, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
+import { Wind, Fan, Bike, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
+import BannerCarousel from '@/components/layout/BannerCarousel'
 import { prisma } from '@/lib/prisma'
 
 const categorias = [
@@ -21,12 +22,6 @@ const categorias = [
     desc:     'Desempenho fitness profissional',
     href:     '/produtos?categoria=spinning',
     icon:     Bike,
-  },
-  {
-    label:    'Peças',
-    desc:     'Reposição original garantida',
-    href:     '/pecas',
-    icon:     Wrench,
   },
 ]
 
@@ -49,64 +44,76 @@ const porqueSixxis = [
 ]
 
 export default async function HomePage() {
-  const destaques = await prisma.produto.findMany({
-    where:   { ativo: true },
-    orderBy: { createdAt: 'desc' },
-    take:    8,
-  })
+  const [destaques, banners] = await Promise.all([
+    prisma.produto.findMany({
+      where:   { ativo: true },
+      orderBy: { createdAt: 'desc' },
+      take:    8,
+    }),
+    prisma.banner.findMany({
+      where:   { ativo: true },
+      orderBy: { ordem: 'asc' },
+    }),
+  ])
+
+  console.log('[HOME BANNERS]', banners.length, JSON.stringify(banners.map(b => ({ id: b.id, titulo: b.titulo, ativo: b.ativo, imagem: b.imagem?.slice(0, 50) }))))
 
   return (
     <main className="bg-white">
 
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
-      <section
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }}
-      >
-        {/* Decoração de fundo */}
-        <div
-          className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5"
-          style={{ background: '#3cbfb3', filter: 'blur(80px)', transform: 'translate(30%, -30%)' }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-5"
-          style={{ background: '#3cbfb3', filter: 'blur(60px)', transform: 'translate(-30%, 30%)' }}
-        />
+      {/* ── Hero / Banner ───────────────────────────────────────────────────── */}
+      {banners.length > 0 ? (
+        <BannerCarousel banners={banners} />
+      ) : (
+        <section
+          className="relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)' }}
+        >
+          {/* Decoração de fundo */}
+          <div
+            className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5"
+            style={{ background: '#3cbfb3', filter: 'blur(80px)', transform: 'translate(30%, -30%)' }}
+          />
+          <div
+            className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-5"
+            style={{ background: '#3cbfb3', filter: 'blur(60px)', transform: 'translate(-30%, 30%)' }}
+          />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-24 md:py-32 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-full border border-white/20 mb-8">
-            <span>🏆</span>
-            Loja Oficial Sixxis — Araçatuba, SP
+          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-24 md:py-32 text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-full border border-white/20 mb-8">
+              <span>🏆</span>
+              Loja Oficial Sixxis — Araçatuba, SP
+            </div>
+
+            {/* Título */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
+              Climatizadores, Aspiradores e Fitness
+            </h1>
+
+            {/* Subtítulo */}
+            <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Produtos originais Sixxis com garantia e entrega rápida para todo o Brasil.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/produtos" className="btn-primary text-base">
+                Explorar Produtos <ArrowRight size={18} />
+              </Link>
+            </div>
+
+            {/* Credenciais */}
+            <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-white/60">
+              {['Garantia Sixxis', 'Frete Grátis acima R$500', 'Pagamento Seguro', 'Suporte Técnico'].map(c => (
+                <span key={c} className="flex items-center gap-1.5">
+                  <span className="text-[#3cbfb3] font-bold">✓</span> {c}
+                </span>
+              ))}
+            </div>
           </div>
-
-          {/* Título */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
-            Climatizadores, Aspiradores e Fitness
-          </h1>
-
-          {/* Subtítulo */}
-          <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Produtos originais Sixxis com garantia e entrega rápida para todo o Brasil.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/produtos" className="btn-primary text-base">
-              Explorar Produtos <ArrowRight size={18} />
-            </Link>
-          </div>
-
-          {/* Credenciais */}
-          <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-white/60">
-            {['Garantia Sixxis', 'Frete Grátis acima R$500', 'Pagamento Seguro', 'Suporte Técnico'].map(c => (
-              <span key={c} className="flex items-center gap-1.5">
-                <span className="text-[#3cbfb3] font-bold">✓</span> {c}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Stats ───────────────────────────────────────────────────────────── */}
       <section className="bg-[#3cbfb3]">
