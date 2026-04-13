@@ -205,7 +205,7 @@ function CampoFrete({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className="shrink-0 flex flex-col gap-1">
-      <label className="text-white/60 text-[10px] font-semibold uppercase tracking-wider">
+      <label className="text-white font-semibold text-xs uppercase tracking-wider">
         Calcule o Frete
       </label>
       <div className="flex items-center bg-white rounded-lg overflow-hidden h-9">
@@ -322,7 +322,7 @@ export default function Header({
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
 
             {/* Linha unificada — mobile e desktop compartilham a mesma row */}
-            <div className="relative flex items-center h-16 lg:h-auto lg:py-3 gap-3">
+            <div className="relative flex items-center h-14 lg:h-auto lg:py-3 gap-3">
 
               {/* Burger — mobile only */}
               <button
@@ -334,22 +334,21 @@ export default function Header({
               </button>
 
               {/* ★ LOGO ÚNICA — centralizada no mobile via absolute, estática no desktop */}
-              <Link
-                href="/"
-                className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 shrink-0 flex flex-col items-center lg:items-start lg:mr-2"
-              >
-                <Image
-                  src={logoUrl}
-                  alt="Sixxis"
-                  width={130}
-                  height={44}
-                  className="object-contain h-9 sm:h-11 w-auto"
-                  priority
-                />
-                <p className="hidden lg:block text-[#3cbfb3] text-xs font-semibold tracking-wide mt-0.5">
+              <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 shrink-0 flex flex-col items-center lg:mr-2">
+                <Link href="/">
+                  <Image
+                    src={logoUrl}
+                    alt="Sixxis"
+                    width={110}
+                    height={36}
+                    className="object-contain w-auto"
+                    priority
+                  />
+                </Link>
+                <p style={{ color: '#3cbfb3', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'center', marginTop: '2px' }}>
                   Qualidade e Inovação
                 </p>
-              </Link>
+              </div>
 
               {/* Search — desktop only */}
               <SearchVentisol className="hidden lg:flex flex-1" />
@@ -381,13 +380,13 @@ export default function Header({
                   <>
                     <Link
                       href="/login"
-                      className="border border-white/30 text-white text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition whitespace-nowrap"
+                      className="border border-white/30 text-white text-sm px-3 py-1.5 h-8 rounded-lg hover:bg-white/10 transition whitespace-nowrap"
                     >
                       Entrar
                     </Link>
                     <Link
                       href="/cadastro"
-                      className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap"
+                      className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-3 py-1.5 h-8 rounded-lg transition whitespace-nowrap"
                     >
                       Cadastrar
                     </Link>
@@ -395,15 +394,12 @@ export default function Header({
                 )}
                 <Link
                   href="/carrinho"
-                  className="relative flex items-center gap-1.5 text-white hover:text-white/80 transition ml-1 px-2 py-2 rounded-lg hover:bg-white/10"
+                  className="relative flex items-center text-white hover:text-white/80 transition ml-1 px-2 py-2 rounded-lg hover:bg-white/10"
                   aria-label="Carrinho"
                 >
-                  <ShoppingCart size={22} />
-                  <span className="text-sm font-medium hidden xl:block whitespace-nowrap">
-                    Carrinho{totalItens > 0 ? ` (${totalItens})` : ''}
-                  </span>
+                  <ShoppingCart size={20} />
                   {totalItens > 0 && (
-                    <span className="absolute -top-1 -right-1 xl:hidden bg-[#3cbfb3] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                    <span className="absolute -top-1 -right-1 bg-[#3cbfb3] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}

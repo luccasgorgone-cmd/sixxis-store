@@ -225,22 +225,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Formas de Pagamento ──────────────────────────────────────────────── */}
-      <section className="bg-white border-t border-gray-200 py-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-sm text-gray-500 font-medium mb-5">Pagamento 100% seguro:</p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm font-semibold text-gray-700">
-            {['PIX', 'Visa', 'Mastercard', 'Boleto', 'Parcelamos em até 12x'].map((m) => (
-              <span
-                key={m}
-                className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 hover:border-[#3cbfb3] transition"
-              >
-                {m}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   )
 }
