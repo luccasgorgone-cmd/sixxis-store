@@ -16,11 +16,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    // h-screen + overflow-hidden garante que h-full da sidebar resolve corretamente
+    // Sidebar é lg:static (flex child) — não precisa de wrapper com largura duplicada
+    <div className="h-screen flex overflow-hidden bg-gray-100">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto">
+      <div className="flex-1 min-w-0 overflow-auto">
         {children}
-      </main>
+      </div>
     </div>
   )
 }
