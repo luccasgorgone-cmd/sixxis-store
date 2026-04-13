@@ -66,7 +66,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-transparent">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
       {banners.length > 0 ? (
@@ -111,13 +111,13 @@ export default async function HomePage() {
       <CategoriasSection />
 
       {/* ── 4. Produtos em Destaque ───────────────────────────────── */}
-      <section className="bg-white/10 backdrop-blur-none py-8">
+      <section className="bg-transparent border-b border-white/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header da seção */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-xl font-extrabold text-gray-900">Produtos em Destaque</h2>
+              <h2 className="text-xl font-extrabold text-white">Produtos em Destaque</h2>
               <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
             </div>
             <Link
@@ -148,7 +148,7 @@ export default async function HomePage() {
       <OfertasRelampago produtos={produtosOferta} />
 
       {/* ── 6. Banners duplos ─────────────────────────────────────── */}
-      <section className="bg-transparent pb-8">
+      <section className="bg-transparent border-b border-white/10 pb-8 pt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -214,18 +214,17 @@ export default async function HomePage() {
       </section>
 
       {/* ── 7. Stats ──────────────────────────────────────────────── */}
-      <section className="bg-[#1a4f4a] py-10">
+      <section className="bg-transparent border-b border-white/10 py-10">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/20">
+          <div className="grid grid-cols-3 gap-0 divide-x divide-white/20">
             {[
-              { num: cfg.stat_1_num   || '5.000+',   label: cfg.stat_1_label || 'Clientes Satisfeitos' },
-              { num: cfg.stat_2_num   || '12 meses', label: cfg.stat_2_label || 'Garantia Sixxis'      },
-              { num: cfg.stat_3_num   || '100%',     label: cfg.stat_3_label || 'Entrega para o Brasil'},
-              { num: cfg.stat_4_num   || '48h',      label: cfg.stat_4_label || 'Entrega Expressa SP'  },
+              { num: '1 Milhão+', label: 'Clientes Atendidos'    },
+              { num: '12 meses',  label: 'Garantia Sixxis'       },
+              { num: '100%',      label: 'Entrega para o Brasil' },
             ].map(({ num, label }) => (
               <div key={label} className="flex flex-col items-center text-center py-4 px-6">
                 <p className="text-2xl md:text-3xl font-extrabold text-white">{num}</p>
-                <p className="text-white/80 text-xs font-medium mt-1">{label}</p>
+                <p className="text-white/70 text-xs font-medium mt-1">{label}</p>
               </div>
             ))}
           </div>
@@ -233,10 +232,10 @@ export default async function HomePage() {
       </section>
 
       {/* ── 8. Por que Sixxis? ────────────────────────────────────── */}
-      <section className="bg-white/5 py-10">
+      <section className="bg-transparent border-b border-white/10 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="mb-6">
-            <h2 className="text-xl font-extrabold text-gray-900">Por que Sixxis?</h2>
+            <h2 className="text-xl font-extrabold text-white">Por que Sixxis?</h2>
             <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -247,14 +246,14 @@ export default async function HomePage() {
             ].map(({ titulo, texto, Icon }) => (
               <div
                 key={titulo}
-                className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-shadow duration-300"
+                className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-xl p-8 hover:shadow-lg hover:bg-white/[0.12] transition-all duration-300"
                 style={{ borderTop: '4px solid #3cbfb3' }}
               >
-                <div className="w-12 h-12 rounded-xl bg-[#e8f8f7] flex items-center justify-center mb-5">
+                <div className="w-12 h-12 rounded-xl bg-[#1a4f4a] flex items-center justify-center mb-5">
                   <Icon size={22} className="text-[#3cbfb3]" />
                 </div>
-                <h3 className="font-bold text-[#0a0a0a] mb-3 text-base">{titulo}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{texto}</p>
+                <h3 className="font-bold text-white mb-3 text-base">{titulo}</h3>
+                <p className="text-sm text-white/70 leading-relaxed">{texto}</p>
               </div>
             ))}
           </div>
@@ -263,7 +262,7 @@ export default async function HomePage() {
 
       {/* ── 9. Newsletter ─────────────────────────────────────────── */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="bg-[#0f2e2b] py-10">
+        <section className="bg-transparent border-b border-white/10 py-10">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl font-extrabold text-white mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
@@ -277,12 +276,12 @@ export default async function HomePage() {
       )}
 
       {/* ── 10. Banner WhatsApp ───────────────────────────────────── */}
-      <section className="bg-[#111827] py-10">
+      <section className="bg-transparent py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             {cfg.whatsapp_banner_titulo || 'Precisa de ajuda para escolher?'}
           </h2>
-          <p className="text-white/60 mb-8 text-base leading-relaxed">
+          <p className="text-white/70 mb-8 text-base leading-relaxed">
             {cfg.whatsapp_banner_subtitulo || 'Nossa equipe especializada está pronta para te orientar.'}
           </p>
           <a

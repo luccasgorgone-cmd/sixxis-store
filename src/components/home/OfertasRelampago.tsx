@@ -47,9 +47,9 @@ export default function OfertasRelampago({ produtos }: Props) {
   ]
 
   return (
-    <section className="bg-[#f0f2f5] pb-8">
+    <section className="bg-transparent border-b border-white/10 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-[#e8f8f7] border border-[#3cbfb3]/20 rounded-2xl p-5 sm:p-6">
+        <div className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-2xl p-5 sm:p-6">
 
           {/* Header com timer */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -58,7 +58,7 @@ export default function OfertasRelampago({ produtos }: Props) {
             <div className="flex items-center gap-3">
               <span className="text-3xl select-none">⚡</span>
               <div>
-                <h2 className="text-2xl font-extrabold text-[#0f2e2b] leading-none">
+                <h2 className="text-2xl font-extrabold text-white leading-none">
                   Ofertas Relâmpago
                 </h2>
                 <p className="text-[#3cbfb3] text-sm font-semibold mt-0.5">
@@ -69,7 +69,7 @@ export default function OfertasRelampago({ produtos }: Props) {
 
             {/* Timer estilo Casas Bahia */}
             <div className="flex items-end gap-1.5">
-              <span className="text-[#1a4f4a] font-semibold text-sm hidden sm:inline mb-3">
+              <span className="text-white/70 font-semibold text-sm hidden sm:inline mb-3">
                 Termina em:
               </span>
               {blocos.map((bloco, i) => (
@@ -78,7 +78,7 @@ export default function OfertasRelampago({ produtos }: Props) {
                     <span className="bg-[#1a4f4a] text-white font-mono font-extrabold px-3 py-2 rounded-lg text-lg sm:text-xl min-w-[48px] text-center tabular-nums leading-none">
                       {bloco.val}
                     </span>
-                    <span className="text-[#1a4f4a] text-[9px] font-bold uppercase tracking-wider mt-1">
+                    <span className="text-white/70 text-[9px] font-bold uppercase tracking-wider mt-1">
                       {bloco.label}
                     </span>
                   </div>

@@ -74,16 +74,16 @@ function CategoriaCard({ cat }: { cat: Categoria }) {
           </span>
         )}
       </div>
-      <span className="text-sm font-bold text-white text-center">{cat.nome}</span>
+      <span className="text-sm font-bold text-white/80 text-center">{cat.nome}</span>
     </Link>
   )
 }
 
 export default function CategoriasSection() {
   return (
-    <section className="bg-[#1a4f4a] w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <h2 className="text-xl font-bold text-white mb-8">Nossas Categorias</h2>
+    <section className="bg-transparent border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
+        <h2 className="text-xl font-extrabold text-white mb-6">Nossas Categorias</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {CATEGORIAS.map((cat) => (
             <CategoriaCard key={cat.nome} cat={cat} />

@@ -38,8 +38,8 @@ export default function NewsletterForm() {
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="seu@email.com"
-        className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-transparent"
+        placeholder="Seu melhor e-mail"
+        className="flex-1 bg-white text-gray-800 placeholder-gray-400 px-5 py-3.5 rounded-xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#3cbfb3]"
       />
       <button
         type="submit"

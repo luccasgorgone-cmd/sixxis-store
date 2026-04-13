@@ -68,7 +68,7 @@ function PagamentoBadges() {
 
 function ColTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-white font-bold text-sm pb-2 mb-4 border-b border-[#3cbfb3]/30">
+    <p className="text-white font-bold text-sm pb-2 mb-4 border-b border-white/15">
       {children}
     </p>
   )
@@ -121,7 +121,7 @@ export default async function Footer() {
   } catch {}
 
   return (
-    <footer className="text-gray-400" style={{ backgroundColor: 'var(--bg-footer, #111827)' }}>
+    <footer className="text-white/60" style={{ backgroundColor: 'var(--bg-header, #1a4f4a)' }}>
 
       {/* ── Linha tiffany topo ────────────────────────────────────────────── */}
       <div className="h-1 bg-[#3cbfb3]" />
@@ -142,7 +142,7 @@ export default async function Footer() {
                 unoptimized
               />
             </Link>
-            <p className="text-sm text-gray-300 leading-relaxed mb-5">
+            <p className="text-sm text-white/70 leading-relaxed mb-5">
               Qualidade e inovação para o seu conforto e bem-estar.
             </p>
 
@@ -163,7 +163,7 @@ export default async function Footer() {
               href={`https://wa.me/${whatsappSuporte}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-[#3cbfb3]/40 text-gray-300 hover:text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 mb-3"
+              className="flex items-center gap-2 w-full bg-[#0f2e2b] hover:bg-[#0a1f1d] border border-white/20 hover:border-[#3cbfb3]/50 text-white/70 hover:text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 mb-3"
               aria-label="WhatsApp Assistência Técnica"
             >
               <WaIcon size={16} />
@@ -173,17 +173,17 @@ export default async function Footer() {
             {/* Contato */}
             <Link
               href="/contato"
-              className="flex items-center justify-center gap-2 w-full border border-gray-600 hover:border-[#3cbfb3] text-gray-300 hover:text-[#3cbfb3] text-sm font-medium px-4 py-2 rounded-xl transition-all mb-5"
+              className="flex items-center justify-center gap-2 w-full border border-white/20 hover:border-[#3cbfb3] text-white/70 hover:text-[#3cbfb3] text-sm font-medium px-4 py-2 rounded-xl transition-all mb-5"
             >
               Entre em Contato
             </Link>
 
             {/* Email */}
             <div className="text-sm space-y-1">
-              <p className="text-gray-600 text-xs">Envie um e-mail:</p>
+              <p className="text-white/40 text-xs">Envie um e-mail:</p>
               <a
                 href="mailto:brasil.sixxis@gmail.com"
-                className="flex items-center gap-1.5 text-gray-300 hover:text-[#3cbfb3] transition py-1"
+                className="flex items-center gap-1.5 text-white/70 hover:text-[#3cbfb3] transition py-1"
               >
                 <Mail size={13} />
                 brasil.sixxis@gmail.com
@@ -192,10 +192,10 @@ export default async function Footer() {
 
             {/* Horário */}
             <div className="mt-4 text-xs space-y-0.5">
-              <p className="flex items-center gap-1.5 text-gray-400 font-medium">
+              <p className="flex items-center gap-1.5 text-white/50 font-medium">
                 <Clock size={12} /> Horário de Atendimento SAC:
               </p>
-              <p className="text-gray-300">Seg–Sex: 8h às 18h&nbsp;&nbsp;|&nbsp;&nbsp;Sáb: 8h às 12h</p>
+              <p className="text-white/70">Seg–Sex: 8h às 18h&nbsp;&nbsp;|&nbsp;&nbsp;Sáb: 8h às 12h</p>
             </div>
           </div>
 
@@ -210,7 +210,7 @@ export default async function Footer() {
                 ['FAQ',                     '/faq'],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <Link href={href} className="block py-1 text-gray-300 hover:text-[#3cbfb3] hover:translate-x-1 transition-all duration-200">
+                  <Link href={href} className="block py-1 text-white/60 hover:text-white hover:translate-x-1 transition-all duration-200">
                     {label}
                   </Link>
                 </li>
@@ -229,7 +229,7 @@ export default async function Footer() {
                 ['Termo de Garantia',       '/garantia'],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <Link href={href} className="block py-1 text-gray-300 hover:text-[#3cbfb3] hover:translate-x-1 transition-all duration-200">
+                  <Link href={href} className="block py-1 text-white/60 hover:text-white hover:translate-x-1 transition-all duration-200">
                     {label}
                   </Link>
                 </li>
@@ -249,7 +249,7 @@ export default async function Footer() {
                 ['FAQ',             '/faq'],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <Link href={href} className="block py-1 text-gray-300 hover:text-[#3cbfb3] hover:translate-x-1 transition-all duration-200">
+                  <Link href={href} className="block py-1 text-white/60 hover:text-white hover:translate-x-1 transition-all duration-200">
                     {label}
                   </Link>
                 </li>
@@ -269,10 +269,10 @@ export default async function Footer() {
                   className="flex items-center gap-3 group"
                   aria-label="Instagram Sixxis"
                 >
-                  <span className="w-8 h-8 rounded-full border border-gray-700 group-hover:border-[#3cbfb3] flex items-center justify-center text-gray-400 group-hover:text-[#3cbfb3] transition-all duration-200 shrink-0">
+                  <span className="w-8 h-8 rounded-full border border-white/15 group-hover:border-[#3cbfb3] flex items-center justify-center text-white/50 group-hover:text-[#3cbfb3] transition-all duration-200 shrink-0">
                     <IgIcon />
                   </span>
-                  <span className="text-sm text-gray-400 group-hover:text-[#3cbfb3] transition-colors duration-200">
+                  <span className="text-sm text-white/50 group-hover:text-[#3cbfb3] transition-colors duration-200">
                     @sixxisoficial
                   </span>
                 </a>
@@ -285,10 +285,10 @@ export default async function Footer() {
                   className="flex items-center gap-3 group"
                   aria-label="Facebook Sixxis"
                 >
-                  <span className="w-8 h-8 rounded-full border border-gray-700 group-hover:border-[#3cbfb3] flex items-center justify-center text-gray-400 group-hover:text-[#3cbfb3] transition-all duration-200 shrink-0">
+                  <span className="w-8 h-8 rounded-full border border-white/15 group-hover:border-[#3cbfb3] flex items-center justify-center text-white/50 group-hover:text-[#3cbfb3] transition-all duration-200 shrink-0">
                     <FbIcon />
                   </span>
-                  <span className="text-sm text-gray-400 group-hover:text-[#3cbfb3] transition-colors duration-200">
+                  <span className="text-sm text-white/50 group-hover:text-[#3cbfb3] transition-colors duration-200">
                     Sixxis do Brasil
                   </span>
                 </a>
@@ -297,17 +297,17 @@ export default async function Footer() {
 
             <ColTitle>Certificados</ColTitle>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 bg-gray-800/60 border border-gray-700 rounded-xl px-3 py-2.5 hover:border-gray-600 transition-colors">
+              <div className="flex items-center gap-2 bg-[#0f2e2b]/60 border border-white/10 rounded-xl px-3 py-2.5 hover:border-white/20 transition-colors">
                 <ShieldCheck size={14} color="#34A853" strokeWidth={2.5} />
-                <span className="text-xs text-gray-300 font-medium">Google Safe Browsing</span>
+                <span className="text-xs text-white/70 font-medium">Google Safe Browsing</span>
               </div>
-              <div className="flex items-center gap-2 bg-gray-800/60 border border-gray-700 rounded-xl px-3 py-2.5 hover:border-gray-600 transition-colors">
+              <div className="flex items-center gap-2 bg-[#0f2e2b]/60 border border-white/10 rounded-xl px-3 py-2.5 hover:border-white/20 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle cx="12" cy="12" r="11" fill="#009EE3"/>
                   <ellipse cx="12" cy="12" rx="6" ry="4" fill="white"/>
                   <circle cx="12" cy="12" r="2" fill="#009EE3"/>
                 </svg>
-                <span className="text-xs text-gray-300 font-medium">Mercado Pago</span>
+                <span className="text-xs text-white/70 font-medium">Mercado Pago</span>
               </div>
               <div className="flex items-center gap-2 bg-gray-800/60 border border-[#3cbfb3]/30 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/50 transition-colors">
                 <ShieldCheck size={14} color="#3cbfb3" strokeWidth={2.5} />
@@ -319,20 +319,20 @@ export default async function Footer() {
       </div>
 
       {/* ── Formas de pagamento ───────────────────────────────────────────── */}
-      <div className="border-t border-white/10 bg-black/20 py-5 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-4">
-          <p className="text-xs text-gray-500 font-medium shrink-0">Formas de Pagamento:</p>
+      <div className="border-t border-white/10" style={{ backgroundColor: '#0f2e2b' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center gap-4">
+          <p className="text-xs text-white/50 font-medium shrink-0">Formas de Pagamento:</p>
           <PagamentoBadges />
-          <p className="text-xs text-gray-600 ml-auto hidden lg:block">
-            Parcele em até <span className="text-gray-400 font-semibold">6x sem juros</span>
+          <p className="text-xs text-white/40 ml-auto hidden lg:block">
+            Parcele em até <span className="text-white/60 font-semibold">6x sem juros</span>
           </p>
         </div>
       </div>
 
       {/* ── Rodapé legal ─────────────────────────────────────────────────── */}
-      <div className="border-t border-[#3cbfb3]/40 bg-black/30">
+      <div className="border-t border-white/10" style={{ backgroundColor: '#0f2e2b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div className="text-xs text-gray-500 space-y-0.5">
+          <div className="text-xs text-white/40 space-y-0.5">
             <p>© {new Date().getFullYear()} Sixxis — SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA</p>
             <p>CNPJ: 54.978.947/0001-09&nbsp;&nbsp;|&nbsp;&nbsp;IE: 117.633.347.114</p>
             <p className="flex items-center gap-1">
@@ -340,7 +340,7 @@ export default async function Footer() {
               R. Anhanguera, 1711 - Icaray, Araçatuba - SP, 16020-355
             </p>
           </div>
-          <p className="text-xs text-gray-600 shrink-0">Todos os direitos reservados.</p>
+          <p className="text-xs text-white/30 shrink-0">Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>
