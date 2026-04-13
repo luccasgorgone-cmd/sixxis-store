@@ -74,6 +74,13 @@ const COR_KEYS = [
   'cor_card_fundo', 'cor_card_borda', 'cor_card_hover',
   'cor_trustbar_fundo', 'cor_trustbar_icones',
   'cor_badge_oferta', 'cor_badge_novo', 'cor_badge_esgotado',
+  // Background global (wallpaper)
+  'bg_body_url', 'bg_body_ativo', 'bg_body_size', 'bg_body_attachment',
+  'bg_body_repeat', 'bg_body_position', 'bg_body_overlay',
+  // Cores configuráveis do header
+  'bg_header_cor', 'bg_header_nav_cor', 'bg_anuncio_cor', 'bg_anuncio_texto',
+  // Cores configuráveis do footer
+  'bg_footer_cor', 'bg_footer_texto', 'bg_footer_titulo', 'bg_footer_hover',
 ] as const
 
 
@@ -139,7 +146,34 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--color-badge-novo':       cfg.cor_badge_novo       || '#3cbfb3',
     '--color-badge-esgotado':   cfg.cor_badge_esgotado   || '#9ca3af',
     '--font-active':            `var(${fontObj.variable})`,
+    // Novas variáveis de personalização visual
+    '--bg-header':      cfg.bg_header_cor      || '#1a4f4a',
+    '--bg-header-nav':  cfg.bg_header_nav_cor  || '#0f2e2b',
+    '--bg-anuncio':     cfg.bg_anuncio_cor     || '#0f2e2b',
+    '--bg-anuncio-txt': cfg.bg_anuncio_texto   || '#ffffff',
+    '--bg-footer':      cfg.bg_footer_cor      || '#111827',
+    '--bg-footer-txt':  cfg.bg_footer_texto    || '#9ca3af',
+    '--bg-footer-h':    cfg.bg_footer_titulo   || '#ffffff',
+    '--bg-footer-hov':  cfg.bg_footer_hover    || '#3cbfb3',
   } as React.CSSProperties
+
+  // Background global do body
+  const bgAtivo = cfg.bg_body_ativo === 'true' && !!cfg.bg_body_url
+  const bodyStyle: React.CSSProperties = {
+    fontFamily: `var(${fontObj.variable}), system-ui, sans-serif`,
+    ...(bgAtivo ? {
+      backgroundImage:    `url(${cfg.bg_body_url})`,
+      backgroundSize:     cfg.bg_body_size       || 'cover',
+      backgroundAttachment: cfg.bg_body_attachment || 'fixed',
+      backgroundRepeat:   cfg.bg_body_repeat     || 'no-repeat',
+      backgroundPosition: cfg.bg_body_position   || 'center center',
+      backgroundColor:    '#0f1f1d',
+    } : {
+      backgroundColor: cfg.cor_fundo || '#ffffff',
+    }),
+  }
+
+  const overlayOpacity = bgAtivo ? Number(cfg.bg_body_overlay || 0) : 0
 
   return (
     <html
@@ -153,12 +187,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="apple-mobile-web-app-title" content="Sixxis Store" />
       </head>
       <body
-        className="min-h-full flex flex-col bg-white"
-        style={{ fontFamily: `var(${fontObj.variable}), system-ui, sans-serif` }}
+        className="min-h-full flex flex-col"
+        style={bodyStyle}
       >
+        {/* Overlay de escurecimento do background (quando ativo) */}
+        {bgAtivo && overlayOpacity > 0 && (
+          <div
+            className="overlay-bg"
+            style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity / 100})` }}
+            aria-hidden="true"
+          />
+        )}
         <SessionProvider>
           <Header logoUrl={logoUrl} />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 relative z-[1]">{children}</div>
           <Footer />
         </SessionProvider>
       </body>

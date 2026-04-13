@@ -71,7 +71,7 @@
 /* ── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
   body {
-    background: #ffffff;
+    min-height: 100vh;
     color: #1f2937;
     font-family: var(--font-inter), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -80,6 +80,23 @@
   * {
     box-sizing: border-box;
   }
+}
+
+/* ── Background overlay e z-index ────────────────────────────────────────── */
+.overlay-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Garante que header, conteúdo e footer ficam acima do wallpaper */
+header,
+footer,
+nav,
+main {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Utilitários ──────────────────────────────────────────────────────────── */

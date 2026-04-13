@@ -261,7 +261,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       {/* ═══════════════════════════════════════════════════════
           CAMADA 1 — Announcement Bar
       ═══════════════════════════════════════════════════════ */}
-      <div className="bg-[#0f2e2b] border-b border-[#3cbfb3]/15 w-full">
+      <div className="border-b border-[#3cbfb3]/15 w-full" style={{ backgroundColor: 'var(--bg-anuncio, #0f2e2b)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-11">
 
@@ -309,7 +309,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       <div className="sticky top-0 z-40">
 
         {/* ─── HEADER PRINCIPAL ─────────────────────────────── */}
-        <div className="bg-[#1a4f4a] shadow-md">
+        <div className="shadow-md" style={{ backgroundColor: 'var(--bg-header, #1a4f4a)' }}>
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
 
             {/* Desktop row — h-[68px] fixo */}
@@ -427,7 +427,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         </div>
 
         {/* ─── NAV CATEGORIAS ───────────────────────────────── */}
-        <nav className="hidden lg:block bg-[#0f2e2b]">
+        <nav className="hidden lg:block" style={{ backgroundColor: 'var(--bg-header-nav, #0f2e2b)' }}>
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
             <div className="flex items-center justify-center">
               {navLinks.map(({ href, label, destaque }, idx) => (
@@ -559,7 +559,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         }}
       >
         {/* Header drawer */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0 bg-[#0f2e2b]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0" style={{ backgroundColor: 'var(--bg-header-nav, #0f2e2b)' }}>
           <Link href="/" onClick={() => setDrawerOpen(false)}>
             <Image src={logoUrl} alt="Sixxis" width={100} height={34} className="object-contain brightness-0 invert" unoptimized />
           </Link>

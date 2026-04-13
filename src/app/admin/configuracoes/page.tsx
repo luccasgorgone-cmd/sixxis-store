@@ -18,6 +18,8 @@ import {
   LayoutTemplate,
   FileText,
   Type,
+  ImageIcon,
+  ExternalLink,
 } from 'lucide-react'
 import CampoCor from '@/components/admin/CampoCor'
 import { Toast } from '@/components/admin/Toast'
@@ -166,10 +168,29 @@ const DEFAULTS: Record<string, string> = {
   cor_botoes_hover: '#2a9d8f',
   cor_textos_sec: '#6b7280',
   cor_titulos: '#0a0a0a',
+  // Background global (wallpaper)
+  bg_body_url: '',
+  bg_body_ativo: 'false',
+  bg_body_size: 'cover',
+  bg_body_attachment: 'fixed',
+  bg_body_repeat: 'no-repeat',
+  bg_body_position: 'center center',
+  bg_body_overlay: '0',
+  // Cores do header
+  bg_header_cor: '#1a4f4a',
+  bg_header_nav_cor: '#0f2e2b',
+  bg_anuncio_cor: '#0f2e2b',
+  bg_anuncio_texto: '#ffffff',
+  // Cores do footer
+  bg_footer_cor: '#111827',
+  bg_footer_texto: '#9ca3af',
+  bg_footer_titulo: '#ffffff',
+  bg_footer_hover: '#3cbfb3',
 }
 
 const TABS = [
   { id: 'loja', label: 'Informações da Loja', icon: Store },
+  { id: 'visual', label: 'Visual do Site', icon: ImageIcon },
   { id: 'aparencia', label: 'Aparência', icon: Palette },
   { id: 'tipografia', label: 'Tipografia', icon: Type },
   { id: 'textos', label: 'Textos do Site', icon: FileText },
@@ -1375,8 +1396,312 @@ export default function ConfiguracoesPage() {
     )
   }
 
+  // ─── renderVisual ────────────────────────────────────────────────────────────
+
+  function ColorPicker({
+    chave,
+    label,
+    descricao,
+    defaultVal,
+  }: {
+    chave: string
+    label: string
+    descricao: string
+    defaultVal: string
+  }) {
+    const valor = configs[chave] || defaultVal
+    return (
+      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+        <div className="flex items-center gap-3 mb-2">
+          <input
+            type="color"
+            value={valor.startsWith('#') && valor.length === 7 ? valor : defaultVal}
+            onChange={(e) => set(chave, e.target.value)}
+            className="w-10 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5 shrink-0"
+          />
+          <div>
+            <p className="font-bold text-gray-900 text-sm">{label}</p>
+            <p className="text-xs text-gray-500">{descricao}</p>
+          </div>
+        </div>
+        <input
+          type="text"
+          value={valor}
+          onChange={(e) => {
+            if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) set(chave, e.target.value)
+          }}
+          placeholder="#000000"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-[#3cbfb3] outline-none"
+          maxLength={7}
+        />
+      </div>
+    )
+  }
+
+  function renderVisual() {
+    const visualKeys = [
+      'bg_body_url', 'bg_body_ativo', 'bg_body_size', 'bg_body_attachment',
+      'bg_body_repeat', 'bg_body_position', 'bg_body_overlay',
+      'bg_header_cor', 'bg_header_nav_cor', 'bg_anuncio_cor', 'bg_anuncio_texto',
+      'bg_footer_cor', 'bg_footer_texto', 'bg_footer_titulo', 'bg_footer_hover',
+    ]
+
+    return (
+      <div className="space-y-5">
+
+        {/* CARD 1 — Wallpaper */}
+        <Card title="Imagem de Fundo (Wallpaper)">
+          <p className="text-xs text-gray-500 mb-4">Aparece como fundo em todas as páginas do site</p>
+
+          {/* Toggle ativo */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 mb-4">
+            <div>
+              <p className="font-bold text-gray-900">Ativar wallpaper no site</p>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Quando ativo, a imagem aparece como fundo de todas as páginas
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+              <input
+                type="checkbox"
+                checked={configs.bg_body_ativo === 'true'}
+                onChange={(e) => set('bg_body_ativo', e.target.checked ? 'true' : 'false')}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[#3cbfb3] rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#3cbfb3] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" />
+            </label>
+          </div>
+
+          {/* Preview */}
+          {configs.bg_body_url ? (
+            <div className="relative rounded-xl overflow-hidden border border-gray-200 h-44 group mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={configs.bg_body_url}
+                alt="Wallpaper atual"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3">
+                <span className="text-white text-sm font-semibold">Wallpaper atual</span>
+                <button
+                  onClick={() => set('bg_body_url', '')}
+                  className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-600 transition"
+                >
+                  Remover
+                </button>
+              </div>
+              <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-lg">
+                {configs.bg_body_ativo === 'true' ? '✅ Ativo' : '⏸ Inativo'}
+              </div>
+            </div>
+          ) : (
+            <div className="h-44 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center mb-4">
+              <div className="text-center">
+                <p className="text-gray-400 font-medium">Nenhum wallpaper configurado</p>
+                <p className="text-gray-300 text-sm mt-1">Cole a URL abaixo para adicionar</p>
+              </div>
+            </div>
+          )}
+
+          {/* URL */}
+          <div className="mb-4">
+            <label className="text-sm font-bold text-gray-700 block mb-2">URL do Wallpaper</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={configs.bg_body_url || ''}
+                onChange={(e) => set('bg_body_url', e.target.value)}
+                placeholder="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/..."
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#3cbfb3] outline-none"
+              />
+              {configs.bg_body_url && (
+                <button
+                  onClick={() => window.open(configs.bg_body_url, '_blank')}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl text-sm font-medium transition"
+                >
+                  Ver
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              💡 Faça o upload em{' '}
+              <a href="/admin/banners" className="text-[#3cbfb3] hover:underline">Admin → Banners</a>
+              , copie a URL e cole aqui. Tamanho recomendado: 1920×1080px.
+            </p>
+          </div>
+
+          {/* Configurações avançadas */}
+          <details className="border border-gray-100 rounded-xl overflow-hidden">
+            <summary className="px-4 py-3 bg-gray-50 cursor-pointer font-semibold text-gray-700 text-sm select-none">
+              ⚙️ Configurações avançadas
+            </summary>
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Tamanho</label>
+                <select
+                  value={configs.bg_body_size || 'cover'}
+                  onChange={(e) => set('bg_body_size', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  <option value="cover">Cover (preenche tudo)</option>
+                  <option value="contain">Contain (mostra inteiro)</option>
+                  <option value="auto">Auto (tamanho original)</option>
+                  <option value="100% 100%">Esticado (100%×100%)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Comportamento ao rolar</label>
+                <select
+                  value={configs.bg_body_attachment || 'fixed'}
+                  onChange={(e) => set('bg_body_attachment', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  <option value="fixed">Fixo (parallax)</option>
+                  <option value="scroll">Rola com a página</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Posição</label>
+                <select
+                  value={configs.bg_body_position || 'center center'}
+                  onChange={(e) => set('bg_body_position', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  <option value="center center">Centro</option>
+                  <option value="top center">Topo</option>
+                  <option value="bottom center">Rodapé</option>
+                  <option value="left center">Esquerda</option>
+                  <option value="right center">Direita</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">
+                  Escurecimento do overlay: {configs.bg_body_overlay || 0}%
+                </label>
+                <input
+                  type="range"
+                  min={0}
+                  max={80}
+                  step={5}
+                  value={Number(configs.bg_body_overlay || 0)}
+                  onChange={(e) => set('bg_body_overlay', e.target.value)}
+                  className="w-full accent-[#3cbfb3]"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>0% (sem overlay)</span>
+                  <span>80% (muito escuro)</span>
+                </div>
+              </div>
+            </div>
+          </details>
+        </Card>
+
+        {/* CARD 2 — Cores do Header */}
+        <Card title="Cores do Cabeçalho">
+          <p className="text-xs text-gray-500 mb-4">Personalize as cores do header e barra de navegação</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ColorPicker
+              chave="bg_anuncio_cor"
+              label="Faixa de Anúncios (topo)"
+              descricao="Fundo da barra com cupom e frete grátis"
+              defaultVal="#0f2e2b"
+            />
+            <ColorPicker
+              chave="bg_anuncio_texto"
+              label="Texto da Faixa de Anúncios"
+              descricao="Cor dos textos na barra de anúncios"
+              defaultVal="#ffffff"
+            />
+            <ColorPicker
+              chave="bg_header_cor"
+              label="Header Principal"
+              descricao="Fundo do header com logo e busca"
+              defaultVal="#1a4f4a"
+            />
+            <ColorPicker
+              chave="bg_header_nav_cor"
+              label="Barra de Navegação"
+              descricao="Fundo da barra com Climatizadores, Aspiradores, etc."
+              defaultVal="#0f2e2b"
+            />
+          </div>
+        </Card>
+
+        {/* CARD 3 — Cores do Footer */}
+        <Card title="Cores do Rodapé">
+          <p className="text-xs text-gray-500 mb-4">Personalize as cores do footer</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ColorPicker
+              chave="bg_footer_cor"
+              label="Fundo do Rodapé"
+              descricao="Cor de fundo do footer"
+              defaultVal="#111827"
+            />
+            <ColorPicker
+              chave="bg_footer_texto"
+              label="Cor dos Links"
+              descricao="Cor padrão dos links e textos secundários"
+              defaultVal="#9ca3af"
+            />
+            <ColorPicker
+              chave="bg_footer_titulo"
+              label="Cor dos Títulos das Colunas"
+              descricao="Cor dos títulos (Institucional, Políticas, etc.)"
+              defaultVal="#ffffff"
+            />
+            <ColorPicker
+              chave="bg_footer_hover"
+              label="Cor dos Links ao passar o mouse"
+              descricao="Cor dos links quando o usuário passa o mouse"
+              defaultVal="#3cbfb3"
+            />
+          </div>
+        </Card>
+
+        {/* CARD 4 — Preview e Ações */}
+        <Card title="Visualizar e Salvar">
+          <div className="space-y-5">
+            {/* Instruções */}
+            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl p-4">
+              <p className="font-bold text-[#1a4f4a] mb-3 flex items-center gap-2">
+                📋 Como adicionar um wallpaper:
+              </p>
+              <ol className="text-sm text-[#1a4f4a]/80 space-y-2 list-decimal list-inside">
+                <li>Vá em <strong>Admin → Banners</strong> e faça o upload da imagem de fundo</li>
+                <li>Copie a URL que aparecer após o upload</li>
+                <li>Volte aqui e cole a URL no campo &quot;URL do Wallpaper&quot;</li>
+                <li>Ative o toggle &quot;Ativar wallpaper no site&quot;</li>
+                <li>Clique em &quot;Salvar Configurações&quot;</li>
+                <li>Aguarde o site atualizar (até 1 minuto)</li>
+              </ol>
+              <p className="text-xs text-[#1a4f4a]/60 mt-3">
+                💡 Tamanho recomendado: 1920×1080px • PNG ou JPG • Máximo 2MB
+              </p>
+            </div>
+
+            {/* Ver site + Salvar */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <a
+                href="https://sixxis-store-production.up.railway.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-[#1a4f4a] hover:bg-[#0f2e2b] text-white font-bold px-5 py-3 rounded-xl transition text-sm"
+              >
+                <ExternalLink size={16} />
+                Ver site ao vivo
+              </a>
+              <SaveButton loading={saving} onClick={() => save(visualKeys)} />
+            </div>
+          </div>
+        </Card>
+
+      </div>
+    )
+  }
+
   const TAB_RENDERERS: Record<string, () => React.ReactNode> = {
     loja: renderLoja,
+    visual: renderVisual,
     aparencia: renderAparencia,
     tipografia: renderTipografia,
     textos: renderTextos,
