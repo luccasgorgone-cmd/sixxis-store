@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -48,21 +47,18 @@ export default function BannerCarousel({ banners }: Props) {
   const proximoBanner = banners.length > 1 ? banners[proximoIdx] : null
 
   return (
-    /* Mobile: 260px | Desktop: clamp(280px, 50vw, 560px) */
     <div
       className="relative w-full overflow-hidden bg-[#0f1f1e]"
-      style={{ height: 'clamp(260px, 50vw, 560px)' }}
+      style={{ height: 'clamp(280px, 45vw, 560px)' }}
     >
       {/* Imagem */}
       <div className="absolute inset-0">
         {banner.imagem && (
-          <Image
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={banner.imagem}
             alt={banner.titulo || 'Banner Sixxis'}
-            fill
-            className="object-cover"
-            priority
-            unoptimized
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
@@ -70,13 +66,12 @@ export default function BannerCarousel({ banners }: Props) {
 
       {/* Preload do próximo banner */}
       {proximoBanner?.imagem && (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={proximoBanner.imagem}
           alt=""
-          fill
-          className="invisible absolute"
-          unoptimized
           aria-hidden
+          style={{ position: 'absolute', visibility: 'hidden', width: 0, height: 0 }}
         />
       )}
 
