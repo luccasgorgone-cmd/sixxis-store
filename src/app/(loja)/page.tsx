@@ -21,27 +21,31 @@ export const metadata: Metadata = {
 }
 
 // Categorias com fotos reais do R2 — estilo Casas Bahia
-const categorias = [
+const CATEGORIAS = [
   {
     nome: 'Climatizadores',
     href: '/produtos?categoria=climatizadores',
-    imagem: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775737122831-k4d1lc1.jpg',
+    img: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775737122831-k4d1lc1.jpg',
+    bgColor: null,
   },
   {
     nome: 'Aspiradores',
     href: '/produtos?categoria=aspiradores',
-    imagem: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775743809308-70oi3e0.png',
+    img: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775743809308-70oi3e0.png',
+    bgColor: null,
   },
   {
     nome: 'Spinning',
     href: '/produtos?categoria=spinning',
-    imagem: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775754930452-4ixi773.png',
+    img: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775754930452-4ixi773.png',
+    bgColor: null,
   },
   {
     nome: 'Ofertas',
     href: '/ofertas',
-    imagem: null,
+    img: null,
     badge: 'HOT',
+    bgColor: '#f59e0b',
   },
 ]
 
@@ -75,7 +79,7 @@ export default async function HomePage() {
   const countdownTarget = hoje.toISOString()
 
   return (
-    <main className="bg-[#f5f5f5] min-h-screen">
+    <main className="min-h-screen bg-[#f0f2f5]">
 
       {/* 1. BannerCarousel */}
       {banners.length > 0 ? (
@@ -125,35 +129,40 @@ export default async function HomePage() {
       ]} />
 
       {/* 3. Categorias com fotos — estilo Casas Bahia */}
-      <section className="bg-white border-b border-gray-100 py-4">
+      <section className="bg-white border-b border-gray-100 py-5">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide justify-center">
-            {categorias.map(cat => (
+          <div className="flex items-center justify-center gap-8 overflow-x-auto scrollbar-hide">
+            {CATEGORIAS.map(cat => (
               <Link key={cat.nome} href={cat.href}
-                className="flex flex-col items-center gap-2 min-w-[80px] group"
+                className="flex flex-col items-center gap-2 min-w-[80px] group cursor-pointer"
               >
-                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-[#3cbfb3] transition-all shadow-sm bg-gray-50 flex items-center justify-center">
-                  {cat.imagem ? (
+                <div
+                  className="w-[72px] h-[72px] rounded-2xl overflow-hidden border-2 border-gray-100 group-hover:border-[#3cbfb3] transition-all duration-200 shadow-sm bg-gray-50 flex items-center justify-center"
+                  style={cat.bgColor ? { backgroundColor: cat.bgColor } : {}}
+                >
+                  {cat.img ? (
                     <Image
-                      src={cat.imagem}
+                      src={cat.img}
                       alt={cat.nome}
-                      width={64}
-                      height={64}
+                      width={72}
+                      height={72}
                       className="w-full h-full object-cover"
                       unoptimized
                     />
                   ) : (
-                    <Tag size={28} className="text-[#f59e0b]" />
+                    <span className="text-white text-2xl font-black">%</span>
                   )}
                 </div>
-                <span className="text-xs font-semibold text-gray-700 group-hover:text-[#3cbfb3] text-center whitespace-nowrap transition-colors">
-                  {cat.nome}
+                <div className="text-center">
+                  <span className="text-xs font-semibold text-gray-700 group-hover:text-[#3cbfb3] transition-colors block leading-tight">
+                    {cat.nome}
+                  </span>
                   {cat.badge && (
-                    <span className="ml-1 bg-[#f59e0b] text-white text-[9px] font-black px-1 rounded">
+                    <span className="inline-block bg-[#f59e0b] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5">
                       {cat.badge}
                     </span>
                   )}
-                </span>
+                </div>
               </Link>
             ))}
           </div>
@@ -161,7 +170,7 @@ export default async function HomePage() {
       </section>
 
       {/* 4. Produtos em Destaque */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <section className="bg-[#f0f2f5] max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold text-gray-900">Produtos em Destaque</h2>
           {produtosMostrar.length > 0 && (
@@ -281,7 +290,7 @@ export default async function HomePage() {
       </section>
 
       {/* 8. Por que Sixxis? */}
-      <section className="py-10 bg-white">
+      <section className="py-10 bg-[#f0f2f5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="text-xl font-bold text-gray-900 mb-8">Por que Sixxis?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -308,7 +317,7 @@ export default async function HomePage() {
 
       {/* 9. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="py-10 bg-[#1a4f4a]">
+        <section className="py-10 bg-[#0f2e2b]">
           <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl font-extrabold text-white mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
