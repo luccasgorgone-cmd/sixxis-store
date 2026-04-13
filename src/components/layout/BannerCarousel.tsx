@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -48,21 +49,20 @@ export default function BannerCarousel({ banners }: Props) {
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-[#0f1f1e]"
-      style={{ height: 'clamp(280px, 45vw, 560px)' }}
+      className="relative w-full overflow-hidden"
+      style={{ background: '#0f2e2b', aspectRatio: '16 / 5', maxHeight: '560px' }}
     >
-      {/* Imagem */}
-      <div className="absolute inset-0">
-        {banner.imagem && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={banner.imagem}
-            alt={banner.titulo || 'Banner Sixxis'}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-      </div>
+      {/* Imagem — object-contain para mostrar o banner inteiro */}
+      {banner.imagem && (
+        <Image
+          src={banner.imagem}
+          alt={banner.titulo || 'Banner Sixxis'}
+          fill
+          className="object-contain"
+          priority
+          unoptimized
+        />
+      )}
 
       {/* Preload do próximo banner */}
       {proximoBanner?.imagem && (
@@ -75,29 +75,27 @@ export default function BannerCarousel({ banners }: Props) {
         />
       )}
 
-      {/* Conteúdo */}
-      <div className="relative h-full flex items-center">
-        <div className="max-w-7xl mx-auto px-5 sm:px-10 w-full">
-          <div className="max-w-xl">
-            {banner.titulo && (
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-3 sm:mb-4">
-                {banner.titulo}
-              </h2>
-            )}
-            {banner.subtitulo && (
-              <p className="text-white/80 text-sm sm:text-lg mb-5 sm:mb-8 leading-relaxed hidden sm:block">
-                {banner.subtitulo}
-              </p>
-            )}
-            {banner.link && (
-              <Link
-                href={banner.link}
-                className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-5 py-3 sm:px-8 sm:py-4 text-sm sm:text-base rounded-xl transition-all shadow-lg hover:shadow-[#3cbfb3]/40 hover:-translate-y-0.5"
-              >
-                Ver produto →
-              </Link>
-            )}
-          </div>
+      {/* Texto sobreposto */}
+      <div className="absolute inset-0 flex items-center">
+        <div className="max-w-7xl mx-auto px-10 w-full">
+          {banner.titulo && (
+            <h2 className="text-4xl font-extrabold text-white mb-4 max-w-lg">
+              {banner.titulo}
+            </h2>
+          )}
+          {banner.subtitulo && (
+            <p className="text-white/80 text-lg mb-6 max-w-md">
+              {banner.subtitulo}
+            </p>
+          )}
+          {banner.link && (
+            <Link
+              href={banner.link}
+              className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition"
+            >
+              Ver produto →
+            </Link>
+          )}
         </div>
       </div>
 

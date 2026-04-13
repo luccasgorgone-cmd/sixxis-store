@@ -117,17 +117,17 @@ export default async function HomePage() {
 
       {/* ── Stats ───────────────────────────────────────────────────────────── */}
       <section className="bg-[#3cbfb3]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 text-center divide-x divide-white/20">
             {[
               { num: '10+',    label: 'Anos de Mercado' },
               { num: '5.000+', label: 'Clientes Atendidos' },
               { num: '15+',    label: 'Produtos' },
               { num: '100%',   label: 'Garantia' },
             ].map(({ num, label }) => (
-              <div key={label}>
-                <p className="text-3xl md:text-4xl font-extrabold text-white">{num}</p>
-                <p className="text-white/80 text-sm font-medium mt-1">{label}</p>
+              <div key={label} className="py-4 px-3">
+                <p className="text-2xl md:text-3xl font-extrabold text-white">{num}</p>
+                <p className="text-white/80 text-xs font-medium mt-1">{label}</p>
               </div>
             ))}
           </div>
@@ -135,24 +135,24 @@ export default async function HomePage() {
       </section>
 
       {/* ── Categorias ──────────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <h2 className="section-title mb-10">Categorias</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {categorias.map(({ label, desc, href, icon: Icon }) => (
-            <Link
-              key={label}
-              href={href}
-              className="group bg-white border border-gray-200 hover:border-[#3cbfb3] rounded-xl p-6 text-center flex flex-col items-center gap-3 transition-all duration-200 hover:shadow-md"
-            >
-              <div className="w-14 h-14 rounded-full bg-[#e8f8f7] group-hover:bg-[#3cbfb3] flex items-center justify-center transition-colors duration-200">
-                <Icon size={24} className="text-[#3cbfb3] group-hover:text-white transition-colors duration-200" />
-              </div>
-              <div>
-                <p className="font-bold text-[#0a0a0a] text-sm">{label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
-              </div>
-            </Link>
-          ))}
+      <section className="py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="section-title mb-10">Categorias</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {categorias.map(({ label, desc, href, icon: Icon }) => (
+              <Link
+                key={label}
+                href={href}
+                className="group bg-white border border-gray-200 hover:border-[#3cbfb3]/50 rounded-xl p-8 text-center flex flex-col items-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              >
+                <div className="w-16 h-16 mb-5 rounded-full bg-[#e8f8f7] group-hover:bg-[#3cbfb3] flex items-center justify-center transition-colors duration-300">
+                  <Icon size={26} className="text-[#3cbfb3] group-hover:text-white transition-colors duration-300" />
+                </div>
+                <p className="font-bold text-[#0a0a0a] text-base mt-2">{label}</p>
+                <p className="text-sm text-gray-500 mt-1">{desc}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
