@@ -322,7 +322,7 @@ export default function Header({
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
 
             {/* Linha unificada — mobile e desktop compartilham a mesma row */}
-            <div className="relative flex items-center h-14 lg:h-auto lg:py-3 gap-3">
+            <div className="relative flex items-center h-16 lg:h-auto lg:py-0 gap-4">
 
               {/* Burger — mobile only */}
               <button
@@ -334,24 +334,24 @@ export default function Header({
               </button>
 
               {/* ★ LOGO ÚNICA — centralizada no mobile via absolute, estática no desktop */}
-              <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 shrink-0 flex flex-col items-center lg:mr-2">
+              <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 shrink-0 flex flex-col items-start lg:mr-2">
                 <Link href="/">
                   <Image
                     src={logoUrl}
                     alt="Sixxis"
-                    width={110}
-                    height={36}
+                    width={140}
+                    height={47}
                     className="object-contain w-auto"
                     priority
                   />
                 </Link>
-                <p style={{ color: '#3cbfb3', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'center', marginTop: '2px' }}>
+                <p style={{ color: '#ffffff', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textAlign: 'left', marginTop: '3px', opacity: 0.9 }}>
                   Qualidade e Inovação
                 </p>
               </div>
 
               {/* Search — desktop only */}
-              <SearchVentisol className="hidden lg:flex flex-1" />
+              <SearchVentisol className="hidden lg:flex flex-1 max-w-lg" />
 
               {/* CEP — desktop only */}
               <div className="hidden lg:block shrink-0">
@@ -380,13 +380,13 @@ export default function Header({
                   <>
                     <Link
                       href="/login"
-                      className="border border-white/30 text-white text-sm px-3 py-1.5 h-8 rounded-lg hover:bg-white/10 transition whitespace-nowrap"
+                      className="border border-white/30 text-white text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition whitespace-nowrap"
                     >
                       Entrar
                     </Link>
                     <Link
                       href="/cadastro"
-                      className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-3 py-1.5 h-8 rounded-lg transition whitespace-nowrap"
+                      className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap"
                     >
                       Cadastrar
                     </Link>
@@ -394,12 +394,13 @@ export default function Header({
                 )}
                 <Link
                   href="/carrinho"
-                  className="relative flex items-center text-white hover:text-white/80 transition ml-1 px-2 py-2 rounded-lg hover:bg-white/10"
+                  className="relative flex items-center gap-2 p-2 text-white hover:text-[#3cbfb3] transition"
                   aria-label="Carrinho"
                 >
-                  <ShoppingCart size={20} />
+                  <ShoppingCart size={24} />
+                  <span className="hidden xl:inline text-sm font-medium">Carrinho</span>
                   {totalItens > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#3cbfb3] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                    <span className="absolute -top-0.5 -right-0.5 bg-[#3cbfb3] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}
