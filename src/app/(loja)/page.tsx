@@ -215,28 +215,28 @@ export default async function HomePage() {
       {produtosOferta.length > 0 && (
         <section className="bg-[#f0f2f5]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-          <div className="bg-[#e8f8f7] rounded-xl p-5">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Zap size={22} className="text-[#f59e0b] fill-[#f59e0b]" />
-                <h2 className="text-xl font-bold text-gray-900">Ofertas Relâmpago</h2>
+            <div className="bg-[#e8f8f7] rounded-xl p-5">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Zap size={22} className="text-[#f59e0b] fill-[#f59e0b]" />
+                  <h2 className="text-xl font-bold text-gray-900">Ofertas Relâmpago</h2>
+                </div>
+                <OfertaCountdown targetDate={countdownTarget} />
               </div>
-              <OfertaCountdown targetDate={countdownTarget} />
+              {/* Grid 4 colunas */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {produtosOferta.map((produto) => (
+                  <CardProduto key={produto.id} produto={produto} ofertaBadge />
+                ))}
+              </div>
+              {/* Ver todas */}
+              <div className="mt-4 text-center">
+                <Link href="/ofertas" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2a9d8f] hover:text-[#1a7a74] transition">
+                  Ver todas as ofertas <ArrowRight size={14} />
+                </Link>
+              </div>
             </div>
-            {/* Grid 4 colunas */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {produtosOferta.map((produto) => (
-                <CardProduto key={produto.id} produto={produto} ofertaBadge />
-              ))}
-            </div>
-            {/* Ver todas */}
-            <div className="mt-4 text-center">
-              <Link href="/ofertas" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2a9d8f] hover:text-[#1a7a74] transition">
-                Ver todas as ofertas <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
           </div>
         </section>
       )}
@@ -244,7 +244,7 @@ export default async function HomePage() {
       {/* 6. Banners duplos */}
       <section className="bg-[#f0f2f5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Banner Climatizadores */}
           <Link
             href="/produtos?categoria=climatizadores"
@@ -304,7 +304,7 @@ export default async function HomePage() {
               />
             </div>
           </Link>
-        </div>
+          </div>
         </div>
       </section>
 

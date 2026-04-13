@@ -121,7 +121,7 @@ export default async function Footer() {
   } catch {}
 
   return (
-    <footer className="text-gray-400" style={{ backgroundColor: 'var(--color-footer, #111827)' }}>
+    <footer className="text-gray-400 bg-[#111827]">
 
       {/* ── Linha tiffany topo ────────────────────────────────────────────── */}
       <div className="h-1 bg-[#3cbfb3]" />
