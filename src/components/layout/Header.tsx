@@ -208,7 +208,7 @@ function CampoFrete({ compact = false }: { compact?: boolean }) {
       <label className="text-white/60 text-[10px] font-semibold uppercase tracking-wider">
         Calcule o Frete
       </label>
-      <div className="flex items-center bg-white rounded-lg overflow-hidden h-9">
+      <div className="flex items-center bg-white rounded-lg h-8 overflow-hidden">
         <input
           type="text"
           value={cep}
@@ -216,12 +216,12 @@ function CampoFrete({ compact = false }: { compact?: boolean }) {
           onKeyDown={(e) => e.key === 'Enter' && handleOk()}
           placeholder="00000-000"
           maxLength={9}
-          className="flex-1 px-3 text-sm text-gray-700 outline-none w-32"
+          className="w-28 px-2.5 text-sm text-gray-700 outline-none"
         />
         <button
           onClick={handleOk}
           disabled={carregando}
-          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white text-xs font-bold px-3 h-full transition"
+          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white text-xs font-bold px-2.5 h-full transition"
         >
           {carregando ? '...' : 'OK'}
         </button>
@@ -428,24 +428,27 @@ export default function Header({
         <nav className="hidden lg:block bg-[#0f2e2b]">
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
             <div className="flex items-center justify-center overflow-x-auto scrollbar-hide">
-              {navLinks.map(({ href, label, destaque }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`
-                    group relative shrink-0 px-6 py-3 text-sm font-bold tracking-wider uppercase transition-colors duration-200
-                    ${destaque ? 'text-amber-300 hover:text-amber-200' : 'text-white/80 hover:text-white'}
-                  `}
-                >
-                  {label}
-                  {destaque && (
-                    <span className="ml-1.5 text-[9px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full align-middle normal-case tracking-normal">
-                      HOT
-                    </span>
+              {navLinks.map(({ href, label, destaque }, idx) => (
+                <div key={href} className="flex items-center">
+                  {idx > 0 && (
+                    <span className="text-white/20 text-sm select-none">|</span>
                   )}
-                  {/* Underline tiffany no hover */}
-                  <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-[#3cbfb3] transition-all duration-200 ${destaque ? 'w-0 group-hover:w-4/5' : 'w-0 group-hover:w-4/5'}`} />
-                </Link>
+                  <Link
+                    href={href}
+                    className={`
+                      group relative shrink-0 px-5 py-2.5 text-sm font-semibold tracking-wide uppercase transition-colors duration-200
+                      ${destaque ? 'text-amber-300 hover:text-amber-200' : 'text-white/80 hover:text-white'}
+                    `}
+                  >
+                    {label}
+                    {destaque && (
+                      <span className="ml-1.5 text-[9px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full align-middle normal-case tracking-normal">
+                        HOT
+                      </span>
+                    )}
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-[#3cbfb3] transition-all duration-200 w-0 group-hover:w-4/5" />
+                  </Link>
+                </div>
               ))}
             </div>
           </div>
