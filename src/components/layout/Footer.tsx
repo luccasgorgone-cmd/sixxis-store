@@ -129,13 +129,13 @@ export default async function Footer() {
 
           {/* Col 1 — Marca + Contato */}
           <div className="col-span-2 md:col-span-3 xl:col-span-2">
-            <Link href="/" className="inline-block mb-4">
+            <Link href="/" className="inline-block mb-5">
               <Image
                 src={logoUrl}
                 alt="Sixxis"
-                width={130}
-                height={44}
-                className="object-contain"
+                width={165}
+                height={56}
+                className="object-contain h-12 w-auto"
                 unoptimized
               />
             </Link>
@@ -148,11 +148,11 @@ export default async function Footer() {
               href={`https://wa.me/${whatsappVendas}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#25D366]/30 mb-2"
+              className="flex items-center gap-2 w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#25D366]/30 mb-2"
               aria-label="Falar no WhatsApp — Vendas"
             >
               <WaIcon size={16} />
-              Vendas — WhatsApp
+              Vendas
             </a>
 
             {/* WhatsApp Assistência Técnica */}

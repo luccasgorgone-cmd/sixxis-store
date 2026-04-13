@@ -264,44 +264,46 @@ export default function Header({
   return (
     <>
       {/* ═══════════════════════════════════════════════════════
-          CAMADA 1 — Barra superior (NÃO sticky, some ao rolar)
-          Desktop only
+          CAMADA 1 — Announcement Bar (NÃO sticky, some ao rolar)
       ═══════════════════════════════════════════════════════ */}
-      <div className="hidden lg:block bg-[#0f2e2b] py-1.5">
-        <div className="max-w-7xl mx-auto px-4 xl:px-6 flex items-center justify-between">
+      <div className="bg-[#0f2e2b] border-b border-[#3cbfb3]/15 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-11">
 
-          {/* Esquerda */}
-          <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
-            <span>🏆</span>
-            <span>Bem-vindo à <strong className="text-[#3cbfb3]">Loja Oficial da Sixxis!</strong></span>
-          </div>
+            {/* BLOCO 1 — Cupom */}
+            <div className="flex items-center gap-2">
+              <span className="text-base">🏷️</span>
+              <span className="text-white/80 text-xs sm:text-sm font-medium">CUPOM:</span>
+              <span className="bg-[#3cbfb3] text-black text-xs font-black px-2.5 py-1 rounded-md tracking-wider uppercase">
+                SIXXIS10
+              </span>
+              <span className="text-white text-xs sm:text-sm font-semibold hidden sm:inline">
+                — 10% OFF na 1ª compra
+              </span>
+            </div>
 
-          {/* Direita */}
-          <div className="flex items-center gap-3 text-sm">
-            <Link
-              href="/pedidos"
-              className="flex items-center gap-1.5 text-white/80 hover:text-white font-medium transition-colors"
-            >
-              <Package size={13} />
-              Rastreie seu Pedido
-            </Link>
-            <span className="text-white/20">|</span>
-            <a
-              href="https://wa.me/5511934102621"
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-white/80 hover:text-white font-medium transition-colors"
-            >
-              <Wrench size={13} />
-              Assistência Técnica
-            </a>
-            <span className="text-white/20">|</span>
-            <Link
-              href="/seja-revendedor"
-              className="flex items-center gap-1.5 text-[#3cbfb3] hover:text-[#5ad8cc] font-semibold transition-colors"
-            >
-              <Store size={13} />
-              Seja um Revendedor
-            </Link>
+            {/* Separador */}
+            <div className="hidden md:block w-px h-5 bg-white/20" />
+
+            {/* BLOCO 2 — Frete */}
+            <div className="hidden md:flex items-center gap-2">
+              <span className="text-base">✨</span>
+              <span className="text-white text-sm font-bold tracking-wide">
+                FRETE GRÁTIS acima de R$ 500
+              </span>
+            </div>
+
+            {/* Separador */}
+            <div className="hidden lg:block w-px h-5 bg-white/20" />
+
+            {/* BLOCO 3 — Entrega */}
+            <div className="hidden lg:flex items-center gap-2">
+              <span className="text-base">🚚</span>
+              <span className="text-white text-sm font-medium">
+                Entrega para todo o Brasil
+              </span>
+            </div>
+
           </div>
         </div>
       </div>
@@ -334,24 +336,21 @@ export default function Header({
               </button>
 
               {/* ★ LOGO ÚNICA — centralizada no mobile via absolute, estática no desktop */}
-              <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 shrink-0 flex flex-col items-start lg:mr-2">
+              <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 shrink-0 lg:mr-2">
                 <Link href="/">
                   <Image
                     src={logoUrl}
                     alt="Sixxis"
-                    width={140}
-                    height={47}
-                    className="object-contain w-auto"
+                    width={155}
+                    height={52}
+                    className="object-contain h-11 w-auto"
                     priority
                   />
                 </Link>
-                <p style={{ color: '#ffffff', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textAlign: 'left', marginTop: '3px', opacity: 0.9 }}>
-                  Qualidade e Inovação
-                </p>
               </div>
 
               {/* Search — desktop only */}
-              <SearchVentisol className="hidden lg:flex flex-1 max-w-lg" />
+              <SearchVentisol className="hidden lg:flex flex-1 max-w-2xl" />
 
               {/* CEP — desktop only */}
               <div className="hidden lg:block shrink-0">
@@ -359,48 +358,34 @@ export default function Header({
               </div>
 
               {/* Auth + Carrinho — desktop only */}
-              <div className="hidden lg:flex items-center gap-2 shrink-0 ml-2">
-                {session ? (
-                  <>
-                    <Link
-                      href="/minha-conta"
-                      className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10"
-                    >
-                      <User size={16} />
-                      Minha Conta
-                    </Link>
-                    <button
-                      onClick={() => signOut({ callbackUrl: '/' })}
-                      className="text-xs text-white/60 hover:text-red-300 transition px-2 py-1"
-                    >
-                      Sair
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      className="border border-white/30 text-white text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition whitespace-nowrap"
-                    >
-                      Entrar
-                    </Link>
-                    <Link
-                      href="/cadastro"
-                      className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition whitespace-nowrap"
-                    >
-                      Cadastrar
-                    </Link>
-                  </>
-                )}
+              <div className="hidden lg:flex items-center shrink-0 gap-0.5 ml-2">
+                {/* Divisor */}
+                <div className="w-px h-8 bg-white/20 mx-1" />
+
+                {/* Conta */}
+                <Link
+                  href={session ? '/minha-conta' : '/login'}
+                  className="flex flex-col items-center gap-0.5 px-2.5 py-1.5 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-lg transition min-w-[60px]"
+                >
+                  <User size={22} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium leading-none whitespace-nowrap">
+                    {session ? `Olá, ${session.user?.name?.split(' ')[0]}` : 'Entrar'}
+                  </span>
+                </Link>
+
+                {/* Divisor */}
+                <div className="w-px h-8 bg-white/20 mx-1" />
+
+                {/* Carrinho */}
                 <Link
                   href="/carrinho"
-                  className="relative flex items-center gap-2 p-2 text-white hover:text-[#3cbfb3] transition"
+                  className="relative flex flex-col items-center gap-0.5 px-2.5 py-1.5 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-lg transition min-w-[60px]"
                   aria-label="Carrinho"
                 >
-                  <ShoppingCart size={24} />
-                  <span className="hidden xl:inline text-sm font-medium">Carrinho</span>
+                  <ShoppingCart size={22} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium leading-none">Carrinho</span>
                   {totalItens > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-[#3cbfb3] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                    <span className="absolute top-0.5 right-1 bg-[#f59e0b] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}

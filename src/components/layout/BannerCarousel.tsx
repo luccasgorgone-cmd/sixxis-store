@@ -50,15 +50,15 @@ export default function BannerCarousel({ banners }: Props) {
   return (
     <div
       className="relative w-full overflow-hidden"
-      style={{ background: '#0f2e2b', aspectRatio: '16 / 5', maxHeight: '560px' }}
+      style={{ background: '#0f2e2b', aspectRatio: '1920/460', maxHeight: '460px' }}
     >
-      {/* Imagem — object-contain para mostrar o banner inteiro */}
+      {/* Imagem — object-cover preenche o espaço */}
       {banner.imagem && (
         <Image
           src={banner.imagem}
           alt={banner.titulo || 'Banner Sixxis'}
           fill
-          className="object-contain"
+          className="object-cover"
           priority
           unoptimized
         />

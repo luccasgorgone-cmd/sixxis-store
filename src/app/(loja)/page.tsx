@@ -1,29 +1,9 @@
 import Link from 'next/link'
-import { Wind, Fan, Bike, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
+import { Bike, ArrowRight, Cpu, Headphones, BadgeCheck } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import BannerCarousel from '@/components/layout/BannerCarousel'
+import CategoriasSection from '@/components/home/CategoriasSection'
 import { prisma } from '@/lib/prisma'
-
-const categorias = [
-  {
-    label:    'Climatizadores',
-    desc:     'Conforto térmico para sua casa',
-    href:     '/produtos?categoria=climatizadores',
-    icon:     Wind,
-  },
-  {
-    label:    'Aspiradores',
-    desc:     'Limpeza eficiente e prática',
-    href:     '/produtos?categoria=aspiradores',
-    icon:     Fan,
-  },
-  {
-    label:    'Spinning',
-    desc:     'Desempenho fitness profissional',
-    href:     '/produtos?categoria=spinning',
-    icon:     Bike,
-  },
-]
 
 const porqueSixxis = [
   {
@@ -135,56 +115,39 @@ export default async function HomePage() {
       </section>
 
       {/* ── Categorias ──────────────────────────────────────────────────────── */}
-      <section className="py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="section-title mb-10">Categorias</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {categorias.map(({ label, desc, href, icon: Icon }) => (
-              <Link
-                key={label}
-                href={href}
-                className="group bg-white border border-gray-200 hover:border-[#3cbfb3]/50 rounded-xl p-8 text-center flex flex-col items-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              >
-                <div className="w-16 h-16 mb-5 rounded-full bg-[#e8f8f7] group-hover:bg-[#3cbfb3] flex items-center justify-center transition-colors duration-300">
-                  <Icon size={26} className="text-[#3cbfb3] group-hover:text-white transition-colors duration-300" />
-                </div>
-                <p className="font-bold text-[#0a0a0a] text-base mt-2">{label}</p>
-                <p className="text-sm text-gray-500 mt-1">{desc}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CategoriasSection />
 
       {/* ── Produtos em Destaque ─────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="section-title">Produtos em Destaque</h2>
-          <Link
-            href="/produtos"
-            className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition"
-          >
-            Ver todos <ArrowRight size={14} />
-          </Link>
-        </div>
+      <section className="bg-[#f0f2f5] w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="section-title">Produtos em Destaque</h2>
+            <Link
+              href="/produtos"
+              className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition"
+            >
+              Ver todos <ArrowRight size={14} />
+            </Link>
+          </div>
 
-        {destaques.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-gray-200 rounded-2xl">
-            <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
-              <Bike size={28} className="text-[#3cbfb3]" />
+          {destaques.length === 0 ? (
+            <div className="text-center py-20 border border-dashed border-gray-200 rounded-2xl bg-white">
+              <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
+                <Bike size={28} className="text-[#3cbfb3]" />
+              </div>
+              <p className="text-gray-500 font-medium">Nenhum produto cadastrado ainda.</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Os produtos serão exibidos aqui após a sincronização com o ERP.
+              </p>
             </div>
-            <p className="text-gray-500 font-medium">Nenhum produto cadastrado ainda.</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Os produtos serão exibidos aqui após a sincronização com o ERP.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {destaques.map((produto, idx) => (
-              <CardProduto key={produto.id} produto={produto} priority={idx < 4} />
-            ))}
-          </div>
-        )}
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              {destaques.map((produto, idx) => (
+                <CardProduto key={produto.id} produto={produto} priority={idx < 4} />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ── Por que Sixxis? ──────────────────────────────────────────────────── */}
