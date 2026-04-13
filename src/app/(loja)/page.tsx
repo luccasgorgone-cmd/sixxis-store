@@ -151,6 +151,10 @@ export default async function HomePage() {
                       height={76}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       unoptimized
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = 'none'
+                      }}
                     />
                   ) : (
                     <span className="text-white text-2xl font-black">%</span>
@@ -173,41 +177,44 @@ export default async function HomePage() {
       </section>
 
       {/* 4. Produtos em Destaque */}
-      <section className="bg-[#f0f2f5] max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-900">Produtos em Destaque</h2>
-          {produtosMostrar.length > 0 && (
-            <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
-              Ver todos <ArrowRight size={14} />
-            </Link>
+      <section className="bg-[#f0f2f5]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-bold text-gray-900">Produtos em Destaque</h2>
+            {produtosMostrar.length > 0 && (
+              <Link href="/produtos" className="flex items-center gap-1.5 text-sm font-medium text-[#3cbfb3] hover:text-[#2a9d8f] transition">
+                Ver todos <ArrowRight size={14} />
+              </Link>
+            )}
+          </div>
+          {produtosMostrar.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              {produtosMostrar.map((produto) => (
+                <CardProduto key={produto.id} produto={produto} />
+              ))}
+            </div>
+          ) : (
+            <div className="border-2 border-dashed border-[#3cbfb3]/30 rounded-2xl p-10 text-center bg-white">
+              <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
+                <ArrowRight size={28} className="text-[#3cbfb3]" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-700 mb-2">Nenhum produto cadastrado ainda</h3>
+              <p className="text-sm text-gray-500 mb-6">Adicione produtos no painel admin para que apareçam aqui.</p>
+              <Link
+                href="/admin/produtos"
+                className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition-all"
+              >
+                Cadastrar Produtos
+              </Link>
+            </div>
           )}
         </div>
-        {produtosMostrar.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {produtosMostrar.map((produto) => (
-              <CardProduto key={produto.id} produto={produto} />
-            ))}
-          </div>
-        ) : (
-          <div className="border-2 border-dashed border-[#3cbfb3]/30 rounded-2xl p-10 text-center bg-white">
-            <div className="w-16 h-16 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
-              <ArrowRight size={28} className="text-[#3cbfb3]" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-700 mb-2">Nenhum produto cadastrado ainda</h3>
-            <p className="text-sm text-gray-500 mb-6">Adicione produtos no painel admin para que apareçam aqui.</p>
-            <Link
-              href="/admin/produtos"
-              className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition-all"
-            >
-              Cadastrar Produtos
-            </Link>
-          </div>
-        )}
       </section>
 
       {/* 5. Ofertas Relâmpago */}
       {produtosOferta.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
+        <section className="bg-[#f0f2f5]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
           <div className="bg-[#e8f8f7] rounded-xl p-5">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
@@ -230,11 +237,13 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
+          </div>
         </section>
       )}
 
       {/* 6. Banners duplos */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
+      <section className="bg-[#f0f2f5]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Banner Climatizadores */}
           <Link
@@ -296,11 +305,12 @@ export default async function HomePage() {
             </div>
           </Link>
         </div>
+        </div>
       </section>
 
       {/* 7. Stats */}
-      <section style={{ backgroundColor: 'var(--color-stats, #3cbfb3)' }} className="py-10">
-        <div className="max-w-5xl mx-auto px-4">
+      <section className="bg-[#1a4f4a] py-10">
+        <div className="max-w-3xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/20">
             {[
               { num: cfg.stat_1_num   || '5.000+',   label: cfg.stat_1_label || 'Clientes Satisfeitos' },
@@ -346,7 +356,7 @@ export default async function HomePage() {
       {/* 9. Newsletter */}
       {cfg.newsletter_ativo !== 'false' && (
         <section className="py-10 bg-[#0f2e2b]">
-          <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl font-extrabold text-white mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
             </h2>
@@ -359,8 +369,8 @@ export default async function HomePage() {
       )}
 
       {/* 10. Banner WhatsApp */}
-      <section className="py-10" style={{ backgroundColor: 'var(--color-wa, #111827)' }}>
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
+      <section className="py-10 bg-[#111827]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             {cfg.whatsapp_banner_titulo || 'Precisa de ajuda para escolher?'}
           </h2>

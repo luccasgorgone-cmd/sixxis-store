@@ -456,7 +456,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           >
             {/* Cabeçalho */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900 text-lg">Calcule o frete</h3>
+              <h3 className="font-bold text-gray-900 text-lg">Informe seu CEP</h3>
               <button
                 onClick={() => setCepModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition"
@@ -563,14 +563,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             className="w-full flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-xl px-4 py-3 transition text-left"
           >
             <MapPin size={18} className="text-[#3cbfb3] shrink-0" />
-            <div>
-              <p className="text-[10px] text-white/60 uppercase tracking-wide font-semibold leading-none mb-0.5">
-                Calcule o frete
-              </p>
-              <p className="text-sm font-semibold text-white">
-                {cepSalvo ? cepSalvo : 'Informe seu CEP'}
-              </p>
-            </div>
+            <p className="text-sm font-semibold text-white">
+              {cepSalvo ? cepSalvo : 'Informe seu CEP'}
+            </p>
           </button>
         </div>
 
