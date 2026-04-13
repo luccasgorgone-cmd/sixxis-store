@@ -10,8 +10,6 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import { SessionProvider } from 'next-auth/react'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic    = 'force-dynamic'
@@ -199,9 +197,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
         )}
         <SessionProvider>
-          <Header logoUrl={logoUrl} />
-          <div className="flex-1 relative z-[1]">{children}</div>
-          <Footer />
+          {children}
         </SessionProvider>
       </body>
     </html>
