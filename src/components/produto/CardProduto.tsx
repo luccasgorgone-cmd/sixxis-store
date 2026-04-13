@@ -9,7 +9,6 @@ import type { Produto } from '@/types'
 
 interface Props {
   produto: Produto
-  ofertaBadge?: boolean
 }
 
 function fmt(v: number) {
@@ -98,13 +97,25 @@ export default function CardProduto({ produto }: Props) {
             {produto.nome}
           </p>
 
-          {/* Estrelas placeholder (quando disponível) */}
-          <div className="flex items-center gap-1 mb-2">
-            {[1,2,3,4,5].map(s => (
-              <Star key={s} size={11} className="text-gray-200 fill-gray-200" />
-            ))}
-            <span className="text-[10px] text-gray-300 ml-0.5">Sem avaliações</span>
-          </div>
+          {/* Estrelas — exibidas quando houver avaliações cadastradas */}
+          {(produto as { mediaAvaliacoes?: number; totalAvaliacoes?: number }).totalAvaliacoes ? (
+            <div className="flex items-center gap-1 mb-2">
+              {[1,2,3,4,5].map(s => (
+                <Star
+                  key={s}
+                  size={11}
+                  className={
+                    s <= Math.round((produto as { mediaAvaliacoes?: number }).mediaAvaliacoes ?? 0)
+                      ? 'text-[#f59e0b] fill-[#f59e0b]'
+                      : 'text-gray-200 fill-gray-200'
+                  }
+                />
+              ))}
+              <span className="text-[10px] text-gray-400 ml-0.5">
+                ({(produto as { totalAvaliacoes?: number }).totalAvaliacoes})
+              </span>
+            </div>
+          ) : null}
 
           {/* Preços */}
           <div className="mt-auto">
