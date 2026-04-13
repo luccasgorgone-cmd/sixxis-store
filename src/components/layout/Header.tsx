@@ -197,23 +197,64 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
     }
   }, [cepInput])
 
-  const usarLocalizacaoAtual = useCallback(() => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(async pos => {
-      try {
-        const res  = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`
-        )
-        const data = await res.json()
-        const raw  = (data.address?.postcode || '').replace(/\D/g, '')
-        if (raw.length === 8) {
-          const fmt = raw.slice(0, 5) + '-' + raw.slice(5)
-          setCepInput(fmt)
-          handleBuscarCep(raw)
+  const usarLocalizacaoAtual = () => {
+    if (!navigator.geolocation) {
+      setCepErro('Geolocalização não disponível no seu navegador')
+      return
+    }
+    setCepLoading(true)
+    setCepErro('')
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords
+
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&accept-language=pt-BR`,
+            { headers: { 'User-Agent': 'SixxisStore/1.0' } }
+          )
+          const data = await res.json()
+
+          let cepBruto = ''
+          if (data.address?.postcode) {
+            cepBruto = data.address.postcode.replace(/\D/g, '')
+          }
+
+          if (cepBruto.length >= 8) {
+            const cepLimpo     = cepBruto.slice(0, 8)
+            const cepFormatado = cepLimpo.slice(0, 5) + '-' + cepLimpo.slice(5)
+            setCepInput(cepFormatado)
+
+            const viaCep     = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
+            const viaCepData = await viaCep.json()
+
+            if (!viaCepData.erro) {
+              await handleBuscarCep(cepLimpo)
+            } else {
+              setCepErro(`CEP detectado (${cepFormatado}) inválido. Digite manualmente.`)
+            }
+          } else {
+            setCepErro('Não foi possível detectar o CEP. Digite manualmente.')
+          }
+        } catch {
+          setCepErro('Erro ao obter localização. Digite o CEP manualmente.')
+        } finally {
+          setCepLoading(false)
         }
-      } catch { /* silencioso */ }
-    })
-  }, [handleBuscarCep])
+      },
+      (error) => {
+        setCepLoading(false)
+        if (error.code === 1) {
+          setCepErro('Permissão negada. Digite o CEP manualmente.')
+        } else if (error.code === 2) {
+          setCepErro('Localização indisponível. Digite o CEP manualmente.')
+        } else {
+          setCepErro('Tempo esgotado. Digite o CEP manualmente.')
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    )
+  }
 
   return (
     <>
@@ -226,18 +267,18 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           {/* Esquerda — Cupom */}
           <div className="flex items-center gap-2 shrink-0">
             <span>🏷️</span>
-            <span className="text-white/70 font-medium">CUPOM:</span>
-            <span className="bg-[#2a9d8f] text-white font-black px-2.5 py-0.5 rounded tracking-wider">
+            <span className="text-white text-xs font-medium">CUPOM:</span>
+            <span className="bg-[#3cbfb3] text-white font-black px-2 py-0.5 rounded text-xs">
               SIXXIS10
             </span>
-            <span className="text-white/60">— 10% OFF na 1ª compra</span>
+            <span className="text-white text-xs font-medium">— 10% OFF na 1ª compra</span>
           </div>
 
           <span className="text-white/20">|</span>
 
           {/* Centro — Frete */}
           <div className="flex-1 text-center">
-            <span className="text-white font-bold tracking-wide">✨ FRETE GRÁTIS acima de R$&nbsp;500</span>
+            <span className="text-white text-xs font-medium">✨ FRETE GRÁTIS acima de R$&nbsp;500</span>
           </div>
 
           <span className="text-white/20">|</span>
@@ -245,7 +286,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           {/* Direita — Entrega */}
           <div className="flex items-center gap-1.5 shrink-0">
             <span>🚚</span>
-            <span className="text-white">Entrega para todo o Brasil</span>
+            <span className="text-white text-xs font-medium">Entrega para todo o Brasil</span>
           </div>
         </div>
       </div>
@@ -267,8 +308,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <Image
                   src={logoUrl}
                   alt="Sixxis"
-                  width={120}
-                  height={40}
+                  width={140}
+                  height={47}
                   className="object-contain"
                   priority
                 />
@@ -279,24 +320,22 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <SearchBar className="w-full" />
               </div>
 
-              {/* Coluna 3 — CEP botão */}
-              <button
-                onClick={() => { setCepResultado(null); setCepErro(''); setCepModalOpen(true) }}
-                className="hidden lg:flex flex-col items-start gap-0.5 text-white hover:text-[#3cbfb3] transition shrink-0"
-              >
-                <span className="text-[10px] text-white/60 uppercase tracking-wide font-semibold leading-none">
-                  Calcule o frete
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <MapPin size={14} className="text-[#3cbfb3]" />
-                  <span className="text-sm font-semibold">
+              {/* Coluna 3 — Ações: [CEP] | [Entrar/Conta] | [Carrinho] */}
+              <div className="flex items-center gap-1 shrink-0">
+
+                {/* CEP */}
+                <button
+                  onClick={() => { setCepResultado(null); setCepErro(''); setCepModalOpen(true) }}
+                  className="flex flex-col items-center gap-0.5 px-2 py-1 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[72px]"
+                >
+                  <MapPin size={22} strokeWidth={1.5} />
+                  <span className="text-[10px] font-medium leading-none whitespace-nowrap">
                     {cepSalvo ? cepSalvo : 'Informe seu CEP'}
                   </span>
-                </div>
-              </button>
+                </button>
 
-              {/* Coluna 4 — Ações */}
-              <div className="flex items-center gap-1 shrink-0">
+                {/* Divisor */}
+                <div className="w-px h-8 bg-white/20 mx-1" />
 
                 {/* Conta */}
                 {session ? (

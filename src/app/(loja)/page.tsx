@@ -132,7 +132,7 @@ export default async function HomePage() {
       ]} />
 
       {/* 3. Categorias com fotos — estilo Casas Bahia */}
-      <section className="bg-white border-b border-gray-100 py-5">
+      <section className="bg-[#1a4f4a] border-b border-[#3cbfb3]/20 py-5">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-center gap-10 overflow-x-auto scrollbar-hide">
             {CATEGORIAS.map(cat => (
@@ -140,7 +140,7 @@ export default async function HomePage() {
                 className="flex flex-col items-center gap-2 min-w-[80px] group cursor-pointer"
               >
                 <div
-                  className="w-[76px] h-[76px] rounded-2xl overflow-hidden border-2 border-gray-100 group-hover:border-[#3cbfb3] transition-all duration-200 shadow-sm bg-gray-50 flex items-center justify-center"
+                  className="w-[76px] h-[76px] rounded-2xl overflow-hidden border-2 border-white/20 group-hover:border-[#3cbfb3] transition-all duration-200 shadow-sm bg-gray-50 flex items-center justify-center"
                   style={cat.bgColor ? { backgroundColor: cat.bgColor } : {}}
                 >
                   {cat.img ? (
@@ -157,7 +157,7 @@ export default async function HomePage() {
                   )}
                 </div>
                 <div className="text-center">
-                  <span className="text-xs font-semibold text-gray-700 group-hover:text-[#3cbfb3] transition-colors block leading-tight">
+                  <span className="text-xs font-semibold text-white group-hover:text-[#3cbfb3] transition-colors block leading-tight">
                     {cat.nome}
                   </span>
                   {cat.badge && (
