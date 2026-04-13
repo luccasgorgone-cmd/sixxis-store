@@ -378,6 +378,8 @@ export default function ConfiguracoesPage() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const heroInputRef = useRef<HTMLInputElement>(null)
   const [uploadingHero, setUploadingHero] = useState(false)
+  const [uploadingBg, setUploadingBg] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
 
   // Password change state
   const [senhaAtual, setSenhaAtual] = useState('')
@@ -462,6 +464,50 @@ export default function ConfiguracoesPage() {
     }
     setUploadingLogo(false)
     e.target.value = ''
+  }
+
+  async function handleUploadBackground(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 3 * 1024 * 1024) {
+      alert('❌ Imagem muito grande. Máximo: 3MB')
+      return
+    }
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      alert('❌ Formato inválido. Use PNG, JPG ou WebP')
+      return
+    }
+
+    setUploadingBg(true)
+    setUploadProgress('Enviando imagem...')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/admin/upload-background', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (data.url) {
+        setConfigs(prev => ({ ...prev, bg_body_url: data.url }))
+        setUploadProgress('✅ Upload concluído!')
+        setTimeout(() => setUploadProgress(''), 3000)
+      } else {
+        alert('❌ Erro: ' + (data.erro || 'Tente novamente'))
+        setUploadProgress('')
+      }
+    } catch {
+      alert('❌ Erro ao enviar imagem')
+      setUploadProgress('')
+    } finally {
+      setUploadingBg(false)
+      e.target.value = ''
+    }
   }
 
   async function handlePasswordChange() {
@@ -1453,81 +1499,109 @@ export default function ConfiguracoesPage() {
         <Card title="Imagem de Fundo (Wallpaper)">
           <p className="text-xs text-gray-500 mb-4">Aparece como fundo em todas as páginas do site</p>
 
-          {/* Toggle ativo */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 mb-4">
+          <div className="space-y-4">
+            {/* Preview atual */}
+            {configs.bg_body_url ? (
+              <div className="relative rounded-xl overflow-hidden border border-gray-200 h-48 group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={configs.bg_body_url}
+                  alt="Wallpaper atual"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    onClick={() => setConfigs(prev => ({ ...prev, bg_body_url: '' }))}
+                    className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition"
+                  >
+                    🗑️ Remover imagem
+                  </button>
+                </div>
+                <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-lg">
+                  {configs.bg_body_ativo === 'true' ? '✅ Wallpaper ativo' : '⏸ Wallpaper inativo'}
+                </div>
+              </div>
+            ) : (
+              <div className="h-48 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <ImageIcon size={24} className="text-gray-400" />
+                  </div>
+                  <p className="text-gray-500 font-medium text-sm">Nenhum wallpaper configurado</p>
+                </div>
+              </div>
+            )}
+
+            {/* Área de upload direto */}
             <div>
-              <p className="font-bold text-gray-900">Ativar wallpaper no site</p>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Quando ativo, a imagem aparece como fundo de todas as páginas
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
               <input
-                type="checkbox"
-                checked={configs.bg_body_ativo === 'true'}
-                onChange={(e) => set('bg_body_ativo', e.target.checked ? 'true' : 'false')}
-                className="sr-only peer"
+                type="file"
+                id="upload-wallpaper"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleUploadBackground}
+                disabled={uploadingBg}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[#3cbfb3] rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#3cbfb3] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" />
-            </label>
-          </div>
-
-          {/* Preview */}
-          {configs.bg_body_url ? (
-            <div className="relative rounded-xl overflow-hidden border border-gray-200 h-44 group mb-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={configs.bg_body_url}
-                alt="Wallpaper atual"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3">
-                <span className="text-white text-sm font-semibold">Wallpaper atual</span>
-                <button
-                  onClick={() => set('bg_body_url', '')}
-                  className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-600 transition"
-                >
-                  Remover
-                </button>
-              </div>
-              <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-lg">
-                {configs.bg_body_ativo === 'true' ? '✅ Ativo' : '⏸ Inativo'}
-              </div>
-            </div>
-          ) : (
-            <div className="h-44 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center mb-4">
-              <div className="text-center">
-                <p className="text-gray-400 font-medium">Nenhum wallpaper configurado</p>
-                <p className="text-gray-300 text-sm mt-1">Cole a URL abaixo para adicionar</p>
-              </div>
-            </div>
-          )}
-
-          {/* URL */}
-          <div className="mb-4">
-            <label className="text-sm font-bold text-gray-700 block mb-2">URL do Wallpaper</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={configs.bg_body_url || ''}
-                onChange={(e) => set('bg_body_url', e.target.value)}
-                placeholder="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/..."
-                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#3cbfb3] outline-none"
-              />
-              {configs.bg_body_url && (
-                <button
-                  onClick={() => window.open(configs.bg_body_url, '_blank')}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl text-sm font-medium transition"
-                >
-                  Ver
-                </button>
+              <label
+                htmlFor="upload-wallpaper"
+                className={`
+                  flex flex-col items-center justify-center w-full h-36
+                  border-2 border-dashed rounded-xl cursor-pointer transition-all
+                  ${uploadingBg
+                    ? 'border-[#3cbfb3] bg-[#e8f8f7] cursor-not-allowed'
+                    : 'border-gray-300 hover:border-[#3cbfb3] hover:bg-[#e8f8f7] bg-gray-50'
+                  }
+                `}
+              >
+                {uploadingBg ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-[#3cbfb3] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[#3cbfb3] font-semibold text-sm">{uploadProgress}</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 pointer-events-none">
+                    <div className="w-12 h-12 bg-[#e8f8f7] rounded-full flex items-center justify-center">
+                      <Upload size={22} className="text-[#3cbfb3]" />
+                    </div>
+                    <p className="font-bold text-gray-700 text-sm">
+                      Clique para fazer upload do wallpaper
+                    </p>
+                    <p className="text-gray-400 text-xs text-center">
+                      PNG, JPG ou WebP • Recomendado 1920×1080px • Máximo 3MB
+                    </p>
+                    {configs.bg_body_url && (
+                      <p className="text-[#3cbfb3] text-xs font-semibold">
+                        Clique para substituir a imagem atual
+                      </p>
+                    )}
+                  </div>
+                )}
+              </label>
+              {uploadProgress && !uploadingBg && (
+                <p className="text-center text-[#3cbfb3] font-semibold text-sm mt-2">
+                  {uploadProgress}
+                </p>
               )}
             </div>
-            <p className="text-xs text-gray-400 mt-2">
-              💡 Faça o upload em{' '}
-              <a href="/admin/banners" className="text-[#3cbfb3] hover:underline">Admin → Banners</a>
-              , copie a URL e cole aqui. Tamanho recomendado: 1920×1080px.
-            </p>
+
+            {/* Toggle ativo */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <div>
+                <p className="font-bold text-gray-900 text-sm">Ativar wallpaper no site</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Exibe a imagem de fundo em todas as páginas
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                <input
+                  type="checkbox"
+                  checked={configs.bg_body_ativo === 'true'}
+                  onChange={(e) => setConfigs(prev => ({ ...prev, bg_body_ativo: e.target.checked ? 'true' : 'false' }))}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[#3cbfb3] rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#3cbfb3] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" />
+              </label>
+            </div>
           </div>
 
           {/* Configurações avançadas */}
@@ -1667,15 +1741,14 @@ export default function ConfiguracoesPage() {
                 📋 Como adicionar um wallpaper:
               </p>
               <ol className="text-sm text-[#1a4f4a]/80 space-y-2 list-decimal list-inside">
-                <li>Vá em <strong>Admin → Banners</strong> e faça o upload da imagem de fundo</li>
-                <li>Copie a URL que aparecer após o upload</li>
-                <li>Volte aqui e cole a URL no campo &quot;URL do Wallpaper&quot;</li>
+                <li>No card &quot;Imagem de Fundo&quot, clique na área de upload</li>
+                <li>Selecione a imagem (PNG, JPG ou WebP, máximo 3MB)</li>
+                <li>Aguarde o upload concluir automaticamente</li>
                 <li>Ative o toggle &quot;Ativar wallpaper no site&quot;</li>
                 <li>Clique em &quot;Salvar Configurações&quot;</li>
-                <li>Aguarde o site atualizar (até 1 minuto)</li>
               </ol>
               <p className="text-xs text-[#1a4f4a]/60 mt-3">
-                💡 Tamanho recomendado: 1920×1080px • PNG ou JPG • Máximo 2MB
+                💡 Tamanho recomendado: 1920×1080px • PNG, JPG ou WebP • Máximo 3MB
               </p>
             </div>
 
