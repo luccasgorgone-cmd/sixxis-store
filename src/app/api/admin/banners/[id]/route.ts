@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/adminAuth'
 
 const NO_CACHE = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -13,6 +14,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const body = await request.json()
   const { imagem, titulo, subtitulo, link, ordem, ativo, tempoCads } = body
@@ -30,8 +34,6 @@ export async function PUT(
     },
   })
 
-  console.log('[ADMIN] banner atualizado:', id)
-
   return NextResponse.json({ banner }, { headers: NO_CACHE })
 }
 
@@ -39,6 +41,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const body = await request.json()
 
@@ -51,11 +56,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   await prisma.banner.delete({ where: { id } })
-  console.log('[ADMIN] banner deletado:', id)
   return NextResponse.json({ ok: true }, { headers: NO_CACHE })
 }

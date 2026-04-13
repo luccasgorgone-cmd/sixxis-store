@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/adminAuth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const cupons = await prisma.cupom.findMany({ orderBy: { createdAt: 'desc' } })
   return NextResponse.json({ cupons })
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const body = await request.json()
   const { codigo, tipo, valor, usoMaximo, valorMinimo, expiresAt, ativo } = body
 
@@ -28,6 +35,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const body = await request.json()
   const { id, codigo, tipo, valor, usoMaximo, valorMinimo, expiresAt, ativo } = body
 
@@ -48,6 +58,9 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { searchParams } = request.nextUrl
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })

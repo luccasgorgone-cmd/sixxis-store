@@ -8,6 +8,5 @@ export async function GET() {
     where:   { ativo: true },
     orderBy: { ordem: 'asc' },
   })
-  console.log('[API BANNERS]', new Date().toISOString(), 'total:', banners.length)
   return NextResponse.json({ banners })
 }

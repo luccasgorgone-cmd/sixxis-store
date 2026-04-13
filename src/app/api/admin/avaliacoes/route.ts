@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function GET(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { searchParams } = request.nextUrl
   const aprovada = searchParams.get('aprovada')
   const produtoId = searchParams.get('produtoId')
@@ -22,6 +26,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { id, aprovada } = await request.json()
 
   const avaliacao = await prisma.avaliacao.update({

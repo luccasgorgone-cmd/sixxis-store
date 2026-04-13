@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: 'Como funciona a garantia dos produtos?',
-    a: 'Todos os produtos Sixxis possuem garantia contra defeitos de fabricação. O prazo de garantia varia por produto: climatizadores e spinning têm 12 meses, aspiradores têm 6 meses, e peças de reposição têm 3 meses. A garantia cobre defeitos de fabricação, mas não cobre danos por uso inadequado.',
+    a: 'Todos os produtos Sixxis possuem garantia contra defeitos de fabricação. O prazo de garantia varia por produto: climatizadores e spinning têm 12 meses, aspiradores têm 6 meses. A garantia cobre defeitos de fabricação, mas não cobre danos por uso inadequado.',
   },
   {
     q: 'Posso trocar ou devolver um produto?',

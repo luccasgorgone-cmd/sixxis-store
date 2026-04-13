@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/adminAuth'
 
 const NO_CACHE = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -10,6 +11,9 @@ const NO_CACHE = {
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const { searchParams } = request.nextUrl
   const q = searchParams.get('q') ?? ''
   const categoria = searchParams.get('categoria') ?? ''
@@ -51,6 +55,9 @@ interface VariacaoInput {
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
+
   const body = await request.json()
 
   const {
@@ -116,8 +123,6 @@ export async function POST(request: NextRequest) {
     },
     include: { variacoes: true },
   })
-
-  console.log('[ADMIN] produto criado:', produto.id, produto.nome)
 
   return NextResponse.json({ produto }, { status: 201, headers: NO_CACHE })
 }
