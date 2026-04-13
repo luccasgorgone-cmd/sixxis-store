@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { ArrowRight, Cpu, Headphones, BadgeCheck, Tag, Zap } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
-import PagamentosBar from '@/components/layout/PagamentosBar'
+
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
@@ -52,11 +52,12 @@ const CATEGORIAS = [
 export default async function HomePage() {
   let banners: Awaited<ReturnType<typeof prisma.banner.findMany>> = []
   let produtosMostrar: Awaited<ReturnType<typeof prisma.produto.findMany>> = []
+  let produtosOferta:  Awaited<ReturnType<typeof prisma.produto.findMany>> = []
   let cfg:   Record<string, string> = {}
   let trust: Record<string, string> = {}
 
   try {
-    const [bannersDb, destaques, produtosGerais, configRows, trustRows] = await Promise.all([
+    const [bannersDb, destaques, produtosGerais, configRows, trustRows, ofertasDb] = await Promise.all([
       prisma.banner.findMany({ where: { ativo: true }, orderBy: { ordem: 'asc' } }),
       prisma.produtoDestaque.findMany({ where: { secao: 'mais-vendidos' }, include: { produto: true }, orderBy: { ordem: 'asc' } }),
       prisma.produto.findMany({ where: { ativo: true }, take: 8, orderBy: { createdAt: 'desc' } }),
@@ -64,11 +65,13 @@ export default async function HomePage() {
       prisma.configuracao.findMany({
         where: { chave: { in: ['trust_1_titulo','trust_1_sub','trust_2_titulo','trust_2_sub','trust_3_titulo','trust_3_sub','trust_4_titulo','trust_4_sub'] } },
       }),
+      prisma.produto.findMany({ where: { ativo: true, precoPromocional: { not: null } }, take: 4, orderBy: { createdAt: 'desc' } }),
     ])
     banners = bannersDb
     cfg = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
     trust = Object.fromEntries(trustRows.map((r) => [r.chave, r.valor]))
     produtosMostrar = destaques.length > 0 ? destaques.map((d) => d.produto) : produtosGerais
+    produtosOferta  = ofertasDb
   } catch (error) {
     console.error('[HOME DB ERROR]', error)
   }
@@ -131,22 +134,22 @@ export default async function HomePage() {
       {/* 3. Categorias com fotos — estilo Casas Bahia */}
       <section className="bg-white border-b border-gray-100 py-5">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-center gap-8 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center justify-center gap-10 overflow-x-auto scrollbar-hide">
             {CATEGORIAS.map(cat => (
               <Link key={cat.nome} href={cat.href}
                 className="flex flex-col items-center gap-2 min-w-[80px] group cursor-pointer"
               >
                 <div
-                  className="w-[72px] h-[72px] rounded-2xl overflow-hidden border-2 border-gray-100 group-hover:border-[#3cbfb3] transition-all duration-200 shadow-sm bg-gray-50 flex items-center justify-center"
+                  className="w-[76px] h-[76px] rounded-2xl overflow-hidden border-2 border-gray-100 group-hover:border-[#3cbfb3] transition-all duration-200 shadow-sm bg-gray-50 flex items-center justify-center"
                   style={cat.bgColor ? { backgroundColor: cat.bgColor } : {}}
                 >
                   {cat.img ? (
                     <Image
                       src={cat.img}
                       alt={cat.nome}
-                      width={72}
-                      height={72}
-                      className="w-full h-full object-cover"
+                      width={76}
+                      height={76}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       unoptimized
                     />
                   ) : (
@@ -158,7 +161,7 @@ export default async function HomePage() {
                     {cat.nome}
                   </span>
                   {cat.badge && (
-                    <span className="inline-block bg-[#f59e0b] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5">
+                    <span className="inline-block bg-[#f59e0b] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5 uppercase tracking-wide">
                       {cat.badge}
                     </span>
                   )}
@@ -203,25 +206,28 @@ export default async function HomePage() {
       </section>
 
       {/* 5. Ofertas Relâmpago */}
-      {produtosMostrar.length > 0 && (
+      {produtosOferta.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-          <div className="bg-white rounded-xl p-5 shadow-sm">
-            {/* Header da seção */}
+          <div className="bg-[#e8f8f7] rounded-xl p-5">
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Zap size={22} className="text-[#f59e0b] fill-[#f59e0b]" />
                 <h2 className="text-xl font-bold text-gray-900">Ofertas Relâmpago</h2>
               </div>
-              {/* Countdown */}
               <OfertaCountdown targetDate={countdownTarget} />
             </div>
-            {/* Cards em scroll horizontal */}
-            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-              {produtosMostrar.slice(0, 6).map((produto) => (
-                <div key={produto.id} className="min-w-[180px] max-w-[200px] flex-shrink-0">
-                  <CardProduto produto={produto} ofertaBadge />
-                </div>
+            {/* Grid 4 colunas */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {produtosOferta.map((produto) => (
+                <CardProduto key={produto.id} produto={produto} ofertaBadge />
               ))}
+            </div>
+            {/* Ver todas */}
+            <div className="mt-4 text-center">
+              <Link href="/ofertas" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2a9d8f] hover:text-[#1a7a74] transition">
+                Ver todas as ofertas <ArrowRight size={14} />
+              </Link>
             </div>
           </div>
         </section>
@@ -230,13 +236,14 @@ export default async function HomePage() {
       {/* 6. Banners duplos */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Banner Climatizadores */}
           <Link
             href="/produtos?categoria=climatizadores"
-            className="group relative overflow-hidden rounded-xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
-            style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0d3d3a 0%, #1a7a74 60%, #3cbfb3 100%)' }}
+            className="group relative overflow-hidden rounded-xl flex items-end p-7 hover:scale-[1.02] transition-transform duration-300"
+            style={{ minHeight: '220px', background: 'linear-gradient(135deg, #0d3d3a 0%, #1a7a74 60%, #3cbfb3 100%)' }}
           >
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #fff, transparent)' }} />
-            <div className="relative z-10">
+            <div className="relative z-10 flex-1">
               <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
                 Linha Residencial e Comercial
               </span>
@@ -247,15 +254,26 @@ export default async function HomePage() {
                 Ver linha <ArrowRight size={14} />
               </span>
             </div>
+            {/* Produto — lado direito */}
+            <div className="absolute right-4 bottom-0 w-[42%] h-[115%] group-hover:scale-105 group-hover:-translate-y-1 transition-all duration-500 pointer-events-none">
+              <Image
+                src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775737122831-k4d1lc1.jpg"
+                alt="Climatizador Sixxis"
+                fill
+                className="object-contain object-bottom drop-shadow-2xl"
+                unoptimized
+              />
+            </div>
           </Link>
 
+          {/* Banner Spinning */}
           <Link
             href="/produtos?categoria=spinning"
-            className="group relative overflow-hidden rounded-xl flex flex-col justify-end p-7 hover:scale-[1.02] transition-transform duration-300"
-            style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0a0a0a 0%, #111827 60%, #1f2937 100%)' }}
+            className="group relative overflow-hidden rounded-xl flex items-end p-7 hover:scale-[1.02] transition-transform duration-300"
+            style={{ minHeight: '220px', background: 'linear-gradient(135deg, #0a0a0a 0%, #111827 60%, #1f2937 100%)' }}
           >
             <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #3cbfb3, transparent)' }} />
-            <div className="relative z-10">
+            <div className="relative z-10 flex-1">
               <span className="inline-block bg-[#3cbfb3]/20 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide border border-[#3cbfb3]/30">
                 Spinning & Fitness
               </span>
@@ -265,6 +283,16 @@ export default async function HomePage() {
               <span className="inline-flex items-center gap-2 bg-[#3cbfb3]/20 hover:bg-[#3cbfb3]/30 text-[#3cbfb3] text-sm font-bold px-4 py-2 rounded-xl transition border border-[#3cbfb3]/40">
                 Ver linha <ArrowRight size={14} />
               </span>
+            </div>
+            {/* Produto — lado direito */}
+            <div className="absolute right-4 bottom-0 w-[38%] h-[110%] group-hover:scale-105 group-hover:-translate-y-1 transition-all duration-500 pointer-events-none">
+              <Image
+                src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775754930452-4ixi773.png"
+                alt="Bike Spinning Sixxis"
+                fill
+                className="object-contain object-bottom drop-shadow-2xl"
+                unoptimized
+              />
             </div>
           </Link>
         </div>
@@ -354,8 +382,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 11. PagamentosBar */}
-      <PagamentosBar />
     </main>
   )
 }
