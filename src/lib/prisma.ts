@@ -9,7 +9,12 @@ function createPrisma(): PrismaClient {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL não está definido no ambiente.')
   }
+
+  // connection_limit, pool_timeout e connect_timeout são parâmetros de URL
+  // suportados pelo adapter MariaDB para controle do pool de conexões.
+  // Configure no Railway: DATABASE_URL=...?connection_limit=20&pool_timeout=30
   const adapter = new PrismaMariaDb(process.env.DATABASE_URL)
+
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],

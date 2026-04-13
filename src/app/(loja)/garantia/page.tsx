@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ShieldCheck, Mail } from 'lucide-react'
 
+export const revalidate = 86400
+
 export const metadata: Metadata = {
   title: 'Termo de Garantia | Sixxis',
   description: 'Conheça os prazos e condições de garantia dos produtos Sixxis e saiba como acionar a assistência técnica.',

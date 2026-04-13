@@ -133,9 +133,9 @@ export default async function Footer() {
               <Image
                 src={logoUrl}
                 alt="Sixxis"
-                width={110}
-                height={36}
-                className="object-contain brightness-0 invert"
+                width={130}
+                height={44}
+                className="object-contain"
                 unoptimized
               />
             </Link>
@@ -148,11 +148,11 @@ export default async function Footer() {
               href={`https://wa.me/${whatsappVendas}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2.5 w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#25D366]/30 mb-2"
+              className="flex items-center gap-2 w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#25D366]/30 mb-2"
               aria-label="Falar no WhatsApp — Vendas"
             >
               <WaIcon size={16} />
-              (18) 99747-4701
+              Vendas — WhatsApp
             </a>
 
             {/* WhatsApp Assistência Técnica */}
@@ -160,11 +160,11 @@ export default async function Footer() {
               href={`https://wa.me/${whatsappSuporte}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2.5 w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-[#3cbfb3]/40 text-gray-300 hover:text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 mb-3"
+              className="flex items-center gap-2 w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-[#3cbfb3]/40 text-gray-300 hover:text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 mb-3"
               aria-label="WhatsApp Assistência Técnica"
             >
               <WaIcon size={16} />
-              (11) 93410-2621 — Técnico
+              Assistência Técnica
             </a>
 
             {/* Contato */}

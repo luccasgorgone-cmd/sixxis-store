@@ -28,7 +28,7 @@ const ESTADOS_BR = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS',
 
 const DEFAULTS: Record<string, string> = {
   loja_nome: 'Sixxis Store',
-  loja_descricao: 'Loja oficial Sixxis. Climatizadores, aspiradores, spinning e peças de reposição originais.',
+  loja_descricao: 'Loja oficial Sixxis. Climatizadores, aspiradores e spinning.',
   loja_email: 'brasil.sixxis@gmail.com',
   loja_telefone: '(18) 99747-4701',
   loja_endereco: 'R. Anhanguera, 1711 - Icaray, Araçatuba - SP',
@@ -58,7 +58,7 @@ const DEFAULTS: Record<string, string> = {
   social_instagram: 'https://instagram.com/sixxisoficial',
   social_facebook: 'https://www.facebook.com/profile.php?id=100090936724453',
   seo_title: 'Sixxis Store — Climatizadores, Aspiradores e Spinning',
-  seo_description: 'Loja oficial Sixxis. Climatizadores, aspiradores, spinning e peças de reposição originais com entrega rápida para todo o Brasil.',
+  seo_description: 'Loja oficial Sixxis. Climatizadores, aspiradores e spinning com garantia e entrega rápida para todo o Brasil.',
   seo_ga_id: '',
   seo_pixel_id: '',
   // Transportadoras

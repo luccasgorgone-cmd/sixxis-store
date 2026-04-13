@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Shield } from 'lucide-react'
 
+export const revalidate = 86400
+
 export const metadata: Metadata = {
   title: 'Política de Privacidade | Sixxis',
   description: 'Saiba como a Sixxis coleta, usa e protege seus dados pessoais, em conformidade com a LGPD.',

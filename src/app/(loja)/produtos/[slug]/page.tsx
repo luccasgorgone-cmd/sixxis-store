@@ -269,7 +269,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
               {relacionados.map((p) => (
-                <CardProduto key={p.id} produto={p} showDesconto />
+                <CardProduto key={p.id} produto={p} />
               ))}
             </div>
             <div className="mt-6 sm:hidden text-center">
