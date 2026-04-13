@@ -66,13 +66,13 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f0f2f5]">
+    <main className="min-h-screen">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
       {banners.length > 0 ? (
         <BannerCarousel banners={banners} />
       ) : (
-        <section className="relative bg-gradient-to-br from-[#0f2e2b] via-[#1a4f4a] to-[#0f2e2b] min-h-[420px] flex items-center">
+        <section className="relative bg-gradient-to-br from-[#0f2e2b] via-[#1a4f4a] to-[#0f2e2b] min-h-[400px] flex items-center">
           <div className="max-w-7xl mx-auto px-6 py-16">
             <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4">
               Climatizadores, Aspiradores<br />
@@ -111,7 +111,7 @@ export default async function HomePage() {
       <CategoriasSection />
 
       {/* ── 4. Produtos em Destaque ───────────────────────────────── */}
-      <section className="bg-[#f0f2f5] py-8">
+      <section className="bg-white/10 backdrop-blur-none py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header da seção */}
@@ -148,7 +148,7 @@ export default async function HomePage() {
       <OfertasRelampago produtos={produtosOferta} />
 
       {/* ── 6. Banners duplos ─────────────────────────────────────── */}
-      <section className="bg-[#f0f2f5] pb-8">
+      <section className="bg-transparent pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -233,7 +233,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── 8. Por que Sixxis? ────────────────────────────────────── */}
-      <section className="bg-[#f0f2f5] py-10">
+      <section className="bg-white/5 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="mb-6">
             <h2 className="text-xl font-extrabold text-gray-900">Por que Sixxis?</h2>

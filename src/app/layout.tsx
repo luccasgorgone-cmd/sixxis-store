@@ -157,27 +157,30 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   // Background global do body
   const bgAtivo = cfg.bg_body_ativo === 'true' && !!cfg.bg_body_url
-  const bodyStyle: React.CSSProperties = {
-    fontFamily: `var(${fontObj.variable}), system-ui, sans-serif`,
-    ...(bgAtivo ? {
-      backgroundImage:    `url(${cfg.bg_body_url})`,
-      backgroundSize:     cfg.bg_body_size       || 'cover',
-      backgroundAttachment: cfg.bg_body_attachment || 'fixed',
-      backgroundRepeat:   cfg.bg_body_repeat     || 'no-repeat',
-      backgroundPosition: cfg.bg_body_position   || 'center center',
-      backgroundColor:    '#0f1f1d',
-    } : {
-      backgroundColor: cfg.cor_fundo || '#ffffff',
-    }),
+  const bgStyle: React.CSSProperties = bgAtivo ? {
+    backgroundImage:      `url(${cfg.bg_body_url})`,
+    backgroundSize:       cfg.bg_body_size       || 'cover',
+    backgroundAttachment: cfg.bg_body_attachment || 'fixed',
+    backgroundRepeat:     cfg.bg_body_repeat     || 'no-repeat',
+    backgroundPosition:   cfg.bg_body_position   || 'center center',
+    backgroundColor:      '#0f1f1d',
+  } : {
+    backgroundColor: cfg.cor_fundo || '#ffffff',
   }
 
   const overlayOpacity = bgAtivo ? Number(cfg.bg_body_overlay || 0) : 0
+
+  // Merge: CSS vars + font + background all on body so wallpaper and vars are co-located
+  const bodyStyle: React.CSSProperties = {
+    fontFamily: `var(${fontObj.variable}), system-ui, sans-serif`,
+    ...bgStyle,
+    ...cssVars,
+  }
 
   return (
     <html
       lang="pt-BR"
       className={`${allFontVars} h-full antialiased`}
-      style={cssVars}
     >
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />

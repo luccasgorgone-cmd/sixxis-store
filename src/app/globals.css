@@ -90,10 +90,8 @@
   z-index: 0;
 }
 
-/* Garante que header, conteúdo e footer ficam acima do wallpaper */
-header,
+/* Garante que conteúdo e footer ficam acima do wallpaper overlay */
 footer,
-nav,
 main {
   position: relative;
   z-index: 1;

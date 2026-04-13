@@ -47,15 +47,15 @@ function CategoriaCard({ cat }: { cat: Categoria }) {
   return (
     <Link
       href={cat.href}
-      className="group flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-300"
+      className="group flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-white/10 transition-all duration-300"
     >
       <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
         {imgError || !cat.img ? (
           <div
-            className="w-full h-full flex items-center justify-center"
-            style={{ backgroundColor: cat.cor }}
+            className="w-full h-full flex items-center justify-center rounded-2xl"
+            style={{ backgroundColor: cat.cor || '#1a4f4a' }}
           >
-            <span className="text-white text-2xl font-black">{cat.emoji}</span>
+            <span className="text-2xl">{cat.emoji}</span>
           </div>
         ) : (
           <Image
@@ -74,16 +74,16 @@ function CategoriaCard({ cat }: { cat: Categoria }) {
           </span>
         )}
       </div>
-      <span className="text-sm font-bold text-gray-800 text-center">{cat.nome}</span>
+      <span className="text-sm font-bold text-white text-center">{cat.nome}</span>
     </Link>
   )
 }
 
 export default function CategoriasSection() {
   return (
-    <section className="bg-white w-full border-b border-gray-100">
+    <section className="bg-[#1a4f4a] w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <h2 className="section-title mb-8">Categorias</h2>
+        <h2 className="text-xl font-bold text-white mb-8">Nossas Categorias</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {CATEGORIAS.map((cat) => (
             <CategoriaCard key={cat.nome} cat={cat} />

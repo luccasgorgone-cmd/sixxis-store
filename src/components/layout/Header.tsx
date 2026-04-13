@@ -304,9 +304,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       </div>
 
       {/* ═══════════════════════════════════════════════════════
-          STICKY WRAPPER
+          HEADER STICKY
       ═══════════════════════════════════════════════════════ */}
-      <div className="sticky top-0 z-40">
+      <header className="sticky top-0 z-40">
 
         {/* ─── HEADER PRINCIPAL ─────────────────────────────── */}
         <div className="shadow-md" style={{ backgroundColor: 'var(--bg-header, #1a4f4a)' }}>
@@ -452,7 +452,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             </div>
           </div>
         </nav>
-      </div>
+      </header>
 
       {/* ═══════════════════════════════════════════════════════
           MODAL CEP
