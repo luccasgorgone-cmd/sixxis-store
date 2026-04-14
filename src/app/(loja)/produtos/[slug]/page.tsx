@@ -5,6 +5,7 @@ import { ChevronRight, Share2 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import GaleriaProduto from '@/components/produto/GaleriaProduto'
+import type { GaleriaItem } from '@/components/produto/GaleriaProduto'
 import BlocoPrecoProduto from '@/components/produto/BlocoPrecoProduto'
 import AbasProduto from '@/components/produto/AbasProduto'
 import StickyBarMobile from '@/components/produto/StickyBarMobile'
@@ -61,6 +62,11 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   })
 
   const imagens     = produto.imagens as string[]
+  const videoUrl    = (produto as unknown as { videoUrl?: string | null }).videoUrl ?? ''
+  const itens: GaleriaItem[] = [
+    ...imagens.map(url => ({ tipo: 'imagem' as const, url })),
+    ...(videoUrl ? [{ tipo: 'video' as const, url: videoUrl }] : []),
+  ]
   const preco       = Number(produto.preco)
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
   const precoFinal  = promocional ?? preco
@@ -108,7 +114,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-8">
 
           {/* Coluna esquerda — Galeria */}
-          <GaleriaProduto imagens={imagens} nome={produto.nome} />
+          <GaleriaProduto itens={itens} nomeProduto={produto.nome} />
 
           {/* Coluna direita — Info */}
           <div>
@@ -153,7 +159,6 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         <AbasProduto
           descricao={produto.descricao}
           produtoId={produto.id}
-          comprouProduto={comprouProduto}
         />
 
         {/* Produtos relacionados */}

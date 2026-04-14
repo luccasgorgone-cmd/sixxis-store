@@ -56,6 +56,7 @@ export async function PUT(
     estoque,
     ativo,
     imagens,
+    videoUrl,
     temVariacoes,
     variacoes,
   } = body
@@ -125,6 +126,7 @@ export async function PUT(
         estoque: estoqueTotal,
         ativo: ativo !== false,
         imagens: imagens ?? [],
+        videoUrl: videoUrl ?? null,
         temVariacoes: Boolean(temVariacoes),
       },
     })

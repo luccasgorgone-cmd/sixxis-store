@@ -1,18 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import { Package } from 'lucide-react'
+import { ZoomIn, X, ChevronLeft, ChevronRight, Play, Package } from 'lucide-react'
 
-interface Props {
-  imagens: string[]
-  nome: string
+export interface GaleriaItem {
+  tipo: 'imagem' | 'video'
+  url: string
+  thumb?: string
 }
 
-export default function GaleriaProduto({ imagens, nome }: Props) {
-  const [ativa, setAtiva] = useState(0)
+interface Props {
+  itens: GaleriaItem[]
+  nomeProduto: string
+}
 
-  if (imagens.length === 0) {
+export default function GaleriaProduto({ itens, nomeProduto }: Props) {
+  const [ativo, setAtivo] = useState(0)
+  const [zoom, setZoom] = useState(false)
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 })
+  const [fullscreen, setFullscreen] = useState(false)
+  const imgRef = useRef<HTMLDivElement>(null)
+
+  if (!itens.length) {
     return (
       <div className="aspect-square bg-[#f8f9fa] rounded-2xl flex flex-col items-center justify-center gap-3 text-gray-300 border border-gray-200">
         <Package size={56} strokeWidth={1.5} />
@@ -21,43 +31,188 @@ export default function GaleriaProduto({ imagens, nome }: Props) {
     )
   }
 
+  const itemAtivo = itens[ativo]
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imgRef.current || itemAtivo?.tipo === 'video') return
+    const rect = imgRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setZoomPos({ x, y })
+    setZoom(true)
+  }, [itemAtivo])
+
+  const handleMouseLeave = () => setZoom(false)
+
+  const anterior = useCallback(() => setAtivo(i => i > 0 ? i - 1 : itens.length - 1), [itens.length])
+  const proximo = useCallback(() => setAtivo(i => i < itens.length - 1 ? i + 1 : 0), [itens.length])
+
   return (
-    <div>
-      {/* Imagem principal */}
-      <div className="relative aspect-square bg-[#f8f9fa] rounded-2xl overflow-hidden mb-4 border border-gray-200 group cursor-zoom-in">
-        <Image
-          src={imagens[ativa]}
-          alt={nome}
-          fill
-          className="object-contain p-4 transition-transform duration-300 group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, 50vw"
-          priority
-        />
+    <div className="flex flex-col gap-4">
+      {/* Imagem/Vídeo principal */}
+      <div className="relative">
+        <div
+          ref={imgRef}
+          className={`relative bg-white rounded-2xl border-2 border-gray-100 overflow-hidden aspect-square${itemAtivo?.tipo === 'imagem' ? ' cursor-zoom-in' : ''}`}
+          style={{ minHeight: '400px' }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          {itemAtivo?.tipo === 'imagem' && (
+            <>
+              <Image
+                src={itemAtivo.url}
+                alt={`${nomeProduto} — imagem ${ativo + 1}`}
+                fill
+                className={`object-contain p-6 transition-transform duration-100${zoom ? ' scale-150' : ' scale-100'}`}
+                style={zoom ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
+                unoptimized
+                priority={ativo === 0}
+              />
+              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-xl p-2 shadow-sm border border-gray-100 pointer-events-none">
+                <ZoomIn size={16} className="text-gray-500" />
+              </div>
+            </>
+          )}
+
+          {itemAtivo?.tipo === 'video' && (
+            <div className="w-full h-full flex items-center justify-center">
+              {itemAtivo.url.includes('youtube') || itemAtivo.url.includes('youtu.be') ? (
+                <iframe
+                  src={itemAtivo.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                  className="w-full h-full rounded-xl"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Vídeo do produto"
+                />
+              ) : (
+                <video src={itemAtivo.url} controls className="w-full h-full object-contain rounded-xl" />
+              )}
+            </div>
+          )}
+
+          {itens.length > 1 && (
+            <>
+              <button
+                onClick={anterior}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-100 rounded-xl p-2 shadow-md transition z-10"
+                aria-label="Imagem anterior"
+              >
+                <ChevronLeft size={18} className="text-gray-700" />
+              </button>
+              <button
+                onClick={proximo}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-100 rounded-xl p-2 shadow-md transition z-10"
+                aria-label="Próxima imagem"
+              >
+                <ChevronRight size={18} className="text-gray-700" />
+              </button>
+            </>
+          )}
+
+          {itemAtivo?.tipo === 'imagem' && (
+            <button
+              onClick={() => setFullscreen(true)}
+              className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm border border-gray-100 rounded-xl px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-sm hover:bg-white transition flex items-center gap-1.5 z-10"
+            >
+              <ZoomIn size={12} />
+              Ver ampliado
+            </button>
+          )}
+
+          {itens.length > 1 && (
+            <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full z-10">
+              {ativo + 1}/{itens.length}
+            </div>
+          )}
+        </div>
+
+        {itemAtivo?.tipo === 'imagem' && !zoom && (
+          <p className="text-center text-xs text-gray-400 mt-2 flex items-center justify-center gap-1">
+            <ZoomIn size={11} />
+            Passe o mouse para ampliar
+          </p>
+        )}
       </div>
 
       {/* Thumbnails */}
-      {imagens.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {imagens.map((img, i) => (
+      {itens.length > 1 && (
+        <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+          {itens.map((item, i) => (
             <button
               key={i}
-              onClick={() => setAtiva(i)}
-              className={`relative shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
-                i === ativa
-                  ? 'border-[#3cbfb3] shadow-md shadow-[#3cbfb3]/20'
-                  : 'border-gray-200 hover:border-[#3cbfb3]/50'
+              onClick={() => setAtivo(i)}
+              className={`relative shrink-0 w-[72px] h-[72px] rounded-xl border-2 overflow-hidden transition-all duration-150 bg-white${
+                i === ativo
+                  ? ' border-[#3cbfb3] shadow-md shadow-[#3cbfb3]/20 scale-105'
+                  : ' border-gray-100 hover:border-gray-300'
               }`}
-              aria-label={`Ver imagem ${i + 1}`}
+              aria-label={`Ver ${item.tipo === 'video' ? 'vídeo' : `imagem ${i + 1}`}`}
             >
-              <Image
-                src={img}
-                alt={`${nome} — imagem ${i + 1}`}
-                fill
-                className="object-cover"
-                sizes="64px"
-              />
+              {item.tipo === 'video' ? (
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                  {item.thumb && (
+                    <Image src={item.thumb} alt="thumb" fill className="object-cover opacity-70" unoptimized />
+                  )}
+                  <Play size={20} className="text-white absolute z-10" fill="white" />
+                </div>
+              ) : (
+                <Image
+                  src={item.url}
+                  alt={`thumb ${i + 1}`}
+                  fill
+                  className="object-contain p-1.5"
+                  unoptimized
+                />
+              )}
+              {i === ativo && (
+                <div className="absolute inset-0 ring-2 ring-[#3cbfb3] ring-inset rounded-xl pointer-events-none" />
+              )}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Modal Fullscreen */}
+      {fullscreen && itemAtivo?.tipo === 'imagem' && (
+        <div
+          className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4"
+          onClick={() => setFullscreen(false)}
+        >
+          <button
+            className="absolute top-5 right-5 bg-white/10 hover:bg-white/20 text-white rounded-xl p-2.5 transition z-10"
+            onClick={(e) => { e.stopPropagation(); setFullscreen(false) }}
+            aria-label="Fechar"
+          >
+            <X size={22} />
+          </button>
+          <div className="relative max-w-4xl max-h-[90vh] w-full h-full">
+            <Image
+              src={itemAtivo.url}
+              alt={nomeProduto}
+              fill
+              className="object-contain"
+              unoptimized
+            />
+          </div>
+          {itens.length > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); anterior() }}
+                className="absolute left-5 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-xl p-3 transition z-10"
+                aria-label="Anterior"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); proximo() }}
+                className="absolute right-5 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-xl p-3 transition z-10"
+                aria-label="Próxima"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

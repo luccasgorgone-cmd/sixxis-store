@@ -68,7 +68,7 @@ function PagamentoBadges() {
 
 function ColTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-white font-bold text-sm pb-2 mb-4 border-b border-white/15 uppercase tracking-wider">
+    <p className="text-white font-bold text-sm pb-2 mb-4 border-b border-white/20 uppercase tracking-wider">
       {children}
     </p>
   )
@@ -138,11 +138,11 @@ export default async function Footer() {
                 alt="Sixxis"
                 width={165}
                 height={56}
-                className="object-contain h-12 w-auto mx-auto lg:mx-0"
+                className="object-contain h-12 w-auto ml-0 pl-2"
                 unoptimized
               />
             </Link>
-            <p className="text-sm text-white/70 leading-relaxed mb-5">
+            <p className="text-sm text-white/85 leading-relaxed mb-5">
               Qualidade e inovação para o seu conforto e bem-estar.
             </p>
 
@@ -183,7 +183,7 @@ export default async function Footer() {
               <p className="text-white/40 text-xs">Envie um e-mail:</p>
               <a
                 href="mailto:brasil.sixxis@gmail.com"
-                className="flex items-center gap-1.5 text-white/70 hover:text-[#3cbfb3] transition py-1"
+                className="flex items-center gap-1.5 text-white/80 hover:text-[#3cbfb3] transition py-1"
               >
                 <Mail size={13} />
                 brasil.sixxis@gmail.com
@@ -192,10 +192,10 @@ export default async function Footer() {
 
             {/* Horário */}
             <div className="mt-4 text-xs space-y-0.5">
-              <p className="flex items-center gap-1.5 text-white/50 font-medium">
+              <p className="flex items-center gap-1.5 text-white/70 font-medium">
                 <Clock size={12} /> Horário de Atendimento SAC:
               </p>
-              <p className="text-white/70">Seg–Sex: 8h às 18h&nbsp;&nbsp;|&nbsp;&nbsp;Sáb: 8h às 12h</p>
+              <p className="text-white/85">Seg–Sex: 8h às 18h&nbsp;&nbsp;|&nbsp;&nbsp;Sáb: 8h às 12h</p>
             </div>
           </div>
 
@@ -210,7 +210,7 @@ export default async function Footer() {
                 ['FAQ',                     '/faq'],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <Link href={href} className="block py-1 text-white/60 hover:text-white hover:translate-x-1 transition-all duration-200">
+                  <Link href={href} className="block py-1 text-white/85 hover:text-white hover:translate-x-1 transition-all duration-200">
                     {label}
                   </Link>
                 </li>
@@ -229,7 +229,7 @@ export default async function Footer() {
                 ['Termo de Garantia',       '/garantia'],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <Link href={href} className="block py-1 text-white/60 hover:text-white hover:translate-x-1 transition-all duration-200">
+                  <Link href={href} className="block py-1 text-white/85 hover:text-white hover:translate-x-1 transition-all duration-200">
                     {label}
                   </Link>
                 </li>
@@ -249,7 +249,7 @@ export default async function Footer() {
                 ['FAQ',             '/faq'],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <Link href={href} className="block py-1 text-white/60 hover:text-white hover:translate-x-1 transition-all duration-200">
+                  <Link href={href} className="block py-1 text-white/85 hover:text-white hover:translate-x-1 transition-all duration-200">
                     {label}
                   </Link>
                 </li>
@@ -319,20 +319,20 @@ export default async function Footer() {
       </div>
 
       {/* ── Formas de pagamento ───────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#0a1e1c' }}>
+      <div className="border-t border-white/20" style={{ backgroundColor: '#0a1e1c' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center gap-4">
-          <p className="text-xs text-white/50 font-medium shrink-0">Formas de Pagamento:</p>
+          <p className="text-xs text-white/85 font-medium shrink-0">Formas de Pagamento:</p>
           <PagamentoBadges />
-          <p className="text-xs text-white/40 ml-auto hidden lg:block">
-            Parcele em até <span className="text-white/60 font-semibold">6x sem juros</span>
+          <p className="text-xs ml-auto hidden lg:block">
+            <span className="text-white font-semibold">Parcele em até 6x sem juros</span>
           </p>
         </div>
       </div>
 
       {/* ── Rodapé legal ─────────────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#081614' }}>
+      <div className="border-t border-white/20" style={{ backgroundColor: '#081614' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div className="text-xs text-white/55 space-y-0.5">
+          <div className="text-xs text-white/75 space-y-0.5">
             <p>© {new Date().getFullYear()} Sixxis — SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA</p>
             <p>CNPJ: 54.978.947/0001-09&nbsp;&nbsp;|&nbsp;&nbsp;IE: 117.633.347.114</p>
             <p className="flex items-center gap-1">
@@ -340,7 +340,7 @@ export default async function Footer() {
               R. Anhanguera, 1711 - Icaray, Araçatuba - SP, 16020-355
             </p>
           </div>
-          <p className="text-xs text-white/55 shrink-0">Todos os direitos reservados.</p>
+          <p className="text-xs text-white/75 shrink-0">Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

@@ -1,40 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
-  const unauthorized = await requireAdmin(request)
-  if (unauthorized) return unauthorized
+  const unauth = await requireAdmin(request)
+  if (unauth) return unauth
 
   const { searchParams } = request.nextUrl
-  const aprovada = searchParams.get('aprovada')
   const produtoId = searchParams.get('produtoId')
+  const status    = searchParams.get('status') // 'aprovadas' | 'pendentes' | 'todas'
+  const q         = searchParams.get('q')
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = {}
+  if (produtoId) where.produtoId = produtoId
+  if (status === 'aprovadas')  where.aprovada = true
+  if (status === 'pendentes')  where.aprovada = false
+  if (status === 'destaque')   where.destaque = true
+  if (q) where.OR = [
+    { nomeAutor:  { contains: q } },
+    { comentario: { contains: q } },
+    { titulo:     { contains: q } },
+  ]
 
   const avaliacoes = await prisma.avaliacao.findMany({
-    where: {
-      ...(aprovada !== null ? { aprovada: aprovada === 'true' } : {}),
-      ...(produtoId ? { produtoId } : {}),
-    },
+    where,
     include: {
-      cliente: { select: { nome: true, email: true } },
-      produto: { select: { nome: true, slug: true } },
+      fotos:   true,
+      produto: { select: { nome: true, imagens: true, slug: true } },
+      cliente: { select: { nome: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
 
-  return NextResponse.json({ avaliacoes })
-}
-
-export async function PATCH(request: NextRequest) {
-  const unauthorized = await requireAdmin(request)
-  if (unauthorized) return unauthorized
-
-  const { id, aprovada } = await request.json()
-
-  const avaliacao = await prisma.avaliacao.update({
-    where: { id },
-    data:  { aprovada },
-  })
-
-  return NextResponse.json({ avaliacao })
+  return Response.json({ avaliacoes })
 }

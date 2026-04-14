@@ -56,6 +56,7 @@ model Produto {
   createdAt        DateTime          @default(now())
   sku              String?           @unique
   temVariacoes     Boolean           @default(false)
+  videoUrl         String?           @default("")
   avaliacoes       Avaliacao[]
   itensCarrinho    ItemCarrinho[]
   itensPedido      ItemPedido[]
@@ -130,19 +131,36 @@ model ItemCarrinho {
 }
 
 model Avaliacao {
-  id         String   @id @default(cuid())
-  produtoId  String
-  clienteId  String
-  nota       Int
-  titulo     String?
-  comentario String?  @db.Text
-  aprovada   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  cliente    Cliente  @relation(fields: [clienteId], references: [id])
-  produto    Produto  @relation(fields: [produtoId], references: [id])
+  id          String          @id @default(cuid())
+  produtoId   String
+  clienteId   String?
+  nomeAutor   String          @default("")
+  emailAutor  String?
+  nota        Int
+  titulo      String?
+  comentario  String?         @db.Text
+  aprovada    Boolean         @default(false)
+  destaque    Boolean         @default(false)
+  resposta    String?         @db.Text
+  respostaEm  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  fotos       AvaliacaoFoto[]
+  cliente     Cliente?        @relation(fields: [clienteId], references: [id])
+  produto     Produto         @relation(fields: [produtoId], references: [id])
 
   @@index([clienteId], map: "Avaliacao_clienteId_fkey")
   @@index([produtoId, aprovada])
+}
+
+model AvaliacaoFoto {
+  id          String    @id @default(cuid())
+  avaliacaoId String
+  url         String
+  createdAt   DateTime  @default(now())
+  avaliacao   Avaliacao @relation(fields: [avaliacaoId], references: [id], onDelete: Cascade)
+
+  @@index([avaliacaoId])
 }
 
 model Banner {
