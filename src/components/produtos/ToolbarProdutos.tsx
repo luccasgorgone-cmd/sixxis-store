@@ -21,6 +21,7 @@ interface Props {
 
 const ORDENS = [
   { val: 'relevancia', label: 'Relevância' },
+  { val: 'vendidos',   label: 'Mais vendidos' },
   { val: 'recentes',   label: 'Mais recentes' },
   { val: 'preco-asc',  label: 'Menor preço' },
   { val: 'preco-desc', label: 'Maior preço' },

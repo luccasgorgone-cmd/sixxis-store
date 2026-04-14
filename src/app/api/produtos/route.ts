@@ -36,7 +36,9 @@ export async function GET(request: NextRequest) {
     ordem === 'preco-asc'  ? { preco:     'asc'  } :
     ordem === 'preco-desc' ? { preco:     'desc' } :
     ordem === 'recentes'   ? { createdAt: 'desc' } :
-    /* default nome */       { nome:      'asc'  }
+    ordem === 'vendidos'   ? { vendidos:  'desc' } :
+    ordem === 'nome'       ? { nome:      'asc'  } :
+    /* relevancia default */ { createdAt: 'desc' }
 
   const [produtos, total] = await Promise.all([
     prisma.produto.findMany({

@@ -170,9 +170,25 @@ export default function SidebarFiltros({
             </div>
           </FiltroSecao>
 
-          <FiltroSecao titulo="Capacidade (Litros)">
+          <FiltroSecao titulo="Litragem">
             <div className="space-y-0.5">
               {['Até 7L', '7L – 15L', '15L – 25L', 'Acima de 25L'].map(v => (
+                <FiltroOpcao key={v} label={v} ativo={false} onClick={() => {}} />
+              ))}
+            </div>
+          </FiltroSecao>
+
+          <FiltroSecao titulo="Vazão (m³/h)">
+            <div className="space-y-0.5">
+              {['Até 500 m³/h', '500 – 1.000 m³/h', '1.000 – 2.000 m³/h', 'Acima de 2.000 m³/h'].map(v => (
+                <FiltroOpcao key={v} label={v} ativo={false} onClick={() => {}} />
+              ))}
+            </div>
+          </FiltroSecao>
+
+          <FiltroSecao titulo="Área de Cobertura">
+            <div className="space-y-0.5">
+              {['Até 20 m²', '20 – 40 m²', '40 – 60 m²', 'Acima de 60 m²'].map(v => (
                 <FiltroOpcao key={v} label={v} ativo={false} onClick={() => {}} />
               ))}
             </div>

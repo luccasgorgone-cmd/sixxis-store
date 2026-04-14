@@ -59,6 +59,7 @@ model Produto {
   videoUrl         String?           @default("")
   especificacoes   Json?
   faqs             Json?
+  vendidos         Int               @default(0)
   avaliacoes       Avaliacao[]
   itensCarrinho    ItemCarrinho[]
   itensPedido      ItemPedido[]
