@@ -1,49 +1,42 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
-import {
-  Home, Building2, Droplets, Zap, Trophy, Tag,
-  Hand, Bot, ArrowUp, Wind, Fan, Bike, Flame, Sparkles, Medal,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 
 interface Subcategoria {
   label: string
   href: string
-  Icon: LucideIcon
-  img?: string
+  ativo?: boolean
 }
 
 const SUBCATS: Record<string, Subcategoria[]> = {
   climatizadores: [
-    { label: 'Residencial',    href: '/produtos?categoria=climatizadores&tipo=residencial', Icon: Home      },
-    { label: 'Comercial',      href: '/produtos?categoria=climatizadores&tipo=comercial',   Icon: Building2 },
-    { label: 'Tanque Grande',  href: '/produtos?categoria=climatizadores&min_litros=40',    Icon: Droplets  },
-    { label: 'Bivolt',         href: '/produtos?categoria=climatizadores&voltagem=bivolt',  Icon: Zap       },
-    { label: 'Mais Vendidos',  href: '/produtos?categoria=climatizadores&ordem=vendidos',   Icon: Trophy    },
-    { label: 'Melhores Preços',href: '/produtos?categoria=climatizadores&ordem=preco-asc',  Icon: Tag       },
+    { label: 'Residencial',     href: '/produtos?categoria=climatizadores&tipo=residencial' },
+    { label: 'Comercial',       href: '/produtos?categoria=climatizadores&tipo=comercial'   },
+    { label: 'Tanque Grande',   href: '/produtos?categoria=climatizadores&min_litros=40'    },
+    { label: 'Bivolt',          href: '/produtos?categoria=climatizadores&voltagem=bivolt'  },
+    { label: 'Mais Vendidos',   href: '/produtos?categoria=climatizadores&ordem=vendidos'   },
+    { label: 'Melhores Preços', href: '/produtos?categoria=climatizadores&ordem=preco-asc'  },
   ],
   aspiradores: [
-    { label: 'Portátil',       href: '/produtos?categoria=aspiradores&tipo=portatil',       Icon: Hand      },
-    { label: 'Robô',           href: '/produtos?categoria=aspiradores&tipo=robo',           Icon: Bot       },
-    { label: 'Vertical',       href: '/produtos?categoria=aspiradores&tipo=vertical',       Icon: ArrowUp   },
-    { label: 'Mais Vendidos',  href: '/produtos?categoria=aspiradores&ordem=vendidos',      Icon: Trophy    },
-    { label: 'Melhores Preços',href: '/produtos?categoria=aspiradores&ordem=preco-asc',     Icon: Tag       },
+    { label: 'Portátil',        href: '/produtos?categoria=aspiradores&tipo=portatil'  },
+    { label: 'Robô',            href: '/produtos?categoria=aspiradores&tipo=robo'      },
+    { label: 'Vertical',        href: '/produtos?categoria=aspiradores&tipo=vertical'  },
+    { label: 'Mais Vendidos',   href: '/produtos?categoria=aspiradores&ordem=vendidos' },
+    { label: 'Melhores Preços', href: '/produtos?categoria=aspiradores&ordem=preco-asc'},
   ],
   spinning: [
-    { label: 'Profissional',   href: '/produtos?categoria=spinning&tipo=profissional',      Icon: Medal     },
-    { label: 'Residencial',    href: '/produtos?categoria=spinning&tipo=residencial',       Icon: Home      },
-    { label: 'Mais Vendidos',  href: '/produtos?categoria=spinning&ordem=vendidos',         Icon: Trophy    },
-    { label: 'Melhores Preços',href: '/produtos?categoria=spinning&ordem=preco-asc',        Icon: Tag       },
+    { label: 'Profissional',    href: '/produtos?categoria=spinning&tipo=profissional' },
+    { label: 'Residencial',     href: '/produtos?categoria=spinning&tipo=residencial'  },
+    { label: 'Mais Vendidos',   href: '/produtos?categoria=spinning&ordem=vendidos'    },
+    { label: 'Melhores Preços', href: '/produtos?categoria=spinning&ordem=preco-asc'   },
   ],
   '': [
-    { label: 'Climatizadores', href: '/produtos?categoria=climatizadores', Icon: Wind     },
-    { label: 'Aspiradores',    href: '/produtos?categoria=aspiradores',    Icon: Fan      },
-    { label: 'Spinning',       href: '/produtos?categoria=spinning',       Icon: Bike     },
-    { label: 'Ofertas',        href: '/ofertas',                           Icon: Tag      },
-    { label: 'Mais Vendidos',  href: '/produtos?ordem=vendidos',           Icon: Flame    },
-    { label: 'Novidades',      href: '/produtos?ordem=recentes',           Icon: Sparkles },
+    { label: 'Climatizadores',  href: '/produtos?categoria=climatizadores' },
+    { label: 'Aspiradores',     href: '/produtos?categoria=aspiradores'    },
+    { label: 'Spinning',        href: '/produtos?categoria=spinning'       },
+    { label: 'Ofertas',         href: '/ofertas'                           },
+    { label: 'Mais Vendidos',   href: '/produtos?ordem=vendidos'           },
+    { label: 'Novidades',       href: '/produtos?ordem=recentes'           },
   ],
 }
 
@@ -57,23 +50,24 @@ export default function SubcategoriasCarrossel({ categoria }: Props) {
   return (
     <div className="border-b border-gray-100 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex gap-1 overflow-x-auto py-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {subcats.map(sub => (
+        <div
+          className="flex gap-2 overflow-x-auto py-3"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {subcats.map((sub) => (
             <Link
               key={sub.label}
               href={sub.href}
-              className="flex flex-col items-center gap-2 shrink-0 group px-3"
+              className={`
+                shrink-0 px-4 py-2.5 rounded-xl border-2 text-xs font-semibold
+                whitespace-nowrap transition-all duration-150
+                ${sub.ativo
+                  ? 'bg-[#3cbfb3] border-[#3cbfb3] text-white shadow-md'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-[#3cbfb3] hover:text-[#3cbfb3]'
+                }
+              `}
             >
-              <div className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center border-2 transition-all duration-200 bg-gray-50 border-gray-100 group-hover:border-[#3cbfb3]/50 group-hover:bg-[#f0fffe]">
-                {sub.img ? (
-                  <Image src={sub.img} alt={sub.label} width={64} height={64} className="object-contain p-2" unoptimized />
-                ) : (
-                  <sub.Icon size={24} className="text-gray-500 group-hover:text-[#3cbfb3] transition-colors" />
-                )}
-              </div>
-              <span className="text-xs font-semibold text-center leading-tight max-w-[70px] text-gray-600 group-hover:text-[#3cbfb3] transition-colors">
-                {sub.label}
-              </span>
+              {sub.label}
             </Link>
           ))}
         </div>

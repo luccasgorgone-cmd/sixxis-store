@@ -177,24 +177,60 @@ export default function ProdutosClient() {
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
-      <nav className="bg-gray-50 border-b border-gray-100 py-2.5">
+      <nav style={{ background: '#f9fafb', borderBottom: '1px solid #f3f4f6' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-1.5 text-sm text-gray-500 flex-wrap">
-            <Link href="/" className="hover:text-gray-700 transition">Início</Link>
+          <ol
+            style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', whiteSpace: 'nowrap', padding: '10px 0', overflowX: 'auto', scrollbarWidth: 'none' }}
+          >
+            {/* Início */}
+            <li style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <a
+                href="/"
+                style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', lineHeight: '1', whiteSpace: 'nowrap', textDecoration: 'none' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#374151')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
+              >
+                Início
+              </a>
+            </li>
+
             {categoriaLabel ? (
               <>
-                <ChevronRight size={13} className="text-gray-300" />
-                <Link href="/produtos" className="hover:text-gray-700 transition">Produtos</Link>
-                <ChevronRight size={13} className="text-gray-300" />
-                <span className="text-gray-800 font-medium">{categoriaLabel}</span>
+                {/* › Produtos */}
+                <li style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '6px', marginRight: '6px', flexShrink: 0 }}>
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                  <a
+                    href="/produtos"
+                    style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', lineHeight: '1', whiteSpace: 'nowrap', textDecoration: 'none' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#374151')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
+                  >
+                    Produtos
+                  </a>
+                </li>
+                {/* › Categoria */}
+                <li style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '6px', marginRight: '6px', flexShrink: 0 }}>
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#111827', lineHeight: '1', whiteSpace: 'nowrap' }}>
+                    {categoriaLabel}
+                  </span>
+                </li>
               </>
             ) : (
-              <>
-                <ChevronRight size={13} className="text-gray-300" />
-                <span className="text-gray-800 font-medium">Todos os Produtos</span>
-              </>
+              <li style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '6px', marginRight: '6px', flexShrink: 0 }}>
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#111827', lineHeight: '1', whiteSpace: 'nowrap' }}>
+                  Todos os Produtos
+                </span>
+              </li>
             )}
-          </div>
+          </ol>
         </div>
       </nav>
 
