@@ -32,76 +32,83 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
   const banner = banners[current]
 
   return (
-    <div
-      className="relative w-full overflow-hidden bg-[#0f2e2b] select-none"
-      style={{ aspectRatio: '1920/500', maxHeight: '500px' }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      {/* Imagem do banner — SEM overlay */}
-      {banner.link ? (
-        <Link href={banner.link} className="block w-full h-full">
-          <Image
-            key={banner.id}
-            src={banner.imagem}
-            alt={banner.titulo || 'Banner Sixxis'}
-            fill
-            className="object-cover w-full h-full"
-            priority
-            unoptimized
-          />
-        </Link>
-      ) : (
-        <Image
-          key={banner.id}
-          src={banner.imagem}
-          alt={banner.titulo || 'Banner Sixxis'}
-          fill
-          className="object-cover w-full h-full"
-          priority
-          unoptimized
-        />
-      )}
-
-      {/* Seta esquerda */}
-      {banners.length > 1 && (
-        <button
-          onClick={prev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
-          aria-label="Banner anterior"
+    /* Outer: full width, sem background — wallpaper da página aparece nas laterais */
+    <section className="w-full py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div
+          className="relative w-full overflow-hidden rounded-2xl bg-[#0f2e2b] select-none"
+          style={{ aspectRatio: '1920/500', maxHeight: '500px' }}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
         >
-          <ChevronLeft size={22} />
-        </button>
-      )}
-
-      {/* Seta direita */}
-      {banners.length > 1 && (
-        <button
-          onClick={next}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
-          aria-label="Próximo banner"
-        >
-          <ChevronRight size={22} />
-        </button>
-      )}
-
-      {/* Indicadores estilo Casas Bahia */}
-      {banners.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
-          {banners.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`transition-all duration-300 rounded-full ${
-                i === current
-                  ? 'w-6 h-2.5 bg-white'
-                  : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'
-              }`}
-              aria-label={`Ir para banner ${i + 1}`}
+          {/* Imagem do banner */}
+          {banner.link ? (
+            <Link href={banner.link} className="block w-full h-full">
+              <Image
+                key={banner.id}
+                src={banner.imagem}
+                alt={banner.titulo || 'Banner Sixxis'}
+                fill
+                className="object-cover w-full h-full"
+                style={{ objectPosition: 'center top' }}
+                priority
+                unoptimized
+              />
+            </Link>
+          ) : (
+            <Image
+              key={banner.id}
+              src={banner.imagem}
+              alt={banner.titulo || 'Banner Sixxis'}
+              fill
+              className="object-cover w-full h-full"
+              style={{ objectPosition: 'center top' }}
+              priority
+              unoptimized
             />
-          ))}
+          )}
+
+          {/* Seta esquerda */}
+          {banners.length > 1 && (
+            <button
+              onClick={prev}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
+              aria-label="Banner anterior"
+            >
+              <ChevronLeft size={22} />
+            </button>
+          )}
+
+          {/* Seta direita */}
+          {banners.length > 1 && (
+            <button
+              onClick={next}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
+              aria-label="Próximo banner"
+            >
+              <ChevronRight size={22} />
+            </button>
+          )}
+
+          {/* Indicadores */}
+          {banners.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+              {banners.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  className={`transition-all duration-300 rounded-full ${
+                    i === current
+                      ? 'w-6 h-2.5 bg-white'
+                      : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'
+                  }`}
+                  aria-label={`Ir para banner ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </section>
   )
 }
