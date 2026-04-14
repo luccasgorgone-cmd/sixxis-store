@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
+import { prisma } from '@/lib/prisma'
 
 async function verificarAdmin() {
   const cookieStore = await cookies()
@@ -9,101 +9,126 @@ async function verificarAdmin() {
 
 export async function GET(req: NextRequest) {
   if (!(await verificarAdmin())) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    return Response.json({ erro: 'Não autorizado' }, { status: 401 })
   }
 
   try {
-    const { searchParams } = req.nextUrl
-    const periodo = searchParams.get('periodo') ?? '7d'
-
-    const dias = periodo === '30d' ? 30 : periodo === '90d' ? 90 : 7
-    const desde = new Date()
-    desde.setDate(desde.getDate() - dias)
+    const periodo = parseInt(req.nextUrl.searchParams.get('periodo') || '7')
+    const dataInicio = new Date()
+    dataInicio.setDate(dataInicio.getDate() - periodo)
+    dataInicio.setHours(0, 0, 0, 0)
 
     const [
       totalVisitas,
-      visitasPorDia,
+      aceitaram,
+      recusaram,
       totalEventos,
-      eventosPorTipo,
-      totalConsentimentos,
-      consentimentosAnaliticos,
-      consentimentosMarketing,
-      paginasMaisVisitadas,
-      eventosRecentes,
+      insights,
+      topPaginasRaw,
+      topBuscasRaw,
+      dispositivosRaw,
+      comprasRaw,
     ] = await Promise.all([
-      prisma.visitaAnalitica.count({ where: { createdAt: { gte: desde } } }),
-
-      prisma.$queryRaw<{ dia: string; total: number }[]>`
-        SELECT DATE(createdAt) as dia, COUNT(*) as total
-        FROM VisitaAnalitica
-        WHERE createdAt >= ${desde}
-        GROUP BY DATE(createdAt)
-        ORDER BY dia ASC
-      `,
-
-      prisma.eventoAnalitico.count({ where: { createdAt: { gte: desde } } }),
-
-      prisma.eventoAnalitico.groupBy({
-        by: ['tipo'],
-        _count: { tipo: true },
-        where: { createdAt: { gte: desde } },
-        orderBy: { _count: { tipo: 'desc' } },
-        take: 10,
+      prisma.clienteInsight.count({ where: { ultimaVisita: { gte: dataInicio } } }),
+      prisma.cookieConsent.count({ where: { aceitou: true, createdAt: { gte: dataInicio } } }),
+      prisma.cookieConsent.count({ where: { aceitou: false, createdAt: { gte: dataInicio } } }),
+      prisma.eventoAnalitico.count({ where: { createdAt: { gte: dataInicio } } }),
+      prisma.clienteInsight.findMany({
+        orderBy: { ultimaVisita: 'desc' },
+        take: 100,
       }),
-
-      prisma.cookieConsent.count(),
-
-      prisma.cookieConsent.count({ where: { analiticos: true } }),
-
-      prisma.cookieConsent.count({ where: { marketing: true } }),
-
-      prisma.$queryRaw<{ pagina: string; total: number }[]>`
-        SELECT pagina, COUNT(*) as total
-        FROM VisitaAnalitica
-        WHERE createdAt >= ${desde}
-        GROUP BY pagina
-        ORDER BY total DESC
-        LIMIT 10
-      `,
-
       prisma.eventoAnalitico.findMany({
-        where: { createdAt: { gte: desde } },
-        orderBy: { createdAt: 'desc' },
-        take: 20,
-        select: { id: true, tipo: true, pagina: true, dados: true, createdAt: true, sessionId: true },
+        where: { tipo: 'page_view', createdAt: { gte: dataInicio } },
+        select: { pagina: true },
+      }),
+      prisma.eventoAnalitico.findMany({
+        where: { tipo: 'search', createdAt: { gte: dataInicio } },
+        select: { dados: true },
+        take: 200,
+      }),
+      prisma.clienteInsight.groupBy({
+        by: ['dispositivo'],
+        _count: { dispositivo: true },
+        where: { ultimaVisita: { gte: dataInicio } },
+      }),
+      prisma.eventoAnalitico.findMany({
+        where: { tipo: 'purchase', createdAt: { gte: dataInicio } },
+        select: { dados: true },
       }),
     ])
 
-    const taxaConsentimentoAnalitico = totalConsentimentos > 0
-      ? Math.round((consentimentosAnaliticos / totalConsentimentos) * 100)
-      : 0
-
-    const taxaConsentimentoMarketing = totalConsentimentos > 0
-      ? Math.round((consentimentosMarketing / totalConsentimentos) * 100)
-      : 0
-
-    return NextResponse.json({
-      periodo,
-      visitas: {
-        total: totalVisitas,
-        porDia: visitasPorDia.map((r) => ({ dia: String(r.dia), total: Number(r.total) })),
-      },
-      eventos: {
-        total: totalEventos,
-        porTipo: eventosPorTipo.map((r) => ({ tipo: r.tipo, total: r._count.tipo })),
-        recentes: eventosRecentes,
-      },
-      cookies: {
-        total: totalConsentimentos,
-        analiticos: consentimentosAnaliticos,
-        marketing: consentimentosMarketing,
-        taxaAnalitico: taxaConsentimentoAnalitico,
-        taxaMarketing: taxaConsentimentoMarketing,
-      },
-      paginas: paginasMaisVisitadas.map((r) => ({ pagina: String(r.pagina), total: Number(r.total) })),
+    // Processar top páginas
+    const paginaMap: Record<string, number> = {}
+    topPaginasRaw.forEach(e => {
+      const p = e.pagina || '/'
+      paginaMap[p] = (paginaMap[p] || 0) + 1
     })
-  } catch (err) {
-    console.error('[admin/analytics]', err)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    const topPaginas = Object.entries(paginaMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([pagina, visitas]) => ({ pagina, visitas }))
+
+    // Processar top buscas
+    const buscaMap: Record<string, number> = {}
+    topBuscasRaw.forEach(e => {
+      try {
+        const d = JSON.parse(e.dados)
+        if (d.termo) buscaMap[d.termo] = (buscaMap[d.termo] || 0) + 1
+      } catch { /* ignore */ }
+    })
+    const topBuscas = Object.entries(buscaMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([termo, count]) => ({ termo, count }))
+
+    // Processar receita
+    let receita = 0
+    const compras = comprasRaw.length
+    comprasRaw.forEach(e => {
+      try { receita += JSON.parse(e.dados).valor || 0 } catch { /* ignore */ }
+    })
+
+    const taxaAceite =
+      aceitaram + recusaram > 0
+        ? Math.round((aceitaram / (aceitaram + recusaram)) * 100)
+        : 0
+
+    const taxaConversao =
+      totalVisitas > 0
+        ? parseFloat(((compras / totalVisitas) * 100).toFixed(1))
+        : 0
+
+    return Response.json({
+      periodo,
+      resumo: {
+        totalVisitas,
+        aceitaram,
+        recusaram,
+        taxaAceite,
+        totalEventos,
+        compras,
+        taxaConversao,
+        receita: parseFloat(receita.toFixed(2)),
+      },
+      topPaginas,
+      topBuscas,
+      dispositivoStats: dispositivosRaw.map(d => ({
+        dispositivo: d.dispositivo || 'desktop',
+        count: d._count.dispositivo,
+      })),
+      clientes: insights.map(c => ({
+        sessionId: c.sessionId.slice(0, 12) + '...',
+        ultimaVisita: c.ultimaVisita,
+        totalVisitas: c.totalVisitas,
+        totalPaginas: c.totalPaginas,
+        dispositivo: c.dispositivo || '—',
+        carrinhosAbertos: c.carrinhosAbertos,
+        comprasFeitas: c.comprasFeitas,
+        totalGasto: c.totalGasto,
+      })),
+    })
+  } catch (error) {
+    console.error('[admin/analytics]', error)
+    return Response.json({ erro: 'Erro interno', detalhes: String(error) }, { status: 500 })
   }
 }

@@ -1,296 +1,368 @@
 'use client'
-
 import { useState, useEffect, useCallback } from 'react'
-import { BarChart2, Eye, MousePointer2, Cookie, TrendingUp, Clock, Globe } from 'lucide-react'
+import {
+  Users, Eye, ShoppingCart, TrendingUp,
+  Monitor, Smartphone, Tablet, Cookie,
+  Search, RefreshCw,
+} from 'lucide-react'
 
-interface AnalyticsData {
-  periodo: string
-  visitas: {
-    total: number
-    porDia: { dia: string; total: number }[]
+interface DadosAnalytics {
+  periodo: number
+  resumo: {
+    totalVisitas: number
+    aceitaram: number
+    recusaram: number
+    taxaAceite: number
+    totalEventos: number
+    compras: number
+    taxaConversao: number
+    receita: number
   }
-  eventos: {
-    total: number
-    porTipo: { tipo: string; total: number }[]
-    recentes: { id: string; tipo: string; pagina: string | null; dados: unknown; createdAt: string; sessionId: string }[]
-  }
-  cookies: {
-    total: number
-    analiticos: number
-    marketing: number
-    taxaAnalitico: number
-    taxaMarketing: number
-  }
-  paginas: { pagina: string; total: number }[]
-}
-
-function StatCard({ icon: Icon, label, value, sub, color = '#3cbfb3' }: {
-  icon: React.ElementType
-  label: string
-  value: string | number
-  sub?: string
-  color?: string
-}) {
-  return (
-    <div className="bg-[#1a2535] rounded-2xl p-5 flex items-start gap-4">
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}20` }}>
-        <Icon size={20} style={{ color }} />
-      </div>
-      <div>
-        <p className="text-white/50 text-xs font-medium uppercase tracking-wide">{label}</p>
-        <p className="text-white text-2xl font-extrabold mt-0.5">{value}</p>
-        {sub && <p className="text-white/40 text-xs mt-0.5">{sub}</p>}
-      </div>
-    </div>
-  )
-}
-
-function ProgressBar({ label, value, max, color = '#3cbfb3' }: { label: string; value: number; max: number; color?: string }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <span className="text-white/70 text-xs truncate max-w-[65%]">{label}</span>
-        <span className="text-white/50 text-xs font-semibold">{value.toLocaleString('pt-BR')}</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${pct}%`, backgroundColor: color }}
-        />
-      </div>
-    </div>
-  )
-}
-
-function MiniBar({ data }: { data: { dia: string; total: number }[] }) {
-  if (!data.length) return <p className="text-white/30 text-xs">Sem dados</p>
-  const max = Math.max(...data.map((d) => d.total), 1)
-  return (
-    <div className="flex items-end gap-1 h-16">
-      {data.map((d) => {
-        const h = Math.max(4, Math.round((d.total / max) * 64))
-        return (
-          <div key={d.dia} className="flex-1 flex flex-col items-center gap-1 group relative">
-            <div
-              className="w-full rounded-sm transition-opacity group-hover:opacity-80"
-              style={{ height: `${h}px`, backgroundColor: '#3cbfb3' }}
-            />
-            <span className="text-white/20 text-[9px] hidden group-hover:block absolute -top-5 bg-[#0f1f1d] px-1 rounded text-white/70 whitespace-nowrap">
-              {d.dia.slice(5)}: {d.total}
-            </span>
-          </div>
-        )
-      })}
-    </div>
-  )
+  topPaginas: { pagina: string; visitas: number }[]
+  topBuscas: { termo: string; count: number }[]
+  dispositivoStats: { dispositivo: string; count: number }[]
+  clientes: {
+    sessionId: string
+    ultimaVisita: string
+    totalVisitas: number
+    totalPaginas: number
+    dispositivo: string
+    carrinhosAbertos: number
+    comprasFeitas: number
+    totalGasto: number
+  }[]
 }
 
 export default function AnalyticsDashboard() {
-  const [dados, setDados] = useState<AnalyticsData | null>(null)
+  const [dados, setDados] = useState<DadosAnalytics | null>(null)
+  const [periodo, setPeriodo] = useState('7')
   const [loading, setLoading] = useState(true)
-  const [periodo, setPeriodo] = useState('7d')
+  const [erro, setErro] = useState('')
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null)
 
-  const carregar = useCallback(async (p: string) => {
+  const buscarDados = useCallback(async (p: string) => {
     setLoading(true)
+    setErro('')
     try {
       const res = await fetch(`/api/admin/analytics?periodo=${p}`)
-      if (res.ok) setDados(await res.json())
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.detalhes || err.erro || `HTTP ${res.status}`)
+      }
+      const data = await res.json()
+      setDados(data)
+      setUltimaAtualizacao(new Date())
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Erro ao carregar analytics'
+      setErro(msg)
+      console.error('[AnalyticsDashboard]', e)
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => { carregar(periodo) }, [periodo, carregar])
+  useEffect(() => { buscarDados(periodo) }, [periodo, buscarDados])
 
-  const periodos = [
-    { value: '7d', label: '7 dias' },
-    { value: '30d', label: '30 dias' },
-    { value: '90d', label: '90 dias' },
-  ]
+  if (erro) return (
+    <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+      <p className="text-red-700 font-bold mb-2">Erro ao carregar analytics</p>
+      <p className="text-red-500 text-sm font-mono mb-4">{erro}</p>
+      <button
+        onClick={() => buscarDados(periodo)}
+        className="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-700 transition"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  )
+
+  const r = dados?.resumo
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-white text-2xl font-extrabold">Analytics</h1>
-          <p className="text-white/40 text-sm mt-0.5">Visitas, eventos e consentimentos LGPD</p>
-        </div>
-        <div className="flex gap-2">
-          {periodos.map((p) => (
+    <div className="space-y-6">
+
+      {/* Controles */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-gray-600">Período:</span>
+          {[
+            { val: '1', label: 'Hoje' },
+            { val: '7', label: '7 dias' },
+            { val: '30', label: '30 dias' },
+            { val: '90', label: '90 dias' },
+          ].map(p => (
             <button
-              key={p.value}
-              onClick={() => setPeriodo(p.value)}
-              className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-              style={
-                periodo === p.value
-                  ? { backgroundColor: '#3cbfb3', color: '#fff' }
-                  : { backgroundColor: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.60)' }
-              }
+              key={p.val}
+              onClick={() => setPeriodo(p.val)}
+              className={`px-3 py-1.5 rounded-xl text-sm font-bold transition ${
+                periodo === p.val
+                  ? 'bg-[#0f2e2b] text-white'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:border-[#3cbfb3]'
+              }`}
             >
               {p.label}
             </button>
           ))}
         </div>
+        <div className="flex items-center gap-2">
+          {ultimaAtualizacao && (
+            <span className="text-xs text-gray-400">
+              Atualizado: {ultimaAtualizacao.toLocaleTimeString('pt-BR')}
+            </span>
+          )}
+          <button
+            onClick={() => buscarDados(periodo)}
+            disabled={loading}
+            className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl hover:border-[#3cbfb3] hover:text-[#3cbfb3] transition disabled:opacity-50"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            Atualizar
+          </button>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-24">
-          <div className="w-8 h-8 border-2 border-[#3cbfb3]/30 border-t-[#3cbfb3] rounded-full animate-spin" />
+      {loading && !dados ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-28 bg-gray-100 rounded-2xl animate-pulse" />
+          ))}
         </div>
-      ) : !dados ? (
-        <p className="text-white/40 text-center py-16">Erro ao carregar dados.</p>
       ) : (
         <>
-          {/* Stats grid */}
+          {/* KPIs */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard icon={Eye} label="Visitas" value={dados.visitas.total.toLocaleString('pt-BR')} sub={`Últimos ${periodo === '7d' ? '7' : periodo === '30d' ? '30' : '90'} dias`} />
-            <StatCard icon={MousePointer2} label="Eventos" value={dados.eventos.total.toLocaleString('pt-BR')} color="#f59e0b" />
-            <StatCard icon={Cookie} label="Consentimentos" value={dados.cookies.total.toLocaleString('pt-BR')} color="#8b5cf6" />
-            <StatCard
-              icon={TrendingUp}
-              label="Taxa analítica"
-              value={`${dados.cookies.taxaAnalitico}%`}
-              sub={`${dados.cookies.analiticos} aceitaram`}
-              color="#10b981"
-            />
+            {[
+              { icon: Users,        label: 'Visitantes Únicos',    valor: String(r?.totalVisitas || 0), cor: '#3cbfb3', num: true },
+              { icon: Cookie,       label: 'Taxa de Aceite LGPD',  valor: `${r?.taxaAceite || 0}%`,    cor: '#16a34a', num: false },
+              { icon: ShoppingCart, label: 'Compras Rastreadas',   valor: String(r?.compras || 0),      cor: '#8b5cf6', num: true },
+              { icon: TrendingUp,   label: 'Taxa de Conversão',    valor: `${r?.taxaConversao || 0}%`, cor: '#f59e0b', num: false },
+            ].map(kpi => {
+              const Icon = kpi.icon
+              return (
+                <div
+                  key={kpi.label}
+                  className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition"
+                >
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
+                    style={{ backgroundColor: kpi.cor + '18' }}
+                  >
+                    <Icon size={17} style={{ color: kpi.cor }} />
+                  </div>
+                  <p className="text-2xl font-extrabold text-gray-900">
+                    {kpi.num ? Number(kpi.valor).toLocaleString('pt-BR') : kpi.valor}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">{kpi.label}</p>
+                </div>
+              )
+            })}
           </div>
 
-          {/* Linha 2: gráfico + cookies */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Gráfico visitas por dia */}
-            <div className="lg:col-span-2 bg-[#1a2535] rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <BarChart2 size={16} style={{ color: '#3cbfb3' }} />
-                <h2 className="text-white font-bold text-sm">Visitas por dia</h2>
-              </div>
-              <MiniBar data={dados.visitas.porDia} />
-              {dados.visitas.porDia.length === 0 && (
-                <p className="text-white/30 text-xs mt-2">Sem visitas registradas neste período.</p>
-              )}
-            </div>
-
-            {/* Cookie consent breakdown */}
-            <div className="bg-[#1a2535] rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Cookie size={16} style={{ color: '#8b5cf6' }} />
-                <h2 className="text-white font-bold text-sm">Consentimentos</h2>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-white/60 text-xs">Analíticos</span>
-                    <span className="text-white/50 text-xs font-bold">{dados.cookies.taxaAnalitico}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                    <div className="h-full rounded-full bg-[#3cbfb3]" style={{ width: `${dados.cookies.taxaAnalitico}%` }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-white/60 text-xs">Marketing</span>
-                    <span className="text-white/50 text-xs font-bold">{dados.cookies.taxaMarketing}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                    <div className="h-full rounded-full bg-[#f59e0b]" style={{ width: `${dados.cookies.taxaMarketing}%` }} />
-                  </div>
-                </div>
-                <div className="pt-3 border-t border-white/10 space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-white/40">Total consentimentos</span>
-                    <span className="text-white/70 font-semibold">{dados.cookies.total}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-white/40">Aceitaram analíticos</span>
-                    <span className="text-white/70 font-semibold">{dados.cookies.analiticos}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-white/40">Aceitaram marketing</span>
-                    <span className="text-white/70 font-semibold">{dados.cookies.marketing}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Linha 3: páginas + eventos por tipo */}
+          {/* Receita + Consentimentos */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Páginas mais visitadas */}
-            <div className="bg-[#1a2535] rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Globe size={16} style={{ color: '#3cbfb3' }} />
-                <h2 className="text-white font-bold text-sm">Páginas mais visitadas</h2>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <h3 className="text-sm font-extrabold text-gray-900 mb-4">Resumo Financeiro</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                  <span className="text-sm text-gray-600">Receita rastreada</span>
+                  <span className="text-base font-extrabold text-green-700">
+                    R$ {(r?.receita || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                  <span className="text-sm text-gray-600">Total de compras</span>
+                  <span className="text-base font-bold text-gray-900">{r?.compras || 0}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm text-gray-600">Ticket médio</span>
+                  <span className="text-base font-bold text-gray-900">
+                    {r?.compras
+                      ? `R$ ${((r.receita || 0) / r.compras).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                      : '—'}
+                  </span>
+                </div>
               </div>
-              {dados.paginas.length === 0 ? (
-                <p className="text-white/30 text-xs">Sem dados neste período.</p>
-              ) : (
-                <div className="space-y-3">
-                  {dados.paginas.map((p, i) => (
-                    <ProgressBar key={i} label={p.pagina} value={p.total} max={dados.paginas[0].total} />
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+                <Cookie size={14} className="text-[#3cbfb3]" />
+                Consentimentos LGPD
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600 font-medium">Aceitaram analytics</span>
+                    <span className="text-green-600 font-bold">{r?.aceitaram || 0}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div
+                      className="bg-green-500 h-2 rounded-full transition-all"
+                      style={{ width: `${r?.taxaAceite || 0}%` }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600 font-medium">Recusaram opcionais</span>
+                    <span className="text-orange-500 font-bold">{r?.recusaram || 0}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div
+                      className="bg-orange-400 h-2 rounded-full transition-all"
+                      style={{ width: `${100 - (r?.taxaAceite || 0)}%` }}
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-gray-400 pt-1">
+                  Taxa de aceite: <strong>{r?.taxaAceite || 0}%</strong> dos visitantes
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Top páginas + Top buscas + Dispositivos */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <h3 className="text-sm font-extrabold text-gray-900 mb-3 flex items-center gap-2">
+                <Eye size={14} className="text-[#3cbfb3]" />
+                Páginas Mais Visitadas
+              </h3>
+              {dados?.topPaginas?.length ? (
+                <div className="space-y-2">
+                  {dados.topPaginas.map((p, i) => (
+                    <div key={p.pagina} className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-gray-400 w-4">{i + 1}</span>
+                      <span className="text-xs text-gray-600 truncate flex-1 font-mono">{p.pagina || '/'}</span>
+                      <span className="text-xs font-extrabold text-gray-900 shrink-0">{p.visitas}</span>
+                    </div>
                   ))}
                 </div>
+              ) : (
+                <p className="text-xs text-gray-400 text-center py-4">
+                  Sem dados ainda. Os eventos aparecerão conforme os visitantes navegam.
+                </p>
               )}
             </div>
 
-            {/* Eventos por tipo */}
-            <div className="bg-[#1a2535] rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <MousePointer2 size={16} style={{ color: '#f59e0b' }} />
-                <h2 className="text-white font-bold text-sm">Eventos por tipo</h2>
-              </div>
-              {dados.eventos.porTipo.length === 0 ? (
-                <p className="text-white/30 text-xs">Sem eventos neste período.</p>
-              ) : (
-                <div className="space-y-3">
-                  {dados.eventos.porTipo.map((e, i) => (
-                    <ProgressBar key={i} label={e.tipo} value={e.total} max={dados.eventos.porTipo[0].total} color="#f59e0b" />
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <h3 className="text-sm font-extrabold text-gray-900 mb-3 flex items-center gap-2">
+                <Search size={14} className="text-[#3cbfb3]" />
+                Termos Mais Buscados
+              </h3>
+              {dados?.topBuscas?.length ? (
+                <div className="space-y-2">
+                  {dados.topBuscas.map((b, i) => (
+                    <div key={b.termo} className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-gray-400 w-4">{i + 1}</span>
+                      <span className="text-xs text-gray-700 truncate flex-1">{b.termo}</span>
+                      <span className="text-xs font-extrabold text-gray-900 shrink-0">{b.count}</span>
+                    </div>
                   ))}
                 </div>
+              ) : (
+                <p className="text-xs text-gray-400 text-center py-4">
+                  Nenhuma busca registrada ainda.
+                </p>
+              )}
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <h3 className="text-sm font-extrabold text-gray-900 mb-3 flex items-center gap-2">
+                <Monitor size={14} className="text-[#3cbfb3]" />
+                Dispositivos
+              </h3>
+              {dados?.dispositivoStats?.length ? (
+                <div className="space-y-3">
+                  {dados.dispositivoStats.map(d => {
+                    const total = dados.dispositivoStats.reduce((s, x) => s + x.count, 0)
+                    const pct = total > 0 ? Math.round((d.count / total) * 100) : 0
+                    const Icon =
+                      d.dispositivo === 'mobile' ? Smartphone
+                      : d.dispositivo === 'tablet' ? Tablet
+                      : Monitor
+                    return (
+                      <div key={d.dispositivo}>
+                        <div className="flex justify-between text-xs mb-1">
+                          <div className="flex items-center gap-1.5">
+                            <Icon size={12} className="text-gray-500" />
+                            <span className="text-gray-600 capitalize font-medium">{d.dispositivo}</span>
+                          </div>
+                          <span className="font-bold text-gray-900">{pct}% ({d.count})</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="bg-[#3cbfb3] h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 text-center py-4">Sem dados de dispositivos.</p>
               )}
             </div>
           </div>
 
-          {/* Eventos recentes */}
-          {dados.eventos.recentes.length > 0 && (
-            <div className="bg-[#1a2535] rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Clock size={16} style={{ color: '#3cbfb3' }} />
-                <h2 className="text-white font-bold text-sm">Eventos recentes</h2>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-white/30 uppercase tracking-wide text-[10px]">
-                      <th className="text-left pb-3 pr-4">Tipo</th>
-                      <th className="text-left pb-3 pr-4">Página</th>
-                      <th className="text-left pb-3 pr-4">Sessão</th>
-                      <th className="text-left pb-3">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {dados.eventos.recentes.map((e) => (
-                      <tr key={e.id} className="hover:bg-white/5 transition">
-                        <td className="py-2.5 pr-4">
-                          <span
-                            className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                            style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}
-                          >
-                            {e.tipo}
-                          </span>
-                        </td>
-                        <td className="py-2.5 pr-4 text-white/50 max-w-[140px] truncate">{e.pagina ?? '—'}</td>
-                        <td className="py-2.5 pr-4 text-white/30 font-mono">{e.sessionId.slice(0, 12)}…</td>
-                        <td className="py-2.5 text-white/30">
-                          {new Date(e.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          {/* Tabela de visitantes */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+              <Users size={15} className="text-[#3cbfb3]" />
+              <h3 className="text-sm font-extrabold text-gray-900">
+                Visitantes Recentes ({dados?.clientes?.length || 0})
+              </h3>
             </div>
-          )}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {['Sessão', 'Dispositivo', 'Visitas', 'Páginas', 'Carrinhos', 'Compras', 'Gasto Total', 'Última Visita'].map(h => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left text-[10px] font-extrabold text-gray-500 uppercase tracking-wide whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {dados?.clientes?.length ? dados.clientes.map(c => (
+                    <tr key={c.sessionId} className="hover:bg-gray-50/80 transition">
+                      <td className="px-4 py-3 text-xs font-mono text-gray-500">{c.sessionId}</td>
+                      <td className="px-4 py-3 text-xs text-gray-600 capitalize">{c.dispositivo}</td>
+                      <td className="px-4 py-3 text-xs font-bold text-gray-900">{c.totalVisitas}</td>
+                      <td className="px-4 py-3 text-xs text-gray-600">{c.totalPaginas}</td>
+                      <td className="px-4 py-3 text-xs text-gray-600">{c.carrinhosAbertos}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-bold ${c.comprasFeitas > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                          {c.comprasFeitas}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs font-bold text-gray-900">
+                        {c.totalGasto > 0
+                          ? `R$ ${c.totalGasto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                        {new Date(c.ultimaVisita).toLocaleString('pt-BR', {
+                          day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+                        })}
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-10 text-center text-sm text-gray-400">
+                        Nenhum visitante registrado ainda. Os dados aparecerão assim que os visitantes
+                        aceitarem os cookies de analytics e navegarem pelo site.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </>
       )}
     </div>

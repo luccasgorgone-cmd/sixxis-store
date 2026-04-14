@@ -23,12 +23,17 @@ function getSessionId(): string {
 
 async function salvarConsentimento(consent: ConsentState) {
   const sessionId = getSessionId()
-  localStorage.setItem(CONSENT_KEY, JSON.stringify({ ...consent, sessionId, timestamp: Date.now() }))
+  const categorias = { analytics: consent.analiticos, marketing: consent.marketing }
+  const aceitou = consent.analiticos || consent.marketing
+  localStorage.setItem(
+    CONSENT_KEY,
+    JSON.stringify({ aceitou, categorias, sessionId, timestamp: Date.now() }),
+  )
   try {
     await fetch('/api/cookies/consent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, ...consent }),
+      body: JSON.stringify({ sessionId, aceitou, categorias }),
     })
   } catch {
     // silencioso

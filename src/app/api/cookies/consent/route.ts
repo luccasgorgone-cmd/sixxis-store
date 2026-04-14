@@ -1,61 +1,70 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { sessionId, necessarios, analiticos, marketing } = body
+    const { sessionId, aceitou, categorias } = body
 
     if (!sessionId) {
-      return NextResponse.json({ error: 'sessionId obrigatório' }, { status: 400 })
+      return Response.json({ ok: false, erro: 'sessionId obrigatório' }, { status: 400 })
     }
 
-    const session = await auth()
-    const clienteId = session?.user?.id ?? null
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? null
-    const userAgent = req.headers.get('user-agent') ?? null
+    const ip =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      'desconhecido'
+    const userAgent = req.headers.get('user-agent') || ''
 
-    const consent = await prisma.cookieConsent.upsert({
-      where: { id: sessionId },
-      create: {
-        id: sessionId,
+    await prisma.cookieConsent.create({
+      data: {
         sessionId,
-        clienteId,
-        necessarios: true,
-        analiticos: !!analiticos,
-        marketing: !!marketing,
         ip,
         userAgent,
-      },
-      update: {
-        analiticos: !!analiticos,
-        marketing: !!marketing,
-        clienteId,
-        ip,
-        userAgent,
+        aceitou: Boolean(aceitou),
+        categorias: JSON.stringify(categorias || {}),
       },
     })
 
-    return NextResponse.json({ ok: true, id: consent.id })
-  } catch (err) {
-    console.error('[cookies/consent]', err)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    const dispositivo = /mobile/i.test(userAgent)
+      ? 'mobile'
+      : /tablet|ipad/i.test(userAgent)
+        ? 'tablet'
+        : 'desktop'
+
+    await prisma.clienteInsight.upsert({
+      where: { sessionId },
+      update: {
+        ultimaVisita: new Date(),
+        cookieCategs: JSON.stringify(categorias || {}),
+        dispositivo,
+      },
+      create: {
+        sessionId,
+        dispositivo,
+        cookieCategs: JSON.stringify(categorias || {}),
+      },
+    })
+
+    return Response.json({ ok: true })
+  } catch (error) {
+    console.error('[cookies/consent]', error)
+    return Response.json({ ok: false, erro: 'Erro interno' }, { status: 500 })
   }
 }
 
 export async function GET(req: NextRequest) {
   try {
     const sessionId = req.nextUrl.searchParams.get('sessionId')
-    if (!sessionId) return NextResponse.json(null)
+    if (!sessionId) return Response.json(null)
 
     const consent = await prisma.cookieConsent.findFirst({
       where: { sessionId },
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json(consent)
+    return Response.json(consent)
   } catch {
-    return NextResponse.json(null)
+    return Response.json(null)
   }
 }
