@@ -101,11 +101,23 @@ export default function AvaliacoesAdminProduto({ produtoId }: Props) {
 
   async function salvarNova() {
     setSalvando(true)
-    await fetch('/api/avaliacoes', {
+    const res = await fetch('/api/avaliacoes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ produtoId, ...novaAv }),
     })
+    const json = await res.json()
+    // Endpoint público cria como aprovada:false — se admin marcou aprovada:true, aplicar via PATCH
+    if (novaAv.aprovada && json.avaliacao?.id) {
+      await fetch(`/api/avaliacoes/${json.avaliacao.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          aprovada: true,
+          ...(novaAv.resposta ? { resposta: novaAv.resposta } : {}),
+        }),
+      })
+    }
     setSalvando(false)
     setAdicionando(false)
     setNovaAv({ nota: 5, nomeAutor: '', emailAutor: '', titulo: '', comentario: '', aprovada: true, resposta: '' })

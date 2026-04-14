@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Share2 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
 import GaleriaProduto from '@/components/produto/GaleriaProduto'
 import type { GaleriaItem } from '@/components/produto/GaleriaProduto'
 import BlocoPrecoProduto from '@/components/produto/BlocoPrecoProduto'
@@ -27,9 +26,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function ProdutoPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
-  const session = await auth()
-  const clienteEmail = session?.user?.email
-
   const [produto, taxaConfig] = await Promise.all([
     prisma.produto.findUnique({
       where: { slug },
@@ -43,17 +39,6 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   if (!produto || !produto.ativo) notFound()
 
   const taxaJuros = Number(taxaConfig?.valor || 2.99)
-
-  let comprouProduto = false
-  if (clienteEmail) {
-    const compra = await prisma.itemPedido.findFirst({
-      where: {
-        produtoId: produto.id,
-        pedido: { cliente: { email: clienteEmail }, status: { not: 'cancelado' } },
-      },
-    })
-    comprouProduto = !!compra
-  }
 
   const relacionados = await prisma.produto.findMany({
     where: { ativo: true, categoria: produto.categoria, id: { not: produto.id } },
