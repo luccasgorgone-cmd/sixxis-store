@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Mail, MapPin, Clock, ShieldCheck } from 'lucide-react'
+import { MapPin, ShieldCheck } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 
 /* ─── Ícones de pagamento ────────────────────────────────────────────────── */
@@ -131,71 +131,43 @@ export default async function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-8 xl:gap-6">
 
           {/* Col 1 — Marca + Contato */}
-          <div className="col-span-2 md:col-span-3 xl:col-span-2 flex flex-col items-center text-center lg:items-start lg:text-left">
-            <Link href="/" className="block mb-5 self-center lg:self-start">
+          <div className="col-span-2 md:col-span-3 xl:col-span-2">
+            <div className="flex flex-col items-start">
+              {/* Logo — left-aligned, no mx-auto */}
               <Image
                 src={logoUrl}
                 alt="Sixxis"
-                width={165}
-                height={56}
-                className="object-contain h-12 w-auto"
+                width={155}
+                height={52}
+                className="object-contain mb-4"
                 unoptimized
               />
-            </Link>
-            <p className="text-sm text-white/85 leading-relaxed mb-5">
-              Qualidade e inovação para o seu conforto e bem-estar.
-            </p>
-
-            {/* WhatsApp Vendas */}
-            <a
-              href={`https://wa.me/${whatsappVendas}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#25D366]/30 mb-2"
-              aria-label="Falar no WhatsApp — Vendas"
-            >
-              <WaIcon size={16} />
-              Vendas
-            </a>
-
-            {/* WhatsApp Assistência Técnica */}
-            <a
-              href={`https://wa.me/${whatsappSuporte}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 w-full bg-[#0a1e1c] hover:bg-[#081614] border border-white/30 hover:border-white text-white/70 hover:text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 mb-3"
-              aria-label="WhatsApp Assistência Técnica"
-            >
-              <WaIcon size={16} />
-              Assistência Técnica
-            </a>
-
-            {/* Contato */}
-            <a
-              href="/contato"
-              className="flex items-center justify-center gap-2 w-full border border-white/20 hover:border-[#3cbfb3] text-white/70 hover:text-[#3cbfb3] text-sm font-medium px-4 py-2 rounded-xl transition-all mb-5"
-            >
-              Entre em Contato
-            </a>
-
-            {/* Email */}
-            <div className="text-sm space-y-1">
-              <p className="text-white/40 text-xs">Envie um e-mail:</p>
-              <a
-                href="mailto:brasil.sixxis@gmail.com"
-                className="flex items-center gap-1.5 text-white/80 hover:text-[#3cbfb3] transition py-1"
-              >
-                <Mail size={13} />
-                brasil.sixxis@gmail.com
-              </a>
-            </div>
-
-            {/* Horário */}
-            <div className="mt-4 text-xs space-y-0.5">
-              <p className="flex items-center gap-1.5 text-white/70 font-medium">
-                <Clock size={12} /> Horário de Atendimento SAC:
+              <p className="text-white/70 text-sm leading-relaxed mb-5 max-w-[280px]">
+                Qualidade e inovação para o seu conforto e bem-estar.
               </p>
-              <p className="text-white/85">Seg–Sex: 8h às 18h&nbsp;&nbsp;|&nbsp;&nbsp;Sáb: 8h às 12h</p>
+              {/* Buttons aligned with logo width */}
+              <div className="flex flex-col gap-2.5 w-full max-w-[260px]">
+                <a href={`https://wa.me/${whatsappVendas}`}
+                  className="flex items-center justify-center gap-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-bold py-2.5 px-4 rounded-xl transition w-full">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.724.977.993-3.63-.235-.374A9.818 9.818 0 1112 21.818z"/>
+                  </svg>
+                  Vendas
+                </a>
+                <a href={`https://wa.me/${whatsappSuporte}`}
+                  className="flex items-center justify-center gap-2.5 border border-white/30 hover:border-white/60 text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition w-full">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.724.977.993-3.63-.235-.374A9.818 9.818 0 1112 21.818z"/>
+                  </svg>
+                  Assistência Técnica
+                </a>
+                <a href="/contato"
+                  className="flex items-center justify-center text-white/60 hover:text-white text-sm py-2 rounded-xl transition w-full border border-white/10 hover:border-white/30">
+                  Entre em Contato
+                </a>
+              </div>
             </div>
           </div>
 

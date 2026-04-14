@@ -12,19 +12,22 @@ interface Props {
   produtoId: string
   especificacoes?: EspecificacaoRow[]
   faqs?: FaqRow[]
+  hideDescricao?: boolean
 }
 
-const ABAS_BASE = ['Descrição', 'Avaliações']
-
-export default function AbasProduto({ descricao, produtoId, especificacoes, faqs }: Props) {
+export default function AbasProduto({ descricao, produtoId, especificacoes, faqs, hideDescricao }: Props) {
   const abas = [
-    'Descrição',
+    ...(hideDescricao ? [] : ['Descrição']),
     ...(especificacoes && especificacoes.length > 0 ? ['Especificações'] : []),
     ...(faqs && faqs.length > 0 ? ['Perguntas Frequentes'] : []),
     'Avaliações',
   ]
 
-  const [aba, setAba] = useState('Descrição')
+  const defaultAba = hideDescricao
+    ? (faqs && faqs.length > 0 ? 'Perguntas Frequentes' : 'Avaliações')
+    : 'Descrição'
+
+  const [aba, setAba] = useState(defaultAba)
   const [faqAberto, setFaqAberto] = useState<number | null>(null)
 
   return (

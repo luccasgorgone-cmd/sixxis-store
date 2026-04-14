@@ -439,6 +439,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           </div>
         </div>
 
+        {/* ─── Separator ────────────────────────────────────── */}
+        <div className="h-px bg-white/20 w-full" />
+
         {/* ─── NAV CATEGORIAS ───────────────────────────────── */}
         <nav className="hidden lg:block" style={{ backgroundColor: 'var(--bg-header, #0f2e2b)' }}>
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
@@ -449,8 +452,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   <Link
                     href={href}
                     className={`
-                      group relative shrink-0 px-4 py-2.5 text-sm font-semibold tracking-wide uppercase transition-colors duration-200 rounded-lg hover:bg-white/10
-                      ${destaque ? 'text-amber-300 hover:text-amber-200' : 'text-white/80 hover:text-white'}
+                      group relative shrink-0 px-4 py-2.5 text-sm font-semibold tracking-wide uppercase transition-colors duration-200 hover:bg-white/15 hover:rounded-lg
+                      ${destaque ? 'text-amber-300 hover:text-amber-200' : 'text-white font-semibold'}
                     `}
                   >
                     {label}

@@ -3,43 +3,43 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Search, X, SlidersHorizontal } from 'lucide-react'
+import { ChevronRight, SlidersHorizontal, X, Search, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
-import CategoriaBanner from '@/components/produtos/CategoriaBanner'
-import SidebarFiltros from '@/components/produtos/SidebarFiltros'
-import ToolbarProdutos from '@/components/produtos/ToolbarProdutos'
+import SubcategoriasCarrossel from '@/components/produtos/SubcategoriasCarrossel'
+import SidebarFiltrosCB from '@/components/produtos/SidebarFiltrosCB'
 import type { Produto } from '@/types'
 
-// ── Constantes ──────────────────────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────────────────────────
 
-const CATEGORIAS = [
-  { val: 'climatizadores', label: 'Climatizadores' },
-  { val: 'aspiradores',    label: 'Aspiradores'    },
-  { val: 'spinning',       label: 'Spinning'       },
+const CATEGORIAS: Record<string, string> = {
+  climatizadores: 'Climatizadores',
+  aspiradores: 'Aspiradores',
+  spinning: 'Spinning',
+}
+
+const ORDENS = [
+  { val: 'relevancia', label: 'Popularidade' },
+  { val: 'vendidos',   label: 'Mais vendidos' },
+  { val: 'preco-asc',  label: 'Menor preço' },
+  { val: 'preco-desc', label: 'Maior preço' },
 ]
 
-const FAIXAS_PRECO = [
-  { label: 'Até R$ 500',          min: 0,    max: 500    },
-  { label: 'R$ 500 – R$ 1.000',   min: 500,  max: 1000   },
-  { label: 'R$ 1.000 – R$ 2.000', min: 1000, max: 2000   },
-  { label: 'R$ 2.000 – R$ 5.000', min: 2000, max: 5000   },
-  { label: 'Acima de R$ 5.000',   min: 5000, max: 999999 },
-]
+const LIMIT = 12
 
-// ── Skeleton ─────────────────────────────────────────────────────────────────
+// ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ProductSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="bg-white/8 rounded-2xl animate-pulse overflow-hidden border border-white/5">
-          <div className="bg-white/10 w-full" style={{ aspectRatio: '1/1' }} />
+        <div key={i} className="border border-gray-100 rounded-2xl overflow-hidden animate-pulse bg-white">
+          <div className="bg-gray-100 w-full" style={{ aspectRatio: '1/1' }} />
           <div className="p-3 space-y-2">
-            <div className="h-3 bg-white/10 rounded w-4/5" />
-            <div className="h-3 bg-white/10 rounded w-3/5" />
-            <div className="h-5 bg-white/10 rounded w-2/3 mt-2" />
-            <div className="h-8 bg-white/10 rounded-xl mt-3" />
-            <div className="h-7 bg-white/5 rounded-xl" />
+            <div className="h-3 bg-gray-100 rounded w-4/5" />
+            <div className="h-3 bg-gray-100 rounded w-3/5" />
+            <div className="h-5 bg-gray-100 rounded w-2/3 mt-2" />
+            <div className="h-9 bg-gray-100 rounded-xl mt-3" />
+            <div className="h-8 bg-gray-50 rounded-xl border border-gray-100" />
           </div>
         </div>
       ))}
@@ -47,63 +47,104 @@ function ProductSkeleton() {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Pagination ────────────────────────────────────────────────────────────────
+
+function Paginacao({ pagina, total, limit, onChange }: { pagina: number; total: number; limit: number; onChange: (p: number) => void }) {
+  const totalPaginas = Math.max(1, Math.ceil(total / limit))
+  if (totalPaginas <= 1) return null
+
+  const pages = Array.from({ length: totalPaginas }, (_, i) => i + 1)
+    .filter(p => p === 1 || p === totalPaginas || Math.abs(p - pagina) <= 2)
+
+  return (
+    <div className="flex items-center justify-center gap-1.5 mt-10 flex-wrap">
+      <button
+        onClick={() => onChange(Math.max(1, pagina - 1))}
+        disabled={pagina === 1}
+        className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center hover:border-[#3cbfb3] disabled:opacity-40 disabled:cursor-not-allowed transition"
+      >
+        <ChevronLeft size={16} className="text-gray-600" />
+      </button>
+
+      {pages.map((p, idx, arr) => (
+        <span key={p} className="flex items-center gap-1.5">
+          {idx > 0 && arr[idx - 1] !== p - 1 && (
+            <span className="text-gray-400 text-sm px-1">...</span>
+          )}
+          <button
+            onClick={() => onChange(p)}
+            className={`w-9 h-9 rounded-xl text-sm font-bold border transition ${
+              p === pagina
+                ? 'bg-[#0f2e2b] text-white border-[#0f2e2b]'
+                : 'border-gray-200 text-gray-600 hover:border-[#3cbfb3] hover:text-[#3cbfb3]'
+            }`}
+          >
+            {p}
+          </button>
+        </span>
+      ))}
+
+      <button
+        onClick={() => onChange(Math.min(totalPaginas, pagina + 1))}
+        disabled={pagina === totalPaginas}
+        className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center hover:border-[#3cbfb3] disabled:opacity-40 disabled:cursor-not-allowed transition"
+      >
+        <ChevronRightIcon size={16} className="text-gray-600" />
+      </button>
+
+      <span className="text-sm text-gray-500 ml-2">
+        Página <strong>{pagina}</strong> de <strong>{totalPaginas}</strong>
+      </span>
+    </div>
+  )
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function ProdutosClient() {
-  const router       = useRouter()
-  const pathname     = usePathname()
+  const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [produtos,   setProdutos]   = useState<Produto[]>([])
-  const [total,      setTotal]      = useState(0)
-  const [loading,    setLoading]    = useState(true)
-  const [viewMode,   setViewMode]   = useState<'grid' | 'list'>('grid')
+  const [produtos, setProdutos] = useState<Produto[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [contagens,  setContagens]  = useState<Record<string, number>>({})
+  const [pagina, setPagina] = useState(1)
 
   const categoria = searchParams.get('categoria') || ''
-  const ordem     = searchParams.get('ordem')     || 'relevancia'
-  const busca     = searchParams.get('q')         || ''
-  const precoMin  = searchParams.get('precoMin')  || ''
-  const precoMax  = searchParams.get('precoMax')  || ''
+  const ordem = searchParams.get('ordem') || 'relevancia'
+  const busca = searchParams.get('q') || ''
+  const precoMin = searchParams.get('precoMin') || ''
+  const precoMax = searchParams.get('precoMax') || ''
 
-  // ── helpers ──────────────────────────────────────────────────────────────
+  // Reset pagina when filters change
+  useEffect(() => { setPagina(1) }, [categoria, ordem, busca, precoMin, precoMax])
 
   function setParam(key: string, val: string) {
     const p = new URLSearchParams(searchParams.toString())
-    if (val) p.set(key, val)
-    else     p.delete(key)
+    if (val) p.set(key, val); else p.delete(key)
     router.push(`${pathname}?${p.toString()}`)
   }
 
   function setParams(pairs: [string, string][]) {
     const p = new URLSearchParams(searchParams.toString())
     for (const [key, val] of pairs) {
-      if (val) p.set(key, val)
-      else     p.delete(key)
+      if (val) p.set(key, val); else p.delete(key)
     }
     router.push(`${pathname}?${p.toString()}`)
   }
 
-  // ── fetch contagens ───────────────────────────────────────────────────────
-
-  useEffect(() => {
-    fetch('/api/produtos/contagens')
-      .then(r => r.json())
-      .then(data => setContagens(data))
-      .catch(() => {})
-  }, [])
-
-  // ── fetch produtos ────────────────────────────────────────────────────────
-
   useEffect(() => {
     setLoading(true)
     const p = new URLSearchParams()
-    if (categoria)                        p.set('categoria', categoria)
+    if (categoria) p.set('categoria', categoria)
     if (ordem && ordem !== 'relevancia') p.set('ordem', ordem)
-    if (busca)                           p.set('q', busca)
-    if (precoMin)                        p.set('precoMin', precoMin)
-    if (precoMax)                        p.set('precoMax', precoMax)
+    if (busca) p.set('q', busca)
+    if (precoMin) p.set('precoMin', precoMin)
+    if (precoMax) p.set('precoMax', precoMax)
+    p.set('page', String(pagina))
+    p.set('limit', String(LIMIT))
 
     fetch(`/api/produtos?${p.toString()}`)
       .then(r => r.json())
@@ -113,181 +154,195 @@ export default function ProdutosClient() {
       })
       .catch(() => setProdutos([]))
       .finally(() => setLoading(false))
-  }, [categoria, ordem, busca, precoMin, precoMax])
+  }, [categoria, ordem, busca, precoMin, precoMax, pagina])
 
-  // ── derived ───────────────────────────────────────────────────────────────
-
-  const activeFaixa = FAIXAS_PRECO.find(
-    f => String(f.min) === precoMin && String(f.max) === precoMax,
-  )
-
-  const activeFilters: { label: string; clear: () => void }[] = []
-  if (categoria) activeFilters.push({
-    label: CATEGORIAS.find(c => c.val === categoria)?.label ?? categoria,
-    clear: () => setParam('categoria', ''),
-  })
-  if (activeFaixa) activeFilters.push({
-    label: activeFaixa.label,
-    clear: () => setParams([['precoMin', ''], ['precoMax', '']]),
-  })
-  if (busca) activeFilters.push({
-    label: `"${busca}"`,
-    clear: () => setParam('q', ''),
-  })
-
-  const categoriaLabel = categoria
-    ? (CATEGORIAS.find(c => c.val === categoria)?.label ?? categoria)
-    : null
+  const categoriaLabel = categoria ? (CATEGORIAS[categoria] ?? categoria) : null
   const titulo = busca ? `Resultados para "${busca}"` : categoriaLabel ?? 'Todos os Produtos'
 
-  const categoriasComContagem = CATEGORIAS.map(c => ({
-    ...c,
-    count: contagens[c.val],
-  }))
+  const filtrosAtivos = [
+    categoria ? 1 : 0,
+    (precoMin || precoMax) ? 1 : 0,
+    busca ? 1 : 0,
+  ].reduce((a, b) => a + b, 0)
 
-  // ── sidebar content ───────────────────────────────────────────────────────
-
-  const sidebarContent = (
-    <SidebarFiltros
-      categorias={categoriasComContagem}
-      faixas={FAIXAS_PRECO}
+  const sidebarEl = (
+    <SidebarFiltrosCB
       categoria={categoria}
       precoMin={precoMin}
       precoMax={precoMax}
-      onCategoria={val => setParam('categoria', val)}
       onFaixa={(min, max) => setParams([['precoMin', min], ['precoMax', max]])}
     />
   )
 
-  // ── render ───────────────────────────────────────────────────────────────
-
   return (
-    <>
-      <main className="min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-
-          <div className="flex gap-6 lg:gap-8">
-
-            {/* Sidebar desktop */}
-            <aside className="w-56 shrink-0 hidden md:block">
-              <div className="sticky top-24 bg-white/[0.06] border border-white/10 backdrop-blur-sm rounded-2xl p-5">
-                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-4">Filtros</p>
-                {sidebarContent}
-              </div>
-            </aside>
-
-            {/* Main content */}
-            <section className="flex-1 min-w-0">
-
-              {/* Categoria banner (only when a category is selected) */}
-              <CategoriaBanner categoria={categoria} total={total} loading={loading} />
-
-              {/* Toolbar */}
-              <ToolbarProdutos
-                titulo={titulo}
-                total={total}
-                loading={loading}
-                ordem={ordem}
-                viewMode={viewMode}
-                activeFilters={activeFilters}
-                onOrdem={val => setParam('ordem', val)}
-                onViewMode={setViewMode}
-                onOpenDrawer={() => setDrawerOpen(true)}
-              />
-
-              {/* Products */}
-              {loading ? (
-                <ProductSkeleton />
-              ) : produtos.length === 0 ? (
-                <div className="text-center py-20 border border-dashed border-white/15 rounded-2xl bg-white/[0.02]">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-                    <Search size={28} className="text-white/20" />
-                  </div>
-                  <p className="text-white/60 font-semibold text-lg mb-1">Nenhum produto encontrado</p>
-                  <p className="text-sm text-white/30 mb-6">Tente ajustar os filtros ou fazer uma nova busca.</p>
-                  {activeFilters.length > 0 && (
-                    <button
-                      onClick={() => setParams([['categoria', ''], ['precoMin', ''], ['precoMax', ''], ['q', '']])}
-                      className="inline-flex items-center gap-2 text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-semibold border border-[#3cbfb3]/40 rounded-xl px-5 py-2.5 hover:bg-[#3cbfb3]/10 transition"
-                    >
-                      <X size={14} />
-                      Limpar filtros
-                    </button>
-                  )}
-                  <Link
-                    href="/produtos"
-                    className="block mt-3 text-sm text-white/40 hover:text-white/60 transition"
-                  >
-                    Ver todos os produtos →
-                  </Link>
-                </div>
-              ) : viewMode === 'grid' ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                  {produtos.map(p => <CardProduto key={p.id} produto={p} />)}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {produtos.map(p => <CardProduto key={p.id} produto={p} />)}
-                </div>
-              )}
-
-            </section>
+    <div className="min-h-screen bg-white">
+      {/* Breadcrumb */}
+      <nav className="bg-gray-50 border-b border-gray-100 py-2.5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-1.5 text-sm text-gray-500 flex-wrap">
+            <Link href="/" className="hover:text-[#3cbfb3] transition">Início</Link>
+            {categoriaLabel ? (
+              <>
+                <ChevronRight size={13} className="text-gray-300" />
+                <Link href="/produtos" className="hover:text-[#3cbfb3] transition">Produtos</Link>
+                <ChevronRight size={13} className="text-gray-300" />
+                <span className="text-gray-800 font-medium">{categoriaLabel}</span>
+              </>
+            ) : (
+              <>
+                <ChevronRight size={13} className="text-gray-300" />
+                <span className="text-gray-800 font-medium">Todos os Produtos</span>
+              </>
+            )}
           </div>
         </div>
-      </main>
+      </nav>
+
+      {/* Subcategorias carrossel */}
+      <SubcategoriasCarrossel categoria={categoria} />
+
+      {/* Main */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="flex gap-7">
+          {/* Sidebar */}
+          {sidebarEl}
+
+          {/* Content */}
+          <main className="flex-1 min-w-0">
+            {/* Toolbar */}
+            <div className="flex items-start justify-between mb-5 gap-3 flex-wrap">
+              <div>
+                <h1 className="text-xl font-extrabold text-gray-900">{titulo}</h1>
+                {!loading && (
+                  <p className="text-gray-500 text-sm mt-0.5">
+                    <span className="font-bold text-gray-800">{total}</span> produto{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Sort buttons (desktop) */}
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <span className="text-sm text-gray-500">Ordenar por</span>
+                  {ORDENS.map(op => (
+                    <button
+                      key={op.val}
+                      onClick={() => setParam('ordem', op.val)}
+                      className={`text-xs font-semibold px-3 py-2 rounded-xl border transition whitespace-nowrap ${
+                        ordem === op.val
+                          ? 'bg-[#0f2e2b] text-white border-[#0f2e2b]'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-[#3cbfb3] hover:text-[#3cbfb3]'
+                      }`}
+                    >
+                      {op.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Sort select (mobile) */}
+                <select
+                  value={ordem}
+                  onChange={e => setParam('ordem', e.target.value)}
+                  className="sm:hidden border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  {ORDENS.map(op => <option key={op.val} value={op.val}>{op.label}</option>)}
+                </select>
+
+                {/* Filter button (mobile) */}
+                <button
+                  onClick={() => setDrawerOpen(true)}
+                  className="lg:hidden flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm font-semibold px-3 py-2 rounded-xl hover:border-[#3cbfb3] transition"
+                >
+                  <SlidersHorizontal size={15} />
+                  Filtrar
+                  {filtrosAtivos > 0 && (
+                    <span className="w-4 h-4 bg-[#3cbfb3] text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                      {filtrosAtivos}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Active filter pills */}
+            {filtrosAtivos > 0 && (
+              <div className="flex flex-wrap gap-2 mb-5">
+                {categoria && (
+                  <button onClick={() => setParam('categoria', '')}
+                    className="flex items-center gap-1.5 bg-[#3cbfb3]/10 border border-[#3cbfb3]/30 text-[#3cbfb3] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#3cbfb3]/20 transition">
+                    {CATEGORIAS[categoria] ?? categoria} <X size={11} />
+                  </button>
+                )}
+                {(precoMin || precoMax) && (
+                  <button onClick={() => setParams([['precoMin', ''], ['precoMax', '']])}
+                    className="flex items-center gap-1.5 bg-[#3cbfb3]/10 border border-[#3cbfb3]/30 text-[#3cbfb3] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#3cbfb3]/20 transition">
+                    Faixa de preço <X size={11} />
+                  </button>
+                )}
+                {busca && (
+                  <button onClick={() => setParam('q', '')}
+                    className="flex items-center gap-1.5 bg-[#3cbfb3]/10 border border-[#3cbfb3]/30 text-[#3cbfb3] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#3cbfb3]/20 transition">
+                    &quot;{busca}&quot; <X size={11} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Products grid */}
+            {loading ? (
+              <ProductSkeleton />
+            ) : produtos.length === 0 ? (
+              <div className="text-center py-20 border border-dashed border-gray-200 rounded-2xl">
+                <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
+                  <Search size={28} className="text-gray-300" />
+                </div>
+                <p className="text-gray-600 font-semibold text-lg mb-1">Nenhum produto encontrado</p>
+                <p className="text-sm text-gray-400 mb-6">Tente ajustar os filtros ou fazer outra busca.</p>
+                <Link href="/produtos"
+                  className="inline-flex items-center gap-2 text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-semibold border border-[#3cbfb3]/40 rounded-xl px-5 py-2.5 hover:bg-[#3cbfb3]/5 transition">
+                  Ver todos os produtos →
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                {produtos.map(p => <CardProduto key={p.id} produto={p} />)}
+              </div>
+            )}
+
+            {/* Pagination */}
+            <Paginacao
+              pagina={pagina}
+              total={total}
+              limit={LIMIT}
+              onChange={p => { setPagina(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+            />
+          </main>
+        </div>
+      </div>
 
       {/* Mobile drawer overlay */}
       <div
-        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
-          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setDrawerOpen(false)}
-        aria-hidden="true"
       />
 
       {/* Mobile drawer */}
       <div
-        className="fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] shadow-2xl transition-transform duration-300 md:hidden overflow-y-auto"
-        style={{
-          backgroundColor: '#1a4f4a',
-          transform: drawerOpen ? 'translateX(0)' : 'translateX(100%)',
-        }}
+        className="fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-white shadow-2xl transition-transform duration-300 lg:hidden overflow-y-auto"
+        style={{ transform: drawerOpen ? 'translateX(0)' : 'translateX(100%)' }}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0" style={{ backgroundColor: '#0f2e2b' }}>
-          <p className="text-white font-bold text-base flex items-center gap-2">
-            <SlidersHorizontal size={18} />
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <p className="text-gray-900 font-bold text-base flex items-center gap-2">
+            <SlidersHorizontal size={18} className="text-[#3cbfb3]" />
             Filtros
-            {activeFilters.length > 0 && (
-              <span className="bg-[#3cbfb3] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-                {activeFilters.length}
-              </span>
-            )}
           </p>
-          <button
-            onClick={() => setDrawerOpen(false)}
-            className="p-2 text-white/60 hover:text-white rounded-lg hover:bg-white/10 transition"
-            aria-label="Fechar filtros"
-          >
+          <button onClick={() => setDrawerOpen(false)}
+            className="p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-50 transition">
             <X size={20} />
           </button>
         </div>
-        <div className="p-5">
-          {sidebarContent}
-        </div>
-        {activeFilters.length > 0 && (
-          <div className="p-5 border-t border-white/10">
-            <button
-              onClick={() => {
-                setParams([['categoria', ''], ['precoMin', ''], ['precoMax', ''], ['q', '']])
-                setDrawerOpen(false)
-              }}
-              className="w-full text-center text-sm text-white/50 hover:text-white transition font-medium"
-            >
-              Limpar todos os filtros
-            </button>
-          </div>
-        )}
+        <div className="p-5">{sidebarEl}</div>
       </div>
-    </>
+    </div>
   )
 }
