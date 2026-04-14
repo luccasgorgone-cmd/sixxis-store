@@ -140,9 +140,10 @@ const NAV_LINKS = [
   { href: '/produtos?categoria=climatizadores', label: 'CLIMATIZADORES', icon: Wind  },
   { href: '/produtos?categoria=aspiradores',    label: 'ASPIRADORES',    icon: Fan   },
   { href: '/produtos?categoria=spinning',       label: 'SPINNING',       icon: Bike  },
-  { href: '/ofertas',                           label: 'OFERTAS',        icon: Tag, hot: true },
+  { href: '/ofertas',                           label: 'OFERTAS',        icon: Tag,   hot: true },
   { href: '/sobre',                             label: 'SOBRE',          icon: Info  },
   { href: '/contato',                           label: 'CONTATO',        icon: Phone },
+  { href: '/seja-revendedor',                   label: 'PARCEIRO',       icon: Store },
 ]
 
 // ── HEADER ────────────────────────────────────────────────────────────────────
@@ -428,7 +429,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   >
                     {link.label}
                     {link.hot && (
-                      <span className="bg-[#f59e0b] text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase leading-none">
+                      <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase leading-none">
                         HOT
                       </span>
                     )}
@@ -577,7 +578,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <Icon size={20} className={hot ? 'text-amber-300' : 'text-white/50'} />
               {label}
               {hot && (
-                <span className="ml-auto text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full">HOT</span>
+                <span className="ml-auto text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded-full">HOT</span>
               )}
             </Link>
           ))}

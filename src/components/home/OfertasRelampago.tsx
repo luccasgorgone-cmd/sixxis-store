@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Zap, Timer } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import type { Produto } from '@/types'
 
@@ -37,64 +38,68 @@ export default function OfertasRelampago({ produtos }: Props) {
 
   if (produtos.length === 0) return null
 
-  const blocos = [
-    { val: tempo.h, label: 'HH' },
-    { val: tempo.m, label: 'MM' },
-    { val: tempo.s, label: 'SS' },
-  ]
-
   return (
     <section className="bg-transparent border-b border-white/10 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-2xl p-5 sm:p-6">
 
-          {/* Header com timer */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          {/* ── Header com timer ──────────────────────────────────────────── */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
 
-            {/* Título */}
-            <div className="flex items-center gap-3">
-              <span className="text-3xl select-none">⚡</span>
+            {/* Título esquerda */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center shadow-md shadow-red-600/30">
+                <Zap size={18} className="text-white" fill="white" />
+              </div>
               <div>
-                <h2 className="text-2xl font-extrabold text-white leading-none">
+                <h2 className="text-xl font-extrabold text-white leading-none">
                   Ofertas Relâmpago
                 </h2>
-                <p className="text-[#3cbfb3] text-sm font-semibold mt-0.5">
-                  Aproveite antes que acabe!
-                </p>
+                <p className="text-white/60 text-xs mt-0.5">Aproveite antes que acabe!</p>
               </div>
             </div>
 
-            {/* Timer estilo Casas Bahia */}
-            <div className="flex items-end gap-1.5">
-              <span className="text-white/70 font-semibold text-sm hidden sm:inline mb-3">
-                Termina em:
-              </span>
-              {blocos.map((bloco, i) => (
-                <div key={bloco.label} className="flex items-end gap-1.5">
-                  <div className="flex flex-col items-center">
-                    <span className="bg-[#1a4f4a] text-white font-mono font-extrabold px-3 py-2 rounded-lg text-lg sm:text-xl min-w-[48px] text-center tabular-nums leading-none">
-                      {bloco.val}
-                    </span>
-                    <span className="text-white/70 text-[9px] font-bold uppercase tracking-wider mt-1">
-                      {bloco.label}
-                    </span>
+            {/* Timer */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <Timer size={13} className="text-red-400" />
+                <span className="text-white/70 text-xs font-semibold">Termina em:</span>
+              </div>
+
+              {/* Blocos do contador */}
+              <div className="flex items-center gap-1">
+                {[
+                  { val: tempo.h, label: 'HORAS' },
+                  { val: tempo.m, label: 'MIN'   },
+                  { val: tempo.s, label: 'SEG'   },
+                ].map((item, i) => (
+                  <div key={item.label} className="flex items-center gap-1">
+                    <div className="flex flex-col items-center">
+                      <span className="bg-red-600 text-white font-mono font-extrabold px-3 py-1.5 rounded-lg text-base min-w-[42px] text-center tabular-nums leading-none shadow-md shadow-red-600/30">
+                        {item.val}
+                      </span>
+                      <span className="text-red-400 text-[9px] font-bold uppercase tracking-wider mt-0.5">
+                        {item.label}
+                      </span>
+                    </div>
+                    {i < 2 && (
+                      <span className="text-red-400 font-extrabold text-lg pb-4">:</span>
+                    )}
                   </div>
-                  {i < 2 && (
-                    <span className="text-[#3cbfb3] font-extrabold text-xl mb-4 leading-none">:</span>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+
           </div>
 
-          {/* Grid de produtos */}
+          {/* ── Grid de produtos ──────────────────────────────────────────── */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {produtos.slice(0, 4).map(p => (
               <CardProduto key={p.id} produto={p} />
             ))}
           </div>
 
-          {/* Link ver todas */}
+          {/* ── Link ver todas ────────────────────────────────────────────── */}
           <div className="text-center mt-5">
             <Link
               href="/ofertas"
@@ -103,6 +108,7 @@ export default function OfertasRelampago({ produtos }: Props) {
               Ver todas as ofertas →
             </Link>
           </div>
+
         </div>
       </div>
     </section>

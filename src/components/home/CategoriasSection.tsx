@@ -69,7 +69,7 @@ function CategoriaCard({ cat }: { cat: Categoria }) {
           />
         )}
         {cat.badge && (
-          <span className="absolute top-1 right-1 bg-[#f59e0b] text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase leading-none">
+          <span className="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase leading-none">
             {cat.badge}
           </span>
         )}
