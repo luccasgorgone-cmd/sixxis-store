@@ -47,6 +47,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
   const [form, setForm] = useState({ nota: 0, nomeAutor: '', emailAutor: '', titulo: '', comentario: '' })
   const [fotosFiles, setFotosFiles] = useState<File[]>([])
   const [fotosPreview, setFotosPreview] = useState<string[]>([])
+  const [expandida, setExpandida] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -274,7 +275,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
       {/* ── Lista ── */}
       {avaliacoes.length > 0 && (
         <div className="space-y-4">
-          {avaliacoes.map((av) => {
+          {avaliacoesExibidas.map((av) => {
             const nomeExibido = av.nomeAutor || av.cliente?.nome || 'Anônimo'
             return (
               <div key={av.id}
@@ -326,6 +327,20 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
             )
           })}
         </div>
+      )}
+
+      {/* ── Botão expandir/colapsar ── */}
+      {temMais && (
+        <button
+          onClick={() => setExpandida(!expandida)}
+          className="w-full py-3 text-sm font-bold text-[#3cbfb3] hover:bg-[#e8f8f7] transition rounded-2xl border border-[#3cbfb3]/20 flex items-center justify-center gap-2 mt-4"
+        >
+          {expandida ? (
+            <><span>Mostrar menos</span><span>↑</span></>
+          ) : (
+            <><span>Ver mais {avaliacoes.length - VISIVEIS_INICIAL} avaliações</span><span>↓</span></>
+          )}
+        </button>
       )}
     </div>
   )

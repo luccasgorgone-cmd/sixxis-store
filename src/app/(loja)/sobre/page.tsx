@@ -99,13 +99,12 @@ export default function SobrePage() {
       {/* ─── NÚMEROS ─── */}
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
               { val: '30+',  label: 'Anos de mercado',        cor: '#3cbfb3' },
               { val: '1M+',  label: 'Clientes atendidos',     cor: '#0f2e2b' },
               { val: '200+', label: 'Revendedores parceiros', cor: '#8b5cf6' },
-              { val: '3',    label: 'Linhas de produto',      cor: '#f59e0b' },
-              { val: '12m',  label: 'Garantia total',         cor: '#16a34a' },
+              { val: '12M',  label: 'Garantia',               cor: '#16a34a' },
               { val: '100%', label: 'Entrega nacional',       cor: '#2563eb' },
             ].map((s, i) => (
               <Reveal key={s.label} delay={i * 70}

@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm run:*)",
       "Bash(node -e \"const l = require\\('lucide-react'\\); const social = Object.keys\\(l\\).filter\\(k => /insta|face|twitter|linked|you|tiktok|whats|share/i.test\\(k\\)\\); console.log\\(social\\)\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm install:*)"
     ]
   }
 }
