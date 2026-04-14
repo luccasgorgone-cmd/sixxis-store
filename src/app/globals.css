@@ -184,6 +184,16 @@
     animation: wa-pulse 2s infinite;
   }
 
+  /* ── Raio (badge HOT nav) pulse ── */
+  @keyframes raio-pulse {
+    0%, 100% { transform: scale(1) rotate(-5deg); }
+    50%       { transform: scale(1.2) rotate(5deg); }
+  }
+  .raio-pulse {
+    animation: raio-pulse 1.5s ease-in-out infinite;
+    display: inline-block;
+  }
+
   /* ── Classes dinâmicas via CSS custom properties ── */
   .bg-brand       { background: var(--tiffany, #3cbfb3); }
   .bg-brand-dark  { background: var(--tiffany-dark, #2a9d8f); }
@@ -242,4 +252,20 @@ button, a {
 /* ── Safe area (iPhone home indicator) ───────────────────────────────────── */
 .safe-area-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* ── Mobile base ─────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Scroll horizontal suave em carrosséis */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .overflow-x-auto::-webkit-scrollbar { display: none; }
+
+  /* Evitar overflow horizontal na estrutura */
+  section, article {
+    overflow-x: hidden;
+  }
 }

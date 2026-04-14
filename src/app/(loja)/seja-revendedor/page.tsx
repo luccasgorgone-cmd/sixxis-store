@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { DollarSign, Headphones, Truck, BadgeCheck, Store } from 'lucide-react'
 import FormRevendedor from './FormRevendedor'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const metadata: Metadata = {
   title: 'Seja um Revendedor Sixxis — Programa de Parceiros',
@@ -34,6 +35,7 @@ const beneficios = [
 export default function SejaRevendedorPage() {
   return (
     <main className="bg-white">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Seja um Parceiro' }]} />
 
       {/* ── Hero ── */}
       <section

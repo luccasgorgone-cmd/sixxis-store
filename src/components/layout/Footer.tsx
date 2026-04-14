@@ -74,25 +74,7 @@ function ColTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-/* ─── Ícone Instagram SVG ────────────────────────────────────────────────── */
-function IgIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-      <circle cx="12" cy="12" r="4.5"/>
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
-    </svg>
-  )
-}
-
-/* ─── Ícone Facebook SVG ─────────────────────────────────────────────────── */
-function FbIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-    </svg>
-  )
-}
+/* ─── Ícones sociais internos (não usados na seção de redes) ─────────────── */
 
 /* ─── Ícone WhatsApp SVG oficial ─────────────────────────────────────────── */
 function WaIcon({ size = 18 }: { size?: number }) {
@@ -260,40 +242,50 @@ export default async function Footer() {
           {/* Col 5 — Redes Sociais + Segurança */}
           <div>
             <ColTitle>Redes Sociais</ColTitle>
-            <ul className="space-y-3 mb-7">
-              <li>
-                <a
-                  href="https://instagram.com/sixxisoficial"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 group"
-                  aria-label="Instagram Sixxis"
-                >
-                  <span className="w-8 h-8 rounded-full border border-gray-700 group-hover:border-[#3cbfb3] flex items-center justify-center text-gray-400 group-hover:text-[#3cbfb3] transition-all duration-200 shrink-0">
-                    <IgIcon />
-                  </span>
-                  <span className="text-sm text-gray-400 group-hover:text-[#3cbfb3] transition-colors duration-200">
-                    @sixxisoficial
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.facebook.com/profile.php?id=100090936724453"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 group"
-                  aria-label="Facebook Sixxis"
-                >
-                  <span className="w-8 h-8 rounded-full border border-gray-700 group-hover:border-[#3cbfb3] flex items-center justify-center text-gray-400 group-hover:text-[#3cbfb3] transition-all duration-200 shrink-0">
-                    <FbIcon />
-                  </span>
-                  <span className="text-sm text-gray-400 group-hover:text-[#3cbfb3] transition-colors duration-200">
-                    Sixxis do Brasil
-                  </span>
-                </a>
-              </li>
-            </ul>
+            <div className="flex gap-3 mb-2">
+              {/* Instagram */}
+              <a
+                href="https://instagram.com/sixxisoficial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                style={{ width: '42px', height: '42px', backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}
+                aria-label="Instagram @sixxisoficial"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </a>
+
+              {/* Facebook */}
+              <a
+                href="https://www.facebook.com/profile.php?id=100090936724453"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                style={{ width: '42px', height: '42px', backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}
+                aria-label="Facebook Sixxis do Brasil"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+              </a>
+
+              {/* WhatsApp */}
+              <a
+                href="https://wa.me/5518997474701"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                style={{ width: '42px', height: '42px', backgroundColor: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.3)', flexShrink: 0 }}
+                aria-label="WhatsApp Sixxis"
+              >
+                <WaIcon size={20} />
+              </a>
+            </div>
+            <p className="text-white/40 text-[10px] mb-7">@sixxisoficial</p>
 
             <ColTitle>Certificados</ColTitle>
             <div className="space-y-2">

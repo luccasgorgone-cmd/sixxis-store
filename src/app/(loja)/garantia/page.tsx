@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ShieldCheck, Mail } from 'lucide-react'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const revalidate = 86400
 
@@ -72,6 +73,7 @@ const naoCobertas = [
 export default function GarantiaPage() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Garantia' }]} />
       {/* Hero */}
       <section
         className="text-white py-16 px-4"

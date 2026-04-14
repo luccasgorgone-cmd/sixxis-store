@@ -56,7 +56,14 @@ export default function OfertasRelampago({ produtos }: Props) {
 
             {/* Título */}
             <div className="flex items-center gap-3">
-              <span className="text-3xl select-none">⚡</span>
+              {/* Raio esquerdo */}
+              <svg width="24" height="34" viewBox="0 0 14 20" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                  fill="#FFD700" opacity="0.3" transform="translate(0.5,0.5)"/>
+                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                  fill="#FFD700" stroke="#111" strokeWidth="1.2"
+                  strokeLinejoin="round" strokeLinecap="round"/>
+              </svg>
               <div>
                 <h2 className="text-2xl font-extrabold text-[#0f2e2b] leading-none">
                   Ofertas Relâmpago
@@ -65,6 +72,14 @@ export default function OfertasRelampago({ produtos }: Props) {
                   Aproveite antes que acabe!
                 </p>
               </div>
+              {/* Raio direito — espelhado */}
+              <svg width="24" height="34" viewBox="0 0 14 20" fill="none" style={{ flexShrink: 0, transform: 'scaleX(-1)' }}>
+                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                  fill="#FFD700" opacity="0.3" transform="translate(0.5,0.5)"/>
+                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                  fill="#FFD700" stroke="#111" strokeWidth="1.2"
+                  strokeLinejoin="round" strokeLinecap="round"/>
+              </svg>
             </div>
 
             {/* Timer estilo Casas Bahia */}

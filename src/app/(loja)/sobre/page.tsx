@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Target, Eye, Heart, Users, ShieldCheck, Truck, Award } from 'lucide-react'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const revalidate = 3600
 
@@ -10,15 +11,16 @@ export const metadata: Metadata = {
 }
 
 const stats = [
-  { Icon: Users,       numero: '5.000+', label: 'Clientes Satisfeitos'   },
-  { Icon: Award,       numero: '10+',    label: 'Anos de Mercado'         },
-  { Icon: ShieldCheck, numero: '12 m',   label: 'Garantia nos Produtos'  },
-  { Icon: Truck,       numero: '100%',   label: 'Entrega para o Brasil'   },
+  { Icon: Award,       numero: '30+',  label: 'Anos de mercado'       },
+  { Icon: Users,       numero: '1M+',  label: 'Clientes atendidos'    },
+  { Icon: ShieldCheck, numero: '12M',  label: 'Garantia'               },
+  { Icon: Truck,       numero: '100%', label: 'Entrega nacional'       },
 ]
 
 export default function SobrePage() {
   return (
     <main className="bg-white">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Sobre Nós' }]} />
 
       {/* ── Hero ── */}
       <section
@@ -176,6 +178,35 @@ export default function SobrePage() {
           <Link href="/contato" className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-8 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg">
             Fale Conosco
           </Link>
+        </div>
+      </section>
+
+      {/* ── CTA Final ── */}
+      <section
+        className="py-14 text-center"
+        style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}
+      >
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 leading-tight">
+            Faça parte da história Sixxis
+          </h2>
+          <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-8">
+            Seja como cliente, revendedor ou parceiro — estamos prontos para construir juntos um futuro com mais qualidade e bem-estar.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/produtos"
+              className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-8 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              Ver produtos
+            </Link>
+            <Link
+              href="/seja-revendedor"
+              className="inline-flex items-center gap-2 border border-white/30 hover:border-white/60 text-white font-semibold px-8 py-3 rounded-xl transition-all hover:-translate-y-0.5"
+            >
+              Seja um Parceiro
+            </Link>
+          </div>
         </div>
       </section>
     </main>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Shield } from 'lucide-react'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const revalidate = 86400
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export default function PrivacidadePage() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Política de Privacidade' }]} />
       {/* Hero */}
       <section
         className="text-white py-16 px-4"

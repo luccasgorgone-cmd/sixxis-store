@@ -430,8 +430,14 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   >
                     {label}
                     {destaque && (
-                      <span className="ml-1.5 text-[9px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full align-middle normal-case tracking-normal">
-                        HOT
+                      <span className="ml-1 raio-pulse" style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle' }}>
+                        <svg width="16" height="22" viewBox="0 0 14 20" fill="none">
+                          <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                            fill="#FFD700" opacity="0.3" transform="translate(0.5,0.5)"/>
+                          <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                            fill="#FFD700" stroke="#111" strokeWidth="1.3"
+                            strokeLinejoin="round" strokeLinecap="round"/>
+                        </svg>
                       </span>
                     )}
                   </Link>
@@ -583,7 +589,15 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <Icon size={20} className={destaque ? 'text-amber-300' : 'text-white/50'} />
               {label}
               {destaque && (
-                <span className="ml-auto text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full">HOT</span>
+                <span className="ml-auto raio-pulse" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <svg width="16" height="22" viewBox="0 0 14 20" fill="none">
+                    <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                      fill="#FFD700" opacity="0.3" transform="translate(0.5,0.5)"/>
+                    <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
+                      fill="#FFD700" stroke="#111" strokeWidth="1.3"
+                      strokeLinejoin="round" strokeLinecap="round"/>
+                  </svg>
+                </span>
               )}
             </Link>
           ))}
