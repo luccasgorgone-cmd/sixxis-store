@@ -5,7 +5,7 @@ import { Star, Search, Check, X, Trash2, Edit2, ChevronDown } from 'lucide-react
 import Link from 'next/link'
 
 interface AvaliacaoFoto { id: string; url: string }
-interface Produto { nome: string; imagens: string[]; slug: string }
+interface Produto { id: string; nome: string; imagens: string[]; slug: string }
 interface AvaliacaoGlobal {
   id: string
   nota: number
@@ -227,7 +227,7 @@ export default function AdminAvaliacoesPage() {
                 {/* Avaliação */}
                 <div className="min-w-0">
                   {av.produto && (
-                    <Link href={`/admin/produtos/${av.produto.slug}`} className="text-xs text-[#3cbfb3] hover:underline font-medium block truncate mb-0.5">
+                    <Link href={`/admin/produtos/${av.produto.id}`} className="text-xs text-[#3cbfb3] hover:underline font-medium block truncate mb-0.5">
                       {av.produto.nome}
                     </Link>
                   )}

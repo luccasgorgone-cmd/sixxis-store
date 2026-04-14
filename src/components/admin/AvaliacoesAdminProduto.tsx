@@ -319,11 +319,31 @@ export default function AvaliacoesAdminProduto({ produtoId }: Props) {
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#3cbfb3] outline-none" />
               </div>
               <div>
+                <label className="text-sm font-bold text-gray-700 block mb-1.5">E-mail</label>
+                <input type="email" value={novaAv.emailAutor}
+                  onChange={e => setNovaAv(a => ({...a, emailAutor: e.target.value}))}
+                  placeholder="email@exemplo.com"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#3cbfb3] outline-none" />
+              </div>
+              <div>
                 <label className="text-sm font-bold text-gray-700 block mb-1.5">Comentário *</label>
                 <textarea value={novaAv.comentario}
                   onChange={e => setNovaAv(a => ({...a, comentario: e.target.value}))}
                   rows={3} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#3cbfb3] outline-none resize-none" />
               </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700 block mb-1.5">Resposta da Loja</label>
+                <textarea value={novaAv.resposta}
+                  onChange={e => setNovaAv(a => ({...a, resposta: e.target.value}))}
+                  rows={2} placeholder="Deixe em branco para não incluir resposta."
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#3cbfb3] outline-none resize-none" />
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={novaAv.aprovada}
+                  onChange={e => setNovaAv(a => ({...a, aprovada: e.target.checked}))}
+                  className="w-4 h-4 accent-[#3cbfb3]" />
+                <span className="text-sm font-medium text-gray-700">Aprovada (publicar imediatamente)</span>
+              </label>
               <div className="flex gap-3 pt-2">
                 <button onClick={salvarNova} disabled={salvando || !novaAv.nomeAutor || !novaAv.comentario}
                   className="flex-1 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-bold py-3 rounded-2xl transition">

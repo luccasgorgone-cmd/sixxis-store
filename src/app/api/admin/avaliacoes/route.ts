@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     where,
     include: {
       fotos:   true,
-      produto: { select: { nome: true, imagens: true, slug: true } },
+      produto: { select: { id: true, nome: true, imagens: true, slug: true } },
       cliente: { select: { nome: true } },
     },
     orderBy: { createdAt: 'desc' },

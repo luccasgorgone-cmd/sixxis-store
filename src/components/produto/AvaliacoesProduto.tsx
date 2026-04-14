@@ -126,6 +126,8 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
 
   return (
     <div className="mt-2">
+      <h3 className="text-xl font-extrabold text-gray-900 mb-6">Avaliações dos Clientes</h3>
+
       {/* ── Resumo ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2e2b] to-[#1a4f4a] rounded-2xl p-8 text-white">
