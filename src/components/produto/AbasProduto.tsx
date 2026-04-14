@@ -4,74 +4,26 @@ import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import AvaliacoesProduto from '@/components/produto/AvaliacoesProduto'
 
+interface EspecificacaoRow { label: string; valor: string }
+interface FaqRow { pergunta: string; resposta: string }
+
 interface Props {
   descricao: string | null
   produtoId: string
+  especificacoes?: EspecificacaoRow[]
+  faqs?: FaqRow[]
 }
 
-const ABAS = ['Descrição', 'Especificações', 'Perguntas Frequentes', 'Avaliações']
+const ABAS_BASE = ['Descrição', 'Avaliações']
 
-const ESPECIFICACOES = [
-  ['Modelo',                  'SX040'],
-  ['Cor',                     'Preto e Branco'],
-  ['Voltagem',                '110V / 220V (Bivolt)'],
-  ['Potência',                '180 W'],
-  ['Vazão de Ar',             '5.500 m³/h'],
-  ['Capacidade do Tanque',    '45 litros'],
-  ['Consumo de Água',         '4 a 6 L/h'],
-  ['Área Recomendada',        'até 45 m²'],
-  ['Nível de Ruído',          'inferior a 60 dB'],
-  ['Velocidades',             '3 velocidades'],
-  ['Oscilação Vertical',      'Automática'],
-  ['Oscilação Horizontal',    'Manual'],
-  ['Tipo de Ventilação',      'Hélice'],
-  ['Colmeias',                '4 cm com Filtro ANTI-PÓ'],
-  ['Eficiência Energética',   'Classe A'],
-  ['É Umidificador',          'Sim'],
-  ['É Purificador de Ar',     'Sim'],
-  ['Controle Remoto',         'Incluso'],
-  ['Painel',                  'Touch Screen'],
-  ['Peso',                    '15 kg'],
-  ['Dimensões (A×L×C)',       '105.5 × 46 × 36 cm'],
-  ['Garantia',                '12 meses'],
-]
+export default function AbasProduto({ descricao, produtoId, especificacoes, faqs }: Props) {
+  const abas = [
+    'Descrição',
+    ...(especificacoes && especificacoes.length > 0 ? ['Especificações'] : []),
+    ...(faqs && faqs.length > 0 ? ['Perguntas Frequentes'] : []),
+    'Avaliações',
+  ]
 
-const FAQS = [
-  {
-    pergunta: 'Qual a potência do climatizador SX040?',
-    resposta: 'O climatizador SX040 possui potência de 180 W, garantindo refrigeração eficiente com baixo consumo de energia — 90% mais econômico que um ar condicionado convencional.',
-  },
-  {
-    pergunta: 'Para qual tamanho de ambiente ele é recomendado?',
-    resposta: 'É ideal para ambientes de até 45 m², como salas, quartos, escritórios e comércio de pequeno porte. Para melhores resultados, utilize em ambientes semi-abertos com ventilação.',
-  },
-  {
-    pergunta: 'Qual a voltagem disponível?',
-    resposta: 'O SX040 é bivolt — funciona tanto em 110V quanto em 220V, sem necessidade de adaptador.',
-  },
-  {
-    pergunta: 'Como funciona a oscilação vertical?',
-    resposta: 'A oscilação vertical é automática, distribuindo o ar uniformemente por todo o ambiente. A oscilação horizontal é ajustada manualmente conforme sua preferência.',
-  },
-  {
-    pergunta: 'O climatizador é silencioso?',
-    resposta: 'Sim! O nível de ruído é inferior a 60 decibéis na velocidade máxima — equivalente a uma conversa normal. Nas velocidades mais baixas é ainda mais silencioso.',
-  },
-  {
-    pergunta: 'Vem com controle remoto?',
-    resposta: 'Sim! O SX040 inclui controle remoto e também possui painel touch screen frontal, permitindo ajuste de velocidade, oscilação e timer diretamente no aparelho.',
-  },
-  {
-    pergunta: 'Como realizar a limpeza das colmeias?',
-    resposta: 'A limpeza é simples: retire as colmeias pelo painel frontal, lave com água corrente e deixe secar. O filtro ANTI-PÓ pode ser limpo com aspirador. Recomenda-se limpeza mensal para melhor desempenho.',
-  },
-  {
-    pergunta: 'Quanto tempo leva para encher o tanque?',
-    resposta: 'O tanque tem capacidade de 45 litros. O consumo varia de 4 a 6 litros por hora dependendo da velocidade e umidade do ambiente. Recomenda-se verificar o nível diariamente.',
-  },
-]
-
-export default function AbasProduto({ descricao, produtoId }: Props) {
   const [aba, setAba] = useState('Descrição')
   const [faqAberto, setFaqAberto] = useState<number | null>(null)
 
@@ -80,7 +32,7 @@ export default function AbasProduto({ descricao, produtoId }: Props) {
       {/* Header das abas */}
       <div className="border-b border-gray-100 mb-8">
         <div className="flex gap-0 overflow-x-auto">
-          {ABAS.map(a => (
+          {abas.map(a => (
             <button
               key={a}
               onClick={() => setAba(a)}
@@ -111,11 +63,11 @@ export default function AbasProduto({ descricao, produtoId }: Props) {
       )}
 
       {/* ABA: Especificações */}
-      {aba === 'Especificações' && (
+      {aba === 'Especificações' && especificacoes && especificacoes.length > 0 && (
         <div className="max-w-2xl">
           <h3 className="text-lg font-extrabold text-gray-900 mb-4">Especificações Técnicas</h3>
           <div className="rounded-2xl border border-gray-100 overflow-hidden">
-            {ESPECIFICACOES.map(([label, valor], i) => (
+            {especificacoes.map(({ label, valor }, i) => (
               <div
                 key={label}
                 className={`flex items-start gap-4 px-5 py-3.5 ${
@@ -131,9 +83,9 @@ export default function AbasProduto({ descricao, produtoId }: Props) {
       )}
 
       {/* ABA: Perguntas Frequentes */}
-      {aba === 'Perguntas Frequentes' && (
+      {aba === 'Perguntas Frequentes' && faqs && faqs.length > 0 && (
         <div className="max-w-2xl space-y-3">
-          {FAQS.map((faq, i) => (
+          {faqs.map((faq, i) => (
             <div
               key={i}
               className="border border-gray-100 rounded-2xl overflow-hidden hover:border-[#3cbfb3]/30 transition"

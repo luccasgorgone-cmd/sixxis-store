@@ -57,6 +57,8 @@ model Produto {
   sku              String?           @unique
   temVariacoes     Boolean           @default(false)
   videoUrl         String?           @default("")
+  especificacoes   Json?
+  faqs             Json?
   avaliacoes       Avaliacao[]
   itensCarrinho    ItemCarrinho[]
   itensPedido      ItemPedido[]

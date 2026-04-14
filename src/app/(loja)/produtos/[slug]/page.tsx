@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight, Share2 } from 'lucide-react'
+import { ChevronRight, Share2, ShieldCheck, Truck, RotateCcw, Star } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import GaleriaProduto from '@/components/produto/GaleriaProduto'
 import type { GaleriaItem } from '@/components/produto/GaleriaProduto'
@@ -13,6 +13,9 @@ import CardProduto from '@/components/produto/CardProduto'
 export const dynamic = 'force-dynamic'
 
 interface Params { slug: string }
+
+interface EspecificacaoRow { label: string; valor: string }
+interface FaqRow { pergunta: string; resposta: string }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
@@ -26,11 +29,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function ProdutoPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
+
   const [produto, taxaConfig] = await Promise.all([
     prisma.produto.findUnique({
       where: { slug },
       include: {
         variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
+        avaliacoes: { where: { aprovada: true }, select: { nota: true } },
       },
     }),
     prisma.configuracao.findUnique({ where: { chave: 'juros_cartao_taxa_mensal' } }),
@@ -56,6 +61,12 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
   const precoFinal  = promocional ?? preco
 
+  // Avaliações — média para exibir abaixo do título
+  const totalAv = produto.avaliacoes.length
+  const mediaAv = totalAv > 0
+    ? produto.avaliacoes.reduce((s, a) => s + a.nota, 0) / totalAv
+    : 0
+
   const variacoes = produto.variacoes.map(v => ({
     id:      v.id,
     nome:    v.nome,
@@ -79,6 +90,10 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     estoque:          produto.estoque,
     temVariacoes:     produto.temVariacoes,
   }
+
+  // Especificações e FAQs dinâmicas do banco
+  const especificacoes = (produto as unknown as { especificacoes?: EspecificacaoRow[] | null }).especificacoes ?? null
+  const faqs = (produto as unknown as { faqs?: FaqRow[] | null }).faqs ?? null
 
   return (
     <main className="bg-white pb-28 md:pb-8">
@@ -114,9 +129,35 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             )}
 
             {/* Nome */}
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight mb-4">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight mb-3">
               {produto.nome}
             </h1>
+
+            {/* Rating inline */}
+            {totalAv > 0 && (
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <Star
+                      key={n}
+                      size={14}
+                      className={n <= Math.round(mediaAv) ? 'fill-[#f59e0b] text-[#f59e0b]' : 'fill-gray-200 text-gray-200'}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-bold text-gray-700">{mediaAv.toFixed(1)}</span>
+                <Link
+                  href="#avaliacoes"
+                  onClick={e => {
+                    e.preventDefault()
+                    document.querySelector('[data-aba="Avaliações"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+                  }}
+                  className="text-xs text-[#3cbfb3] hover:underline"
+                >
+                  ({totalAv} avaliação{totalAv !== 1 ? 'ões' : ''})
+                </Link>
+              </div>
+            )}
 
             {/* Bloco preço + variações + botões */}
             <BlocoPrecoProduto
@@ -124,6 +165,22 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
               variacoes={variacoes}
               taxaJuros={taxaJuros}
             />
+
+            {/* Trust strip */}
+            <div className="mt-4 grid grid-cols-3 gap-2 border-t border-gray-100 pt-4">
+              <div className="flex flex-col items-center gap-1 text-center">
+                <ShieldCheck size={18} className="text-[#3cbfb3]" />
+                <span className="text-[10px] text-gray-500 font-medium leading-tight">Garantia<br/>12 meses</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-center">
+                <Truck size={18} className="text-[#3cbfb3]" />
+                <span className="text-[10px] text-gray-500 font-medium leading-tight">Frete grátis<br/>acima R$ 500</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-center">
+                <RotateCcw size={18} className="text-[#3cbfb3]" />
+                <span className="text-[10px] text-gray-500 font-medium leading-tight">Troca fácil<br/>7 dias úteis</span>
+              </div>
+            </div>
 
             {/* Compartilhar */}
             <div className="mt-4">
@@ -140,10 +197,12 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           </div>
         </div>
 
-        {/* Abas: Descrição / Especificações / FAQ / Avaliações */}
+        {/* Abas */}
         <AbasProduto
           descricao={produto.descricao}
           produtoId={produto.id}
+          especificacoes={especificacoes ?? undefined}
+          faqs={faqs ?? undefined}
         />
 
         {/* Produtos relacionados */}

@@ -132,13 +132,13 @@ export default async function Footer() {
 
           {/* Col 1 — Marca + Contato */}
           <div className="col-span-2 md:col-span-3 xl:col-span-2 flex flex-col items-center text-center lg:items-start lg:text-left">
-            <Link href="/" className="mb-5">
+            <Link href="/" className="block mb-5 self-center lg:self-start">
               <Image
                 src={logoUrl}
                 alt="Sixxis"
                 width={165}
                 height={56}
-                className="object-contain h-12 w-auto ml-0 pl-2"
+                className="object-contain h-12 w-auto"
                 unoptimized
               />
             </Link>

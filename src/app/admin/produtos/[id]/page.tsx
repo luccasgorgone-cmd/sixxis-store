@@ -36,6 +36,8 @@ export default async function EditarProdutoPage({
           ativo: produto.ativo,
           imagens: (produto.imagens as string[]) ?? [],
           videoUrl: (produto as unknown as { videoUrl?: string | null }).videoUrl ?? '',
+          especificacoes: (produto as unknown as { especificacoes?: unknown }).especificacoes as import('@/components/admin/ProdutoForm').EspecificacaoRow[] | null ?? null,
+          faqs: (produto as unknown as { faqs?: unknown }).faqs as import('@/components/admin/ProdutoForm').FaqRow[] | null ?? null,
           temVariacoes: produto.temVariacoes,
           variacoes: produto.variacoes.map((v) => ({
             id: v.id,
