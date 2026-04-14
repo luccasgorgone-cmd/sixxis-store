@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
     estoque,
     ativo,
     imagens,
+    videoUrl,
     temVariacoes,
     variacoes,
   } = body
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
       estoque: estoqueTotal,
       ativo: ativo !== false,
       imagens: imagens ?? [],
+      videoUrl: videoUrl ?? null,
       temVariacoes: Boolean(temVariacoes),
       variacoes: temVariacoes && variacoesInput.length > 0
         ? {

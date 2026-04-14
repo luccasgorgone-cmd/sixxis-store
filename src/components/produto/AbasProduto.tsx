@@ -3,12 +3,10 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import AvaliacoesProduto from '@/components/produto/AvaliacoesProduto'
-import FormAvaliacao from '@/components/produto/FormAvaliacao'
 
 interface Props {
   descricao: string | null
   produtoId: string
-  comprouProduto: boolean
 }
 
 const ABAS = ['Descrição', 'Especificações', 'Perguntas Frequentes', 'Avaliações']
@@ -73,7 +71,7 @@ const FAQS = [
   },
 ]
 
-export default function AbasProduto({ descricao, produtoId, comprouProduto }: Props) {
+export default function AbasProduto({ descricao, produtoId }: Props) {
   const [aba, setAba] = useState('Descrição')
   const [faqAberto, setFaqAberto] = useState<number | null>(null)
 
@@ -167,10 +165,7 @@ export default function AbasProduto({ descricao, produtoId, comprouProduto }: Pr
 
       {/* ABA: Avaliações */}
       {aba === 'Avaliações' && (
-        <div className="grid md:grid-cols-2 gap-8">
-          <AvaliacoesProduto produtoId={produtoId} />
-          <FormAvaliacao produtoId={produtoId} comprouProduto={comprouProduto} />
-        </div>
+        <AvaliacoesProduto produtoId={produtoId} />
       )}
     </div>
   )

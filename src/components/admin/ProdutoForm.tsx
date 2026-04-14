@@ -34,11 +34,13 @@ interface ProdutoFormData {
   precoPromocional: string
   estoque: string
   ativo: boolean
+  videoUrl: string
 }
 
 interface ProdutoFormProps {
   initialData?: Partial<ProdutoFormData> & {
     imagens?: string[]
+    videoUrl?: string
     temVariacoes?: boolean
     variacoes?: VariacaoInput[]
   }
@@ -81,6 +83,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     precoPromocional: initialData?.precoPromocional ?? '',
     estoque: initialData?.estoque ?? '0',
     ativo: initialData?.ativo !== false,
+    videoUrl: initialData?.videoUrl ?? '',
   })
 
   const [temVariacoes, setTemVariacoes] = useState(initialData?.temVariacoes ?? false)
@@ -163,6 +166,10 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     setImagens((prev) => prev.filter((u) => u !== url))
   }
 
+  function moverImagemParaInicio(url: string) {
+    setImagens(prev => [url, ...prev.filter(u => u !== url)])
+  }
+
   // ─── Submit ──────────────────────────────────────────────────────────────────
 
   async function handleSubmit(e: React.FormEvent) {
@@ -202,6 +209,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
       precoPromocional: form.precoPromocional ? Number(form.precoPromocional) : null,
       estoque: temVariacoes ? estoqueCalculado : Number(form.estoque),
       imagens,
+      videoUrl: form.videoUrl,
       temVariacoes,
       variacoes: temVariacoes ? variacoes : [],
     }
@@ -640,6 +648,15 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
                         CAPA
                       </span>
                     )}
+                    {i !== 0 && (
+                      <button
+                        type="button"
+                        onClick={() => moverImagemParaInicio(url)}
+                        className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-[#3cbfb3] text-white text-[9px] font-black px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+                      >
+                        Tornar capa
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => removeImagem(url)}
@@ -656,6 +673,42 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
                 <ImageIcon className="w-4 h-4" />
                 Nenhuma foto adicionada
+              </div>
+            )}
+          </div>
+
+          {/* Vídeo do produto */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider flex items-center gap-2">
+              Vídeo do Produto
+            </h2>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">URL do Vídeo</label>
+              <input
+                name="videoUrl"
+                type="text"
+                value={form.videoUrl}
+                onChange={handleChange}
+                placeholder="https://www.youtube.com/watch?v=... ou link direto MP4"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+              />
+              <p className="text-xs text-gray-400 mt-1.5">
+                Cole URL do YouTube, Vimeo ou MP4 direto. Aparece como último item na galeria do produto.
+              </p>
+            </div>
+            {form.videoUrl && (
+              <div className="mt-4 bg-gray-50 rounded-xl overflow-hidden h-44 flex items-center justify-center border border-gray-100">
+                {form.videoUrl.includes('youtube') || form.videoUrl.includes('youtu.be') ? (
+                  <iframe
+                    src={form.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay"
+                    allowFullScreen
+                    title="Preview do vídeo"
+                  />
+                ) : (
+                  <video src={form.videoUrl} controls className="w-full h-full object-contain" />
+                )}
               </div>
             )}
           </div>

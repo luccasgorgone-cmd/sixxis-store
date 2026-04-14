@@ -333,9 +333,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <Image
                   src={logoUrl}
                   alt="Sixxis"
-                  width={155}
-                  height={52}
-                  className="object-contain h-11 w-auto"
+                  width={147}
+                  height={49}
+                  className="object-contain h-[49px] w-auto"
                   priority
                 />
               </Link>
@@ -351,10 +351,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 {/* CEP */}
                 <button
                   onClick={() => { setCepResultado(null); setCepErro(''); setCepModalOpen(true) }}
-                  className="flex flex-col items-center gap-0.5 px-2 py-1 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[72px]"
+                  className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[76px]"
                 >
-                  <MapPin size={22} strokeWidth={1.5} />
-                  <span className="text-[10px] font-medium leading-none whitespace-nowrap">
+                  <MapPin size={24} strokeWidth={1.5} />
+                  <span className="text-[12px] font-medium leading-none whitespace-nowrap">
                     {cepSalvo ? cepSalvo : 'Informe seu CEP'}
                   </span>
                 </button>
@@ -366,20 +366,20 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 {session ? (
                   <Link
                     href="/minha-conta"
-                    className="flex flex-col items-center gap-0.5 px-2 py-1 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[56px]"
+                    className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[62px]"
                   >
-                    <User size={22} strokeWidth={1.5} />
-                    <span className="text-[10px] font-medium leading-none">
+                    <User size={24} strokeWidth={1.5} />
+                    <span className="text-[12px] font-medium leading-none">
                       Olá, {session.user?.name?.split(' ')[0] || 'Você'}
                     </span>
                   </Link>
                 ) : (
                   <Link
                     href="/login"
-                    className="flex flex-col items-center gap-0.5 px-2 py-1 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[56px]"
+                    className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[62px]"
                   >
-                    <User size={22} strokeWidth={1.5} />
-                    <span className="text-[10px] font-medium leading-none">Entrar</span>
+                    <User size={24} strokeWidth={1.5} />
+                    <span className="text-[12px] font-medium leading-none">Entrar</span>
                   </Link>
                 )}
 
@@ -389,10 +389,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 {/* Carrinho */}
                 <Link
                   href="/carrinho"
-                  className="relative flex flex-col items-center gap-0.5 px-2 py-1 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[56px]"
+                  className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[62px]"
                 >
-                  <ShoppingCart size={22} strokeWidth={1.5} />
-                  <span className="text-[10px] font-medium leading-none">Carrinho</span>
+                  <ShoppingCart size={24} strokeWidth={1.5} />
+                  <span className="text-[12px] font-medium leading-none">Carrinho</span>
                   {totalItens > 0 && (
                     <span className="absolute top-0 right-1 bg-[#f59e0b] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">
                       {totalItens > 9 ? '9+' : totalItens}
