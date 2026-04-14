@@ -61,36 +61,47 @@ export default async function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
           {/* ── Coluna esquerda — Logo + Botões ──────────────────────────── */}
-          <div className="lg:col-span-1">
-            <div className="flex flex-col items-center lg:items-start">
+          <div className="lg:col-span-1 flex justify-center lg:justify-start">
+            <div className="flex flex-col items-center" style={{ width: '260px' }}>
 
-              {/* Logo */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={logoUrl}
-                alt="Sixxis"
-                loading="lazy"
-                style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
-              />
+              {/* CAIXA COM BORDA TIFFANY — contém logo + subtitle + slogan */}
+              <div
+                className="w-full rounded-2xl flex flex-col items-center p-5 mb-4"
+                style={{
+                  border: '1.5px solid rgba(60,191,179,0.45)',
+                  backgroundColor: 'rgba(60,191,179,0.04)',
+                }}
+              >
+                {/* Logo */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={logoUrl}
+                  alt="Sixxis"
+                  loading="lazy"
+                  style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
+                />
 
-              {/* Slogan — 2 linhas, centralizado com a logo */}
-              <div className="mt-2 mb-5 flex flex-col items-center lg:items-start w-full" style={{ maxWidth: '175px' }}>
-                <p className="text-white/60 text-xs font-medium leading-snug text-center lg:text-left w-full">
-                  Qualidade e Inovação
+                {/* "do Brasil" */}
+                <p className="text-white/50 text-xs font-medium mt-1 mb-3 tracking-wide">
+                  do Brasil
                 </p>
-                <p className="text-white/60 text-xs font-medium leading-snug text-center lg:text-left w-full">
-                  Para Seu Conforto e Bem-Estar
+
+                {/* Slogan */}
+                <p className="text-white/65 text-xs text-center leading-relaxed">
+                  Qualidade e inovação para seu
+                  <br />
+                  conforto e bem estar!
                 </p>
               </div>
 
-              {/* Botões — EXATAMENTE o mesmo comprimento que a logo (175px) */}
-              <div className="flex flex-col gap-2.5" style={{ width: '175px' }}>
+              {/* BOTÕES — fora da caixa, mesma largura */}
+              <div className="flex flex-col gap-2.5 w-full">
                 <a
                   href={`https://wa.me/${whatsappVendas}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-bold py-2.5 px-4 rounded-xl transition"
-                  style={{ width: '175px' }}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm text-white hover:opacity-90 transition"
+                  style={{ backgroundColor: '#25D366' }}
                 >
                   <WaSVG />
                   Vendas
@@ -99,16 +110,14 @@ export default async function Footer() {
                   href={`https://wa.me/${whatsappSuporte}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 border border-white/30 hover:border-white/60 text-white text-sm font-medium py-2.5 px-4 rounded-xl transition"
-                  style={{ width: '175px' }}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-medium text-sm text-white border border-white/30 hover:border-white/60 transition"
                 >
                   <WaSVG />
                   Assistência Técnica
                 </a>
                 <Link
                   href="/contato"
-                  className="flex items-center justify-center text-white/55 hover:text-white text-sm py-2.5 px-4 rounded-xl transition border border-white/[0.12] hover:border-white/30"
-                  style={{ width: '175px' }}
+                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm text-white/55 hover:text-white/85 border border-white/[0.12] hover:border-white/30 transition"
                 >
                   Entre em Contato
                 </Link>
