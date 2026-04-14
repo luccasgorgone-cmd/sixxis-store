@@ -436,7 +436,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   >
                     {link.label}
                     {link.hot && (
-                      <RaioIcon size={14} comFundo={false} className="ml-0.5" />
+                      <RaioIcon size={18} comFundo={false} className="ml-0.5" />
                     )}
                   </Link>
                 </div>
@@ -583,7 +583,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <Icon size={20} className={hot ? 'text-amber-300' : 'text-white/50'} />
               {label}
               {hot && (
-                <RaioIcon size={16} comFundo={false} className="ml-auto" />
+                <RaioIcon size={18} comFundo={false} className="ml-auto" />
               )}
             </Link>
           ))}

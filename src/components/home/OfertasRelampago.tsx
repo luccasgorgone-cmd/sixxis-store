@@ -51,11 +51,11 @@ export default function OfertasRelampago({ produtos }: Props) {
         <div className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-2xl p-5 sm:p-6">
 
           {/* ── Header com timer ──────────────────────────────────────────── */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
 
             {/* Esquerda: ícone + título */}
             <div className="flex items-center gap-3">
-              <RaioIcon size={22} comFundo={true} />
+              <RaioIcon size={28} comFundo={true} />
               <div>
                 <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-none tracking-tight">
                   Ofertas Relâmpago
@@ -64,38 +64,49 @@ export default function OfertasRelampago({ produtos }: Props) {
               </div>
             </div>
 
-            {/* Direita: timer em container escuro */}
-            <div className="flex flex-col items-center gap-1.5 bg-[#0f2e2b]/60 rounded-2xl px-5 py-3 border border-white/15">
+            {/* Direita: timer centralizado e grande */}
+            <div className="flex flex-col items-center gap-2">
 
               {/* Rótulo "Termina em:" */}
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-[#1a4f4a] rounded-lg flex items-center justify-center border border-white/20">
-                  <Clock size={13} className="text-[#3cbfb3]" strokeWidth={2.5} />
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center border border-black/20"
+                  style={{ backgroundColor: '#2a9d8f' }}>
+                  <Clock size={14} className="text-white" strokeWidth={2} />
                 </div>
-                <span className="text-white font-extrabold text-sm tracking-widest uppercase">
+                <span className="text-white font-extrabold text-base tracking-widest uppercase">
                   Termina em:
                 </span>
               </div>
 
               {/* Blocos do contador */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 {blocos.map((item, i) => (
-                  <div key={item.label} className="flex items-center gap-1.5">
+                  <div key={item.label} className="flex items-center gap-2">
                     <div className="flex flex-col items-center">
                       {/* Bloco do número */}
-                      <div className="relative bg-[#3cbfb3] rounded-xl px-4 py-2.5 shadow-xl shadow-black/40 min-w-[56px] flex items-center justify-center border-2 border-black/25 overflow-hidden">
-                        <div className="absolute top-0 left-0 right-0 h-px bg-white/25" />
-                        <span className="text-white font-black text-xl font-mono tabular-nums leading-none">
+                      <div className="relative rounded-2xl flex items-center justify-center border-2 border-black/30 overflow-hidden"
+                        style={{
+                          backgroundColor: '#3cbfb3',
+                          minWidth: '64px',
+                          height: '64px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)',
+                        }}>
+                        <div className="absolute left-0 right-0 top-1/2 -translate-y-px h-px bg-black/10" />
+                        <div className="absolute top-0 left-0 right-0 h-7 bg-white/10 rounded-t-xl" />
+                        <span className="text-white font-black text-3xl font-mono tabular-nums leading-none tracking-tight relative z-10">
                           {item.val}
                         </span>
                       </div>
                       {/* Label */}
-                      <span className="text-[#3cbfb3] text-[9px] font-black uppercase tracking-widest mt-1">
+                      <span className="text-white/70 text-[9px] font-black uppercase tracking-widest mt-1.5">
                         {item.label}
                       </span>
                     </div>
                     {i < 2 && (
-                      <span className="text-[#3cbfb3] font-black text-xl mb-5 select-none">:</span>
+                      <div className="flex flex-col gap-2 mb-5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
+                      </div>
                     )}
                   </div>
                 ))}

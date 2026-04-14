@@ -1,33 +1,28 @@
-interface RaioIconProps {
+interface Props {
   size?: number
   comFundo?: boolean
   className?: string
 }
 
-export default function RaioIcon({ size = 20, comFundo = false, className = '' }: RaioIconProps) {
+export default function RaioIcon({ size = 20, comFundo = false, className = '' }: Props) {
   if (comFundo) {
     return (
       <div
-        className={`flex items-center justify-center rounded-xl border border-black/30 shadow-md ${className}`}
+        className={`flex items-center justify-center rounded-xl border-2 border-black/30 shadow-lg ${className}`}
         style={{
-          width: size * 1.8,
-          height: size * 1.8,
+          width: size * 2.2,
+          height: size * 2.2,
           backgroundColor: '#3cbfb3',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+          boxShadow: '0 3px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+          flexShrink: 0,
         }}
       >
-        <svg
-          width={size}
-          height={size}
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg width={size * 1.1} height={size * 1.1} viewBox="0 0 24 24" fill="none">
           <path
             d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
-            fill="#FFFFFF"
-            stroke="#000000"
-            strokeWidth="1.2"
+            fill="#FFD700"
+            stroke="#111111"
+            strokeWidth="1.4"
             strokeLinejoin="round"
             strokeLinecap="round"
           />
@@ -38,18 +33,18 @@ export default function RaioIcon({ size = 20, comFundo = false, className = '' }
 
   return (
     <svg
-      width={size}
-      height={size}
+      width={size * 1.2}
+      height={size * 1.2}
       viewBox="0 0 24 24"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
       className={className}
+      style={{ flexShrink: 0 }}
     >
       <path
         d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
-        fill="#3cbfb3"
-        stroke="#000000"
-        strokeWidth="1.5"
+        fill="#FFD700"
+        stroke="#111111"
+        strokeWidth="1.6"
         strokeLinejoin="round"
         strokeLinecap="round"
       />

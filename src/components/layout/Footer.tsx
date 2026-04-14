@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
@@ -63,39 +62,35 @@ export default async function Footer() {
 
           {/* ── Coluna esquerda — Logo + Botões ──────────────────────────── */}
           <div className="lg:col-span-1">
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-center lg:items-start">
 
-              {/* Logo sem box */}
-              <div className="mb-2">
-                <Image
-                  src={logoUrl}
-                  alt="Sixxis"
-                  width={175}
-                  height={59}
-                  quality={100}
-                  unoptimized
-                  className="object-contain"
-                  style={{ height: '56px', width: 'auto' }}
-                />
-              </div>
+              {/* Logo */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoUrl}
+                alt="Sixxis"
+                loading="lazy"
+                style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
+              />
 
-              {/* Slogan — 2 linhas */}
-              <div className="mb-5">
-                <p className="text-white/60 text-xs font-medium leading-snug">
+              {/* Slogan — 2 linhas, centralizado com a logo */}
+              <div className="mt-2 mb-5 flex flex-col items-center lg:items-start w-full" style={{ maxWidth: '175px' }}>
+                <p className="text-white/60 text-xs font-medium leading-snug text-center lg:text-left w-full">
                   Qualidade e Inovação
                 </p>
-                <p className="text-white/60 text-xs font-medium leading-snug">
+                <p className="text-white/60 text-xs font-medium leading-snug text-center lg:text-left w-full">
                   Para Seu Conforto e Bem-Estar
                 </p>
               </div>
 
-              {/* Botões — mesma largura que a logo */}
-              <div className="flex flex-col gap-2.5 w-full" style={{ maxWidth: '175px' }}>
+              {/* Botões — EXATAMENTE o mesmo comprimento que a logo (175px) */}
+              <div className="flex flex-col gap-2.5" style={{ width: '175px' }}>
                 <a
                   href={`https://wa.me/${whatsappVendas}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-bold py-2.5 px-4 rounded-xl transition w-full"
+                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-bold py-2.5 px-4 rounded-xl transition"
+                  style={{ width: '175px' }}
                 >
                   <WaSVG />
                   Vendas
@@ -104,14 +99,16 @@ export default async function Footer() {
                   href={`https://wa.me/${whatsappSuporte}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 border border-white/30 hover:border-white/60 text-white text-sm font-medium py-2.5 px-4 rounded-xl transition w-full"
+                  className="flex items-center justify-center gap-2 border border-white/30 hover:border-white/60 text-white text-sm font-medium py-2.5 px-4 rounded-xl transition"
+                  style={{ width: '175px' }}
                 >
                   <WaSVG />
                   Assistência Técnica
                 </a>
                 <Link
                   href="/contato"
-                  className="flex items-center justify-center text-white/55 hover:text-white text-sm py-2.5 px-4 rounded-xl transition w-full border border-white/[0.12] hover:border-white/30"
+                  className="flex items-center justify-center text-white/55 hover:text-white text-sm py-2.5 px-4 rounded-xl transition border border-white/[0.12] hover:border-white/30"
+                  style={{ width: '175px' }}
                 >
                   Entre em Contato
                 </Link>

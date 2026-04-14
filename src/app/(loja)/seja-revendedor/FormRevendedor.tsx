@@ -11,14 +11,6 @@ const ESTADOS = [
 ]
 
 // ── Máscaras ──────────────────────────────────────────────────────────────────
-function maskCPF(v: string) {
-  v = v.replace(/\D/g, '').slice(0, 11)
-  if (v.length > 9) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
-  if (v.length > 6) return v.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3')
-  if (v.length > 3) return v.replace(/(\d{3})(\d+)/, '$1.$2')
-  return v
-}
-
 function maskCNPJ(v: string) {
   v = v.replace(/\D/g, '').slice(0, 14)
   if (v.length > 12) return v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
@@ -70,7 +62,7 @@ const inputCls = (err?: string) =>
 
 // ── Main Form ──────────────────────────────────────────────────────────────────
 export default function FormRevendedor() {
-  const [tipo, setTipo] = useState<'pf' | 'pj'>('pj')
+  const tipo = 'pj' as const
   const [enviado, setEnviado] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [erroGlobal, setErroGlobal] = useState('')
@@ -102,9 +94,8 @@ export default function FormRevendedor() {
     if (!form.estado)           errors.estado = 'Selecione um estado'
     if (!form.cep.trim())       errors.cep = 'Campo obrigatório'
     if (!form.endereco.trim())  errors.endereco = 'Campo obrigatório'
-    if (tipo === 'pf' && !form.cpf.trim())             errors.cpf = 'Campo obrigatório'
-    if (tipo === 'pj' && !form.cnpj.trim())            errors.cnpj = 'Campo obrigatório'
-    if (tipo === 'pj' && !form.razaoSocial.trim())     errors.razaoSocial = 'Campo obrigatório'
+    if (!form.cnpj.trim())        errors.cnpj = 'Campo obrigatório'
+    if (!form.razaoSocial.trim()) errors.razaoSocial = 'Campo obrigatório'
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -116,8 +107,7 @@ export default function FormRevendedor() {
     const hasErrors =
       !form.nome.trim() || !form.email.trim() || !form.telefone.trim() ||
       !form.cidade.trim() || !form.estado || !form.cep.trim() || !form.endereco.trim() ||
-      (tipo === 'pf' && !form.cpf.trim()) ||
-      (tipo === 'pj' && (!form.cnpj.trim() || !form.razaoSocial.trim())) ||
+      !form.cnpj.trim() || !form.razaoSocial.trim() ||
       !/\S+@\S+\.\S+/.test(form.email)
 
     if (hasErrors) return
@@ -174,40 +164,8 @@ export default function FormRevendedor() {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
 
-      {/* Tipo de pessoa */}
-      <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">
-          Tipo de Pessoa <span className="text-red-500">*</span>
-        </p>
-        <div className="flex gap-4">
-          {(['pj', 'pf'] as const).map((t) => (
-            <label
-              key={t}
-              className={`flex items-center gap-2.5 cursor-pointer px-5 py-3 rounded-xl border-2 font-semibold text-sm transition-all flex-1 justify-center ${
-                tipo === t
-                  ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#1a4f4a]'
-                  : 'border-gray-200 text-gray-600 hover:border-[#3cbfb3]/50'
-              }`}
-            >
-              <input
-                type="radio" name="tipo" value={t}
-                checked={tipo === t}
-                onChange={() => setTipo(t)}
-                className="sr-only"
-              />
-              <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                tipo === t ? 'border-[#3cbfb3]' : 'border-gray-300'
-              }`}>
-                {tipo === t && <span className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
-              </span>
-              {t === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}
-            </label>
-          ))}
-        </div>
-      </div>
-
       {/* Campos PJ */}
-      {tipo === 'pj' && (
+      {(
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-2xl border border-gray-100">
           <Field label="CNPJ" required error={errors.cnpj}>
             <input
@@ -231,20 +189,6 @@ export default function FormRevendedor() {
               onChange={(e) => set('nomeFantasia', e.target.value)}
               placeholder="Como a empresa é conhecida"
               className={inputCls()}
-            />
-          </Field>
-        </div>
-      )}
-
-      {/* Campos PF */}
-      {tipo === 'pf' && (
-        <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
-          <Field label="CPF" required error={errors.cpf}>
-            <input
-              value={form.cpf}
-              onChange={(e) => handleMasked('cpf', e.target.value, maskCPF)}
-              placeholder="XXX.XXX.XXX-XX"
-              className={inputCls(errors.cpf)}
             />
           </Field>
         </div>

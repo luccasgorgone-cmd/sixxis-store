@@ -31,18 +31,6 @@ interface Props {
 
 const LABELS: Record<number, string> = { 1: 'Péssimo', 2: 'Ruim', 3: 'Regular', 4: 'Bom', 5: 'Excelente!' }
 
-function Estrelas({ nota, size = 16 }: { nota: number; size?: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Star key={n} size={size}
-          className={n <= nota ? 'fill-[#f59e0b] text-[#f59e0b]' : 'fill-gray-200 text-gray-200'}
-        />
-      ))}
-    </div>
-  )
-}
-
 export default function AvaliacoesProduto({ produtoId }: Props) {
   const [data, setData] = useState<{
     avaliacoes: Avaliacao[]

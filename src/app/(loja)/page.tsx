@@ -78,28 +78,9 @@ export default async function HomePage() {
     console.error('[HOME DB ERROR]', error)
   }
 
-  // Wallpaper only on home page
   const bgAtivo = bgCfg.bg_body_ativo === 'true' && !!bgCfg.bg_body_url
-  const wallpaperStyle: React.CSSProperties = bgAtivo ? {
-    backgroundImage:      `url(${bgCfg.bg_body_url})`,
-    backgroundSize:       bgCfg.bg_body_size       || 'cover',
-    backgroundAttachment: bgCfg.bg_body_attachment || 'fixed',
-    backgroundRepeat:     bgCfg.bg_body_repeat     || 'no-repeat',
-    backgroundPosition:   bgCfg.bg_body_position   || 'center center',
-    backgroundColor:      '#0f1f1d',
-  } : { backgroundColor: '#0f1f1d' }
-  const overlayOpacity = bgAtivo ? Number(bgCfg.bg_body_overlay || 0) : 0
 
   return (
-    <div className="relative min-h-screen" style={wallpaperStyle}>
-      {bgAtivo && overlayOpacity > 0 && (
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity / 100})`, zIndex: 0 }}
-          aria-hidden="true"
-        />
-      )}
-      <div className="relative" style={{ zIndex: 1 }}>
     <main className="min-h-screen bg-transparent">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
@@ -144,7 +125,10 @@ export default async function HomePage() {
         ]}
       />
 
-      {/* ── 3. Produtos em Destaque ───────────────────────────────── */}
+      {/* ── 3. Ofertas Relâmpago ──────────────────────────────────── */}
+      <OfertasRelampago produtos={produtosOferta} />
+
+      {/* ── 4. Mais Vendidos ─────────────────────────────────────── */}
       <section className="bg-transparent border-b border-white/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
@@ -177,9 +161,6 @@ export default async function HomePage() {
           )}
         </div>
       </section>
-
-      {/* ── 5. Ofertas Relâmpago ──────────────────────────────────── */}
-      <OfertasRelampago produtos={produtosOferta} />
 
       {/* ── 6. Banners duplos ─────────────────────────────────────── */}
       <section className="bg-transparent border-b border-white/10 pb-8 pt-8">
@@ -334,7 +315,5 @@ export default async function HomePage() {
       </section>
 
     </main>
-      </div>
-    </div>
   )
 }

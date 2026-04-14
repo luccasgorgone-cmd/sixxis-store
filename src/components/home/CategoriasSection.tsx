@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import RaioIcon from '@/components/ui/RaioIcon'
 
 const CATEGORIAS = [
   {
@@ -69,9 +70,9 @@ function CategoriaCard({ cat }: { cat: Categoria }) {
           />
         )}
         {cat.badge && (
-          <span className="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase leading-none">
-            {cat.badge}
-          </span>
+          <div className="absolute top-1 right-1">
+            <RaioIcon size={18} comFundo={true} />
+          </div>
         )}
       </div>
       <span className="text-sm font-bold text-white/80 text-center">{cat.nome}</span>
