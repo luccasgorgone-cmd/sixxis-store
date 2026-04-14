@@ -451,10 +451,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   {idx > 0 && <span className="text-white/20 text-sm select-none">|</span>}
                   <Link
                     href={href}
-                    className={`
-                      group relative shrink-0 px-4 py-2.5 text-sm font-semibold tracking-wide uppercase transition-colors duration-200 hover:bg-white/15 hover:rounded-lg
-                      ${destaque ? 'text-amber-300 hover:text-amber-200' : 'text-white font-semibold'}
-                    `}
+                    className="group relative shrink-0 px-4 py-2.5 text-sm font-semibold tracking-wide uppercase text-white transition-colors duration-200 hover:bg-white/15 hover:rounded-lg"
                   >
                     {label}
                     {destaque && (
