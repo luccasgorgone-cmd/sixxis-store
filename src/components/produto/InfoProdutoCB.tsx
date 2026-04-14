@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, ShoppingBag, ChevronDown, Truck, Check, Star, Share2 } from 'lucide-react'
+import { ShoppingCart, ShoppingBag, ChevronDown, Truck, Check, Star, Share2, MessageCircle, ShieldCheck, RefreshCw, Award } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 
 interface Variacao {
@@ -147,18 +147,19 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
                   className={s <= Math.round(mediaAvaliacoes) ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-gray-200 fill-gray-200'} />
               ))}
             </div>
-            <span className="text-sm font-bold text-gray-800">{mediaAvaliacoes.toFixed(1)}</span>
-            <a href="#avaliacoes" className="text-sm text-[#0066cc] hover:underline">
+            <span className="text-xs leading-none font-bold text-gray-800">{mediaAvaliacoes.toFixed(1)}</span>
+            <a href="#avaliacoes" className="text-xs leading-none text-[#0066cc] hover:underline">
               {totalAvaliacoes} avaliação{totalAvaliacoes !== 1 ? 'ões' : ''}
             </a>
           </>
         ) : (
-          <span className="text-xs text-gray-400">Seja o primeiro a avaliar</span>
+          <span className="text-xs leading-none text-gray-400">Seja o primeiro a avaliar</span>
         )}
-        <span className="text-gray-200">|</span>
+        <div className="w-px h-3.5 bg-gray-200 mx-1 shrink-0" />
         <a href={`https://wa.me/5518997474701?text=Tenho%20uma%20dúvida%20sobre%20${encodeURIComponent(produto.nome)}`}
           target="_blank" rel="noopener noreferrer"
-          className="text-sm text-[#0066cc] hover:underline">
+          className="flex items-center gap-1 text-xs leading-none text-[#0066cc] hover:underline">
+          <MessageCircle size={12} />
           Tire sua dúvida
         </a>
       </div>
@@ -298,6 +299,27 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}
           {adicionado ? 'Adicionado ao Carrinho!' : 'Adicionar ao Carrinho'}
         </button>
+      </div>
+
+      {/* Trust cards */}
+      <div className="grid grid-cols-2 gap-2 mb-5">
+        {[
+          { icon: ShieldCheck, label: 'Compra Segura',    sub: 'Dados criptografados', color: 'text-[#3cbfb3]',  bg: 'bg-[#e8f8f7]'  },
+          { icon: Truck,       label: 'Frete Grátis',     sub: 'Acima de R$ 500',      color: 'text-blue-500',   bg: 'bg-blue-50'    },
+          { icon: RefreshCw,   label: 'Troca Fácil',      sub: 'Até 7 dias úteis',     color: 'text-amber-500',  bg: 'bg-amber-50'   },
+          { icon: Award,       label: 'Produto Original', sub: 'Garantia Sixxis',      color: 'text-purple-500', bg: 'bg-purple-50'  },
+        ].map(({ icon: Icon, label, sub, color, bg }) => (
+          <div key={label}
+            className="flex items-center gap-2.5 bg-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-gray-200 hover:shadow-sm transition-all">
+            <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center shrink-0`}>
+              <Icon size={15} className={color} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-gray-800 leading-tight truncate">{label}</p>
+              <p className="text-[10px] text-gray-500 leading-tight truncate mt-0.5">{sub}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Frete */}
