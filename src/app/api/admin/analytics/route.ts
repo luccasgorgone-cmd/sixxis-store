@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 async function verificarAdmin() {
   const cookieStore = await cookies()
   return cookieStore.get('admin_session')?.value === process.env.ADMIN_SECRET
@@ -9,96 +11,172 @@ async function verificarAdmin() {
 
 export async function GET(req: NextRequest) {
   if (!(await verificarAdmin())) {
-    return Response.json({ erro: 'Não autorizado' }, { status: 401 })
+    return Response.json({ ok: false, erro: 'Não autorizado' }, { status: 401 })
   }
 
   try {
-    const periodo = parseInt(req.nextUrl.searchParams.get('periodo') || '7')
+    const periodo = Math.min(90, Math.max(1, parseInt(req.nextUrl.searchParams.get('periodo') || '7')))
     const dataInicio = new Date()
     dataInicio.setDate(dataInicio.getDate() - periodo)
     dataInicio.setHours(0, 0, 0, 0)
 
-    const [
-      totalVisitas,
-      aceitaram,
-      recusaram,
-      totalEventos,
-      insights,
-      topPaginasRaw,
-      topBuscasRaw,
-      dispositivosRaw,
-      comprasRaw,
-    ] = await Promise.all([
+    const resultados = await Promise.allSettled([
+      // 0: visitantes únicos
       prisma.clienteInsight.count({ where: { ultimaVisita: { gte: dataInicio } } }),
+      // 1: aceitaram cookies
       prisma.cookieConsent.count({ where: { aceitou: true, createdAt: { gte: dataInicio } } }),
+      // 2: recusaram cookies
       prisma.cookieConsent.count({ where: { aceitou: false, createdAt: { gte: dataInicio } } }),
+      // 3: total eventos
       prisma.eventoAnalitico.count({ where: { createdAt: { gte: dataInicio } } }),
+      // 4: insights clientes
       prisma.clienteInsight.findMany({
         orderBy: { ultimaVisita: 'desc' },
         take: 100,
       }),
+      // 5: page_views
       prisma.eventoAnalitico.findMany({
         where: { tipo: 'page_view', createdAt: { gte: dataInicio } },
         select: { pagina: true },
       }),
+      // 6: searches
       prisma.eventoAnalitico.findMany({
         where: { tipo: 'search', createdAt: { gte: dataInicio } },
         select: { dados: true },
-        take: 200,
+        take: 500,
       }),
+      // 7: dispositivos
       prisma.clienteInsight.groupBy({
         by: ['dispositivo'],
         _count: { dispositivo: true },
         where: { ultimaVisita: { gte: dataInicio } },
       }),
+      // 8: compras
       prisma.eventoAnalitico.findMany({
         where: { tipo: 'purchase', createdAt: { gte: dataInicio } },
+        select: { dados: true, sessionId: true, createdAt: true },
+      }),
+      // 9: add_to_cart
+      prisma.eventoAnalitico.findMany({
+        where: { tipo: 'add_to_cart', createdAt: { gte: dataInicio } },
+        select: { dados: true, sessionId: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 200,
+      }),
+      // 10: product_views
+      prisma.eventoAnalitico.findMany({
+        where: { tipo: 'product_view', createdAt: { gte: dataInicio } },
         select: { dados: true },
+        take: 500,
       }),
     ])
 
-    // Processar top páginas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const get = (i: number, fallback: any = null) =>
+      resultados[i].status === 'fulfilled' ? resultados[i].value : fallback
+
+    const totalVisitas       = get(0, 0) as number
+    const aceitaram          = get(1, 0) as number
+    const recusaram          = get(2, 0) as number
+    const totalEventos       = get(3, 0) as number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const insights           = get(4, []) as any[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pageViews          = get(5, []) as any[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const searches           = get(6, []) as any[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dispositivos       = get(7, []) as any[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const comprasRaw         = get(8, []) as any[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cartsRaw           = get(9, []) as any[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productViewsRaw    = get(10, []) as any[]
+
+    // Top páginas
     const paginaMap: Record<string, number> = {}
-    topPaginasRaw.forEach(e => {
+    pageViews.forEach((e: { pagina: string | null }) => {
       const p = e.pagina || '/'
       paginaMap[p] = (paginaMap[p] || 0) + 1
     })
     const topPaginas = Object.entries(paginaMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
+      .sort((a, b) => b[1] - a[1]).slice(0, 10)
       .map(([pagina, visitas]) => ({ pagina, visitas }))
 
-    // Processar top buscas
+    // Top buscas
     const buscaMap: Record<string, number> = {}
-    topBuscasRaw.forEach(e => {
+    searches.forEach((e: { dados: string }) => {
       try {
         const d = JSON.parse(e.dados)
         if (d.termo) buscaMap[d.termo] = (buscaMap[d.termo] || 0) + 1
       } catch { /* ignore */ }
     })
     const topBuscas = Object.entries(buscaMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
+      .sort((a, b) => b[1] - a[1]).slice(0, 10)
       .map(([termo, count]) => ({ termo, count }))
 
-    // Processar receita
+    // Top produtos
+    const produtoMap: Record<string, number> = {}
+    productViewsRaw.forEach((e: { dados: string }) => {
+      try {
+        const d = JSON.parse(e.dados)
+        if (d.produto) produtoMap[d.produto] = (produtoMap[d.produto] || 0) + 1
+      } catch { /* ignore */ }
+    })
+    const topProdutos = Object.entries(produtoMap)
+      .sort((a, b) => b[1] - a[1]).slice(0, 10)
+      .map(([produto, views]) => ({ produto, views }))
+
+    // Receita
     let receita = 0
     const compras = comprasRaw.length
-    comprasRaw.forEach(e => {
+    const sessoesComCompra = new Set<string>()
+    comprasRaw.forEach((e: { dados: string; sessionId: string }) => {
+      sessoesComCompra.add(e.sessionId)
       try { receita += JSON.parse(e.dados).valor || 0 } catch { /* ignore */ }
     })
 
-    const taxaAceite =
-      aceitaram + recusaram > 0
-        ? Math.round((aceitaram / (aceitaram + recusaram)) * 100)
-        : 0
+    // Carrinhos
+    const sessoesComCarrinho = new Set<string>(cartsRaw.map((e: { sessionId: string }) => e.sessionId))
+    const totalSessoesCarrinho = sessoesComCarrinho.size
+    const carrinhosAbandonados = [...sessoesComCarrinho].filter(s => !sessoesComCompra.has(s)).length
 
-    const taxaConversao =
-      totalVisitas > 0
-        ? parseFloat(((compras / totalVisitas) * 100).toFixed(1))
-        : 0
+    let valorAbandonado = 0
+    const sessoesAbandonadas = new Set([...sessoesComCarrinho].filter(s => !sessoesComCompra.has(s)))
+    cartsRaw.forEach((e: { sessionId: string; dados: string }) => {
+      if (sessoesAbandonadas.has(e.sessionId)) {
+        try {
+          const d = JSON.parse(e.dados)
+          valorAbandonado += (d.preco || 0) * (d.quantidade || 1)
+        } catch { /* ignore */ }
+      }
+    })
+
+    const taxaAceite = (aceitaram + recusaram) > 0
+      ? Math.round((aceitaram / (aceitaram + recusaram)) * 100) : 0
+    const taxaConversao = totalVisitas > 0
+      ? parseFloat(((compras / totalVisitas) * 100).toFixed(2)) : 0
+
+    // Itens de carrinho formatados
+    const itensCarrinho = cartsRaw.slice(0, 50).map((e: { sessionId: string; dados: string; createdAt: Date }) => {
+      let d: Record<string, unknown> = {}
+      try { d = JSON.parse(e.dados) } catch { /* ignore */ }
+      return {
+        produtoNome: String(d.produtoNome || d.produto || '—'),
+        produtoSlug: String(d.produtoSlug || d.produto || ''),
+        variacao: d.variacao ? String(d.variacao) : null,
+        quantidade: Number(d.quantidade || 1),
+        preco: Number(d.preco || 0),
+        valor: Number(d.quantidade || 1) * Number(d.preco || 0),
+        adicionadoEm: e.createdAt,
+        comprado: sessoesComCompra.has(e.sessionId),
+        sessionId: e.sessionId.slice(0, 8) + '...',
+      }
+    })
 
     return Response.json({
+      ok: true,
       periodo,
       resumo: {
         totalVisitas,
@@ -109,26 +187,41 @@ export async function GET(req: NextRequest) {
         compras,
         taxaConversao,
         receita: parseFloat(receita.toFixed(2)),
+        totalSessoesCarrinho,
+        carrinhosAbandonados,
+        valorAbandonado: parseFloat(valorAbandonado.toFixed(2)),
       },
       topPaginas,
       topBuscas,
-      dispositivoStats: dispositivosRaw.map(d => ({
+      topProdutos,
+      dispositivoStats: dispositivos.map((d: { dispositivo: string | null; _count: { dispositivo: number } }) => ({
         dispositivo: d.dispositivo || 'desktop',
         count: d._count.dispositivo,
       })),
-      clientes: insights.map(c => ({
+      itensCarrinho,
+      clientes: insights.map((c: {
+        sessionId: string; ultimaVisita: Date; totalVisitas: number; totalPaginas: number;
+        dispositivo: string | null; carrinhosAbertos: number; comprasFeitas: number; totalGasto: number;
+      }) => ({
         sessionId: c.sessionId.slice(0, 12) + '...',
         ultimaVisita: c.ultimaVisita,
         totalVisitas: c.totalVisitas,
         totalPaginas: c.totalPaginas,
-        dispositivo: c.dispositivo || '—',
+        dispositivo: c.dispositivo || 'desktop',
         carrinhosAbertos: c.carrinhosAbertos,
         comprasFeitas: c.comprasFeitas,
         totalGasto: c.totalGasto,
       })),
     })
-  } catch (error) {
-    console.error('[admin/analytics]', error)
-    return Response.json({ erro: 'Erro interno', detalhes: String(error) }, { status: 500 })
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
+    console.error('[admin/analytics GET]', error)
+    return Response.json({
+      ok: false,
+      erro: 'Erro ao carregar analytics',
+      detalhes: msg,
+      stack: process.env.NODE_ENV === 'development' ? stack : undefined,
+    }, { status: 500 })
   }
 }
