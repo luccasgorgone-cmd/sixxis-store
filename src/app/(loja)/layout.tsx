@@ -2,6 +2,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import FloatingButtons from '@/components/layout/FloatingButtons'
 import { prisma } from '@/lib/prisma'
+import CookieBanner from '@/components/cookies/CookieBanner'
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   let logoUrl = '/logo-sixxis.png'
@@ -73,6 +74,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
           whatsappVendas={cfg.agente_whatsapp_vendas}
           whatsappSuporte={cfg.agente_whatsapp_suporte}
         />
+        <CookieBanner />
       </div>
     </div>
   )

@@ -21,6 +21,7 @@ model Cliente {
   historicoPontos HistoricoPontos[]
   pedidos         Pedido[]
   pontos          PontosCliente?
+  insight         ClienteInsight?
 }
 
 model Endereco {
@@ -267,4 +268,60 @@ model EmailTemplate {
   prazo        Int      @default(0)
   unidadePrazo String   @default("horas")
   updatedAt    DateTime @updatedAt
+}
+
+model CookieConsent {
+  id          String   @id @default(cuid())
+  sessionId   String
+  clienteId   String?
+  necessarios Boolean  @default(true)
+  analiticos  Boolean  @default(false)
+  marketing   Boolean  @default(false)
+  ip          String?
+  userAgent   String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([clienteId])
+}
+
+model VisitaAnalitica {
+  id        String   @id @default(cuid())
+  sessionId String
+  clienteId String?
+  pagina    String
+  referrer  String?
+  userAgent String?  @db.Text
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([pagina])
+  @@index([createdAt])
+}
+
+model EventoAnalitico {
+  id        String   @id @default(cuid())
+  sessionId String
+  clienteId String?
+  tipo      String
+  dados     Json?
+  pagina    String?
+  createdAt DateTime @default(now())
+
+  @@index([tipo])
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+model ClienteInsight {
+  id               String    @id @default(cuid())
+  clienteId        String    @unique
+  totalVisitas     Int       @default(0)
+  totalEventos     Int       @default(0)
+  ultimaVisita     DateTime?
+  paginasFavoritas Json?
+  updatedAt        DateTime  @updatedAt
+  cliente          Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 }
