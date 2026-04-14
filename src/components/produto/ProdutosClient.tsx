@@ -18,11 +18,12 @@ const CATEGORIAS = [
   { val: 'spinning',       label: 'Spinning'       },
 ]
 
-const FAIXAS = [
+const FAIXAS_PRECO = [
   { label: 'Até R$ 500',          min: 0,    max: 500    },
   { label: 'R$ 500 – R$ 1.000',   min: 500,  max: 1000   },
   { label: 'R$ 1.000 – R$ 2.000', min: 1000, max: 2000   },
-  { label: 'Acima de R$ 2.000',   min: 2000, max: 999999 },
+  { label: 'R$ 2.000 – R$ 5.000', min: 2000, max: 5000   },
+  { label: 'Acima de R$ 5.000',   min: 5000, max: 999999 },
 ]
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
@@ -116,7 +117,7 @@ export default function ProdutosClient() {
 
   // ── derived ───────────────────────────────────────────────────────────────
 
-  const activeFaixa = FAIXAS.find(
+  const activeFaixa = FAIXAS_PRECO.find(
     f => String(f.min) === precoMin && String(f.max) === precoMax,
   )
 
@@ -149,7 +150,7 @@ export default function ProdutosClient() {
   const sidebarContent = (
     <SidebarFiltros
       categorias={categoriasComContagem}
-      faixas={FAIXAS}
+      faixas={FAIXAS_PRECO}
       categoria={categoria}
       precoMin={precoMin}
       precoMax={precoMax}

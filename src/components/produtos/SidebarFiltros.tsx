@@ -152,32 +152,48 @@ export default function SidebarFiltros({
       </FiltroSecao>
 
       {/* Filtros específicos — Climatizadores */}
-      {(categoria === 'climatizadores' || !categoria) && (
-        <FiltroSecao titulo="Voltagem">
-          <div className="space-y-0.5">
-            {['110V', '220V', 'Bivolt'].map(v => (
-              <FiltroOpcao
-                key={v}
-                label={v}
-                ativo={false}
-                onClick={() => {}}
-              />
-            ))}
-          </div>
-        </FiltroSecao>
+      {categoria === 'climatizadores' && (
+        <>
+          <FiltroSecao titulo="Voltagem">
+            <div className="space-y-0.5">
+              {['110V', '220V', 'Bivolt'].map(v => (
+                <FiltroOpcao key={v} label={v} ativo={false} onClick={() => {}} />
+              ))}
+            </div>
+          </FiltroSecao>
+
+          <FiltroSecao titulo="Potência">
+            <div className="space-y-0.5">
+              {['Até 7.500 BTU', '7.500 – 12.000 BTU', '12.000 – 18.000 BTU', 'Acima de 18.000 BTU'].map(v => (
+                <FiltroOpcao key={v} label={v} ativo={false} onClick={() => {}} />
+              ))}
+            </div>
+          </FiltroSecao>
+
+          <FiltroSecao titulo="Capacidade (Litros)">
+            <div className="space-y-0.5">
+              {['Até 7L', '7L – 15L', '15L – 25L', 'Acima de 25L'].map(v => (
+                <FiltroOpcao key={v} label={v} ativo={false} onClick={() => {}} />
+              ))}
+            </div>
+          </FiltroSecao>
+
+          <FiltroSecao titulo="Cor">
+            <div className="space-y-0.5">
+              {['Branco', 'Preto', 'Cinza', 'Azul'].map(v => (
+                <FiltroOpcao key={v} label={v} ativo={false} onClick={() => {}} />
+              ))}
+            </div>
+          </FiltroSecao>
+        </>
       )}
 
       {/* Filtros específicos — Aspiradores */}
-      {(categoria === 'aspiradores' || !categoria) && (
+      {categoria === 'aspiradores' && (
         <FiltroSecao titulo="Tipo">
           <div className="space-y-0.5">
             {['Portátil', 'Robô', 'Vertical', 'Piso e parede'].map(t => (
-              <FiltroOpcao
-                key={t}
-                label={t}
-                ativo={false}
-                onClick={() => {}}
-              />
+              <FiltroOpcao key={t} label={t} ativo={false} onClick={() => {}} />
             ))}
           </div>
         </FiltroSecao>

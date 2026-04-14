@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import FormEndereco from '@/components/checkout/FormEndereco'
 import FormPagamento from '@/components/checkout/FormPagamento'
 import ResumoPedido from '@/components/checkout/ResumoPedido'
 import CampoCupom from '@/components/checkout/CampoCupom'
 import Link from 'next/link'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Zap } from 'lucide-react'
 
 type Etapa = 'endereco' | 'pagamento' | 'confirmacao'
 
@@ -17,7 +18,10 @@ const etapaLabels: Record<Etapa, string> = {
   confirmacao: 'Confirmação',
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
+  const searchParams = useSearchParams()
+  const compraDireta = searchParams.get('compra_direta') === '1'
+
   const { itens, total, limparCarrinho } = useCarrinho()
   const [etapa, setEtapa] = useState<Etapa>('endereco')
   const [enderecoId, setEnderecoId] = useState<string | null>(null)
@@ -26,7 +30,9 @@ export default function CheckoutPage() {
   const [cupomCodigo, setCupomCodigo] = useState<string | null>(null)
   const [desconto, setDesconto] = useState(0)
 
-  if (itens.length === 0 && etapa !== 'confirmacao') {
+  // Quando compra_direta=1, o item foi adicionado antes do redirect.
+  // Toleramos carrinho vazio durante a hidratação (localStorage ainda carregando).
+  if (itens.length === 0 && etapa !== 'confirmacao' && !compraDireta) {
     return (
       <main className="max-w-2xl mx-auto px-6 py-20 text-center">
         <p className="text-gray-500 mb-4">Adicione produtos ao carrinho antes de finalizar.</p>
@@ -40,9 +46,17 @@ export default function CheckoutPage() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-6 sm:mb-8">
-        Checkout
-      </h1>
+      <div className="flex items-center gap-3 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0a0a0a] tracking-tight">
+          {compraDireta ? 'Finalizar Compra' : 'Checkout'}
+        </h1>
+        {compraDireta && (
+          <span className="inline-flex items-center gap-1.5 bg-[#e8f8f7] text-[#3cbfb3] text-xs font-bold px-3 py-1.5 rounded-full border border-[#3cbfb3]/30">
+            <Zap size={12} />
+            Compra Rápida
+          </span>
+        )}
+      </div>
 
       {/* Progresso */}
       <div className="flex items-center gap-2 mb-8 sm:mb-10">
@@ -141,5 +155,24 @@ export default function CheckoutPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-100 rounded w-48" />
+          <div className="h-4 bg-gray-100 rounded w-72" />
+          <div className="grid grid-cols-3 gap-8 mt-8">
+            <div className="col-span-2 h-64 bg-gray-100 rounded-xl" />
+            <div className="h-48 bg-gray-100 rounded-xl" />
+          </div>
+        </div>
+      </main>
+    }>
+      <CheckoutContent />
+    </Suspense>
   )
 }
