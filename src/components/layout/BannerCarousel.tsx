@@ -32,8 +32,8 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
   const banner = banners[current]
 
   return (
-    /* Outer: full width, sem background — wallpaper da página aparece nas laterais */
-    <section className="w-full py-4">
+    /* Outer: full width, sem background — sem espaço acima/abaixo */
+    <section className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div
           className="relative w-full overflow-hidden rounded-2xl bg-[#0f2e2b] select-none"

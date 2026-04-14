@@ -266,34 +266,36 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       {/* ═══════════════════════════════════════════════════════
           CAMADA 1 — ANNOUNCEMENT BAR
       ═══════════════════════════════════════════════════════ */}
-      <div style={{ backgroundColor: '#0f2e2b' }}>
+      <div className="bg-[#3cbfb3] w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-10">
 
             {/* Esquerda — Cupom */}
             <div className="flex items-center gap-2">
-              <Tag size={13} className="text-[#3cbfb3] shrink-0" strokeWidth={2} />
-              <span className="text-white/80 text-xs font-medium">CUPOM:</span>
-              <span className="bg-[#3cbfb3] text-black text-[11px] font-black px-2 py-0.5 rounded-md tracking-wide">
+              <Tag size={13} className="text-black/60 shrink-0" strokeWidth={2} />
+              <span className="text-black/80 text-xs font-semibold">CUPOM:</span>
+              <span className="bg-white text-black text-[11px] font-black px-2.5 py-0.5 rounded-md border border-white/80 tracking-wider shadow-sm">
                 SIXXIS10
               </span>
-              <span className="text-white text-xs font-semibold hidden sm:inline">
+              <span className="text-black/70 text-xs font-medium hidden sm:inline">
                 — 10% OFF na 1ª compra
               </span>
             </div>
 
             {/* Centro — Frete */}
             <div className="hidden md:flex items-center gap-2">
-              <Truck size={13} className="text-[#3cbfb3] shrink-0" strokeWidth={2} />
-              <span className="text-white text-xs font-bold tracking-wide">
+              <div className="w-px h-4 bg-black/20 mr-1" />
+              <Truck size={13} className="text-black/60 shrink-0" strokeWidth={2} />
+              <span className="text-black font-bold text-xs tracking-wide">
                 FRETE GRÁTIS acima de R$ 500
               </span>
             </div>
 
             {/* Direita — Entrega */}
             <div className="hidden lg:flex items-center gap-2">
-              <MapPin size={13} className="text-[#3cbfb3] shrink-0" strokeWidth={2} />
-              <span className="text-white text-xs font-medium">
+              <div className="w-px h-4 bg-black/20 mr-1" />
+              <MapPin size={13} className="text-black/60 shrink-0" strokeWidth={2} />
+              <span className="text-black/80 text-xs font-medium">
                 Entrega para todo o Brasil
               </span>
             </div>
@@ -301,6 +303,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           </div>
         </div>
       </div>
+      {/* Separador fino entre announcement e header */}
+      <div className="w-full border-b border-black/15" />
 
       {/* ═══════════════════════════════════════════════════════
           CAMADA 2 — HEADER PRINCIPAL (sticky)

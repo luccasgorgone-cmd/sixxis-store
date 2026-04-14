@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Zap, Timer } from 'lucide-react'
+import { Zap, Clock } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
 import type { Produto } from '@/types'
 
@@ -38,6 +38,12 @@ export default function OfertasRelampago({ produtos }: Props) {
 
   if (produtos.length === 0) return null
 
+  const blocos = [
+    { val: tempo.h, label: 'HORAS' },
+    { val: tempo.m, label: 'MIN'   },
+    { val: tempo.s, label: 'SEG'   },
+  ]
+
   return (
     <section className="bg-transparent border-b border-white/10 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -46,50 +52,57 @@ export default function OfertasRelampago({ produtos }: Props) {
           {/* ── Header com timer ──────────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
 
-            {/* Título esquerda */}
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center shadow-md shadow-red-600/30">
-                <Zap size={18} className="text-white" fill="white" />
+            {/* Esquerda: ícone + título */}
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-black/30 shrink-0 border-2 border-black/20">
+                <Zap size={22} className="text-yellow-300 fill-yellow-300" />
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-white leading-none">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-none tracking-tight">
                   Ofertas Relâmpago
                 </h2>
-                <p className="text-white/60 text-xs mt-0.5">Aproveite antes que acabe!</p>
+                <p className="text-white/55 text-xs mt-0.5">Aproveite antes que acabe!</p>
               </div>
             </div>
 
-            {/* Timer */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <Timer size={13} className="text-red-400" />
-                <span className="text-white/70 text-xs font-semibold">Termina em:</span>
+            {/* Direita: timer em container escuro */}
+            <div className="flex flex-col items-center gap-1.5 bg-black/20 rounded-2xl px-5 py-3 border border-white/10">
+
+              {/* Rótulo "Termina em:" */}
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-red-700 rounded-lg flex items-center justify-center border border-black/25">
+                  <Clock size={13} className="text-yellow-300" strokeWidth={2.5} />
+                </div>
+                <span className="text-white font-extrabold text-sm tracking-widest uppercase">
+                  Termina em:
+                </span>
               </div>
 
               {/* Blocos do contador */}
-              <div className="flex items-center gap-1">
-                {[
-                  { val: tempo.h, label: 'HORAS' },
-                  { val: tempo.m, label: 'MIN'   },
-                  { val: tempo.s, label: 'SEG'   },
-                ].map((item, i) => (
-                  <div key={item.label} className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
+                {blocos.map((item, i) => (
+                  <div key={item.label} className="flex items-center gap-1.5">
                     <div className="flex flex-col items-center">
-                      <span className="bg-red-600 text-white font-mono font-extrabold px-3 py-1.5 rounded-lg text-base min-w-[42px] text-center tabular-nums leading-none shadow-md shadow-red-600/30">
-                        {item.val}
-                      </span>
-                      <span className="text-red-400 text-[9px] font-bold uppercase tracking-wider mt-0.5">
+                      {/* Bloco do número */}
+                      <div className="relative bg-red-600 rounded-xl px-4 py-2.5 shadow-xl shadow-black/40 min-w-[56px] flex items-center justify-center border-2 border-black/25 overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-px bg-white/25" />
+                        <span className="text-white font-black text-xl font-mono tabular-nums leading-none">
+                          {item.val}
+                        </span>
+                      </div>
+                      {/* Label */}
+                      <span className="text-red-400 text-[9px] font-black uppercase tracking-widest mt-1">
                         {item.label}
                       </span>
                     </div>
                     {i < 2 && (
-                      <span className="text-red-400 font-extrabold text-lg pb-4">:</span>
+                      <span className="text-red-500 font-black text-xl mb-5 select-none">:</span>
                     )}
                   </div>
                 ))}
               </div>
-            </div>
 
+            </div>
           </div>
 
           {/* ── Grid de produtos ──────────────────────────────────────────── */}
