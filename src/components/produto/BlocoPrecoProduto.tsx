@@ -38,6 +38,18 @@ function calcPMT(pv: number, taxa: number, n: number) {
   return pv * (taxa * Math.pow(1 + taxa, n)) / (Math.pow(1 + taxa, n) - 1)
 }
 
+function inferirTipoVariacao(nomes: string[]): string {
+  if (!nomes.length) return 'Variação'
+  const joined = nomes.join(' ')
+  if (/\d+\s*v\b|bivolt/i.test(joined))                                              return 'Voltagem'
+  const cores = ['preto','branco','azul','vermelho','verde','amarelo','rosa',
+                 'cinza','laranja','roxo','marrom','bege','prata','dourado','grafite']
+  if (cores.some(c => joined.toLowerCase().includes(c)))                             return 'Cor'
+  if (/\b(pp|p|m|g{1,2}|xg|xxg|xs|s|l|xl{1,2}|xxl)\b/i.test(joined))              return 'Tamanho'
+  if (/\b\d+(cm|mm|ml|l|kg|g|w|hz|gb|tb|pol)\b/i.test(joined))                     return 'Capacidade'
+  return 'Variação'
+}
+
 export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Props) {
   const router = useRouter()
   const { adicionarItem } = useCarrinho()
@@ -103,7 +115,7 @@ export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Pro
       {/* Variações */}
       {variacoesAtivas.length > 0 && (
         <div className="mb-5">
-          <p className="text-sm font-bold text-gray-700 mb-2">Voltagem:</p>
+          <p className="text-sm font-bold text-gray-700 mb-2">{inferirTipoVariacao(variacoesAtivas.map(v => v.nome))}:</p>
           <div className="flex flex-wrap gap-2">
             {variacoesAtivas.map(v => (
               <button
