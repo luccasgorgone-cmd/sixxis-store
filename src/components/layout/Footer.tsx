@@ -64,37 +64,22 @@ export default async function Footer() {
           <div className="lg:col-span-1 flex justify-center lg:justify-start">
             <div className="flex flex-col items-center" style={{ width: '260px' }}>
 
-              {/* CAIXA COM BORDA TIFFANY — contém logo + subtitle + slogan */}
-              <div
-                className="w-full rounded-2xl flex flex-col items-center p-5 mb-4"
-                style={{
-                  border: '1.5px solid rgba(60,191,179,0.45)',
-                  backgroundColor: 'rgba(60,191,179,0.04)',
-                }}
-              >
-                {/* Logo */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={logoUrl}
-                  alt="Sixxis"
-                  loading="lazy"
-                  style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
-                />
+              {/* Logo */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoUrl}
+                alt="Sixxis"
+                loading="lazy"
+                style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
+              />
 
-                {/* "do Brasil" */}
-                <p className="text-white/50 text-xs font-medium mt-1 mb-3 tracking-wide">
-                  do Brasil
-                </p>
+              {/* Slogan */}
+              <p className="text-white/65 text-xs text-center leading-relaxed mt-2 mb-5">
+                Qualidade e inovação para seu<br />
+                conforto e bem estar!
+              </p>
 
-                {/* Slogan */}
-                <p className="text-white/65 text-xs text-center leading-relaxed">
-                  Qualidade e inovação para seu
-                  <br />
-                  conforto e bem estar!
-                </p>
-              </div>
-
-              {/* BOTÕES — fora da caixa, mesma largura */}
+              {/* BOTÕES */}
               <div className="flex flex-col gap-2.5 w-full">
                 <a
                   href={`https://wa.me/${whatsappVendas}`}
@@ -110,14 +95,16 @@ export default async function Footer() {
                   href={`https://wa.me/${whatsappSuporte}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-medium text-sm text-white border border-white/30 hover:border-white/60 transition"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-medium text-sm text-white transition"
+                  style={{ border: '1.5px solid rgba(255,255,255,0.30)' }}
                 >
                   <WaSVG />
                   Assistência Técnica
                 </a>
                 <Link
                   href="/contato"
-                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm text-white/55 hover:text-white/85 border border-white/[0.12] hover:border-white/30 transition"
+                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm text-white/55 hover:text-white/85 hover:border-white/30 transition"
+                  style={{ border: '1.5px solid rgba(255,255,255,0.12)' }}
                 >
                   Entre em Contato
                 </Link>

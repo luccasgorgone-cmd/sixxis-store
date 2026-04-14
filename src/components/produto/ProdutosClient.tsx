@@ -180,11 +180,11 @@ export default function ProdutosClient() {
       <nav className="bg-gray-50 border-b border-gray-100 py-2.5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-1.5 text-sm text-gray-500 flex-wrap">
-            <Link href="/" className="hover:text-[#3cbfb3] transition">Início</Link>
+            <Link href="/" className="hover:text-gray-700 transition">Início</Link>
             {categoriaLabel ? (
               <>
                 <ChevronRight size={13} className="text-gray-300" />
-                <Link href="/produtos" className="hover:text-[#3cbfb3] transition">Produtos</Link>
+                <Link href="/produtos" className="hover:text-gray-700 transition">Produtos</Link>
                 <ChevronRight size={13} className="text-gray-300" />
                 <span className="text-gray-800 font-medium">{categoriaLabel}</span>
               </>

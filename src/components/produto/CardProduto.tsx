@@ -74,7 +74,7 @@ export default function CardProduto({ produto }: Props) {
       <article className="bg-white h-full flex flex-col border border-gray-200/80 rounded-2xl overflow-hidden hover:border-[#3cbfb3]/30 hover:shadow-lg hover:shadow-gray-200/80 hover:-translate-y-0.5 transition-all duration-200">
 
         {/* Imagem */}
-        <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1', minHeight: '220px' }}>
+        <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1', minHeight: '220px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
           {/* Badge desconto */}
           {desconto > 0 && !esgotado && (
             <div className="absolute top-2.5 left-2.5 z-10">

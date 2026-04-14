@@ -251,7 +251,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
               Cancelar
             </button>
           </div>
-          <p className="text-xs text-gray-400 mt-3">✅ Sua avaliação será publicada após revisão da equipe Sixxis.</p>
+          <p className="text-xs text-gray-400 mt-3">Sua avaliação será publicada após revisão da equipe Sixxis.</p>
         </div>
       )}
 
@@ -286,7 +286,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
                   <div className="flex items-center gap-1.5">
                     {av.destaque && (
                       <span className="bg-[#e8f8f7] text-[#1a4f4a] text-[10px] font-black px-2 py-0.5 rounded-full border border-[#3cbfb3]/20">
-                        ⭐ DESTAQUE
+                        DESTAQUE
                       </span>
                     )}
                     <EstrelasNota nota={av.nota} size={13} />

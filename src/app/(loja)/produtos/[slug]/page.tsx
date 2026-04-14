@@ -112,13 +112,13 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ol className="flex items-center overflow-x-auto scrollbar-hide whitespace-nowrap">
             <li className="shrink-0">
-              <Link href="/" className="text-xs leading-none text-gray-500 hover:text-[#3cbfb3] font-medium transition">Início</Link>
+              <Link href="/" className="text-xs leading-none text-gray-500 hover:text-gray-700 font-medium transition">Início</Link>
             </li>
             <li className="mx-2 shrink-0">
               <ChevronRight size={12} className="text-gray-300" />
             </li>
             <li className="shrink-0">
-              <Link href={`/produtos?categoria=${produto.categoria}`} className="text-xs leading-none text-gray-500 hover:text-[#3cbfb3] font-medium transition">
+              <Link href={`/produtos?categoria=${produto.categoria}`} className="text-xs leading-none text-gray-500 hover:text-gray-700 font-medium transition">
                 {categoriaLabel}
               </Link>
             </li>
@@ -138,8 +138,36 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           <div className="relative">
             <GaleriaCB itens={itens} nome={produto.nome} />
             {especificacoes && especificacoes.length > 0 && (
-              <div className="mt-4">
-                <CaracteristicasRapidas especificacoes={especificacoes} />
+              <div className="mt-4 rounded-2xl overflow-hidden border border-gray-100 bg-white">
+                {/* Header */}
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="#3cbfb3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                  </svg>
+                  <h3 className="text-xs font-extrabold text-gray-800 uppercase tracking-wide">
+                    Especificações Técnicas
+                  </h3>
+                </div>
+                {/* Linhas */}
+                <div className="divide-y divide-gray-50">
+                  {especificacoes.map(({ label, valor }, i) => (
+                    <div
+                      key={label}
+                      className={`flex items-center px-4 py-2.5 hover:bg-gray-50 transition ${
+                        i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
+                      }`}
+                    >
+                      <span className="text-[11px] text-gray-500 font-medium w-[48%] shrink-0 leading-snug">{label}</span>
+                      <span className="text-[11px] text-gray-900 font-semibold leading-snug">{valor}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -185,7 +213,6 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         {especificacoes && especificacoes.length > 0 && (
           <div className="mb-12">
             <h2 className="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
-              <span className="text-[#3cbfb3]">≡</span>
               Especificações Técnicas
             </h2>
             <div className="rounded-2xl border border-gray-100 overflow-hidden">
