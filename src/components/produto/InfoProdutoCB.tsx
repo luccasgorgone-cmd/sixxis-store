@@ -309,19 +309,32 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       )}
 
       {/* Botões */}
-      <div className="space-y-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6">
+        {/* COMPRAR AGORA — principal, sempre sólido */}
         <button
           onClick={handleComprar}
           disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
-          className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-60 text-white font-extrabold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] shadow-xl shadow-[#3cbfb3]/25 hover:-translate-y-0.5 flex items-center justify-center gap-2.5"
+          className="w-full text-white font-extrabold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
+          style={{
+            backgroundColor: '#3cbfb3',
+            boxShadow: '0 6px 20px rgba(60,191,179,0.40)',
+            opacity: 1,
+          }}
         >
-          <ShoppingBag size={20} />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
           Comprar Agora
         </button>
+
+        {/* ADICIONAR AO CARRINHO — secundário, outline */}
         <button
           onClick={handleAddToCart}
           disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
-          className="w-full border-2 border-[#3cbfb3] text-[#3cbfb3] font-extrabold text-base py-3.5 rounded-2xl hover:bg-[#e8f8f7] disabled:opacity-60 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5"
+          className="w-full font-bold text-base py-3.5 rounded-2xl border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7] disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5"
         >
           {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}
           {adicionado ? 'Adicionado ao Carrinho!' : 'Adicionar ao Carrinho'}

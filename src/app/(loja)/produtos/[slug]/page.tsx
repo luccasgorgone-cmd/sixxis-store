@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
-import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight, ShieldCheck, Award, Headphones, Package } from 'lucide-react'
+import type { Metadata } from 'next'
+import { ShieldCheck, Award, Headphones, Package } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import GaleriaCB from '@/components/produto/GaleriaCB'
 import type { GaleriaItemCB } from '@/components/produto/GaleriaCB'
 import InfoProdutoCB from '@/components/produto/InfoProdutoCB'
@@ -89,7 +90,19 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
   const categoriaLabel = getNomeCategoria(produto.categoria)
 
-  const especificacoes = (produto as unknown as { especificacoes?: EspecificacaoRow[] | null }).especificacoes ?? null
+  // Normaliza specs — aceita [{label,valor}] ou [["label","valor"]]
+  const especificacoes = (() => {
+    try {
+      const raw = (produto as unknown as { especificacoes?: unknown }).especificacoes
+      if (!raw) return [] as EspecificacaoRow[]
+      const arr: unknown[] = Array.isArray(raw) ? raw : JSON.parse(raw as string)
+      return arr.map((item) => {
+        if (Array.isArray(item)) return { label: String(item[0] ?? ''), valor: String(item[1] ?? '') }
+        const o = item as Record<string, unknown>
+        return { label: String(o.label ?? ''), valor: String(o.valor ?? '') }
+      }) as EspecificacaoRow[]
+    } catch { return [] as EspecificacaoRow[] }
+  })()
   const faqs = (produto as unknown as { faqs?: FaqRow[] | null }).faqs ?? null
 
   const produtoParaInfo = {
@@ -106,40 +119,24 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Breadcrumb */}
-      <nav className="bg-white border-b border-gray-100 py-2.5" aria-label="Breadcrumb">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <ol className="flex items-center overflow-x-auto scrollbar-hide whitespace-nowrap">
-            <li className="shrink-0">
-              <Link href="/" className="text-xs leading-none text-gray-500 hover:text-gray-700 font-medium transition">Início</Link>
-            </li>
-            <li className="mx-2 shrink-0">
-              <ChevronRight size={12} className="text-gray-300" />
-            </li>
-            <li className="shrink-0">
-              <Link href={`/produtos?categoria=${produto.categoria}`} className="text-xs leading-none text-gray-500 hover:text-gray-700 font-medium transition">
-                {categoriaLabel}
-              </Link>
-            </li>
-            <li className="mx-2 shrink-0">
-              <ChevronRight size={12} className="text-gray-300" />
-            </li>
-            <li className="shrink-0">
-              <span className="text-xs leading-none font-bold text-gray-900">{produto.nome}</span>
-            </li>
-          </ol>
-        </div>
-      </nav>
+      <Breadcrumb items={[
+        { label: 'Início', href: '/' },
+        { label: categoriaLabel, href: `/produtos?categoria=${produto.categoria}` },
+        { label: produto.nome },
+      ]} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Galeria + Info */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10 lg:overflow-visible">
           <div className="relative">
             <GaleriaCB itens={itens} nome={produto.nome} />
-            {especificacoes && especificacoes.length > 0 && (
-              <div className="mt-4 rounded-2xl overflow-hidden border border-gray-100 bg-white">
-                {/* Header */}
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50">
+            {especificacoes.length > 0 && (
+              <div className="mt-5 rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+                {/* Header escuro */}
+                <div
+                  className="flex items-center gap-2.5 px-4 py-3"
+                  style={{ background: 'linear-gradient(to right, #0f2e2b, #1a4f4a)' }}
+                >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                     stroke="#3cbfb3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="8" y1="6" x2="21" y2="6"/>
@@ -149,24 +146,35 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
                     <line x1="3" y1="12" x2="3.01" y2="12"/>
                     <line x1="3" y1="18" x2="3.01" y2="18"/>
                   </svg>
-                  <h3 className="text-xs font-extrabold text-gray-800 uppercase tracking-wide">
+                  <span className="text-xs font-extrabold text-white uppercase tracking-wider">
                     Especificações Técnicas
-                  </h3>
+                  </span>
                 </div>
-                {/* Linhas */}
-                <div className="divide-y divide-gray-50">
-                  {especificacoes.map(({ label, valor }, i) => (
+                {/* Linhas zebradas — até 10 */}
+                <div>
+                  {especificacoes.slice(0, 10).map(({ label, valor }, i) => (
                     <div
                       key={label}
-                      className={`flex items-center px-4 py-2.5 hover:bg-gray-50 transition ${
+                      className={`flex items-start px-4 py-2.5 border-b border-gray-50 last:border-0 hover:bg-blue-50/20 transition ${
                         i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
                       }`}
                     >
-                      <span className="text-[11px] text-gray-500 font-medium w-[48%] shrink-0 leading-snug">{label}</span>
-                      <span className="text-[11px] text-gray-900 font-semibold leading-snug">{valor}</span>
+                      <span className="text-[11px] text-gray-500 font-medium shrink-0 leading-snug" style={{ width: '48%' }}>
+                        {label}
+                      </span>
+                      <span className="text-[11px] text-gray-900 font-semibold leading-snug flex-1">
+                        {valor}
+                      </span>
                     </div>
                   ))}
                 </div>
+                {especificacoes.length > 10 && (
+                  <div className="py-2.5 text-center border-t border-gray-100">
+                    <span className="text-xs font-bold text-[#3cbfb3]">
+                      + {especificacoes.length - 10} especificações abaixo
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
