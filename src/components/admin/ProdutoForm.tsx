@@ -34,13 +34,20 @@ interface ProdutoFormData {
   precoPromocional: string
   estoque: string
   ativo: boolean
+  videoUrl: string
 }
+
+export interface EspecificacaoRow { label: string; valor: string }
+export interface FaqRow { pergunta: string; resposta: string }
 
 interface ProdutoFormProps {
   initialData?: Partial<ProdutoFormData> & {
     imagens?: string[]
+    videoUrl?: string
     temVariacoes?: boolean
     variacoes?: VariacaoInput[]
+    especificacoes?: EspecificacaoRow[] | null
+    faqs?: FaqRow[] | null
   }
   produtoId?: string
   mode: 'novo' | 'editar'
@@ -81,7 +88,16 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     precoPromocional: initialData?.precoPromocional ?? '',
     estoque: initialData?.estoque ?? '0',
     ativo: initialData?.ativo !== false,
+    videoUrl: initialData?.videoUrl ?? '',
   })
+
+  // Especificações e FAQs como JSON editável
+  const [especificacoesJson, setEspecificacoesJson] = useState(
+    initialData?.especificacoes ? JSON.stringify(initialData.especificacoes, null, 2) : ''
+  )
+  const [faqsJson, setFaqsJson] = useState(
+    initialData?.faqs ? JSON.stringify(initialData.faqs, null, 2) : ''
+  )
 
   const [temVariacoes, setTemVariacoes] = useState(initialData?.temVariacoes ?? false)
   const [variacoes, setVariacoes] = useState<VariacaoInput[]>(
@@ -163,6 +179,10 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     setImagens((prev) => prev.filter((u) => u !== url))
   }
 
+  function moverImagemParaInicio(url: string) {
+    setImagens(prev => [url, ...prev.filter(u => u !== url)])
+  }
+
   // ─── Submit ──────────────────────────────────────────────────────────────────
 
   async function handleSubmit(e: React.FormEvent) {
@@ -195,6 +215,11 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
 
     setSaving(true)
 
+    let especificacoesParsed = null
+    let faqsParsed = null
+    try { if (especificacoesJson.trim()) especificacoesParsed = JSON.parse(especificacoesJson) } catch {}
+    try { if (faqsJson.trim()) faqsParsed = JSON.parse(faqsJson) } catch {}
+
     const body = {
       ...form,
       sku: form.sku || null,
@@ -202,8 +227,11 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
       precoPromocional: form.precoPromocional ? Number(form.precoPromocional) : null,
       estoque: temVariacoes ? estoqueCalculado : Number(form.estoque),
       imagens,
+      videoUrl: form.videoUrl,
       temVariacoes,
       variacoes: temVariacoes ? variacoes : [],
+      especificacoes: especificacoesParsed,
+      faqs: faqsParsed,
     }
 
     const url = mode === 'novo' ? '/api/admin/produtos' : `/api/admin/produtos/${produtoId}`
@@ -640,6 +668,15 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
                         CAPA
                       </span>
                     )}
+                    {i !== 0 && (
+                      <button
+                        type="button"
+                        onClick={() => moverImagemParaInicio(url)}
+                        className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-[#3cbfb3] text-white text-[9px] font-black px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+                      >
+                        Tornar capa
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => removeImagem(url)}
@@ -658,6 +695,76 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
                 Nenhuma foto adicionada
               </div>
             )}
+          </div>
+
+          {/* Vídeo do produto */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider flex items-center gap-2">
+              Vídeo do Produto
+            </h2>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">URL do Vídeo</label>
+              <input
+                name="videoUrl"
+                type="text"
+                value={form.videoUrl}
+                onChange={handleChange}
+                placeholder="https://www.youtube.com/watch?v=... ou link direto MP4"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+              />
+              <p className="text-xs text-gray-400 mt-1.5">
+                Cole URL do YouTube, Vimeo ou MP4 direto. Aparece como último item na galeria do produto.
+              </p>
+            </div>
+            {form.videoUrl && (
+              <div className="mt-4 bg-gray-50 rounded-xl overflow-hidden h-44 flex items-center justify-center border border-gray-100">
+                {form.videoUrl.includes('youtube') || form.videoUrl.includes('youtu.be') ? (
+                  <iframe
+                    src={form.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay"
+                    allowFullScreen
+                    title="Preview do vídeo"
+                  />
+                ) : (
+                  <video src={form.videoUrl} controls className="w-full h-full object-contain" />
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Especificações */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wider">
+              Especificações Técnicas
+            </h2>
+            <p className="text-xs text-gray-400 mb-3">
+              Formato JSON: <code className="bg-gray-100 px-1 rounded">{`[{"label":"Potência","valor":"180W"},...]`}</code>
+            </p>
+            <textarea
+              value={especificacoesJson}
+              onChange={e => setEspecificacoesJson(e.target.value)}
+              rows={8}
+              placeholder={'[\n  {"label": "Modelo", "valor": "SX040"},\n  {"label": "Potência", "valor": "180 W"}\n]'}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] resize-none"
+            />
+          </div>
+
+          {/* Perguntas Frequentes */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wider">
+              Perguntas Frequentes (FAQ)
+            </h2>
+            <p className="text-xs text-gray-400 mb-3">
+              Formato JSON: <code className="bg-gray-100 px-1 rounded">{`[{"pergunta":"...","resposta":"..."},...]`}</code>
+            </p>
+            <textarea
+              value={faqsJson}
+              onChange={e => setFaqsJson(e.target.value)}
+              rows={8}
+              placeholder={'[\n  {\n    "pergunta": "Qual a voltagem?",\n    "resposta": "Bivolt 110V/220V."\n  }\n]'}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] resize-none"
+            />
           </div>
         </div>
 

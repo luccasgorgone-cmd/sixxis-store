@@ -72,8 +72,11 @@ export async function POST(request: NextRequest) {
     estoque,
     ativo,
     imagens,
+    videoUrl,
     temVariacoes,
     variacoes,
+    especificacoes,
+    faqs,
   } = body
 
   if (!nome || !slug || !categoria || preco == null) {
@@ -108,7 +111,10 @@ export async function POST(request: NextRequest) {
       estoque: estoqueTotal,
       ativo: ativo !== false,
       imagens: imagens ?? [],
+      videoUrl: videoUrl ?? null,
       temVariacoes: Boolean(temVariacoes),
+      especificacoes: especificacoes ?? undefined,
+      faqs: faqs ?? undefined,
       variacoes: temVariacoes && variacoesInput.length > 0
         ? {
             create: variacoesInput.map((v) => ({

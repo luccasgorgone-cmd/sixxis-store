@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Clock } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
+import RaioIcon from '@/components/ui/RaioIcon'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -10,14 +12,13 @@ interface Props {
 }
 
 interface Tempo {
-  d: string
   h: string
   m: string
   s: string
 }
 
 export default function OfertasRelampago({ produtos }: Props) {
-  const [tempo, setTempo] = useState<Tempo>({ d: '0', h: '00', m: '00', s: '00' })
+  const [tempo, setTempo] = useState<Tempo>({ h: '00', m: '00', s: '00' })
 
   useEffect(() => {
     const calcular = () => {
@@ -26,8 +27,7 @@ export default function OfertasRelampago({ produtos }: Props) {
       fim.setHours(23, 59, 59, 0)
       const diff = Math.max(0, fim.getTime() - agora.getTime())
       setTempo({
-        d: String(Math.floor(diff / 86400000)),
-        h: String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0'),
+        h: String(Math.floor(diff / 3600000)).padStart(2, '0'),
         m: String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0'),
         s: String(Math.floor((diff % 60000) / 1000)).padStart(2, '0'),
       })
@@ -40,79 +40,89 @@ export default function OfertasRelampago({ produtos }: Props) {
   if (produtos.length === 0) return null
 
   const blocos = [
-    { val: tempo.d, label: 'DIAS'  },
     { val: tempo.h, label: 'HORAS' },
     { val: tempo.m, label: 'MIN'   },
     { val: tempo.s, label: 'SEG'   },
   ]
 
   return (
-    <section className="bg-[#f0f2f5] pb-8">
+    <section className="bg-transparent border-b border-white/10 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-[#e8f8f7] border border-[#3cbfb3]/20 rounded-2xl p-5 sm:p-6">
+        <div className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-2xl p-5 sm:p-6">
 
-          {/* Header com timer */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          {/* ── Header centralizado ───────────────────────────────── */}
+          <div className="flex flex-col items-center gap-4 mb-8">
 
-            {/* Título */}
+            {/* Título com raio nos dois lados */}
             <div className="flex items-center gap-3">
-              {/* Raio esquerdo */}
-              <svg width="24" height="34" viewBox="0 0 14 20" fill="none" style={{ flexShrink: 0 }}>
-                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
-                  fill="#FFD700" opacity="0.3" transform="translate(0.5,0.5)"/>
-                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
-                  fill="#FFD700" stroke="#111" strokeWidth="1.2"
-                  strokeLinejoin="round" strokeLinecap="round"/>
-              </svg>
-              <div>
-                <h2 className="text-2xl font-extrabold text-[#0f2e2b] leading-none">
+              <RaioIcon size={26} comFundo={false} />
+              <div className="text-center">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-none tracking-tight">
                   Ofertas Relâmpago
                 </h2>
-                <p className="text-[#3cbfb3] text-sm font-semibold mt-0.5">
-                  Aproveite antes que acabe!
-                </p>
+                <p className="text-white/55 text-xs mt-0.5">Aproveite antes que acabe!</p>
               </div>
-              {/* Raio direito — espelhado */}
-              <svg width="24" height="34" viewBox="0 0 14 20" fill="none" style={{ flexShrink: 0, transform: 'scaleX(-1)' }}>
-                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
-                  fill="#FFD700" opacity="0.3" transform="translate(0.5,0.5)"/>
-                <path d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
-                  fill="#FFD700" stroke="#111" strokeWidth="1.2"
-                  strokeLinejoin="round" strokeLinecap="round"/>
-              </svg>
+              <RaioIcon size={26} comFundo={false} />
             </div>
 
-            {/* Timer estilo Casas Bahia */}
-            <div className="flex items-end gap-1.5">
-              <span className="text-[#1a4f4a] font-semibold text-sm hidden sm:inline mb-3">
-                Termina em:
-              </span>
-              {blocos.map((bloco, i) => (
-                <div key={bloco.label} className="flex items-end gap-1.5">
-                  <div className="flex flex-col items-center">
-                    <span className="bg-[#1a4f4a] text-white font-mono font-extrabold px-3 py-2 rounded-lg text-lg sm:text-xl min-w-[48px] text-center tabular-nums leading-none">
-                      {bloco.val}
-                    </span>
-                    <span className="text-[#1a4f4a] text-[9px] font-bold uppercase tracking-wider mt-1">
-                      {bloco.label}
-                    </span>
+            {/* Timer */}
+            <div className="flex flex-col items-center gap-2">
+
+              {/* Rótulo */}
+              <div className="flex items-center gap-2">
+                <Clock size={14} className="text-white" strokeWidth={2} />
+                <span className="text-white font-extrabold text-base tracking-widest uppercase">
+                  Termina em:
+                </span>
+              </div>
+
+              {/* Blocos do contador */}
+              <div className="flex items-center gap-2">
+                {blocos.map((item, i) => (
+                  <div key={item.label} className="flex items-center gap-2">
+                    <div className="flex flex-col items-center">
+                      {/* Bloco número */}
+                      <div
+                        className="relative rounded-2xl flex items-center justify-center border-2 border-black/30 overflow-hidden"
+                        style={{
+                          backgroundColor: '#3cbfb3',
+                          minWidth: '72px',
+                          height: '72px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)',
+                        }}
+                      >
+                        <div className="absolute left-0 right-0 top-1/2 -translate-y-px h-px bg-black/10" />
+                        <div className="absolute top-0 left-0 right-0 h-8 bg-white/10 rounded-t-xl" />
+                        <span className="text-white font-black text-4xl font-mono tabular-nums leading-none tracking-tight relative z-10">
+                          {item.val}
+                        </span>
+                      </div>
+                      {/* Label */}
+                      <span className="text-white/70 text-[9px] font-black uppercase tracking-widest mt-1.5">
+                        {item.label}
+                      </span>
+                    </div>
+                    {i < 2 && (
+                      <div className="flex flex-col gap-2 mb-5">
+                        <div className="w-2 h-2 rounded-full bg-white/60" />
+                        <div className="w-2 h-2 rounded-full bg-white/60" />
+                      </div>
+                    )}
                   </div>
-                  {i < 3 && (
-                    <span className="text-[#3cbfb3] font-extrabold text-xl mb-4 leading-none">:</span>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
+
             </div>
           </div>
 
-          {/* Grid de produtos */}
+          {/* ── Grid de produtos ──────────────────────────────────── */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {produtos.slice(0, 4).map(p => (
               <CardProduto key={p.id} produto={p} />
             ))}
           </div>
 
-          {/* Link ver todas */}
+          {/* ── Link ver todas ────────────────────────────────────── */}
           <div className="text-center mt-5">
             <Link
               href="/ofertas"
@@ -121,6 +131,7 @@ export default function OfertasRelampago({ produtos }: Props) {
               Ver todas as ofertas →
             </Link>
           </div>
+
         </div>
       </div>
     </section>

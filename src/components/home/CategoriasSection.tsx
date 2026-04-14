@@ -1,94 +1,93 @@
 'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import RaioIcon from '@/components/ui/RaioIcon'
 
 const CATEGORIAS = [
   {
     nome: 'Climatizadores',
     href: '/produtos?categoria=climatizadores',
     img: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775737122831-k4d1lc1.jpg',
+    emoji: '❄️',
+    cor: '#1a4f4a',
     badge: null,
-    bgColor: null,
   },
   {
     nome: 'Aspiradores',
     href: '/produtos?categoria=aspiradores',
     img: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775743809308-70oi3e0.png',
+    emoji: '🌀',
+    cor: '#1a4f4a',
     badge: null,
-    bgColor: null,
   },
   {
     nome: 'Spinning',
     href: '/produtos?categoria=spinning',
     img: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775754930452-4ixi773.png',
+    emoji: '🚴',
+    cor: '#1a4f4a',
     badge: null,
-    bgColor: null,
   },
   {
     nome: 'Ofertas',
     href: '/ofertas',
     img: null,
+    emoji: '%',
+    cor: '#f59e0b',
     badge: 'HOT',
-    bgColor: '#f59e0b',
   },
 ]
 
-function CategoriaItem({ cat }: { cat: typeof CATEGORIAS[0] }) {
+type Categoria = (typeof CATEGORIAS)[number]
+
+function CategoriaCard({ cat }: { cat: Categoria }) {
   const [imgError, setImgError] = useState(false)
 
   return (
     <Link
       href={cat.href}
-      className="flex flex-col items-center gap-2.5 min-w-[80px] group cursor-pointer"
+      className="group flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-white/10 transition-all duration-300"
     >
-      <div
-        className="w-[76px] h-[76px] rounded-2xl overflow-hidden border-2 border-white/20 group-hover:border-[#3cbfb3] group-hover:shadow-lg transition-all duration-300 bg-gray-100 flex items-center justify-center relative"
-        style={cat.bgColor ? { backgroundColor: cat.bgColor } : {}}
-      >
-        {cat.img && !imgError ? (
+      <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
+        {imgError || !cat.img ? (
+          <div
+            className="w-full h-full flex items-center justify-center rounded-2xl"
+            style={{ backgroundColor: cat.cor || '#1a4f4a' }}
+          >
+            <span className="text-2xl">{cat.emoji}</span>
+          </div>
+        ) : (
           <Image
             src={cat.img}
             alt={cat.nome}
-            width={76}
-            height={76}
+            width={80}
+            height={80}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             unoptimized
             onError={() => setImgError(true)}
           />
-        ) : cat.bgColor ? (
-          <span className="text-white text-2xl font-black">%</span>
-        ) : (
-          /* Fallback tiffany com ícone — aparece quando a imagem quebra */
-          <div className="w-full h-full bg-[#1a4f4a] flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="1.5" className="w-8 h-8">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v4l3 3"/>
-            </svg>
+        )}
+        {cat.badge && (
+          <div className="absolute top-1 right-1">
+            <RaioIcon size={18} comFundo={true} />
           </div>
         )}
       </div>
-      <div className="text-center">
-        <span className="text-xs font-semibold text-white group-hover:text-[#3cbfb3] transition-colors block leading-tight">
-          {cat.nome}
-        </span>
-        {cat.badge && (
-          <span className="inline-block bg-[#f59e0b] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5 uppercase tracking-wide">
-            {cat.badge}
-          </span>
-        )}
-      </div>
+      <span className="text-sm font-bold text-white/80 text-center">{cat.nome}</span>
     </Link>
   )
 }
 
 export default function CategoriasSection() {
   return (
-    <section className="bg-[#1a4f4a] border-b border-[#3cbfb3]/20 py-5">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-center gap-10 overflow-x-auto scrollbar-hide pb-1">
-          {CATEGORIAS.map(cat => (
-            <CategoriaItem key={cat.nome} cat={cat} />
+    <section className="bg-transparent border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
+        <h2 className="text-xl font-extrabold text-white mb-6">Nossas Categorias</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {CATEGORIAS.map((cat) => (
+            <CategoriaCard key={cat.nome} cat={cat} />
           ))}
         </div>
       </div>

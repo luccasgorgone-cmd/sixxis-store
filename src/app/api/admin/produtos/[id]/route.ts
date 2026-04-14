@@ -56,8 +56,11 @@ export async function PUT(
     estoque,
     ativo,
     imagens,
+    videoUrl,
     temVariacoes,
     variacoes,
+    especificacoes,
+    faqs,
   } = body
 
   // Validar SKUs únicos das variações
@@ -125,7 +128,10 @@ export async function PUT(
         estoque: estoqueTotal,
         ativo: ativo !== false,
         imagens: imagens ?? [],
+        videoUrl: videoUrl ?? null,
         temVariacoes: Boolean(temVariacoes),
+        especificacoes: especificacoes ?? undefined,
+        faqs: faqs ?? undefined,
       },
     })
   })

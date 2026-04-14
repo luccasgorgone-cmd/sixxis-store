@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Image as ImageIcon, Tag, Star, Trophy, LayoutTemplate, Mail, Smartphone, X } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Image as ImageIcon, Tag, Star, Trophy, LayoutTemplate, Mail, X, BarChart2, Users } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const navItems = [
@@ -14,9 +14,10 @@ const navItems = [
   { href: '/admin/banners',       label: 'Banners',        icon: ImageIcon,       exact: false },
   { href: '/admin/cupons',        label: 'Cupons',         icon: Tag,             exact: false },
   { href: '/admin/avaliacoes',    label: 'Avaliações',     icon: Star,            exact: false },
+  { href: '/admin/avaliacoes-parceiros', label: 'Aval. Parceiros', icon: Users, exact: false },
   { href: '/admin/fidelidade',    label: 'Fidelidade',     icon: Trophy,          exact: false },
   { href: '/admin/emails',        label: 'E-mails',        icon: Mail,            exact: false },
-  { href: '/admin/mobile',        label: 'Editor Mobile',  icon: Smartphone,      exact: false },
+  { href: '/admin/analytics',     label: 'Analytics',      icon: BarChart2,       exact: false },
   { href: '/admin/configuracoes', label: 'Configurações',  icon: Settings,        exact: false },
 ]
 

@@ -10,8 +10,6 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import { SessionProvider } from 'next-auth/react'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic    = 'force-dynamic'
@@ -74,6 +72,13 @@ const COR_KEYS = [
   'cor_card_fundo', 'cor_card_borda', 'cor_card_hover',
   'cor_trustbar_fundo', 'cor_trustbar_icones',
   'cor_badge_oferta', 'cor_badge_novo', 'cor_badge_esgotado',
+  // Background global (wallpaper)
+  'bg_body_url', 'bg_body_ativo', 'bg_body_size', 'bg_body_attachment',
+  'bg_body_repeat', 'bg_body_position', 'bg_body_overlay',
+  // Cores configuráveis do header
+  'bg_header_cor', 'bg_header_nav_cor', 'bg_anuncio_cor', 'bg_anuncio_texto',
+  // Cores configuráveis do footer
+  'bg_footer_cor', 'bg_footer_texto', 'bg_footer_titulo', 'bg_footer_hover',
 ] as const
 
 
@@ -89,6 +94,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
     if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
+
+    // ── Migração lazy: corrige valores antigos do esquema de cores ────────────
+    // Se o DB ainda tem os defaults antigos, atualiza para o novo esquema.
+    // Após a 1ª requisição pós-deploy o DB fica correto e isso nunca mais roda.
+    const colorMigrations: { chave: string; antigo: string; novo: string }[] = [
+      { chave: 'bg_header_cor',     antigo: '#1a4f4a', novo: '#0f2e2b' },
+      { chave: 'bg_header_nav_cor', antigo: '#0f2e2b', novo: '#1a4f4a' },
+      { chave: 'bg_anuncio_cor',    antigo: '#0f2e2b', novo: '#1a4f4a' },
+    ]
+    for (const { chave, antigo, novo } of colorMigrations) {
+      if (cfg[chave] === antigo) {
+        await prisma.configuracao.update({ where: { chave }, data: { valor: novo } })
+        cfg[chave] = novo  // atualiza in-memory para o restante desta requisição
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
   } catch {
     // silently use defaults
   }
@@ -139,13 +160,28 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--color-badge-novo':       cfg.cor_badge_novo       || '#3cbfb3',
     '--color-badge-esgotado':   cfg.cor_badge_esgotado   || '#9ca3af',
     '--font-active':            `var(${fontObj.variable})`,
+    // Novas variáveis de personalização visual
+    '--bg-header':      cfg.bg_header_cor      || '#0f2e2b',
+    '--bg-header-nav':  cfg.bg_header_nav_cor  || '#1a4f4a',
+    '--bg-anuncio':     cfg.bg_anuncio_cor     || '#1a4f4a',
+    '--bg-anuncio-txt': cfg.bg_anuncio_texto   || '#ffffff',
+    '--bg-footer':      cfg.bg_footer_cor      || '#111827',
+    '--bg-footer-txt':  cfg.bg_footer_texto    || '#9ca3af',
+    '--bg-footer-h':    cfg.bg_footer_titulo   || '#ffffff',
+    '--bg-footer-hov':  cfg.bg_footer_hover    || '#3cbfb3',
   } as React.CSSProperties
+
+  // Body: plain background color only — wallpaper is applied per-page (home page)
+  const bodyStyle: React.CSSProperties = {
+    fontFamily: `var(${fontObj.variable}), system-ui, sans-serif`,
+    backgroundColor: cfg.cor_fundo || '#ffffff',
+    ...cssVars,
+  }
 
   return (
     <html
       lang="pt-BR"
       className={`${allFontVars} h-full antialiased`}
-      style={cssVars}
     >
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -153,13 +189,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="apple-mobile-web-app-title" content="Sixxis Store" />
       </head>
       <body
-        className="min-h-full flex flex-col bg-white"
-        style={{ fontFamily: `var(${fontObj.variable}), system-ui, sans-serif` }}
+        className="min-h-full flex flex-col"
+        style={bodyStyle}
       >
         <SessionProvider>
-          <Header logoUrl={logoUrl} />
-          <div className="flex-1">{children}</div>
-          <Footer />
+          {children}
         </SessionProvider>
       </body>
     </html>

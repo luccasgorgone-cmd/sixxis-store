@@ -23,6 +23,7 @@ model Cliente {
   pontos          PontosCliente?
 }
 
+
 model Endereco {
   id          String   @id @default(cuid())
   clienteId   String
@@ -56,6 +57,12 @@ model Produto {
   createdAt        DateTime          @default(now())
   sku              String?           @unique
   temVariacoes     Boolean           @default(false)
+  videoUrl         String?           @default("")
+  especificacoes   Json?
+  faqs             Json?
+  vendidos            Int               @default(0)
+  mediaAvaliacoes     Float             @default(0)
+  totalAvaliacoes     Int               @default(0)
   avaliacoes       Avaliacao[]
   itensCarrinho    ItemCarrinho[]
   itensPedido      ItemPedido[]
@@ -130,19 +137,36 @@ model ItemCarrinho {
 }
 
 model Avaliacao {
-  id         String   @id @default(cuid())
-  produtoId  String
-  clienteId  String
-  nota       Int
-  titulo     String?
-  comentario String?  @db.Text
-  aprovada   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  cliente    Cliente  @relation(fields: [clienteId], references: [id])
-  produto    Produto  @relation(fields: [produtoId], references: [id])
+  id          String          @id @default(cuid())
+  produtoId   String
+  clienteId   String?
+  nomeAutor   String          @default("")
+  emailAutor  String?
+  nota        Int
+  titulo      String?
+  comentario  String?         @db.Text
+  aprovada    Boolean         @default(false)
+  destaque    Boolean         @default(false)
+  resposta    String?         @db.Text
+  respostaEm  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  fotos       AvaliacaoFoto[]
+  cliente     Cliente?        @relation(fields: [clienteId], references: [id])
+  produto     Produto         @relation(fields: [produtoId], references: [id])
 
   @@index([clienteId], map: "Avaliacao_clienteId_fkey")
   @@index([produtoId, aprovada])
+}
+
+model AvaliacaoFoto {
+  id          String    @id @default(cuid())
+  avaliacaoId String
+  url         String
+  createdAt   DateTime  @default(now())
+  avaliacao   Avaliacao @relation(fields: [avaliacaoId], references: [id], onDelete: Cascade)
+
+  @@index([avaliacaoId])
 }
 
 model Banner {
@@ -244,4 +268,72 @@ model EmailTemplate {
   prazo        Int      @default(0)
   unidadePrazo String   @default("horas")
   updatedAt    DateTime @updatedAt
+}
+
+model CookieConsent {
+  id         String   @id @default(uuid())
+  sessionId  String
+  ip         String?
+  userAgent  String?  @db.Text
+  aceitou    Boolean  @default(false)
+  categorias String   @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+model EventoAnalitico {
+  id        String   @id @default(uuid())
+  sessionId String
+  userId    String?
+  tipo      String
+  dados     String   @default("{}")
+  pagina    String?
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([tipo])
+  @@index([createdAt])
+}
+
+model ClienteInsight {
+  id               String   @id @default(uuid())
+  sessionId        String   @unique
+  userId           String?
+  primeiraVisita   DateTime @default(now())
+  ultimaVisita     DateTime @default(now())
+  totalVisitas     Int      @default(1)
+  totalPaginas     Int      @default(1)
+  carrinhosAbertos Int      @default(0)
+  comprasFeitas    Int      @default(0)
+  totalGasto       Float    @default(0)
+  produtosVistos   String   @default("[]")
+  buscas           String   @default("[]")
+  dispositivo      String?
+  cidade           String?
+  fonte            String?
+  cookieCategs     String   @default("{}")
+
+  @@index([ultimaVisita])
+}
+
+model AvaliacaoParceiro {
+  id            String   @id @default(uuid())
+  nomeCompleto  String
+  empresa       String?
+  cargo         String?
+  cidade        String?
+  nota          Int      @default(5)
+  titulo        String
+  comentario    String   @db.Text
+  avatarInicial String?
+  corAvatar     String   @default("#3cbfb3")
+  aprovada      Boolean  @default(true)
+  destaque      Boolean  @default(false)
+  ordem         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("avaliacao_parceiro")
 }

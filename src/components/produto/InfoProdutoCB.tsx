@@ -1,0 +1,456 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle, Minus, Plus } from 'lucide-react'
+import EstrelasNota from '@/components/ui/EstrelasNota'
+import CalcFrete from '@/components/produto/CalcFrete'
+import { useCarrinho } from '@/hooks/useCarrinho'
+
+interface Variacao {
+  id: string
+  nome: string
+  sku: string
+  preco: number | null
+  estoque: number
+  ativo: boolean
+}
+
+interface Props {
+  produto: {
+    id: string
+    nome: string
+    slug: string
+    sku: string | null
+    preco: number
+    precoPromocional: number | null
+    estoque: number
+    temVariacoes: boolean
+    imagem?: string
+  }
+  variacoes: Variacao[]
+  taxaJuros: number
+  mediaAvaliacoes: number
+  totalAvaliacoes: number
+}
+
+function fmt(v: number) {
+  return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+function calcPMT(pv: number, taxa: number, n: number) {
+  if (taxa === 0) return pv / n
+  return pv * (taxa * Math.pow(1 + taxa, n)) / (Math.pow(1 + taxa, n) - 1)
+}
+
+function inferirTipoVariacao(nomes: string[]): string {
+  if (!nomes.length) return 'Variação'
+  const joined = nomes.join(' ')
+  if (/\d+\s*v\b|bivolt/i.test(joined)) return 'Voltagem'
+  const cores = ['preto','branco','azul','vermelho','verde','amarelo','rosa','cinza','laranja','roxo','marrom','bege','prata','dourado','grafite']
+  if (cores.some(c => joined.toLowerCase().includes(c))) return 'Cor'
+  if (/\b(pp|p|m|g{1,2}|xg|xxg|xs|s|l|xl{1,2}|xxl)\b/i.test(joined)) return 'Tamanho'
+  if (/\b\d+(cm|mm|ml|l|kg|g|w|hz|gb|tb|pol)\b/i.test(joined)) return 'Capacidade'
+  return 'Variação'
+}
+
+export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAvaliacoes, totalAvaliacoes }: Props) {
+  const router = useRouter()
+  const { adicionarItem, setDrawerAberto } = useCarrinho()
+  const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
+  const [adicionado, setAdicionado] = useState(false)
+  const [parcelasAberto, setParcelasAberto] = useState(false)
+  const [quantidade, setQuantidade] = useState(1)
+
+  const precoBase = produto.precoPromocional ?? produto.preco
+  const precoAtual = variacaoSelecionada?.preco ?? precoBase
+  const precoOriginal = produto.preco
+  const desconto = precoOriginal > precoAtual
+    ? Math.round(((precoOriginal - precoAtual) / precoOriginal) * 100)
+    : 0
+  const precoAtVista = precoAtual * 0.97
+  const taxa = taxaJuros / 100
+  const estoqueAtual = variacaoSelecionada ? variacaoSelecionada.estoque : produto.estoque
+  const esgotado = estoqueAtual === 0
+  const variacoesAtivas = variacoes.filter(v => v.ativo)
+
+  function handleAddToCart() {
+    if (produto.temVariacoes && !variacaoSelecionada) return
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco: precoAtual,
+      quantidade,
+      imagem: produto.imagem,
+      ...(variacaoSelecionada && {
+        variacaoId: variacaoSelecionada.id,
+        variacaoNome: variacaoSelecionada.nome,
+      }),
+    })
+    setAdicionado(true)
+    setDrawerAberto(true)
+    setTimeout(() => setAdicionado(false), 2500)
+  }
+
+  function handleComprar() {
+    if (produto.temVariacoes && !variacaoSelecionada) return
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco: precoAtual,
+      quantidade,
+      imagem: produto.imagem,
+      ...(variacaoSelecionada && {
+        variacaoId: variacaoSelecionada.id,
+        variacaoNome: variacaoSelecionada.nome,
+      }),
+    })
+    router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
+  }
+
+  return (
+    <div>
+      {/* Vendido por */}
+      <div className="flex flex-wrap gap-2 mb-3">
+        <span className="text-xs text-gray-500 bg-gray-50 border border-gray-100 px-2 py-1 rounded-lg">
+          Vendido e entregue por <strong>Sixxis</strong>
+        </span>
+      </div>
+
+      {/* Título */}
+      <h1 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight mb-2">
+        {produto.nome}
+      </h1>
+
+      {/* SKU */}
+      {produto.sku && (
+        <p className="text-xs text-gray-400 mb-3">(Cód. Item {produto.sku})</p>
+      )}
+
+      {/* Avaliações */}
+      <div className="flex flex-nowrap items-center gap-2 mb-4 pb-4 border-b border-gray-100">
+        {totalAvaliacoes > 0 ? (
+          <>
+            <EstrelasNota nota={mediaAvaliacoes} size={14} />
+            <span className="text-xs leading-none font-bold text-gray-800">{mediaAvaliacoes.toFixed(1)}</span>
+            <a href="#avaliacoes" className="text-xs leading-none text-[#0066cc] hover:underline whitespace-nowrap">
+              {totalAvaliacoes} avaliação{totalAvaliacoes !== 1 ? 'ões' : ''}
+            </a>
+          </>
+        ) : (
+          <span className="text-xs leading-none text-gray-400">Seja o primeiro a avaliar</span>
+        )}
+        <div className="w-px h-3.5 bg-gray-200 mx-1 shrink-0" />
+        <a href={`https://wa.me/5518997474701?text=Tenho%20uma%20dúvida%20sobre%20${encodeURIComponent(produto.nome)}`}
+          target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs leading-none text-[#0066cc] hover:underline whitespace-nowrap">
+          <MessageCircle size={12} />
+          Tire sua dúvida
+        </a>
+      </div>
+
+      {/* Badge desconto */}
+      {desconto > 0 && (
+        <div className="flex items-center gap-2 mb-2">
+          <span className="bg-[#dc2626] text-white text-xs font-black px-2.5 py-1 rounded-lg">
+            Baixou {desconto}%
+          </span>
+        </div>
+      )}
+
+      {/* Bloco de preços */}
+      <div className="mb-5">
+        {precoOriginal > precoAtual && (
+          <p className="text-sm text-gray-400 line-through mb-0.5">
+            de R$ {fmt(precoOriginal)}
+          </p>
+        )}
+
+        <div className="mb-2">
+          <span className="text-gray-600 text-sm">por </span>
+          <span className="text-3xl font-black text-gray-900">R$ {fmt(precoAtual)}</span>
+          <span className="text-sm text-gray-600 ml-2">
+            em até <strong>6x</strong> de{' '}
+            <strong>R$ {fmt(precoAtual / 6)}</strong> sem juros no cartão
+          </span>
+        </div>
+
+        {/* PIX */}
+        <div className="flex items-center gap-2 mb-4 p-3 bg-[#f0fffe] border border-[#3cbfb3]/20 rounded-xl">
+          <div className="w-8 h-8 bg-[#3cbfb3] rounded-lg flex items-center justify-center shrink-0">
+            <span className="text-white font-black text-[9px]">PIX</span>
+          </div>
+          <div>
+            <span className="text-gray-500 text-sm">por </span>
+            <span className="text-lg font-black text-gray-900">R$ {fmt(precoAtVista)}</span>
+            <span className="text-[#3cbfb3] text-sm font-semibold ml-1">com 3% de desconto</span>
+          </div>
+        </div>
+
+        {/* Ver parcelamento */}
+        <button
+          onClick={() => setParcelasAberto(a => !a)}
+          className="text-[#0066cc] text-sm hover:underline mb-4 flex items-center gap-1"
+        >
+          Ver mais opções de pagamento
+          <ChevronDown size={14} className={`transition-transform ${parcelasAberto ? 'rotate-180' : ''}`} />
+        </button>
+
+        {parcelasAberto && (
+          <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 mb-4">
+            <div className="grid grid-cols-2 gap-3">
+
+              {/* Coluna 1: 1x–6x sem juros */}
+              <div>
+                <p className="text-[10px] font-extrabold text-green-700 uppercase tracking-wide mb-2 text-center">
+                  Sem juros
+                </p>
+                <div className="space-y-1">
+                  {[1,2,3,4,5,6].map(n => (
+                    <div key={n} className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs ${
+                      n === 6 ? 'bg-[#e8f8f7] border border-[#3cbfb3]/30' : 'bg-white border border-gray-100'
+                    }`}>
+                      <span className="font-bold text-gray-700 w-6">{n}x</span>
+                      <span className={`font-bold ${n === 6 ? 'text-[#3cbfb3]' : 'text-gray-700'}`}>
+                        R$ {fmt(precoAtual / n)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Coluna 2: 7x–12x com juros */}
+              <div>
+                <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-2 text-center">
+                  Com juros
+                </p>
+                <div className="space-y-1">
+                  {[7,8,9,10,11,12].map(n => {
+                    const valor = calcPMT(precoAtual, taxa, n)
+                    return (
+                      <div key={n} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs bg-white border border-gray-100">
+                        <span className="font-bold text-gray-700 w-6">{n}x</span>
+                        <span className="font-bold text-gray-600">R$ {fmt(valor)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+            </div>
+            <p className="text-[10px] text-gray-400 text-center mt-3">
+              * Parcelas com juros calculadas sobre o valor total. Confira no checkout.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Variações */}
+      {variacoesAtivas.length > 0 && (
+        <div className="mb-5">
+          <p className="text-sm font-bold text-gray-700 mb-2">
+            {inferirTipoVariacao(variacoesAtivas.map(v => v.nome))}:
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {variacoesAtivas.map(v => (
+              <button
+                key={v.id}
+                onClick={() => setVariacaoSelecionada(v)}
+                disabled={v.estoque === 0}
+                className={`px-5 py-2.5 rounded-2xl text-sm font-bold border-2 transition-all ${
+                  variacaoSelecionada?.id === v.id
+                    ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#1a4f4a]'
+                    : v.estoque === 0
+                      ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
+                      : 'border-gray-200 text-gray-600 hover:border-[#3cbfb3]/50'
+                }`}
+              >
+                {v.nome}
+              </button>
+            ))}
+          </div>
+          {produto.temVariacoes && !variacaoSelecionada && (
+            <p className="text-amber-600 text-xs font-medium mt-2">⚡ Selecione a opção para continuar</p>
+          )}
+        </div>
+      )}
+
+      {/* Estoque */}
+      <div className="mb-4">
+        {esgotado ? (
+          <span className="text-red-600 text-sm font-bold">✗ Produto esgotado</span>
+        ) : (
+          <span className="text-green-700 text-sm font-semibold">✓ Em estoque</span>
+        )}
+      </div>
+
+      {/* Seletor de quantidade */}
+      {!esgotado && (
+        <div className="flex items-center gap-3 mb-5">
+          <span className="text-sm font-bold text-gray-700">Quantidade:</span>
+          <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setQuantidade(q => Math.max(1, q - 1))}
+              className="w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+              aria-label="Diminuir quantidade"
+            >
+              <Minus size={14} />
+            </button>
+            <span className="w-10 text-center text-base font-bold text-gray-900">{quantidade}</span>
+            <button
+              onClick={() => setQuantidade(q => q + 1)}
+              className="w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+              aria-label="Aumentar quantidade"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Botões */}
+      <div className="flex flex-col gap-3 mb-6">
+        {/* COMPRAR AGORA — principal, sempre sólido */}
+        <button
+          onClick={handleComprar}
+          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          className="w-full text-white font-extrabold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
+          style={{
+            backgroundColor: '#3cbfb3',
+            boxShadow: '0 6px 20px rgba(60,191,179,0.40)',
+            opacity: 1,
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+          Comprar Agora
+        </button>
+
+        {/* ADICIONAR AO CARRINHO — secundário, outline */}
+        <button
+          onClick={handleAddToCart}
+          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          className="w-full font-bold text-base py-3.5 rounded-2xl border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7] disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5"
+        >
+          {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}
+          {adicionado ? 'Adicionado ao Carrinho!' : 'Adicionar ao Carrinho'}
+        </button>
+      </div>
+
+      {/* Badges de segurança */}
+      <div className="mt-4 mb-5">
+        {/* Grid 2x2 */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-green-100 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Compra Segura</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Dados protegidos SSL</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-[#e8f8f7] rounded-lg flex items-center justify-center shrink-0 group-hover:bg-[#d0f4f1] transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <circle cx="12" cy="12" r="3" fill="#0f9488" stroke="none"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Garantia 12 Meses</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Suporte técnico Sixxis</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="1"/>
+                <path d="M16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Entrega Rápida</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Para todo o Brasil</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-purple-100 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 .49-4.46"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Troca Fácil</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Até 7 dias corridos</p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Selos de confiança */}
+        <div className="flex items-center justify-center gap-3 bg-gray-50/80 border border-gray-100 rounded-xl py-2.5 px-3 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            {/* Mercado Pago SVG logo */}
+            <svg width="24" height="16" viewBox="0 0 200 130" fill="none">
+              <rect width="200" height="130" rx="12" fill="#009ee3"/>
+              <text x="100" y="87" textAnchor="middle" fill="white" fontSize="65" fontWeight="bold" fontFamily="Arial, sans-serif">MP</text>
+            </svg>
+            <span className="text-[10px] text-gray-600 font-semibold">Mercado Pago</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span className="text-[10px] text-gray-600 font-semibold">Loja Verificada</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5">
+            <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span className="text-[10px] text-gray-600 font-semibold">SSL Ativo</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="6"/>
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+            </svg>
+            <span className="text-[10px] text-gray-600 font-semibold">100% Original</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Frete */}
+      <CalcFrete produtoId={produto.id} />
+
+      {/* Compartilhar */}
+      <a
+        href={`https://wa.me/?text=${encodeURIComponent(`Olha esse produto na Sixxis Store: ${produto.nome} — https://sixxisstore.com.br/produtos/${produto.slug}`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#25D366] border border-gray-200 hover:border-[#25D366] rounded-lg px-3 py-2 transition-colors"
+      >
+        <Share2 size={13} />
+        Compartilhar via WhatsApp
+      </a>
+    </div>
+  )
+}

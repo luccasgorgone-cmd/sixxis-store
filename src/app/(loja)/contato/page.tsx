@@ -103,24 +103,25 @@ export default function ContatoPage() {
               ))}
             </div>
 
-            {/* Mapa OpenStreetMap — R. Anhanguera, 1711, Araçatuba-SP */}
-            <div className="mt-8 rounded-xl overflow-hidden border border-gray-200">
+            {/* Mapa Google Maps — R. Anhanguera, 1711, Araçatuba-SP */}
+            <div className="mt-8 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
               <iframe
-                title="Localização Sixxis — R. Anhanguera, 1711, Araçatuba-SP"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=-50.4567%2C-21.2043%2C-50.4367%2C-21.1843&layer=mapnik&marker=-21.1943%2C-50.4467"
+                src="https://maps.google.com/maps?q=R.+Anhanguera,+1711,+Icaray,+Araçatuba,+SP,+16020-355&output=embed&z=16"
                 width="100%"
-                height="220"
+                height="320"
                 style={{ border: 0, display: 'block' }}
+                allowFullScreen
                 loading="lazy"
+                title="Localização Sixxis — R. Anhanguera, 1711, Araçatuba SP"
               />
             </div>
             <a
-              href="https://www.openstreetmap.org/?mlat=-21.1943&mlon=-50.4467#map=16/-21.1943/-50.4467"
+              href="https://maps.google.com/maps?q=R.+Anhanguera,+1711,+Icaray,+Araçatuba,+SP,+16020-355"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 mt-2 text-xs text-[#3cbfb3] hover:underline"
             >
-              <MapPin size={11} /> Ver mapa maior
+              <MapPin size={11} /> Abrir no Google Maps
             </a>
           </div>
         </div>

@@ -8,6 +8,7 @@ export interface ItemCarrinho {
   nome:         string
   preco:        number
   quantidade:   number
+  imagem?:      string
   variacaoId?:  string
   variacaoNome?: string
 }
@@ -19,6 +20,8 @@ function itemKey(produtoId: string, variacaoId?: string) {
 
 interface CarrinhoStore {
   itens: ItemCarrinho[]
+  drawerAberto: boolean
+  setDrawerAberto: (v: boolean) => void
   adicionarItem: (item: ItemCarrinho) => void
   removerItem: (produtoId: string, variacaoId?: string) => void
   atualizarQuantidade: (produtoId: string, quantidade: number, variacaoId?: string) => void
@@ -31,6 +34,8 @@ export const useCarrinho = create<CarrinhoStore>()(
   persist(
     (set, get) => ({
       itens: [],
+      drawerAberto: false,
+      setDrawerAberto: (v) => set({ drawerAberto: v }),
       get total() {
         return get().itens.reduce((acc, item) => acc + item.preco * item.quantidade, 0)
       },
@@ -79,6 +84,9 @@ export const useCarrinho = create<CarrinhoStore>()(
         set({ itens: [] })
       },
     }),
-    { name: 'sixxis-carrinho' },
+    {
+      name: 'sixxis-carrinho',
+      partialize: (state) => ({ itens: state.itens }),
+    },
   ),
 )

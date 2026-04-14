@@ -18,6 +18,9 @@ import {
   LayoutTemplate,
   FileText,
   Type,
+  ImageIcon,
+  ExternalLink,
+  Bot,
 } from 'lucide-react'
 import CampoCor from '@/components/admin/CampoCor'
 import { Toast } from '@/components/admin/Toast'
@@ -166,10 +169,43 @@ const DEFAULTS: Record<string, string> = {
   cor_botoes_hover: '#2a9d8f',
   cor_textos_sec: '#6b7280',
   cor_titulos: '#0a0a0a',
+  // Background global (wallpaper)
+  bg_body_url: '',
+  bg_body_ativo: 'false',
+  bg_body_size: 'cover',
+  bg_body_attachment: 'fixed',
+  bg_body_repeat: 'no-repeat',
+  bg_body_position: 'center center',
+  bg_body_overlay: '0',
+  // Cores do header
+  bg_header_cor: '#1a4f4a',
+  bg_header_nav_cor: '#0f2e2b',
+  bg_anuncio_cor: '#0f2e2b',
+  bg_anuncio_texto: '#ffffff',
+  // Cores do footer
+  bg_footer_cor: '#111827',
+  bg_footer_texto: '#9ca3af',
+  bg_footer_titulo: '#ffffff',
+  bg_footer_hover: '#3cbfb3',
+  juros_cartao_taxa_mensal: '2.99',
+  // Agente Luna
+  agente_ativo:            'true',
+  agente_nome:             'Luna',
+  agente_saudacao:         'Olá! Sou a Luna, assistente da Sixxis 👋 Como posso te ajudar hoje?',
+  agente_cor_primaria:     '#3cbfb3',
+  agente_cor_secundaria:   '#0f2e2b',
+  agente_modelo:           'claude-haiku-4-5-20251001',
+  agente_max_tokens:       '400',
+  agente_temperatura:      '0.7',
+  agente_whatsapp_vendas:  '5518997474701',
+  agente_whatsapp_suporte: '5511934102621',
+  agente_system_prompt:    '',
+  anthropic_api_key:       '',
 }
 
 const TABS = [
   { id: 'loja', label: 'Informações da Loja', icon: Store },
+  { id: 'visual', label: 'Visual do Site', icon: ImageIcon },
   { id: 'aparencia', label: 'Aparência', icon: Palette },
   { id: 'tipografia', label: 'Tipografia', icon: Type },
   { id: 'textos', label: 'Textos do Site', icon: FileText },
@@ -179,6 +215,7 @@ const TABS = [
   { id: 'editor', label: 'Editor do Site', icon: LayoutTemplate },
   { id: 'seo', label: 'SEO', icon: Search },
   { id: 'seguranca', label: 'Segurança', icon: Shield },
+  { id: 'agente', label: 'Agente Luna', icon: Bot },
 ]
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -357,6 +394,8 @@ export default function ConfiguracoesPage() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const heroInputRef = useRef<HTMLInputElement>(null)
   const [uploadingHero, setUploadingHero] = useState(false)
+  const [uploadingBg, setUploadingBg] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
 
   // Password change state
   const [senhaAtual, setSenhaAtual] = useState('')
@@ -441,6 +480,50 @@ export default function ConfiguracoesPage() {
     }
     setUploadingLogo(false)
     e.target.value = ''
+  }
+
+  async function handleUploadBackground(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('❌ Imagem muito grande. Máximo: 10MB')
+      return
+    }
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      alert('❌ Formato inválido. Use PNG, JPG ou WebP')
+      return
+    }
+
+    setUploadingBg(true)
+    setUploadProgress('Enviando imagem...')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/admin/upload-background', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (data.url) {
+        setConfigs(prev => ({ ...prev, bg_body_url: data.url }))
+        setUploadProgress('✅ Upload concluído!')
+        setTimeout(() => setUploadProgress(''), 3000)
+      } else {
+        alert('❌ Erro: ' + (data.erro || 'Tente novamente'))
+        setUploadProgress('')
+      }
+    } catch {
+      alert('❌ Erro ao enviar imagem')
+      setUploadProgress('')
+    } finally {
+      setUploadingBg(false)
+      e.target.value = ''
+    }
   }
 
   async function handlePasswordChange() {
@@ -704,6 +787,7 @@ export default function ConfiguracoesPage() {
       'frete_minimo_gratis', 'frete_cep_origem',
       'pagamento_pix', 'pagamento_boleto', 'pagamento_cartao',
       'pagamento_parcelas', 'pagamento_desconto_pix',
+      'juros_cartao_taxa_mensal',
     ]
     return (
       <div className="space-y-5">
@@ -767,6 +851,28 @@ export default function ConfiguracoesPage() {
                 onChange={(v) => set('pagamento_desconto_pix', v)}
                 placeholder="3"
               />
+            </Field>
+          </div>
+        </Card>
+
+        <Card title="Juros do Cartão de Crédito">
+          <div className="space-y-4">
+            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl p-4">
+              <p className="font-bold text-[#1a4f4a] text-sm">Parcelas 1x a 6x: SEM juros</p>
+              <p className="text-[#2a9d8f] text-xs mt-1">Fixo — as 6 primeiras parcelas são sempre sem juros.</p>
+            </div>
+            <Field label="Taxa de Juros Mensal (7x a 12x)" hint="Ex: 2.99 = 2.99% ao mês. Usado no cálculo Price (juros compostos).">
+              <div className="flex items-center gap-2">
+                <div className="relative max-w-xs">
+                  <Input
+                    type="number"
+                    value={configs.juros_cartao_taxa_mensal ?? '2.99'}
+                    onChange={(v) => set('juros_cartao_taxa_mensal', v)}
+                    placeholder="2.99"
+                  />
+                </div>
+                <span className="text-gray-500 text-sm font-bold shrink-0">% a.m.</span>
+              </div>
             </Field>
           </div>
         </Card>
@@ -1375,8 +1481,543 @@ export default function ConfiguracoesPage() {
     )
   }
 
+  // ─── renderVisual ────────────────────────────────────────────────────────────
+
+  function ColorPicker({
+    chave,
+    label,
+    descricao,
+    defaultVal,
+  }: {
+    chave: string
+    label: string
+    descricao: string
+    defaultVal: string
+  }) {
+    const valor = configs[chave] || defaultVal
+    return (
+      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+        <div className="flex items-center gap-3 mb-2">
+          <input
+            type="color"
+            value={valor.startsWith('#') && valor.length === 7 ? valor : defaultVal}
+            onChange={(e) => set(chave, e.target.value)}
+            className="w-10 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5 shrink-0"
+          />
+          <div>
+            <p className="font-bold text-gray-900 text-sm">{label}</p>
+            <p className="text-xs text-gray-500">{descricao}</p>
+          </div>
+        </div>
+        <input
+          type="text"
+          value={valor}
+          onChange={(e) => {
+            if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) set(chave, e.target.value)
+          }}
+          placeholder="#000000"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-[#3cbfb3] outline-none"
+          maxLength={7}
+        />
+      </div>
+    )
+  }
+
+  function renderVisual() {
+    const visualKeys = [
+      'bg_body_url', 'bg_body_ativo', 'bg_body_size', 'bg_body_attachment',
+      'bg_body_repeat', 'bg_body_position', 'bg_body_overlay',
+      'bg_header_cor', 'bg_header_nav_cor', 'bg_anuncio_cor', 'bg_anuncio_texto',
+      'bg_footer_cor', 'bg_footer_texto', 'bg_footer_titulo', 'bg_footer_hover',
+    ]
+
+    return (
+      <div className="space-y-5">
+
+        {/* CARD 1 — Wallpaper */}
+        <Card title="Imagem de Fundo (Wallpaper)">
+          <p className="text-xs text-gray-500 mb-4">Aparece como fundo em todas as páginas do site</p>
+
+          <div className="space-y-4">
+            {/* Preview atual */}
+            {configs.bg_body_url ? (
+              <div className="relative rounded-xl overflow-hidden border border-gray-200 h-48 group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={configs.bg_body_url}
+                  alt="Wallpaper atual"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    onClick={() => setConfigs(prev => ({ ...prev, bg_body_url: '' }))}
+                    className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition"
+                  >
+                    🗑️ Remover imagem
+                  </button>
+                </div>
+                <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-lg">
+                  {configs.bg_body_ativo === 'true' ? '✅ Wallpaper ativo' : '⏸ Wallpaper inativo'}
+                </div>
+              </div>
+            ) : (
+              <div className="h-48 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <ImageIcon size={24} className="text-gray-400" />
+                  </div>
+                  <p className="text-gray-500 font-medium text-sm">Nenhum wallpaper configurado</p>
+                </div>
+              </div>
+            )}
+
+            {/* Área de upload direto */}
+            <div>
+              <input
+                type="file"
+                id="upload-wallpaper"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleUploadBackground}
+                disabled={uploadingBg}
+              />
+              <label
+                htmlFor="upload-wallpaper"
+                className={`
+                  flex flex-col items-center justify-center w-full h-36
+                  border-2 border-dashed rounded-xl cursor-pointer transition-all
+                  ${uploadingBg
+                    ? 'border-[#3cbfb3] bg-[#e8f8f7] cursor-not-allowed'
+                    : 'border-gray-300 hover:border-[#3cbfb3] hover:bg-[#e8f8f7] bg-gray-50'
+                  }
+                `}
+              >
+                {uploadingBg ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-[#3cbfb3] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[#3cbfb3] font-semibold text-sm">{uploadProgress}</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 pointer-events-none">
+                    <div className="w-12 h-12 bg-[#e8f8f7] rounded-full flex items-center justify-center">
+                      <Upload size={22} className="text-[#3cbfb3]" />
+                    </div>
+                    <p className="font-bold text-gray-700 text-sm">
+                      Clique para fazer upload do wallpaper
+                    </p>
+                    <p className="text-gray-400 text-xs text-center">
+                      PNG, JPG ou WebP • Recomendado 1920×1080px • Máximo 10MB
+                    </p>
+                    {configs.bg_body_url && (
+                      <p className="text-[#3cbfb3] text-xs font-semibold">
+                        Clique para substituir a imagem atual
+                      </p>
+                    )}
+                  </div>
+                )}
+              </label>
+              {uploadProgress && !uploadingBg && (
+                <p className="text-center text-[#3cbfb3] font-semibold text-sm mt-2">
+                  {uploadProgress}
+                </p>
+              )}
+            </div>
+
+            {/* Toggle ativo */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <div>
+                <p className="font-bold text-gray-900 text-sm">Ativar wallpaper no site</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Exibe a imagem de fundo em todas as páginas
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                <input
+                  type="checkbox"
+                  checked={configs.bg_body_ativo === 'true'}
+                  onChange={(e) => setConfigs(prev => ({ ...prev, bg_body_ativo: e.target.checked ? 'true' : 'false' }))}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[#3cbfb3] rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#3cbfb3] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" />
+              </label>
+            </div>
+          </div>
+
+          {/* Configurações avançadas */}
+          <details className="border border-gray-100 rounded-xl overflow-hidden">
+            <summary className="px-4 py-3 bg-gray-50 cursor-pointer font-semibold text-gray-700 text-sm select-none">
+              ⚙️ Configurações avançadas
+            </summary>
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Tamanho</label>
+                <select
+                  value={configs.bg_body_size || 'cover'}
+                  onChange={(e) => set('bg_body_size', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  <option value="cover">Cover (preenche tudo)</option>
+                  <option value="contain">Contain (mostra inteiro)</option>
+                  <option value="auto">Auto (tamanho original)</option>
+                  <option value="100% 100%">Esticado (100%×100%)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Comportamento ao rolar</label>
+                <select
+                  value={configs.bg_body_attachment || 'fixed'}
+                  onChange={(e) => set('bg_body_attachment', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  <option value="fixed">Fixo (parallax)</option>
+                  <option value="scroll">Rola com a página</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Posição</label>
+                <select
+                  value={configs.bg_body_position || 'center center'}
+                  onChange={(e) => set('bg_body_position', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  <option value="center center">Centro</option>
+                  <option value="top center">Topo</option>
+                  <option value="bottom center">Rodapé</option>
+                  <option value="left center">Esquerda</option>
+                  <option value="right center">Direita</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">
+                  Escurecimento do overlay: {configs.bg_body_overlay || 0}%
+                </label>
+                <input
+                  type="range"
+                  min={0}
+                  max={80}
+                  step={5}
+                  value={Number(configs.bg_body_overlay || 0)}
+                  onChange={(e) => set('bg_body_overlay', e.target.value)}
+                  className="w-full accent-[#3cbfb3]"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>0% (sem overlay)</span>
+                  <span>80% (muito escuro)</span>
+                </div>
+              </div>
+            </div>
+          </details>
+        </Card>
+
+        {/* CARD 2 — Cores do Header */}
+        <Card title="Cores do Cabeçalho">
+          <p className="text-xs text-gray-500 mb-4">Personalize as cores do header e barra de navegação</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ColorPicker
+              chave="bg_anuncio_cor"
+              label="Faixa de Anúncios (topo)"
+              descricao="Fundo da barra com cupom e frete grátis"
+              defaultVal="#0f2e2b"
+            />
+            <ColorPicker
+              chave="bg_anuncio_texto"
+              label="Texto da Faixa de Anúncios"
+              descricao="Cor dos textos na barra de anúncios"
+              defaultVal="#ffffff"
+            />
+            <ColorPicker
+              chave="bg_header_cor"
+              label="Header Principal"
+              descricao="Fundo do header com logo e busca"
+              defaultVal="#1a4f4a"
+            />
+            <ColorPicker
+              chave="bg_header_nav_cor"
+              label="Barra de Navegação"
+              descricao="Fundo da barra com Climatizadores, Aspiradores, etc."
+              defaultVal="#0f2e2b"
+            />
+          </div>
+        </Card>
+
+        {/* CARD 3 — Cores do Footer */}
+        <Card title="Cores do Rodapé">
+          <p className="text-xs text-gray-500 mb-4">Personalize as cores do footer</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ColorPicker
+              chave="bg_footer_cor"
+              label="Fundo do Rodapé"
+              descricao="Cor de fundo do footer"
+              defaultVal="#111827"
+            />
+            <ColorPicker
+              chave="bg_footer_texto"
+              label="Cor dos Links"
+              descricao="Cor padrão dos links e textos secundários"
+              defaultVal="#9ca3af"
+            />
+            <ColorPicker
+              chave="bg_footer_titulo"
+              label="Cor dos Títulos das Colunas"
+              descricao="Cor dos títulos (Institucional, Políticas, etc.)"
+              defaultVal="#ffffff"
+            />
+            <ColorPicker
+              chave="bg_footer_hover"
+              label="Cor dos Links ao passar o mouse"
+              descricao="Cor dos links quando o usuário passa o mouse"
+              defaultVal="#3cbfb3"
+            />
+          </div>
+        </Card>
+
+        {/* CARD 4 — Preview e Ações */}
+        <Card title="Visualizar e Salvar">
+          <div className="space-y-5">
+            {/* Instruções */}
+            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl p-4">
+              <p className="font-bold text-[#1a4f4a] mb-3 flex items-center gap-2">
+                📋 Como adicionar um wallpaper:
+              </p>
+              <ol className="text-sm text-[#1a4f4a]/80 space-y-2 list-decimal list-inside">
+                <li>No card &quot;Imagem de Fundo&quot, clique na área de upload</li>
+                <li>Selecione a imagem (PNG, JPG ou WebP, máximo 3MB)</li>
+                <li>Aguarde o upload concluir automaticamente</li>
+                <li>Ative o toggle &quot;Ativar wallpaper no site&quot;</li>
+                <li>Clique em &quot;Salvar Configurações&quot;</li>
+              </ol>
+              <p className="text-xs text-[#1a4f4a]/60 mt-3">
+                💡 Tamanho recomendado: 1920×1080px • PNG, JPG ou WebP • Máximo 10MB
+              </p>
+            </div>
+
+            {/* Ver site + Salvar */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <a
+                href="https://sixxis-store-production.up.railway.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-[#1a4f4a] hover:bg-[#0f2e2b] text-white font-bold px-5 py-3 rounded-xl transition text-sm"
+              >
+                <ExternalLink size={16} />
+                Ver site ao vivo
+              </a>
+              <SaveButton loading={saving} onClick={() => save(visualKeys)} />
+            </div>
+          </div>
+        </Card>
+
+      </div>
+    )
+  }
+
+  // ─── renderAgente ─────────────────────────────────────────────────────────────
+
+  function renderAgente() {
+    const keys = [
+      'agente_ativo', 'agente_nome', 'agente_saudacao',
+      'agente_cor_primaria', 'agente_cor_secundaria',
+      'agente_modelo', 'agente_max_tokens', 'agente_temperatura',
+      'agente_whatsapp_vendas', 'agente_whatsapp_suporte',
+      'agente_system_prompt', 'anthropic_api_key',
+    ]
+
+    const corPrim = configs.agente_cor_primaria || '#3cbfb3'
+    const corSec  = configs.agente_cor_secundaria || '#0f2e2b'
+
+    return (
+      <div className="space-y-5">
+        {/* Status */}
+        <Card title="Status do Agente">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div>
+              <p className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                <Bot className="w-4 h-4 text-[#3cbfb3]" />
+                Agente Luna ativo no site
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Exibe o chat no canto inferior esquerdo de todas as páginas da loja
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={configs.agente_ativo === 'true'}
+                onChange={(e) => set('agente_ativo', e.target.checked ? 'true' : 'false')}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[#3cbfb3] rounded-full peer peer-checked:bg-[#3cbfb3] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+            </label>
+          </div>
+        </Card>
+
+        {/* Identidade */}
+        <Card title="Identidade da Luna">
+          <div className="space-y-4">
+            <Field label="Nome do agente">
+              <Input
+                value={configs.agente_nome}
+                onChange={(v) => set('agente_nome', v)}
+                placeholder="Luna"
+              />
+            </Field>
+            <Field label="Mensagem de saudação" hint="Primeira mensagem exibida ao abrir o chat">
+              <textarea
+                value={configs.agente_saudacao}
+                onChange={(e) => set('agente_saudacao', e.target.value)}
+                rows={2}
+                placeholder="Olá! Sou a Luna, assistente da Sixxis 👋 Como posso te ajudar hoje?"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-none"
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Cor primária">
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={configs.agente_cor_primaria}
+                    onChange={(e) => set('agente_cor_primaria', e.target.value)}
+                    className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-1"
+                  />
+                  <Input
+                    value={configs.agente_cor_primaria}
+                    onChange={(v) => set('agente_cor_primaria', v)}
+                    placeholder="#3cbfb3"
+                  />
+                </div>
+              </Field>
+              <Field label="Cor secundária">
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={configs.agente_cor_secundaria}
+                    onChange={(e) => set('agente_cor_secundaria', e.target.value)}
+                    className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-1"
+                  />
+                  <Input
+                    value={configs.agente_cor_secundaria}
+                    onChange={(v) => set('agente_cor_secundaria', v)}
+                    placeholder="#0f2e2b"
+                  />
+                </div>
+              </Field>
+            </div>
+
+            {/* Preview ao vivo */}
+            <div className="bg-gray-50 rounded-2xl p-4 border border-dashed border-gray-200">
+              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-3">
+                Preview do agente
+              </p>
+              <div className="flex items-end gap-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${corSec}, ${corPrim})` }}
+                >
+                  <span className="text-white text-lg">🤖</span>
+                </div>
+                <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm border border-gray-100 max-w-[260px]">
+                  <p className="text-sm text-gray-700">
+                    {configs.agente_saudacao || 'Olá! Sou a Luna 👋'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* IA */}
+        <Card title="Configurações de IA">
+          <div className="space-y-4">
+            <Field
+              label="Anthropic API Key"
+              hint="Chave da API Anthropic (sk-ant-...). Pode ser configurada como variável de ambiente ANTHROPIC_API_KEY no Railway."
+            >
+              <MaskedInput
+                value={configs.anthropic_api_key}
+                onChange={(v) => set('anthropic_api_key', v)}
+                placeholder="sk-ant-api03-..."
+              />
+            </Field>
+
+            <Field label="Modelo de IA" hint="Claude Haiku é mais rápido e econômico; Sonnet é mais preciso">
+              <select
+                value={configs.agente_modelo || 'claude-haiku-4-5-20251001'}
+                onChange={(e) => set('agente_modelo', e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] bg-white"
+              >
+                <option value="claude-haiku-4-5-20251001">Claude Haiku — Rápido e econômico</option>
+                <option value="claude-sonnet-4-6">Claude Sonnet — Equilibrado e mais preciso</option>
+              </select>
+            </Field>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Máx. tokens por resposta"
+                hint="400 = respostas médias · 800 = respostas detalhadas"
+              >
+                <Input
+                  type="number"
+                  value={configs.agente_max_tokens}
+                  onChange={(v) => set('agente_max_tokens', v)}
+                  placeholder="400"
+                />
+              </Field>
+              <Field
+                label="Temperatura (0 – 1)"
+                hint="0 = mais preciso · 1 = mais criativo"
+              >
+                <Input
+                  type="number"
+                  value={configs.agente_temperatura}
+                  onChange={(v) => set('agente_temperatura', v)}
+                  placeholder="0.7"
+                />
+              </Field>
+            </div>
+
+            <Field
+              label="System prompt personalizado"
+              hint="Deixe vazio para usar o prompt padrão da Sixxis. Altere apenas se souber o que está fazendo."
+            >
+              <textarea
+                value={configs.agente_system_prompt}
+                onChange={(e) => set('agente_system_prompt', e.target.value)}
+                rows={8}
+                placeholder="Deixe em branco para usar o comportamento padrão da Sixxis.&#10;&#10;Exemplo: Você é a Luna, assistente da Sixxis..."
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-y font-mono"
+              />
+            </Field>
+          </div>
+        </Card>
+
+        {/* WhatsApp */}
+        <Card title="WhatsApp para encaminhamento">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="WhatsApp Vendas" hint="Número com DDI (5518...)">
+              <Input
+                value={configs.agente_whatsapp_vendas}
+                onChange={(v) => set('agente_whatsapp_vendas', v)}
+                placeholder="5518997474701"
+              />
+            </Field>
+            <Field label="WhatsApp Suporte" hint="Número com DDI (5511...)">
+              <Input
+                value={configs.agente_whatsapp_suporte}
+                onChange={(v) => set('agente_whatsapp_suporte', v)}
+                placeholder="5511934102621"
+              />
+            </Field>
+          </div>
+        </Card>
+
+        <SaveButton loading={saving} onClick={() => save(keys)} />
+      </div>
+    )
+  }
+
   const TAB_RENDERERS: Record<string, () => React.ReactNode> = {
     loja: renderLoja,
+    visual: renderVisual,
     aparencia: renderAparencia,
     tipografia: renderTipografia,
     textos: renderTextos,
@@ -1386,6 +2027,7 @@ export default function ConfiguracoesPage() {
     editor: renderEditor,
     seo: renderSeo,
     seguranca: renderSeguranca,
+    agente: renderAgente,
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────
