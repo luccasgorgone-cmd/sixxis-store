@@ -25,7 +25,7 @@ export default function FloatingButtons({
   whatsappSuporte,
 }: Props) {
   return (
-    <div className="fixed bottom-6 right-6 z-[999] flex items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-[999] flex flex-col-reverse items-end gap-3">
       {agenteAtivo && (
         <LunaWidget
           nome={nome}

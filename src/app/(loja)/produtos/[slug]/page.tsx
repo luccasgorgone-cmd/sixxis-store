@@ -10,6 +10,7 @@ import InfoProdutoCB from '@/components/produto/InfoProdutoCB'
 import DescricaoRica from '@/components/produto/DescricaoRica'
 import AbasProduto from '@/components/produto/AbasProduto'
 import CardProduto from '@/components/produto/CardProduto'
+import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 export const dynamic = 'force-dynamic'
 
@@ -131,51 +132,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           <div className="relative">
             <GaleriaCB itens={itens} nome={produto.nome} />
             {especificacoes.length > 0 && (
-              <div className="mt-5 rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
-                {/* Header escuro */}
-                <div
-                  className="flex items-center gap-2.5 px-4 py-3"
-                  style={{ background: 'linear-gradient(to right, #0f2e2b, #1a4f4a)' }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                    stroke="#3cbfb3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="8" y1="6" x2="21" y2="6"/>
-                    <line x1="8" y1="12" x2="21" y2="12"/>
-                    <line x1="8" y1="18" x2="21" y2="18"/>
-                    <line x1="3" y1="6" x2="3.01" y2="6"/>
-                    <line x1="3" y1="12" x2="3.01" y2="12"/>
-                    <line x1="3" y1="18" x2="3.01" y2="18"/>
-                  </svg>
-                  <span className="text-xs font-extrabold text-white uppercase tracking-wider">
-                    Especificações Técnicas
-                  </span>
-                </div>
-                {/* Linhas zebradas — até 10 */}
-                <div>
-                  {especificacoes.slice(0, 10).map(({ label, valor }, i) => (
-                    <div
-                      key={label}
-                      className={`flex items-start px-4 py-2.5 border-b border-gray-50 last:border-0 hover:bg-blue-50/20 transition ${
-                        i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
-                      }`}
-                    >
-                      <span className="text-[11px] text-gray-500 font-medium shrink-0 leading-snug" style={{ width: '48%' }}>
-                        {label}
-                      </span>
-                      <span className="text-[11px] text-gray-900 font-semibold leading-snug flex-1">
-                        {valor}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                {especificacoes.length > 10 && (
-                  <div className="py-2.5 text-center border-t border-gray-100">
-                    <span className="text-xs font-bold text-[#3cbfb3]">
-                      + {especificacoes.length - 10} especificações abaixo
-                    </span>
-                  </div>
-                )}
-              </div>
+              <SpecsExpandiveis especificacoes={especificacoes} />
             )}
           </div>
           <InfoProdutoCB
@@ -215,28 +172,6 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
         {/* Descrição */}
         <DescricaoRica descricao={produto.descricao} />
-
-        {/* Especificações técnicas */}
-        {especificacoes && especificacoes.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
-              Especificações Técnicas
-            </h2>
-            <div className="rounded-2xl border border-gray-100 overflow-hidden">
-              {especificacoes.map(({ label, valor }, i) => (
-                <div
-                  key={label}
-                  className={`flex items-start gap-6 px-5 py-3.5 border-b border-gray-50 last:border-0 ${
-                    i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
-                  }`}
-                >
-                  <span className="text-sm text-gray-500 w-52 shrink-0">{label}</span>
-                  <span className="text-sm text-gray-900 font-semibold">{valor}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Abas (Perguntas Frequentes + Avaliações) */}
         <div id="avaliacoes">
