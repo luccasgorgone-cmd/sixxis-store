@@ -14,7 +14,7 @@ export default function DescricaoRica({ descricao }: Props) {
         Descrição do produto
       </h2>
       <div
-        className="descricao-rica"
+        className="produto-descricao"
         dangerouslySetInnerHTML={{ __html: descricao }}
       />
     </div>

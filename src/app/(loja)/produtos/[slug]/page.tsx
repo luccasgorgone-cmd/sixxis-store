@@ -96,24 +96,26 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
-      <nav className="bg-gray-50 border-b border-gray-100 py-2.5">
+      <nav className="bg-white border-b border-gray-100 py-2.5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-1.5 text-sm text-gray-500 flex-wrap">
-            <Link href="/" className="hover:text-[#3cbfb3] transition">Início</Link>
-            <ChevronRight size={13} className="text-gray-300" />
-            <Link href={`/produtos?categoria=${produto.categoria}`} className="hover:text-[#3cbfb3] transition capitalize">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide whitespace-nowrap">
+            <Link href="/" className="text-gray-500 hover:text-[#3cbfb3] text-xs font-medium transition shrink-0">Início</Link>
+            <ChevronRight size={12} className="text-gray-300 shrink-0" />
+            <Link href={`/produtos?categoria=${produto.categoria}`} className="text-gray-500 hover:text-[#3cbfb3] text-xs font-medium transition capitalize shrink-0">
               {categoriaLabel}
             </Link>
-            <ChevronRight size={13} className="text-gray-300" />
-            <span className="text-gray-800 font-medium truncate max-w-[200px]">{produto.nome}</span>
+            <ChevronRight size={12} className="text-gray-300 shrink-0" />
+            <span className="text-xs font-bold text-gray-900 shrink-0">{produto.nome}</span>
           </div>
         </div>
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Galeria + Info */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-          <GaleriaCB itens={itens} nome={produto.nome} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10 lg:overflow-visible">
+          <div className="relative">
+            <GaleriaCB itens={itens} nome={produto.nome} />
+          </div>
           <InfoProdutoCB
             produto={produtoParaInfo}
             variacoes={variacoes}
