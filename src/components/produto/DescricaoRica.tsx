@@ -14,13 +14,7 @@ export default function DescricaoRica({ descricao }: Props) {
         Descrição do produto
       </h2>
       <div
-        className="prose prose-gray max-w-none
-          prose-h2:text-xl prose-h2:font-extrabold prose-h2:text-gray-900
-          prose-h3:text-lg prose-h3:font-bold prose-h3:text-[#1a4f4a]
-          prose-p:text-gray-600 prose-p:leading-relaxed
-          prose-strong:text-gray-900 prose-strong:font-bold
-          prose-ul:text-gray-600 prose-li:mb-1
-          prose-img:rounded-2xl prose-img:shadow-sm prose-img:w-full"
+        className="descricao-rica"
         dangerouslySetInnerHTML={{ __html: descricao }}
       />
     </div>

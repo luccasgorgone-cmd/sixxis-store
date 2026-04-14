@@ -20,6 +20,7 @@ import {
   Type,
   ImageIcon,
   ExternalLink,
+  Bot,
 } from 'lucide-react'
 import CampoCor from '@/components/admin/CampoCor'
 import { Toast } from '@/components/admin/Toast'
@@ -187,6 +188,19 @@ const DEFAULTS: Record<string, string> = {
   bg_footer_titulo: '#ffffff',
   bg_footer_hover: '#3cbfb3',
   juros_cartao_taxa_mensal: '2.99',
+  // Agente Luna
+  agente_ativo:            'true',
+  agente_nome:             'Luna',
+  agente_saudacao:         'Olá! Sou a Luna, assistente da Sixxis 👋 Como posso te ajudar hoje?',
+  agente_cor_primaria:     '#3cbfb3',
+  agente_cor_secundaria:   '#0f2e2b',
+  agente_modelo:           'claude-haiku-4-5-20251001',
+  agente_max_tokens:       '400',
+  agente_temperatura:      '0.7',
+  agente_whatsapp_vendas:  '5518997474701',
+  agente_whatsapp_suporte: '5511934102621',
+  agente_system_prompt:    '',
+  anthropic_api_key:       '',
 }
 
 const TABS = [
@@ -201,6 +215,7 @@ const TABS = [
   { id: 'editor', label: 'Editor do Site', icon: LayoutTemplate },
   { id: 'seo', label: 'SEO', icon: Search },
   { id: 'seguranca', label: 'Segurança', icon: Shield },
+  { id: 'agente', label: 'Agente Luna', icon: Bot },
 ]
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -1796,6 +1811,210 @@ export default function ConfiguracoesPage() {
     )
   }
 
+  // ─── renderAgente ─────────────────────────────────────────────────────────────
+
+  function renderAgente() {
+    const keys = [
+      'agente_ativo', 'agente_nome', 'agente_saudacao',
+      'agente_cor_primaria', 'agente_cor_secundaria',
+      'agente_modelo', 'agente_max_tokens', 'agente_temperatura',
+      'agente_whatsapp_vendas', 'agente_whatsapp_suporte',
+      'agente_system_prompt', 'anthropic_api_key',
+    ]
+
+    const corPrim = configs.agente_cor_primaria || '#3cbfb3'
+    const corSec  = configs.agente_cor_secundaria || '#0f2e2b'
+
+    return (
+      <div className="space-y-5">
+        {/* Status */}
+        <Card title="Status do Agente">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div>
+              <p className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                <Bot className="w-4 h-4 text-[#3cbfb3]" />
+                Agente Luna ativo no site
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Exibe o chat no canto inferior esquerdo de todas as páginas da loja
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={configs.agente_ativo === 'true'}
+                onChange={(e) => set('agente_ativo', e.target.checked ? 'true' : 'false')}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[#3cbfb3] rounded-full peer peer-checked:bg-[#3cbfb3] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+            </label>
+          </div>
+        </Card>
+
+        {/* Identidade */}
+        <Card title="Identidade da Luna">
+          <div className="space-y-4">
+            <Field label="Nome do agente">
+              <Input
+                value={configs.agente_nome}
+                onChange={(v) => set('agente_nome', v)}
+                placeholder="Luna"
+              />
+            </Field>
+            <Field label="Mensagem de saudação" hint="Primeira mensagem exibida ao abrir o chat">
+              <textarea
+                value={configs.agente_saudacao}
+                onChange={(e) => set('agente_saudacao', e.target.value)}
+                rows={2}
+                placeholder="Olá! Sou a Luna, assistente da Sixxis 👋 Como posso te ajudar hoje?"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-none"
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Cor primária">
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={configs.agente_cor_primaria}
+                    onChange={(e) => set('agente_cor_primaria', e.target.value)}
+                    className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-1"
+                  />
+                  <Input
+                    value={configs.agente_cor_primaria}
+                    onChange={(v) => set('agente_cor_primaria', v)}
+                    placeholder="#3cbfb3"
+                  />
+                </div>
+              </Field>
+              <Field label="Cor secundária">
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={configs.agente_cor_secundaria}
+                    onChange={(e) => set('agente_cor_secundaria', e.target.value)}
+                    className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-1"
+                  />
+                  <Input
+                    value={configs.agente_cor_secundaria}
+                    onChange={(v) => set('agente_cor_secundaria', v)}
+                    placeholder="#0f2e2b"
+                  />
+                </div>
+              </Field>
+            </div>
+
+            {/* Preview ao vivo */}
+            <div className="bg-gray-50 rounded-2xl p-4 border border-dashed border-gray-200">
+              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-3">
+                Preview do agente
+              </p>
+              <div className="flex items-end gap-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${corSec}, ${corPrim})` }}
+                >
+                  <span className="text-white text-lg">🤖</span>
+                </div>
+                <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm border border-gray-100 max-w-[260px]">
+                  <p className="text-sm text-gray-700">
+                    {configs.agente_saudacao || 'Olá! Sou a Luna 👋'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* IA */}
+        <Card title="Configurações de IA">
+          <div className="space-y-4">
+            <Field
+              label="Anthropic API Key"
+              hint="Chave da API Anthropic (sk-ant-...). Pode ser configurada como variável de ambiente ANTHROPIC_API_KEY no Railway."
+            >
+              <MaskedInput
+                value={configs.anthropic_api_key}
+                onChange={(v) => set('anthropic_api_key', v)}
+                placeholder="sk-ant-api03-..."
+              />
+            </Field>
+
+            <Field label="Modelo de IA" hint="Claude Haiku é mais rápido e econômico; Sonnet é mais preciso">
+              <select
+                value={configs.agente_modelo || 'claude-haiku-4-5-20251001'}
+                onChange={(e) => set('agente_modelo', e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] bg-white"
+              >
+                <option value="claude-haiku-4-5-20251001">Claude Haiku — Rápido e econômico</option>
+                <option value="claude-sonnet-4-6">Claude Sonnet — Equilibrado e mais preciso</option>
+              </select>
+            </Field>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Máx. tokens por resposta"
+                hint="400 = respostas médias · 800 = respostas detalhadas"
+              >
+                <Input
+                  type="number"
+                  value={configs.agente_max_tokens}
+                  onChange={(v) => set('agente_max_tokens', v)}
+                  placeholder="400"
+                />
+              </Field>
+              <Field
+                label="Temperatura (0 – 1)"
+                hint="0 = mais preciso · 1 = mais criativo"
+              >
+                <Input
+                  type="number"
+                  value={configs.agente_temperatura}
+                  onChange={(v) => set('agente_temperatura', v)}
+                  placeholder="0.7"
+                />
+              </Field>
+            </div>
+
+            <Field
+              label="System prompt personalizado"
+              hint="Deixe vazio para usar o prompt padrão da Sixxis. Altere apenas se souber o que está fazendo."
+            >
+              <textarea
+                value={configs.agente_system_prompt}
+                onChange={(e) => set('agente_system_prompt', e.target.value)}
+                rows={8}
+                placeholder="Deixe em branco para usar o comportamento padrão da Sixxis.&#10;&#10;Exemplo: Você é a Luna, assistente da Sixxis..."
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-y font-mono"
+              />
+            </Field>
+          </div>
+        </Card>
+
+        {/* WhatsApp */}
+        <Card title="WhatsApp para encaminhamento">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="WhatsApp Vendas" hint="Número com DDI (5518...)">
+              <Input
+                value={configs.agente_whatsapp_vendas}
+                onChange={(v) => set('agente_whatsapp_vendas', v)}
+                placeholder="5518997474701"
+              />
+            </Field>
+            <Field label="WhatsApp Suporte" hint="Número com DDI (5511...)">
+              <Input
+                value={configs.agente_whatsapp_suporte}
+                onChange={(v) => set('agente_whatsapp_suporte', v)}
+                placeholder="5511934102621"
+              />
+            </Field>
+          </div>
+        </Card>
+
+        <SaveButton loading={saving} onClick={() => save(keys)} />
+      </div>
+    )
+  }
+
   const TAB_RENDERERS: Record<string, () => React.ReactNode> = {
     loja: renderLoja,
     visual: renderVisual,
@@ -1808,6 +2027,7 @@ export default function ConfiguracoesPage() {
     editor: renderEditor,
     seo: renderSeo,
     seguranca: renderSeguranca,
+    agente: renderAgente,
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────

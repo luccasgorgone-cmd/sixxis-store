@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
+import React from 'react'
 import {
   ChevronDown, ChevronRight, Loader2, ShoppingCart,
   Search, Package, MapPin, CreditCard, Truck, CheckCircle,
@@ -382,9 +383,8 @@ export default function AdminPedidosPage() {
                   {pedidos.map((p) => {
                     const isOpen = expanded.has(p.id)
                     return (
-                      <>
+                      <React.Fragment key={p.id}>
                         <tr
-                          key={p.id}
                           className={`border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer ${isOpen ? 'bg-gray-50' : ''}`}
                           onClick={() => toggleExpand(p.id)}
                         >
@@ -424,9 +424,9 @@ export default function AdminPedidosPage() {
                           </td>
                         </tr>
                         {isOpen && (
-                          <PedidoDetalhe key={`${p.id}-detail`} pedido={p} onUpdate={handleUpdate} showToast={showToast} />
+                          <PedidoDetalhe pedido={p} onUpdate={handleUpdate} showToast={showToast} />
                         )}
-                      </>
+                      </React.Fragment>
                     )
                   })}
                 </tbody>

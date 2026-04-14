@@ -75,6 +75,8 @@ export async function POST(request: NextRequest) {
     videoUrl,
     temVariacoes,
     variacoes,
+    especificacoes,
+    faqs,
   } = body
 
   if (!nome || !slug || !categoria || preco == null) {
@@ -111,6 +113,8 @@ export async function POST(request: NextRequest) {
       imagens: imagens ?? [],
       videoUrl: videoUrl ?? null,
       temVariacoes: Boolean(temVariacoes),
+      especificacoes: especificacoes ?? undefined,
+      faqs: faqs ?? undefined,
       variacoes: temVariacoes && variacoesInput.length > 0
         ? {
             create: variacoesInput.map((v) => ({
