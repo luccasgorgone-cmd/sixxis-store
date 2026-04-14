@@ -5,14 +5,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  ShoppingCart, Menu, X, User, UserPlus,
-  Wind, Fan, Bike, Tag, Info, Phone, HelpCircle,
-  Clock, Mail, Store, Search, MapPin, Navigation, Truck,
+  Tag, Truck, MapPin, Search, User, ShoppingCart,
+  Menu, X, Navigation, Clock, Mail, Store, HelpCircle,
+  Wind, Fan, Bike, Info, Phone, UserPlus,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 interface Sugestao {
   id: string
   nome: string
@@ -21,7 +21,7 @@ interface Sugestao {
   imagens: string[]
 }
 
-// ── WA Icon ───────────────────────────────────────────────────────────────────
+// ── WA Icon (drawer) ──────────────────────────────────────────────────────────
 function WaIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true">
@@ -31,7 +31,7 @@ function WaIcon() {
   )
 }
 
-// ── SearchBar com autocomplete ─────────────────────────────────────────────────
+// ── SearchBar com autocomplete ────────────────────────────────────────────────
 function SearchBar({ className = '' }: { className?: string }) {
   const router = useRouter()
   const [query, setQuery] = useState('')
@@ -78,7 +78,7 @@ function SearchBar({ className = '' }: { className?: string }) {
 
   return (
     <div ref={wrapperRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="flex h-10 bg-white rounded-lg overflow-hidden shadow-sm">
+      <form onSubmit={handleSubmit} className="flex h-11 bg-white rounded-xl overflow-hidden shadow-sm">
         <input
           type="search"
           value={query}
@@ -95,7 +95,7 @@ function SearchBar({ className = '' }: { className?: string }) {
         >
           {carregando
             ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            : <Search size={18} className="text-white" />
+            : <Search size={17} className="text-white" />
           }
         </button>
       </form>
@@ -136,24 +136,24 @@ function SearchBar({ className = '' }: { className?: string }) {
 }
 
 // ── Nav links ─────────────────────────────────────────────────────────────────
-const navLinks = [
-  { href: '/produtos?categoria=climatizadores', label: 'Climatizadores', icon: Wind,  destaque: false },
-  { href: '/produtos?categoria=aspiradores',    label: 'Aspiradores',    icon: Fan,   destaque: false },
-  { href: '/produtos?categoria=spinning',       label: 'Spinning',       icon: Bike,  destaque: false },
-  { href: '/ofertas',                           label: 'Ofertas',        icon: Tag,   destaque: true  },
-  { href: '/sobre',                             label: 'Sobre',          icon: Info,  destaque: false },
-  { href: '/contato',                           label: 'Contato',        icon: Phone, destaque: false },
+const NAV_LINKS = [
+  { href: '/produtos?categoria=climatizadores', label: 'CLIMATIZADORES', icon: Wind  },
+  { href: '/produtos?categoria=aspiradores',    label: 'ASPIRADORES',    icon: Fan   },
+  { href: '/produtos?categoria=spinning',       label: 'SPINNING',       icon: Bike  },
+  { href: '/ofertas',                           label: 'OFERTAS',        icon: Tag, hot: true },
+  { href: '/sobre',                             label: 'SOBRE',          icon: Info  },
+  { href: '/contato',                           label: 'CONTATO',        icon: Phone },
 ]
 
 // ── HEADER ────────────────────────────────────────────────────────────────────
 export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: string }) {
-  const [drawerOpen, setDrawerOpen]   = useState(false)
-  const [cepModalOpen, setCepModalOpen] = useState(false)
-  const [cepSalvo, setCepSalvo]       = useState('')
-  const [cepInput, setCepInput]       = useState('')
-  const [cepLoading, setCepLoading]   = useState(false)
-  const [cepResultado, setCepResultado] = useState<{ mensagem: string } | null>(null)
-  const [cepErro, setCepErro]         = useState('')
+  const [drawerOpen,    setDrawerOpen]    = useState(false)
+  const [cepModalOpen,  setCepModalOpen]  = useState(false)
+  const [cepSalvo,      setCepSalvo]      = useState('')
+  const [cepInput,      setCepInput]      = useState('')
+  const [cepLoading,    setCepLoading]    = useState(false)
+  const [cepResultado,  setCepResultado]  = useState<{ mensagem: string } | null>(null)
+  const [cepErro,       setCepErro]       = useState('')
 
   const { data: session } = useSession()
   const { totalItens }    = useCarrinho()
@@ -163,7 +163,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen, cepModalOpen])
 
-  // Salva CEP no localStorage
   useEffect(() => {
     const saved = localStorage.getItem('sixxis_cep')
     if (saved) setCepSalvo(saved)
@@ -198,21 +197,15 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   }, [cepInput])
 
   const usarLocalizacaoAtual = () => {
-    if (!navigator.geolocation) {
-      setCepErro('Geolocalização não disponível')
-      return
-    }
+    if (!navigator.geolocation) { setCepErro('Geolocalização não disponível'); return }
     setCepLoading(true)
     setCepErro('')
     setCepResultado(null)
-
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords
           let cepEncontrado = ''
-
-          // Fonte 1: Nominatim OpenStreetMap
           try {
             const r1 = await fetch(
               `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
@@ -224,7 +217,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               if (pc.length >= 8) cepEncontrado = pc.slice(0, 8)
             }
           } catch {}
-
           if (cepEncontrado.length === 8) {
             try {
               const r2 = await fetch(`https://viacep.com.br/ws/${cepEncontrado}/json/`)
@@ -248,10 +240,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               }
             } catch {}
           }
-
           setCepErro('CEP não detectado automaticamente. Digite manualmente.')
         } catch {
-          setCepErro('Erro ao obter localização. Digite o CEP manualmente.')
+          setCepErro('Erro ao obter localização.')
         } finally {
           setCepLoading(false)
         }
@@ -260,8 +251,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         setCepLoading(false)
         const msgs: Record<number, string> = {
           1: 'Permissão negada. Digite o CEP manualmente.',
-          2: 'Localização indisponível. Digite o CEP manualmente.',
-          3: 'Tempo esgotado. Digite o CEP manualmente.',
+          2: 'Localização indisponível.',
+          3: 'Tempo esgotado.',
         }
         setCepErro(msgs[error.code] || 'Erro de localização.')
       },
@@ -272,42 +263,36 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   return (
     <>
       {/* ═══════════════════════════════════════════════════════
-          CAMADA 1 — Announcement Bar
+          CAMADA 1 — ANNOUNCEMENT BAR
       ═══════════════════════════════════════════════════════ */}
-      <div className="border-b border-[#3cbfb3]/15 w-full" style={{ backgroundColor: 'var(--bg-anuncio, #1a4f4a)' }}>
+      <div style={{ backgroundColor: '#0f2e2b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-11">
+          <div className="flex items-center justify-between h-10">
 
-            {/* BLOCO 1 — Cupom */}
+            {/* Esquerda — Cupom */}
             <div className="flex items-center gap-2">
-              <Tag size={14} className="text-[#3cbfb3] shrink-0" />
-              <span className="text-white/80 text-xs sm:text-sm font-medium">CUPOM:</span>
-              <span className="bg-[#3cbfb3] text-black text-xs font-black px-2.5 py-1 rounded-md tracking-wider uppercase">
+              <Tag size={13} className="text-[#3cbfb3] shrink-0" strokeWidth={2} />
+              <span className="text-white/80 text-xs font-medium">CUPOM:</span>
+              <span className="bg-[#3cbfb3] text-black text-[11px] font-black px-2 py-0.5 rounded-md tracking-wide">
                 SIXXIS10
               </span>
-              <span className="text-white text-xs sm:text-sm font-semibold hidden sm:inline">
+              <span className="text-white text-xs font-semibold hidden sm:inline">
                 — 10% OFF na 1ª compra
               </span>
             </div>
 
-            {/* Separador */}
-            <div className="hidden md:block w-px h-5 bg-white/20" />
-
-            {/* BLOCO 2 — Frete */}
+            {/* Centro — Frete */}
             <div className="hidden md:flex items-center gap-2">
-              <Truck size={14} className="text-[#3cbfb3] shrink-0" />
-              <span className="text-white text-sm font-bold tracking-wide">
+              <Truck size={13} className="text-[#3cbfb3] shrink-0" strokeWidth={2} />
+              <span className="text-white text-xs font-bold tracking-wide">
                 FRETE GRÁTIS acima de R$ 500
               </span>
             </div>
 
-            {/* Separador */}
-            <div className="hidden lg:block w-px h-5 bg-white/20" />
-
-            {/* BLOCO 3 — Entrega */}
+            {/* Direita — Entrega */}
             <div className="hidden lg:flex items-center gap-2">
-              <MapPin size={14} className="text-[#3cbfb3] shrink-0" />
-              <span className="text-white text-sm font-medium">
+              <MapPin size={13} className="text-[#3cbfb3] shrink-0" strokeWidth={2} />
+              <span className="text-white text-xs font-medium">
                 Entrega para todo o Brasil
               </span>
             </div>
@@ -317,84 +302,71 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       </div>
 
       {/* ═══════════════════════════════════════════════════════
-          HEADER STICKY
+          CAMADA 2 — HEADER PRINCIPAL (sticky)
       ═══════════════════════════════════════════════════════ */}
       <header className="sticky top-0 z-40">
 
-        {/* ─── HEADER PRINCIPAL ─────────────────────────────── */}
-        <div className="shadow-md" style={{ backgroundColor: 'var(--bg-header, #0f2e2b)' }}>
-          <div className="max-w-7xl mx-auto px-4 xl:px-6">
+        <div style={{ backgroundColor: '#1a4f4a' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-            {/* Desktop row — h-[68px] fixo */}
-            <div className="hidden lg:flex items-center h-[68px] gap-4">
+            {/* ── Desktop ────────────────────────────────────── */}
+            <div className="hidden md:flex items-center h-[68px] gap-4">
 
-              {/* Coluna 1 — Logo */}
+              {/* Logo */}
               <Link href="/" className="shrink-0">
                 <Image
                   src={logoUrl}
                   alt="Sixxis"
-                  width={135}
-                  height={45}
-                  className="object-contain h-[45px] w-auto"
+                  width={130}
+                  height={44}
+                  className="object-contain h-10 w-auto"
                   priority
                 />
               </Link>
 
-              {/* Coluna 2 — SearchBar (flex-1) */}
-              <div className="flex-1 max-w-2xl mx-auto">
+              {/* Search */}
+              <div className="flex-1 max-w-2xl mx-4">
                 <SearchBar className="w-full" />
               </div>
 
-              {/* Coluna 3 — Ações: [CEP] | [Entrar/Conta] | [Carrinho] */}
-              <div className="flex items-center gap-1 shrink-0">
+              {/* Ações */}
+              <div className="flex items-center gap-0 shrink-0">
 
                 {/* CEP */}
                 <button
                   onClick={() => { setCepResultado(null); setCepErro(''); setCepModalOpen(true) }}
-                  className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[76px]"
+                  className="hidden lg:flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-xl transition min-w-[70px]"
                 >
-                  <MapPin size={24} strokeWidth={1.5} />
-                  <span className="text-[12px] font-medium leading-none whitespace-nowrap">
-                    {cepSalvo ? cepSalvo : 'Informe seu CEP'}
+                  <MapPin size={21} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium leading-none whitespace-nowrap">
+                    {cepSalvo || 'Informe CEP'}
                   </span>
                 </button>
 
-                {/* Divisor */}
-                <div className="w-px h-8 bg-white/20 mx-1" />
+                <div className="w-px h-8 bg-white/20 hidden lg:block mx-1" />
 
-                {/* Conta */}
-                {session ? (
-                  <Link
-                    href="/minha-conta"
-                    className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[62px]"
-                  >
-                    <User size={24} strokeWidth={1.5} />
-                    <span className="text-[12px] font-medium leading-none">
-                      Olá, {session.user?.name?.split(' ')[0] || 'Você'}
-                    </span>
-                  </Link>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[62px]"
-                  >
-                    <User size={24} strokeWidth={1.5} />
-                    <span className="text-[12px] font-medium leading-none">Entrar</span>
-                  </Link>
-                )}
+                {/* Entrar / Conta */}
+                <Link
+                  href={session ? '/minha-conta' : '/login'}
+                  className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-xl transition min-w-[60px]"
+                >
+                  <User size={21} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium leading-none">
+                    {session ? (session.user?.name?.split(' ')[0] || 'Conta') : 'Entrar'}
+                  </span>
+                </Link>
 
-                {/* Divisor */}
                 <div className="w-px h-8 bg-white/20 mx-1" />
 
                 {/* Carrinho */}
                 <Link
                   href="/carrinho"
-                  className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] transition rounded-lg hover:bg-white/10 min-w-[62px]"
+                  className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-xl transition min-w-[60px]"
                 >
-                  <ShoppingCart size={24} strokeWidth={1.5} />
-                  <span className="text-[12px] font-medium leading-none">Carrinho</span>
+                  <ShoppingCart size={21} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium leading-none">Carrinho</span>
                   {totalItens > 0 && (
-                    <span className="absolute top-0 right-1 bg-[#f59e0b] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                    <span className="absolute top-1.5 right-2 bg-[#f59e0b] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}
@@ -402,8 +374,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </div>
             </div>
 
-            {/* Mobile row */}
-            <div className="flex lg:hidden items-center h-16 gap-3">
+            {/* ── Mobile ─────────────────────────────────────── */}
+            <div className="flex md:hidden items-center h-16 gap-3">
               <button
                 onClick={() => setDrawerOpen(true)}
                 className="shrink-0 p-2 rounded-lg hover:bg-white/20 transition"
@@ -412,12 +384,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <Menu size={24} className="text-white" />
               </button>
 
-              {/* Logo centralizada */}
               <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-                <Image src={logoUrl} alt="Sixxis" width={110} height={37} className="object-contain" priority />
+                <Image src={logoUrl} alt="Sixxis" width={115} height={38} className="object-contain" priority />
               </Link>
 
-              {/* Carrinho mobile */}
               <Link
                 href="/carrinho"
                 className="relative ml-auto p-2 text-white"
@@ -432,30 +402,33 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </Link>
             </div>
 
-            {/* Search mobile */}
-            <div className="lg:hidden pb-3">
+            {/* Busca mobile */}
+            <div className="md:hidden pb-2">
               <SearchBar className="w-full" />
             </div>
+
           </div>
         </div>
 
-        {/* ─── Separator ────────────────────────────────────── */}
+        {/* ── Separador ───────────────────────────────────────── */}
         <div className="w-full border-t border-white/15" />
 
-        {/* ─── NAV CATEGORIAS ───────────────────────────────── */}
-        <nav className="hidden lg:block" style={{ backgroundColor: 'var(--bg-header, #0f2e2b)' }}>
-          <div className="max-w-7xl mx-auto px-4 xl:px-6">
-            <div className="flex items-center justify-center">
-              {navLinks.map(({ href, label, destaque }, idx) => (
-                <div key={href} className="flex items-center">
-                  {idx > 0 && <span className="text-white/20 text-sm select-none">|</span>}
+        {/* ── NAV CATEGORIAS ──────────────────────────────────── */}
+        <nav className="hidden lg:block" style={{ backgroundColor: '#0f2e2b' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="flex items-center justify-center gap-0 py-2">
+              {NAV_LINKS.map((link, i) => (
+                <div key={link.href} className="flex items-center">
+                  {i > 0 && (
+                    <span className="text-white/25 mx-1 select-none text-sm">|</span>
+                  )}
                   <Link
-                    href={href}
-                    className="group relative shrink-0 px-4 py-2.5 text-sm font-semibold tracking-wide uppercase text-white transition-colors duration-200 hover:bg-white/15 hover:rounded-lg"
+                    href={link.href}
+                    className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-bold text-white hover:text-[#3cbfb3] tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
                   >
-                    {label}
-                    {destaque && (
-                      <span className="ml-1.5 text-[9px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full align-middle normal-case tracking-normal">
+                    {link.label}
+                    {link.hot && (
+                      <span className="bg-[#f59e0b] text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase leading-none">
                         HOT
                       </span>
                     )}
@@ -465,6 +438,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             </div>
           </div>
         </nav>
+
       </header>
 
       {/* ═══════════════════════════════════════════════════════
@@ -479,7 +453,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            {/* Cabeçalho */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-gray-900 text-lg">Informe seu CEP</h3>
               <button
@@ -490,7 +463,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </button>
             </div>
 
-            {/* Geolocalização */}
             <button
               onClick={usarLocalizacaoAtual}
               className="w-full flex items-center gap-3 p-3 border border-[#3cbfb3] rounded-xl mb-4 hover:bg-[#e8f8f7] transition text-left"
@@ -504,14 +476,12 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </div>
             </button>
 
-            {/* Separador visual */}
             <div className="flex items-center gap-3 mb-3">
               <div className="flex-1 border-t border-gray-100" />
               <span className="text-xs text-gray-400">ou digite o CEP</span>
               <div className="flex-1 border-t border-gray-100" />
             </div>
 
-            {/* Input */}
             <div className="flex gap-2">
               <input
                 type="text"
@@ -538,7 +508,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </button>
             </div>
 
-            {/* Resultado */}
             {cepResultado && (
               <div className="mt-3 p-3 bg-[#e8f8f7] rounded-xl">
                 <p className="text-sm font-semibold text-[#1a4f4a]">✓ {cepResultado.mensagem}</p>
@@ -572,7 +541,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         }}
       >
         {/* Header drawer */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0" style={{ backgroundColor: 'var(--bg-header-nav, #0f2e2b)' }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0" style={{ backgroundColor: '#0f2e2b' }}>
           <Link href="/" onClick={() => setDrawerOpen(false)}>
             <Image src={logoUrl} alt="Sixxis" width={100} height={34} className="object-contain brightness-0 invert" unoptimized />
           </Link>
@@ -581,7 +550,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           </button>
         </div>
 
-        {/* CEP no drawer */}
+        {/* CEP */}
         <div className="px-5 py-4 border-b border-white/10">
           <button
             onClick={() => { setDrawerOpen(false); setCepModalOpen(true) }}
@@ -596,18 +565,18 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto py-2">
-          {navLinks.map(({ href, label, icon: Icon, destaque }) => (
+          {NAV_LINKS.map(({ href, label, icon: Icon, hot }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setDrawerOpen(false)}
               className={`flex items-center gap-4 px-6 py-4 text-base font-semibold border-b border-white/5 transition-colors ${
-                destaque ? 'text-amber-300 hover:bg-white/10' : 'text-white/90 hover:text-white hover:bg-white/10'
+                hot ? 'text-amber-300 hover:bg-white/10' : 'text-white/90 hover:text-white hover:bg-white/10'
               }`}
             >
-              <Icon size={20} className={destaque ? 'text-amber-300' : 'text-white/50'} />
+              <Icon size={20} className={hot ? 'text-amber-300' : 'text-white/50'} />
               {label}
-              {destaque && (
+              {hot && (
                 <span className="ml-auto text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full">HOT</span>
               )}
             </Link>

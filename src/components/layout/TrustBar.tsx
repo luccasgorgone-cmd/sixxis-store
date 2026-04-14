@@ -16,7 +16,7 @@ const DEFAULT_ITEMS: TrustItem[] = [
 
 export default function TrustBar({ items = DEFAULT_ITEMS }: { items?: TrustItem[] }) {
   return (
-    <div className="bg-transparent border-b border-white/10 w-full">
+    <div className="bg-transparent border-t border-b border-white/10 w-full">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/15">
           {items.map(({ titulo, sub }, i) => {
