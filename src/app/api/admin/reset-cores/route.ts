@@ -32,10 +32,10 @@ const DEFAULTS = [
   { chave: 'bg_body_repeat',     valor: 'no-repeat' },
   { chave: 'bg_body_position',   valor: 'center center' },
   { chave: 'bg_body_overlay',    valor: '0' },
-  // Novas: Cores header
-  { chave: 'bg_header_cor',      valor: '#1a4f4a' },
-  { chave: 'bg_header_nav_cor',  valor: '#0f2e2b' },
-  { chave: 'bg_anuncio_cor',     valor: '#0f2e2b' },
+  // Novas: Cores header (esquema v2: announcement e nav mais claros, principal mais escuro)
+  { chave: 'bg_header_cor',      valor: '#0f2e2b' },
+  { chave: 'bg_header_nav_cor',  valor: '#1a4f4a' },
+  { chave: 'bg_anuncio_cor',     valor: '#1a4f4a' },
   { chave: 'bg_anuncio_texto',   valor: '#ffffff' },
   // Novas: Cores footer
   { chave: 'bg_footer_cor',      valor: '#111827' },
