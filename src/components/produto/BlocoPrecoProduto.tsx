@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ShoppingCart, Check } from 'lucide-react'
+import { ShoppingCart, Check, Zap } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useRouter } from 'next/navigation'
 
@@ -90,8 +90,18 @@ export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Pro
   }
 
   function handleBuyNow() {
-    handleAddToCart()
-    router.push('/carrinho')
+    if (produto.temVariacoes && !variacaoSelecionada) return
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco: precoAtual,
+      quantidade: 1,
+      ...(variacaoSelecionada && {
+        variacaoId: variacaoSelecionada.id,
+        variacaoNome: variacaoSelecionada.nome,
+      }),
+    })
+    router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
   }
 
   return (
@@ -226,9 +236,10 @@ export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Pro
         <button
           onClick={handleBuyNow}
           disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
-          className="px-6 py-4 rounded-2xl border-2 border-[#3cbfb3] text-[#3cbfb3] font-bold hover:bg-[#e8f8f7] disabled:opacity-60 transition text-sm"
+          className="px-6 py-4 rounded-2xl border-2 border-[#3cbfb3] text-[#3cbfb3] font-bold hover:bg-[#e8f8f7] disabled:opacity-60 transition text-sm flex items-center gap-2"
         >
-          Comprar
+          <Zap size={16} />
+          Comprar Agora
         </button>
       </div>
 

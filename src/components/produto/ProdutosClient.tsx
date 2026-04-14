@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { Search, X, SlidersHorizontal } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
-import {
-  ChevronRight, Grid3X3, List, SlidersHorizontal, X,
-} from 'lucide-react'
+import CategoriaBanner from '@/components/produtos/CategoriaBanner'
+import SidebarFiltros from '@/components/produtos/SidebarFiltros'
+import ToolbarProdutos from '@/components/produtos/ToolbarProdutos'
 import type { Produto } from '@/types'
 
 // ── Constantes ──────────────────────────────────────────────────────────────
@@ -15,14 +16,6 @@ const CATEGORIAS = [
   { val: 'climatizadores', label: 'Climatizadores' },
   { val: 'aspiradores',    label: 'Aspiradores'    },
   { val: 'spinning',       label: 'Spinning'       },
-]
-
-const ORDENS = [
-  { val: 'relevancia', label: 'Relevância'    },
-  { val: 'recentes',   label: 'Mais recentes' },
-  { val: 'preco-asc',  label: 'Menor preço'   },
-  { val: 'preco-desc', label: 'Maior preço'   },
-  { val: 'nome',       label: 'A–Z'           },
 ]
 
 const FAIXAS = [
@@ -37,8 +30,17 @@ const FAIXAS = [
 function ProductSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="bg-white/10 rounded-xl animate-pulse" style={{ aspectRatio: '3/4' }} />
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="bg-white/8 rounded-2xl animate-pulse overflow-hidden border border-white/5">
+          <div className="bg-white/10 w-full" style={{ aspectRatio: '1/1' }} />
+          <div className="p-3 space-y-2">
+            <div className="h-3 bg-white/10 rounded w-4/5" />
+            <div className="h-3 bg-white/10 rounded w-3/5" />
+            <div className="h-5 bg-white/10 rounded w-2/3 mt-2" />
+            <div className="h-8 bg-white/10 rounded-xl mt-3" />
+            <div className="h-7 bg-white/5 rounded-xl" />
+          </div>
+        </div>
       ))}
     </div>
   )
@@ -47,15 +49,16 @@ function ProductSkeleton() {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ProdutosClient() {
-  const router      = useRouter()
-  const pathname    = usePathname()
+  const router       = useRouter()
+  const pathname     = usePathname()
   const searchParams = useSearchParams()
 
-  const [produtos,     setProdutos]     = useState<Produto[]>([])
-  const [total,        setTotal]        = useState(0)
-  const [loading,      setLoading]      = useState(true)
-  const [viewMode,     setViewMode]     = useState<'grid' | 'list'>('grid')
-  const [drawerOpen,   setDrawerOpen]   = useState(false)
+  const [produtos,   setProdutos]   = useState<Produto[]>([])
+  const [total,      setTotal]      = useState(0)
+  const [loading,    setLoading]    = useState(true)
+  const [viewMode,   setViewMode]   = useState<'grid' | 'list'>('grid')
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [contagens,  setContagens]  = useState<Record<string, number>>({})
 
   const categoria = searchParams.get('categoria') || ''
   const ordem     = searchParams.get('ordem')     || 'relevancia'
@@ -81,16 +84,25 @@ export default function ProdutosClient() {
     router.push(`${pathname}?${p.toString()}`)
   }
 
-  // ── fetch ────────────────────────────────────────────────────────────────
+  // ── fetch contagens ───────────────────────────────────────────────────────
+
+  useEffect(() => {
+    fetch('/api/produtos/contagens')
+      .then(r => r.json())
+      .then(data => setContagens(data))
+      .catch(() => {})
+  }, [])
+
+  // ── fetch produtos ────────────────────────────────────────────────────────
 
   useEffect(() => {
     setLoading(true)
     const p = new URLSearchParams()
-    if (categoria)                            p.set('categoria', categoria)
-    if (ordem && ordem !== 'relevancia')     p.set('ordem', ordem)
-    if (busca)                               p.set('q', busca)
-    if (precoMin)                            p.set('precoMin', precoMin)
-    if (precoMax)                            p.set('precoMax', precoMax)
+    if (categoria)                        p.set('categoria', categoria)
+    if (ordem && ordem !== 'relevancia') p.set('ordem', ordem)
+    if (busca)                           p.set('q', busca)
+    if (precoMin)                        p.set('precoMin', precoMin)
+    if (precoMax)                        p.set('precoMax', precoMax)
 
     fetch(`/api/produtos?${p.toString()}`)
       .then(r => r.json())
@@ -102,7 +114,7 @@ export default function ProdutosClient() {
       .finally(() => setLoading(false))
   }, [categoria, ordem, busca, precoMin, precoMax])
 
-  // ── derived state ─────────────────────────────────────────────────────────
+  // ── derived ───────────────────────────────────────────────────────────────
 
   const activeFaixa = FAIXAS.find(
     f => String(f.min) === precoMin && String(f.max) === precoMax,
@@ -127,106 +139,23 @@ export default function ProdutosClient() {
     : null
   const titulo = busca ? `Resultados para "${busca}"` : categoriaLabel ?? 'Todos os Produtos'
 
-  // ── sidebar content (shared by desktop + mobile drawer) ──────────────────
+  const categoriasComContagem = CATEGORIAS.map(c => ({
+    ...c,
+    count: contagens[c.val],
+  }))
+
+  // ── sidebar content ───────────────────────────────────────────────────────
 
   const sidebarContent = (
-    <div className="space-y-6">
-      {/* Categorias */}
-      <div>
-        <p className="text-white font-bold text-sm pb-2 mb-3 border-b border-white/15">
-          Categoria
-        </p>
-        <ul className="space-y-0.5">
-          <li>
-            <button
-              onClick={() => setParam('categoria', '')}
-              className={`w-full text-left text-sm px-3 py-2 rounded-lg transition ${
-                !categoria
-                  ? 'bg-[#3cbfb3] text-white font-semibold'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Todos
-            </button>
-          </li>
-          {CATEGORIAS.map(c => (
-            <li key={c.val}>
-              <button
-                onClick={() => setParam('categoria', c.val)}
-                className={`w-full text-left text-sm px-3 py-2 rounded-lg transition ${
-                  categoria === c.val
-                    ? 'bg-[#3cbfb3] text-white font-semibold'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                {c.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Faixa de preço */}
-      <div>
-        <p className="text-white font-bold text-sm pb-2 mb-3 border-b border-white/15">
-          Faixa de Preço
-        </p>
-        <ul className="space-y-0.5">
-          <li>
-            <button
-              onClick={() => setParams([['precoMin', ''], ['precoMax', '']])}
-              className={`w-full text-left text-sm px-3 py-2 rounded-lg transition ${
-                !precoMin && !precoMax
-                  ? 'bg-[#3cbfb3] text-white font-semibold'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Todos os preços
-            </button>
-          </li>
-          {FAIXAS.map(f => {
-            const active = String(f.min) === precoMin && String(f.max) === precoMax
-            return (
-              <li key={f.label}>
-                <button
-                  onClick={() => setParams([['precoMin', String(f.min)], ['precoMax', String(f.max)]])}
-                  className={`w-full text-left text-sm px-3 py-2 rounded-lg transition ${
-                    active
-                      ? 'bg-[#3cbfb3] text-white font-semibold'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-
-      {/* Ordenação */}
-      <div>
-        <p className="text-white font-bold text-sm pb-2 mb-3 border-b border-white/15">
-          Ordenar por
-        </p>
-        <ul className="space-y-0.5">
-          {ORDENS.map(o => (
-            <li key={o.val}>
-              <button
-                onClick={() => setParam('ordem', o.val)}
-                className={`w-full text-left text-sm px-3 py-2 rounded-lg transition ${
-                  ordem === o.val
-                    ? 'bg-[#3cbfb3] text-white font-semibold'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                {o.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <SidebarFiltros
+      categorias={categoriasComContagem}
+      faixas={FAIXAS}
+      categoria={categoria}
+      precoMin={precoMin}
+      precoMax={precoMax}
+      onCategoria={val => setParam('categoria', val)}
+      onFaixa={(min, max) => setParams([['precoMin', min], ['precoMax', max]])}
+    />
   )
 
   // ── render ───────────────────────────────────────────────────────────────
@@ -236,26 +165,12 @@ export default function ProdutosClient() {
       <main className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-xs text-white/50 mb-6" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-[#3cbfb3] transition-colors">Home</Link>
-            <ChevronRight size={12} />
-            {categoriaLabel ? (
-              <>
-                <Link href="/produtos" className="hover:text-[#3cbfb3] transition-colors">Produtos</Link>
-                <ChevronRight size={12} />
-                <span className="text-[#3cbfb3] font-semibold">{categoriaLabel}</span>
-              </>
-            ) : (
-              <span className="text-[#3cbfb3] font-semibold">{titulo}</span>
-            )}
-          </nav>
-
           <div className="flex gap-6 lg:gap-8">
 
             {/* Sidebar desktop */}
-            <aside className="w-52 shrink-0 hidden md:block">
-              <div className="sticky top-24 bg-white/[0.06] border border-white/10 backdrop-blur-sm rounded-2xl p-4">
+            <aside className="w-56 shrink-0 hidden md:block">
+              <div className="sticky top-24 bg-white/[0.06] border border-white/10 backdrop-blur-sm rounded-2xl p-5">
+                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-4">Filtros</p>
                 {sidebarContent}
               </div>
             </aside>
@@ -263,77 +178,44 @@ export default function ProdutosClient() {
             {/* Main content */}
             <section className="flex-1 min-w-0">
 
-              {/* Header row */}
-              <div className="flex items-center justify-between mb-5 gap-3">
-                <div>
-                  <h1 className="text-xl font-extrabold text-white leading-tight">{titulo}</h1>
-                  {!loading && (
-                    <p className="text-xs text-white/50 mt-0.5">
-                      {total} produto{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
-                    </p>
-                  )}
-                </div>
+              {/* Categoria banner (only when a category is selected) */}
+              <CategoriaBanner categoria={categoria} total={total} loading={loading} />
 
-                <div className="flex items-center gap-2 shrink-0">
-                  {/* Mobile filter button */}
-                  <button
-                    onClick={() => setDrawerOpen(true)}
-                    className="md:hidden flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-3 py-2 rounded-xl transition"
-                  >
-                    <SlidersHorizontal size={16} />
-                    Filtros
-                  </button>
-
-                  {/* View toggle */}
-                  <div className="flex bg-white/10 rounded-xl p-0.5">
-                    <button
-                      onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded-lg transition ${
-                        viewMode === 'grid' ? 'bg-[#3cbfb3] text-white' : 'text-white/50 hover:text-white'
-                      }`}
-                      aria-label="Visualização em grade"
-                    >
-                      <Grid3X3 size={16} />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('list')}
-                      className={`p-2 rounded-lg transition ${
-                        viewMode === 'list' ? 'bg-[#3cbfb3] text-white' : 'text-white/50 hover:text-white'
-                      }`}
-                      aria-label="Visualização em lista"
-                    >
-                      <List size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Active filter pills */}
-              {activeFilters.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {activeFilters.map(f => (
-                    <button
-                      key={f.label}
-                      onClick={f.clear}
-                      className="flex items-center gap-1.5 bg-[#3cbfb3]/20 border border-[#3cbfb3]/40 text-[#3cbfb3] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#3cbfb3]/30 transition"
-                    >
-                      {f.label}
-                      <X size={12} />
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Toolbar */}
+              <ToolbarProdutos
+                titulo={titulo}
+                total={total}
+                loading={loading}
+                ordem={ordem}
+                viewMode={viewMode}
+                activeFilters={activeFilters}
+                onOrdem={val => setParam('ordem', val)}
+                onViewMode={setViewMode}
+                onOpenDrawer={() => setDrawerOpen(true)}
+              />
 
               {/* Products */}
               {loading ? (
                 <ProductSkeleton />
               ) : produtos.length === 0 ? (
-                <div className="text-center py-20 border border-dashed border-white/20 rounded-2xl bg-white/[0.03]">
-                  <p className="text-white/60 font-medium">Nenhum produto encontrado.</p>
-                  <p className="text-sm text-white/40 mt-1">Tente outra categoria ou filtro.</p>
+                <div className="text-center py-20 border border-dashed border-white/15 rounded-2xl bg-white/[0.02]">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                    <Search size={28} className="text-white/20" />
+                  </div>
+                  <p className="text-white/60 font-semibold text-lg mb-1">Nenhum produto encontrado</p>
+                  <p className="text-sm text-white/30 mb-6">Tente ajustar os filtros ou fazer uma nova busca.</p>
+                  {activeFilters.length > 0 && (
+                    <button
+                      onClick={() => setParams([['categoria', ''], ['precoMin', ''], ['precoMax', ''], ['q', '']])}
+                      className="inline-flex items-center gap-2 text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-semibold border border-[#3cbfb3]/40 rounded-xl px-5 py-2.5 hover:bg-[#3cbfb3]/10 transition"
+                    >
+                      <X size={14} />
+                      Limpar filtros
+                    </button>
+                  )}
                   <Link
                     href="/produtos"
-                    className="inline-block mt-4 text-sm text-[#3cbfb3] hover:underline font-medium"
+                    className="block mt-3 text-sm text-white/40 hover:text-white/60 transition"
                   >
                     Ver todos os produtos →
                   </Link>
@@ -374,6 +256,11 @@ export default function ProdutosClient() {
           <p className="text-white font-bold text-base flex items-center gap-2">
             <SlidersHorizontal size={18} />
             Filtros
+            {activeFilters.length > 0 && (
+              <span className="bg-[#3cbfb3] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                {activeFilters.length}
+              </span>
+            )}
           </p>
           <button
             onClick={() => setDrawerOpen(false)}
@@ -386,6 +273,19 @@ export default function ProdutosClient() {
         <div className="p-5">
           {sidebarContent}
         </div>
+        {activeFilters.length > 0 && (
+          <div className="p-5 border-t border-white/10">
+            <button
+              onClick={() => {
+                setParams([['categoria', ''], ['precoMin', ''], ['precoMax', ''], ['q', '']])
+                setDrawerOpen(false)
+              }}
+              className="w-full text-center text-sm text-white/50 hover:text-white transition font-medium"
+            >
+              Limpar todos os filtros
+            </button>
+          </div>
+        )}
       </div>
     </>
   )
