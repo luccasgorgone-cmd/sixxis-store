@@ -186,6 +186,7 @@ const DEFAULTS: Record<string, string> = {
   bg_footer_texto: '#9ca3af',
   bg_footer_titulo: '#ffffff',
   bg_footer_hover: '#3cbfb3',
+  juros_cartao_taxa_mensal: '2.99',
 }
 
 const TABS = [
@@ -771,6 +772,7 @@ export default function ConfiguracoesPage() {
       'frete_minimo_gratis', 'frete_cep_origem',
       'pagamento_pix', 'pagamento_boleto', 'pagamento_cartao',
       'pagamento_parcelas', 'pagamento_desconto_pix',
+      'juros_cartao_taxa_mensal',
     ]
     return (
       <div className="space-y-5">
@@ -834,6 +836,28 @@ export default function ConfiguracoesPage() {
                 onChange={(v) => set('pagamento_desconto_pix', v)}
                 placeholder="3"
               />
+            </Field>
+          </div>
+        </Card>
+
+        <Card title="Juros do Cartão de Crédito">
+          <div className="space-y-4">
+            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl p-4">
+              <p className="font-bold text-[#1a4f4a] text-sm">Parcelas 1x a 6x: SEM juros</p>
+              <p className="text-[#2a9d8f] text-xs mt-1">Fixo — as 6 primeiras parcelas são sempre sem juros.</p>
+            </div>
+            <Field label="Taxa de Juros Mensal (7x a 12x)" hint="Ex: 2.99 = 2.99% ao mês. Usado no cálculo Price (juros compostos).">
+              <div className="flex items-center gap-2">
+                <div className="relative max-w-xs">
+                  <Input
+                    type="number"
+                    value={configs.juros_cartao_taxa_mensal ?? '2.99'}
+                    onChange={(v) => set('juros_cartao_taxa_mensal', v)}
+                    placeholder="2.99"
+                  />
+                </div>
+                <span className="text-gray-500 text-sm font-bold shrink-0">% a.m.</span>
+              </div>
             </Field>
           </div>
         </Card>

@@ -24,12 +24,12 @@ export default function GaleriaProduto({ imagens, nome }: Props) {
   return (
     <div>
       {/* Imagem principal */}
-      <div className="relative aspect-square bg-[#f8f9fa] rounded-2xl overflow-hidden mb-4 border border-gray-200">
+      <div className="relative aspect-square bg-[#f8f9fa] rounded-2xl overflow-hidden mb-4 border border-gray-200 group cursor-zoom-in">
         <Image
           src={imagens[ativa]}
           alt={nome}
           fill
-          className="object-contain p-4 transition-opacity duration-200"
+          className="object-contain p-4 transition-transform duration-300 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
         />

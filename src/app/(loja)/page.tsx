@@ -27,6 +27,20 @@ export default async function HomePage() {
   let cfg:   Record<string, string> = {}
   let trust: Record<string, string> = {}
 
+  // Dedicated BG query — isolated from product data queries
+  let bgCfg: Record<string, string> = {}
+  try {
+    const bgRows = await prisma.configuracao.findMany({
+      where: {
+        chave: {
+          in: ['bg_body_url', 'bg_body_ativo', 'bg_body_size',
+               'bg_body_attachment', 'bg_body_position', 'bg_body_overlay']
+        }
+      }
+    })
+    bgCfg = Object.fromEntries(bgRows.map(r => [r.chave, r.valor]))
+  } catch {}
+
   try {
     const [bannersDb, destaques, produtosGerais, configRows, trustRows, ofertasDb] = await Promise.all([
       prisma.banner.findMany({ where: { ativo: true }, orderBy: { ordem: 'asc' } }),
@@ -66,26 +80,27 @@ export default async function HomePage() {
   }
 
   // Wallpaper only on home page
-  const bgAtivo = cfg.bg_body_ativo === 'true' && !!cfg.bg_body_url
+  const bgAtivo = bgCfg.bg_body_ativo === 'true' && !!bgCfg.bg_body_url
   const wallpaperStyle: React.CSSProperties = bgAtivo ? {
-    backgroundImage:      `url(${cfg.bg_body_url})`,
-    backgroundSize:       cfg.bg_body_size       || 'cover',
-    backgroundAttachment: cfg.bg_body_attachment || 'fixed',
-    backgroundRepeat:     cfg.bg_body_repeat     || 'no-repeat',
-    backgroundPosition:   cfg.bg_body_position   || 'center center',
+    backgroundImage:      `url(${bgCfg.bg_body_url})`,
+    backgroundSize:       bgCfg.bg_body_size       || 'cover',
+    backgroundAttachment: bgCfg.bg_body_attachment || 'fixed',
+    backgroundRepeat:     bgCfg.bg_body_repeat     || 'no-repeat',
+    backgroundPosition:   bgCfg.bg_body_position   || 'center center',
     backgroundColor:      '#0f1f1d',
   } : { backgroundColor: '#0f1f1d' }
-  const overlayOpacity = bgAtivo ? Number(cfg.bg_body_overlay || 0) : 0
+  const overlayOpacity = bgAtivo ? Number(bgCfg.bg_body_overlay || 0) : 0
 
   return (
-    <div className="relative" style={wallpaperStyle}>
+    <div className="relative min-h-screen" style={wallpaperStyle}>
       {bgAtivo && overlayOpacity > 0 && (
         <div
-          className="overlay-bg"
-          style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity / 100})` }}
+          className="absolute inset-0 pointer-events-none"
+          style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity / 100})`, zIndex: 0 }}
           aria-hidden="true"
         />
       )}
+      <div className="relative" style={{ zIndex: 1 }}>
     <main className="min-h-screen bg-transparent">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
@@ -320,6 +335,7 @@ export default async function HomePage() {
       </section>
 
     </main>
+      </div>
     </div>
   )
 }

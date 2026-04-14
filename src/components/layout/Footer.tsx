@@ -68,7 +68,7 @@ function PagamentoBadges() {
 
 function ColTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-white font-bold text-sm pb-2 mb-4 border-b border-white/15">
+    <p className="text-white font-bold text-sm pb-2 mb-4 border-b border-white/15 uppercase tracking-wider">
       {children}
     </p>
   )
@@ -297,11 +297,11 @@ export default async function Footer() {
 
             <ColTitle>Certificados</ColTitle>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 bg-[#0f2e2b]/60 border border-white/10 rounded-xl px-3 py-2.5 hover:border-white/20 transition-colors">
+              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 hover:border-white/20 transition-colors">
                 <ShieldCheck size={14} color="#34A853" strokeWidth={2.5} />
                 <span className="text-xs text-white/70 font-medium">Google Safe Browsing</span>
               </div>
-              <div className="flex items-center gap-2 bg-[#0f2e2b]/60 border border-white/10 rounded-xl px-3 py-2.5 hover:border-white/20 transition-colors">
+              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 hover:border-white/20 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle cx="12" cy="12" r="11" fill="#009EE3"/>
                   <ellipse cx="12" cy="12" rx="6" ry="4" fill="white"/>
@@ -332,7 +332,7 @@ export default async function Footer() {
       {/* ── Rodapé legal ─────────────────────────────────────────────────── */}
       <div className="border-t border-white/10" style={{ backgroundColor: '#081614' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div className="text-xs text-white/40 space-y-0.5">
+          <div className="text-xs text-white/55 space-y-0.5">
             <p>© {new Date().getFullYear()} Sixxis — SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA</p>
             <p>CNPJ: 54.978.947/0001-09&nbsp;&nbsp;|&nbsp;&nbsp;IE: 117.633.347.114</p>
             <p className="flex items-center gap-1">
@@ -340,7 +340,7 @@ export default async function Footer() {
               R. Anhanguera, 1711 - Icaray, Araçatuba - SP, 16020-355
             </p>
           </div>
-          <p className="text-xs text-white/30 shrink-0">Todos os direitos reservados.</p>
+          <p className="text-xs text-white/55 shrink-0">Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

@@ -199,43 +199,57 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
   const usarLocalizacaoAtual = () => {
     if (!navigator.geolocation) {
-      setCepErro('Geolocalização não disponível no seu navegador')
+      setCepErro('Geolocalização não disponível')
       return
     }
     setCepLoading(true)
     setCepErro('')
+    setCepResultado(null)
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords
+          let cepEncontrado = ''
 
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&accept-language=pt-BR`,
-            { headers: { 'User-Agent': 'SixxisStore/1.0' } }
-          )
-          const data = await res.json()
-
-          let cepBruto = ''
-          if (data.address?.postcode) {
-            cepBruto = data.address.postcode.replace(/\D/g, '')
-          }
-
-          if (cepBruto.length >= 8) {
-            const cepLimpo     = cepBruto.slice(0, 8)
-            const cepFormatado = cepLimpo.slice(0, 5) + '-' + cepLimpo.slice(5)
-            setCepInput(cepFormatado)
-
-            const viaCep     = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
-            const viaCepData = await viaCep.json()
-
-            if (!viaCepData.erro) {
-              await handleBuscarCep(cepLimpo)
-            } else {
-              setCepErro(`CEP detectado (${cepFormatado}) inválido. Digite manualmente.`)
+          // Fonte 1: Nominatim OpenStreetMap
+          try {
+            const r1 = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+              { headers: { 'User-Agent': 'SixxisStore/1.0 (brasil.sixxis@gmail.com)' } }
+            )
+            const d1 = await r1.json()
+            if (d1.address?.postcode) {
+              const pc = d1.address.postcode.replace(/\D/g, '')
+              if (pc.length >= 8) cepEncontrado = pc.slice(0, 8)
             }
-          } else {
-            setCepErro('Não foi possível detectar o CEP. Digite manualmente.')
+          } catch {}
+
+          if (cepEncontrado.length === 8) {
+            try {
+              const r2 = await fetch(`https://viacep.com.br/ws/${cepEncontrado}/json/`)
+              const d2 = await r2.json()
+              if (!d2.erro) {
+                const cepFormatado = cepEncontrado.slice(0, 5) + '-' + cepEncontrado.slice(5)
+                setCepInput(cepFormatado)
+                const r3 = await fetch('/api/frete/cep', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ cep: cepEncontrado }),
+                })
+                const d3 = await r3.json()
+                if (d3.ok) {
+                  setCepResultado({ mensagem: d3.mensagem })
+                  setCepSalvo(cepFormatado)
+                  localStorage.setItem('sixxis_cep', cepFormatado)
+                  setCepLoading(false)
+                  return
+                }
+              }
+            } catch {}
           }
+
+          setCepErro('CEP não detectado automaticamente. Digite manualmente.')
         } catch {
           setCepErro('Erro ao obter localização. Digite o CEP manualmente.')
         } finally {
@@ -244,15 +258,14 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       },
       (error) => {
         setCepLoading(false)
-        if (error.code === 1) {
-          setCepErro('Permissão negada. Digite o CEP manualmente.')
-        } else if (error.code === 2) {
-          setCepErro('Localização indisponível. Digite o CEP manualmente.')
-        } else {
-          setCepErro('Tempo esgotado. Digite o CEP manualmente.')
+        const msgs: Record<number, string> = {
+          1: 'Permissão negada. Digite o CEP manualmente.',
+          2: 'Localização indisponível. Digite o CEP manualmente.',
+          3: 'Tempo esgotado. Digite o CEP manualmente.',
         }
+        setCepErro(msgs[error.code] || 'Erro de localização.')
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     )
   }
 
