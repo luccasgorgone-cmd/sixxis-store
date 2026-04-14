@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Check, Zap, Package, ArrowDown } from 'lucide-react'
+import { ShoppingCart, Check, Zap, Package } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useState } from 'react'
@@ -19,9 +19,8 @@ function fmt(v: number) {
 
 export default function CardProduto({ produto }: Props) {
   const router = useRouter()
-  const { adicionarItem } = useCarrinho()
+  const { adicionarItem, setDrawerAberto } = useCarrinho()
   const [adicionado, setAdicionado] = useState(false)
-  const [adicionando, setAdicionando] = useState(false)
   const [imgError, setImgError] = useState(false)
 
   const imagens = produto.imagens as string[]
@@ -44,10 +43,15 @@ export default function CardProduto({ produto }: Props) {
     e.preventDefault()
     e.stopPropagation()
     if (esgotado || adicionado) return
-    setAdicionando(true)
-    adicionarItem({ produtoId: produto.id, nome: produto.nome, preco: precoFinal, quantidade: 1 })
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco: precoFinal,
+      quantidade: 1,
+      imagem: imagemCapa || undefined,
+    })
     setAdicionado(true)
-    setAdicionando(false)
+    setDrawerAberto(true)
     setTimeout(() => setAdicionado(false), 2000)
   }
 
@@ -55,24 +59,29 @@ export default function CardProduto({ produto }: Props) {
     e.preventDefault()
     e.stopPropagation()
     if (esgotado) return
-    adicionarItem({ produtoId: produto.id, nome: produto.nome, preco: precoFinal, quantidade: 1 })
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco: precoFinal,
+      quantidade: 1,
+      imagem: imagemCapa || undefined,
+    })
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
   }
 
-  // suppress unused var warning
-  void adicionando
-
   return (
     <Link href={`/produtos/${produto.slug}`} className="block h-full group">
-      <article className="bg-white h-full flex flex-col border border-gray-200 rounded-2xl overflow-hidden hover:border-[#3cbfb3]/30 hover:shadow-lg hover:shadow-gray-200/80 hover:-translate-y-0.5 transition-all duration-200">
+      <article className="bg-white h-full flex flex-col border border-gray-200/80 rounded-2xl overflow-hidden hover:border-[#3cbfb3]/30 hover:shadow-lg hover:shadow-gray-200/80 hover:-translate-y-0.5 transition-all duration-200">
 
         {/* Imagem */}
-        <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1' }}>
+        <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1', minHeight: '220px' }}>
           {/* Badge desconto */}
           {desconto > 0 && !esgotado && (
             <div className="absolute top-2.5 left-2.5 z-10">
-              <span className="bg-[#16a34a] text-white text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                <ArrowDown size={9} strokeWidth={3} />
+              <span className="bg-[#dc2626] text-white text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12l7 7 7-7"/>
+                </svg>
                 Baixou {desconto}%
               </span>
             </div>
@@ -99,7 +108,7 @@ export default function CardProduto({ produto }: Props) {
               src={imagemCapa}
               alt={produto.nome}
               fill
-              className="object-contain p-4 group-hover:scale-105 transition-transform duration-400"
+              className="object-contain p-2 group-hover:scale-105 transition-transform duration-400"
               sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
               unoptimized
               loading="lazy"
@@ -131,7 +140,7 @@ export default function CardProduto({ produto }: Props) {
             {precoOriginal && (
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="text-xs text-gray-400 line-through">R$ {fmt(precoOriginal)}</span>
-                <span className="text-[10px] text-[#16a34a] font-bold">Baixou {desconto}%</span>
+                <span className="text-[10px] text-[#dc2626] font-bold">Baixou {desconto}%</span>
               </div>
             )}
 
@@ -148,8 +157,18 @@ export default function CardProduto({ produto }: Props) {
               <span className="text-gray-400 font-normal"> (3% OFF)</span>
             </p>
 
-            {/* Botões */}
+            {/* Botões — Comprar Agora primeiro, Adicionar segundo */}
             <div className="space-y-2">
+              {!esgotado && (
+                <button
+                  onClick={handleComprarAgora}
+                  className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
+                >
+                  <Zap size={14} />
+                  Comprar Agora
+                </button>
+              )}
+
               <button
                 onClick={handleAddToCart}
                 disabled={esgotado}
@@ -157,23 +176,15 @@ export default function CardProduto({ produto }: Props) {
                   esgotado
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : adicionado
-                      ? 'bg-green-500 text-white'
-                      : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white shadow-sm'
+                      ? 'bg-green-500 text-white border-2 border-green-500'
+                      : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
                 }`}
               >
                 <ShoppingCart size={14} />
-                {esgotado ? 'Esgotado' : adicionado ? '✓ Adicionado!' : 'Adicionar ao Carrinho'}
+                {esgotado ? 'Esgotado' : adicionado ? (
+                  <><Check size={14} /> Adicionado!</>
+                ) : 'Adicionar ao Carrinho'}
               </button>
-
-              {!esgotado && (
-                <button
-                  onClick={handleComprarAgora}
-                  className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7] transition-all duration-200 active:scale-[0.98]"
-                >
-                  <Zap size={14} />
-                  Comprar Agora
-                </button>
-              )}
             </div>
           </div>
         </div>

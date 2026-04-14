@@ -147,13 +147,18 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
 
       {/* ── Botão abrir form ── */}
       {!formAberto && !enviado && (
-        <button
-          onClick={() => setFormAberto(true)}
-          className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3.5 rounded-2xl transition shadow-lg shadow-[#3cbfb3]/20 mb-8"
-        >
-          <Star size={18} fill="white" />
-          Deixar minha avaliação
-        </button>
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={() => setFormAberto(true)}
+            className="flex items-center gap-2 text-white font-bold px-8 py-3.5 rounded-2xl transition shadow-lg hover:opacity-90 hover:-translate-y-0.5"
+            style={{ backgroundColor: '#2a9d8f' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+            </svg>
+            Deixar minha avaliação
+          </button>
+        </div>
       )}
 
       {/* ── Formulário ── */}

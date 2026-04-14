@@ -102,6 +102,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     precoPromocional: promocional,
     estoque: produto.estoque,
     temVariacoes: produto.temVariacoes,
+    imagem: imagens[0] ?? undefined,
   }
 
   return (
@@ -136,6 +137,11 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10 lg:overflow-visible">
           <div className="relative">
             <GaleriaCB itens={itens} nome={produto.nome} />
+            {especificacoes && especificacoes.length > 0 && (
+              <div className="mt-4">
+                <CaracteristicasRapidas especificacoes={especificacoes} />
+              </div>
+            )}
           </div>
           <InfoProdutoCB
             produto={produtoParaInfo}
@@ -145,9 +151,6 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             totalAvaliacoes={totalAv}
           />
         </div>
-
-        {/* Características rápidas */}
-        <CaracteristicasRapidas especificacoes={especificacoes} />
 
         {/* ★ Você também pode gostar — acima da descrição */}
         <section className="mt-8 mb-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-8 bg-gray-50">

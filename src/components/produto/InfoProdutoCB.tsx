@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle } from 'lucide-react'
+import { ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle, Minus, Plus } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
 import { useCarrinho } from '@/hooks/useCarrinho'
@@ -26,6 +26,7 @@ interface Props {
     precoPromocional: number | null
     estoque: number
     temVariacoes: boolean
+    imagem?: string
   }
   variacoes: Variacao[]
   taxaJuros: number
@@ -55,10 +56,11 @@ function inferirTipoVariacao(nomes: string[]): string {
 
 export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAvaliacoes, totalAvaliacoes }: Props) {
   const router = useRouter()
-  const { adicionarItem } = useCarrinho()
+  const { adicionarItem, setDrawerAberto } = useCarrinho()
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
   const [adicionado, setAdicionado] = useState(false)
   const [parcelasAberto, setParcelasAberto] = useState(false)
+  const [quantidade, setQuantidade] = useState(1)
 
   const precoBase = produto.precoPromocional ?? produto.preco
   const precoAtual = variacaoSelecionada?.preco ?? precoBase
@@ -78,13 +80,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       produtoId: produto.id,
       nome: produto.nome,
       preco: precoAtual,
-      quantidade: 1,
+      quantidade,
+      imagem: produto.imagem,
       ...(variacaoSelecionada && {
         variacaoId: variacaoSelecionada.id,
         variacaoNome: variacaoSelecionada.nome,
       }),
     })
     setAdicionado(true)
+    setDrawerAberto(true)
     setTimeout(() => setAdicionado(false), 2500)
   }
 
@@ -94,7 +98,8 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       produtoId: produto.id,
       nome: produto.nome,
       preco: precoAtual,
-      quantidade: 1,
+      quantidade,
+      imagem: produto.imagem,
       ...(variacaoSelecionada && {
         variacaoId: variacaoSelecionada.id,
         variacaoNome: variacaoSelecionada.nome,
@@ -123,12 +128,12 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       )}
 
       {/* Avaliações */}
-      <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100">
+      <div className="flex flex-nowrap items-center gap-2 mb-4 pb-4 border-b border-gray-100">
         {totalAvaliacoes > 0 ? (
           <>
             <EstrelasNota nota={mediaAvaliacoes} size={14} />
             <span className="text-xs leading-none font-bold text-gray-800">{mediaAvaliacoes.toFixed(1)}</span>
-            <a href="#avaliacoes" className="text-xs leading-none text-[#0066cc] hover:underline">
+            <a href="#avaliacoes" className="text-xs leading-none text-[#0066cc] hover:underline whitespace-nowrap">
               {totalAvaliacoes} avaliação{totalAvaliacoes !== 1 ? 'ões' : ''}
             </a>
           </>
@@ -138,7 +143,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         <div className="w-px h-3.5 bg-gray-200 mx-1 shrink-0" />
         <a href={`https://wa.me/5518997474701?text=Tenho%20uma%20dúvida%20sobre%20${encodeURIComponent(produto.nome)}`}
           target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs leading-none text-[#0066cc] hover:underline">
+          className="flex items-center gap-1 text-xs leading-none text-[#0066cc] hover:underline whitespace-nowrap">
           <MessageCircle size={12} />
           Tire sua dúvida
         </a>
@@ -147,7 +152,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       {/* Badge desconto */}
       {desconto > 0 && (
         <div className="flex items-center gap-2 mb-2">
-          <span className="bg-[#16a34a] text-white text-xs font-black px-2.5 py-1 rounded-lg">
+          <span className="bg-[#dc2626] text-white text-xs font-black px-2.5 py-1 rounded-lg">
             Baixou {desconto}%
           </span>
         </div>
@@ -261,6 +266,30 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         )}
       </div>
 
+      {/* Seletor de quantidade */}
+      {!esgotado && (
+        <div className="flex items-center gap-3 mb-5">
+          <span className="text-sm font-bold text-gray-700">Quantidade:</span>
+          <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setQuantidade(q => Math.max(1, q - 1))}
+              className="w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+              aria-label="Diminuir quantidade"
+            >
+              <Minus size={14} />
+            </button>
+            <span className="w-10 text-center text-base font-bold text-gray-900">{quantidade}</span>
+            <button
+              onClick={() => setQuantidade(q => q + 1)}
+              className="w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+              aria-label="Aumentar quantidade"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Botões */}
       <div className="space-y-3 mb-6">
         <button
@@ -269,7 +298,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-60 text-white font-extrabold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] shadow-xl shadow-[#3cbfb3]/25 hover:-translate-y-0.5 flex items-center justify-center gap-2.5"
         >
           <ShoppingBag size={20} />
-          Comprar
+          Comprar Agora
         </button>
         <button
           onClick={handleAddToCart}
@@ -345,9 +374,11 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         {/* Selos de confiança */}
         <div className="flex items-center justify-center gap-3 bg-gray-50/80 border border-gray-100 rounded-xl py-2.5 px-3 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-[#009ee3] flex items-center justify-center">
-              <span className="text-white text-[8px] font-black">MP</span>
-            </div>
+            {/* Mercado Pago SVG logo */}
+            <svg width="24" height="16" viewBox="0 0 200 130" fill="none">
+              <rect width="200" height="130" rx="12" fill="#009ee3"/>
+              <text x="100" y="87" textAnchor="middle" fill="white" fontSize="65" fontWeight="bold" fontFamily="Arial, sans-serif">MP</text>
+            </svg>
             <span className="text-[10px] text-gray-600 font-semibold">Mercado Pago</span>
           </div>
           <div className="w-px h-4 bg-gray-200" />

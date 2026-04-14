@@ -10,6 +10,7 @@ import {
   Wind, Fan, Bike, Info, Phone, UserPlus,
 } from 'lucide-react'
 import RaioIcon from '@/components/ui/RaioIcon'
+import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 
@@ -158,7 +159,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   const [cepErro,       setCepErro]       = useState('')
 
   const { data: session } = useSession()
-  const { totalItens }    = useCarrinho()
+  const { totalItens, setDrawerAberto } = useCarrinho()
 
   useEffect(() => {
     document.body.style.overflow = (drawerOpen || cepModalOpen) ? 'hidden' : ''
@@ -367,9 +368,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <div className="w-px h-8 bg-white/20 mx-1" />
 
                 {/* Carrinho */}
-                <Link
-                  href="/carrinho"
+                <button
+                  onClick={() => setDrawerAberto(true)}
                   className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-xl transition min-w-[60px]"
+                  aria-label="Abrir carrinho"
                 >
                   <ShoppingCart size={21} strokeWidth={1.5} />
                   <span className="text-[11px] font-medium leading-none">Carrinho</span>
@@ -378,7 +380,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}
-                </Link>
+                </button>
               </div>
             </div>
 
@@ -396,10 +398,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <Image src={logoUrl} alt="Sixxis" width={115} height={38} className="object-contain" priority />
               </Link>
 
-              <Link
-                href="/carrinho"
+              <button
+                onClick={() => setDrawerAberto(true)}
                 className="relative ml-auto p-2 text-white"
-                aria-label="Carrinho"
+                aria-label="Abrir carrinho"
               >
                 <ShoppingCart size={24} />
                 {totalItens > 0 && (
@@ -407,7 +409,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                     {totalItens > 9 ? '9+' : totalItens}
                   </span>
                 )}
-              </Link>
+              </button>
             </div>
 
             {/* Busca mobile */}
@@ -432,11 +434,11 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   )}
                   <Link
                     href={link.href}
-                    className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-bold text-white hover:text-[#3cbfb3] tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
+                    className="flex items-center gap-1 px-4 py-1.5 text-[13px] font-bold text-white hover:text-[#3cbfb3] tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
                   >
                     {link.label}
                     {link.hot && (
-                      <RaioIcon size={18} comFundo={false} className="ml-0.5" />
+                      <RaioIcon size={20} comFundo={false} className="ml-0.5" />
                     )}
                   </Link>
                 </div>
@@ -525,6 +527,11 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           </div>
         </div>
       )}
+
+      {/* ═══════════════════════════════════════════════════════
+          CARRINHO DRAWER
+      ═══════════════════════════════════════════════════════ */}
+      <CarrinhoDrawer />
 
       {/* ═══════════════════════════════════════════════════════
           MOBILE DRAWER
