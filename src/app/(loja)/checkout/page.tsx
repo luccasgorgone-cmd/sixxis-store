@@ -33,7 +33,7 @@ interface EnderecoData {
 // ─── Campo de input ───────────────────────────────────────────────────────────
 
 function Campo({
-  label, value, onChange, placeholder, disabled, required = false,
+  label, value, onChange, placeholder, disabled, required = false, inputMode,
 }: {
   label: string
   value: string
@@ -41,6 +41,7 @@ function Campo({
   placeholder?: string
   disabled?: boolean
   required?: boolean
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']
 }) {
   return (
     <div>
@@ -50,11 +51,12 @@ function Campo({
       </label>
       <input
         type="text"
+        inputMode={inputMode}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] disabled:bg-gray-50 disabled:text-gray-400 transition"
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] disabled:bg-gray-50 disabled:text-gray-400 transition"
       />
     </div>
   )
@@ -326,12 +328,13 @@ function CheckoutContent() {
                 <div className="relative">
                   <input
                     type="text"
+                    inputMode="numeric"
                     value={end.cep}
                     onChange={e => setEnd(ev => ({ ...ev, cep: e.target.value }))}
                     onBlur={e => buscarCep(e.target.value)}
                     placeholder="00000-000"
                     maxLength={9}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition pr-10"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition pr-10"
                   />
                   {buscandoCep && (
                     <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3cbfb3] animate-spin" />
@@ -344,7 +347,7 @@ function CheckoutContent() {
                   onChange={v => setEnd(e => ({ ...e, logradouro: v }))} />
               </div>
               <Campo label="Número" required value={end.numero}
-                onChange={v => setEnd(e => ({ ...e, numero: v }))} />
+                onChange={v => setEnd(e => ({ ...e, numero: v }))} inputMode="numeric" />
               <Campo label="Complemento" value={end.complemento}
                 onChange={v => setEnd(e => ({ ...e, complemento: v }))} placeholder="Apto, bloco..." />
               <Campo label="Bairro" required value={end.bairro}
@@ -435,7 +438,7 @@ function CheckoutContent() {
                       onChange={e => { setCupomInput(e.target.value.toUpperCase()); setCupomErro('') }}
                       onKeyDown={e => e.key === 'Enter' && aplicarCupom()}
                       placeholder="CÓDIGO DO CUPOM"
-                      className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition"
+                      className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-3 md:py-2.5 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition"
                     />
                   </div>
                   <button
@@ -502,10 +505,10 @@ function CheckoutContent() {
                     <Campo label="Nome no cartão" value="" onChange={() => {}} placeholder="Como aparece no cartão" />
                   </div>
                   <div className="sm:col-span-2">
-                    <Campo label="Número do cartão" value="" onChange={() => {}} placeholder="0000 0000 0000 0000" />
+                    <Campo label="Número do cartão" value="" onChange={() => {}} placeholder="0000 0000 0000 0000" inputMode="numeric" />
                   </div>
-                  <Campo label="Validade" value="" onChange={() => {}} placeholder="MM/AA" />
-                  <Campo label="CVV" value="" onChange={() => {}} placeholder="123" />
+                  <Campo label="Validade" value="" onChange={() => {}} placeholder="MM/AA" inputMode="numeric" />
+                  <Campo label="CVV" value="" onChange={() => {}} placeholder="123" inputMode="numeric" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Parcelas</label>
@@ -513,7 +516,7 @@ function CheckoutContent() {
                     <select
                       value={parcelas}
                       onChange={e => setParcelas(Number(e.target.value))}
-                      className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition bg-white pr-10"
+                      className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] transition bg-white pr-10"
                     >
                       {Array.from({ length: 12 }, (_, i) => i + 1).map(n => {
                         const vlr = calcParcela(n)

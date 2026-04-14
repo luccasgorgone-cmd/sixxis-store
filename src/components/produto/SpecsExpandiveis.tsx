@@ -38,22 +38,24 @@ export default function SpecsExpandiveis({ especificacoes, initialCount = 10 }: 
       </div>
 
       {/* Linhas zebradas */}
-      <div>
-        {visiveis.map(({ label, valor }, i) => (
-          <div
-            key={label}
-            className={`flex items-start px-4 py-2.5 border-b border-gray-50 last:border-0 hover:bg-blue-50/20 transition ${
-              i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
-            }`}
-          >
-            <span className="text-[11px] text-gray-500 font-medium shrink-0 leading-snug" style={{ width: '48%' }}>
-              {label}
-            </span>
-            <span className="text-[11px] text-gray-900 font-semibold leading-snug flex-1">
-              {valor}
-            </span>
-          </div>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="min-w-[280px]">
+          {visiveis.map(({ label, valor }, i) => (
+            <div
+              key={label}
+              className={`flex items-start px-4 py-2.5 border-b border-gray-50 last:border-0 hover:bg-blue-50/20 transition ${
+                i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
+              }`}
+            >
+              <span className="text-[11px] text-gray-500 font-medium shrink-0 leading-snug" style={{ width: '48%' }}>
+                {label}
+              </span>
+              <span className="text-[11px] text-gray-900 font-semibold leading-snug flex-1">
+                {valor}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Botão expand/collapse */}

@@ -234,7 +234,20 @@ main {
   }
 }
 
-/* ── Mobile — iOS zoom prevention ────────────────────────────────────────── */
+/* ── Mobile — iOS zoom prevention (device-pixel-ratio) ───────────────────── */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ── Mobile — iOS zoom prevention (fallback) ──────────────────────────────── */
 @media (max-width: 767px) {
   input, select, textarea {
     font-size: 16px !important;
@@ -252,6 +265,12 @@ button, a {
 }
 .btn-sm {
   min-height: 36px !important;
+}
+
+/* ── Mobile — fontes muito pequenas override ──────────────────────────────── */
+@media (max-width: 640px) {
+  .text-\[9px\] { font-size: 10px !important; }
+  .text-\[10px\] { font-size: 11px !important; }
 }
 
 /* ── Safe area (iPhone home indicator) ───────────────────────────────────── */

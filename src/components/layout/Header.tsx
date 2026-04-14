@@ -388,7 +388,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             <div className="flex md:hidden items-center h-16 gap-3">
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="shrink-0 p-2 rounded-lg hover:bg-white/20 transition"
+                className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/20 transition"
                 aria-label="Abrir menu"
               >
                 <Menu size={24} className="text-white" />
@@ -400,7 +400,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
               <button
                 onClick={() => setDrawerAberto(true)}
-                className="relative ml-auto p-2 text-white"
+                className="relative ml-auto w-11 h-11 flex items-center justify-center text-white"
                 aria-label="Abrir carrinho"
               >
                 <ShoppingCart size={24} />

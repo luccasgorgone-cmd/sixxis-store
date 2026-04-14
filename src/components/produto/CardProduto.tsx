@@ -74,7 +74,7 @@ export default function CardProduto({ produto }: Props) {
       <article className="bg-white h-full flex flex-col border border-gray-200/80 rounded-2xl overflow-hidden hover:border-[#3cbfb3]/30 hover:shadow-lg hover:shadow-gray-200/80 hover:-translate-y-0.5 transition-all duration-200">
 
         {/* Imagem */}
-        <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1', minHeight: '220px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+        <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1', minHeight: 'min(220px, 42vw)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
           {/* Badge desconto */}
           {desconto > 0 && !esgotado && (
             <div className="absolute top-2.5 left-2.5 z-10">
@@ -123,7 +123,7 @@ export default function CardProduto({ produto }: Props) {
 
         {/* Conteúdo */}
         <div className="flex flex-col flex-1 px-3 pt-3 pb-3">
-          <p className="text-sm text-gray-800 line-clamp-2 leading-snug font-medium mb-2 flex-1">
+          <p className="text-xs sm:text-sm text-gray-800 line-clamp-2 leading-snug font-medium mb-2 flex-1">
             {produto.nome}
           </p>
 
