@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import {
   ShoppingCart, Menu, X, User, UserPlus,
   Wind, Fan, Bike, Tag, Info, Phone, HelpCircle,
-  Clock, Mail, Store, Search, MapPin, Navigation,
+  Clock, Mail, Store, Search, MapPin, Navigation, Truck,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'
@@ -261,13 +261,13 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       {/* ═══════════════════════════════════════════════════════
           CAMADA 1 — Announcement Bar
       ═══════════════════════════════════════════════════════ */}
-      <div className="border-b border-[#3cbfb3]/15 w-full" style={{ backgroundColor: 'var(--bg-anuncio, #0f2e2b)' }}>
+      <div className="border-b border-[#3cbfb3]/15 w-full" style={{ backgroundColor: 'var(--bg-anuncio, #1a4f4a)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-11">
 
             {/* BLOCO 1 — Cupom */}
             <div className="flex items-center gap-2">
-              <span className="text-base">🏷️</span>
+              <Tag size={14} className="text-[#3cbfb3] shrink-0" />
               <span className="text-white/80 text-xs sm:text-sm font-medium">CUPOM:</span>
               <span className="bg-[#3cbfb3] text-black text-xs font-black px-2.5 py-1 rounded-md tracking-wider uppercase">
                 SIXXIS10
@@ -282,7 +282,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
             {/* BLOCO 2 — Frete */}
             <div className="hidden md:flex items-center gap-2">
-              <span className="text-base">✨</span>
+              <Truck size={14} className="text-[#3cbfb3] shrink-0" />
               <span className="text-white text-sm font-bold tracking-wide">
                 FRETE GRÁTIS acima de R$ 500
               </span>
@@ -293,7 +293,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
             {/* BLOCO 3 — Entrega */}
             <div className="hidden lg:flex items-center gap-2">
-              <span className="text-base">🚚</span>
+              <MapPin size={14} className="text-[#3cbfb3] shrink-0" />
               <span className="text-white text-sm font-medium">
                 Entrega para todo o Brasil
               </span>
@@ -309,7 +309,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       <header className="sticky top-0 z-40">
 
         {/* ─── HEADER PRINCIPAL ─────────────────────────────── */}
-        <div className="shadow-md" style={{ backgroundColor: 'var(--bg-header, #1a4f4a)' }}>
+        <div className="shadow-md" style={{ backgroundColor: 'var(--bg-header, #0f2e2b)' }}>
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
 
             {/* Desktop row — h-[68px] fixo */}
@@ -427,7 +427,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         </div>
 
         {/* ─── NAV CATEGORIAS ───────────────────────────────── */}
-        <nav className="hidden lg:block" style={{ backgroundColor: 'var(--bg-header-nav, #0f2e2b)' }}>
+        <nav className="hidden lg:block" style={{ backgroundColor: 'var(--bg-header-nav, #1a4f4a)' }}>
           <div className="max-w-7xl mx-auto px-4 xl:px-6">
             <div className="flex items-center justify-center">
               {navLinks.map(({ href, label, destaque }, idx) => (

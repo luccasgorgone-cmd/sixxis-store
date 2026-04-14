@@ -121,7 +121,7 @@ export default async function Footer() {
   } catch {}
 
   return (
-    <footer className="text-white/60" style={{ backgroundColor: 'var(--bg-header, #1a4f4a)' }}>
+    <footer className="text-white/60" style={{ backgroundColor: '#0f2e2b' }}>
 
       {/* ── Linha tiffany topo ────────────────────────────────────────────── */}
       <div className="h-1 bg-[#3cbfb3]" />
@@ -131,14 +131,14 @@ export default async function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-8 xl:gap-6">
 
           {/* Col 1 — Marca + Contato */}
-          <div className="col-span-2 md:col-span-3 xl:col-span-2">
-            <Link href="/" className="inline-block mb-5">
+          <div className="col-span-2 md:col-span-3 xl:col-span-2 flex flex-col items-center text-center lg:items-start lg:text-left">
+            <Link href="/" className="mb-5">
               <Image
                 src={logoUrl}
                 alt="Sixxis"
                 width={165}
                 height={56}
-                className="object-contain h-12 w-auto"
+                className="object-contain h-12 w-auto mx-auto lg:mx-0"
                 unoptimized
               />
             </Link>
@@ -151,7 +151,7 @@ export default async function Footer() {
               href={`https://wa.me/${whatsappVendas}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#25D366]/30 mb-2"
+              className="flex items-center justify-center gap-2.5 w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#25D366]/30 mb-2"
               aria-label="Falar no WhatsApp — Vendas"
             >
               <WaIcon size={16} />
@@ -163,7 +163,7 @@ export default async function Footer() {
               href={`https://wa.me/${whatsappSuporte}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 w-full bg-[#0f2e2b] hover:bg-[#0a1f1d] border border-white/20 hover:border-[#3cbfb3]/50 text-white/70 hover:text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 mb-3"
+              className="flex items-center justify-center gap-2.5 w-full bg-[#0a1e1c] hover:bg-[#081614] border border-white/30 hover:border-white text-white/70 hover:text-white text-sm font-semibold px-3 py-2 rounded-xl transition-all hover:-translate-y-0.5 mb-3"
               aria-label="WhatsApp Assistência Técnica"
             >
               <WaIcon size={16} />
@@ -171,12 +171,12 @@ export default async function Footer() {
             </a>
 
             {/* Contato */}
-            <Link
+            <a
               href="/contato"
               className="flex items-center justify-center gap-2 w-full border border-white/20 hover:border-[#3cbfb3] text-white/70 hover:text-[#3cbfb3] text-sm font-medium px-4 py-2 rounded-xl transition-all mb-5"
             >
               Entre em Contato
-            </Link>
+            </a>
 
             {/* Email */}
             <div className="text-sm space-y-1">
@@ -319,7 +319,7 @@ export default async function Footer() {
       </div>
 
       {/* ── Formas de pagamento ───────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#0f2e2b' }}>
+      <div className="border-t border-white/10" style={{ backgroundColor: '#0a1e1c' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center gap-4">
           <p className="text-xs text-white/50 font-medium shrink-0">Formas de Pagamento:</p>
           <PagamentoBadges />
@@ -330,7 +330,7 @@ export default async function Footer() {
       </div>
 
       {/* ── Rodapé legal ─────────────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#0f2e2b' }}>
+      <div className="border-t border-white/10" style={{ backgroundColor: '#081614' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div className="text-xs text-white/40 space-y-0.5">
             <p>© {new Date().getFullYear()} Sixxis — SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA</p>

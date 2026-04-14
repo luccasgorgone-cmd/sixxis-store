@@ -65,7 +65,27 @@ export default async function HomePage() {
     console.error('[HOME DB ERROR]', error)
   }
 
+  // Wallpaper only on home page
+  const bgAtivo = cfg.bg_body_ativo === 'true' && !!cfg.bg_body_url
+  const wallpaperStyle: React.CSSProperties = bgAtivo ? {
+    backgroundImage:      `url(${cfg.bg_body_url})`,
+    backgroundSize:       cfg.bg_body_size       || 'cover',
+    backgroundAttachment: cfg.bg_body_attachment || 'fixed',
+    backgroundRepeat:     cfg.bg_body_repeat     || 'no-repeat',
+    backgroundPosition:   cfg.bg_body_position   || 'center center',
+    backgroundColor:      '#0f1f1d',
+  } : { backgroundColor: '#0f1f1d' }
+  const overlayOpacity = bgAtivo ? Number(cfg.bg_body_overlay || 0) : 0
+
   return (
+    <div className="relative" style={wallpaperStyle}>
+      {bgAtivo && overlayOpacity > 0 && (
+        <div
+          className="overlay-bg"
+          style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity / 100})` }}
+          aria-hidden="true"
+        />
+      )}
     <main className="min-h-screen bg-transparent">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
@@ -300,5 +320,6 @@ export default async function HomePage() {
       </section>
 
     </main>
+    </div>
   )
 }

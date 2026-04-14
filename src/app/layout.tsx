@@ -145,9 +145,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--color-badge-esgotado':   cfg.cor_badge_esgotado   || '#9ca3af',
     '--font-active':            `var(${fontObj.variable})`,
     // Novas variáveis de personalização visual
-    '--bg-header':      cfg.bg_header_cor      || '#1a4f4a',
-    '--bg-header-nav':  cfg.bg_header_nav_cor  || '#0f2e2b',
-    '--bg-anuncio':     cfg.bg_anuncio_cor     || '#0f2e2b',
+    '--bg-header':      cfg.bg_header_cor      || '#0f2e2b',
+    '--bg-header-nav':  cfg.bg_header_nav_cor  || '#1a4f4a',
+    '--bg-anuncio':     cfg.bg_anuncio_cor     || '#1a4f4a',
     '--bg-anuncio-txt': cfg.bg_anuncio_texto   || '#ffffff',
     '--bg-footer':      cfg.bg_footer_cor      || '#111827',
     '--bg-footer-txt':  cfg.bg_footer_texto    || '#9ca3af',
@@ -155,25 +155,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--bg-footer-hov':  cfg.bg_footer_hover    || '#3cbfb3',
   } as React.CSSProperties
 
-  // Background global do body
-  const bgAtivo = cfg.bg_body_ativo === 'true' && !!cfg.bg_body_url
-  const bgStyle: React.CSSProperties = bgAtivo ? {
-    backgroundImage:      `url(${cfg.bg_body_url})`,
-    backgroundSize:       cfg.bg_body_size       || 'cover',
-    backgroundAttachment: cfg.bg_body_attachment || 'fixed',
-    backgroundRepeat:     cfg.bg_body_repeat     || 'no-repeat',
-    backgroundPosition:   cfg.bg_body_position   || 'center center',
-    backgroundColor:      '#0f1f1d',
-  } : {
-    backgroundColor: cfg.cor_fundo || '#ffffff',
-  }
-
-  const overlayOpacity = bgAtivo ? Number(cfg.bg_body_overlay || 0) : 0
-
-  // Merge: CSS vars + font + background all on body so wallpaper and vars are co-located
+  // Body: plain background color only — wallpaper is applied per-page (home page)
   const bodyStyle: React.CSSProperties = {
     fontFamily: `var(${fontObj.variable}), system-ui, sans-serif`,
-    ...bgStyle,
+    backgroundColor: cfg.cor_fundo || '#ffffff',
     ...cssVars,
   }
 
@@ -191,14 +176,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className="min-h-full flex flex-col"
         style={bodyStyle}
       >
-        {/* Overlay de escurecimento do background (quando ativo) */}
-        {bgAtivo && overlayOpacity > 0 && (
-          <div
-            className="overlay-bg"
-            style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity / 100})` }}
-            aria-hidden="true"
-          />
-        )}
         <SessionProvider>
           {children}
         </SessionProvider>
