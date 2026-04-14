@@ -149,6 +149,32 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         {/* Características rápidas */}
         <CaracteristicasRapidas especificacoes={especificacoes} />
 
+        {/* ★ Você também pode gostar — acima da descrição */}
+        <section className="mt-8 mb-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-extrabold text-gray-900">Você também pode gostar</h2>
+              <Link href={`/produtos?categoria=${produto.categoria}`}
+                className="text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-medium hidden sm:block">
+                Ver todos →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+              {relacionados.map(p => <CardProduto key={p.id} produto={p} />)}
+              {Array.from({ length: Math.max(0, 4 - relacionados.length) }).map((_, i) => (
+                <div key={`placeholder-${i}`}
+                  className="rounded-2xl border-2 border-dashed border-gray-200 bg-white flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-1">
+                    <Package size={18} className="text-gray-300" />
+                  </div>
+                  <span className="text-xs font-bold text-gray-400">Em breve</span>
+                  <span className="text-[10px] text-gray-300">Novo produto chegando</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Descrição */}
         <DescricaoRica descricao={produto.descricao} />
 
@@ -256,31 +282,6 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           </div>
         </section>
 
-        {/* Produtos relacionados */}
-        <section className="mt-16 -mx-4 sm:-mx-6 px-4 sm:px-6 py-10 bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-extrabold text-gray-900">Você também pode gostar</h2>
-              <Link href={`/produtos?categoria=${produto.categoria}`}
-                className="text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-medium hidden sm:block">
-                Ver todos →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
-              {relacionados.map(p => <CardProduto key={p.id} produto={p} />)}
-              {Array.from({ length: Math.max(0, 4 - relacionados.length) }).map((_, i) => (
-                <div key={`placeholder-${i}`}
-                  className="rounded-2xl border-2 border-dashed border-gray-200 bg-white flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-1">
-                    <Package size={18} className="text-gray-300" />
-                  </div>
-                  <span className="text-xs font-bold text-gray-400">Em breve</span>
-                  <span className="text-[10px] text-gray-300">Novo produto chegando</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   )

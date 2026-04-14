@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Zap, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
+import RaioIcon from '@/components/ui/RaioIcon'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -54,9 +55,7 @@ export default function OfertasRelampago({ produtos }: Props) {
 
             {/* Esquerda: ícone + título */}
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-black/30 shrink-0 border-2 border-black/20">
-                <Zap size={22} className="text-yellow-300 fill-yellow-300" />
-              </div>
+              <RaioIcon size={22} comFundo={true} />
               <div>
                 <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-none tracking-tight">
                   Ofertas Relâmpago
@@ -66,12 +65,12 @@ export default function OfertasRelampago({ produtos }: Props) {
             </div>
 
             {/* Direita: timer em container escuro */}
-            <div className="flex flex-col items-center gap-1.5 bg-black/20 rounded-2xl px-5 py-3 border border-white/10">
+            <div className="flex flex-col items-center gap-1.5 bg-[#0f2e2b]/60 rounded-2xl px-5 py-3 border border-white/15">
 
               {/* Rótulo "Termina em:" */}
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-red-700 rounded-lg flex items-center justify-center border border-black/25">
-                  <Clock size={13} className="text-yellow-300" strokeWidth={2.5} />
+                <div className="w-6 h-6 bg-[#1a4f4a] rounded-lg flex items-center justify-center border border-white/20">
+                  <Clock size={13} className="text-[#3cbfb3]" strokeWidth={2.5} />
                 </div>
                 <span className="text-white font-extrabold text-sm tracking-widest uppercase">
                   Termina em:
@@ -84,19 +83,19 @@ export default function OfertasRelampago({ produtos }: Props) {
                   <div key={item.label} className="flex items-center gap-1.5">
                     <div className="flex flex-col items-center">
                       {/* Bloco do número */}
-                      <div className="relative bg-red-600 rounded-xl px-4 py-2.5 shadow-xl shadow-black/40 min-w-[56px] flex items-center justify-center border-2 border-black/25 overflow-hidden">
+                      <div className="relative bg-[#3cbfb3] rounded-xl px-4 py-2.5 shadow-xl shadow-black/40 min-w-[56px] flex items-center justify-center border-2 border-black/25 overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-px bg-white/25" />
                         <span className="text-white font-black text-xl font-mono tabular-nums leading-none">
                           {item.val}
                         </span>
                       </div>
                       {/* Label */}
-                      <span className="text-red-400 text-[9px] font-black uppercase tracking-widest mt-1">
+                      <span className="text-[#3cbfb3] text-[9px] font-black uppercase tracking-widest mt-1">
                         {item.label}
                       </span>
                     </div>
                     {i < 2 && (
-                      <span className="text-red-500 font-black text-xl mb-5 select-none">:</span>
+                      <span className="text-[#3cbfb3] font-black text-xl mb-5 select-none">:</span>
                     )}
                   </div>
                 ))}

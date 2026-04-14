@@ -3,7 +3,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Star, Check, Zap, Package, ArrowDown } from 'lucide-react'
+import { ShoppingCart, Check, Zap, Package, ArrowDown } from 'lucide-react'
+import EstrelasNota from '@/components/ui/EstrelasNota'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useState } from 'react'
 import type { Produto } from '@/types'
@@ -120,12 +121,7 @@ export default function CardProduto({ produto }: Props) {
           {/* Avaliações */}
           {totalAvaliacoes > 0 && (
             <div className="flex items-center gap-1.5 mb-2.5">
-              <div className="flex gap-0.5">
-                {[1,2,3,4,5].map(s => (
-                  <Star key={s} size={12}
-                    className={s <= Math.round(mediaAvaliacoes) ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-gray-200 fill-gray-200'} />
-                ))}
-              </div>
+              <EstrelasNota nota={mediaAvaliacoes} size={12} />
               <span className="text-xs text-gray-500">({totalAvaliacoes})</span>
             </div>
           )}

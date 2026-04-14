@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, ShoppingBag, ChevronDown, Truck, Check, Star, Share2, MessageCircle, ShieldCheck, RefreshCw, Award } from 'lucide-react'
+import { ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle } from 'lucide-react'
+import EstrelasNota from '@/components/ui/EstrelasNota'
+import CalcFrete from '@/components/produto/CalcFrete'
 import { useCarrinho } from '@/hooks/useCarrinho'
 
 interface Variacao {
@@ -57,9 +59,6 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
   const [adicionado, setAdicionado] = useState(false)
   const [parcelasAberto, setParcelasAberto] = useState(false)
-  const [cepInput, setCepInput] = useState('')
-  const [freteResult, setFreteResult] = useState<{ opcoes?: { tipo: string; preco: number; prazo?: string }[] } | null>(null)
-  const [calculandoFrete, setCalculandoFrete] = useState(false)
 
   const precoBase = produto.precoPromocional ?? produto.preco
   const precoAtual = variacaoSelecionada?.preco ?? precoBase
@@ -104,20 +103,6 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
   }
 
-  async function calcularFrete() {
-    if (cepInput.length < 8) return
-    setCalculandoFrete(true)
-    // Simulação de frete — integração real via API de frete
-    await new Promise(r => setTimeout(r, 600))
-    setFreteResult({
-      opcoes: [
-        { tipo: 'PAC', preco: produto.preco >= 500 ? 0 : 29.90, prazo: '5 a 8 dias úteis' },
-        { tipo: 'SEDEX', preco: 49.90, prazo: '1 a 3 dias úteis' },
-      ],
-    })
-    setCalculandoFrete(false)
-  }
-
   return (
     <div>
       {/* Vendido por */}
@@ -141,12 +126,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100">
         {totalAvaliacoes > 0 ? (
           <>
-            <div className="flex gap-0.5">
-              {[1,2,3,4,5].map(s => (
-                <Star key={s} size={14}
-                  className={s <= Math.round(mediaAvaliacoes) ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-gray-200 fill-gray-200'} />
-              ))}
-            </div>
+            <EstrelasNota nota={mediaAvaliacoes} size={14} />
             <span className="text-xs leading-none font-bold text-gray-800">{mediaAvaliacoes.toFixed(1)}</span>
             <a href="#avaliacoes" className="text-xs leading-none text-[#0066cc] hover:underline">
               {totalAvaliacoes} avaliação{totalAvaliacoes !== 1 ? 'ões' : ''}
@@ -301,69 +281,103 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         </button>
       </div>
 
-      {/* Trust cards */}
-      <div className="grid grid-cols-2 gap-2 mb-5">
-        {[
-          { icon: ShieldCheck, label: 'Compra Segura',    sub: 'Dados criptografados', color: 'text-[#3cbfb3]',  bg: 'bg-[#e8f8f7]'  },
-          { icon: Truck,       label: 'Frete Grátis',     sub: 'Acima de R$ 500',      color: 'text-blue-500',   bg: 'bg-blue-50'    },
-          { icon: RefreshCw,   label: 'Troca Fácil',      sub: 'Até 7 dias úteis',     color: 'text-amber-500',  bg: 'bg-amber-50'   },
-          { icon: Award,       label: 'Produto Original', sub: 'Garantia Sixxis',      color: 'text-purple-500', bg: 'bg-purple-50'  },
-        ].map(({ icon: Icon, label, sub, color, bg }) => (
-          <div key={label}
-            className="flex items-center gap-2.5 bg-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-gray-200 hover:shadow-sm transition-all">
-            <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center shrink-0`}>
-              <Icon size={15} className={color} />
+      {/* Badges de segurança */}
+      <div className="mt-4 mb-5">
+        {/* Grid 2x2 */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-green-100 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-gray-800 leading-tight truncate">{label}</p>
-              <p className="text-[10px] text-gray-500 leading-tight truncate mt-0.5">{sub}</p>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Compra Segura</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Dados protegidos SSL</p>
             </div>
           </div>
-        ))}
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-[#e8f8f7] rounded-lg flex items-center justify-center shrink-0 group-hover:bg-[#d0f4f1] transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <circle cx="12" cy="12" r="3" fill="#0f9488" stroke="none"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Garantia 12 Meses</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Suporte técnico Sixxis</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="1"/>
+                <path d="M16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Entrega Rápida</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Para todo o Brasil</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
+            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-purple-100 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 .49-4.46"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Troca Fácil</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Até 7 dias corridos</p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Selos de confiança */}
+        <div className="flex items-center justify-center gap-3 bg-gray-50/80 border border-gray-100 rounded-xl py-2.5 px-3 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <div className="w-5 h-5 rounded-full bg-[#009ee3] flex items-center justify-center">
+              <span className="text-white text-[8px] font-black">MP</span>
+            </div>
+            <span className="text-[10px] text-gray-600 font-semibold">Mercado Pago</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span className="text-[10px] text-gray-600 font-semibold">Loja Verificada</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5">
+            <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span className="text-[10px] text-gray-600 font-semibold">SSL Ativo</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="6"/>
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+            </svg>
+            <span className="text-[10px] text-gray-600 font-semibold">100% Original</span>
+          </div>
+        </div>
       </div>
 
       {/* Frete */}
-      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 mb-4">
-        <p className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-1.5">
-          <Truck size={15} className="text-[#3cbfb3]" />
-          Calcular frete e prazo de entrega
-        </p>
-        <div className="flex gap-2">
-          <input
-            value={cepInput}
-            onChange={e => setCepInput(e.target.value.replace(/\D/g, '').slice(0, 8))}
-            placeholder="00000-000"
-            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
-          />
-          <button
-            onClick={calcularFrete}
-            disabled={calculandoFrete || cepInput.length < 8}
-            className="bg-[#0f2e2b] hover:bg-[#1a4f4a] disabled:opacity-60 text-white font-bold px-4 py-2 rounded-xl text-sm transition"
-          >
-            {calculandoFrete ? '...' : 'Consultar'}
-          </button>
-        </div>
-        {freteResult && freteResult.opcoes && (
-          <div className="mt-3 space-y-1">
-            {freteResult.opcoes.map(op => (
-              <div key={op.tipo} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-100 last:border-0">
-                <div className="flex items-center gap-1.5">
-                  <Truck size={12} className="text-[#3cbfb3]" />
-                  <span className="text-gray-700 font-semibold">{op.tipo}</span>
-                </div>
-                <span className="font-bold text-gray-900">
-                  {op.preco === 0 ? (
-                    <span className="text-green-600">Grátis</span>
-                  ) : (
-                    `R$ ${op.preco.toFixed(2).replace('.', ',')}`
-                  )}
-                  {op.prazo && <span className="text-gray-400 font-normal ml-1">• {op.prazo}</span>}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <CalcFrete produtoId={produto.id} />
 
       {/* Compartilhar */}
       <a

@@ -9,6 +9,7 @@ import {
   Menu, X, Navigation, Clock, Mail, Store, HelpCircle,
   Wind, Fan, Bike, Info, Phone, UserPlus,
 } from 'lucide-react'
+import RaioIcon from '@/components/ui/RaioIcon'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 
@@ -263,39 +264,42 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
   return (
     <>
+      {/* Linha cinza ACIMA do announcement */}
+      <div className="w-full h-px bg-gray-200" />
+
       {/* ═══════════════════════════════════════════════════════
           CAMADA 1 — ANNOUNCEMENT BAR
       ═══════════════════════════════════════════════════════ */}
       <div className="bg-[#3cbfb3] w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-10">
+          <div className="flex items-center justify-between h-11">
 
             {/* Esquerda — Cupom */}
             <div className="flex items-center gap-2">
-              <Tag size={13} className="text-black/60 shrink-0" strokeWidth={2} />
-              <span className="text-black/80 text-xs font-semibold">CUPOM:</span>
-              <span className="bg-white text-black text-[11px] font-black px-2.5 py-0.5 rounded-md border border-white/80 tracking-wider shadow-sm">
+              <Tag size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
+              <span className="text-[#0f2e2b] text-sm font-extrabold">CUPOM:</span>
+              <span className="bg-white text-[#0f2e2b] text-xs font-black px-2.5 py-1 rounded-lg border border-[#0f2e2b]/15 shadow-sm">
                 SIXXIS10
               </span>
-              <span className="text-black/70 text-xs font-medium hidden sm:inline">
+              <span className="text-[#0f2e2b]/85 text-sm font-semibold hidden sm:inline">
                 — 10% OFF na 1ª compra
               </span>
             </div>
 
             {/* Centro — Frete */}
             <div className="hidden md:flex items-center gap-2">
-              <div className="w-px h-4 bg-black/20 mr-1" />
-              <Truck size={13} className="text-black/60 shrink-0" strokeWidth={2} />
-              <span className="text-black font-bold text-xs tracking-wide">
+              <div className="w-px h-5 bg-[#0f2e2b]/20" />
+              <Truck size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
+              <span className="text-[#0f2e2b] text-sm font-extrabold">
                 FRETE GRÁTIS acima de R$ 500
               </span>
             </div>
 
             {/* Direita — Entrega */}
             <div className="hidden lg:flex items-center gap-2">
-              <div className="w-px h-4 bg-black/20 mr-1" />
-              <MapPin size={13} className="text-black/60 shrink-0" strokeWidth={2} />
-              <span className="text-black/80 text-xs font-medium">
+              <div className="w-px h-5 bg-[#0f2e2b]/20" />
+              <MapPin size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
+              <span className="text-[#0f2e2b]/85 text-sm font-semibold">
                 Entrega para todo o Brasil
               </span>
             </div>
@@ -303,8 +307,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           </div>
         </div>
       </div>
-      {/* Separador fino entre announcement e header */}
-      <div className="w-full border-b border-black/15" />
+      {/* Separador entre announcement e header */}
+      <div className="w-full border-b border-[#0f2e2b]/20" />
 
       {/* ═══════════════════════════════════════════════════════
           CAMADA 2 — HEADER PRINCIPAL (sticky)
@@ -319,15 +323,12 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
               {/* Logo */}
               <Link href="/" className="shrink-0 flex items-center">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={logoUrl || '/logo-sixxis.png'}
                   alt="Sixxis"
-                  width={104}
-                  height={35}
-                  quality={100}
-                  priority
-                  className="object-contain h-9 w-auto"
-                  style={{ imageRendering: 'auto' }}
+                  style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+                  loading="eager"
                 />
               </Link>
 
@@ -435,9 +436,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   >
                     {link.label}
                     {link.hot && (
-                      <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase leading-none">
-                        HOT
-                      </span>
+                      <RaioIcon size={14} comFundo={false} className="ml-0.5" />
                     )}
                   </Link>
                 </div>
@@ -584,7 +583,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <Icon size={20} className={hot ? 'text-amber-300' : 'text-white/50'} />
               {label}
               {hot && (
-                <span className="ml-auto text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded-full">HOT</span>
+                <RaioIcon size={16} comFundo={false} className="ml-auto" />
               )}
             </Link>
           ))}

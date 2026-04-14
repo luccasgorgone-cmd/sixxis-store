@@ -59,30 +59,38 @@ export default async function Footer() {
 
       {/* ── Bloco principal ────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
           {/* ── Coluna esquerda — Logo + Botões ──────────────────────────── */}
           <div className="lg:col-span-1">
             <div className="flex flex-col items-start">
 
               {/* Logo sem box */}
-              <Image
-                src={logoUrl}
-                alt="Sixxis"
-                width={175}
-                height={59}
-                quality={100}
-                className="object-contain h-14 w-auto mb-2"
-                unoptimized
-              />
+              <div className="mb-2">
+                <Image
+                  src={logoUrl}
+                  alt="Sixxis"
+                  width={175}
+                  height={59}
+                  quality={100}
+                  unoptimized
+                  className="object-contain"
+                  style={{ height: '56px', width: 'auto' }}
+                />
+              </div>
 
-              {/* Tagline — discreta, pequena, alinhada com a logo */}
-              <p className="text-white/55 text-xs leading-relaxed mb-5 max-w-[230px]">
-                Qualidade e inovação para o seu conforto e bem-estar.
-              </p>
+              {/* Slogan — 2 linhas */}
+              <div className="mb-5">
+                <p className="text-white/60 text-xs font-medium leading-snug">
+                  Qualidade e Inovação
+                </p>
+                <p className="text-white/60 text-xs font-medium leading-snug">
+                  Para Seu Conforto e Bem-Estar
+                </p>
+              </div>
 
               {/* Botões — mesma largura que a logo */}
-              <div className="flex flex-col gap-2.5 w-full max-w-[230px]">
+              <div className="flex flex-col gap-2.5 w-full" style={{ maxWidth: '175px' }}>
                 <a
                   href={`https://wa.me/${whatsappVendas}`}
                   target="_blank"

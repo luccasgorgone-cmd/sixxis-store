@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Star, Camera, MessageSquare, User, X } from 'lucide-react'
+import EstrelasNota from '@/components/ui/EstrelasNota'
 import Image from 'next/image'
 
 interface AvaliacaoFoto {
@@ -133,7 +134,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
         <div className="flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2e2b] to-[#1a4f4a] rounded-2xl p-8 text-white">
           <span className="text-6xl font-black leading-none mb-2">{total > 0 ? media.toFixed(1) : '—'}</span>
           <div className="flex gap-1 mb-2">
-            <Estrelas nota={Math.round(media)} size={18} />
+            <EstrelasNota nota={media} size={20} />
           </div>
           <span className="text-white/70 text-sm">{total} avaliação{total !== 1 ? 'ões' : ''}</span>
         </div>
@@ -295,7 +296,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
                         ⭐ DESTAQUE
                       </span>
                     )}
-                    <Estrelas nota={av.nota} size={13} />
+                    <EstrelasNota nota={av.nota} size={13} />
                   </div>
                 </div>
                 {av.titulo && <p className="font-bold text-gray-900 text-sm mb-1">{av.titulo}</p>}
