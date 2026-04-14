@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Search, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import CardProduto from '@/components/produto/CardProduto'
-import SubcategoriasCarrossel from '@/components/produtos/SubcategoriasCarrossel'
 import FiltrosHorizontais from '@/components/produtos/FiltrosHorizontais'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import type { GrupoFiltro } from '@/components/produtos/FiltrosHorizontais'
@@ -20,29 +19,6 @@ const CATEGORIAS: Record<string, string> = {
 }
 
 const LIMIT = 12
-
-// ── Subcategorias por categoria ───────────────────────────────────────────────
-
-const SUBCATS_MAP: Record<string, { label: string; href: string }[]> = {
-  climatizadores: [
-    { label: 'Residencial',    href: '/produtos?categoria=climatizadores&tipo=residencial' },
-    { label: 'Comercial',      href: '/produtos?categoria=climatizadores&tipo=comercial' },
-    { label: '110 Volts',      href: '/produtos?categoria=climatizadores&voltagem=110V' },
-    { label: '220 Volts',      href: '/produtos?categoria=climatizadores&voltagem=220V' },
-    { label: 'Mais Vendidos',  href: '/produtos?categoria=climatizadores&ordem=vendidos' },
-    { label: 'Menor Preço',    href: '/produtos?categoria=climatizadores&ordem=preco_asc' },
-  ],
-  aspiradores: [
-    { label: 'Sem Fio', href: '/produtos?categoria=aspiradores&tipo=sem-fio' },
-    { label: 'Bivolt',  href: '/produtos?categoria=aspiradores&voltagem=bivolt' },
-  ],
-  spinning: [
-    { label: 'Bike Life',   href: '/produtos?categoria=spinning&modelo=life' },
-    { label: 'Bike Cardio', href: '/produtos?categoria=spinning&modelo=cardio' },
-    { label: 'Bivolt',      href: '/produtos?categoria=spinning&voltagem=bivolt' },
-    { label: 'À Bateria',   href: '/produtos?categoria=spinning&voltagem=bateria' },
-  ],
-}
 
 // ── Grupos de filtro por categoria ────────────────────────────────────────────
 
@@ -211,7 +187,6 @@ export default function ProdutosClient() {
   const categoriaLabel = categoria ? (CATEGORIAS[categoria] ?? categoria) : null
   const titulo = busca ? `Resultados para "${busca}"` : categoriaLabel ?? 'Todos os Produtos'
 
-  const subcategorias = SUBCATS_MAP[categoria] ?? []
   const grupos = categoria === 'climatizadores' ? GRUPOS_CLIMATIZADORES
     : categoria === 'aspiradores' ? GRUPOS_ASPIRADORES
     : categoria === 'spinning'    ? GRUPOS_SPINNING
@@ -229,7 +204,6 @@ export default function ProdutosClient() {
   return (
     <div className="min-h-screen bg-white">
       <Breadcrumb items={breadcrumbItems} />
-      <SubcategoriasCarrossel subcategorias={subcategorias} />
       <FiltrosHorizontais grupos={grupos} total={total} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">

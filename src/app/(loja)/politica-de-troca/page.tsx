@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Clock, CheckCircle, RotateCcw, Phone } from 'lucide-react'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const revalidate = 86400
 
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export default function PoliticaDeTrocaPage() {
   return (
     <main className="bg-white">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Trocas e Devoluções' }]} />
 
       {/* Hero */}
       <section

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { HelpCircle } from 'lucide-react'
 import FaqAccordion from '@/components/faq/FaqAccordion'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const revalidate = 3600
 
@@ -56,6 +57,7 @@ const faqs = [
 export default function FaqPage() {
   return (
     <main className="bg-white">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'FAQ' }]} />
 
       {/* Hero */}
       <section

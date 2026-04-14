@@ -142,7 +142,7 @@ export default async function Footer() {
                 {[
                   { label: 'Trocas e Devoluções',     href: '/politica-de-troca' },
                   { label: 'Política de Privacidade',  href: '/privacidade'       },
-                  { label: 'Política de Cookies',      href: '/privacidade'       },
+                  { label: 'Política de Cookies',      href: '/cookies'           },
                   { label: 'Termo de Garantia',        href: '/garantia'          },
                 ].map(item => (
                   <li key={item.label}>

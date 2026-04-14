@@ -1,261 +1,226 @@
-import type { Metadata } from 'next'
+'use client'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ShieldCheck, Mail } from 'lucide-react'
+import Breadcrumb from '@/components/ui/Breadcrumb'
+import {
+  Shield, CheckCircle, X, Phone, Mail,
+  Package, Wind, Bike, Sparkles, ArrowRight, FileText
+} from 'lucide-react'
 
-export const revalidate = 86400
-
-export const metadata: Metadata = {
-  title: 'Termo de Garantia | Sixxis',
-  description: 'Conheça os prazos e condições de garantia dos produtos Sixxis e saiba como acionar a assistência técnica.',
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [v, setV] = useState(false)
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setV(true) }, { threshold: 0.1 })
+    if (ref.current) obs.observe(ref.current)
+    return () => obs.disconnect()
+  }, [])
+  return { ref, visible: v }
 }
-
-const categoriasGarantia = [
-  {
-    categoria: 'Climatizadores',
-    prazo: '12 meses',
-    cobertura: 'Defeitos de fabricação em compressor, motor, painel eletrônico e peças estruturais.',
-    obs: 'Filtros e consumíveis não cobertos.',
-  },
-  {
-    categoria: 'Aspiradores de Pó',
-    prazo: '12 meses',
-    cobertura: 'Motor, corpo do aspirador, mangueiras e acessórios originais.',
-    obs: 'Sacos e filtros descartáveis não cobertos.',
-  },
-  {
-    categoria: 'Bikes de Spinning',
-    prazo: '12 meses',
-    cobertura: 'Estrutura metálica, sistema de freio magnético, guidão, selim e pedais.',
-    obs: 'Desgaste natural de correia e partes móveis após uso intenso não cobertos.',
-  },
-  {
-    categoria: 'Peças de Reposição',
-    prazo: '90 dias',
-    cobertura: 'Defeito de fabricação ou incompatibilidade com o produto original Sixxis.',
-    obs: 'Peças instaladas por terceiros não autorizados não cobertas.',
-  },
-]
-
-const etapasGarantia = [
-  {
-    numero: '1',
-    titulo: 'Entre em contato',
-    desc: 'Envie um e-mail para brasil.sixxis@gmail.com com seu número de pedido, descrição do problema e fotos ou vídeo do defeito.',
-  },
-  {
-    numero: '2',
-    titulo: 'Análise do caso',
-    desc: 'Nossa equipe técnica avaliará seu chamado em até 2 dias úteis e confirmará se o defeito é coberto pela garantia.',
-  },
-  {
-    numero: '3',
-    titulo: 'Logística reversa',
-    desc: 'Aprovada a garantia, enviaremos uma etiqueta de devolução gratuita para que você nos envie o produto.',
-  },
-  {
-    numero: '4',
-    titulo: 'Reparo ou substituição',
-    desc: 'O produto será reparado ou substituído em até 30 dias corridos a partir do recebimento. Você será notificado em cada etapa.',
-  },
-]
-
-const naoCobertas = [
-  'Danos causados por mau uso, acidentes, quedas ou impactos físicos',
-  'Desgaste natural por uso prolongado (consumíveis, filtros, borrachas)',
-  'Modificações ou reparos realizados por terceiros não autorizados',
-  'Danos por tensão elétrica incorreta ou surtos de energia',
-  'Danos causados por agentes externos (umidade excessiva, corrosão, insetos)',
-  'Produtos sem nota fiscal ou com número de série adulterado',
-  'Produtos fora do prazo de garantia',
-]
+function Reveal({ children, delay = 0, className = '' }: {
+  children: React.ReactNode; delay?: number; className?: string
+}) {
+  const { ref, visible } = useReveal()
+  return (
+    <div ref={ref} className={className} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'none' : 'translateY(20px)',
+      transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
+    }}>{children}</div>
+  )
+}
 
 export default function GarantiaPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero */}
-      <section
-        className="text-white py-16 px-4"
-        style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="w-16 h-16 rounded-full bg-[#3cbfb3]/20 flex items-center justify-center mx-auto mb-5">
-            <ShieldCheck size={32} className="text-[#3cbfb3]" />
+    <div className="min-h-screen bg-white">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Garantia' }]} />
+
+      {/* ─── Hero ─── */}
+      <section className="py-16 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(#3cbfb3 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <div className="w-16 h-16 bg-[#3cbfb3]/15 border border-[#3cbfb3]/30 rounded-3xl flex items-center justify-center mx-auto mb-5">
+            <Shield size={28} className="text-[#3cbfb3]" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">Termo de Garantia Sixxis</h1>
-          <p className="text-white/70 text-lg">Produtos de qualidade com suporte técnico especializado</p>
-          <p className="text-white/50 text-sm mt-2">Válido para compras realizadas na loja oficial Sixxis a partir de janeiro de 2025</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
+            Termo de Garantia Sixxis
+          </h1>
+          <p className="text-white/60 text-sm leading-relaxed max-w-xl mx-auto mb-5">
+            Produtos de qualidade com suporte técnico especializado.
+            Sua compra protegida por <strong className="text-white/90">12 meses de garantia total</strong>,
+            em conformidade com o CDC — Lei nº 8.078/1990.
+          </p>
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+            <span className="text-white/70 text-xs">Válido para compras na loja oficial a partir de Jan/2025</span>
+          </div>
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 py-12 space-y-10">
-
-        {/* Intro */}
-        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <p className="text-gray-700 leading-relaxed">
-            A <strong>Sixxis</strong> garante todos os produtos vendidos em sua loja oficial contra defeitos de
-            fabricação, conforme os prazos e condições descritos neste termo, em cumprimento ao{' '}
-            <strong>Código de Defesa do Consumidor (CDC — Lei nº 8.078/1990)</strong> e às políticas internas da
-            empresa. A garantia é válida exclusivamente para o comprador original e para produtos adquiridos
-            diretamente na loja oficial Sixxis.
-          </p>
+      {/* ─── Prazos por produto ─── */}
+      <section className="py-14 border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <Reveal className="text-center mb-10">
+            <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Cobertura</span>
+            <h2 className="text-2xl font-extrabold text-gray-900 mt-2">Prazos de garantia por produto</h2>
+          </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                icon: Wind,     titulo: 'Climatizadores', prazo: '12 meses', cor: '#3cbfb3',
+                cobre: ['Motor e compressor', 'Painel eletrônico', 'Estrutura e corpo', 'Acessórios originais'],
+                nao:   ['Filtros e consumíveis', 'Danos por mau uso'],
+              },
+              {
+                icon: Sparkles, titulo: 'Aspiradores',    prazo: '12 meses', cor: '#8b5cf6',
+                cobre: ['Motor principal', 'Corpo do aspirador', 'Mangueiras originais', 'Acessórios inclusos'],
+                nao:   ['Sacos descartáveis', 'Filtros de uso'],
+              },
+              {
+                icon: Bike,     titulo: 'Bikes Spinning', prazo: '12 meses', cor: '#f59e0b',
+                cobre: ['Estrutura metálica', 'Sistema de freio', 'Guidão e selim', 'Pedais originais'],
+                nao:   ['Desgaste de correia', 'Partes móveis por uso'],
+              },
+            ].map((p, i) => {
+              const Icon = p.icon
+              return (
+                <Reveal key={p.titulo} delay={i * 80}
+                  className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="p-5 border-b border-gray-50"
+                    style={{ background: `linear-gradient(135deg, ${p.cor}08, transparent)` }}>
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
+                      style={{ backgroundColor: p.cor + '18' }}>
+                      <Icon size={20} style={{ color: p.cor }} />
+                    </div>
+                    <h3 className="text-base font-extrabold text-gray-900">{p.titulo}</h3>
+                    <div className="inline-flex items-center gap-1.5 mt-1.5">
+                      <Shield size={11} style={{ color: p.cor }} />
+                      <span className="text-xs font-extrabold" style={{ color: p.cor }}>{p.prazo}</span>
+                    </div>
+                  </div>
+                  <div className="p-5 space-y-1.5">
+                    <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider mb-2">Coberto:</p>
+                    {p.cobre.map(c => (
+                      <div key={c} className="flex items-center gap-2 text-xs text-gray-700">
+                        <CheckCircle size={11} className="text-green-500 shrink-0" /> {c}
+                      </div>
+                    ))}
+                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mt-3 mb-1">Não coberto:</p>
+                    {p.nao.map(n => (
+                      <div key={n} className="flex items-center gap-2 text-xs text-gray-400">
+                        <X size={11} className="text-red-400 shrink-0" /> {n}
+                      </div>
+                    ))}
+                  </div>
+                </Reveal>
+              )
+            })}
+          </div>
+          <Reveal className="mt-4">
+            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/25 rounded-2xl px-5 py-3.5 text-center">
+              <p className="text-xs text-[#0f2e2b] font-semibold">
+                A garantia legal do CDC (90 dias para produtos duráveis) é
+                <strong> adicional</strong> à garantia contratual Sixxis.
+              </p>
+            </div>
+          </Reveal>
         </div>
+      </section>
 
-        {/* Prazos por categoria */}
-        <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-[#0f2e2b] mb-6 flex items-center gap-2">
-            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
-            Prazos de garantia por categoria
-          </h2>
-          <div className="space-y-4">
-            {categoriasGarantia.map((item) => (
-              <div key={item.categoria} className="border border-gray-100 rounded-xl overflow-hidden">
-                <div className="bg-[#e8f8f7] px-5 py-3 flex items-center justify-between">
-                  <h3 className="font-bold text-gray-800">{item.categoria}</h3>
-                  <span className="bg-[#3cbfb3] text-white text-sm font-bold px-3 py-1 rounded-full">
-                    {item.prazo}
-                  </span>
+      {/* ─── Como acionar ─── */}
+      <section className="py-14">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <Reveal className="text-center mb-10">
+            <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Processo</span>
+            <h2 className="text-2xl font-extrabold text-gray-900 mt-2">Como acionar a garantia</h2>
+          </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            {[
+              { n: '01', titulo: 'Entre em contato', texto: 'Envie e-mail com nº do pedido, descrição do problema e fotos/vídeo do defeito.', cor: '#3cbfb3' },
+              { n: '02', titulo: 'Análise técnica',   texto: 'Nossa equipe avalia o chamado em até 2 dias úteis e confirma se está coberto.',    cor: '#8b5cf6' },
+              { n: '03', titulo: 'Logística reversa', texto: 'Aprovada a garantia, enviamos etiqueta de devolução gratuita para você.',           cor: '#f59e0b' },
+              { n: '04', titulo: 'Reparo ou troca',   texto: 'Produto reparado ou substituído em até 30 dias. Você será notificado em cada etapa.', cor: '#16a34a' },
+            ].map((step, i) => (
+              <Reveal key={step.n} delay={i * 80}
+                className="bg-white rounded-2xl border border-gray-100 p-5 text-center hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-extrabold text-sm"
+                  style={{ backgroundColor: step.cor }}>
+                  {step.n}
                 </div>
-                <div className="px-5 py-4">
-                  <p className="text-sm text-gray-700 mb-1">
-                    <strong>Cobertura:</strong> {item.cobertura}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    <strong>Obs.:</strong> {item.obs}
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-sm font-extrabold text-gray-900 mb-2">{step.titulo}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">{step.texto}</p>
+              </Reveal>
             ))}
           </div>
-          <p className="mt-4 text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
-            A garantia legal do CDC (90 dias para produtos duráveis) é adicional à garantia contratual Sixxis.
-            Os prazos acima se somam ao prazo legal.
-          </p>
-        </section>
-
-        {/* Como acionar */}
-        <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-[#0f2e2b] mb-6 flex items-center gap-2">
-            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
-            Como acionar a garantia
-          </h2>
-          <div className="space-y-4">
-            {etapasGarantia.map((etapa) => (
-              <div key={etapa.numero} className="flex gap-4">
-                <div className="shrink-0 bg-[#3cbfb3] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
-                  {etapa.numero}
-                </div>
-                <div className="pt-1">
-                  <h3 className="font-semibold text-gray-800 mb-1">{etapa.titulo}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{etapa.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 bg-[#e8f8f7] rounded-xl p-4 text-sm text-gray-700">
-            <strong className="text-[#0f2e2b]">Importante:</strong> O acionamento da garantia deve ser solicitado dentro do prazo vigente.
-            Guarde sempre sua nota fiscal como comprovante de compra — ela é obrigatória para acionamento.
-          </div>
-        </section>
-
-        {/* O que não cobre */}
-        <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
-            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
-            Situações não cobertas pela garantia
-          </h2>
-          <ul className="space-y-2">
-            {naoCobertas.map((item, i) => (
-              <li key={i} className="flex gap-3 text-sm text-gray-700">
-                <span className="text-red-400 font-bold shrink-0 mt-0.5">✕</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Assistência técnica */}
-        <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
-            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">4</span>
-            Assistência técnica autorizada
-          </h2>
-          <p className="text-gray-600 leading-relaxed mb-4">
-            Para serviços de reparo dentro ou fora do prazo de garantia, você pode acionar diretamente a central
-            de suporte técnico Sixxis. Reparos realizados por assistências não autorizadas anulam a garantia do
-            produto.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-4 text-sm">
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-800 mb-2">Central de Suporte</h3>
-              <ul className="space-y-1 text-gray-600">
-                <li>E-mail: brasil.sixxis@gmail.com</li>
-                <li>WhatsApp: (11) 93410-2621</li>
-                <li>Horário: Seg–Sex, 8h–18h</li>
-                <li>Resposta em até 2 dias úteis</li>
-              </ul>
+          <Reveal className="mt-5">
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-start gap-3">
+              <FileText size={16} className="text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-800 leading-relaxed">
+                <strong>Importante:</strong> Guarde sempre sua nota fiscal.
+                Ela é obrigatória para o acionamento da garantia.
+                O prazo deve ser solicitado dentro do período vigente.
+              </p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-800 mb-2">Documentos necessários</h3>
-              <ul className="space-y-1 text-gray-600">
-                <li>Nota fiscal de compra</li>
-                <li>Número do pedido (loja online)</li>
-                <li>Fotos/vídeo do defeito</li>
-                <li>Descrição detalhada do problema</li>
-              </ul>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ─── Não coberto ─── */}
+      <section className="py-12 bg-gray-50/40 border-y border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <Reveal className="text-center mb-6">
+            <h2 className="text-xl font-extrabold text-gray-900">Situações não cobertas</h2>
+          </Reveal>
+          <Reveal>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                'Danos por mau uso, acidentes ou impactos físicos',
+                'Desgaste natural por uso prolongado',
+                'Modificações por terceiros não autorizados',
+                'Danos por tensão elétrica incorreta ou surtos',
+                'Danos por agentes externos (umidade, corrosão)',
+                'Produtos sem nota fiscal ou número de série adulterado',
+                'Produtos fora do prazo de garantia',
+                'Reparos em assistências não autorizadas',
+              ].map(item => (
+                <div key={item} className="flex items-center gap-2.5 bg-white rounded-xl px-3.5 py-2.5 border border-gray-100">
+                  <X size={13} className="text-red-400 shrink-0" />
+                  <span className="text-xs text-gray-600">{item}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ─── CTA contato ─── */}
+      <section className="py-14">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="rounded-3xl p-8 text-center"
+            style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
+            <div className="w-12 h-12 bg-[#3cbfb3]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Phone size={20} className="text-[#3cbfb3]" />
+            </div>
+            <h3 className="text-xl font-extrabold text-white mb-2">Precisa acionar a garantia?</h3>
+            <p className="text-white/55 text-sm mb-6">
+              Nossa equipe técnica está pronta para ajudar.
+              Resposta em até 2 dias úteis.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <a href="mailto:brasil.sixxis@gmail.com"
+                className="inline-flex items-center gap-2 bg-[#3cbfb3] text-white font-bold px-5 py-3 rounded-xl transition hover:bg-[#2a9d8f] text-sm">
+                <Mail size={14} /> brasil.sixxis@gmail.com
+              </a>
+              <Link href="/pedidos"
+                className="inline-flex items-center gap-2 border border-white/20 text-white font-semibold px-5 py-3 rounded-xl hover:bg-white/10 transition text-sm">
+                <Package size={14} /> Ver meus pedidos
+              </Link>
             </div>
           </div>
-        </section>
-
-        {/* Prazo de resposta / direitos */}
-        <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
-            <span className="bg-[#e8f8f7] text-[#3cbfb3] rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">5</span>
-            Seus direitos e prazos legais
-          </h2>
-          <div className="space-y-3 text-sm text-gray-700">
-            <p>
-              Conforme o <strong>CDC (Art. 26 e 18)</strong>, você tem direito a reclamar por vícios (defeitos)
-              nos produtos nos seguintes prazos:
-            </p>
-            <ul className="space-y-2">
-              <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>30 dias</strong> para produtos e serviços não duráveis.</span></li>
-              <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>90 dias</strong> para produtos duráveis (eletrodomésticos, equipamentos).</span></li>
-            </ul>
-            <p>
-              Se o defeito não for sanado em <strong>30 dias corridos</strong>, você pode exigir, à sua escolha:
-              substituição do produto, restituição do valor pago ou abatimento proporcional no preço.
-            </p>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section
-          className="text-white rounded-2xl p-8 text-center"
-          style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
-        >
-          <div className="w-12 h-12 rounded-full bg-[#3cbfb3]/20 flex items-center justify-center mx-auto mb-4">
-            <Mail size={22} className="text-[#3cbfb3]" />
-          </div>
-          <h2 className="text-xl font-bold mb-3">Precisa acionar a garantia?</h2>
-          <p className="text-white/70 mb-6 text-sm leading-relaxed">
-            Nossa equipe está pronta para ajudar. Entre em contato informando seu pedido e o defeito encontrado.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href="mailto:brasil.sixxis@gmail.com"
-              className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition-colors"
-            >
-              brasil.sixxis@gmail.com
-            </a>
-            <Link
-              href="/pedidos"
-              className="border-2 border-white/30 hover:border-white text-white font-bold px-6 py-3 rounded-xl hover:bg-white/10 transition-colors"
-            >
-              Ver meus pedidos
-            </Link>
-          </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Phone, Mail, MapPin, Clock, MessageCircle } from 'lucide-react'
 import FormContato from '@/components/contato/FormContato'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const revalidate = 3600
 
@@ -44,6 +45,7 @@ const infos = [
 export default function ContatoPage() {
   return (
     <main className="bg-white">
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Contato' }]} />
 
       {/* Hero */}
       <section
