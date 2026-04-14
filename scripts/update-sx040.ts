@@ -168,15 +168,16 @@ async function main() {
 
   console.log(`✅ Produto encontrado: ${produto.nome} (slug: ${produto.slug}, id: ${produto.id})`)
 
-  // Atualiza a descrição e ativa variações
+  // Atualiza nome, descrição e ativa variações
   await prisma.produto.update({
     where: { id: produto.id },
     data: {
+      nome: 'Climatizador SX040',
       descricao: DESCRICAO_SX040.trim(),
       temVariacoes: true,
     },
   })
-  console.log('✅ Descrição atualizada')
+  console.log('✅ Nome + Descrição atualizados')
 
   // Upsert das variações de voltagem
   const variacoes = [

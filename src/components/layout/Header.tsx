@@ -307,21 +307,23 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       ═══════════════════════════════════════════════════════ */}
       <header className="sticky top-0 z-40">
 
-        <div style={{ backgroundColor: '#1a4f4a' }}>
+        <div style={{ backgroundColor: '#0f2e2b' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
             {/* ── Desktop ────────────────────────────────────── */}
             <div className="hidden md:flex items-center h-[68px] gap-4">
 
               {/* Logo */}
-              <Link href="/" className="shrink-0">
+              <Link href="/" className="shrink-0 flex items-center">
                 <Image
-                  src={logoUrl}
+                  src={logoUrl || '/logo-sixxis.png'}
                   alt="Sixxis"
-                  width={130}
-                  height={44}
-                  className="object-contain h-10 w-auto"
+                  width={104}
+                  height={35}
+                  quality={100}
                   priority
+                  className="object-contain h-9 w-auto"
+                  style={{ imageRendering: 'auto' }}
                 />
               </Link>
 
@@ -412,7 +414,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         </div>
 
         {/* ── Separador ───────────────────────────────────────── */}
-        <div className="w-full border-t border-white/15" />
+        <div className="w-full border-t border-white/10" />
 
         {/* ── NAV CATEGORIAS ──────────────────────────────────── */}
         <nav className="hidden lg:block" style={{ backgroundColor: '#0f2e2b' }}>
@@ -537,7 +539,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         style={{
           width: '85%',
           maxWidth: '320px',
-          backgroundColor: '#1a4f4a',
+          backgroundColor: '#0f2e2b',
           transform: drawerOpen ? 'translateX(0)' : 'translateX(-100%)',
         }}
       >

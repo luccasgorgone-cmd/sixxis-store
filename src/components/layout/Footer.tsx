@@ -63,30 +63,31 @@ export default async function Footer() {
 
           {/* ── Coluna esquerda — Logo + Botões ──────────────────────────── */}
           <div className="lg:col-span-1">
-            <div className="flex flex-col">
+            <div className="flex flex-col items-start">
 
-              {/* Card com borda tiffany */}
-              <div className="border border-[#3cbfb3]/40 rounded-2xl p-5 mb-5 max-w-[260px]">
-                <Image
-                  src={logoUrl}
-                  alt="Sixxis"
-                  width={155}
-                  height={52}
-                  className="object-contain"
-                  unoptimized
-                />
-                <p className="text-white/70 text-sm leading-relaxed mt-2">
-                  Qualidade e inovação para seu conforto e bem estar!
-                </p>
-              </div>
+              {/* Logo sem box */}
+              <Image
+                src={logoUrl}
+                alt="Sixxis"
+                width={175}
+                height={59}
+                quality={100}
+                className="object-contain h-14 w-auto mb-2"
+                unoptimized
+              />
 
-              {/* Botões fora do card */}
-              <div className="flex flex-col gap-2.5 max-w-[260px]">
+              {/* Tagline — discreta, pequena, alinhada com a logo */}
+              <p className="text-white/55 text-xs leading-relaxed mb-5 max-w-[230px]">
+                Qualidade e inovação para o seu conforto e bem-estar.
+              </p>
+
+              {/* Botões — mesma largura que a logo */}
+              <div className="flex flex-col gap-2.5 w-full max-w-[230px]">
                 <a
                   href={`https://wa.me/${whatsappVendas}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-bold py-3 px-4 rounded-xl transition w-full"
+                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-bold py-2.5 px-4 rounded-xl transition w-full"
                 >
                   <WaSVG />
                   Vendas
@@ -95,14 +96,14 @@ export default async function Footer() {
                   href={`https://wa.me/${whatsappSuporte}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2.5 border border-white/30 hover:border-white/60 text-white text-sm font-semibold py-3 px-4 rounded-xl transition w-full"
+                  className="flex items-center justify-center gap-2 border border-white/30 hover:border-white/60 text-white text-sm font-medium py-2.5 px-4 rounded-xl transition w-full"
                 >
                   <WaSVG />
                   Assistência Técnica
                 </a>
                 <Link
                   href="/contato"
-                  className="flex items-center justify-center text-white/65 hover:text-white text-sm py-3 px-4 rounded-xl transition w-full border border-white/15 hover:border-white/40"
+                  className="flex items-center justify-center text-white/55 hover:text-white text-sm py-2.5 px-4 rounded-xl transition w-full border border-white/[0.12] hover:border-white/30"
                 >
                   Entre em Contato
                 </Link>

@@ -214,9 +214,6 @@ export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Pro
                 <span className="font-semibold text-xs text-gray-600">
                   R$ {fmt(valor)}
                 </span>
-                <span className="text-[10px] text-orange-500 font-bold">
-                  {taxaJuros}% a.m.
-                </span>
               </div>
             )
           })}

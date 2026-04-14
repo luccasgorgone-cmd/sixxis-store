@@ -214,29 +214,28 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 mb-4">
             <div className="grid grid-cols-2 gap-1.5 mb-3">
               {[1,2,3,4,5,6].map(n => (
-                <div key={n} className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs ${
-                  n === 6 ? 'bg-[#e8f8f7] border border-[#3cbfb3]/20' : 'bg-white border border-gray-100'
+                <div key={n} className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm ${
+                  n === 6 ? 'bg-[#e8f8f7] border border-[#3cbfb3]/30' : 'bg-white border border-gray-100'
                 }`}>
                   <span className="font-bold text-gray-700">{n}x</span>
                   <span className={`font-bold ${n === 6 ? 'text-[#3cbfb3]' : 'text-gray-600'}`}>
                     R$ {fmt(precoAtual / n)}
                   </span>
-                  <span className="text-green-600 font-bold text-[9px]">sem juros</span>
+                  <span className="text-[10px] text-green-600 font-bold">sem juros</span>
                 </div>
               ))}
               {[7,8,9,10,11,12].map(n => {
                 const valor = calcPMT(precoAtual, taxa, n)
                 return (
-                  <div key={n} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs bg-white border border-gray-100">
+                  <div key={n} className="flex items-center justify-between px-3 py-2 rounded-xl text-sm bg-white border border-gray-100">
                     <span className="font-bold text-gray-700">{n}x</span>
                     <span className="font-bold text-gray-600">R$ {fmt(valor)}</span>
-                    <span className="text-orange-500 text-[9px] font-bold">{taxaJuros}% a.m.</span>
                   </div>
                 )
               })}
             </div>
-            <p className="text-[10px] text-gray-400 text-center">
-              * Parcelas de 7x a 12x sujeitas a juros. Consulte condições no checkout.
+            <p className="text-[10px] text-gray-400 text-center col-span-2">
+              * Parcelas de 7x a 12x sujeitas a juros. Consulte no checkout.
             </p>
           </div>
         )}
