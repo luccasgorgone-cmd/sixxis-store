@@ -305,7 +305,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       {/* ═══════════════════════════════════════════════════════
           CAMADA 2 — HEADER PRINCIPAL (sticky)
       ═══════════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-40">
+      <header className="sticky top-0 z-40 bg-[#0f2e2b] shadow-md">
 
         <div style={{ backgroundColor: '#0f2e2b' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
