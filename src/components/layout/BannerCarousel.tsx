@@ -37,7 +37,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div
           className="relative w-full overflow-hidden rounded-2xl bg-[#0f2e2b] select-none"
-          style={{ aspectRatio: '1920/500', maxHeight: '500px' }}
+          style={{ aspectRatio: '1920/560', maxHeight: '560px' }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >

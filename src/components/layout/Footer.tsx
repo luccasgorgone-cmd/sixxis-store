@@ -137,12 +137,12 @@ export default async function Footer() {
               <Image
                 src={logoUrl}
                 alt="Sixxis"
-                width={155}
-                height={52}
+                width={160}
+                height={54}
                 className="object-contain mb-4"
                 unoptimized
               />
-              <p className="text-white/70 text-sm leading-relaxed mb-5 max-w-[280px]">
+              <p className="text-white/70 text-sm leading-relaxed mb-5 max-w-[260px]">
                 Qualidade e inovação para o seu conforto e bem-estar.
               </p>
               {/* Buttons aligned with logo width */}
@@ -291,7 +291,7 @@ export default async function Footer() {
       </div>
 
       {/* ── Formas de pagamento ───────────────────────────────────────────── */}
-      <div className="border-t border-white/20" style={{ backgroundColor: '#0a1e1c' }}>
+      <div className="border-t border-white/20" style={{ backgroundColor: '#0f2e2b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center gap-4">
           <p className="text-xs text-white/85 font-medium shrink-0">Formas de Pagamento:</p>
           <PagamentoBadges />
@@ -302,7 +302,7 @@ export default async function Footer() {
       </div>
 
       {/* ── Rodapé legal ─────────────────────────────────────────────────── */}
-      <div className="border-t border-white/20" style={{ backgroundColor: '#081614' }}>
+      <div className="border-t border-white/20" style={{ backgroundColor: '#0f2e2b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div className="text-xs text-white/75 space-y-0.5">
             <p>© {new Date().getFullYear()} Sixxis — SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA</p>

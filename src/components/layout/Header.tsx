@@ -333,9 +333,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <Image
                   src={logoUrl}
                   alt="Sixxis"
-                  width={132}
-                  height={44}
-                  className="object-contain h-[44px] w-auto"
+                  width={135}
+                  height={45}
+                  className="object-contain h-[45px] w-auto"
                   priority
                 />
               </Link>
@@ -440,7 +440,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         </div>
 
         {/* ─── Separator ────────────────────────────────────── */}
-        <div className="h-px bg-white/20 w-full" />
+        <div className="w-full border-t border-white/15" />
 
         {/* ─── NAV CATEGORIAS ───────────────────────────────── */}
         <nav className="hidden lg:block" style={{ backgroundColor: 'var(--bg-header, #0f2e2b)' }}>

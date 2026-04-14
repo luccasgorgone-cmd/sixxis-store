@@ -2,43 +2,48 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import {
+  Home, Building2, Droplets, Zap, Trophy, Tag,
+  Hand, Bot, ArrowUp, Wind, Fan, Bike, Flame, Sparkles, Medal,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface Subcategoria {
   label: string
   href: string
-  emoji: string
+  Icon: LucideIcon
   img?: string
 }
 
 const SUBCATS: Record<string, Subcategoria[]> = {
   climatizadores: [
-    { label: 'Residencial', href: '/produtos?categoria=climatizadores&tipo=residencial', emoji: '🏠' },
-    { label: 'Comercial', href: '/produtos?categoria=climatizadores&tipo=comercial', emoji: '🏢' },
-    { label: 'Tanque Grande', href: '/produtos?categoria=climatizadores&min_litros=40', emoji: '💧' },
-    { label: 'Bivolt', href: '/produtos?categoria=climatizadores&voltagem=bivolt', emoji: '⚡' },
-    { label: 'Mais Vendidos', href: '/produtos?categoria=climatizadores&ordem=vendidos', emoji: '🏆' },
-    { label: 'Melhores Preços', href: '/produtos?categoria=climatizadores&ordem=preco-asc', emoji: '💰' },
+    { label: 'Residencial',    href: '/produtos?categoria=climatizadores&tipo=residencial', Icon: Home      },
+    { label: 'Comercial',      href: '/produtos?categoria=climatizadores&tipo=comercial',   Icon: Building2 },
+    { label: 'Tanque Grande',  href: '/produtos?categoria=climatizadores&min_litros=40',    Icon: Droplets  },
+    { label: 'Bivolt',         href: '/produtos?categoria=climatizadores&voltagem=bivolt',  Icon: Zap       },
+    { label: 'Mais Vendidos',  href: '/produtos?categoria=climatizadores&ordem=vendidos',   Icon: Trophy    },
+    { label: 'Melhores Preços',href: '/produtos?categoria=climatizadores&ordem=preco-asc',  Icon: Tag       },
   ],
   aspiradores: [
-    { label: 'Portátil', href: '/produtos?categoria=aspiradores&tipo=portatil', emoji: '🤲' },
-    { label: 'Robô', href: '/produtos?categoria=aspiradores&tipo=robo', emoji: '🤖' },
-    { label: 'Vertical', href: '/produtos?categoria=aspiradores&tipo=vertical', emoji: '⬆️' },
-    { label: 'Mais Vendidos', href: '/produtos?categoria=aspiradores&ordem=vendidos', emoji: '🏆' },
-    { label: 'Melhores Preços', href: '/produtos?categoria=aspiradores&ordem=preco-asc', emoji: '💰' },
+    { label: 'Portátil',       href: '/produtos?categoria=aspiradores&tipo=portatil',       Icon: Hand      },
+    { label: 'Robô',           href: '/produtos?categoria=aspiradores&tipo=robo',           Icon: Bot       },
+    { label: 'Vertical',       href: '/produtos?categoria=aspiradores&tipo=vertical',       Icon: ArrowUp   },
+    { label: 'Mais Vendidos',  href: '/produtos?categoria=aspiradores&ordem=vendidos',      Icon: Trophy    },
+    { label: 'Melhores Preços',href: '/produtos?categoria=aspiradores&ordem=preco-asc',     Icon: Tag       },
   ],
   spinning: [
-    { label: 'Profissional', href: '/produtos?categoria=spinning&tipo=profissional', emoji: '🏅' },
-    { label: 'Residencial', href: '/produtos?categoria=spinning&tipo=residencial', emoji: '🏠' },
-    { label: 'Mais Vendidos', href: '/produtos?categoria=spinning&ordem=vendidos', emoji: '🏆' },
-    { label: 'Melhores Preços', href: '/produtos?categoria=spinning&ordem=preco-asc', emoji: '💰' },
+    { label: 'Profissional',   href: '/produtos?categoria=spinning&tipo=profissional',      Icon: Medal     },
+    { label: 'Residencial',    href: '/produtos?categoria=spinning&tipo=residencial',       Icon: Home      },
+    { label: 'Mais Vendidos',  href: '/produtos?categoria=spinning&ordem=vendidos',         Icon: Trophy    },
+    { label: 'Melhores Preços',href: '/produtos?categoria=spinning&ordem=preco-asc',        Icon: Tag       },
   ],
   '': [
-    { label: 'Climatizadores', href: '/produtos?categoria=climatizadores', emoji: '❄️' },
-    { label: 'Aspiradores', href: '/produtos?categoria=aspiradores', emoji: '🌀' },
-    { label: 'Spinning', href: '/produtos?categoria=spinning', emoji: '🚴' },
-    { label: 'Ofertas', href: '/ofertas', emoji: '🏷️' },
-    { label: 'Mais Vendidos', href: '/produtos?ordem=vendidos', emoji: '🔥' },
-    { label: 'Novidades', href: '/produtos?ordem=recentes', emoji: '✨' },
+    { label: 'Climatizadores', href: '/produtos?categoria=climatizadores', Icon: Wind     },
+    { label: 'Aspiradores',    href: '/produtos?categoria=aspiradores',    Icon: Fan      },
+    { label: 'Spinning',       href: '/produtos?categoria=spinning',       Icon: Bike     },
+    { label: 'Ofertas',        href: '/ofertas',                           Icon: Tag      },
+    { label: 'Mais Vendidos',  href: '/produtos?ordem=vendidos',           Icon: Flame    },
+    { label: 'Novidades',      href: '/produtos?ordem=recentes',           Icon: Sparkles },
   ],
 }
 
@@ -63,7 +68,7 @@ export default function SubcategoriasCarrossel({ categoria }: Props) {
                 {sub.img ? (
                   <Image src={sub.img} alt={sub.label} width={64} height={64} className="object-contain p-2" unoptimized />
                 ) : (
-                  <span className="text-2xl">{sub.emoji}</span>
+                  <sub.Icon size={24} className="text-gray-500 group-hover:text-[#3cbfb3] transition-colors" />
                 )}
               </div>
               <span className="text-xs font-semibold text-center leading-tight max-w-[70px] text-gray-600 group-hover:text-[#3cbfb3] transition-colors">

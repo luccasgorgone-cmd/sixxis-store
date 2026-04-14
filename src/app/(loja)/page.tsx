@@ -8,7 +8,6 @@ import { prisma } from '@/lib/prisma'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
-import CategoriasSection from '@/components/home/CategoriasSection'
 import OfertasRelampago from '@/components/home/OfertasRelampago'
 
 export const dynamic    = 'force-dynamic'
@@ -142,17 +141,14 @@ export default async function HomePage() {
         { titulo: trust.trust_4_titulo || 'Produtos Originais',         sub: trust.trust_4_sub || 'Garantia Sixxis'                  },
       ]} />
 
-      {/* ── 3. Categorias ─────────────────────────────────────────── */}
-      <CategoriasSection />
-
-      {/* ── 4. Produtos em Destaque ───────────────────────────────── */}
+      {/* ── 3. Produtos em Destaque ───────────────────────────────── */}
       <section className="bg-transparent border-b border-white/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header da seção */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-xl font-extrabold text-white">Produtos em Destaque</h2>
+              <h2 className="text-xl font-extrabold text-white">Mais Vendidos</h2>
               <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
             </div>
             <Link

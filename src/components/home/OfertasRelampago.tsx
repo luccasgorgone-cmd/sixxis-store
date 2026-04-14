@@ -10,14 +10,13 @@ interface Props {
 }
 
 interface Tempo {
-  d: string
   h: string
   m: string
   s: string
 }
 
 export default function OfertasRelampago({ produtos }: Props) {
-  const [tempo, setTempo] = useState<Tempo>({ d: '0', h: '00', m: '00', s: '00' })
+  const [tempo, setTempo] = useState<Tempo>({ h: '00', m: '00', s: '00' })
 
   useEffect(() => {
     const calcular = () => {
@@ -26,8 +25,7 @@ export default function OfertasRelampago({ produtos }: Props) {
       fim.setHours(23, 59, 59, 0)
       const diff = Math.max(0, fim.getTime() - agora.getTime())
       setTempo({
-        d: String(Math.floor(diff / 86400000)),
-        h: String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0'),
+        h: String(Math.floor(diff / 3600000)).padStart(2, '0'),
         m: String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0'),
         s: String(Math.floor((diff % 60000) / 1000)).padStart(2, '0'),
       })
@@ -40,10 +38,9 @@ export default function OfertasRelampago({ produtos }: Props) {
   if (produtos.length === 0) return null
 
   const blocos = [
-    { val: tempo.d, label: 'DIAS'  },
-    { val: tempo.h, label: 'HORAS' },
-    { val: tempo.m, label: 'MIN'   },
-    { val: tempo.s, label: 'SEG'   },
+    { val: tempo.h, label: 'HH' },
+    { val: tempo.m, label: 'MM' },
+    { val: tempo.s, label: 'SS' },
   ]
 
   return (
@@ -82,7 +79,7 @@ export default function OfertasRelampago({ produtos }: Props) {
                       {bloco.label}
                     </span>
                   </div>
-                  {i < 3 && (
+                  {i < 2 && (
                     <span className="text-[#3cbfb3] font-extrabold text-xl mb-4 leading-none">:</span>
                   )}
                 </div>
