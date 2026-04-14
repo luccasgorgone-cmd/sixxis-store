@@ -259,6 +259,17 @@ button, a {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
+/* ── Mobile scroll horizontal suave (carrosséis) ────────────────────────── */
+@media (max-width: 640px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* ── Luna Chat — bounce suave da bolha ────────────────────────────────────── */
 @keyframes bounce-gentle {
   0%, 100% { transform: translateY(0px); }

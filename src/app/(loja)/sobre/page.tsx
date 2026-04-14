@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  Shield, Truck, Award, Users, MapPin, Phone, Mail,
+  Shield, Truck, Award, Users, TrendingUp,
   Heart, Zap, Star, ArrowRight, Wind,
-  Bike, Sparkles, Target, Eye, Handshake, TrendingUp,
+  Bike, Target, Handshake, MapPin,
   ChevronRight,
 } from 'lucide-react'
 
-// ─── Hook de animação ao aparecer na tela ─────────────────────
+// ─── Hook de animação ──────────────────────────────────────────────────────────
+
 function useReveal(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
@@ -24,46 +25,6 @@ function useReveal(threshold = 0.15) {
   return { ref, visible }
 }
 
-// ─── Counter animado ──────────────────────────────────────────
-function CounterAnimate({
-  target,
-  suffix = '',
-  duration = 2000,
-  isMilhao = false,
-}: {
-  target: number
-  suffix?: string
-  duration?: number
-  isMilhao?: boolean
-}) {
-  const [count, setCount] = useState(0)
-  const { ref, visible } = useReveal(0.3)
-
-  useEffect(() => {
-    if (!visible) return
-    if (isMilhao) { setCount(1); return }
-    const step = Math.ceil(target / (duration / 16))
-    let current = 0
-    const timer = setInterval(() => {
-      current = Math.min(current + step, target)
-      setCount(current)
-      if (current >= target) clearInterval(timer)
-    }, 16)
-    return () => clearInterval(timer)
-  }, [visible, target, duration, isMilhao])
-
-  if (isMilhao) {
-    return <div ref={ref} className="tabular-nums">1 Milhão+</div>
-  }
-
-  return (
-    <div ref={ref} className="tabular-nums">
-      {count.toLocaleString('pt-BR')}{suffix}
-    </div>
-  )
-}
-
-// ─── Card animado ─────────────────────────────────────────────
 function RevealCard({
   children,
   delay = 0,
@@ -82,8 +43,8 @@ function RevealCard({
       className={className}
       style={{
         ...style,
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(28px)',
+        opacity:    visible ? 1 : 0,
+        transform:  visible ? 'translateY(0)' : 'translateY(28px)',
         transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
       }}
     >
@@ -92,84 +53,158 @@ function RevealCard({
   )
 }
 
+// ─── Counter animado ───────────────────────────────────────────────────────────
+
+function CounterAnimate({
+  target,
+  suffix = '',
+  duration = 2000,
+  prefix = '',
+}: {
+  target: number
+  suffix?: string
+  duration?: number
+  prefix?: string
+}) {
+  const [count, setCount] = useState(0)
+  const { ref, visible } = useReveal(0.3)
+
+  useEffect(() => {
+    if (!visible) return
+    const step = Math.ceil(target / (duration / 16))
+    let current = 0
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target)
+      setCount(current)
+      if (current >= target) clearInterval(timer)
+    }, 16)
+    return () => clearInterval(timer)
+  }, [visible, target, duration])
+
+  return (
+    <div ref={ref} className="tabular-nums">
+      {prefix}{count.toLocaleString('pt-BR')}{suffix}
+    </div>
+  )
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface AvaliacaoParceiro {
+  id:            string
+  nomeCompleto:  string
+  empresa?:      string
+  cargo?:        string
+  cidade?:       string
+  nota:          number
+  titulo:        string
+  comentario:    string
+  avatarInicial?: string
+  corAvatar:     string
+  destaque:      boolean
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function SobrePage() {
+  const [destaques, setDestaques] = useState<AvaliacaoParceiro[]>([])
+
+  useEffect(() => {
+    fetch('/api/avaliacoes-parceiros')
+      .then(r => r.json())
+      .then((d: unknown) => {
+        if (Array.isArray(d)) {
+          setDestaques(d.filter((a: AvaliacaoParceiro) => a.destaque).slice(0, 3))
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const timeline = [
+    { ano: '1993', titulo: 'Fundação', desc: 'Abertura da Sixxis em Araçatuba, SP, como pequena importadora de equipamentos domésticos.', cor: '#3cbfb3' },
+    { ano: '1998', titulo: 'Climatizadores',  desc: 'Lançamento da primeira linha de climatizadores residenciais própria da marca.',           cor: '#0f2e2b' },
+    { ano: '2004', titulo: 'Expansão',        desc: 'Expansão para o interior de SP com rede de revendedores parceiros.',                       cor: '#1a4f4a' },
+    { ano: '2010', titulo: 'Linha Comercial', desc: 'Lançamento da linha comercial de alta capacidade para empresas e eventos.',                cor: '#8b5cf6' },
+    { ano: '2015', titulo: '200 Parceiros',   desc: 'Marca de 200 revendedores ativos em todo o Brasil.',                                       cor: '#f59e0b' },
+    { ano: '2018', titulo: 'Linha Fitness',   desc: 'Entrada no mercado fitness com aspiradores e bikes spinning profissionais.',               cor: '#16a34a' },
+    { ano: '2022', titulo: 'Digital',         desc: 'Plataforma digital própria e atendimento nacional integrado.',                             cor: '#2563eb' },
+    { ano: '2025', titulo: '1 Milhão',        desc: 'Milestone histórico: 1 milhão de clientes atendidos em todo o Brasil.',                   cor: '#ef4444' },
+  ]
+
+  const numeros = [
+    { label: 'Clientes Atendidos', target: 1000000, prefix: '', suffix: '+', Icon: Users,      cor: '#3cbfb3', isMilhao: true },
+    { label: 'Anos de Mercado',    target: 30,       prefix: '', suffix: '+', Icon: TrendingUp, cor: '#0f2e2b', isMilhao: false },
+    { label: 'Garantia',           target: 12,       prefix: '', suffix: 'm', Icon: Shield,     cor: '#16a34a', isMilhao: false },
+    { label: 'Revendedores',       target: 200,      prefix: '', suffix: '+', Icon: Handshake,  cor: '#8b5cf6', isMilhao: false },
+    { label: 'Entrega Nacional',   target: 100,      prefix: '', suffix: '%', Icon: Truck,      cor: '#f59e0b', isMilhao: false },
+    { label: 'Qualidade',          target: 0,        prefix: '', suffix: '',  Icon: Award,      cor: '#2563eb', isMilhao: false, custom: 'Zero Recall' },
+  ]
+
+  const linhas = [
+    { icon: Wind, titulo: 'Climatizadores',  desc: 'Do residencial ao industrial. A linha que tornou a Sixxis referência nacional em climatização evaporativa.', cor: '#3cbfb3', href: '/produtos?categoria=climatizadores' },
+    { icon: Zap,  titulo: 'Purificadores',   desc: 'Tecnologia de filtração avançada para ar puro e livre de impurezas em qualquer ambiente.',                 cor: '#0f2e2b', href: '/produtos?categoria=purificadores'  },
+    { icon: Bike, titulo: 'Fitness',          desc: 'Bikes spinning e equipamentos fitness de qualidade profissional acessíveis para academias e uso doméstico.', cor: '#8b5cf6', href: '/produtos?categoria=bikes'          },
+  ]
+
+  const valores = [
+    { icon: Target,    titulo: 'Missão',  desc: 'Desenvolver produtos que melhorem o bem-estar das pessoas, com qualidade, inovação e preço justo.',                      cor: '#3cbfb3' },
+    { icon: Heart,     titulo: 'Valores', desc: 'Qualidade sem compromisso, transparência nas relações, respeito ao cliente e responsabilidade com o meio ambiente.',    cor: '#16a34a' },
+    { icon: Star,      titulo: 'Visão',   desc: 'Ser a marca mais amada de climatização e bem-estar do Brasil, presente em todos os lares que buscam qualidade de vida.', cor: '#f59e0b' },
+  ]
+
   return (
     <div className="min-h-screen bg-white">
 
-      {/* ═══════════════════════════════════════════════════════
-          BREADCRUMB
-      ═══════════════════════════════════════════════════════ */}
+      {/* Breadcrumb */}
       <nav className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <ol className="flex items-center gap-1.5 text-sm text-gray-500 flex-wrap">
-            <li>
-              <Link href="/" className="hover:text-gray-700 transition font-medium">Início</Link>
-            </li>
+            <li><Link href="/" className="hover:text-gray-700 transition font-medium">Início</Link></li>
             <li><ChevronRight size={13} className="text-gray-300" /></li>
             <li className="text-gray-900 font-semibold">Sobre Nós</li>
           </ol>
         </div>
       </nav>
 
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 1 — HERO
-      ═══════════════════════════════════════════════════════ */}
+      {/* ─── HERO ─────────────────────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 50%, #0f2e2b 100%)' }}
       >
-        {/* Elementos decorativos de fundo */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div
-            className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
-            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)', transform: 'translate(30%, -30%)' }}
-          />
-          <div
-            className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10"
-            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)', transform: 'translate(-30%, 30%)' }}
-          />
-          <div
-            className="absolute inset-0 opacity-5"
-            style={{ backgroundImage: 'radial-gradient(#3cbfb3 1px, transparent 1px)', backgroundSize: '32px 32px' }}
-          />
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
+            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)', transform: 'translate(30%, -30%)' }} />
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10"
+            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)', transform: 'translate(-30%, 30%)' }} />
+          <div className="absolute inset-0 opacity-[0.04]"
+            style={{ backgroundImage: 'radial-gradient(#3cbfb3 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
           <div className="max-w-3xl">
-
-            {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-[#3cbfb3]/15 border border-[#3cbfb3]/30 rounded-full px-4 py-2 mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-[#3cbfb3] animate-pulse" />
               <span className="text-[#3cbfb3] text-xs font-bold tracking-widest uppercase">
-                Fundada em Araçatuba, SP
+                Fundada em 1993 · Araçatuba, SP
               </span>
             </div>
-
-            {/* Título */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-              Qualidade e Inovação<br />
-              <span style={{ color: '#3cbfb3' }}>Para o Seu Conforto</span>
+              30 anos de qualidade<br />
+              <span style={{ color: '#3cbfb3' }}>e inovação brasileira</span>
             </h1>
-
             <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-2xl">
               A Sixxis nasceu com um propósito claro: levar produtos de alta qualidade
               que transformam o dia a dia de famílias e negócios em todo o Brasil.
-              Da climatização ao fitness, somos parceiros do seu bem-estar.
+              Da climatização ao fitness, somos parceiros do seu bem-estar há mais de três décadas.
             </p>
-
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/produtos"
+              <Link href="/produtos"
                 className="inline-flex items-center gap-2 font-extrabold text-[#0f2e2b] px-6 py-3.5 rounded-2xl transition-all hover:-translate-y-0.5 active:scale-[0.98] text-sm"
-                style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 20px rgba(60,191,179,0.4)' }}
-              >
-                Ver nossos produtos
-                <ArrowRight size={16} />
+                style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 20px rgba(60,191,179,0.4)' }}>
+                Ver nossos produtos <ArrowRight size={16} />
               </Link>
-              <Link
-                href="/contato"
-                className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3.5 rounded-2xl border-2 border-white/20 hover:border-white/40 hover:bg-white/10 transition-all text-sm"
-              >
+              <Link href="/contato"
+                className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3.5 rounded-2xl border-2 border-white/20 hover:border-white/40 hover:bg-white/10 transition-all text-sm">
                 Fale conosco
               </Link>
             </div>
@@ -177,515 +212,286 @@ export default function SobrePage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 2 — NÚMEROS
-      ═══════════════════════════════════════════════════════ */}
+      {/* ─── NÚMEROS ──────────────────────────────────────────────────────────── */}
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { isMilhao: true,  target: 0,   sufixo: '',       label: 'Clientes Atendidos',            Icon: Users,      cor: '#3cbfb3' },
-              { isMilhao: false, target: 10,  sufixo: '+',      label: 'Anos de Mercado',               Icon: TrendingUp, cor: '#0f2e2b' },
-              { isMilhao: false, target: 12,  sufixo: ' meses', label: 'Garantia em todos os produtos', Icon: Shield,     cor: '#16a34a' },
-              { isMilhao: false, target: 100, sufixo: '%',      label: 'Entrega para o Brasil',         Icon: Truck,      cor: '#8b5cf6' },
-            ].map((stat, i) => (
-              <RevealCard
-                key={stat.label}
-                delay={i * 100}
-                className="flex flex-col items-center text-center p-6 rounded-3xl border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                style={{ background: 'linear-gradient(to bottom, rgba(249,250,251,0.5), #ffffff)' }}
-              >
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
-                  style={{ backgroundColor: stat.cor + '15' }}
-                >
-                  <stat.Icon size={22} style={{ color: stat.cor }} />
-                </div>
-                <div className="text-3xl lg:text-4xl font-black mb-1" style={{ color: stat.cor }}>
-                  <CounterAnimate
-                    target={stat.target}
-                    suffix={stat.sufixo}
-                    isMilhao={stat.isMilhao}
-                  />
-                </div>
-                <p className="text-sm text-gray-500 font-medium leading-tight">{stat.label}</p>
-              </RevealCard>
-            ))}
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+            {numeros.map((n, i) => {
+              const Icon = n.Icon
+              return (
+                <RevealCard key={n.label} delay={i * 70}
+                  className="text-center p-5 rounded-2xl border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                    style={{ backgroundColor: n.cor + '18' }}>
+                    <Icon size={18} style={{ color: n.cor }} />
+                  </div>
+                  <p className="text-2xl font-extrabold mb-0.5" style={{ color: n.cor }}>
+                    {n.custom ? n.custom : n.isMilhao ? '1M+' : (
+                      <CounterAnimate target={n.target} suffix={n.suffix} prefix={n.prefix} />
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium leading-tight">{n.label}</p>
+                </RevealCard>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 3 — NOSSA HISTÓRIA (timeline)
-      ═══════════════════════════════════════════════════════ */}
+      {/* ─── NOSSA HISTÓRIA — TIMELINE ─────────────────────────────────────────── */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-
           <RevealCard className="text-center mb-14">
-            <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">
-              Nossa trajetória
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-4">
-              De Araçatuba para o Brasil inteiro
+            <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">Nossa Trajetória</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-3">
+              32 anos construindo história
             </h2>
-            <p className="text-gray-500 text-base max-w-2xl mx-auto leading-relaxed">
-              Uma história construída com dedicação, inovação e foco absoluto
-              na satisfação de quem confia na Sixxis.
+            <p className="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
+              De uma pequena importadora em Araçatuba a uma marca nacional reconhecida por mais de 1 milhão de clientes.
             </p>
           </RevealCard>
 
           {/* Timeline */}
           <div className="relative">
-            {/* Linha central desktop */}
-            <div
-              className="hidden lg:block absolute top-0 bottom-0 w-0.5"
-              style={{
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'linear-gradient(to bottom, #3cbfb3, #0f2e2b)',
-              }}
-            />
+            {/* Linha central — visível apenas em lg */}
+            <div className="hidden lg:block absolute left-1/2 -translate-x-px top-0 bottom-0 w-0.5 bg-gray-100" />
 
-            <div className="space-y-10">
-              {[
-                {
-                  ano: '2014',
-                  titulo: 'O início de tudo',
-                  texto: 'A Sixxis foi fundada em Araçatuba, SP, como uma pequena importadora com grande sonho: levar produtos de qualidade a preços justos para famílias brasileiras.',
-                  lado: 'esquerdo',
-                  cor: '#3cbfb3',
-                  Icon: Heart,
-                },
-                {
-                  ano: '2017',
-                  titulo: 'Expansão nacional',
-                  texto: 'Com a linha de climatizadores já consolidada, a Sixxis expandiu o atendimento para todo o Brasil, estruturando uma logística ágil com Correios e transportadoras parceiras.',
-                  lado: 'direito',
-                  cor: '#0f2e2b',
-                  Icon: Truck,
-                },
-                {
-                  ano: '2019',
-                  titulo: 'Novos segmentos',
-                  texto: 'Lançamos a linha de aspiradores e equipamentos de spinning, ampliando o portfólio para o segmento fitness e de limpeza doméstica e comercial.',
-                  lado: 'esquerdo',
-                  cor: '#8b5cf6',
-                  Icon: Bike,
-                },
-                {
-                  ano: '2022',
-                  titulo: 'Loja online própria',
-                  texto: 'Inauguramos nossa plataforma de e-commerce própria, aproximando ainda mais a Sixxis dos clientes e facilitando a compra com mais segurança, praticidade e atendimento personalizado.',
-                  lado: 'direito',
-                  cor: '#f59e0b',
-                  Icon: Star,
-                },
-                {
-                  ano: '2024+',
-                  titulo: '1 Milhão de clientes',
-                  texto: 'Ultrapassamos a marca de 1 milhão de clientes atendidos, consolidando a Sixxis como referência nacional em climatizadores, aspiradores e equipamentos fitness.',
-                  lado: 'esquerdo',
-                  cor: '#3cbfb3',
-                  Icon: Award,
-                },
-              ].map((item, i) => {
-                const esquerdo = item.lado === 'esquerdo'
-                return (
-                  <RevealCard key={item.ano} delay={i * 80}>
-                    <div className={`flex items-center gap-6 lg:gap-12 ${esquerdo ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
-                      {/* Conteúdo */}
-                      <div className="flex-1">
-                        <div
-                          className={`bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${esquerdo ? 'lg:text-right' : 'lg:text-left'}`}
-                        >
-                          <div className={`flex items-center gap-3 mb-3 ${esquerdo ? 'lg:flex-row-reverse lg:justify-start' : ''}`}>
-                            <div
-                              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                              style={{ backgroundColor: item.cor + '15' }}
-                            >
-                              <item.Icon size={17} style={{ color: item.cor }} />
-                            </div>
-                            <span className="text-2xl font-extrabold" style={{ color: item.cor }}>
-                              {item.ano}
-                            </span>
-                          </div>
-                          <h3 className="text-base font-extrabold text-gray-900 mb-2">{item.titulo}</h3>
-                          <p className="text-sm text-gray-500 leading-relaxed">{item.texto}</p>
-                        </div>
-                      </div>
-
-                      {/* Ponto central na timeline */}
-                      <div
-                        className="hidden lg:flex w-12 h-12 rounded-full border-4 border-white shadow-lg items-center justify-center shrink-0 z-10"
-                        style={{ backgroundColor: item.cor }}
-                      >
-                        <item.Icon size={18} className="text-white" />
-                      </div>
-
-                      {/* Espaço oposto */}
-                      <div className="flex-1 hidden lg:block" />
+            <div className="space-y-6 lg:space-y-0">
+              {timeline.map((item, i) => (
+                <RevealCard key={item.ano} delay={i * 80}
+                  className={`lg:flex lg:items-center lg:gap-8 ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} mb-6 lg:mb-10`}>
+                  {/* Conteúdo */}
+                  <div className={`flex-1 ${i % 2 === 0 ? 'lg:text-right' : 'lg:text-left'}`}>
+                    <div className={`bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow inline-block w-full lg:max-w-sm ${i % 2 === 0 ? 'lg:ml-auto' : ''}`}>
+                      <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: item.cor }}>
+                        {item.ano}
+                      </span>
+                      <h3 className="font-extrabold text-gray-900 text-base mt-0.5 mb-1">{item.titulo}</h3>
+                      <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
                     </div>
-                  </RevealCard>
-                )
-              })}
+                  </div>
+
+                  {/* Ponto central */}
+                  <div className="hidden lg:flex w-8 h-8 rounded-full border-4 border-white shadow-md items-center justify-center shrink-0 z-10"
+                    style={{ backgroundColor: item.cor }}>
+                    <div className="w-2 h-2 rounded-full bg-white" />
+                  </div>
+
+                  {/* Espaço do lado oposto */}
+                  <div className="hidden lg:block flex-1" />
+                </RevealCard>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 4 — NOSSOS PRODUTOS
-      ═══════════════════════════════════════════════════════ */}
-      <section className="py-20" style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
+      {/* ─── LINHAS DE PRODUTO ────────────────────────────────────────────────── */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-
           <RevealCard className="text-center mb-12">
-            <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">
-              Portfólio
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2 mb-3">
-              Produtos que transformam
-            </h2>
-            <p className="text-white/60 text-base max-w-xl mx-auto">
-              Três linhas desenvolvidas para elevar seu conforto, saúde e bem-estar.
-            </p>
+            <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">Portfolio</span>
+            <h2 className="text-3xl font-extrabold text-gray-900 mt-2">Nossas linhas de produto</h2>
           </RevealCard>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {[
-              {
-                Icon: Wind,
-                titulo: 'Climatizadores',
-                texto: 'Tecnologia evaporativa que refresca, umidifica e purifica o ar. Consumo até 90% menor que ar condicionado. Ideais para ambientes de até 45m².',
-                destaque: 'Mais de 1 milhão vendidos',
-                href: '/produtos?categoria=climatizadores',
-                cor: '#3cbfb3',
-              },
-              {
-                Icon: Sparkles,
-                titulo: 'Aspiradores',
-                texto: 'Aspiradores sem fio de alta potência para limpeza profunda. Leves, silenciosos e eficientes para toda a casa.',
-                destaque: 'Filtro HEPA de alta eficiência',
-                href: '/produtos?categoria=aspiradores',
-                cor: '#8b5cf6',
-              },
-              {
-                Icon: Bike,
-                titulo: 'Bikes Spinning',
-                texto: 'Equipamentos fitness de alto desempenho para treinos profissionais em casa. Bivolt e à bateria.',
-                destaque: 'Academia em casa',
-                href: '/produtos?categoria=spinning',
-                cor: '#f59e0b',
-              },
-            ].map((item, i) => (
-              <RevealCard key={item.titulo} delay={i * 100}>
-                <Link
-                  href={item.href}
-                  className="group flex flex-col h-full rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1.5"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
-                    style={{ backgroundColor: item.cor + '25' }}
-                  >
-                    <item.Icon size={24} style={{ color: item.cor }} />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {linhas.map((l, i) => {
+              const Icon = l.icon
+              return (
+                <RevealCard key={l.titulo} delay={i * 100}
+                  className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                  <div className="h-2 w-full" style={{ backgroundColor: l.cor }} />
+                  <div className="p-6">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
+                      style={{ backgroundColor: l.cor + '18' }}>
+                      <Icon size={22} style={{ color: l.cor }} />
+                    </div>
+                    <h3 className="text-base font-extrabold text-gray-900 mb-2">{l.titulo}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed mb-4">{l.desc}</p>
+                    <Link href={l.href}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold transition"
+                      style={{ color: l.cor }}>
+                      Ver produtos <ArrowRight size={13} />
+                    </Link>
                   </div>
-                  <h3 className="text-lg font-extrabold text-white mb-2">{item.titulo}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed flex-1 mb-4">{item.texto}</p>
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-xs font-bold px-3 py-1.5 rounded-full"
-                      style={{ backgroundColor: item.cor + '20', color: item.cor }}
-                    >
-                      {item.destaque}
-                    </span>
-                    <ArrowRight
-                      size={16}
-                      className="text-white/30 group-hover:text-white/70 transition-all duration-300 group-hover:translate-x-1"
-                    />
-                  </div>
-                </Link>
-              </RevealCard>
-            ))}
+                </RevealCard>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 5 — MISSÃO, VISÃO E VALORES
-      ═══════════════════════════════════════════════════════ */}
+      {/* ─── MISSÃO, VALORES, VISÃO ───────────────────────────────────────────── */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-
-          <RevealCard className="text-center mb-14">
-            <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">
-              Propósito
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">
-              O que nos move todos os dias
-            </h2>
-          </RevealCard>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {[
-              {
-                Icon: Target,
-                titulo: 'Missão',
-                texto: 'Proporcionar qualidade de vida e bem-estar às pessoas por meio de produtos inovadores, confiáveis e acessíveis, com excelência no atendimento e na entrega.',
-                cor: '#3cbfb3',
-                bgFrom: '#e8f8f7',
-                borda: 'rgba(60,191,179,0.20)',
-              },
-              {
-                Icon: Eye,
-                titulo: 'Visão',
-                texto: 'Ser a empresa mais reconhecida no Brasil no segmento de climatização, limpeza e fitness, expandindo nossa atuação e impactando positivamente a vida de milhões de famílias.',
-                cor: '#0f2e2b',
-                bgFrom: '#f9fafb',
-                borda: '#e5e7eb',
-              },
-              {
-                Icon: Handshake,
-                titulo: 'Valores',
-                texto: 'Qualidade sem compromisso. Integridade em cada relação. Inovação constante. Foco total no cliente. Responsabilidade social e ambiental. Excelência em cada detalhe.',
-                cor: '#8b5cf6',
-                bgFrom: '#faf5ff',
-                borda: '#ede9fe',
-              },
-            ].map((item, i) => (
-              <RevealCard
-                key={item.titulo}
-                delay={i * 120}
-                className="rounded-3xl p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5"
-                style={{
-                  background: `linear-gradient(to bottom, ${item.bgFrom}, #ffffff)`,
-                  border: `1px solid ${item.borda}`,
-                }}
-              >
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
-                  style={{ backgroundColor: item.cor + '15' }}
-                >
-                  <item.Icon size={22} style={{ color: item.cor }} />
-                </div>
-                <h3 className="text-xl font-extrabold text-gray-900 mb-3">{item.titulo}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.texto}</p>
-              </RevealCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 6 — DIFERENCIAIS
-      ═══════════════════════════════════════════════════════ */}
-      <section className="py-20" style={{ backgroundColor: 'rgba(249,250,251,0.5)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-
           <RevealCard className="text-center mb-12">
-            <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">
-              Por que Sixxis
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">
-              O que nos diferencia
-            </h2>
+            <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">Propósito</span>
+            <h2 className="text-3xl font-extrabold text-gray-900 mt-2">O que nos move</h2>
           </RevealCard>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { Icon: Shield,  titulo: 'Garantia Real',      texto: '12 meses de garantia total em todos os produtos. Suporte técnico especializado em caso de qualquer problema.',                          cor: '#16a34a' },
-              { Icon: Award,   titulo: 'Produtos Originais', texto: 'Somos importadores diretos. 100% dos produtos são originais Sixxis com certificação de qualidade e nota fiscal.',                       cor: '#3cbfb3' },
-              { Icon: Truck,   titulo: 'Entrega Ágil',       texto: 'Parcerias com Correios e transportadoras para entregas rápidas e seguras para qualquer canto do Brasil.',                                cor: '#2563eb' },
-              { Icon: Users,   titulo: 'Atendimento Humano', texto: 'Nossa equipe está disponível via WhatsApp para tirar dúvidas antes, durante e após a compra. Sem chatbots impessoais.',                 cor: '#f59e0b' },
-              { Icon: Zap,     titulo: 'Inovação Constante', texto: 'Linha de produtos em constante evolução, com tecnologias que combinam eficiência energética e máxima performance.',                      cor: '#8b5cf6' },
-              { Icon: Heart,   titulo: 'Compromisso Social', texto: 'Empresa 100% brasileira sediada no interior de SP, gerando empregos locais e contribuindo com a economia regional.',                     cor: '#ef4444' },
-            ].map((item, i) => (
-              <RevealCard
-                key={item.titulo}
-                delay={i * 70}
-                className="bg-white border border-gray-100 rounded-2xl p-5 flex items-start gap-4 hover:shadow-md hover:border-gray-200 transition-all duration-300 group"
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300"
-                  style={{ backgroundColor: item.cor + '15' }}
-                >
-                  <item.Icon size={18} style={{ color: item.cor }} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-extrabold text-gray-900 mb-1">{item.titulo}</h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">{item.texto}</p>
-                </div>
-              </RevealCard>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {valores.map((v, i) => {
+              const Icon = v.icon
+              return (
+                <RevealCard key={v.titulo} delay={i * 100}
+                  className="text-center p-7 rounded-2xl border border-gray-100 bg-white hover:shadow-lg transition-shadow">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                    style={{ backgroundColor: v.cor + '18' }}>
+                    <Icon size={24} style={{ color: v.cor }} />
+                  </div>
+                  <h3 className="font-extrabold text-gray-900 text-base mb-2">{v.titulo}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{v.desc}</p>
+                </RevealCard>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 7 — INFORMAÇÕES DA EMPRESA + CONTATO
-      ═══════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
-            {/* Info da empresa */}
-            <RevealCard>
-              <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">
-                Dados da empresa
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2 mb-6">
-                Transparência e confiança
+      {/* ─── NOSSOS PARCEIROS — DESTAQUES ─────────────────────────────────────── */}
+      {destaques.length > 0 && (
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <RevealCard className="text-center mb-10">
+              <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">Parceiros</span>
+              <h2 className="text-3xl font-extrabold text-gray-900 mt-2 mb-2">
+                O que dizem nossos parceiros
               </h2>
+              <p className="text-gray-500 text-sm">
+                Mais de 200 revendedores confiam na Sixxis para crescer
+              </p>
+            </RevealCard>
 
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {destaques.map((av, i) => (
+                <RevealCard key={av.id} delay={i * 100}
+                  className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow">
+                  <div className="flex gap-0.5 mb-3">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <Star key={n} size={14}
+                        className={n <= av.nota ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-gray-200 fill-gray-200'} />
+                    ))}
+                  </div>
+                  <p className="text-sm font-extrabold text-gray-900 mb-2 leading-snug">&ldquo;{av.titulo}&rdquo;</p>
+                  <p className="text-xs text-gray-500 leading-relaxed italic flex-1">{av.comentario}</p>
+                  <div className="flex items-center gap-3 mt-5 pt-4 border-t border-gray-50">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white font-extrabold text-sm shrink-0"
+                      style={{ backgroundColor: av.corAvatar || '#3cbfb3' }}>
+                      {av.avatarInicial || av.nomeCompleto?.[0] || '?'}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-extrabold text-gray-900 truncate">{av.nomeCompleto}</p>
+                      <p className="text-xs text-gray-400 truncate">{av.cargo}{av.empresa ? ` · ${av.empresa}` : ''}</p>
+                      {av.cidade && <p className="text-[10px] text-[#3cbfb3] font-semibold">{av.cidade}</p>}
+                    </div>
+                  </div>
+                </RevealCard>
+              ))}
+            </div>
+
+            <RevealCard className="text-center">
+              <Link href="/seja-revendedor"
+                className="inline-flex items-center gap-2 font-bold text-[#3cbfb3] hover:underline text-sm">
+                Ver mais depoimentos e ser parceiro <ArrowRight size={15} />
+              </Link>
+            </RevealCard>
+          </div>
+        </section>
+      )}
+
+      {/* ─── LOCALIZAÇÃO + CONTATO ────────────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <RevealCard>
+              <span className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest">Onde estamos</span>
+              <h2 className="text-3xl font-extrabold text-gray-900 mt-2 mb-4">
+                Nossa base, o Brasil inteiro
+              </h2>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                Fundada em Araçatuba (SP), a Sixxis atende clientes em todos os estados brasileiros
+                com logística integrada e parceiros distribuídos pelo país.
+              </p>
+              <div className="space-y-3 mb-7">
                 {[
-                  { label: 'Razão Social',       valor: 'SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA' },
-                  { label: 'CNPJ',               valor: '54.978.947/0001-09' },
-                  { label: 'Inscrição Estadual', valor: '117.633.347.114' },
-                  { label: 'Endereço',           valor: 'R. Anhanguera, 1711 - Icaray, Araçatuba - SP, 16020-355' },
-                  { label: 'Fundação',           valor: '2014 — Araçatuba, SP' },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex gap-4 py-3.5 border-b border-gray-50 last:border-0"
-                  >
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide w-32 shrink-0 pt-0.5">
-                      {item.label}
-                    </span>
-                    <span className="text-sm text-gray-800 font-medium leading-relaxed flex-1">
-                      {item.valor}
-                    </span>
+                  { Icon: MapPin,    txt: 'Araçatuba, SP — sede administrativa' },
+                  { Icon: Truck,     txt: 'Entrega para todo o Brasil' },
+                  { Icon: Handshake, txt: '200+ parceiros revendedores ativos' },
+                ].map(({ Icon, txt }) => (
+                  <div key={txt} className="flex items-center gap-3 text-sm text-gray-600">
+                    <div className="w-8 h-8 rounded-xl bg-[#e8f8f7] flex items-center justify-center shrink-0">
+                      <Icon size={15} className="text-[#3cbfb3]" />
+                    </div>
+                    {txt}
                   </div>
                 ))}
               </div>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/contato"
+                  className="inline-flex items-center gap-2 font-bold text-white px-5 py-3 rounded-xl text-sm transition hover:-translate-y-0.5"
+                  style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}>
+                  Fale conosco
+                </Link>
+                <Link href="/seja-revendedor"
+                  className="inline-flex items-center gap-2 font-semibold text-gray-700 border border-gray-200 px-5 py-3 rounded-xl text-sm hover:bg-gray-50 transition">
+                  Seja parceiro
+                </Link>
+              </div>
             </RevealCard>
 
-            {/* Contato + CTA */}
+            {/* Stats block */}
             <RevealCard delay={150}>
               <div
                 className="rounded-3xl p-8 text-white"
                 style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}
               >
-                <h3 className="text-xl font-extrabold mb-2">Vamos conversar?</h3>
-                <p className="text-white/60 text-sm mb-7 leading-relaxed">
-                  Estamos prontos para ajudar com dúvidas, suporte técnico,
-                  revendas ou simplesmente para te ajudar a escolher o produto certo.
+                <p className="text-[#3cbfb3] text-sm font-extrabold uppercase tracking-widest mb-6">
+                  32 anos de conquistas
                 </p>
-
-                <div className="space-y-3 mb-7">
-                  {/* WhatsApp */}
-                  <a
-                    href="https://wa.me/5518997474701"
-                    className="flex items-center gap-4 rounded-2xl px-4 py-3.5 transition group hover:bg-white/15"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
-                  >
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(37,211,102,0.20)' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.724.977.993-3.63-.235-.374A9.818 9.818 0 1112 21.818z"/>
-                      </svg>
+                <div className="grid grid-cols-2 gap-5">
+                  {[
+                    { val: '1993', label: 'Ano de fundação' },
+                    { val: '+1M',  label: 'Clientes atendidos' },
+                    { val: '200+', label: 'Parceiros no Brasil' },
+                    { val: '100%', label: 'Produtos originais' },
+                  ].map(({ val, label }) => (
+                    <div key={label} className="bg-white/10 rounded-2xl p-4">
+                      <p className="text-2xl font-extrabold text-white mb-0.5">{val}</p>
+                      <p className="text-xs text-white/60 font-medium">{label}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-white/50 font-medium">Vendas</p>
-                      <p className="text-sm font-bold text-white">(18) 99747-4701</p>
-                    </div>
-                    <ArrowRight size={14} className="text-white/30 ml-auto group-hover:translate-x-1 transition-transform" />
-                  </a>
-
-                  {/* Telefone */}
-                  <a
-                    href="tel:+551193410262"
-                    className="flex items-center gap-4 rounded-2xl px-4 py-3.5 transition group hover:bg-white/15"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
-                  >
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(60,191,179,0.20)' }}>
-                      <Phone size={17} style={{ color: '#3cbfb3' }} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/50 font-medium">Assistência Técnica</p>
-                      <p className="text-sm font-bold text-white">(11) 93410-2621</p>
-                    </div>
-                    <ArrowRight size={14} className="text-white/30 ml-auto group-hover:translate-x-1 transition-transform" />
-                  </a>
-
-                  {/* E-mail */}
-                  <a
-                    href="mailto:brasil.sixxis@gmail.com"
-                    className="flex items-center gap-4 rounded-2xl px-4 py-3.5 transition group hover:bg-white/15"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
-                  >
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(139,92,246,0.20)' }}>
-                      <Mail size={17} style={{ color: '#a78bfa' }} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/50 font-medium">E-mail</p>
-                      <p className="text-sm font-bold text-white">brasil.sixxis@gmail.com</p>
-                    </div>
-                    <ArrowRight size={14} className="text-white/30 ml-auto group-hover:translate-x-1 transition-transform" />
-                  </a>
-
-                  {/* Endereço */}
-                  <div
-                    className="flex items-center gap-4 rounded-2xl px-4 py-3.5"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
-                  >
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(245,158,11,0.20)' }}>
-                      <MapPin size={17} style={{ color: '#fbbf24' }} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/50 font-medium">Endereço</p>
-                      <p className="text-sm font-bold text-white">R. Anhanguera, 1711 — Araçatuba, SP</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
-                <Link
-                  href="/contato"
-                  className="w-full flex items-center justify-center gap-2 font-extrabold text-[#0f2e2b] py-3.5 rounded-2xl transition-all hover:opacity-90 active:scale-[0.98] text-sm"
-                  style={{ backgroundColor: '#3cbfb3' }}
-                >
-                  Ir para página de contato
-                  <ArrowRight size={15} />
-                </Link>
               </div>
             </RevealCard>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SEÇÃO 8 — CTA FINAL
-      ═══════════════════════════════════════════════════════ */}
-      <section className="py-16" style={{ background: 'linear-gradient(to right, #3cbfb3, #2a9d8f)' }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <RevealCard>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-              Faça parte dos nossos 1 milhão de clientes
-            </h2>
-            <p className="text-white/80 text-base mb-7 max-w-xl mx-auto">
-              Descubra produtos que transformam o seu ambiente e elevam
-              sua qualidade de vida com a qualidade Sixxis.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                href="/produtos"
-                className="inline-flex items-center gap-2 bg-white font-extrabold px-7 py-3.5 rounded-2xl transition hover:bg-gray-50 hover:-translate-y-0.5 active:scale-[0.98] text-sm"
-                style={{ color: '#0f2e2b' }}
-              >
-                Ver catálogo completo
-                <ArrowRight size={15} />
-              </Link>
-              <Link
-                href="/seja-revendedor"
-                className="inline-flex items-center gap-2 border-2 border-white/50 hover:border-white text-white font-bold px-7 py-3.5 rounded-2xl transition hover:bg-white/10 text-sm"
-              >
-                Seja um parceiro
-              </Link>
-            </div>
-          </RevealCard>
-        </div>
+      {/* ─── CTA FINAL ─────────────────────────────────────────────────────────── */}
+      <section
+        className="py-20"
+        style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}
+      >
+        <RevealCard className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-3xl font-extrabold text-white mb-4">
+            Faça parte da história Sixxis
+          </h2>
+          <p className="text-white/60 text-sm mb-8 max-w-xl mx-auto leading-relaxed">
+            Seja como cliente, parceiro revendedor ou simplesmente curtindo os nossos produtos —
+            você faz parte desta história de mais de 30 anos.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/produtos"
+              className="inline-flex items-center gap-2 font-extrabold text-[#0f2e2b] px-7 py-4 rounded-2xl text-sm transition hover:-translate-y-0.5"
+              style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 20px rgba(60,191,179,0.35)' }}>
+              Ver produtos <ArrowRight size={16} />
+            </Link>
+            <Link href="/seja-revendedor"
+              className="inline-flex items-center gap-2 font-semibold text-white border-2 border-white/20 hover:border-white/40 hover:bg-white/10 px-7 py-4 rounded-2xl text-sm transition">
+              Seja parceiro
+            </Link>
+          </div>
+        </RevealCard>
       </section>
-
     </div>
   )
 }
