@@ -36,18 +36,20 @@ export const A = {
 
   // Fidelidade levels
   nivel: {
-    bronze:   { label: 'Bronze',   min: 0,    max: 99,   bg: 'bg-amber-50',   text: 'text-amber-700',  border: 'border-amber-200',  dot: 'bg-amber-500' },
-    prata:    { label: 'Prata',    min: 100,  max: 499,  bg: 'bg-slate-50',   text: 'text-slate-600',  border: 'border-slate-200',  dot: 'bg-slate-400' },
-    ouro:     { label: 'Ouro',     min: 500,  max: 1999, bg: 'bg-yellow-50',  text: 'text-yellow-700', border: 'border-yellow-200', dot: 'bg-yellow-500' },
-    diamante: { label: 'Diamante', min: 2000, max: Infinity, bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200',   dot: 'bg-cyan-500' },
+    cristal:   { label: 'Cristal',   min: 0,     max: 999,   bg: 'bg-sky-50',    text: 'text-sky-700',    border: 'border-sky-200',    dot: 'bg-sky-400' },
+    topazio:   { label: 'Topázio',   min: 1000,  max: 2999,  bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200',  dot: 'bg-amber-500' },
+    safira:    { label: 'Safira',    min: 3000,  max: 7999,  bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200',   dot: 'bg-blue-500' },
+    diamante:  { label: 'Diamante',  min: 8000,  max: 14999, bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200', dot: 'bg-indigo-500' },
+    esmeralda: { label: 'Esmeralda', min: 15000, max: Infinity, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500' },
   },
 } as const
 
-export function getNivel(pontos: number) {
-  if (pontos >= 2000) return A.nivel.diamante
-  if (pontos >= 500)  return A.nivel.ouro
-  if (pontos >= 100)  return A.nivel.prata
-  return A.nivel.bronze
+export function getNivel(gasto: number) {
+  if (gasto >= 15000) return A.nivel.esmeralda
+  if (gasto >= 8000)  return A.nivel.diamante
+  if (gasto >= 3000)  return A.nivel.safira
+  if (gasto >= 1000)  return A.nivel.topazio
+  return A.nivel.cristal
 }
 
 export function getCategoriaBadge(cat: string) {

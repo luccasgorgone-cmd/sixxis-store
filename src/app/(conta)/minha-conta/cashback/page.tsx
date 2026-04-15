@@ -3,36 +3,13 @@
 import { useState, useEffect } from 'react'
 import { Gift, ArrowDownLeft, ArrowUpRight, Zap, Info } from 'lucide-react'
 import LayoutConta from '@/components/conta/LayoutConta'
+import { IconeNivel } from '@/components/ui/NivelIcons'
 
 function formatValor(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 function formatData(d: string | Date) {
   return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function IconeNivel({ nivel, size = 28 }: { nivel: string; size?: number }) {
-  const configs: Record<string, { g1: string; g2: string; sombra: string }> = {
-    Bronze:   { g1: '#cd7f32', g2: '#a0522d', sombra: '#cd7f3250' },
-    Prata:    { g1: '#94a3b8', g2: '#64748b', sombra: '#94a3b850' },
-    Ouro:     { g1: '#f59e0b', g2: '#d97706', sombra: '#f59e0b50' },
-    Diamante: { g1: '#60a5fa', g2: '#3b82f6', sombra: '#3b82f650' },
-    Black:    { g1: '#374151', g2: '#111827', sombra: '#37415150' },
-  }
-  const c = configs[nivel] || configs.Bronze
-  const s = size * 0.5
-  return (
-    <div className="rounded-xl flex items-center justify-center shrink-0"
-      style={{ width: size, height: size, background: `linear-gradient(145deg, ${c.g1}, ${c.g2})`, boxShadow: `0 4px 12px ${c.sombra}` }}>
-      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-        {nivel === 'Diamante' ? (
-          <path d="M6 3L2 9L12 21L22 9L18 3H6Z" fill="white" opacity="0.9" />
-        ) : (
-          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="white" opacity="0.9" />
-        )}
-      </svg>
-    </div>
-  )
 }
 
 export default function CashbackPage() {
@@ -59,7 +36,7 @@ export default function CashbackPage() {
     )
   }
 
-  const nivel = dados?.nivel || { atual: 'Bronze', cor: '#cd7f32', cashbackPct: 0.02 }
+  const nivel = dados?.nivel || { atual: 'Cristal', cor: '#38bdf8', cashbackPct: 0.02 }
   const stats = dados?.estatisticas || {}
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const extrato = (dados?.extrato || []).filter((t: any) =>
@@ -72,7 +49,7 @@ export default function CashbackPage() {
 
         {/* ── HERO SALDO ── */}
         <div className="relative overflow-hidden rounded-2xl"
-          style={{ background: `linear-gradient(135deg, #0b2220 0%, #0f2e2b 55%, ${nivel.cor}30 100%)` }}>
+          style={{ background: `linear-gradient(135deg, #0b2220 0%, #0f2e2b 45%, ${nivel.cor}50 100%)` }}>
           <div className="absolute inset-0 opacity-5"
             style={{ backgroundImage: 'radial-gradient(circle at 3px 3px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
           <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full opacity-10"

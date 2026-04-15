@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Loader2, Gift, TrendingUp, Users, DollarSign, Save } from 'lucide-react'
+import { NIVEIS_CONFIG, ORDEM_NIVEIS_GEM } from '@/lib/avatares'
+import { IconeNivel } from '@/components/ui/NivelIcons'
 
 interface ClienteFidelidade {
   id:               string
@@ -21,39 +23,11 @@ interface Stats {
   resgatadoMes:      number
 }
 
-const NIVEL_CONFIG: Record<string, { cor: string; bg: string; texto: string }> = {
-  Bronze:   { cor: '#cd7f32', bg: '#fdf3e7', texto: '#92400e' },
-  Prata:    { cor: '#94a3b8', bg: '#f1f5f9', texto: '#475569' },
-  Ouro:     { cor: '#f59e0b', bg: '#fffbeb', texto: '#92400e' },
-  Diamante: { cor: '#3b82f6', bg: '#eff6ff', texto: '#1e40af' },
-  Black:    { cor: '#1a1a1a', bg: '#f3f4f6', texto: '#ffffff' },
-}
+const NIVEL_CONFIG: Record<string, { cor: string; bg: string; texto: string }> = Object.fromEntries(
+  ORDEM_NIVEIS_GEM.map(n => [n, { cor: NIVEIS_CONFIG[n].cor, bg: NIVEIS_CONFIG[n].bg, texto: NIVEIS_CONFIG[n].corTexto }])
+)
 
-const NIVEIS_LISTA = ['Bronze', 'Prata', 'Ouro', 'Diamante', 'Black']
-
-function IconeNivel({ nivel, size = 28 }: { nivel: string; size?: number }) {
-  const configs: Record<string, { g1: string; g2: string }> = {
-    Bronze:   { g1: '#cd7f32', g2: '#a0522d' },
-    Prata:    { g1: '#94a3b8', g2: '#64748b' },
-    Ouro:     { g1: '#f59e0b', g2: '#d97706' },
-    Diamante: { g1: '#60a5fa', g2: '#3b82f6' },
-    Black:    { g1: '#374151', g2: '#111827' },
-  }
-  const c = configs[nivel] || configs.Bronze
-  const s = size * 0.5
-  return (
-    <div className="rounded-lg flex items-center justify-center shrink-0"
-      style={{ width: size, height: size, background: `linear-gradient(145deg, ${c.g1}, ${c.g2})` }}>
-      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-        {nivel === 'Diamante' ? (
-          <path d="M6 3L2 9L12 21L22 9L18 3H6Z" fill="white" opacity="0.9" />
-        ) : (
-          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="white" opacity="0.9" />
-        )}
-      </svg>
-    </div>
-  )
-}
+const NIVEIS_LISTA = [...ORDEM_NIVEIS_GEM]
 
 function formatValor(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -181,7 +155,7 @@ export default function AdminFidelidadePage() {
               </thead>
               <tbody>
                 {clientes.map((c, idx) => {
-                  const nc = NIVEL_CONFIG[c.nivel] || NIVEL_CONFIG.Bronze
+                  const nc = NIVEL_CONFIG[c.nivel] || NIVEL_CONFIG.Cristal
                   return (
                     <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition">
                       <td className="px-4 py-3">

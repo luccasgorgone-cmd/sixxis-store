@@ -36,7 +36,7 @@ export function templateBoasVindas({
           '&#128666; Frete grátis acima de R$ 500',
           '&#128179; 6x sem juros no cartão de crédito',
           '&#128274; Garantia real de 12 meses em todos os produtos',
-          '&#127775; Programa de fidelidade com níveis Bronze &#8594; Black'
+          '&#127775; Programa de fidelidade com níveis Cristal &#8594; Esmeralda'
         ].map(item => `
           <div style="margin-bottom:10px;">
             <p style="font-size:14px;color:#374151;margin:0;line-height:1.5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${item}</p>
@@ -619,5 +619,94 @@ export function templateSolicitacaoAvaliacao({
     assunto: `Avalie seu pedido ${idCurto} e ajude outros clientes`,
     preview: `Como foi a sua experiência? Sua opinião vale muito.`,
     conteudo
+  })
+}
+
+// ══════════════════════════════════════════════
+// 9. UPGRADE DE NÍVEL — GEMAS
+// ══════════════════════════════════════════════
+
+const GEM_GRADIENTS: Record<string, string> = {
+  Cristal:   'linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 60%, #38bdf8 100%)',
+  Topázio:   'linear-gradient(135deg, #78350f 0%, #d97706 55%, #fbbf24 100%)',
+  Safira:    'linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #60a5fa 100%)',
+  Diamante:  'linear-gradient(135deg, #3730a3 0%, #818cf8 55%, #e0e7ff 100%)',
+  Esmeralda: 'linear-gradient(135deg, #064e3b 0%, #10b981 55%, #6ee7b7 100%)',
+}
+
+const GEM_CASHBACK: Record<string, string> = {
+  Cristal: '2%', Topázio: '3%', Safira: '4%', Diamante: '5%', Esmeralda: '7%',
+}
+
+export function templateUpgradeNivel({
+  nome, nivelAnterior, nivelNovo, totalGasto, siteUrl
+}: {
+  nome: string
+  nivelAnterior: string
+  nivelNovo: string
+  totalGasto: number
+  siteUrl: string
+}) {
+  const gradient = GEM_GRADIENTS[nivelNovo] ?? GEM_GRADIENTS.Cristal
+  const cashback = GEM_CASHBACK[nivelNovo] ?? '2%'
+  const fmtValor = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+  const conteudo = `
+    <!-- HERO -->
+    <div class="email-hero-pad" style="background:${gradient};padding:52px 40px;text-align:center;">
+      <p style="color:rgba(255,255,255,0.75);font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">&#127775; Parabéns, ${nome}!</p>
+      <h1 style="color:#ffffff;font-size:34px;font-weight:900;line-height:1.15;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        Você subiu para<br/>nível <span style="text-shadow:0 0 20px rgba(255,255,255,0.6);">${nivelNovo}</span>!
+      </h1>
+      <p style="color:rgba(255,255,255,0.7);font-size:15px;margin-bottom:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        De ${nivelAnterior} para ${nivelNovo} — você chegou lá!
+      </p>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div class="email-content-pad" style="padding:40px;">
+
+      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        Olá, <strong>${nome}</strong>! Com <strong>${fmtValor(totalGasto)}</strong> em compras acumuladas,
+        você conquistou o nível <strong style="color:#0f2e2b;">${nivelNovo}</strong> no programa de fidelidade Sixxis.
+        Continue comprando para aproveitar ainda mais benefícios!
+      </p>
+
+      <!-- Destaque cashback -->
+      <div style="background:${gradient};border-radius:20px;padding:28px;margin-bottom:28px;text-align:center;">
+        <p style="color:rgba(255,255,255,0.75);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Seu novo cashback</p>
+        <p style="color:#ffffff;font-size:52px;font-weight:900;line-height:1;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${cashback}</p>
+        <p style="color:rgba(255,255,255,0.75);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">em todas as suas compras</p>
+      </div>
+
+      <!-- Benefícios -->
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:28px;">
+        <p style="font-size:12px;font-weight:800;color:#3cbfb3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">O que você ganhou</p>
+        ${[
+          `&#128176; ${cashback} cashback automático em toda compra`,
+          '&#128666; Benefícios exclusivos de frete e descontos',
+          '&#9889; Acesso prioritário a lançamentos e ofertas',
+        ].map(item => `
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+            <p style="font-size:14px;color:#374151;margin:0;line-height:1.5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${item}</p>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align:center;margin-bottom:24px;">
+        ${emailBotao({ texto: '&#128722; Aproveitar meu novo nível', href: `${siteUrl}/minha-conta/cashback` })}
+      </div>
+
+      <p style="font-size:12px;color:#9ca3af;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        Confira seus benefícios completos em Minha Conta → Cashback.
+      </p>
+    </div>
+  `
+
+  return emailBase({
+    assunto: `🎉 Parabéns! Você é ${nivelNovo} na Sixxis, ${nome}!`,
+    preview: `De ${nivelAnterior} para ${nivelNovo}! Seu cashback subiu para ${cashback}. Confira seus novos benefícios.`,
+    conteudo,
   })
 }

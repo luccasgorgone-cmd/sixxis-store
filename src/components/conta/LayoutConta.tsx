@@ -8,6 +8,7 @@ import {
   LayoutDashboard, ShoppingBag, Gift, User, MapPin, Shield,
 } from 'lucide-react'
 import { AvatarComArco } from '@/components/ui/AvatarComArco'
+import { IconeNivel } from '@/components/ui/NivelIcons'
 import { calcularNivel } from '@/lib/avatares'
 
 const MENU_ITENS = [
@@ -26,95 +27,6 @@ const GRADIENTES_MAP: Record<string, string> = {
   rose:    'linear-gradient(145deg, #6b1f3a, #f43f5e)',
   orange:  'linear-gradient(145deg, #6b3010, #f97316)',
   dark:    'linear-gradient(145deg, #111827, #374151)',
-}
-
-// ── Ícone SVG premium por nível ───────────────────────────────────────────────
-function IconeNivel({ nivel, size = 40 }: { nivel: string; size?: number }) {
-  const s = size * 0.55
-
-  type NivelConfig = { bg: string; sombra: string; svg: React.ReactNode }
-  const configs: Record<string, NivelConfig> = {
-    Bronze: {
-      bg: 'linear-gradient(145deg, #b45309 0%, #d97706 50%, #fbbf24 100%)',
-      sombra: '0 4px 15px rgba(180,83,9,0.5)',
-      svg: (
-        <svg width={s} height={s} viewBox="0 0 32 32" fill="none">
-          <path d="M16 2L28 7V17C28 23.627 22.627 29 16 29C9.373 29 4 23.627 4 17V7L16 2Z"
-            fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/>
-          <path d="M16 6L24 9.5V16.5C24 20.918 20.418 24.5 16 24.5C11.582 24.5 8 20.918 8 16.5V9.5L16 6Z"
-            fill="rgba(255,255,255,0.15)"/>
-          <text x="16" y="21" textAnchor="middle" fontSize="12" fontWeight="900"
-            fill="rgba(255,255,255,0.95)" fontFamily="system-ui">B</text>
-        </svg>
-      ),
-    },
-    Prata: {
-      bg: 'linear-gradient(145deg, #475569 0%, #94a3b8 50%, #cbd5e1 100%)',
-      sombra: '0 4px 15px rgba(71,85,105,0.5)',
-      svg: (
-        <svg width={s} height={s} viewBox="0 0 32 32" fill="none">
-          <path d="M16 2L27.856 8.5V21.5L16 28L4.144 21.5V8.5L16 2Z"
-            fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"/>
-          <circle cx="16" cy="15" r="4" fill="rgba(255,255,255,0.35)"
-            stroke="rgba(255,255,255,0.7)" strokeWidth="1"/>
-          <text x="16" y="20" textAnchor="middle" fontSize="11" fontWeight="900"
-            fill="rgba(255,255,255,0.95)" fontFamily="system-ui">P</text>
-        </svg>
-      ),
-    },
-    Ouro: {
-      bg: 'linear-gradient(145deg, #92400e 0%, #d97706 30%, #fbbf24 60%, #fde68a 100%)',
-      sombra: '0 4px 20px rgba(217,119,6,0.6), 0 0 30px rgba(251,191,36,0.3)',
-      svg: (
-        <svg width={s} height={s} viewBox="0 0 32 32" fill="none">
-          <path d="M4 22H28L26 10L21 16L16 6L11 16L6 10L4 22Z"
-            fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"
-            strokeLinejoin="round"/>
-          <circle cx="6" cy="10" r="2" fill="rgba(255,255,255,0.8)"/>
-          <circle cx="16" cy="6" r="2.5" fill="rgba(255,255,255,0.9)"/>
-          <circle cx="26" cy="10" r="2" fill="rgba(255,255,255,0.8)"/>
-          <rect x="4" y="23" width="24" height="3" rx="1.5" fill="rgba(255,255,255,0.5)"/>
-        </svg>
-      ),
-    },
-    Diamante: {
-      bg: 'linear-gradient(145deg, #1e3a8a 0%, #2563eb 40%, #60a5fa 70%, #bfdbfe 100%)',
-      sombra: '0 4px 20px rgba(37,99,235,0.6), 0 0 40px rgba(96,165,250,0.3)',
-      svg: (
-        <svg width={s} height={s} viewBox="0 0 32 32" fill="none">
-          <path d="M16 3L28 11L24 29H8L4 11L16 3Z"
-            fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"/>
-          <path d="M4 11H28L24 29H8L4 11Z" fill="rgba(255,255,255,0.1)"/>
-          <path d="M4 11L10 18M28 11L22 18M10 18H22M16 3L10 11M16 3L22 11"
-            stroke="rgba(255,255,255,0.5)" strokeWidth="1"/>
-          <path d="M14 10L16 7L18 10" fill="rgba(255,255,255,0.6)"/>
-        </svg>
-      ),
-    },
-    Black: {
-      bg: 'linear-gradient(145deg, #0a0a0a 0%, #1f1f1f 40%, #3d3d3d 70%, #1f1f1f 100%)',
-      sombra: '0 4px 20px rgba(0,0,0,0.8), 0 0 40px rgba(60,191,179,0.2)',
-      svg: (
-        <svg width={s} height={s} viewBox="0 0 32 32" fill="none">
-          <polygon points="18,2 9,17 15,17 14,30 23,15 17,15"
-            fill="#ffd700" stroke="rgba(255,215,0,0.5)" strokeWidth="0.5"/>
-          <circle cx="16" cy="16" r="13" stroke="rgba(60,191,179,0.4)" strokeWidth="1" fill="none"/>
-          <circle cx="16" cy="16" r="10" stroke="rgba(60,191,179,0.2)" strokeWidth="0.5" fill="none"/>
-        </svg>
-      ),
-    },
-  }
-
-  const cfg = configs[nivel] ?? configs.Bronze
-
-  return (
-    <div
-      className="flex items-center justify-center rounded-xl transition-transform hover:scale-110"
-      style={{ width: size, height: size, background: cfg.bg, boxShadow: cfg.sombra, flexShrink: 0 }}
-    >
-      {cfg.svg}
-    </div>
-  )
 }
 
 // ── NivelCard ─────────────────────────────────────────────────────────────────
@@ -179,7 +91,7 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [perfil, setPerfil] = useState<any>(null)
   const [totalGasto, setTotalGasto] = useState(0)
-  const [nivel, setNivel] = useState('Bronze')
+  const [nivel, setNivel] = useState('Cristal')
 
   useEffect(() => {
     if (!session) return

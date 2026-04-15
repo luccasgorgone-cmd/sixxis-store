@@ -29,7 +29,7 @@ export default function PerfilPage() {
   const [avatarId, setAvatarId]     = useState('inicial')
   const [notifEmail, setNotifEmail] = useState(true)
   const [notifWpp, setNotifWpp]     = useState(false)
-  const [nivelAtual, setNivelAtual] = useState('Bronze')
+  const [nivelAtual, setNivelAtual] = useState('Cristal')
   const [totalGasto, setTotalGasto] = useState(0)
 
   useEffect(() => {

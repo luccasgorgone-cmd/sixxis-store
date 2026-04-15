@@ -29,7 +29,7 @@ export function AvatarComArco({
     return calcularNivel(totalGasto)
   }, [nivel, totalGasto])
 
-  const config = NIVEIS_CONFIG[nivelAtual] || NIVEIS_CONFIG.Bronze
+  const config = NIVEIS_CONFIG[nivelAtual] || NIVEIS_CONFIG.Cristal
 
   // Arco SVG: 300° activo, gap de 60° na parte inferior
   const padding = 5

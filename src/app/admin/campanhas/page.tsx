@@ -205,10 +205,11 @@ const SEGMENTOS = [
   { id: 'todos', label: 'Todos os clientes', desc: 'Todos cadastrados' },
   { id: 'comCompras', label: 'Com compras', desc: 'Fizeram pelo menos 1 pedido' },
   { id: 'semCompras', label: 'Sem compras', desc: 'Nunca compraram' },
-  { id: 'bronze', label: 'Nível Bronze', desc: 'R$0–R$499' },
-  { id: 'prata', label: 'Nível Prata', desc: 'R$500–R$1.999' },
-  { id: 'ouro', label: 'Nível Ouro', desc: 'R$2.000–R$4.999' },
-  { id: 'diamante', label: 'Nível Diamante', desc: 'R$5.000+' },
+  { id: 'cristal',   label: 'Nível Cristal',   desc: 'R$0–R$999' },
+  { id: 'topazio',   label: 'Nível Topázio',   desc: 'R$1.000–R$2.999' },
+  { id: 'safira',    label: 'Nível Safira',    desc: 'R$3.000–R$7.999' },
+  { id: 'diamante',  label: 'Nível Diamante',  desc: 'R$8.000–R$14.999' },
+  { id: 'esmeralda', label: 'Nível Esmeralda', desc: 'R$15.000+' },
   { id: 'recentes', label: 'Últimos 30 dias', desc: 'Compraram recentemente' },
 ]
 
@@ -244,8 +245,8 @@ function ModalNovaCampanha({ tipo, onClose, onSalvo }: { tipo: 'EMAIL'|'WHATSAPP
     if (!segmento || segmento === 'manual') return
     const filtros: Record<string, Record<string, string>> = {
       comCompras: { comCompras: 'true' }, semCompras: { semCompras: 'true' },
-      bronze: { nivel: 'Bronze' }, prata: { nivel: 'Prata' }, ouro: { nivel: 'Ouro' },
-      diamante: { nivel: 'Diamante' }, recentes: { ultimaCompraDias: '30' }, todos: {},
+      cristal: { nivel: 'Cristal' }, topazio: { nivel: 'Topázio' }, safira: { nivel: 'Safira' },
+      diamante: { nivel: 'Diamante' }, esmeralda: { nivel: 'Esmeralda' }, recentes: { ultimaCompraDias: '30' }, todos: {},
     }
     const p = new URLSearchParams({ limit: '1', ...filtros[segmento] })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,8 +263,8 @@ function ModalNovaCampanha({ tipo, onClose, onSalvo }: { tipo: 'EMAIL'|'WHATSAPP
       const agendadoPara = tipoEnvio==='agendado' && dataAg ? new Date(`${dataAg}T${horaAg}:00`).toISOString() : null
       const filtros: Record<string,Record<string,string>> = {
         comCompras:{comCompras:'true'},semCompras:{semCompras:'true'},
-        bronze:{nivel:'Bronze'},prata:{nivel:'Prata'},ouro:{nivel:'Ouro'},
-        diamante:{nivel:'Diamante'},recentes:{ultimaCompraDias:'30'},todos:{},
+        cristal:{nivel:'Cristal'},topazio:{nivel:'Topázio'},safira:{nivel:'Safira'},
+        diamante:{nivel:'Diamante'},esmeralda:{nivel:'Esmeralda'},recentes:{ultimaCompraDias:'30'},todos:{},
       }
       const res = await fetch('/api/admin/campanhas', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },

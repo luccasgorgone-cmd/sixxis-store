@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
-
-function calcularNivel(totalGasto: number): string {
-  if (totalGasto >= 10000) return 'Black'
-  if (totalGasto >= 5000)  return 'Diamante'
-  if (totalGasto >= 2000)  return 'Ouro'
-  if (totalGasto >= 500)   return 'Prata'
-  return 'Bronze'
-}
+import { calcularNivel } from '@/lib/avatares'
 
 export async function GET(request: NextRequest) {
   const unauthorized = await requireAdmin(request)

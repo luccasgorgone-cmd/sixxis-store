@@ -8,48 +8,43 @@ import {
   ShoppingBag, Gift, TrendingUp, ChevronRight,
   Package, Star, Zap, Clock, CheckCircle, Truck,
 } from 'lucide-react'
+import { IconeNivel } from '@/components/ui/NivelIcons'
+import { NIVEIS_CONFIG, ORDEM_NIVEIS_GEM } from '@/lib/avatares'
 
 function formatValor(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-function IconeNivel({ nivel, size = 32 }: { nivel: string; size?: number }) {
-  const configs: Record<string, { g1: string; g2: string; sombra: string }> = {
-    Bronze:   { g1: '#cd7f32', g2: '#a0522d', sombra: '#cd7f3250' },
-    Prata:    { g1: '#94a3b8', g2: '#64748b', sombra: '#94a3b850' },
-    Ouro:     { g1: '#f59e0b', g2: '#d97706', sombra: '#f59e0b50' },
-    Diamante: { g1: '#60a5fa', g2: '#3b82f6', sombra: '#3b82f650' },
-    Black:    { g1: '#374151', g2: '#111827', sombra: '#37415150' },
-  }
-  const c = configs[nivel] || configs.Bronze
-  const s = size * 0.5
-  return (
-    <div
-      className="rounded-xl flex items-center justify-center shrink-0"
-      style={{
-        width: size, height: size,
-        background: `linear-gradient(145deg, ${c.g1}, ${c.g2})`,
-        boxShadow: `0 4px 12px ${c.sombra}`,
-      }}
-    >
-      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-        {nivel === 'Diamante' ? (
-          <path d="M6 3L2 9L12 21L22 9L18 3H6Z" fill="white" opacity="0.9" />
-        ) : (
-          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z"
-            fill="white" opacity="0.9" />
-        )}
-      </svg>
-    </div>
-  )
+// ── Padrões geométricos SVG por gema ─────────────────────────────────────────
+const BANNER_POR_NIVEL: Record<string, { pattern: string; gradient: string }> = {
+  Cristal: {
+    gradient: 'linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 60%, #38bdf8 100%)',
+    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><polygon points='20,2 38,11 38,29 20,38 2,29 2,11' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
+  },
+  Topázio: {
+    gradient: 'linear-gradient(135deg, #78350f 0%, #d97706 55%, #fbbf24 100%)',
+    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='40'><ellipse cx='16' cy='20' rx='12' ry='16' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
+  },
+  Safira: {
+    gradient: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #60a5fa 100%)',
+    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><polygon points='20,2 38,12 32,32 8,32 2,12' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
+  },
+  Diamante: {
+    gradient: 'linear-gradient(135deg, #3730a3 0%, #818cf8 55%, #e0e7ff 100%)',
+    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='16' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/><polygon points='20,4 36,20 20,36 4,20' fill='none' stroke='white' stroke-width='0.4' opacity='0.1'/></svg>`,
+  },
+  Esmeralda: {
+    gradient: 'linear-gradient(135deg, #064e3b 0%, #10b981 55%, #6ee7b7 100%)',
+    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><polygon points='8,2 32,2 38,8 38,32 32,38 8,38 2,32 2,8' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
+  },
 }
 
 const VANTAGENS_NIVEL: Record<string, string[]> = {
-  Bronze:   ['2% cashback em compras', 'Acesso ao extrato completo', 'Cupom de boas-vindas SIXXIS10'],
-  Prata:    ['3% cashback em compras', 'Frete grátis acima de R$300', 'Acesso antecipado a ofertas', 'Suporte prioritário'],
-  Ouro:     ['4% cashback em compras', 'Frete grátis a partir de R$200', 'Desconto exclusivo 5%', 'Atendimento VIP', 'Brindes surpresa'],
-  Diamante: ['5% cashback em compras', 'Frete grátis em qualquer pedido', 'Desconto 8% exclusivo', 'Gerente dedicado', 'Acesso a lançamentos'],
-  Black:    ['6% cashback em compras', 'Frete sempre grátis', 'Desconto 10% exclusivo', 'Atendimento 24h', 'Eventos Sixxis', 'Cashback em dobro em datas especiais'],
+  Cristal:   ['2% cashback em compras', 'Acesso ao extrato completo', 'Cupom de boas-vindas SIXXIS10'],
+  Topázio:   ['3% cashback em compras', 'Frete grátis acima de R$300', 'Acesso antecipado a ofertas', 'Suporte prioritário'],
+  Safira:    ['4% cashback em compras', 'Frete grátis a partir de R$200', 'Desconto exclusivo 5%', 'Atendimento VIP', 'Brindes surpresa'],
+  Diamante:  ['5% cashback em compras', 'Frete grátis em qualquer pedido', 'Desconto 8% exclusivo', 'Gerente dedicado', 'Acesso a lançamentos'],
+  Esmeralda: ['7% cashback em compras', 'Frete sempre grátis', 'Desconto 10% exclusivo', 'Atendimento 24h', 'Eventos Sixxis', 'Cashback em dobro em datas especiais'],
 }
 
 const STATUS_CONFIG: Record<string, { label: string; cor: string; bg: string; Icone: React.ElementType }> = {
@@ -62,14 +57,12 @@ const STATUS_CONFIG: Record<string, { label: string; cor: string; bg: string; Ic
   CANCELADO:   { label: 'Cancelado',   cor: '#dc2626', bg: '#fee2e2', Icone: Clock },
 }
 
-const TODOS_NIVEIS = [
-  { nome: 'Bronze',   cor: '#cd7f32', cashback: '2%', max: 499 },
-  { nome: 'Prata',    cor: '#94a3b8', cashback: '3%', max: 1999 },
-  { nome: 'Ouro',     cor: '#f59e0b', cashback: '4%', max: 4999 },
-  { nome: 'Diamante', cor: '#3b82f6', cashback: '5%', max: 9999 },
-  { nome: 'Black',    cor: '#1a1a1a', cashback: '6%', max: null },
-]
-const ORDEM_NIVEIS = ['Bronze', 'Prata', 'Ouro', 'Diamante', 'Black']
+const TODOS_NIVEIS = ORDEM_NIVEIS_GEM.map(nome => ({
+  nome,
+  cor: NIVEIS_CONFIG[nome].cor,
+  cashback: `${(NIVEIS_CONFIG[nome].cashbackPct * 100).toFixed(0)}%`,
+  maxGasto: NIVEIS_CONFIG[nome].maxGasto,
+}))
 
 export default function MinhaContaPage() {
   const { data: session } = useSession()
@@ -90,7 +83,7 @@ export default function MinhaContaPage() {
     }).catch(() => setLoading(false))
   }, [])
 
-  const nivel = dados?.nivel || { atual: 'Bronze', cor: '#cd7f32', progressoPercent: 0, proximoNivel: 'Prata', faltam: 500, cashbackPct: 0.02 }
+  const nivel = dados?.nivel || { atual: 'Cristal', cor: '#38bdf8', progressoPercent: 0, proximoNivel: 'Topázio', faltam: 1000, cashbackPct: 0.02 }
   const stats = dados?.estatisticas || {}
 
   if (loading) {
@@ -111,11 +104,10 @@ export default function MinhaContaPage() {
 
         {/* ── BANNER HERO ── */}
         <div className="relative overflow-hidden rounded-2xl"
-          style={{ background: 'linear-gradient(135deg, #0b2220 0%, #0f2e2b 60%, #1a4f4a 100%)' }}>
-          <div className="absolute inset-0 opacity-5"
+          style={{ background: (BANNER_POR_NIVEL[nivel.atual] ?? BANNER_POR_NIVEL.Cristal).gradient }}>
+          <div className="absolute inset-0 opacity-100"
             style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '24px 24px',
+              backgroundImage: `url("data:image/svg+xml,${encodeURIComponent((BANNER_POR_NIVEL[nivel.atual] ?? BANNER_POR_NIVEL.Cristal).pattern)}")`,
             }} />
           <div className="relative p-6 sm:p-8">
             <div className="flex items-start justify-between gap-4">
@@ -283,7 +275,7 @@ export default function MinhaContaPage() {
           <div className="grid grid-cols-5 gap-2">
             {TODOS_NIVEIS.map((n, i) => {
               const isAtual = n.nome === nivel.atual
-              const idxAtual = ORDEM_NIVEIS.indexOf(nivel.atual)
+              const idxAtual = ORDEM_NIVEIS_GEM.indexOf(nivel.atual as typeof ORDEM_NIVEIS_GEM[number])
               const isAlcancado = i <= idxAtual
               return (
                 <div key={i}
@@ -295,7 +287,7 @@ export default function MinhaContaPage() {
                   <p className="text-[11px] font-black mt-2 text-gray-900">{n.nome}</p>
                   <p className="text-[10px] font-bold" style={{ color: n.cor }}>{n.cashback} CB</p>
                   <p className="text-[9px] text-gray-400 text-center mt-0.5">
-                    {n.max ? `até R$${(n.max / 1000).toFixed(0)}k` : 'R$10k+'}
+                    {n.maxGasto && n.maxGasto !== Infinity ? `até R$${(n.maxGasto / 1000).toFixed(0)}k` : 'R$15k+'}
                   </p>
                   {isAtual && (
                     <span className="mt-1 text-[9px] font-black px-1.5 py-0.5 rounded-full"

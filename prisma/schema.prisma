@@ -23,6 +23,13 @@ model Cliente {
   totalPedidos     Int                  @default(0)
   ultimaCompra     DateTime?
   carrinhoAbandon  Json?
+  // Dados demográficos
+  dataNascimento   DateTime?
+  genero           String?
+  avatar           String?
+  avatarGradiente  String?              @default("tiffany")
+  notifEmail       Boolean              @default(true)
+  notifWhatsapp    Boolean              @default(false)
   avaliacoes           Avaliacao[]
   bloqueios            BloqueioFraude[]
   carrinho             Carrinho?

@@ -48,39 +48,76 @@ export const AVATAR_INICIAL = {
 // ── TODOS os avatares (inicial primeiro, depois os 16)
 export const TODOS_AVATARES = [AVATAR_INICIAL, ...AVATARES_PREDEFINIDOS]
 
-// ── Configuração dos Níveis
+// ── Configuração dos Níveis — 5 gemas
 export const NIVEIS_CONFIG: Record<string, {
-  cor: string; corSec: string; corSombra: string
+  cor: string; corSec: string; corSombra: string; corTexto: string; bg: string
   espessura: number; label: string; emoji: string
+  cashbackPct: number; minGasto: number; maxGasto: number; proximoNivel: string | null
 }> = {
-  Bronze: {
-    cor: '#cd7f32', corSec: '#fbbf24', corSombra: 'rgba(205,127,50,0.4)',
-    espessura: 3, label: 'Bronze', emoji: '🥉',
+  Cristal: {
+    cor: '#38bdf8', corSec: '#bae6fd', corSombra: 'rgba(56,189,248,0.4)',
+    corTexto: '#0c4a6e', bg: '#f0f9ff',
+    espessura: 3, label: 'Cristal', emoji: '🔷',
+    cashbackPct: 0.02, minGasto: 0, maxGasto: 999, proximoNivel: 'Topázio',
   },
-  Prata: {
-    cor: '#94a3b8', corSec: '#e2e8f0', corSombra: 'rgba(148,163,184,0.4)',
-    espessura: 3.5, label: 'Prata', emoji: '🥈',
+  Topázio: {
+    cor: '#f59e0b', corSec: '#fde68a', corSombra: 'rgba(245,158,11,0.45)',
+    corTexto: '#78350f', bg: '#fffbeb',
+    espessura: 3.5, label: 'Topázio', emoji: '🟡',
+    cashbackPct: 0.03, minGasto: 1000, maxGasto: 2999, proximoNivel: 'Safira',
   },
-  Ouro: {
-    cor: '#f59e0b', corSec: '#fde68a', corSombra: 'rgba(245,158,11,0.5)',
-    espessura: 4, label: 'Ouro', emoji: '🥇',
+  Safira: {
+    cor: '#2563eb', corSec: '#bfdbfe', corSombra: 'rgba(37,99,235,0.5)',
+    corTexto: '#1e3a8a', bg: '#eff6ff',
+    espessura: 4, label: 'Safira', emoji: '💙',
+    cashbackPct: 0.04, minGasto: 3000, maxGasto: 7999, proximoNivel: 'Diamante',
   },
   Diamante: {
-    cor: '#3b82f6', corSec: '#bfdbfe', corSombra: 'rgba(59,130,246,0.5)',
+    cor: '#818cf8', corSec: '#e0e7ff', corSombra: 'rgba(129,140,248,0.55)',
+    corTexto: '#3730a3', bg: '#eef2ff',
     espessura: 4.5, label: 'Diamante', emoji: '💎',
+    cashbackPct: 0.05, minGasto: 8000, maxGasto: 14999, proximoNivel: 'Esmeralda',
   },
-  Black: {
-    cor: '#ffd700', corSec: '#fffbeb', corSombra: 'rgba(255,215,0,0.6)',
-    espessura: 5, label: 'Black', emoji: '⬛',
+  Esmeralda: {
+    cor: '#10b981', corSec: '#a7f3d0', corSombra: 'rgba(16,185,129,0.6)',
+    corTexto: '#064e3b', bg: '#ecfdf5',
+    espessura: 5, label: 'Esmeralda', emoji: '💚',
+    cashbackPct: 0.07, minGasto: 15000, maxGasto: Infinity, proximoNivel: null,
   },
 }
 
+export const ORDEM_NIVEIS_GEM = ['Cristal', 'Topázio', 'Safira', 'Diamante', 'Esmeralda'] as const
+
 export function calcularNivel(totalGasto: number): string {
-  if (totalGasto >= 10000) return 'Black'
-  if (totalGasto >= 5000)  return 'Diamante'
-  if (totalGasto >= 2000)  return 'Ouro'
-  if (totalGasto >= 500)   return 'Prata'
-  return 'Bronze'
+  if (totalGasto >= 15000) return 'Esmeralda'
+  if (totalGasto >= 8000)  return 'Diamante'
+  if (totalGasto >= 3000)  return 'Safira'
+  if (totalGasto >= 1000)  return 'Topázio'
+  return 'Cristal'
+}
+
+export function calcularNivelCompleto(totalGasto: number) {
+  const nome = calcularNivel(totalGasto)
+  const cfg = NIVEIS_CONFIG[nome]
+  const faltam = cfg.proximoNivel
+    ? Math.max(0, NIVEIS_CONFIG[cfg.proximoNivel].minGasto - totalGasto)
+    : 0
+  const progressoPercent = cfg.proximoNivel
+    ? Math.min(100, Math.round(((totalGasto - cfg.minGasto) / (NIVEIS_CONFIG[cfg.proximoNivel].minGasto - cfg.minGasto)) * 100))
+    : 100
+  return {
+    atual: nome,
+    proximoNivel: cfg.proximoNivel,
+    progressoPercent,
+    faltam,
+    cor: cfg.cor,
+    corSec: cfg.corSec,
+    corTexto: cfg.corTexto,
+    bg: cfg.bg,
+    cashbackPct: cfg.cashbackPct,
+    minGasto: cfg.minGasto,
+    maxGasto: cfg.maxGasto,
+  }
 }
 
 export function getAvatarUrl(avatarId: string): string | null {

@@ -16,6 +16,7 @@ const TIPO_LABELS: Record<string, string> = {
   volta_estoque: 'Volta ao Estoque',
   cupom_especial: 'Cupom Especial',
   solicitacao_avaliacao: 'Solicitação de Avaliação',
+  upgrade_nivel: 'Upgrade de Nível (Fidelidade)',
 }
 
 const VARIAVEIS_POR_TIPO: Record<string, string[]> = {
@@ -27,6 +28,7 @@ const VARIAVEIS_POR_TIPO: Record<string, string[]> = {
   volta_estoque: ['{{nome}}', '{{produto_nome}}', '{{produto_url}}', '{{site_url}}', '{{PRODUTO_CARD}}'],
   cupom_especial: ['{{nome}}', '{{cupom_codigo}}', '{{cupom_desconto}}', '{{cupom_validade}}', '{{site_url}}'],
   solicitacao_avaliacao: ['{{nome}}', '{{pedido_id}}', '{{site_url}}'],
+  upgrade_nivel: ['{{nome}}', '{{nivel_anterior}}', '{{nivel_novo}}', '{{total_gasto}}', '{{site_url}}'],
 }
 
 export default async function EmailsAdminPage() {
