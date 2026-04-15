@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       // 5: page_views
       prisma.eventoAnalitico.findMany({
         where: { tipo: 'page_view', createdAt: { gte: dataInicio } },
-        select: { pagina: true },
+        select: { pagina: true, createdAt: true, sessionId: true },
       }),
       // 6: searches
       prisma.eventoAnalitico.findMany({
@@ -77,6 +77,7 @@ export async function GET(req: NextRequest) {
     const insights           = get(4, []) as any[]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pageViews          = get(5, []) as any[]
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const searches           = get(6, []) as any[]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -152,6 +153,34 @@ export async function GET(req: NextRequest) {
     const taxaConversao = totalVisitas > 0
       ? parseFloat(((compras / totalVisitas) * 100).toFixed(2)) : 0
 
+    // ── Visitas por dia ──────────────────────────────────────────────────────
+    const visitasDiaMap: Record<string, number> = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pageViews.forEach((e: any) => {
+      const d = new Date(e.createdAt).toISOString().slice(0, 10)
+      visitasDiaMap[d] = (visitasDiaMap[d] || 0) + 1
+    })
+    const visitasPorDia = Object.entries(visitasDiaMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, visitas]) => ({ date, visitas }))
+
+    // ── Horários pico ─────────────────────────────────────────────────────────
+    const horasArray = Array.from({ length: 24 }, (_, hora) => ({ hora, visitas: 0 }))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pageViews.forEach((e: any) => {
+      const h = new Date(e.createdAt).getHours()
+      horasArray[h].visitas++
+    })
+    const horariosPico = horasArray
+
+    // ── Páginas por sessão ────────────────────────────────────────────────────
+    const sessoesPages = new Set<string>()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pageViews.forEach((e: any) => { if (e.sessionId) sessoesPages.add(e.sessionId) })
+    const paginasPorSessao = sessoesPages.size > 0
+      ? parseFloat((pageViews.length / sessoesPages.size).toFixed(1))
+      : 0
+
     // Itens de carrinho formatados
     const itensCarrinho = cartsRaw.slice(0, 50).map((e: { sessionId: string; dados: string; createdAt: Date }) => {
       let d: Record<string, unknown> = {}
@@ -192,6 +221,9 @@ export async function GET(req: NextRequest) {
         dispositivo: d.dispositivo || 'desktop',
         count: d._count.dispositivo,
       })),
+      visitasPorDia,
+      horariosPico,
+      paginasPorSessao,
       itensCarrinho,
       clientes: insights.map((c: {
         sessionId: string; ultimaVisita: Date; totalVisitas: number; totalPaginas: number;
