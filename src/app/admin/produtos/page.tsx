@@ -39,6 +39,7 @@ export default function AdminProdutosPage() {
   const [page, setPage] = useState(1)
   const [q, setQ] = useState('')
   const [categoria, setCategoria] = useState('')
+  const [ativo, setAtivo] = useState('')
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -47,7 +48,7 @@ export default function AdminProdutosPage() {
 
   const fetchProdutos = useCallback(async () => {
     setLoading(true)
-    const params = new URLSearchParams({ page: String(page), q, categoria })
+    const params = new URLSearchParams({ page: String(page), q, categoria, ativo })
     const res = await fetch(`/api/admin/produtos?${params}`)
     const data = await res.json()
     setProdutos(data.produtos ?? [])
@@ -62,7 +63,7 @@ export default function AdminProdutosPage() {
 
   useEffect(() => {
     setPage(1)
-  }, [q, categoria])
+  }, [q, categoria, ativo])
 
   async function handleDelete(id: string, nome: string) {
     if (!confirm(`Deletar "${nome}"? Esta ação não pode ser desfeita.`)) return
@@ -117,6 +118,15 @@ export default function AdminProdutosPage() {
               {c.label}
             </option>
           ))}
+        </select>
+        <select
+          value={ativo}
+          onChange={(e) => setAtivo(e.target.value)}
+          className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] bg-white"
+        >
+          <option value="">Todos os status</option>
+          <option value="true">Ativos</option>
+          <option value="false">Inativos</option>
         </select>
       </div>
 

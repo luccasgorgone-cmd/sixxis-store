@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   DollarSign, ShoppingBag, TrendingUp, Package,
   Clock, Users, ArrowUpRight, ArrowDownRight,
-  AlertTriangle, Pencil,
+  AlertTriangle, Pencil, Tag,
 } from 'lucide-react'
 
 // Recharts precisa de ssr: false — importamos cada gráfico separadamente
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
   const maxEstadoReceita = data?.porEstado[0]?.receita ?? 1
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-6 pb-8 max-w-[1400px] mx-auto">
       {/* Header + filtro */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -264,6 +264,35 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Ações rápidas */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link href="/admin/produtos/novo"
+          className="flex items-center gap-3 rounded-2xl px-5 py-4 text-white font-semibold text-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+          style={{ backgroundColor: '#0f2e2b' }}>
+          <Package className="w-5 h-5 shrink-0" />
+          <div>
+            <p className="font-bold">Adicionar Produto</p>
+            <p className="text-white/60 text-xs font-normal">Cadastrar novo item no catálogo</p>
+          </div>
+        </Link>
+        <Link href="/admin/pedidos"
+          className="flex items-center gap-3 rounded-2xl px-5 py-4 text-white font-semibold text-sm transition hover:-translate-y-0.5 hover:shadow-lg bg-indigo-600">
+          <ShoppingBag className="w-5 h-5 shrink-0" />
+          <div>
+            <p className="font-bold">Ver Pedidos</p>
+            <p className="text-white/60 text-xs font-normal">Gerenciar pedidos pendentes</p>
+          </div>
+        </Link>
+        <Link href="/admin/cupons"
+          className="flex items-center gap-3 rounded-2xl px-5 py-4 text-white font-semibold text-sm transition hover:-translate-y-0.5 hover:shadow-lg bg-violet-600">
+          <Tag className="w-5 h-5 shrink-0" />
+          <div>
+            <p className="font-bold">Criar Cupom</p>
+            <p className="text-white/60 text-xs font-normal">Configurar desconto promocional</p>
+          </div>
+        </Link>
       </div>
 
       {/* Atividade recente + Estoque crítico */}

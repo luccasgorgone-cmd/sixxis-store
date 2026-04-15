@@ -3,22 +3,40 @@ import { useState } from 'react'
 import { Save, Smartphone, Monitor } from 'lucide-react'
 
 interface MobileConfig {
-  bannerMobileUrl:    string
-  bannerMobileHeight: string
-  announcementTexto:  string
-  trustBarItems:      string[]
+  bannerMobileUrl:          string
+  bannerMobileHeight:       string
+  announcementTexto:        string
+  trustBarItems:            string[]
+  heroBotao1Texto:          string
+  heroBotao2Texto:          string
+  heroBotao1Cor:            string
+  heroBotao2Cor:            string
+  ofertasAtivo:             boolean
+  ofertasTitulo:            string
+  ofertasTimerCor:          string
+  maisVendidosNumero:       string
+  maisVendidosVerTodos:     boolean
+  footerMostrarSociais:     boolean
+  footerMostrarNewsletter:  boolean
 }
 
 export default function AdminMobilePage() {
   const [config, setConfig] = useState<MobileConfig>({
-    bannerMobileUrl:    '',
-    bannerMobileHeight: '200',
-    announcementTexto:  'CUPOM: SIXXIS10 — 10% OFF na 1ª compra',
-    trustBarItems:      [
-      'Frete grátis acima de R$ 500',
-      'Compra 100% segura',
-      'Parcele em 6x sem juros',
-    ],
+    bannerMobileUrl:          '',
+    bannerMobileHeight:       '200',
+    announcementTexto:        'CUPOM: SIXXIS10 — 10% OFF na 1ª compra',
+    trustBarItems:            ['Frete grátis acima de R$ 500', 'Compra 100% segura', 'Parcele em 6x sem juros'],
+    heroBotao1Texto:          'Explorar Produtos →',
+    heroBotao2Texto:          'Falar no WhatsApp',
+    heroBotao1Cor:            '#3cbfb3',
+    heroBotao2Cor:            '#ffffff',
+    ofertasAtivo:             true,
+    ofertasTitulo:            'Ofertas Relâmpago',
+    ofertasTimerCor:          '#3cbfb3',
+    maisVendidosNumero:       '4',
+    maisVendidosVerTodos:     true,
+    footerMostrarSociais:     true,
+    footerMostrarNewsletter:  true,
   })
   const [salvo, setSalvo]   = useState(false)
   const [preview, setPreview] = useState<'mobile' | 'desktop'>('mobile')
@@ -124,6 +142,137 @@ export default function AdminMobilePage() {
                   />
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Botões do Hero */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h3 className="text-sm font-extrabold text-gray-900 mb-4">Botões do Hero Mobile</h3>
+            <div className="space-y-3">
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Texto Botão 1</label>
+                  <input value={config.heroBotao1Texto} onChange={(e) => f('heroBotao1Texto', e.target.value)}
+                    className="w-full border border-gray-200 focus:border-[#3cbfb3] rounded-xl px-3 py-2 text-sm outline-none" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Cor</label>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded-lg border border-gray-200" style={{ backgroundColor: config.heroBotao1Cor }} />
+                    <input type="color" value={config.heroBotao1Cor} onChange={(e) => f('heroBotao1Cor', e.target.value)}
+                      className="w-8 h-8 cursor-pointer rounded border-0 bg-transparent p-0" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Texto Botão 2</label>
+                  <input value={config.heroBotao2Texto} onChange={(e) => f('heroBotao2Texto', e.target.value)}
+                    className="w-full border border-gray-200 focus:border-[#3cbfb3] rounded-xl px-3 py-2 text-sm outline-none" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Cor</label>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded-lg border border-gray-200" style={{ backgroundColor: config.heroBotao2Cor }} />
+                    <input type="color" value={config.heroBotao2Cor} onChange={(e) => f('heroBotao2Cor', e.target.value)}
+                      className="w-8 h-8 cursor-pointer rounded border-0 bg-transparent p-0" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Ofertas Relâmpago */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-extrabold text-gray-900">Ofertas Relâmpago Mobile</h3>
+              <button
+                onClick={() => f('ofertasAtivo', !config.ofertasAtivo)}
+                className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+                style={{ backgroundColor: config.ofertasAtivo ? '#3cbfb3' : '#d1d5db' }}
+              >
+                <span className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform"
+                  style={{ transform: config.ofertasAtivo ? 'translateX(18px)' : 'translateX(2px)' }} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Título da seção</label>
+                <input value={config.ofertasTitulo} onChange={(e) => f('ofertasTitulo', e.target.value)}
+                  className="w-full border border-gray-200 focus:border-[#3cbfb3] rounded-xl px-3 py-2 text-sm outline-none" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Cor do timer</label>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg border border-gray-200" style={{ backgroundColor: config.ofertasTimerCor }} />
+                  <input type="color" value={config.ofertasTimerCor} onChange={(e) => f('ofertasTimerCor', e.target.value)}
+                    className="w-8 h-8 cursor-pointer rounded border-0 bg-transparent p-0" />
+                  <span className="text-xs text-gray-400">{config.ofertasTimerCor}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mais Vendidos */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h3 className="text-sm font-extrabold text-gray-900 mb-4">Seção "Mais Vendidos" Mobile</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-2">Produtos exibidos no mobile</label>
+                <div className="flex gap-2">
+                  {['2', '4', '6'].map((n) => (
+                    <button key={n} onClick={() => f('maisVendidosNumero', n)}
+                      className="px-4 py-1.5 rounded-xl text-sm font-semibold border transition"
+                      style={{
+                        backgroundColor: config.maisVendidosNumero === n ? '#0f2e2b' : 'white',
+                        color: config.maisVendidosNumero === n ? 'white' : '#374151',
+                        borderColor: config.maisVendidosNumero === n ? '#0f2e2b' : '#e5e7eb',
+                      }}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">Mostrar botão "Ver todos"</span>
+                <button
+                  onClick={() => f('maisVendidosVerTodos', !config.maisVendidosVerTodos)}
+                  className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+                  style={{ backgroundColor: config.maisVendidosVerTodos ? '#3cbfb3' : '#d1d5db' }}
+                >
+                  <span className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform"
+                    style={{ transform: config.maisVendidosVerTodos ? 'translateX(18px)' : 'translateX(2px)' }} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Mobile */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h3 className="text-sm font-extrabold text-gray-900 mb-4">Footer Mobile</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">Mostrar ícones sociais</span>
+                <button
+                  onClick={() => f('footerMostrarSociais', !config.footerMostrarSociais)}
+                  className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+                  style={{ backgroundColor: config.footerMostrarSociais ? '#3cbfb3' : '#d1d5db' }}
+                >
+                  <span className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform"
+                    style={{ transform: config.footerMostrarSociais ? 'translateX(18px)' : 'translateX(2px)' }} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">Mostrar newsletter</span>
+                <button
+                  onClick={() => f('footerMostrarNewsletter', !config.footerMostrarNewsletter)}
+                  className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+                  style={{ backgroundColor: config.footerMostrarNewsletter ? '#3cbfb3' : '#d1d5db' }}
+                >
+                  <span className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform"
+                    style={{ transform: config.footerMostrarNewsletter ? 'translateX(18px)' : 'translateX(2px)' }} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

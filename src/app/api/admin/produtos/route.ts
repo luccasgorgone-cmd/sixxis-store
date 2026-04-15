@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const q = searchParams.get('q') ?? ''
   const categoria = searchParams.get('categoria') ?? ''
+  const ativoParam = searchParams.get('ativo') ?? ''
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'))
   const limit = 20
 
@@ -29,6 +30,7 @@ export async function GET(request: NextRequest) {
       ],
     }),
     ...(categoria && { categoria }),
+    ...(ativoParam !== '' && { ativo: ativoParam === 'true' }),
   }
 
   const [produtos, total] = await Promise.all([

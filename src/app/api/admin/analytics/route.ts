@@ -1,18 +1,12 @@
 import { NextRequest } from 'next/server'
-import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export const dynamic = 'force-dynamic'
 
-async function verificarAdmin() {
-  const cookieStore = await cookies()
-  return cookieStore.get('admin_session')?.value === process.env.ADMIN_SECRET
-}
-
 export async function GET(req: NextRequest) {
-  if (!(await verificarAdmin())) {
-    return Response.json({ ok: false, erro: 'Não autorizado' }, { status: 401 })
-  }
+  const unauthorized = await requireAdmin(req)
+  if (unauthorized) return Response.json({ ok: false, erro: 'Não autorizado' }, { status: 401 })
 
   try {
     const periodo = Math.min(90, Math.max(1, parseInt(req.nextUrl.searchParams.get('periodo') || '7')))

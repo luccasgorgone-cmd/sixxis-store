@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
               alt="Sixxis"
               width={130}
               height={44}
-              className="object-contain brightness-0 invert"
+              className="object-contain"
             />
           </div>
           <p className="text-[#3cbfb3]/60 text-sm uppercase tracking-widest font-medium">

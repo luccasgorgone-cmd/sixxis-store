@@ -17,7 +17,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         {/* ── Header mobile do admin (< lg) ── */}
         <div
           className="lg:hidden flex items-center justify-between px-4 h-14 border-b border-white/10 shrink-0"
-          style={{ backgroundColor: '#111827' }}
+          style={{ backgroundColor: '#0f2e2b' }}
         >
           {/* Hambúrguer */}
           <button
@@ -34,7 +34,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             alt="Sixxis Admin"
             width={90}
             height={30}
-            className="object-contain brightness-0 invert"
+            className="object-contain"
           />
 
           {/* Espaço para balancear o layout (espelho do hamburger) */}
