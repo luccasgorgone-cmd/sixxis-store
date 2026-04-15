@@ -108,7 +108,7 @@ export default function CardProduto({ produto }: Props) {
               src={imagemCapa}
               alt={produto.nome}
               fill
-              className="object-contain p-2 group-hover:scale-105 transition-transform duration-400"
+              className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
               unoptimized
               loading="lazy"
@@ -117,6 +117,18 @@ export default function CardProduto({ produto }: Props) {
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package size={42} className="text-gray-200" />
+            </div>
+          )}
+
+          {/* Overlay "Ver produto" ao hover */}
+          {!esgotado && (
+            <div className="absolute inset-0 bg-[#0f2e2b]/0 group-hover:bg-[#0f2e2b]/10
+                            transition-colors duration-300 flex items-end justify-center pb-3 pointer-events-none">
+              <span className="text-white text-xs font-bold bg-[#0f2e2b]/70 px-3 py-1.5
+                               rounded-full opacity-0 group-hover:opacity-100 translate-y-2
+                               group-hover:translate-y-0 transition-all duration-300">
+                Ver produto
+              </span>
             </div>
           )}
         </div>
