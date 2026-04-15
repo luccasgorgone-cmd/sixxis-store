@@ -186,9 +186,12 @@ export default function LunaChat({
   const [mostrarBolha, setMostrarBolha] = useState(false)
   const [fechado,      setFechado]      = useState(false)
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef       = useRef<HTMLInputElement>(null)
-  const sessionId      = useRef(`luna_${Date.now()}`)
+  const messagesEndRef      = useRef<HTMLDivElement>(null)
+  const inputRef            = useRef<HTMLInputElement>(null)
+  const sessionId           = useRef(`luna_${Date.now()}`)
+  const inactivityTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastMsgRoleRef      = useRef<'user' | 'assistant' | null>(null)
+  const followUpSentRef     = useRef(false)
 
   // Bolha de boas-vindas após 4 s
   useEffect(() => {
@@ -220,6 +223,51 @@ export default function LunaChat({
       setTimeout(() => inputRef.current?.focus(), 300)
     }
   }, [aberto, minimizado])
+
+  // ── Timer de inatividade — follow-up automático após 30s sem resposta ────────
+
+  const FOLLOWUP_MESSAGES = [
+    'Ficou alguma dúvida sobre os modelos que indiquei? 😊 Se quiser, posso calcular o frete até você — é só me informar o CEP.',
+    'Posso te ajudar com mais alguma coisa? Se já escolheu o modelo, me passa o CEP que calculo prazo e valor do frete.',
+    'Precisa de mais informações para decidir? Estou aqui! Ou, se preferir, nossa equipe de vendas atende pelo WhatsApp: (18) 99747-4701 😊',
+  ]
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current)
+    followUpSentRef.current = false
+  }, [])
+
+  const triggerFollowUp = useCallback(() => {
+    if (
+      lastMsgRoleRef.current !== 'assistant' ||
+      followUpSentRef.current ||
+      !aberto
+    ) return
+    followUpSentRef.current = true
+    const msg = FOLLOWUP_MESSAGES[Math.floor(Math.random() * FOLLOWUP_MESSAGES.length)]
+    setMensagens(prev => [
+      ...prev,
+      { id: `fu_${Date.now()}`, role: 'assistant', content: msg, timestamp: new Date() },
+    ])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aberto])
+
+  useEffect(() => {
+    if (mensagens.length === 0) return
+    const last = mensagens[mensagens.length - 1]
+    lastMsgRoleRef.current = last.role as 'user' | 'assistant'
+    if (last.role === 'assistant') {
+      resetInactivityTimer()
+      inactivityTimerRef.current = setTimeout(triggerFollowUp, 30000)
+    } else {
+      resetInactivityTimer()
+    }
+    return () => { if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current) }
+  }, [mensagens, resetInactivityTimer, triggerFollowUp])
+
+  useEffect(() => {
+    if (!aberto) resetInactivityTimer()
+  }, [aberto, resetInactivityTimer])
 
   // ── Lógica de envio ─────────────────────────────────────────────────────────
 
