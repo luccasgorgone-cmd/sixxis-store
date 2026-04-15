@@ -351,6 +351,31 @@ a[style*="display:inline"] {
   }
 }
 
+/* ── Animações de entrada ─────────────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+  opacity: 0;
+}
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+
+/* ── Timer mobile ─────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .timer-block { width: 56px !important; height: 56px !important; }
+  .timer-value { font-size: 24px !important; }
+  .raio-flash  { animation-duration: 2s; }
+}
+
 /* ── Luna Chat — bounce suave da bolha ────────────────────────────────────── */
 @keyframes bounce-gentle {
   0%, 100% { transform: translateY(0px); }

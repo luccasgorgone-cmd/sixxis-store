@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default function RaioIcon({
-  size = 20,
+  size = 26,
   comFundo = false,
   className = '',
   animate = true,
@@ -18,25 +18,25 @@ export default function RaioIcon({
 
   const svgEl = (
     <svg
-      width={size * 1.2}
-      height={size * 1.2}
-      viewBox="0 0 24 24"
+      width={size}
+      height={Math.round(size * 1.45)}
+      viewBox="0 0 14 20"
       fill="none"
       style={mirrorStyle}
     >
       {/* Brilho/sombra atrás */}
       <path
-        d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
+        d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
         fill="#FFD700"
-        opacity="0.2"
-        transform="translate(0.6, 0.6)"
+        opacity="0.22"
+        transform="translate(0.8, 0.8)"
       />
       {/* Raio principal */}
       <path
-        d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
+        d="M8.5 1.5L1.5 11.5H7L6 18.5L13 8.5H7.5L8.5 1.5Z"
         fill="#FFD700"
         stroke="#1a1a00"
-        strokeWidth="1.4"
+        strokeWidth="1.1"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
@@ -45,18 +45,18 @@ export default function RaioIcon({
 
   if (comFundo) {
     return (
-      <div
-        className={`flex items-center justify-center rounded-xl border-2 border-black/30 shadow-lg ${animClass} ${className}`}
+      <span
+        className={`inline-flex items-center justify-center rounded-xl ${animClass} ${className}`}
         style={{
-          width: size * 2.2,
-          height: size * 2.2,
-          backgroundColor: '#3cbfb3',
-          boxShadow: '0 3px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+          width: size + 10,
+          height: size + 14,
+          backgroundColor: 'rgba(255,215,0,0.12)',
+          border: '1px solid rgba(255,215,0,0.25)',
           flexShrink: 0,
         }}
       >
         {svgEl}
-      </div>
+      </span>
     )
   }
 

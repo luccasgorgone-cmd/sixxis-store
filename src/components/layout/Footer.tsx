@@ -185,7 +185,7 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                   style={{ width: '42px', height: '42px', backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}
-                  aria-label="Instagram @sixxisoficial"
+                  aria-label="Instagram Sixxis"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
