@@ -8,6 +8,7 @@ import {
   LogOut, Image as ImageIcon, Tag, Star, Gift,
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, Handshake, ShieldOff,
+  Target, MessageSquare,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -41,6 +42,13 @@ const NAV_GROUPS = [
       { href: '/admin/avaliacoes',           label: 'Avaliações',     icon: Star,      exact: false },
       { href: '/admin/avaliacoes-parceiros', label: 'Aval. Parceiros',icon: Handshake, exact: false },
       { href: '/admin/emails',               label: 'E-mails',        icon: Mail,      exact: false },
+    ],
+  },
+  {
+    label: 'Marketing',
+    items: [
+      { href: '/admin/campanhas',                    label: 'Campanhas', icon: Target,        exact: false },
+      { href: '/admin/configuracoes/whatsapp',       label: 'WhatsApp',  icon: MessageSquare, exact: false },
     ],
   },
   {

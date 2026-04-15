@@ -23,15 +23,16 @@ model Cliente {
   totalPedidos     Int                  @default(0)
   ultimaCompra     DateTime?
   carrinhoAbandon  Json?
-  avaliacoes       Avaliacao[]
-  bloqueios        BloqueioFraude[]
-  carrinho         Carrinho?
-  cashback         CashbackTransacao[]
-  cupomUsos        CupomUso[]
-  enderecos        Endereco[]
-  historicoPontos  HistoricoPontos[]
-  pedidos          Pedido[]
-  pontos           PontosCliente?
+  avaliacoes           Avaliacao[]
+  bloqueios            BloqueioFraude[]
+  carrinho             Carrinho?
+  cashback             CashbackTransacao[]
+  cupomUsos            CupomUso[]
+  enderecos            Endereco[]
+  historicoPontos      HistoricoPontos[]
+  pedidos              Pedido[]
+  pontos               PontosCliente?
+  campanhasDestinatario CampanhaDestinatario[]
 }
 
 
@@ -395,4 +396,72 @@ model BloqueioFraude {
 
   @@index([clienteId])
   @@index([createdAt])
+}
+
+model Campanha {
+  id          String   @id @default(cuid())
+  tipo        String   // 'EMAIL' | 'WHATSAPP'
+  nome        String
+  assunto     String?
+  mensagem    String   @db.Text
+  status      String   @default("RASCUNHO")
+  agendadoPara DateTime?
+  enviadaEm   DateTime?
+  totalDestinatarios Int @default(0)
+  totalEnviados      Int @default(0)
+  totalErros         Int @default(0)
+  taxaAbertura       Float @default(0)
+  filtroSegmento  Json?
+  whatsappNumeroId String?
+  whatsappNumero   WhatsappNumero? @relation(fields: [whatsappNumeroId], references: [id])
+  destinatarios    CampanhaDestinatario[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CampanhaDestinatario {
+  id         String    @id @default(cuid())
+  campanhaId String
+  campanha   Campanha  @relation(fields: [campanhaId], references: [id], onDelete: Cascade)
+  clienteId  String?
+  cliente    Cliente?  @relation(fields: [clienteId], references: [id])
+  nome       String
+  email      String?
+  telefone   String?
+  status     String    @default("PENDENTE")
+  enviadoEm  DateTime?
+  erroMsg    String?
+  createdAt  DateTime  @default(now())
+
+  @@index([campanhaId])
+  @@index([clienteId])
+}
+
+model WhatsappNumero {
+  id          String   @id @default(cuid())
+  nome        String
+  numero      String
+  instanceId  String?
+  apiUrl      String?
+  apiKey      String?
+  ativo       Boolean  @default(true)
+  status      String   @default("DESCONECTADO")
+  qrCode      String?  @db.Text
+  ehPadrao    Boolean  @default(false)
+  totalEnviados Int    @default(0)
+  campanhas   Campanha[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EnvioLog {
+  id         String   @id @default(cuid())
+  campanhaId String?
+  tipo       String
+  destinatario String
+  status     String
+  erroMsg    String?
+  createdAt  DateTime @default(now())
+
+  @@index([campanhaId])
 }
