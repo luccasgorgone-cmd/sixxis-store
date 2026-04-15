@@ -15,167 +15,10 @@ import type { Produto } from '@/types'
 const CATEGORIAS: Record<string, string> = {
   climatizadores: 'Climatizadores',
   aspiradores: 'Aspiradores',
-  spinning: 'Spinning',
+  spinning: 'Spinning & Fitness',
 }
 
 const LIMIT = 12
-
-// ── Grupos de filtro por categoria ────────────────────────────────────────────
-
-const GRUPOS_GERAL: GrupoFiltro[] = [
-  {
-    id: 'categoria', label: 'Categoria', multiple: false,
-    opcoes: [
-      { label: 'Climatizadores', valor: 'climatizadores' },
-      { label: 'Aspiradores',    valor: 'aspiradores'    },
-      { label: 'Spinning',       valor: 'spinning'       },
-    ],
-  },
-  {
-    id: 'preco', label: 'Preço', multiple: false,
-    opcoes: [
-      { label: 'Até R$ 500',          valor: 'ate500'       },
-      { label: 'R$ 500 a R$ 1.500',   valor: '500-1500'     },
-      { label: 'Acima de R$ 1.500',   valor: 'mais1500'     },
-    ],
-  },
-]
-
-const GRUPOS_CLIMATIZADORES: GrupoFiltro[] = [
-  {
-    id: 'voltagem', label: 'Voltagem', multiple: false,
-    opcoes: [
-      { label: '110V',   valor: '110V'   },
-      { label: '220V',   valor: '220V'   },
-      { label: 'Bivolt', valor: 'bivolt' },
-    ],
-  },
-  {
-    id: 'capacidade', label: 'Capacidade', multiple: false,
-    opcoes: [
-      { label: 'Até 20L',       valor: 'ate20'    },
-      { label: '20 a 40L',      valor: '20-40'    },
-      { label: '40 a 60L',      valor: '40-60'    },
-      { label: 'Acima de 60L',  valor: 'mais60'   },
-    ],
-  },
-  {
-    id: 'cobertura', label: 'Cobertura (m²)', multiple: false,
-    opcoes: [
-      { label: 'Até 15m²',        valor: 'ate15'    },
-      { label: '15 a 25m²',       valor: '15-25'    },
-      { label: '25 a 40m²',       valor: '25-40'    },
-      { label: 'Acima de 40m²',   valor: 'mais40'   },
-    ],
-  },
-  {
-    id: 'vazao', label: 'Vazão de Ar', multiple: false,
-    opcoes: [
-      { label: 'Até 500 m³/h',        valor: 'ate500'    },
-      { label: '500 a 1000 m³/h',     valor: '500-1000'  },
-      { label: 'Acima de 1000 m³/h',  valor: 'mais1000'  },
-    ],
-  },
-  {
-    id: 'velocidades', label: 'Velocidades', multiple: false,
-    opcoes: [
-      { label: '2 velocidades',  valor: '2vel'  },
-      { label: '3 velocidades',  valor: '3vel'  },
-      { label: '4+ velocidades', valor: '4vel'  },
-    ],
-  },
-  {
-    id: 'preco', label: 'Preço', multiple: false,
-    opcoes: [
-      { label: 'Até R$ 800',             valor: 'ate800'    },
-      { label: 'R$ 800 a R$ 1.500',      valor: '800-1500'  },
-      { label: 'R$ 1.500 a R$ 2.500',    valor: '1500-2500' },
-      { label: 'Acima de R$ 2.500',      valor: 'mais2500'  },
-    ],
-  },
-]
-
-const GRUPOS_ASPIRADORES: GrupoFiltro[] = [
-  {
-    id: 'tipo', label: 'Tipo', multiple: false,
-    opcoes: [
-      { label: 'Sem fio',  valor: 'sem-fio'  },
-      { label: 'Com fio',  valor: 'com-fio'  },
-      { label: 'Robô',     valor: 'robo'     },
-      { label: 'Multiuso', valor: 'multiuso' },
-    ],
-  },
-  {
-    id: 'voltagem', label: 'Voltagem', multiple: false,
-    opcoes: [
-      { label: '110V',    valor: '110V'    },
-      { label: '220V',    valor: '220V'    },
-      { label: 'Bivolt',  valor: 'bivolt'  },
-      { label: 'Bateria', valor: 'bateria' },
-    ],
-  },
-  {
-    id: 'potencia', label: 'Potência', multiple: false,
-    opcoes: [
-      { label: 'Até 1000W',       valor: 'ate1000'   },
-      { label: '1000 a 1500W',    valor: '1000-1500' },
-      { label: 'Acima de 1500W',  valor: 'mais1500'  },
-    ],
-  },
-  {
-    id: 'reservatorio', label: 'Reservatório', multiple: false,
-    opcoes: [
-      { label: 'Até 1L',     valor: 'ate1'   },
-      { label: '1L a 2L',    valor: '1-2'    },
-      { label: 'Acima de 2L', valor: 'mais2' },
-    ],
-  },
-  {
-    id: 'preco', label: 'Preço', multiple: false,
-    opcoes: [
-      { label: 'Até R$ 300',          valor: 'ate300'   },
-      { label: 'R$ 300 a R$ 600',     valor: '300-600'  },
-      { label: 'R$ 600 a R$ 1.000',   valor: '600-1000' },
-      { label: 'Acima de R$ 1.000',   valor: 'mais1000' },
-    ],
-  },
-]
-
-const GRUPOS_SPINNING: GrupoFiltro[] = [
-  {
-    id: 'tipo', label: 'Tipo', multiple: false,
-    opcoes: [
-      { label: 'Bike Spinning',    valor: 'spinning'    },
-      { label: 'Bike Ergométrica', valor: 'ergometrica' },
-      { label: 'Elíptico',         valor: 'eliptico'    },
-    ],
-  },
-  {
-    id: 'resistencia', label: 'Resistência', multiple: false,
-    opcoes: [
-      { label: 'Magnética',       valor: 'magnetica'       },
-      { label: 'Por Atrito',      valor: 'atrito'          },
-      { label: 'Eletromagnética', valor: 'eletromagnetica' },
-    ],
-  },
-  {
-    id: 'peso_max', label: 'Peso Suportado', multiple: false,
-    opcoes: [
-      { label: 'Até 100kg',       valor: 'ate100'   },
-      { label: '100 a 120kg',     valor: '100-120'  },
-      { label: 'Acima de 120kg',  valor: 'mais120'  },
-    ],
-  },
-  {
-    id: 'preco', label: 'Preço', multiple: false,
-    opcoes: [
-      { label: 'Até R$ 800',          valor: 'ate800'    },
-      { label: 'R$ 800 a R$ 1.500',   valor: '800-1500'  },
-      { label: 'R$ 1.500 a R$ 2.500', valor: '1500-2500' },
-      { label: 'Acima de R$ 2.500',   valor: 'mais2500'  },
-    ],
-  },
-]
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
@@ -261,12 +104,22 @@ export default function ProdutosClient() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [pagina, setPagina] = useState(1)
+  const [grupos, setGrupos] = useState<GrupoFiltro[]>([])
 
   const categoria = searchParams.get('categoria') || ''
   const ordem     = searchParams.get('ordem')     || ''
   const busca     = searchParams.get('q')         || ''
   const precoMin  = searchParams.get('precoMin')  || ''
   const precoMax  = searchParams.get('precoMax')  || ''
+
+  // Fetch filter groups dynamically from /api/filtros
+  useEffect(() => {
+    const url = `/api/filtros${categoria ? `?categoria=${encodeURIComponent(categoria)}` : ''}`
+    fetch(url)
+      .then(r => r.json())
+      .then(data => setGrupos(Array.isArray(data.grupos) ? data.grupos : []))
+      .catch(() => setGrupos([]))
+  }, [categoria])
 
   useEffect(() => { setPagina(1) }, [categoria, ordem, busca, precoMin, precoMax])
 
@@ -293,11 +146,6 @@ export default function ProdutosClient() {
 
   const categoriaLabel = categoria ? (CATEGORIAS[categoria] ?? categoria) : null
   const titulo = busca ? `Resultados para "${busca}"` : categoriaLabel ?? 'Todos os Produtos'
-
-  const grupos = categoria === 'climatizadores' ? GRUPOS_CLIMATIZADORES
-    : categoria === 'aspiradores' ? GRUPOS_ASPIRADORES
-    : categoria === 'spinning'    ? GRUPOS_SPINNING
-    : GRUPOS_GERAL
 
   const breadcrumbItems = categoriaLabel
     ? [{ label: 'Início', href: '/' }, { label: 'Produtos', href: '/produtos' }, { label: categoriaLabel }]

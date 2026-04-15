@@ -16,6 +16,8 @@ function getNomeCategoria(cat: string | null): string {
   if (!cat) return 'Produtos'
   const map: Record<string, string> = {
     climatizadores: 'Climatizadores',
+    aspiradores: 'Aspiradores',
+    spinning: 'Spinning & Fitness',
     purificadores: 'Purificadores',
     ventiladores: 'Ventiladores',
     umidificadores: 'Umidificadores',
