@@ -5,36 +5,41 @@
 
 const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/micah/svg'
 
+// Parâmetros de qualidade aplicados a todos — garante expressão positiva
+const PARAMS = 'mouth=smile&scale=90'
+
 // ── 16 AVATARES PREDEFINIDOS
+// Todos com mouth=smile para garantir expressão positiva.
+// O avatar da Luna é EXCLUSIVO (LunaAvatar) e NÃO aparece aqui.
 export const AVATARES_PREDEFINIDOS: Array<{
   id: string
   label: string
   url: string
   bgColor: string
 }> = [
-  // ── ROW 1: Tons escuros (Sixxis identity)
-  { id: 'sixxis-explorer', label: 'Explorador', url: `${DICEBEAR_BASE}?seed=SixxisExplorer&backgroundColor=0f2e2b`, bgColor: '#0f2e2b' },
-  { id: 'sixxis-scholar',  label: 'Estudioso',  url: `${DICEBEAR_BASE}?seed=SixxisScholar&backgroundColor=1a4f4a`,  bgColor: '#1a4f4a' },
-  { id: 'sixxis-creative', label: 'Criativo',   url: `${DICEBEAR_BASE}?seed=SixxisCreative&backgroundColor=0d3b44`, bgColor: '#0d3b44' },
-  { id: 'sixxis-pro',      label: 'Profissional',url: `${DICEBEAR_BASE}?seed=SixxisPro&backgroundColor=162032`,     bgColor: '#162032' },
+  // ── ROW 1: Verde Sixxis (identidade da marca)
+  { id: 'sixxis-verde-01', label: 'Viajante',   url: `${DICEBEAR_BASE}?seed=SixxisV01Green&backgroundColor=0f2e2b&${PARAMS}`, bgColor: '#0f2e2b' },
+  { id: 'sixxis-verde-02', label: 'Criativo',   url: `${DICEBEAR_BASE}?seed=SixxisV02Teal&backgroundColor=1a4f4a&${PARAMS}`,  bgColor: '#1a4f4a' },
+  { id: 'sixxis-verde-03', label: 'Moderno',    url: `${DICEBEAR_BASE}?seed=SixxisV03Mid&backgroundColor=0d3b44&${PARAMS}`,   bgColor: '#0d3b44' },
+  { id: 'sixxis-verde-04', label: 'Focado',     url: `${DICEBEAR_BASE}?seed=SixxisV04Pro&backgroundColor=162032&${PARAMS}`,   bgColor: '#162032' },
 
-  // ── ROW 2: Azuis e violetas
-  { id: 'sixxis-dreamer', label: 'Sonhador',   url: `${DICEBEAR_BASE}?seed=SixxisDreamer&backgroundColor=1e1b4b`, bgColor: '#1e1b4b' },
-  { id: 'sixxis-mystic',  label: 'Místico',    url: `${DICEBEAR_BASE}?seed=SixxisMystic&backgroundColor=2d1b69`,  bgColor: '#2d1b69' },
-  { id: 'sixxis-cosmic',  label: 'Cósmico',    url: `${DICEBEAR_BASE}?seed=SixxisCosmic&backgroundColor=0a1628`,  bgColor: '#0a1628' },
-  { id: 'sixxis-nova',    label: 'Nova',        url: `${DICEBEAR_BASE}?seed=SixxisNova&backgroundColor=0f172a`,    bgColor: '#0f172a' },
+  // ── ROW 2: Azul / Índigo (confiança)
+  { id: 'sixxis-azul-01',  label: 'Confiante',  url: `${DICEBEAR_BASE}?seed=SixxisA01Blue&backgroundColor=1e1b4b&${PARAMS}`,  bgColor: '#1e1b4b' },
+  { id: 'sixxis-azul-02',  label: 'Sereno',     url: `${DICEBEAR_BASE}?seed=SixxisA02Calm&backgroundColor=0c4a6e&${PARAMS}`,  bgColor: '#0c4a6e' },
+  { id: 'sixxis-azul-03',  label: 'Visionário', url: `${DICEBEAR_BASE}?seed=SixxisA03Vis&backgroundColor=0a1628&${PARAMS}`,   bgColor: '#0a1628' },
+  { id: 'sixxis-azul-04',  label: 'Noturno',    url: `${DICEBEAR_BASE}?seed=SixxisA04Night&backgroundColor=0f172a&${PARAMS}`, bgColor: '#0f172a' },
 
-  // ── ROW 3: Quentes e terrosos
-  { id: 'sixxis-solar',  label: 'Solar',   url: `${DICEBEAR_BASE}?seed=SixxisSolar&backgroundColor=78350f`,  bgColor: '#78350f' },
-  { id: 'sixxis-ember',  label: 'Brasa',   url: `${DICEBEAR_BASE}?seed=SixxisEmber&backgroundColor=7c2d12`,  bgColor: '#7c2d12' },
-  { id: 'sixxis-earth',  label: 'Terra',   url: `${DICEBEAR_BASE}?seed=SixxisEarth&backgroundColor=44403c`,  bgColor: '#44403c' },
-  { id: 'sixxis-amber',  label: 'Âmbar',   url: `${DICEBEAR_BASE}?seed=SixxisAmber&backgroundColor=92400e`,  bgColor: '#92400e' },
+  // ── ROW 3: Quente (energia / entusiasmo)
+  { id: 'sixxis-quente-01', label: 'Solar',     url: `${DICEBEAR_BASE}?seed=SixxisQ01Solar&backgroundColor=78350f&${PARAMS}`, bgColor: '#78350f' },
+  { id: 'sixxis-quente-02', label: 'Vibrante',  url: `${DICEBEAR_BASE}?seed=SixxisQ02Warm&backgroundColor=7c2d12&${PARAMS}`,  bgColor: '#7c2d12' },
+  { id: 'sixxis-quente-03', label: 'Caloroso',  url: `${DICEBEAR_BASE}?seed=SixxisQ03Amber&backgroundColor=92400e&${PARAMS}`, bgColor: '#92400e' },
+  { id: 'sixxis-quente-04', label: 'Intenso',   url: `${DICEBEAR_BASE}?seed=SixxisQ04Fire&backgroundColor=44403c&${PARAMS}`,  bgColor: '#44403c' },
 
-  // ── ROW 4: Escuros premium
-  { id: 'sixxis-onyx',   label: 'Ônix',        url: `${DICEBEAR_BASE}?seed=SixxisOnyx&backgroundColor=1c1917`,   bgColor: '#1c1917' },
-  { id: 'sixxis-storm',  label: 'Tempestade',   url: `${DICEBEAR_BASE}?seed=SixxisStorm&backgroundColor=1e293b`,  bgColor: '#1e293b' },
-  { id: 'sixxis-forest', label: 'Floresta',     url: `${DICEBEAR_BASE}?seed=SixxisForest&backgroundColor=14532d`, bgColor: '#14532d' },
-  { id: 'sixxis-ocean',  label: 'Oceano',       url: `${DICEBEAR_BASE}?seed=SixxisOcean&backgroundColor=0c4a6e`,  bgColor: '#0c4a6e' },
+  // ── ROW 4: Premium escuro (sofisticação)
+  { id: 'sixxis-prem-01',   label: 'Elegante',   url: `${DICEBEAR_BASE}?seed=SixxisP01Onyx&backgroundColor=1c1917&${PARAMS}`,  bgColor: '#1c1917' },
+  { id: 'sixxis-prem-02',   label: 'Tempestade', url: `${DICEBEAR_BASE}?seed=SixxisP02Storm&backgroundColor=1e293b&${PARAMS}`, bgColor: '#1e293b' },
+  { id: 'sixxis-prem-03',   label: 'Floresta',   url: `${DICEBEAR_BASE}?seed=SixxisP03Forest&backgroundColor=14532d&${PARAMS}`, bgColor: '#14532d' },
+  { id: 'sixxis-prem-04',   label: 'Oceano',     url: `${DICEBEAR_BASE}?seed=SixxisP04Ocean&backgroundColor=083344&${PARAMS}`,  bgColor: '#083344' },
 ]
 
 // Avatar padrão (inicial do nome)

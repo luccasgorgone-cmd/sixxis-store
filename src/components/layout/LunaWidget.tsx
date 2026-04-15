@@ -5,6 +5,7 @@ import {
   X, Send, ChevronDown, Loader2, ExternalLink, ShoppingCart, ShoppingBag, Eye,
 } from 'lucide-react'
 import Link from 'next/link'
+import { LunaAvatar, LunaAvatarMini } from '@/components/ui/LunaAvatar'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -190,29 +191,6 @@ function CTACard({ cta, corPrimaria }: { cta: CTAData; corPrimaria: string }) {
         </Link>
       </div>
     </div>
-  )
-}
-
-// ── Avatar ────────────────────────────────────────────────────────────────────
-
-function LunaAvatar({ small = false }: { small?: boolean }) {
-  const s = small ? 28 : 40
-  return (
-    <svg width={s} height={s} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="50" fill="#3cbfb3" opacity="0.15" />
-      <ellipse cx="50" cy="24" rx="21" ry="14" fill="#2c1810" />
-      <ellipse cx="31" cy="37" rx="7" ry="13" fill="#2c1810" />
-      <ellipse cx="69" cy="37" rx="7" ry="13" fill="#2c1810" />
-      <circle cx="50" cy="40" r="20" fill="#FDDCB5" />
-      <circle cx="43" cy="38" r="3.2" fill="#1a1a2e" />
-      <circle cx="57" cy="38" r="3.2" fill="#1a1a2e" />
-      <circle cx="44.2" cy="37" r="1.1" fill="white" />
-      <circle cx="58.2" cy="37" r="1.1" fill="white" />
-      <ellipse cx="50" cy="44" rx="2" ry="1.5" fill="#e8b89a" />
-      <path d="M44 49 Q50 55 56 49" stroke="#c8745a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      <path d="M22 100 Q22 73 50 69 Q78 73 78 100 Z" fill="#0f2e2b" />
-      <circle cx="50" cy="77" r="3" fill="#3cbfb3" opacity="0.9" />
-    </svg>
   )
 }
 
@@ -453,10 +431,8 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
             onClick={() => setMinimizado(m => !m)}
           >
             <div className="relative shrink-0">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border-2 border-white/30">
-                <LunaAvatar />
-              </div>
-              <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
+              <LunaAvatar size={44} animated={false} />
+              <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#0f2e2b] ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white font-bold text-sm leading-none">{config.nome}</p>
@@ -493,15 +469,15 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
                   return (
                     <div key={msg.id} className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                       {!isUser && (
-                        <div
-                          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 overflow-hidden"
-                          style={{ background: isEnc ? '#e5e7eb' : gradHeader }}
-                        >
-                          {isEnc
-                            ? <span className="text-xs">👋</span>
-                            : <LunaAvatar small />
-                          }
-                        </div>
+                        isEnc ? (
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gray-200">
+                            <span className="text-xs">👋</span>
+                          </div>
+                        ) : (
+                          <div className="shrink-0 mt-0.5">
+                            <LunaAvatarMini size={28} />
+                          </div>
+                        )
                       )}
                       <div className={`max-w-[78%] ${isUser ? '' : 'flex flex-col'}`}>
                         <div
@@ -545,13 +521,14 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
 
                 {enviando && (
                   <div className="flex gap-2.5 items-end">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ background: gradHeader }}>
-                      <LunaAvatar small />
+                    <div className="shrink-0">
+                      <LunaAvatarMini size={28} />
                     </div>
                     <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
-                      <div className="flex gap-1">
+                      <div className="flex gap-1.5 items-center">
                         {[0, 150, 300].map(d => (
-                          <div key={d} className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
+                          <span key={d} className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: corPrimaria, animation: `bounce-dots 1.2s ease-in-out ${d}ms infinite` }} />
                         ))}
                       </div>
                     </div>
@@ -649,9 +626,20 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
       {!aberto && mostrarBolha && (
         <div className="relative animate-bounce-gentle">
           <div
-            className="bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3 max-w-[240px]"
-            style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}
+            className="bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3.5 max-w-[240px]"
+            style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
           >
+            {/* Header com avatar mini + status */}
+            <div className="flex items-center gap-2.5 mb-2 pb-2 border-b border-gray-100">
+              <LunaAvatarMini size={28} />
+              <div>
+                <p className="text-xs font-black text-gray-900 leading-none">{config.nome}</p>
+                <p className="text-[9px] text-emerald-500 font-semibold flex items-center gap-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
+                  Online agora
+                </p>
+              </div>
+            </div>
             <p className="text-sm text-gray-700 font-medium leading-snug whitespace-pre-line">
               {config.saudacao}
             </p>
@@ -683,14 +671,19 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
           )}
           <button
             onClick={() => { setAberto(true); setMostrarBolha(false); setNaoLidas(0) }}
-            className="relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-all duration-200 active:scale-95"
-            style={{ background: gradHeader }}
+            className="relative w-16 h-16 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none overflow-hidden"
+            style={{
+              background: 'linear-gradient(145deg, #0f2e2b, #1a4f4a)',
+              boxShadow: '0 8px 32px rgba(60,191,179,0.35), 0 4px 16px rgba(0,0,0,0.4)',
+            }}
             aria-label={`Abrir chat com ${config.nome}`}
           >
-            <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
-              <LunaAvatar />
-            </div>
-            <div className={`absolute top-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
+            <LunaAvatar size={64} animated={false} />
+            <span className={`absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`}>
+              {!atendimentoEncerrado && (
+                <span className="w-2 h-2 rounded-full bg-white animate-ping opacity-75" />
+              )}
+            </span>
             {naoLidas > 0 && (
               <span className="absolute -top-1 -left-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
                 {naoLidas > 9 ? '9+' : naoLidas}
