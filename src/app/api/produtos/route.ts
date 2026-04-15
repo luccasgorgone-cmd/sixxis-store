@@ -47,7 +47,14 @@ function matchesSpecFilters(
       case 'capacidade': {
         const capStr = getEspecValor(specs, 'tanque') || getEspecValor(specs, 'capacidade') || getEspecValor(specs, 'reservat')
         const cap = extractNumber(capStr)
-        if (cap === 0) break // skip if no spec found
+        if (cap === 0) break
+        // New exact-value format: '45', '60', '70', '100', '120', '175', '200' — ±5L tolerance
+        if (/^\d+$/.test(valor)) {
+          const alvo = parseInt(valor)
+          if (Math.abs(cap - alvo) > 5) return false
+          break
+        }
+        // Legacy range format
         if (valor === 'ate20'  && !(cap <= 20)) return false
         if (valor === '20-40'  && !(cap > 20 && cap <= 40)) return false
         if (valor === '40-60'  && !(cap > 40 && cap <= 60)) return false
@@ -60,10 +67,19 @@ function matchesSpecFilters(
         const cobStr = getEspecValor(specs, 'cobertura') || getEspecValor(specs, 'área') || getEspecValor(specs, 'ambiente')
         const cob = extractNumber(cobStr)
         if (cob === 0) break
-        if (valor === 'ate15'   && !(cob <= 15)) return false
-        if (valor === '15-25'   && !(cob > 15 && cob <= 25)) return false
-        if (valor === '25-40'   && !(cob > 25 && cob <= 40)) return false
-        if (valor === 'mais40'  && !(cob > 40)) return false
+        // New format (predefined for climatizadores)
+        if (valor === 'ate50'   && cob > 55)                      return false
+        if (valor === 'ate60'   && cob > 65)                      return false
+        if (valor === 'ate70'   && cob > 80)                      return false
+        if (valor === 'ate100'  && (cob < 80  || cob > 125))      return false
+        if (valor === 'ate120'  && (cob < 100 || cob > 150))      return false
+        if (valor === 'ate200'  && (cob < 140 || cob > 220))      return false
+        if (valor === 'mais200' && cob <= 200)                    return false
+        // Legacy format
+        if (valor === 'ate15'  && !(cob <= 15))                   return false
+        if (valor === '15-25'  && !(cob > 15 && cob <= 25))       return false
+        if (valor === '25-40'  && !(cob > 25 && cob <= 40))       return false
+        if (valor === 'mais40' && !(cob > 40))                    return false
         break
       }
 
@@ -72,9 +88,16 @@ function matchesSpecFilters(
         const vazStr = getEspecValor(specs, 'vazão') || getEspecValor(specs, 'vazao')
         const vaz = extractNumber(vazStr)
         if (vaz === 0) break
-        if (valor === 'ate500'   && !(vaz <= 500)) return false
+        // New exact-value format with ±500 m³/h tolerance
+        if (/^\d+$/.test(valor)) {
+          const alvo = parseInt(valor)
+          if (Math.abs(vaz - alvo) > 500) return false
+          break
+        }
+        // Legacy format
+        if (valor === 'ate500'   && !(vaz <= 500))           return false
         if (valor === '500-1000' && !(vaz > 500 && vaz <= 1000)) return false
-        if (valor === 'mais1000' && !(vaz > 1000)) return false
+        if (valor === 'mais1000' && !(vaz > 1000))           return false
         break
       }
 
@@ -83,6 +106,13 @@ function matchesSpecFilters(
         const velStr = getEspecValor(specs, 'velocidade')
         const vel = extractNumber(velStr)
         if (vel === 0) break
+        // New exact-number format: '3', '9'
+        if (/^\d+$/.test(valor)) {
+          const alvo = parseInt(valor)
+          if (vel !== alvo) return false
+          break
+        }
+        // Legacy format
         if (valor === '2vel' && !(vel === 2)) return false
         if (valor === '3vel' && !(vel === 3)) return false
         if (valor === '4vel' && !(vel >= 4)) return false
@@ -180,6 +210,10 @@ export async function GET(request: NextRequest) {
       'mais1000':  { min: 1000 },
       'ate1000':   { max: 1000 },
       '1000-1500': { min: 1000, max: 1500 },
+      'ate1500':   { max: 1500 },
+      '1500-3000': { min: 1500, max: 3000 },
+      '3000-6000': { min: 3000, max: 6000 },
+      'mais6000':  { min: 6000 },
     }
     const range = precoMap[precoFiltro]
     if (range) {

@@ -166,55 +166,76 @@ function hasPesoMax(produtos: ProdutoRow[], valor: string): boolean {
 
 // ── Categoria-specific builders ───────────────────────────────────────────────
 
-function buildClimatizadores(produtos: ProdutoRow[]): GrupoFiltro[] {
-  const grupos: GrupoFiltro[] = []
-
-  const optsVoltagem: GrupoFiltro['opcoes'] = [
-    { label: '110V',   valor: '110V'   },
-    { label: '220V',   valor: '220V'   },
-    { label: 'Bivolt', valor: 'bivolt' },
-  ].filter(o => hasVoltagem(produtos, o.valor))
-  if (optsVoltagem.length) grupos.push({ id: 'voltagem', label: 'Voltagem', opcoes: optsVoltagem })
-
-  const optsCapacidade: GrupoFiltro['opcoes'] = [
-    { label: 'Até 20L',       valor: 'ate20'    },
-    { label: '20 a 40L',      valor: '20-40'    },
-    { label: '40 a 60L',      valor: '40-60'    },
-    { label: 'Acima de 60L',  valor: 'mais60'   },
-  ].filter(o => hasCapacidade(produtos, o.valor))
-  if (optsCapacidade.length) grupos.push({ id: 'capacidade', label: 'Capacidade', opcoes: optsCapacidade })
-
-  const optsCobertura: GrupoFiltro['opcoes'] = [
-    { label: 'Até 15m²',      valor: 'ate15'    },
-    { label: '15 a 25m²',     valor: '15-25'    },
-    { label: '25 a 40m²',     valor: '25-40'    },
-    { label: 'Acima de 40m²', valor: 'mais40'   },
-  ].filter(o => hasCobertura(produtos, o.valor))
-  if (optsCobertura.length) grupos.push({ id: 'cobertura', label: 'Cobertura (m²)', opcoes: optsCobertura })
-
-  const optsVazao: GrupoFiltro['opcoes'] = [
-    { label: 'Até 500 m³/h',       valor: 'ate500'   },
-    { label: '500 a 1000 m³/h',    valor: '500-1000' },
-    { label: 'Acima de 1000 m³/h', valor: 'mais1000' },
-  ].filter(o => hasVazao(produtos, o.valor))
-  if (optsVazao.length) grupos.push({ id: 'vazao', label: 'Vazão de Ar', opcoes: optsVazao })
-
-  const optsVel: GrupoFiltro['opcoes'] = [
-    { label: '2 velocidades',  valor: '2vel' },
-    { label: '3 velocidades',  valor: '3vel' },
-    { label: '4+ velocidades', valor: '4vel' },
-  ].filter(o => hasVelocidades(produtos, o.valor))
-  if (optsVel.length) grupos.push({ id: 'velocidades', label: 'Velocidades', opcoes: optsVel })
-
-  const optsPreco: GrupoFiltro['opcoes'] = [
-    { label: 'Até R$ 800',           valor: 'ate800'    },
-    { label: 'R$ 800 a R$ 1.500',    valor: '800-1500'  },
-    { label: 'R$ 1.500 a R$ 2.500',  valor: '1500-2500' },
-    { label: 'Acima de R$ 2.500',    valor: 'mais2500'  },
-  ].filter(o => hasPreco(produtos, o.valor))
-  if (optsPreco.length) grupos.push({ id: 'preco', label: 'Preço', opcoes: optsPreco })
-
-  return grupos
+function buildClimatizadores(_produtos: ProdutoRow[]): GrupoFiltro[] {
+  // Opções fixas e predefinidas para climatizadores Sixxis
+  return [
+    {
+      id: 'voltagem',
+      label: 'Voltagem',
+      opcoes: [
+        { label: '110V',   valor: '110v'   },
+        { label: '220V',   valor: '220v'   },
+        { label: 'Bivolt', valor: 'bivolt' },
+      ],
+    },
+    {
+      id: 'capacidade',
+      label: 'Capacidade (Tanque)',
+      opcoes: [
+        { label: '45 Litros',  valor: '45'  },
+        { label: '60 Litros',  valor: '60'  },
+        { label: '70 Litros',  valor: '70'  },
+        { label: '100 Litros', valor: '100' },
+        { label: '120 Litros', valor: '120' },
+        { label: '175 Litros', valor: '175' },
+        { label: '200 Litros', valor: '200' },
+      ],
+    },
+    {
+      id: 'cobertura',
+      label: 'Cobertura (m²)',
+      opcoes: [
+        { label: 'Até 50 m²',       valor: 'ate50'   },
+        { label: 'Até 60 m²',       valor: 'ate60'   },
+        { label: 'Até 70 m²',       valor: 'ate70'   },
+        { label: 'Até 100 m²',      valor: 'ate100'  },
+        { label: 'Até 120 m²',      valor: 'ate120'  },
+        { label: 'Até 200 m²',      valor: 'ate200'  },
+        { label: 'Acima de 200 m²', valor: 'mais200' },
+      ],
+    },
+    {
+      id: 'velocidades',
+      label: 'Velocidades',
+      opcoes: [
+        { label: '3 velocidades', valor: '3' },
+        { label: '9 velocidades', valor: '9' },
+      ],
+    },
+    {
+      id: 'vazao',
+      label: 'Vazão de Ar',
+      opcoes: [
+        { label: '5.500 m³/h',  valor: '5500'  },
+        { label: '6.000 m³/h',  valor: '6000'  },
+        { label: '8.000 m³/h',  valor: '8000'  },
+        { label: '12.000 m³/h', valor: '12000' },
+        { label: '14.000 m³/h', valor: '14000' },
+        { label: '20.000 m³/h', valor: '20000' },
+        { label: '25.000 m³/h', valor: '25000' },
+      ],
+    },
+    {
+      id: 'preco',
+      label: 'Faixa de Preço',
+      opcoes: [
+        { label: 'Até R$ 1.500',         valor: 'ate1500'   },
+        { label: 'R$ 1.500 a R$ 3.000',  valor: '1500-3000' },
+        { label: 'R$ 3.000 a R$ 6.000',  valor: '3000-6000' },
+        { label: 'Acima de R$ 6.000',    valor: 'mais6000'  },
+      ],
+    },
+  ]
 }
 
 function buildAspiradores(produtos: ProdutoRow[]): GrupoFiltro[] {

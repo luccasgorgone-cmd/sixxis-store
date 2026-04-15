@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ShieldCheck, Award, Headphones } from 'lucide-react'
+import { ShieldCheck, Award, Headphones, Zap, Wind, Droplets } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import type { GaleriaItemCB } from '@/components/produto/GaleriaCB'
@@ -8,6 +8,8 @@ import ProdutoGaleriaInfo from '@/components/produto/ProdutoGaleriaInfo'
 import DescricaoRica from '@/components/produto/DescricaoRica'
 import AbasProduto from '@/components/produto/AbasProduto'
 import ProdutosSimilares from '@/components/produto/ProdutosSimilares'
+import RevealInit from '@/components/produto/RevealInit'
+import ContadorAnimado from '@/components/ui/ContadorAnimado'
 
 export const dynamic = 'force-dynamic'
 
@@ -123,6 +125,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
   return (
     <div className="min-h-screen bg-white">
+      <RevealInit />
       <Breadcrumb items={[
         { label: 'Início', href: '/' },
         { label: categoriaLabel, href: `/produtos?categoria=${produto.categoria}` },
@@ -166,24 +169,32 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
         {/* Stats + Por que Sixxis */}
         <section className="mt-16">
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-4 mb-10">
-            {[
-              { val: '+1M',      label: 'Produtos Vendidos' },
-              { val: '12 meses', label: 'Garantia Sixxis'   },
-              { val: '100%',     label: 'Originais'          },
-            ].map(({ val, label }) => (
-              <div key={label} className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-                <p className="text-2xl font-black text-[#1a4f4a]">{val}</p>
-                <p className="text-xs text-gray-500 font-medium mt-0.5">{label}</p>
-              </div>
-            ))}
+          {/* Stats row com ContadorAnimado */}
+          <div className="grid grid-cols-3 gap-4 mb-10 reveal">
+            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-2xl font-black text-[#1a4f4a]">
+                +<ContadorAnimado alvo={1000000} sufixo="" />
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Produtos Vendidos</p>
+            </div>
+            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-2xl font-black text-[#1a4f4a]">
+                <ContadorAnimado alvo={12} sufixo=" meses" />
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Garantia Sixxis</p>
+            </div>
+            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-2xl font-black text-[#1a4f4a]">
+                <ContadorAnimado alvo={100} sufixo="%" />
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Originais</p>
+            </div>
           </div>
 
           {/* Por que Sixxis */}
-          <h2 className="text-xl font-extrabold text-gray-900 mb-1">Por que comprar na Sixxis?</h2>
-          <p className="text-sm text-gray-500 mb-5">Qualidade e inovação com a confiança que você merece.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <h2 className="text-xl font-extrabold text-gray-900 mb-1 reveal reveal-delay-1">Por que comprar na Sixxis?</h2>
+          <p className="text-sm text-gray-500 mb-5 reveal reveal-delay-1">Qualidade e inovação com a confiança que você merece.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
               {
                 icon: ShieldCheck,
@@ -191,7 +202,45 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
                 desc: '12 meses de garantia em todos os produtos, com suporte ativo da Sixxis.',
                 color: 'text-[#3cbfb3]',
                 bg: 'bg-[#e8f8f7]',
+                delay: '',
               },
+              {
+                icon: Zap,
+                title: 'Até 80% de Economia',
+                desc: 'Consome até 10× menos que um ar-condicionado. Sua conta de luz agradece.',
+                color: 'text-amber-500',
+                bg: 'bg-amber-50',
+                delay: 'reveal-delay-1',
+              },
+              {
+                icon: Wind,
+                title: 'Sem Instalação',
+                desc: 'Liga na tomada e pronto. Sem obra, sem encanamento, sem dor de cabeça.',
+                color: 'text-blue-500',
+                bg: 'bg-blue-50',
+                delay: 'reveal-delay-2',
+              },
+              {
+                icon: Droplets,
+                title: 'Umidifica o Ar',
+                desc: 'Adiciona umidade ao ar — mais saudável para a pele e para a respiração.',
+                color: 'text-purple-500',
+                bg: 'bg-purple-50',
+                delay: 'reveal-delay-3',
+              },
+            ].map(({ icon: Icon, title, desc, color, bg, delay }) => (
+              <div key={title} className={`reveal ${delay} bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all`}>
+                <div className={`w-11 h-11 ${bg} rounded-xl flex items-center justify-center mb-3`}>
+                  <Icon size={20} className={color} />
+                </div>
+                <p className="font-extrabold text-gray-900 text-sm mb-1">{title}</p>
+                <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          {/* Por que Sixxis — 3 cards originais */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {[
               {
                 icon: Award,
                 title: '100% Original',
@@ -206,8 +255,15 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
                 color: 'text-blue-500',
                 bg: 'bg-blue-50',
               },
+              {
+                icon: ShieldCheck,
+                title: 'Troca em 7 Dias',
+                desc: 'Não ficou satisfeito? Troca ou devolução sem burocracia em até 7 dias.',
+                color: 'text-[#3cbfb3]',
+                bg: 'bg-[#e8f8f7]',
+              },
             ].map(({ icon: Icon, title, desc, color, bg }) => (
-              <div key={title} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <div key={title} className="reveal bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className={`w-11 h-11 ${bg} rounded-xl flex items-center justify-center mb-3`}>
                   <Icon size={20} className={color} />
                 </div>
@@ -217,7 +273,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             ))}
           </div>
           {/* WhatsApp CTA */}
-          <div className="rounded-2xl bg-gradient-to-r from-[#0f2e2b] to-[#1a4f4a] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="reveal rounded-2xl bg-gradient-to-r from-[#0f2e2b] to-[#1a4f4a] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <p className="text-white font-extrabold text-sm mb-0.5">Ficou com dúvida? Fale com um especialista</p>
               <p className="text-white/60 text-xs">Atendimento rápido pelo WhatsApp</p>
