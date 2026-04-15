@@ -747,3 +747,28 @@ main {
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+
+/* ── Animações do Arco de Fidelidade ──────────────────────────────────────── */
+@keyframes arco-pulse-ouro {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
+@keyframes arco-pulse-diamante {
+  0%, 100% { filter: drop-shadow(0 0 4px #3b82f6); }
+  50%       { filter: drop-shadow(0 0 10px #93c5fd); }
+}
+@keyframes arco-glow-black {
+  0%, 100% { filter: drop-shadow(0 0 6px #ffd700); }
+  50%       { filter: drop-shadow(0 0 14px #fffde7); }
+}
+
+/* ── Avatar grid de seleção ──────────────────────────────────────────────── */
+.avatar-grid-item {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.avatar-grid-item:hover {
+  transform: translateY(-2px) scale(1.06);
+}
+.avatar-grid-item.active {
+  transform: scale(1.08);
+}

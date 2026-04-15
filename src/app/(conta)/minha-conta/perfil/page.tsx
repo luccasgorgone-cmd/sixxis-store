@@ -1,36 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import LayoutConta from '@/components/conta/LayoutConta'
-import { User, Palette, Bell, Save, Loader2, Check } from 'lucide-react'
+import { AvatarComArco } from '@/components/ui/AvatarComArco'
+import {
+  AVATARES_PREDEFINIDOS, TODOS_AVATARES, NIVEIS_CONFIG,
+  calcularNivel,
+} from '@/lib/avatares'
+import { User, Palette, Bell, Save, Loader2 } from 'lucide-react'
 
 type Tab = 'dados' | 'avatar' | 'notificacoes'
 
-const AVATARS_PREDEFINIDOS = [
-  { id: 'inicial', label: 'Inicial' },
-  { id: '😊', label: 'Feliz' },
-  { id: '🚀', label: 'Foguete' },
-  { id: '⚡', label: 'Raio' },
-  { id: '🌟', label: 'Estrela' },
-  { id: '🔥', label: 'Fogo' },
-  { id: '💎', label: 'Diamante' },
-  { id: '🌊', label: 'Onda' },
-  { id: '🎯', label: 'Alvo' },
-  { id: '🦁', label: 'Leão' },
-  { id: '🐉', label: 'Dragão' },
-  { id: '🎮', label: 'Jogo' },
-]
-
-const GRADIENTES_AVATAR = [
-  { id: 'tiffany', label: 'Tiffany', gradiente: 'linear-gradient(145deg, #0f2e2b, #3cbfb3)', cor: '#3cbfb3' },
-  { id: 'blue',    label: 'Azul',    gradiente: 'linear-gradient(145deg, #1e3a5f, #3b82f6)', cor: '#3b82f6' },
-  { id: 'purple',  label: 'Roxo',    gradiente: 'linear-gradient(145deg, #3b1f6b, #8b5cf6)', cor: '#8b5cf6' },
-  { id: 'rose',    label: 'Rosa',    gradiente: 'linear-gradient(145deg, #6b1f3a, #f43f5e)', cor: '#f43f5e' },
-  { id: 'orange',  label: 'Laranja', gradiente: 'linear-gradient(145deg, #6b3010, #f97316)', cor: '#f97316' },
-  { id: 'dark',    label: 'Dark',    gradiente: 'linear-gradient(145deg, #111827, #374151)', cor: '#374151' },
-]
-
 export default function PerfilPage() {
+  const { data: session } = useSession()
   const [abaAtiva, setAbaAtiva] = useState<Tab>('dados')
   const [loading, setLoading]   = useState(true)
   const [saving, setSaving]     = useState(false)
@@ -38,32 +21,38 @@ export default function PerfilPage() {
   const [msgErr, setMsgErr]     = useState(false)
 
   // campos
-  const [nome, setNome]               = useState('')
-  const [email, setEmail]             = useState('')
-  const [telefone, setTelefone]       = useState('')
-  const [dataNasc, setDataNasc]       = useState('')
-  const [genero, setGenero]           = useState('')
-  const [avatarEmoji, setAvatarEmoji] = useState('inicial')
-  const [gradiente, setGradiente]     = useState('tiffany')
-  const [notifEmail, setNotifEmail]   = useState(true)
-  const [notifWpp, setNotifWpp]       = useState(false)
+  const [nome, setNome]             = useState('')
+  const [email, setEmail]           = useState('')
+  const [telefone, setTelefone]     = useState('')
+  const [dataNasc, setDataNasc]     = useState('')
+  const [genero, setGenero]         = useState('')
+  const [avatarId, setAvatarId]     = useState('inicial')
+  const [notifEmail, setNotifEmail] = useState(true)
+  const [notifWpp, setNotifWpp]     = useState(false)
+  const [nivelAtual, setNivelAtual] = useState('Bronze')
+  const [totalGasto, setTotalGasto] = useState(0)
 
   useEffect(() => {
-    fetch('/api/conta/perfil')
-      .then(r => r.json())
-      .then(d => {
-        const c = d.cliente ?? d
-        setNome(c.nome || '')
-        setEmail(c.email || '')
-        setTelefone(c.telefone || '')
-        setDataNasc(c.dataNascimento ? c.dataNascimento.slice(0, 10) : '')
-        setGenero(c.genero || '')
-        setAvatarEmoji(c.avatar || 'inicial')
-        setGradiente(c.avatarGradiente || 'tiffany')
-        setNotifEmail(c.notifEmail ?? true)
-        setNotifWpp(c.notifWhatsapp ?? false)
-      })
-      .finally(() => setLoading(false))
+    Promise.all([
+      fetch('/api/conta/perfil').then(r => r.json()),
+      fetch('/api/cashback').then(r => r.json()).catch(() => null),
+    ]).then(([perfil, cashback]) => {
+      const c = perfil.cliente ?? perfil
+      setNome(c.nome || '')
+      setEmail(c.email || '')
+      setTelefone(c.telefone || '')
+      setDataNasc(c.dataNascimento ? c.dataNascimento.slice(0, 10) : '')
+      setGenero(c.genero || '')
+      setAvatarId(c.avatar || 'inicial')
+      setNotifEmail(c.notifEmail ?? true)
+      setNotifWpp(c.notifWhatsapp ?? false)
+      if (cashback?.totalGasto) {
+        setTotalGasto(cashback.totalGasto)
+        setNivelAtual(calcularNivel(cashback.totalGasto))
+      } else if (cashback?.nivel?.atual) {
+        setNivelAtual(cashback.nivel.atual)
+      }
+    }).finally(() => setLoading(false))
   }, [])
 
   async function salvar() {
@@ -75,8 +64,8 @@ export default function PerfilPage() {
       payload.dataNascimento = dataNasc || null
       payload.genero = genero || null
     } else if (abaAtiva === 'avatar') {
-      payload.avatar = avatarEmoji
-      payload.avatarGradiente = gradiente
+      payload.avatar = avatarId
+      // Remove gradiente legacy — não precisa mais
     } else {
       payload.notifEmail = notifEmail
       payload.notifWhatsapp = notifWpp
@@ -91,11 +80,6 @@ export default function PerfilPage() {
     setMsg(res.ok ? 'Salvo com sucesso!' : 'Erro ao salvar.')
     if (res.ok) setTimeout(() => setMsg(''), 3000)
   }
-
-  const gradConf = GRADIENTES_AVATAR.find(g => g.id === gradiente) ?? GRADIENTES_AVATAR[0]
-  const avatarDisplay = avatarEmoji === 'inicial'
-    ? (nome?.[0]?.toUpperCase() ?? '?')
-    : avatarEmoji
 
   const ABAS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'dados',        label: 'Dados pessoais', icon: <User size={15} /> },
@@ -115,7 +99,7 @@ export default function PerfilPage() {
     <LayoutConta>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-        {/* Header com preview ao vivo */}
+        {/* Header */}
         <div
           className="px-6 pt-6 pb-8 relative overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #0b2220 0%, #0f2e2b 50%, #1a4f4a 100%)' }}
@@ -123,12 +107,15 @@ export default function PerfilPage() {
           <div className="absolute inset-0 opacity-[0.04]"
             style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
           <div className="relative flex items-center gap-4">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl text-white shadow-xl ring-4 ring-white/20"
-              style={{ background: gradConf.gradiente, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
-            >
-              {avatarDisplay}
-            </div>
+            <AvatarComArco
+              nome={nome || session?.user?.name || '?'}
+              avatarId={avatarId}
+              nivel={nivelAtual}
+              totalGasto={totalGasto}
+              size={56}
+              mostrarBadge={true}
+              mostrarTooltip={false}
+            />
             <div>
               <p className="text-white font-black text-lg leading-tight">{nome || 'Seu nome'}</p>
               <p className="text-white/50 text-xs mt-0.5">{email}</p>
@@ -162,7 +149,7 @@ export default function PerfilPage() {
           ))}
         </div>
 
-        {/* Conteúdo da aba */}
+        {/* Conteúdo */}
         <div className="px-5 py-5 space-y-4">
 
           {/* ── Dados pessoais ── */}
@@ -217,60 +204,127 @@ export default function PerfilPage() {
           {/* ── Avatar ── */}
           {abaAtiva === 'avatar' && (
             <>
-              {/* Preview central */}
-              <div className="flex justify-center py-4">
-                <div
-                  className="w-20 h-20 rounded-2xl flex items-center justify-center font-black text-3xl text-white shadow-xl ring-4 ring-white"
-                  style={{ background: gradConf.gradiente, boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}
-                >
-                  {avatarDisplay}
+              {/* Preview grande com arco real */}
+              <div className="flex items-center gap-5 p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                <AvatarComArco
+                  nome={nome || session?.user?.name || '?'}
+                  avatarId={avatarId}
+                  nivel={nivelAtual}
+                  totalGasto={totalGasto}
+                  size={72}
+                  mostrarBadge={true}
+                  mostrarTooltip={false}
+                />
+                <div>
+                  <p className="font-black text-gray-900">{nome || session?.user?.name}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{email}</p>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: NIVEIS_CONFIG[nivelAtual]?.cor }} />
+                    <p className="text-xs font-bold" style={{ color: NIVEIS_CONFIG[nivelAtual]?.cor }}>
+                      Nível {nivelAtual}
+                    </p>
+                    <span className="text-gray-300">·</span>
+                    <p className="text-xs text-gray-400">
+                      {TODOS_AVATARES.find(a => a.id === avatarId)?.label || 'Inicial do Nome'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
+              {/* Grid de seleção */}
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Escolha um ícone</p>
-                <div className="grid grid-cols-6 gap-2">
-                  {AVATARS_PREDEFINIDOS.map(av => (
-                    <button
-                      key={av.id}
-                      type="button"
-                      onClick={() => setAvatarEmoji(av.id)}
-                      className={[
-                        'aspect-square rounded-xl flex items-center justify-center text-lg transition-all border-2',
-                        avatarEmoji === av.id
-                          ? 'border-[#3cbfb3] bg-[#3cbfb3]/10 scale-105 shadow-sm'
-                          : 'border-gray-100 bg-gray-50 hover:border-gray-300',
-                      ].join(' ')}
-                    >
-                      {av.id === 'inicial'
-                        ? <span className="text-sm font-black text-gray-600">{nome?.[0]?.toUpperCase() ?? 'A'}</span>
-                        : av.id}
-                    </button>
-                  ))}
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Escolha seu avatar</p>
+
+                {/* Opção especial: Inicial do nome */}
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setAvatarId('inicial')}
+                    className={[
+                      'flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all',
+                      'hover:border-[#3cbfb3]/40 hover:bg-[#3cbfb3]/5',
+                      avatarId === 'inicial'
+                        ? 'border-[#3cbfb3] bg-[#3cbfb3]/10 shadow-sm'
+                        : 'border-gray-100',
+                    ].join(' ')}
+                  >
+                    <AvatarComArco
+                      nome={nome || session?.user?.name || '?'}
+                      avatarId="inicial"
+                      nivel={nivelAtual}
+                      size={44}
+                      mostrarBadge={false}
+                    />
+                    <p className={`text-[10px] font-semibold ${avatarId === 'inicial' ? 'text-[#3cbfb3]' : 'text-gray-400'}`}>
+                      Inicial
+                    </p>
+                  </button>
+                </div>
+
+                {/* Separador */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-widest">
+                    ou escolha um personagem
+                  </p>
+                  <div className="flex-1 h-px bg-gray-100" />
+                </div>
+
+                {/* Grid 4×4 DiceBear */}
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                  {AVATARES_PREDEFINIDOS.map(av => {
+                    const ativo = avatarId === av.id
+                    return (
+                      <button
+                        key={av.id}
+                        type="button"
+                        onClick={() => setAvatarId(av.id)}
+                        title={av.label}
+                        className={[
+                          'group flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2',
+                          'transition-all hover:border-[#3cbfb3]/40 hover:bg-[#3cbfb3]/5',
+                          'hover:scale-105 active:scale-95',
+                          ativo
+                            ? 'border-[#3cbfb3] bg-[#3cbfb3]/10 shadow-md scale-105'
+                            : 'border-gray-100',
+                        ].join(' ')}
+                      >
+                        <div className="relative">
+                          <div
+                            className={`w-11 h-11 rounded-full overflow-hidden ring-2 transition-all ${ativo ? 'ring-[#3cbfb3]' : 'ring-transparent'}`}
+                            style={{ backgroundColor: av.bgColor }}
+                          >
+                            <img
+                              src={av.url}
+                              alt={av.label}
+                              width={44}
+                              height={44}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                          {ativo && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#3cbfb3] flex items-center justify-center">
+                              <svg width="8" height="8" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <p className={`text-[9px] font-semibold truncate w-full text-center ${
+                          ativo ? 'text-[#3cbfb3]' : 'text-gray-400 group-hover:text-gray-600'
+                        }`}>
+                          {av.label}
+                        </p>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Cor do avatar</p>
-                <div className="flex gap-3 flex-wrap">
-                  {GRADIENTES_AVATAR.map(g => (
-                    <button
-                      key={g.id}
-                      type="button"
-                      onClick={() => setGradiente(g.id)}
-                      title={g.label}
-                      className="relative w-10 h-10 rounded-xl shadow-sm transition-all hover:scale-110"
-                      style={{ background: g.gradiente }}
-                    >
-                      {gradiente === g.id && (
-                        <span className="absolute inset-0 flex items-center justify-center">
-                          <Check size={16} className="text-white drop-shadow" />
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <p className="text-[9px] text-gray-300 text-center">
+                Avatares gerados por DiceBear · Carregam via internet
+              </p>
             </>
           )}
 
@@ -306,12 +360,10 @@ export default function PerfilPage() {
                       item.valor ? 'bg-[#3cbfb3]' : 'bg-gray-300',
                     ].join(' ')}
                   >
-                    <span
-                      className={[
-                        'inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 mt-0.5',
-                        item.valor ? 'translate-x-5' : 'translate-x-0.5',
-                      ].join(' ')}
-                    />
+                    <span className={[
+                      'inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 mt-0.5',
+                      item.valor ? 'translate-x-5' : 'translate-x-0.5',
+                    ].join(' ')} />
                   </button>
                 </div>
               ))}

@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'pub-543c49f4581a424aa738beacf3a89e96.r2.dev' },
       { protocol: 'https', hostname: '**.r2.dev' },
       { protocol: 'https', hostname: '**.r2.cloudflarestorage.com' },
+      { protocol: 'https', hostname: 'api.dicebear.com', port: '', pathname: '/9.x/**' },
       { protocol: 'https', hostname: '**' },
     ],
     formats: ['image/avif', 'image/webp'],

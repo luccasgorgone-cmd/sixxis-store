@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Star, Camera, MessageSquare, User, X } from 'lucide-react'
+import { Star, Camera, MessageSquare, X } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import Image from 'next/image'
+import { AvatarComArco } from '@/components/ui/AvatarComArco'
+import { calcularNivel, NIVEIS_CONFIG } from '@/lib/avatares'
 
 interface AvaliacaoFoto {
   id: string
@@ -22,7 +24,8 @@ interface Avaliacao {
   resposta: string | null
   respostaEm: string | null
   fotos: AvaliacaoFoto[]
-  cliente: { nome: string } | null
+  clienteId?: string | null
+  cliente: { nome: string; avatar?: string | null; totalGasto?: number } | null
 }
 
 interface Props {
@@ -277,16 +280,38 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
         <div className="space-y-4">
           {avaliacoesExibidas.map((av) => {
             const nomeExibido = av.nomeAutor || av.cliente?.nome || 'Anônimo'
+            const avatarId = av.cliente?.avatar || 'inicial'
+            const gasto = av.cliente?.totalGasto || 0
+            const nivelAutor = calcularNivel(gasto)
+            const temConta = !!(av.clienteId)
             return (
               <div key={av.id}
                 className={`bg-white rounded-2xl border p-5${av.destaque ? ' border-[#3cbfb3]/40 shadow-sm shadow-[#3cbfb3]/10' : ' border-gray-100'}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#e8f8f7] flex items-center justify-center shrink-0">
-                      <User size={18} className="text-[#3cbfb3]" />
-                    </div>
+                    <AvatarComArco
+                      nome={nomeExibido}
+                      avatarId={temConta ? avatarId : 'inicial'}
+                      nivel={nivelAutor}
+                      totalGasto={gasto}
+                      size={42}
+                      mostrarBadge={temConta}
+                    />
                     <div>
-                      <p className="font-bold text-gray-900 text-sm">{nomeExibido}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-gray-900 text-sm">{nomeExibido}</p>
+                        {temConta && gasto > 0 && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: `${NIVEIS_CONFIG[nivelAutor]?.cor}18`,
+                              color: NIVEIS_CONFIG[nivelAutor]?.cor,
+                            }}
+                          >
+                            {NIVEIS_CONFIG[nivelAutor]?.emoji} {nivelAutor} · Compra verificada
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-400">
                         {new Date(av.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                       </p>
