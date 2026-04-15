@@ -224,7 +224,7 @@ export default async function Footer() {
                   </svg>
                 </a>
               </div>
-              <ColTitle>Certificados</ColTitle>
+              <div className="mt-6"><ColTitle>Certificados</ColTitle></div>
               <div className="space-y-2">
                 {[
                   { label: 'Google Safe Browsing', cor: '#34a853' },
