@@ -353,6 +353,20 @@ main {
 .delay-300 { animation-delay: 0.3s; }
 .delay-400 { animation-delay: 0.4s; }
 
+/* ── Animações utilitárias (anim-fade-up, anim-fade) ──────────────────────── */
+.anim-fade-up {
+  animation: fade-in-up 0.55s ease both;
+  opacity: 0;
+}
+.anim-fade {
+  animation: fade-in 0.45s ease-out forwards;
+  opacity: 0;
+}
+.anim-d1 { animation-delay: 0.08s; }
+.anim-d2 { animation-delay: 0.16s; }
+.anim-d3 { animation-delay: 0.24s; }
+.anim-d4 { animation-delay: 0.32s; }
+
 /* ── Timer mobile ─────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .timer-block { width: 56px !important; height: 56px !important; }

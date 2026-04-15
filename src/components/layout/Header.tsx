@@ -149,9 +149,16 @@ const NAV_LINKS = [
 ]
 
 // ── HEADER ────────────────────────────────────────────────────────────────────
+const TICKER_ITEMS = [
+  { icon: Tag,   text: 'CUPOM SIXXIS10 — 10% OFF na 1ª compra' },
+  { icon: Truck, text: 'FRETE GRÁTIS acima de R$ 500' },
+  { icon: MapPin,text: 'Entrega para todo o Brasil' },
+]
+
 export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: string }) {
   const [drawerOpen,    setDrawerOpen]    = useState(false)
   const [cepModalOpen,  setCepModalOpen]  = useState(false)
+  const [tickerIdx,     setTickerIdx]     = useState(0)
   const [cepSalvo,      setCepSalvo]      = useState('')
   const [cepInput,      setCepInput]      = useState('')
   const [cepLoading,    setCepLoading]    = useState(false)
@@ -169,6 +176,11 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   useEffect(() => {
     const saved = localStorage.getItem('sixxis_cep')
     if (saved) setCepSalvo(saved)
+  }, [])
+
+  useEffect(() => {
+    const t = setInterval(() => setTickerIdx(i => (i + 1) % TICKER_ITEMS.length), 3000)
+    return () => clearInterval(t)
   }, [])
 
   const handleBuscarCep = useCallback(async (cepOverride?: string) => {
@@ -275,19 +287,38 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-11">
 
-            {/* Esquerda — Cupom */}
-            <div className="flex items-center gap-2">
+            {/* Mobile: ticker rotativo */}
+            <div className="flex md:hidden items-center justify-center flex-1 gap-2 overflow-hidden">
+              {TICKER_ITEMS.map((item, i) => {
+                const Icon = item.icon
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 transition-all duration-500"
+                    style={{
+                      display: tickerIdx === i ? 'flex' : 'none',
+                      opacity: tickerIdx === i ? 1 : 0,
+                    }}
+                  >
+                    <Icon size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
+                    <span className="text-[#0f2e2b] text-xs font-bold truncate">{item.text}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop: layout completo */}
+            <div className="hidden md:flex items-center gap-2">
               <Tag size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
               <span className="text-[#0f2e2b] text-sm font-extrabold">CUPOM:</span>
               <span className="bg-white text-[#0f2e2b] text-xs font-black px-2.5 py-1 rounded-lg border border-[#0f2e2b]/15 shadow-sm">
                 SIXXIS10
               </span>
-              <span className="text-[#0f2e2b]/85 text-sm font-semibold hidden sm:inline">
+              <span className="text-[#0f2e2b]/85 text-sm font-semibold">
                 — 10% OFF na 1ª compra
               </span>
             </div>
 
-            {/* Centro — Frete */}
             <div className="hidden md:flex items-center gap-2">
               <div className="w-px h-5 bg-[#0f2e2b]/20" />
               <Truck size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
@@ -296,7 +327,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </span>
             </div>
 
-            {/* Direita — Entrega */}
             <div className="hidden lg:flex items-center gap-2">
               <div className="w-px h-5 bg-[#0f2e2b]/20" />
               <MapPin size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />

@@ -220,7 +220,7 @@ export default function SobrePage() {
             <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Por que Sixxis</span>
             <h2 className="text-3xl font-extrabold text-gray-900 mt-2">O que nos diferencia no mercado</h2>
           </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { icon: Shield,  titulo: 'Garantia Real de 12 Meses',    texto: 'Suporte técnico especializado em todo o Brasil. Sem burocracia.',                             cor: '#16a34a' },
               { icon: Award,   titulo: '100% Produtos Originais',       texto: 'Importadores diretos. Todos os produtos com nota fiscal e certificação.',                    cor: '#3cbfb3' },

@@ -133,6 +133,9 @@ export default function AdminDashboard() {
 
   const m = data?.metrics
 
+  const entregues = data?.porStatus.find(s => s.status === 'entregue')?.count ?? 0
+  const enviados  = data?.porStatus.find(s => s.status === 'enviado')?.count ?? 0
+
   const cards = m ? [
     {
       label: 'Receita Total', value: fmt(m.receita), icon: DollarSign,
@@ -159,6 +162,14 @@ export default function AdminDashboard() {
     {
       label: 'Clientes', value: m.totalClientes.toString(), icon: Users,
       iconBg: 'bg-green-50', iconColor: 'text-green-500',
+    },
+    {
+      label: 'Pedidos Entregues', value: entregues.toString(), icon: ArrowUpRight,
+      iconBg: 'bg-teal-50', iconColor: 'text-teal-600',
+    },
+    {
+      label: 'Pedidos Enviados', value: enviados.toString(), icon: ArrowDownRight,
+      iconBg: 'bg-sky-50', iconColor: 'text-sky-500',
     },
   ] : []
 
@@ -199,9 +210,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
-          ? Array.from({ length: 6 }).map((_, i) => (
+          ? Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-24 bg-white rounded-2xl border border-gray-100 animate-pulse" />
             ))
           : cards.map((c) => <MetricCard key={c.label} {...c} />)}

@@ -86,8 +86,8 @@ export default function OfertasRelampago({ produtos }: Props) {
                         className="timer-block relative rounded-2xl flex items-center justify-center border-2 border-black/30 overflow-hidden"
                         style={{
                           backgroundColor: '#3cbfb3',
-                          minWidth: '72px',
-                          height: '72px',
+                          width: 'clamp(52px, 10vw, 72px)',
+                          height: 'clamp(52px, 10vw, 72px)',
                           boxShadow: '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)',
                         }}
                       >
