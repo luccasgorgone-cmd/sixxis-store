@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
+import { getResend } from '@/lib/email-resend'
+import { personalizarTemplate } from '@/lib/whatsapp-templates-premium'
 
 export const dynamic = 'force-dynamic'
 
+const FROM = process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br'
+const FROM_NAME = process.env.EMAIL_FROM_NAME ?? 'Sixxis Store'
+
 function personalizarMensagem(template: string, vars: Record<string, string>) {
-  let msg = template
-  for (const [k, v] of Object.entries(vars)) {
-    msg = msg.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v)
-  }
-  return msg
+  return personalizarTemplate(template, vars)
 }
 
 async function enviarWhatsappEvolutionApi({ instanceId, apiUrl, apiKey, para, mensagem }: {
@@ -26,8 +27,13 @@ async function enviarWhatsappEvolutionApi({ instanceId, apiUrl, apiKey, para, me
 }
 
 async function enviarEmailCampanha({ para, assunto, corpo }: { para: string; assunto: string; corpo: string }) {
-  // Placeholder — adaptar para o serviço de email do projeto
-  console.log(`[Email] Para: ${para} | Assunto: ${assunto} | Body: ${corpo.slice(0, 50)}...`)
+  try {
+    const resend = getResend()
+    await resend.emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html: corpo })
+  } catch (err) {
+    console.error(`[Email campanha] Para: ${para}`, err)
+    throw err
+  }
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

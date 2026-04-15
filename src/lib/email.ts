@@ -1,16 +1,102 @@
-import { Resend } from 'resend'
 import { prisma } from '@/lib/prisma'
-
-let resend: Resend | null = null
-function getResend(): Resend {
-  if (!resend) resend = new Resend(process.env.RESEND_API_KEY ?? 'placeholder')
-  return resend
-}
+import { getResend } from './email-resend'
+import {
+  templateBoasVindas,
+  templateConfirmacaoPedido,
+  templatePedidoEnviado,
+  templateAbandonoCarrinho,
+  templateFollowupEntrega,
+  templateCupomEspecial,
+  templateVoltaEstoque,
+  templateSolicitacaoAvaliacao,
+} from './email-templates-premium'
 
 const FROM = process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br'
 const FROM_NAME = process.env.EMAIL_FROM_NAME ?? 'Sixxis Store'
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://sixxis.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://sixxis-store-production.up.railway.app'
 const LOGO_URL = `${SITE_URL}/logo-sixxis.png`
+
+// ─── gerarHtmlTemplate — escolhe o template premium pelo tipo ─────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function gerarHtmlTemplate(tipo: string, variaveis: Record<string, any>): string {
+  const siteUrl = SITE_URL
+
+  switch (tipo) {
+    case 'boas_vindas':
+      return templateBoasVindas({ nome: variaveis.nome || 'Cliente', siteUrl })
+
+    case 'confirmacao_pedido':
+      return templateConfirmacaoPedido({
+        nome: variaveis.nome || 'Cliente',
+        pedidoId: variaveis.pedido_id || variaveis.pedidoId || 'PEDIDO',
+        itens: variaveis.itens || [],
+        subtotal: Number(variaveis.subtotal) || 0,
+        frete: Number(variaveis.frete) || 0,
+        total: Number(variaveis.total) || 0,
+        formaPagamento: variaveis.forma_pagamento || variaveis.formaPagamento || 'Cartão',
+        siteUrl,
+      })
+
+    case 'pedido_enviado':
+      return templatePedidoEnviado({
+        nome: variaveis.nome || 'Cliente',
+        pedidoId: variaveis.pedido_id || variaveis.pedidoId || 'PEDIDO',
+        codigoRastreio: variaveis.codigo_rastreio || variaveis.codigoRastreio || 'Em processamento',
+        transportadora: variaveis.transportadora || 'Correios',
+        previsaoEntrega: variaveis.previsao_entrega || variaveis.previsaoEntrega || '5 a 8 dias úteis',
+        linkRastreio: variaveis.link_rastreio || variaveis.linkRastreio || `${siteUrl}/minha-conta/pedidos`,
+        siteUrl,
+      })
+
+    case 'abandono_carrinho':
+      return templateAbandonoCarrinho({
+        nome: variaveis.nome || 'Cliente',
+        itens: variaveis.itens || [],
+        totalCarrinho: Number(variaveis.total_carrinho) || Number(variaveis.totalCarrinho) || 0,
+        cupom: variaveis.cupom,
+        siteUrl,
+      })
+
+    case 'followup_entrega':
+      return templateFollowupEntrega({
+        nome: variaveis.nome || 'Cliente',
+        pedidoId: variaveis.pedido_id || variaveis.pedidoId || 'PEDIDO',
+        produto: variaveis.produto || 'seu produto',
+        siteUrl,
+      })
+
+    case 'cupom_especial':
+      return templateCupomEspecial({
+        nome: variaveis.nome || 'Cliente',
+        cupomCodigo: variaveis.cupom_codigo || variaveis.cupomCodigo || variaveis.codigo || '',
+        desconto: variaveis.desconto || variaveis.cupom_desconto || '10%',
+        validade: variaveis.validade || variaveis.cupom_validade || '7 dias',
+        pedidoMinimo: variaveis.pedido_minimo || variaveis.pedidoMinimo,
+        siteUrl,
+      })
+
+    case 'volta_estoque':
+      return templateVoltaEstoque({
+        nome: variaveis.nome || 'Cliente',
+        produtoNome: variaveis.produto_nome || variaveis.produtoNome || variaveis.produto || '',
+        produtoImg: variaveis.produto_img || variaveis.produtoImg,
+        produtoPreco: variaveis.produto_preco || variaveis.produtoPreco || 'Consultar',
+        produtoUrl: variaveis.produto_url || variaveis.produtoUrl || siteUrl,
+        siteUrl,
+      })
+
+    case 'solicitacao_avaliacao':
+      return templateSolicitacaoAvaliacao({
+        nome: variaveis.nome || 'Cliente',
+        pedidoId: variaveis.pedido_id || variaveis.pedidoId || 'PEDIDO',
+        produto: variaveis.produto || 'seu produto',
+        siteUrl,
+      })
+
+    default:
+      return variaveis.corpo || ''
+  }
+}
 
 // ─── Template helpers ────────────────────────────────────────────────────────
 
@@ -138,39 +224,17 @@ export async function enviarEmailConfirmacaoPedido(para: string, opts: {
     assunto = renderTemplate(template.assunto, { nome: nomeCliente, pedido_id: idCurto })
   } else {
     const subtotal = total - frete + desconto
-    const rows = itens.map((i) => itemRow(i.nome, i.variacaoNome ?? null, i.quantidade, Number(i.precoUnitario))).join('')
-    html = layout(`
-      <h1 style="margin:0 0 8px;font-size:28px;font-weight:800;color:#111827;">Pedido confirmado! 🎉</h1>
-      <p style="margin:0 0 24px;color:#6b7280;">Olá, <strong>${nomeCliente}</strong>. Seu pedido foi recebido e está sendo processado.</p>
-      <div style="background:#f0fdf9;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin-bottom:24px;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#065f46;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Número do Pedido</p>
-        <p style="margin:8px 0 0;font-size:26px;font-weight:800;color:#059669;letter-spacing:0.1em;">#${idCurto}</p>
-      </div>
-      <h3 style="margin:0 0 12px;font-size:14px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;">Itens do Pedido</h3>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-        ${rows}
-        <tr>
-          <td style="padding:8px 0;font-size:13px;color:#6b7280;">Subtotal</td>
-          <td style="padding:8px 0;text-align:right;font-size:13px;color:#6b7280;">${subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-        </tr>
-        <tr>
-          <td style="padding:4px 0;font-size:13px;color:#6b7280;">Frete</td>
-          <td style="padding:4px 0;text-align:right;font-size:13px;color:#6b7280;">${frete === 0 ? 'Grátis' : frete.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-        </tr>
-        ${desconto > 0 ? `<tr><td style="padding:4px 0;font-size:13px;color:#059669;">Desconto (cupom)</td><td style="padding:4px 0;text-align:right;font-size:13px;color:#059669;">-${desconto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td></tr>` : ''}
-        <tr>
-          <td style="padding:12px 0 0;font-size:16px;font-weight:800;color:#111827;border-top:2px solid #e5e7eb;">Total</td>
-          <td style="padding:12px 0 0;text-align:right;font-size:16px;font-weight:800;color:#3cbfb3;border-top:2px solid #e5e7eb;">${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-        </tr>
-      </table>
-      <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:24px;">
-        <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;">Entrega</p>
-        <p style="margin:0;font-size:14px;color:#6b7280;">${endereco}</p>
-        <p style="margin:8px 0 0;font-size:12px;color:#6b7280;">Forma de pagamento: <strong style="color:#374151;">${formaPagamento}</strong></p>
-      </div>
-      <div style="text-align:center;">${btn('Acompanhar Pedido →', `${SITE_URL}/pedidos`)}</div>
-    `)
-    assunto = `✅ Pedido #${idCurto} confirmado!`
+    html = templateConfirmacaoPedido({
+      nome: nomeCliente,
+      pedidoId,
+      itens: itens.map(i => ({ nome: i.nome, qtd: i.quantidade, preco: Number(i.precoUnitario) })),
+      subtotal,
+      frete,
+      total,
+      formaPagamento,
+      siteUrl: SITE_URL,
+    })
+    assunto = `Pedido #${idCurto} confirmado — Obrigado, ${nomeCliente}!`
   }
 
   await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
@@ -201,17 +265,16 @@ export async function enviarEmailRastreio(para: string, opts: {
     })
     assunto = renderTemplate(template.assunto, { nome: nomeCliente, pedido_id: idCurto })
   } else {
-    html = layout(`
-      <h1 style="margin:0 0 8px;font-size:28px;font-weight:800;color:#111827;">Seu pedido está a caminho! 🚚</h1>
-      <p style="margin:0 0 24px;color:#6b7280;">Olá, <strong>${nomeCliente}</strong>! Seu pedido foi enviado.</p>
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:24px;margin-bottom:24px;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#1d4ed8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Código de Rastreio</p>
-        <p style="margin:12px 0;font-size:24px;font-weight:800;color:#1e3a8a;letter-spacing:0.15em;font-family:monospace;">${codigoRastreio}</p>
-        <a href="https://www.correios.com.br/rastreamento" style="font-size:13px;color:#3b82f6;">Rastrear nos Correios →</a>
-      </div>
-      <div style="text-align:center;">${btn('Ver Meu Pedido →', `${SITE_URL}/pedidos`)}</div>
-    `)
-    assunto = `📦 Seu pedido #${idCurto} foi enviado!`
+    html = templatePedidoEnviado({
+      nome: nomeCliente,
+      pedidoId,
+      codigoRastreio,
+      transportadora: 'Correios',
+      previsaoEntrega: '5 a 10 dias úteis',
+      linkRastreio: 'https://www.correios.com.br/rastreamento',
+      siteUrl: SITE_URL,
+    })
+    assunto = `Seu pedido #${idCurto} está a caminho!`
   }
 
   await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
@@ -229,28 +292,8 @@ export async function enviarEmailBoasVindas(para: string, nomeCliente: string) {
     html = renderTemplate(template.corpo, { nome: nomeCliente, site_url: SITE_URL })
     assunto = renderTemplate(template.assunto, { nome: nomeCliente })
   } else {
-    html = layout(`
-      <h1 style="margin:0 0 8px;font-size:28px;font-weight:800;color:#111827;">Bem-vindo à Sixxis! 🎉</h1>
-      <p style="margin:0 0 24px;color:#6b7280;">Olá, <strong>${nomeCliente}</strong>! Sua conta foi criada com sucesso.</p>
-      <div style="margin-bottom:24px;">
-        ${[
-          ['🚚', 'Frete grátis', 'Para compras acima de R$500 para todo o Brasil'],
-          ['💳', 'Parcele em até 12x', 'Sem juros no cartão de crédito'],
-          ['🏆', 'Garantia Sixxis', 'Todos os produtos com garantia total'],
-          ['📞', 'Suporte especializado', 'Equipe pronta para te ajudar'],
-        ].map(([icon, title, desc]) => `
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f3f4f6;">
-            <span style="font-size:20px;">${icon}</span>
-            <div>
-              <p style="margin:0;font-weight:700;font-size:14px;color:#111827;">${title}</p>
-              <p style="margin:2px 0 0;font-size:13px;color:#6b7280;">${desc}</p>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      <div style="text-align:center;">${btn('Explorar Produtos →', `${SITE_URL}/produtos`)}</div>
-    `)
-    assunto = `🎉 Bem-vindo à Sixxis, ${nomeCliente}!`
+    html = templateBoasVindas({ nome: nomeCliente, siteUrl: SITE_URL })
+    assunto = `Bem-vindo(a) à Sixxis, ${nomeCliente}! Seu cupom de boas-vindas está aqui`
   }
 
   await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
@@ -287,14 +330,14 @@ export async function enviarEmailAbandonoCarrinho(para: string, opts: {
     })
     assunto = renderTemplate(template.assunto, { nome: nomeCliente })
   } else {
-    html = layout(`
-      <h1 style="margin:0 0 8px;font-size:28px;font-weight:800;color:#111827;">Você esqueceu algo! 🛒</h1>
-      <p style="margin:0 0 24px;color:#6b7280;">Olá, <strong>${nomeCliente}</strong>! Você deixou itens no carrinho.</p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">${itensHtml}</table>
-      <p style="margin:0 0 20px;font-size:14px;color:#6b7280;">Esses produtos podem sair de estoque. Finalize sua compra agora!</p>
-      <div style="text-align:center;">${btn('Finalizar Compra →', `${SITE_URL}/carrinho`)}</div>
-    `)
-    assunto = `🛒 ${nomeCliente}, você esqueceu itens no carrinho!`
+    const totalCarrinho = itens.reduce((s, i) => s + i.preco * i.quantidade, 0)
+    html = templateAbandonoCarrinho({
+      nome: nomeCliente,
+      itens: itens.map(i => ({ nome: i.nome, preco: i.preco * i.quantidade })),
+      totalCarrinho,
+      siteUrl: SITE_URL,
+    })
+    assunto = `${nomeCliente}, seu carrinho ainda está esperando`
   }
 
   await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
@@ -326,16 +369,14 @@ export async function enviarEmailVoltaEstoque(para: string, opts: {
     })
     assunto = renderTemplate(template.assunto, { produto_nome: nomeProduto })
   } else {
-    html = layout(`
-      <h1 style="margin:0 0 8px;font-size:28px;font-weight:800;color:#111827;">Produto disponível! ⚡</h1>
-      <p style="margin:0 0 24px;color:#6b7280;">Uma boa notícia! O produto que você estava aguardando voltou ao estoque.</p>
-      <div style="background:#f0fdf9;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin-bottom:24px;text-align:center;">
-        <p style="margin:0;font-size:18px;font-weight:700;color:#059669;">${nomeProduto}</p>
-        <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">Disponível agora — mas pode esgotar rápido!</p>
-      </div>
-      <div style="text-align:center;">${btn('Comprar Agora →', `${SITE_URL}/produtos/${slugProduto}`)}</div>
-    `)
-    assunto = `⚡ ${nomeProduto} voltou ao estoque!`
+    html = templateVoltaEstoque({
+      nome: 'Cliente',
+      produtoNome: nomeProduto,
+      produtoPreco: 'Consultar',
+      produtoUrl: `${SITE_URL}/produtos/${slugProduto}`,
+      siteUrl: SITE_URL,
+    })
+    assunto = `${nomeProduto} está disponível novamente!`
   }
 
   await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
@@ -364,69 +405,79 @@ export async function enviarEmailFollowUp(para: string, opts: {
     })
     assunto = renderTemplate(template.assunto, { nome: nomeCliente, pedido_id: idCurto })
   } else {
-    html = layout(`
-      <h1 style="margin:0 0 8px;font-size:28px;font-weight:800;color:#111827;">Como foi sua experiência? ⭐</h1>
-      <p style="margin:0 0 24px;color:#6b7280;">Olá, <strong>${nomeCliente}</strong>! Seu pedido <strong>#${idCurto}</strong> foi entregue. O que achou?</p>
-      <div style="margin-bottom:24px;">
-        ${itens.map((i) => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f3f4f6;">
-            <span style="font-size:14px;color:#374151;">${i.nome}</span>
-            <a href="${SITE_URL}/produtos/${i.slug}#avaliacoes" style="font-size:13px;color:#3cbfb3;font-weight:600;text-decoration:none;">Avaliar →</a>
-          </div>
-        `).join('')}
-      </div>
-      <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:24px;text-align:center;">
-        <p style="margin:0;font-size:14px;color:#374151;">Ficou com alguma dúvida?</p>
-        <a href="https://wa.me/5518997474701" style="display:inline-block;margin-top:12px;background:#25d366;color:#fff;font-weight:700;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:14px;">💬 Falar no WhatsApp</a>
-      </div>
-    `)
-    assunto = `⭐ ${nomeCliente}, avalie sua compra!`
+    html = templateFollowupEntrega({
+      nome: nomeCliente,
+      pedidoId,
+      produto: itens[0]?.nome ?? 'seu produto',
+      siteUrl: SITE_URL,
+    })
+    assunto = `Como foi a entrega do seu pedido, ${nomeCliente}?`
   }
 
   await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
 }
 
-// ─── Envio de teste via template do banco ────────────────────────────────────
+// ─── Envio de teste via template premium ─────────────────────────────────────
 
 export async function enviarEmailTeste(tipo: string, emailDestino: string): Promise<void> {
-  const template = await prisma.emailTemplate.findUnique({ where: { tipo } })
-  if (!template) throw new Error(`Template "${tipo}" não encontrado`)
-
-  const dadosFalsos: Record<string, string> = {
+  const dadosFalsos = {
     nome:             'João Silva',
-    pedido_id:        'ABC12345',
-    total:            'R$ 599,90',
+    pedido_id:        'TEST12345678',
+    total:            599.90,
+    subtotal:         599.90,
+    frete:            0,
     forma_pagamento:  'Cartão de Crédito',
     status:           'Confirmado',
     endereco:         'Rua das Flores, 123 - Araçatuba-SP',
     codigo_rastreio:  'BR123456789BR',
     link_rastreio:    'https://www.correios.com.br',
     previsao_entrega: '5 a 10 dias úteis',
+    transportadora:   'Correios',
+    produto:          'Climatizador Sixxis Pro',
     produto_nome:     'Climatizador Sixxis Pro',
     produto_slug:     'climatizador-sixxis-pro',
+    produto_preco:    'R$ 599,90',
     produto_url:      `${SITE_URL}/produtos/climatizador-sixxis-pro`,
     cupom_codigo:     'SIXXIS15',
+    desconto:         '15% OFF',
     cupom_desconto:   '15%',
-    cupom_validade:   '31/12/2025',
+    validade:         '07/05/2026',
+    cupom_validade:   '07/05/2026',
+    total_carrinho:   599.90,
+    itens: [{ nome: 'Climatizador Sixxis Pro', qtd: 1, preco: 599.90 }],
     site_url:         SITE_URL,
-    ITENS_PEDIDO: `<div style="padding:12px 0;border-bottom:1px solid #e5e7eb;">
-      <p style="margin:0;font-weight:600;">Climatizador Sixxis Pro</p>
-      <p style="margin:4px 0 0;color:#6b7280;font-size:13px;">Qtd: 1 × R$ 599,90</p>
-    </div>`,
-    ITENS_CARRINHO: `<div style="padding:12px;background:#f9fafb;border-radius:8px;margin-bottom:8px;">
-      <p style="margin:0;font-weight:600;">Climatizador Sixxis Pro</p>
-      <p style="margin:4px 0 0;color:#3cbfb3;font-weight:700;">R$ 599,90</p>
-    </div>`,
-    PRODUTO_CARD: `<div style="background:#f9fafb;border-radius:12px;padding:20px;">
-      <p style="margin:0;font-weight:700;font-size:16px;">Climatizador Sixxis Pro</p>
-      <p style="margin:8px 0 0;color:#3cbfb3;font-size:18px;font-weight:700;">R$ 599,90</p>
-    </div>`,
+  }
+
+  const htmlFinal = gerarHtmlTemplate(tipo, dadosFalsos)
+
+  // fallback: se o tipo não tem template premium, usar o banco
+  if (!htmlFinal) {
+    const template = await prisma.emailTemplate.findUnique({ where: { tipo } })
+    if (!template) throw new Error(`Template "${tipo}" não encontrado`)
+    await getResend().emails.send({
+      from:    `${FROM_NAME} <${FROM}>`,
+      to:      emailDestino,
+      subject: `[TESTE] ${renderTemplate(template.assunto, { nome: 'João Silva', pedido_id: 'TEST12345678' })}`,
+      html:    renderTemplate(template.corpo, dadosFalsos as unknown as Record<string, string>),
+    })
+    return
+  }
+
+  const assuntosFalsos: Record<string, string> = {
+    boas_vindas:          'Bem-vindo(a) à Sixxis, João Silva!',
+    confirmacao_pedido:   'Pedido #TEST1234 confirmado — Obrigado, João!',
+    pedido_enviado:       'Seu pedido #TEST1234 está a caminho!',
+    abandono_carrinho:    'João, seu carrinho ainda está esperando',
+    followup_entrega:     'Como foi a entrega do seu pedido, João?',
+    cupom_especial:       'Um cupom exclusivo para você, João',
+    volta_estoque:        'Climatizador Sixxis Pro está disponível novamente!',
+    solicitacao_avaliacao:'Avalie seu pedido TEST1234 e ajude outros clientes',
   }
 
   await getResend().emails.send({
     from:    `${FROM_NAME} <${FROM}>`,
     to:      emailDestino,
-    subject: `[TESTE] ${renderTemplate(template.assunto, dadosFalsos)}`,
-    html:    renderTemplate(template.corpo, dadosFalsos),
+    subject: `[TESTE] ${assuntosFalsos[tipo] ?? tipo}`,
+    html:    htmlFinal,
   })
 }

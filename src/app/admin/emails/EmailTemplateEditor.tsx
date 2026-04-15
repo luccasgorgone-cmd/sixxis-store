@@ -189,13 +189,25 @@ export default function EmailTemplateEditor({ templates: initialTemplates }: Pro
                   {current.ativo ? 'Ativo' : 'Inativo'}
                 </button>
 
-                {/* Preview */}
+                {/* Preview inline */}
                 <button
                   onClick={() => setShowPreview((v) => !v)}
                   className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
                 >
                   {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
                   {showPreview ? 'Fechar' : 'Preview'}
+                </button>
+
+                {/* Preview premium em nova aba */}
+                <button
+                  onClick={() => {
+                    window.open(`/api/admin/email-templates/preview?tipo=${current?.tipo}`, '_blank')
+                  }}
+                  className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-[#e8f8f7] text-[#1a4f4a] hover:bg-[#3cbfb3] hover:text-white transition"
+                  title="Abrir template premium renderizado em nova aba"
+                >
+                  <Eye size={16} />
+                  Preview Premium
                 </button>
 
                 {/* Enviar teste */}
