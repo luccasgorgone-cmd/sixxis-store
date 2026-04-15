@@ -229,7 +229,11 @@ const ATALHOS = [
 
 // ── LunaWidget ────────────────────────────────────────────────────────────────
 
-export default function LunaWidget() {
+interface LunaWidgetProps {
+  onOcultar?: () => void
+}
+
+export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
   const [config,      setConfig]      = useState<LunaConfig>(DEFAULT_CONFIG)
   const [aberto,      setAberto]      = useState(false)
   const [minimizado,  setMinimizado]  = useState(false)
@@ -664,22 +668,36 @@ export default function LunaWidget() {
 
       {/* ── Botão flutuante Luna ────────────────────────────────────────────── */}
       {!aberto && (
-        <button
-          onClick={() => { setAberto(true); setMostrarBolha(false); setNaoLidas(0) }}
-          className="relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-all duration-200 active:scale-95"
-          style={{ background: gradHeader }}
-          aria-label={`Abrir chat com ${config.nome}`}
-        >
-          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
-            <LunaAvatar />
-          </div>
-          <div className={`absolute top-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
-          {naoLidas > 0 && (
-            <span className="absolute -top-1 -left-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
-              {naoLidas > 9 ? '9+' : naoLidas}
-            </span>
+        <div className="relative group/luna-btn">
+          {/* × para ocultar — sempre no topo-direito do avatar, nunca interfere com o balão */}
+          {onOcultar && (
+            <button
+              type="button"
+              onClick={e => { e.stopPropagation(); onOcultar() }}
+              aria-label="Ocultar assistente"
+              className="absolute -top-1.5 -right-1.5 z-20 w-5 h-5 rounded-full bg-gray-700/80 backdrop-blur-sm text-white flex items-center justify-center text-[11px] font-bold leading-none opacity-0 group-hover/luna-btn:opacity-100 transition-opacity duration-200 hover:bg-red-500 shadow-sm"
+              title="Ocultar (volta em 24h)"
+            >
+              ×
+            </button>
           )}
-        </button>
+          <button
+            onClick={() => { setAberto(true); setMostrarBolha(false); setNaoLidas(0) }}
+            className="relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-all duration-200 active:scale-95"
+            style={{ background: gradHeader }}
+            aria-label={`Abrir chat com ${config.nome}`}
+          >
+            <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+              <LunaAvatar />
+            </div>
+            <div className={`absolute top-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
+            {naoLidas > 0 && (
+              <span className="absolute -top-1 -left-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
+                {naoLidas > 9 ? '9+' : naoLidas}
+              </span>
+            )}
+          </button>
+        </div>
       )}
     </div>
   )

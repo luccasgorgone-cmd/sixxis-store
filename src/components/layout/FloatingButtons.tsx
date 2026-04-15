@@ -159,19 +159,7 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
         )}
 
         {agenteAtivo && !oculto.luna && (
-          <div className="relative group/luna">
-            <button
-              type="button"
-              onClick={() => ocultarBotao('luna')}
-              aria-label="Ocultar assistente"
-              className="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-gray-700 text-white flex items-center justify-center opacity-0 group-hover/luna:opacity-100 transition-opacity duration-200 shadow-md hover:bg-gray-900"
-            >
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
-                <path d="M1 1l6 6M7 1L1 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-            <LunaWidget />
-          </div>
+          <LunaWidget onOcultar={() => ocultarBotao('luna')} />
         )}
       </div>
 
