@@ -370,7 +370,7 @@ export default function LunaWidget({
       {!aberto && mostrarBolha && (
         <div className="relative animate-bounce-gentle">
           <div
-            className="bg-white rounded-2xl rounded-bl-sm shadow-xl border border-gray-100 px-4 py-3 max-w-[240px]"
+            className="bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3 max-w-[240px]"
             style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}
           >
             <p className="text-sm text-gray-700 font-medium leading-snug">
