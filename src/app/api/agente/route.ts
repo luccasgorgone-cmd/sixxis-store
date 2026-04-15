@@ -5,6 +5,22 @@ import Anthropic from '@anthropic-ai/sdk'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+// ── CEP detector ──────────────────────────────────────────────────────────────
+function extrairCEP(texto: string): string | null {
+  const match = texto.match(/\b\d{5}[-\s]?\d{3}\b/)
+  return match ? match[0].replace(/\D/g, '') : null
+}
+
+// ── Base URL resolution ───────────────────────────────────────────────────────
+function getBaseUrl(): string {
+  if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+    const domain = process.env.RAILWAY_PUBLIC_DOMAIN
+    return domain.startsWith('http') ? domain : `https://${domain}`
+  }
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  return 'https://sixxis-store-production.up.railway.app'
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { mensagens, sessionId } = await req.json()
@@ -32,7 +48,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ erro: 'Agente desativado' }, { status: 403 })
     }
 
-    // Buscar produtos ativos para contexto
+    // ── Buscar produtos diretamente do Prisma (mais eficiente que HTTP self-call) ──
     const produtos = await prisma.produto.findMany({
       where: { ativo: true },
       select: {
@@ -43,13 +59,47 @@ export async function POST(req: NextRequest) {
         categoria: true,
         estoque: true,
         sku: true,
-        descricao: true,
+        mediaAvaliacoes: true,
+        totalAvaliacoes: true,
+        variacoes: {
+          where: { ativo: true },
+          select: { nome: true, preco: true },
+        },
       },
+      orderBy: { categoria: 'asc' },
       take: 50,
     })
 
-    const catalogoTexto = produtos
-      .map((p) => {
+    // ── Separar e formatar ofertas ativas ──────────────────────────────────────
+    const ofertasAtivas = produtos.filter((p) => p.precoPromocional !== null)
+
+    let resumoOfertas = ''
+    if (ofertasAtivas.length === 0) {
+      resumoOfertas = 'Nenhuma oferta relâmpago ativa no momento.'
+    } else {
+      resumoOfertas = ofertasAtivas
+        .map((p) => {
+          const precoNum = Number(p.preco)
+          const promoNum = Number(p.precoPromocional)
+          const desconto = Math.round(((precoNum - promoNum) / precoNum) * 100)
+          const pixPreco = (promoNum * 0.97).toFixed(2).replace('.', ',')
+          return (
+            `• ${p.nome}: DE R$ ${precoNum.toLocaleString('pt-BR')} ` +
+            `POR R$ ${promoNum.toLocaleString('pt-BR')} (${desconto}% OFF) ` +
+            `| PIX: R$ ${pixPreco} | /produtos/${p.slug}`
+          )
+        })
+        .join('\n')
+    }
+
+    // ── Catálogo formatado por categoria ──────────────────────────────────────
+    let catalogoTexto = ''
+    const cats = ['climatizadores', 'aspiradores', 'spinning']
+    for (const cat of cats) {
+      const prodsCat = produtos.filter((p) => p.categoria === cat)
+      if (!prodsCat.length) continue
+      catalogoTexto += `\n[${cat.toUpperCase()}]\n`
+      for (const p of prodsCat) {
         const precoNum = Number(p.preco)
         const promoNum = p.precoPromocional ? Number(p.precoPromocional) : null
         const precoFinal = promoNum ?? precoNum
@@ -57,23 +107,70 @@ export async function POST(req: NextRequest) {
           promoNum && promoNum < precoNum
             ? ` (${Math.round(((precoNum - promoNum) / precoNum) * 100)}% OFF)`
             : ''
-        return (
-          `- ${p.nome}` +
-          ` | SKU: ${p.sku ?? 'N/A'}` +
-          ` | Categoria: ${p.categoria}` +
-          ` | Preço: R$ ${precoFinal.toFixed(2)}${desconto}` +
-          ` | Estoque: ${p.estoque > 0 ? 'disponível' : 'esgotado'}` +
-          ` | Link: /produtos/${p.slug}`
-        )
-      })
-      .join('\n')
+        const vars = p.variacoes.map((v) => v.nome).join(' ou ')
+        const voltagem = vars ? ` | ${vars}` : ''
+        const estoqueStatus = p.estoque > 0 ? 'disponível' : '⚠️ esgotado'
+        catalogoTexto +=
+          `• ${p.nome}: R$ ${precoFinal.toFixed(2)}${desconto}` +
+          `${voltagem} | ${estoqueStatus}` +
+          ` | Nota: ${p.mediaAvaliacoes}/5 (${p.totalAvaliacoes} avs)` +
+          ` | /produtos/${p.slug}\n`
+      }
+    }
+
+    // ── Data/hora atual de Brasília ───────────────────────────────────────────
+    const agora = new Date().toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      dateStyle: 'full',
+      timeStyle: 'short',
+    })
+
+    // ── Contexto dinâmico a ser injetado no prompt ────────────────────────────
+    const contextoLive = `
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DADOS DINÂMICOS EM TEMPO REAL — ${agora}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ OFERTAS RELÂMPAGO ATIVAS AGORA (${ofertasAtivas.length} ativa(s)):
+${resumoOfertas}
+
+📦 CATÁLOGO ATUALIZADO:
+${catalogoTexto}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+
+    // ── Detectar CEP na última mensagem e consultar frete ─────────────────────
+    const ultimaMensagem =
+      String(mensagens[mensagens.length - 1]?.content || '')
+    const cepEncontrado = extrairCEP(ultimaMensagem)
+
+    let contextoFrete = ''
+    if (cepEncontrado) {
+      try {
+        const baseUrl = getBaseUrl()
+        const freteRes = await fetch(`${baseUrl}/api/luna/frete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cep: cepEncontrado, valorPedido: 0 }),
+        })
+        if (freteRes.ok) {
+          const frete = await freteRes.json()
+          contextoFrete =
+            `\n\n[CEP ${cepEncontrado} DETECTADO NA MENSAGEM]\n` +
+            `${frete.mensagem}\n` +
+            (frete.observacao ? `${frete.observacao}\n` : '')
+        }
+      } catch {
+        // falha silenciosa — Luna continua sem dados de frete
+      }
+    }
 
     const vendas   = cfg.agente_whatsapp_vendas  || '5518997474701'
     const suporte  = cfg.agente_whatsapp_suporte || '5511934102621'
     const nomeLuna = cfg.agente_nome             || 'Luna'
 
-    // System prompt dinâmico
-    const systemPrompt =
+    // ── System prompt base (do admin ou padrão) ───────────────────────────────
+    const systemPromptBase =
       cfg.agente_system_prompt ||
       `Você é a ${nomeLuna}, assistente virtual da Sixxis — empresa brasileira de Araçatuba/SP que vende climatizadores, aspiradores e bikes spinning de alto padrão.
 
@@ -83,9 +180,6 @@ PERSONALIDADE:
 - Usa emojis com moderação para dar leveza
 - Nunca inventa informações — se não sabe, encaminha para o WhatsApp
 - Responde de forma concisa (máximo 3 parágrafos por resposta)
-
-CATÁLOGO ATUAL:
-${catalogoTexto}
 
 LINKS ÚTEIS DO SITE:
 - Home: /
@@ -120,7 +214,10 @@ FORMATO DE RESPOSTA:
 - Para WhatsApp use: [Falar com Vendas](https://wa.me/${vendas})
 - Mantenha respostas curtas e diretas`
 
-    // Chamar Claude API
+    // ── System prompt final = base + contexto live + frete (se houver) ────────
+    const systemPromptFinal = systemPromptBase + contextoLive + contextoFrete
+
+    // ── Chamar Claude API ─────────────────────────────────────────────────────
     const apiKey = cfg.anthropic_api_key || process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
       return Response.json({
@@ -130,7 +227,6 @@ FORMATO DE RESPOSTA:
 
     const anthropic = new Anthropic({ apiKey })
 
-    // Filtrar somente as últimas 10 mensagens e garantir roles alternadas
     const historico = mensagens
       .slice(-10)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,17 +234,20 @@ FORMATO DE RESPOSTA:
       .filter((m) => m.content.trim() !== '')
 
     const response = await anthropic.messages.create({
-      model:      cfg.agente_modelo   || 'claude-haiku-4-5-20251001',
-      max_tokens: Number(cfg.agente_max_tokens) || 400,
+      model:       cfg.agente_modelo    || 'claude-haiku-4-5-20251001',
+      max_tokens:  Number(cfg.agente_max_tokens) || 400,
       temperature: Number(cfg.agente_temperatura) || 0.7,
-      system:     systemPrompt,
-      messages:   historico,
+      system:      systemPromptFinal,
+      messages:    historico,
     })
 
     const resposta =
       response.content[0].type === 'text'
         ? response.content[0].text
         : 'Desculpe, não consegui processar sua mensagem.'
+
+    // Suprimir aviso de sessionId não usado
+    void sessionId
 
     return Response.json({ resposta })
   } catch (error) {
