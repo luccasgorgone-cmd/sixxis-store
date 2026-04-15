@@ -317,24 +317,46 @@ export default function SobrePage() {
         </div>
       </section>
 
+      {/* ─── MAPA ─── */}
+      <section className="py-12 bg-white border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <Reveal>
+            <h2 className="text-lg font-extrabold text-gray-900 mb-1">Nossa localização</h2>
+            <p className="text-sm text-gray-500 mb-5">R. Anhanguera, 1711 — Icaray, Araçatuba - SP, 16020-355</p>
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+              <iframe
+                src="https://maps.google.com/maps?q=R.+Anhanguera+1711+Ara%C3%A7atuba+SP&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="300"
+                style={{ border: 0, display: 'block' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Localização Sixxis — R. Anhanguera, 1711, Araçatuba-SP"
+              />
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ─── CTA FINAL ─── */}
-      <section className="py-14 bg-white border-t border-gray-100">
+      <section className="py-14" style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 100%)' }}>
         <Reveal className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
+          <h2 className="text-2xl font-extrabold text-white mb-3">
             Faça parte da história Sixxis
           </h2>
-          <p className="text-gray-500 text-sm mb-6 max-w-lg mx-auto">
+          <p className="text-white/65 text-sm mb-6 max-w-lg mx-auto">
             Junte-se a mais de 1 milhão de clientes que confiam na qualidade Sixxis
             para o conforto e bem-estar do seu dia a dia.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/produtos"
               className="inline-flex items-center gap-2 bg-[#3cbfb3] text-white font-extrabold px-6 py-3.5 rounded-2xl hover:bg-[#2a9d8f] hover:-translate-y-0.5 transition text-sm"
-              style={{ boxShadow: '0 4px 14px rgba(60,191,179,0.3)' }}>
+              style={{ boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}>
               Ver catálogo <ArrowRight size={15} />
             </Link>
             <Link href="/seja-revendedor"
-              className="inline-flex items-center gap-2 border border-gray-200 text-gray-700 font-semibold px-6 py-3.5 rounded-2xl hover:border-[#3cbfb3] hover:text-[#3cbfb3] transition text-sm">
+              className="inline-flex items-center gap-2 border border-white/25 text-white font-semibold px-6 py-3.5 rounded-2xl hover:border-white/50 hover:bg-white/10 transition text-sm">
               Seja um parceiro
             </Link>
           </div>

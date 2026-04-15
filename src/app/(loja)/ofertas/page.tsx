@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import CountdownTimer from '@/components/layout/CountdownTimer'
+import RaioIcon from '@/components/ui/RaioIcon'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +40,11 @@ export default async function OfertasPage() {
           <span className="inline-block bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-wider">
             🔥 Promoções especiais
           </span>
-          <h1 className="text-4xl font-extrabold text-white mb-2">Ofertas da Semana</h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <RaioIcon size={32} comFundo={false} animate={true} />
+            <h1 className="text-4xl font-extrabold text-white">Ofertas da Semana</h1>
+            <RaioIcon size={32} comFundo={false} animate={true} />
+          </div>
           <p className="text-white/60 mb-6">Preços imperdíveis por tempo limitado</p>
 
           {/* Countdown */}

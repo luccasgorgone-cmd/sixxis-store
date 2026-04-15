@@ -55,14 +55,14 @@ export default function OfertasRelampago({ produtos }: Props) {
 
             {/* Título com raio nos dois lados */}
             <div className="flex items-center gap-3">
-              <RaioIcon size={26} comFundo={false} />
+              <RaioIcon size={32} comFundo={false} animate={true} />
               <div className="text-center">
                 <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-none tracking-tight">
                   Ofertas Relâmpago
                 </h2>
                 <p className="text-white/55 text-xs mt-0.5">Aproveite antes que acabe!</p>
               </div>
-              <RaioIcon size={26} comFundo={false} />
+              <RaioIcon size={32} comFundo={false} animate={true} />
             </div>
 
             {/* Timer */}

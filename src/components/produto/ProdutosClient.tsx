@@ -55,17 +55,68 @@ const GRUPOS_CLIMATIZADORES: GrupoFiltro[] = [
 
 const GRUPOS_ASPIRADORES: GrupoFiltro[] = [
   {
+    id: 'tipo', label: 'Tipo', multiple: false,
+    opcoes: [
+      { label: 'Sem fio',  valor: 'sem-fio'  },
+      { label: 'Com fio',  valor: 'com-fio'  },
+      { label: 'Robô',     valor: 'robo'     },
+      { label: 'Multiuso', valor: 'multiuso' },
+    ],
+  },
+  {
     id: 'voltagem', label: 'Voltagem', multiple: false,
-    opcoes: [{ label: 'Bivolt', valor: 'bivolt' }],
+    opcoes: [
+      { label: '110V',    valor: '110V'    },
+      { label: '220V',    valor: '220V'    },
+      { label: 'Bivolt',  valor: 'bivolt'  },
+      { label: 'Bateria', valor: 'bateria' },
+    ],
+  },
+  {
+    id: 'potencia', label: 'Potência', multiple: false,
+    opcoes: [
+      { label: 'Até 1000W',      valor: 'ate1000'   },
+      { label: '1000 a 1500W',   valor: '1000-1500' },
+      { label: 'Acima de 1500W', valor: 'mais1500'  },
+    ],
+  },
+  {
+    id: 'desconto', label: 'Desconto', multiple: false,
+    opcoes: [
+      { label: '10% ou mais', valor: '10' },
+      { label: '20% ou mais', valor: '20' },
+    ],
   },
 ]
 
 const GRUPOS_SPINNING: GrupoFiltro[] = [
   {
+    id: 'tipo', label: 'Tipo', multiple: false,
+    opcoes: [
+      { label: 'Bike Spinning',    valor: 'spinning'   },
+      { label: 'Bike Ergométrica', valor: 'ergometrica' },
+    ],
+  },
+  {
+    id: 'resistencia', label: 'Resistência', multiple: false,
+    opcoes: [
+      { label: 'Magnética',        valor: 'magnetica'        },
+      { label: 'Por Atrito',       valor: 'atrito'           },
+      { label: 'Eletromagnética',  valor: 'eletromagnetica'  },
+    ],
+  },
+  {
     id: 'voltagem', label: 'Alimentação', multiple: false,
     opcoes: [
       { label: 'Bivolt',   valor: 'bivolt'   },
       { label: 'Bateria',  valor: 'bateria'  },
+    ],
+  },
+  {
+    id: 'desconto', label: 'Desconto', multiple: false,
+    opcoes: [
+      { label: '10% ou mais', valor: '10' },
+      { label: '20% ou mais', valor: '20' },
     ],
   },
 ]

@@ -204,7 +204,7 @@ main {
     animation: wa-pulse 2s infinite;
   }
 
-  /* ── Raio (badge HOT nav) pulse ── */
+  /* ── Raio animations ── */
   @keyframes raio-pulse {
     0%, 100% { transform: scale(1) rotate(-5deg); }
     50%       { transform: scale(1.2) rotate(5deg); }
@@ -212,6 +212,37 @@ main {
   .raio-pulse {
     animation: raio-pulse 1.5s ease-in-out infinite;
     display: inline-block;
+  }
+  @keyframes raio-flash {
+    0%, 100% {
+      transform: scale(1) rotate(-8deg);
+      filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
+    }
+    25% { transform: scale(1.3) rotate(0deg);  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); }
+    50% { transform: scale(1.15) rotate(8deg); filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7)); }
+    75% { transform: scale(1.2) rotate(-4deg); filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)); }
+  }
+  @keyframes raio-glow {
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)); }
+    50%       { filter: drop-shadow(0 0 14px rgba(255, 215, 0, 1)) drop-shadow(0 0 28px rgba(255, 165, 0, 0.6)); }
+  }
+  .raio-flash {
+    animation: raio-flash 2s ease-in-out infinite;
+    display: inline-block;
+    transform-origin: center bottom;
+  }
+  .raio-glow {
+    animation: raio-glow 1.8s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  /* ── Scrollbar hide utility ── */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .raio-flash, .raio-glow, .raio-pulse { animation: none; }
   }
 
   /* ── Classes dinâmicas via CSS custom properties ── */

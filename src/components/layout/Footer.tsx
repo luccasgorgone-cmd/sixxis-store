@@ -223,8 +223,6 @@ export default async function Footer() {
                   </svg>
                 </a>
               </div>
-              <p className="text-white/40 text-[10px] mb-6">@sixxisoficial</p>
-
               <ColTitle>Certificados</ColTitle>
               <div className="space-y-2">
                 {[

@@ -2,13 +2,16 @@ interface Props {
   size?: number
   comFundo?: boolean
   className?: string
+  animate?: boolean
 }
 
-export default function RaioIcon({ size = 20, comFundo = false, className = '' }: Props) {
+export default function RaioIcon({ size = 20, comFundo = false, className = '', animate = true }: Props) {
+  const animClass = animate ? 'raio-flash' : ''
+
   if (comFundo) {
     return (
       <div
-        className={`flex items-center justify-center rounded-xl border-2 border-black/30 shadow-lg ${className}`}
+        className={`flex items-center justify-center rounded-xl border-2 border-black/30 shadow-lg ${animClass} ${className}`}
         style={{
           width: size * 2.2,
           height: size * 2.2,
@@ -32,22 +35,22 @@ export default function RaioIcon({ size = 20, comFundo = false, className = '' }
   }
 
   return (
-    <svg
-      width={size * 1.2}
-      height={size * 1.2}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      style={{ flexShrink: 0 }}
-    >
-      <path
-        d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
-        fill="#FFD700"
-        stroke="#111111"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
+    <span className={`inline-flex items-center ${animClass} ${className}`} style={{ flexShrink: 0 }}>
+      <svg
+        width={size * 1.2}
+        height={size * 1.2}
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <path
+          d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
+          fill="#FFD700"
+          stroke="#111111"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
   )
 }
