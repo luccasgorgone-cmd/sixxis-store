@@ -502,7 +502,7 @@ export default function LunaChat({
             <X size={10} className="text-gray-600" />
           </button>
           {/* Triângulo */}
-          <div className="absolute -bottom-2 left-8 w-4 h-4 bg-white border-r border-b border-gray-100 rotate-45" />
+          <div className="absolute -bottom-2 right-4 w-4 h-4 bg-white border-r border-b border-gray-100 rotate-45" />
         </div>
       )}
 
