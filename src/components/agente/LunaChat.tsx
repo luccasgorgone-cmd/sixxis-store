@@ -152,7 +152,7 @@ const CHIPS = ['Climatizadores', 'Aspiradores', 'Preços', 'Frete']
 // ── LunaChat ──────────────────────────────────────────────────────────────────
 
 export default function LunaChat({
-  saudacao       = 'Olá! Sou a Luna, consultora da Sixxis. Estou aqui para ajudar você a encontrar o climatizador ideal para seu ambiente. Como posso te ajudar?',
+  saudacao       = 'Olá! Sou a Luna, da Sixxis. Estou aqui para te ajudar com o que precisar — seja uma dúvida sobre nossos produtos, seu pedido ou qualquer informação. Como posso ajudar?',
   nome           = 'Luna',
   whatsappVendas = '5518997474701',
 }: Props) {
@@ -586,7 +586,7 @@ export default function LunaChat({
             </div>
             <div>
               <p className="text-xs text-gray-800 font-medium leading-snug">
-                Posso te ajudar a escolher o produto ideal? 😊
+                Olá! Estou disponível para te ajudar.
               </p>
               <p className="text-[10px] text-[#3cbfb3] font-semibold mt-1">
                 Luna · Sixxis
