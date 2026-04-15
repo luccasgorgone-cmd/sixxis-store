@@ -327,7 +327,7 @@ export default function SobrePage() {
               <iframe
                 src="https://maps.google.com/maps?q=R.+Anhanguera+1711+Ara%C3%A7atuba+SP&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
-                height="300"
+                className="h-[220px] sm:h-[300px]"
                 style={{ border: 0, display: 'block' }}
                 allowFullScreen
                 loading="lazy"

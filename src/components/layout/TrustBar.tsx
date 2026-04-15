@@ -27,15 +27,19 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false }:
         : 'bg-white border-t border-b border-gray-100'
     }`}>
       <div className="max-w-7xl mx-auto px-4">
-        <div className={`grid grid-cols-2 md:grid-cols-4 ${
-          transparent ? 'divide-x divide-white/15' : 'divide-x divide-gray-200'
-        }`}>
+        {/* Mobile: scroll horizontal / Desktop: grid */}
+        <div
+          className="flex md:grid md:grid-cols-4 gap-0 overflow-x-auto hide-scrollbar"
+          style={{ scrollbarWidth: 'none' }}
+        >
           {items.map(({ titulo, sub }, i) => {
             const Icon = ICONS[i % ICONS.length]
             return (
               <div
                 key={titulo}
-                className="flex items-center justify-center gap-3 py-1 px-3 hover:bg-white/5 transition-colors"
+                className={`flex items-center justify-center gap-3 py-1 px-4 sm:px-3 hover:bg-white/5 transition-colors shrink-0 md:shrink min-w-[180px] md:min-w-0 ${
+                  i > 0 ? (transparent ? 'border-l border-white/15' : 'border-l border-gray-200') : ''
+                }`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                   transparent ? 'bg-white/10' : 'bg-[#e8f8f7]'

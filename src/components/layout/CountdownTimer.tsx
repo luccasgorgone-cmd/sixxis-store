@@ -36,8 +36,8 @@ export default function CountdownTimer({ targetDate }: Props) {
       {blocks.map(({ label, value }, i) => (
         <div key={label} className="flex items-center gap-3">
           <div className="text-center">
-            <div className="bg-white/10 border border-white/20 rounded-xl px-4 py-2 min-w-[56px]">
-              <p className="text-2xl font-extrabold text-white tabular-nums">{pad(value)}</p>
+            <div className="timer-block bg-white/10 border border-white/20 rounded-xl px-4 py-2 min-w-[56px] flex items-center justify-center">
+              <p className="timer-value text-2xl font-extrabold text-white tabular-nums">{pad(value)}</p>
             </div>
             <p className="text-white/50 text-xs mt-1">{label}</p>
           </div>

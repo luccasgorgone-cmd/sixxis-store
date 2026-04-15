@@ -83,7 +83,7 @@ export default function OfertasRelampago({ produtos }: Props) {
                     <div className="flex flex-col items-center">
                       {/* Bloco número */}
                       <div
-                        className="relative rounded-2xl flex items-center justify-center border-2 border-black/30 overflow-hidden"
+                        className="timer-block relative rounded-2xl flex items-center justify-center border-2 border-black/30 overflow-hidden"
                         style={{
                           backgroundColor: '#3cbfb3',
                           minWidth: '72px',
@@ -93,7 +93,7 @@ export default function OfertasRelampago({ produtos }: Props) {
                       >
                         <div className="absolute left-0 right-0 top-1/2 -translate-y-px h-px bg-black/10" />
                         <div className="absolute top-0 left-0 right-0 h-8 bg-white/10 rounded-t-xl" />
-                        <span className="text-white font-black text-4xl font-mono tabular-nums leading-none tracking-tight relative z-10">
+                        <span className="timer-value text-white font-black text-4xl font-mono tabular-nums leading-none tracking-tight relative z-10">
                           {item.val}
                         </span>
                       </div>
