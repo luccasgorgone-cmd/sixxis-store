@@ -205,12 +205,7 @@ export async function GET(req: NextRequest) {
         _count: { genero: true },
       }),
       prisma.cliente.findMany({
-        where: {
-          dataNascimento: { not: null },
-          AND: [
-            { dataNascimento: { not: null } },
-          ],
-        },
+        where: { dataNascimento: { not: null } },
         select: { nome: true, email: true, dataNascimento: true },
       }),
     ])
