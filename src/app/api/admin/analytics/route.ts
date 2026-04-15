@@ -198,29 +198,30 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    // ── Demográficos (clientes cadastrados) ─────────────────────────────────
-    const [generoDist, aniversariantes] = await Promise.all([
-      prisma.cliente.groupBy({
-        by: ['genero'],
-        _count: { genero: true },
-      }),
-      prisma.cliente.findMany({
-        where: { dataNascimento: { not: null } },
-        select: { nome: true, email: true, dataNascimento: true },
-      }),
+    // ── Demográficos (clientes cadastrados) — raw queries para evitar bug de tipo circular do Prisma groupBy ──
+    type GeneroRow = { genero: string | null; total: bigint }
+    type ClienteRow = { nome: string; email: string; dataNascimento: Date | null }
+
+    const [generoDist, aniversariantesRaw] = await Promise.all([
+      prisma.$queryRaw<GeneroRow[]>`
+        SELECT genero, COUNT(*) AS total FROM Cliente GROUP BY genero
+      `.catch(() => [] as GeneroRow[]),
+      prisma.$queryRaw<ClienteRow[]>`
+        SELECT nome, email, dataNascimento FROM Cliente WHERE dataNascimento IS NOT NULL
+      `.catch(() => [] as ClienteRow[]),
     ])
 
     // Gênero pie
     const generoMap: Record<string, number> = { masculino: 0, feminino: 0, outro: 0, 'não informado': 0 }
-    generoDist.forEach((g: { genero: string | null; _count: { genero: number } }) => {
+    generoDist.forEach((g) => {
       const key = g.genero || 'não informado'
-      generoMap[key] = (generoMap[key] || 0) + g._count.genero
+      generoMap[key] = (generoMap[key] || 0) + Number(g.total)
     })
     const generoPie = Object.entries(generoMap)
       .filter(([, v]) => v > 0)
       .map(([nome, count]) => ({ nome, count }))
 
-    // Faixa etária
+    // Faixa etária + aniversariantes
     const hoje = new Date()
     const faixas: Record<string, number> = {
       '< 18': 0, '18-24': 0, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0,
@@ -228,7 +229,7 @@ export async function GET(req: NextRequest) {
     const anivMes = hoje.getMonth() + 1
     const anivHoje: { nome: string; email: string; dia: number }[] = []
 
-    aniversariantes.forEach((c: { nome: string; email: string; dataNascimento: Date | null }) => {
+    aniversariantesRaw.forEach((c) => {
       if (!c.dataNascimento) return
       const nasc = new Date(c.dataNascimento)
       const idade = hoje.getFullYear() - nasc.getFullYear() -
