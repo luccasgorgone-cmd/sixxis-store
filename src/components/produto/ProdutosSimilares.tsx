@@ -81,10 +81,10 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-lg sm:text-xl font-extrabold text-gray-900">
+            <h2 className="text-xl font-extrabold text-gray-900">
               Você também pode gostar
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-sm font-medium text-gray-500 mt-0.5">
               Produtos selecionados especialmente para você
             </p>
           </div>

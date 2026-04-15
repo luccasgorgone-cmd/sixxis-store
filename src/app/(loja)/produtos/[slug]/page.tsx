@@ -8,6 +8,7 @@ import ProdutoGaleriaInfo from '@/components/produto/ProdutoGaleriaInfo'
 import DescricaoRica from '@/components/produto/DescricaoRica'
 import AbasProduto from '@/components/produto/AbasProduto'
 import ProdutosSimilares from '@/components/produto/ProdutosSimilares'
+import { EconomiaBloco } from '@/components/produto/EconomiaBloco'
 import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
 
@@ -111,6 +112,14 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   })()
   const faqs = (produto as unknown as { faqs?: FaqRow[] | null }).faqs ?? null
 
+  // Extrair potência em Watts das specs (NÃO usar vazão de ar)
+  const specPotencia = especificacoes.find(s =>
+    (s.label?.toLowerCase().includes('potênci') || s.label?.toLowerCase().includes('potenci')) &&
+    !s.label?.toLowerCase().includes('vazão') &&
+    !s.label?.toLowerCase().includes('consumo de água')
+  )?.valor
+  const consumoW = specPotencia ? parseInt(specPotencia.replace(/[^0-9]/g, '')) : 0
+
   const produtoParaInfo = {
     id: produto.id,
     nome: produto.nome,
@@ -155,6 +164,9 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
         {/* Descrição */}
         <DescricaoRica descricao={produto.descricao} />
+
+        {/* Bloco de economia — após Principais Benefícios, antes do FAQ */}
+        <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} />
 
         {/* Abas (Perguntas Frequentes + Avaliações) */}
         <div id="avaliacoes">
