@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { X, Wrench, ShoppingBag } from 'lucide-react'
 
 function WaIcon() {
@@ -17,35 +17,19 @@ interface Props {
 }
 
 export default function WhatsAppBotao({ onOcultar }: Props) {
-  const [aberto, setAberto]     = useState(false)
-  const [oculto, setOculto]     = useState(false)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOculto(localStorage.getItem('sixxis_wa_oculto') === '1')
-    }
-  }, [])
-
-  function ocultar() {
-    setOculto(true)
-    localStorage.setItem('sixxis_wa_oculto', '1')
-    onOcultar?.()
-  }
-
-  if (oculto) return null
+  const [aberto, setAberto] = useState(false)
 
   return (
     <div className="relative group/wa flex flex-col items-end gap-3">
       {/* × dismiss button — visible on hover of whole WA group */}
       <button
         type="button"
-        onClick={ocultar}
+        onClick={e => { e.stopPropagation(); onOcultar?.() }}
         aria-label="Ocultar atendimento"
-        className="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-gray-700 text-white flex items-center justify-center opacity-0 group-hover/wa:opacity-100 transition-opacity duration-200 shadow-md hover:bg-gray-900"
+        className="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-gray-700/80 backdrop-blur-sm text-white flex items-center justify-center text-[11px] font-bold leading-none opacity-0 group-hover/wa:opacity-100 transition-opacity duration-200 hover:bg-red-500 shadow-sm"
+        title="Ocultar (volta em 24h)"
       >
-        <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
-          <path d="M1 1l6 6M7 1L1 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
+        ×
       </button>
 
       {aberto && (

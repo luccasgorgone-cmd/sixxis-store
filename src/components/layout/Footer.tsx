@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import FooterAtendimentoBtn from './FooterAtendimentoBtn'
 
 // ── Payment Badge ─────────────────────────────────────────────────────────────
 function PaymentBadge({ label, cor, circular = false }: { label: string; cor: string; circular?: boolean }) {
@@ -109,6 +110,9 @@ export default async function Footer() {
                 >
                   Entre em Contato
                 </Link>
+                <div className="flex items-center justify-center w-full pt-0.5">
+                  <FooterAtendimentoBtn />
+                </div>
               </div>
 
             </div>
