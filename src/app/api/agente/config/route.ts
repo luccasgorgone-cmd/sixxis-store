@@ -23,6 +23,7 @@ export async function GET() {
             'agente_followup_mensagem_2',
             'agente_encerramento_auto',
             'agente_mensagem_encerramento',
+            'agente_system_prompt',
           ],
         },
       },
@@ -45,6 +46,7 @@ export async function GET() {
       followupMensagem2:   cfg.agente_followup_mensagem_2 || 'Se preferir, fale com nossa equipe pelo WhatsApp. Foi um prazer!',
       encerramentoAuto:    cfg.agente_encerramento_auto  !== 'false',
       mensagemEncerramento: cfg.agente_mensagem_encerramento || '👋 Encerrando o atendimento por inatividade. Se precisar de ajuda, é só abrir o chat novamente.',
+      system_prompt:       cfg.agente_system_prompt      || '',
     })
   } catch (error) {
     console.error('[AGENTE CONFIG]', error)
