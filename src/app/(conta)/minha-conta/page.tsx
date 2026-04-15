@@ -1,104 +1,314 @@
-import type { Metadata } from 'next'
-import { auth } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import LayoutConta from '@/components/conta/LayoutConta'
-import { ShoppingBag, Coins, Package, MapPin } from 'lucide-react'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import LayoutConta from '@/components/conta/LayoutConta'
+import {
+  ShoppingBag, Gift, TrendingUp, ChevronRight,
+  Package, Star, Zap, Clock, CheckCircle, Truck,
+} from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
-export const metadata: Metadata = { title: 'Minha Conta' }
-
-function fmt(v: number) {
-  return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+function formatValor(v: number) {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-const STATUS_LABEL: Record<string, string> = { pendente: 'Pendente', pago: 'Pago', enviado: 'Enviado', entregue: 'Entregue', cancelado: 'Cancelado' }
-const STATUS_COLOR: Record<string, string> = { pendente: 'bg-amber-50 text-amber-700', pago: 'bg-blue-50 text-blue-700', enviado: 'bg-purple-50 text-purple-700', entregue: 'bg-green-50 text-green-700', cancelado: 'bg-gray-100 text-gray-500' }
+function IconeNivel({ nivel, size = 32 }: { nivel: string; size?: number }) {
+  const configs: Record<string, { g1: string; g2: string; sombra: string }> = {
+    Bronze:   { g1: '#cd7f32', g2: '#a0522d', sombra: '#cd7f3250' },
+    Prata:    { g1: '#94a3b8', g2: '#64748b', sombra: '#94a3b850' },
+    Ouro:     { g1: '#f59e0b', g2: '#d97706', sombra: '#f59e0b50' },
+    Diamante: { g1: '#60a5fa', g2: '#3b82f6', sombra: '#3b82f650' },
+    Black:    { g1: '#374151', g2: '#111827', sombra: '#37415150' },
+  }
+  const c = configs[nivel] || configs.Bronze
+  const s = size * 0.5
+  return (
+    <div
+      className="rounded-xl flex items-center justify-center shrink-0"
+      style={{
+        width: size, height: size,
+        background: `linear-gradient(145deg, ${c.g1}, ${c.g2})`,
+        boxShadow: `0 4px 12px ${c.sombra}`,
+      }}
+    >
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        {nivel === 'Diamante' ? (
+          <path d="M6 3L2 9L12 21L22 9L18 3H6Z" fill="white" opacity="0.9" />
+        ) : (
+          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z"
+            fill="white" opacity="0.9" />
+        )}
+      </svg>
+    </div>
+  )
+}
 
-export default async function MinhaContaPage() {
-  const session = await auth()
-  if (!session?.user?.id) redirect('/login?next=/minha-conta')
+const VANTAGENS_NIVEL: Record<string, string[]> = {
+  Bronze:   ['2% cashback em compras', 'Acesso ao extrato completo', 'Cupom de boas-vindas SIXXIS10'],
+  Prata:    ['3% cashback em compras', 'Frete grátis acima de R$300', 'Acesso antecipado a ofertas', 'Suporte prioritário'],
+  Ouro:     ['4% cashback em compras', 'Frete grátis a partir de R$200', 'Desconto exclusivo 5%', 'Atendimento VIP', 'Brindes surpresa'],
+  Diamante: ['5% cashback em compras', 'Frete grátis em qualquer pedido', 'Desconto 8% exclusivo', 'Gerente dedicado', 'Acesso a lançamentos'],
+  Black:    ['6% cashback em compras', 'Frete sempre grátis', 'Desconto 10% exclusivo', 'Atendimento 24h', 'Eventos Sixxis', 'Cashback em dobro em datas especiais'],
+}
 
-  const cliente = await prisma.cliente.findUnique({
-    where:  { id: session.user.id },
-    select: { nome: true, email: true, cashbackSaldo: true, totalGasto: true, totalPedidos: true },
-  })
-  if (!cliente) redirect('/login')
+const STATUS_CONFIG: Record<string, { label: string; cor: string; bg: string; Icone: React.ElementType }> = {
+  PENDENTE:    { label: 'Pendente',    cor: '#d97706', bg: '#fef3c7', Icone: Clock },
+  PROCESSANDO: { label: 'Processando', cor: '#2563eb', bg: '#dbeafe', Icone: Package },
+  ENVIADO:     { label: 'Enviado',     cor: '#7c3aed', bg: '#ede9fe', Icone: Truck },
+  ENTREGUE:    { label: 'Entregue',    cor: '#059669', bg: '#d1fae5', Icone: CheckCircle },
+  PENDENTE_L:  { label: 'Pendente',    cor: '#d97706', bg: '#fef3c7', Icone: Clock },
+  PAGO:        { label: 'Pago',        cor: '#2563eb', bg: '#dbeafe', Icone: Package },
+  CANCELADO:   { label: 'Cancelado',   cor: '#dc2626', bg: '#fee2e2', Icone: Clock },
+}
 
-  const pedidosRecentes = await prisma.pedido.findMany({
-    where:   { clienteId: session.user.id },
-    orderBy: { createdAt: 'desc' },
-    take:    3,
-    select:  { id: true, status: true, total: true, createdAt: true },
-  })
+const TODOS_NIVEIS = [
+  { nome: 'Bronze',   cor: '#cd7f32', cashback: '2%', max: 499 },
+  { nome: 'Prata',    cor: '#94a3b8', cashback: '3%', max: 1999 },
+  { nome: 'Ouro',     cor: '#f59e0b', cashback: '4%', max: 4999 },
+  { nome: 'Diamante', cor: '#3b82f6', cashback: '5%', max: 9999 },
+  { nome: 'Black',    cor: '#1a1a1a', cashback: '6%', max: null },
+]
+const ORDEM_NIVEIS = ['Bronze', 'Prata', 'Ouro', 'Diamante', 'Black']
+
+export default function MinhaContaPage() {
+  const { data: session } = useSession()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [dados, setDados] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [pedidos, setPedidos] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/cashback').then(r => r.json()),
+      fetch('/api/pedidos?limit=3').then(r => r.json()),
+    ]).then(([cashback, ped]) => {
+      setDados(cashback)
+      setPedidos(Array.isArray(ped.pedidos) ? ped.pedidos.slice(0, 3) : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [])
+
+  const nivel = dados?.nivel || { atual: 'Bronze', cor: '#cd7f32', progressoPercent: 0, proximoNivel: 'Prata', faltam: 500, cashbackPct: 0.02 }
+  const stats = dados?.estatisticas || {}
+
+  if (loading) {
+    return (
+      <LayoutConta>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl h-32 animate-pulse border border-gray-100" />
+          ))}
+        </div>
+      </LayoutConta>
+    )
+  }
 
   return (
     <LayoutConta>
       <div className="space-y-5">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#0f2e2b] to-[#1a4f4a] rounded-2xl px-6 py-5 text-white">
-          <p className="text-sm text-white/60">Olá,</p>
-          <p className="text-xl font-extrabold">{cliente.nome}</p>
-          <p className="text-xs text-white/50 mt-0.5">{cliente.email}</p>
+
+        {/* ── BANNER HERO ── */}
+        <div className="relative overflow-hidden rounded-2xl"
+          style={{ background: 'linear-gradient(135deg, #0b2220 0%, #0f2e2b 60%, #1a4f4a 100%)' }}>
+          <div className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: '24px 24px',
+            }} />
+          <div className="relative p-6 sm:p-8">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-white/60 text-sm mb-1">Olá,</p>
+                <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-1">
+                  {session?.user?.name?.split(' ')[0] || 'Cliente'}
+                </h1>
+                <p className="text-white/50 text-sm">{session?.user?.email}</p>
+              </div>
+              <div className="flex flex-col items-center gap-2 shrink-0">
+                <IconeNivel nivel={nivel.atual} size={52} />
+                <span className="text-xs font-black px-2.5 py-1 rounded-full"
+                  style={{ backgroundColor: `${nivel.cor}25`, color: nivel.cor }}>
+                  {nivel.atual}
+                </span>
+              </div>
+            </div>
+
+            {nivel.proximoNivel && (
+              <div className="mt-5">
+                <div className="flex justify-between text-xs text-white/50 mb-2">
+                  <span>{nivel.atual}</span>
+                  <span>{nivel.proximoNivel}</span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-1.5">
+                  <div className="h-full rounded-full transition-all duration-1000"
+                    style={{ width: `${nivel.progressoPercent}%`, backgroundColor: nivel.cor }} />
+                </div>
+                <p className="text-xs text-white/50">
+                  Faltam{' '}
+                  <span className="text-white font-bold">{formatValor(nivel.faltam)}</span>{' '}
+                  para alcançar o nível {nivel.proximoNivel}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {/* ── STATS ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { icon: ShoppingBag, label: 'Pedidos',    value: String(cliente.totalPedidos),         color: 'text-blue-500',  bg: 'bg-blue-50'   },
-            { icon: Coins,       label: 'Cashback',   value: `R$ ${fmt(cliente.cashbackSaldo)}`,   color: 'text-[#3cbfb3]', bg: 'bg-[#f0fffe]' },
-            { icon: Package,     label: 'Total Gasto',value: `R$ ${fmt(cliente.totalGasto)}`,      color: 'text-amber-500', bg: 'bg-amber-50'  },
-          ].map(({ icon: Icon, label, value, color, bg }) => (
-            <div key={label} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-              <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center mb-3`}>
-                <Icon size={16} className={color} />
+            { label: 'Saldo Cashback', valor: formatValor(dados?.saldo || 0), Icone: Gift, cor: '#3cbfb3', bg: '#e8f8f7', href: '/minha-conta/cashback', destaque: true },
+            { label: 'Total Gasto',    valor: formatValor(dados?.totalGasto || 0), Icone: TrendingUp, cor: '#16a34a', bg: '#dcfce7', href: '/minha-conta/pedidos', destaque: false },
+            { label: 'Pedidos',        valor: String(stats.totalCompras || 0), Icone: ShoppingBag, cor: '#2563eb', bg: '#dbeafe', href: '/minha-conta/pedidos', destaque: false },
+            { label: 'Cashback Ganho', valor: formatValor(stats.cashbackAcumulado || 0), Icone: Star, cor: '#f59e0b', bg: '#fef9c3', href: '/minha-conta/cashback', destaque: false },
+          ].map((s, i) => (
+            <Link key={i} href={s.href}
+              className={[
+                'bg-white rounded-2xl border shadow-sm p-4 hover:shadow-md hover:-translate-y-0.5 transition-all group',
+                s.destaque ? 'border-[#3cbfb3]/30' : 'border-gray-100',
+              ].join(' ')}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
+                style={{ backgroundColor: s.bg }}>
+                <s.Icone size={17} style={{ color: s.cor }} />
               </div>
-              <p className="text-xs text-gray-500 mb-0.5">{label}</p>
-              <p className="text-base font-extrabold text-gray-900">{value}</p>
-            </div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{s.label}</p>
+              <p className={`text-lg font-black mt-0.5 ${s.destaque ? 'text-[#3cbfb3]' : 'text-gray-900'}`}>
+                {s.valor}
+              </p>
+            </Link>
           ))}
         </div>
 
-        {/* Pedidos recentes */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <h2 className="font-extrabold text-gray-900">Pedidos Recentes</h2>
-            <Link href="/minha-conta/pedidos" className="text-xs text-[#3cbfb3] hover:text-[#2a9d8f] font-semibold">Ver todos →</Link>
+        {/* ── GRADE: Pedidos + Benefícios ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          {/* Pedidos Recentes */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-black text-gray-900">Pedidos Recentes</h2>
+              <Link href="/minha-conta/pedidos"
+                className="text-xs text-[#3cbfb3] hover:underline flex items-center gap-1">
+                Ver todos <ChevronRight size={11} />
+              </Link>
+            </div>
+            {pedidos.length === 0 ? (
+              <div className="py-8 text-center">
+                <ShoppingBag size={32} className="text-gray-200 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">Nenhum pedido ainda</p>
+                <Link href="/produtos"
+                  className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl"
+                  style={{ backgroundColor: '#3cbfb3', color: '#0f2e2b' }}>
+                  <Zap size={12} /> Explorar produtos
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {pedidos.map((p: any) => {
+                  const stKey = String(p.status || '').toUpperCase()
+                  const st = STATUS_CONFIG[stKey] || STATUS_CONFIG.PENDENTE
+                  return (
+                    <Link key={p.id} href={`/minha-conta/pedidos/${p.id}`}
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: st.bg }}>
+                        <st.Icone size={16} style={{ color: st.cor }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-gray-900">#{String(p.id).slice(-8).toUpperCase()}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {new Date(p.createdAt).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-black text-gray-900">{formatValor(Number(p.total))}</p>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                          style={{ backgroundColor: st.bg, color: st.cor }}>
+                          {st.label}
+                        </span>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
           </div>
-          {pedidosRecentes.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">Nenhum pedido ainda.</p>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {pedidosRecentes.map(p => (
-                <div key={p.id} className="flex items-center justify-between px-5 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">#{p.id.slice(-8).toUpperCase()}</p>
-                    <p className="text-xs text-gray-400">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</p>
+
+          {/* Benefícios do Nível */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-5"
+              style={{ backgroundColor: nivel.cor }} />
+            <div className="flex items-center gap-3 mb-4">
+              <IconeNivel nivel={nivel.atual} size={40} />
+              <div>
+                <h2 className="text-sm font-black text-gray-900">Benefícios {nivel.atual}</h2>
+                <p className="text-xs" style={{ color: nivel.cor }}>
+                  {((nivel.cashbackPct || 0.02) * 100).toFixed(0)}% cashback em todas as compras
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              {(VANTAGENS_NIVEL[nivel.atual] || []).map((v, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ backgroundColor: `${nivel.cor}20` }}>
+                    <svg width="8" height="8" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke={nivel.cor} strokeWidth="1.5"
+                        strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLOR[p.status] ?? 'bg-gray-100 text-gray-500'}`}>
-                      {STATUS_LABEL[p.status] ?? p.status}
-                    </span>
-                    <span className="text-sm font-bold text-gray-900">R$ {fmt(Number(p.total))}</span>
-                  </div>
+                  <p className="text-xs text-gray-600 leading-snug">{v}</p>
                 </div>
               ))}
             </div>
-          )}
+            {nivel.proximoNivel && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-400 mb-2">
+                  Próximo nível: <strong className="text-gray-700">{nivel.proximoNivel}</strong>
+                </p>
+                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${nivel.progressoPercent}%`, backgroundColor: nivel.cor }} />
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">{nivel.progressoPercent}% concluído</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Quick links */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/minha-conta/enderecos" className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition">
-            <MapPin size={18} className="text-[#3cbfb3]" />
-            <div><p className="text-sm font-semibold text-gray-900">Endereços</p><p className="text-xs text-gray-400">Gerenciar</p></div>
-          </Link>
-          <Link href="/minha-conta/cashback" className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition">
-            <Coins size={18} className="text-[#3cbfb3]" />
-            <div><p className="text-sm font-semibold text-gray-900">Cashback</p><p className="text-xs text-gray-400">Ver extrato</p></div>
-          </Link>
+        {/* ── TODOS OS NÍVEIS ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h2 className="text-sm font-black text-gray-900 mb-4">Programa de Fidelidade Sixxis</h2>
+          <div className="grid grid-cols-5 gap-2">
+            {TODOS_NIVEIS.map((n, i) => {
+              const isAtual = n.nome === nivel.atual
+              const idxAtual = ORDEM_NIVEIS.indexOf(nivel.atual)
+              const isAlcancado = i <= idxAtual
+              return (
+                <div key={i}
+                  className={[
+                    'flex flex-col items-center p-3 rounded-2xl border-2 transition-all',
+                    isAtual ? 'border-[#3cbfb3] shadow-md' : isAlcancado ? 'border-gray-200 bg-gray-50/50' : 'border-transparent bg-gray-50',
+                  ].join(' ')}>
+                  <IconeNivel nivel={n.nome} size={36} />
+                  <p className="text-[11px] font-black mt-2 text-gray-900">{n.nome}</p>
+                  <p className="text-[10px] font-bold" style={{ color: n.cor }}>{n.cashback} CB</p>
+                  <p className="text-[9px] text-gray-400 text-center mt-0.5">
+                    {n.max ? `até R$${(n.max / 1000).toFixed(0)}k` : 'R$10k+'}
+                  </p>
+                  {isAtual && (
+                    <span className="mt-1 text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                      style={{ backgroundColor: '#3cbfb3', color: '#0f2e2b' }}>
+                      ATUAL
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
+
       </div>
     </LayoutConta>
   )

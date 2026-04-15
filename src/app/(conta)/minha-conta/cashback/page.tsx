@@ -1,62 +1,197 @@
-import type { Metadata } from 'next'
-import { auth } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Gift, ArrowDownLeft, ArrowUpRight, Zap, Info } from 'lucide-react'
 import LayoutConta from '@/components/conta/LayoutConta'
-import { Coins, TrendingUp, TrendingDown } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
-export const metadata: Metadata = { title: 'Cashback' }
-
-function fmt(v: number) {
-  return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+function formatValor(v: number) {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+function formatData(d: string | Date) {
+  return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-export default async function CashbackPage() {
-  const session = await auth()
-  if (!session?.user?.id) redirect('/login?next=/minha-conta/cashback')
+function IconeNivel({ nivel, size = 28 }: { nivel: string; size?: number }) {
+  const configs: Record<string, { g1: string; g2: string; sombra: string }> = {
+    Bronze:   { g1: '#cd7f32', g2: '#a0522d', sombra: '#cd7f3250' },
+    Prata:    { g1: '#94a3b8', g2: '#64748b', sombra: '#94a3b850' },
+    Ouro:     { g1: '#f59e0b', g2: '#d97706', sombra: '#f59e0b50' },
+    Diamante: { g1: '#60a5fa', g2: '#3b82f6', sombra: '#3b82f650' },
+    Black:    { g1: '#374151', g2: '#111827', sombra: '#37415150' },
+  }
+  const c = configs[nivel] || configs.Bronze
+  const s = size * 0.5
+  return (
+    <div className="rounded-xl flex items-center justify-center shrink-0"
+      style={{ width: size, height: size, background: `linear-gradient(145deg, ${c.g1}, ${c.g2})`, boxShadow: `0 4px 12px ${c.sombra}` }}>
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        {nivel === 'Diamante' ? (
+          <path d="M6 3L2 9L12 21L22 9L18 3H6Z" fill="white" opacity="0.9" />
+        ) : (
+          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="white" opacity="0.9" />
+        )}
+      </svg>
+    </div>
+  )
+}
 
-  const [cliente, transacoes] = await Promise.all([
-    prisma.cliente.findUnique({ where: { id: session.user.id }, select: { cashbackSaldo: true } }),
-    prisma.cashbackTransacao.findMany({ where: { clienteId: session.user.id }, orderBy: { createdAt: 'desc' }, take: 50 }),
-  ])
+export default function CashbackPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [dados, setDados] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [filtro, setFiltro] = useState<'todos' | 'credito' | 'debito'>('todos')
 
-  const saldo = cliente?.cashbackSaldo ?? 0
+  useEffect(() => {
+    fetch('/api/cashback').then(r => r.json()).then(d => {
+      setDados(d); setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <LayoutConta>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl h-32 animate-pulse border border-gray-100" />
+          ))}
+        </div>
+      </LayoutConta>
+    )
+  }
+
+  const nivel = dados?.nivel || { atual: 'Bronze', cor: '#cd7f32', cashbackPct: 0.02 }
+  const stats = dados?.estatisticas || {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const extrato = (dados?.extrato || []).filter((t: any) =>
+    filtro === 'todos' ? true : filtro === 'credito' ? t.tipo === 'credito' : t.tipo === 'debito'
+  )
 
   return (
     <LayoutConta>
       <div className="space-y-5">
-        <div className="bg-gradient-to-r from-[#0f2e2b] to-[#1a4f4a] rounded-2xl px-6 py-5 text-white">
-          <p className="text-sm text-white/60 flex items-center gap-2"><Coins size={14} /> Saldo de Cashback</p>
-          <p className="text-3xl font-black mt-1">R$ {fmt(saldo)}</p>
-          <p className="text-xs text-white/50 mt-1">Disponível para usar na próxima compra</p>
+
+        {/* ── HERO SALDO ── */}
+        <div className="relative overflow-hidden rounded-2xl"
+          style={{ background: `linear-gradient(135deg, #0b2220 0%, #0f2e2b 55%, ${nivel.cor}30 100%)` }}>
+          <div className="absolute inset-0 opacity-5"
+            style={{ backgroundImage: 'radial-gradient(circle at 3px 3px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+          <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full opacity-10"
+            style={{ backgroundColor: nivel.cor }} />
+
+          <div className="relative p-6 sm:p-8">
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Gift size={16} className="text-white/60" />
+                  <p className="text-white/60 text-sm font-medium">Saldo disponível</p>
+                </div>
+                <p className="text-4xl font-black text-white">{formatValor(dados?.saldo || 0)}</p>
+                <p className="text-white/50 text-xs mt-1">Use no checkout como desconto</p>
+              </div>
+              <div className="text-right">
+                <p className="text-white/50 text-xs mb-1">Seu cashback</p>
+                <div className="flex items-center gap-1.5 justify-end">
+                  <IconeNivel nivel={nivel.atual} size={24} />
+                  <span className="text-2xl font-black" style={{ color: nivel.cor }}>
+                    {((nivel.cashbackPct || 0.02) * 100).toFixed(0)}%
+                  </span>
+                </div>
+                <p className="text-white/40 text-[10px]">nível {nivel.atual}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Total Ganho', valor: formatValor(stats.cashbackAcumulado || 0) },
+                { label: 'Total Usado', valor: formatValor(stats.cashbackUsado || 0) },
+                { label: 'Compras',     valor: String(stats.totalCompras || 0) },
+              ].map((s, i) => (
+                <div key={i} className="bg-white/10 rounded-xl p-3 text-center">
+                  <p className="text-white/50 text-[9px] uppercase tracking-wide">{s.label}</p>
+                  <p className="text-white font-black text-sm mt-0.5">{s.valor}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="bg-[#f0fffe] border border-[#3cbfb3]/20 rounded-2xl px-5 py-4">
-          <p className="text-sm font-semibold text-[#1a4f4a]">Como funciona?</p>
-          <p className="text-xs text-gray-600 mt-1">Você ganha <strong>3% de cashback</strong> em cada compra aprovada. O saldo pode ser usado como desconto no checkout.</p>
+        {/* ── COMO FUNCIONA ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Info size={16} className="text-[#3cbfb3]" />
+            <h2 className="text-sm font-black text-gray-900">Como funciona o cashback?</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { num: '01', titulo: 'Compre na Sixxis', desc: 'A cada compra aprovada, você recebe cashback automático na sua conta', cor: '#3cbfb3' },
+              { num: '02', titulo: 'Acumule saldo', desc: `Você tem ${((nivel.cashbackPct || 0.02) * 100).toFixed(0)}% de cashback no nível ${nivel.atual}. Suba de nível para ganhar mais!`, cor: nivel.cor },
+              { num: '03', titulo: 'Use no checkout', desc: 'Na finalização, aplique seu saldo como desconto (até 20% do valor do pedido)', cor: '#16a34a' },
+            ].map((s, i) => (
+              <div key={i} className="flex gap-3 p-3 rounded-xl" style={{ backgroundColor: `${s.cor}08` }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black"
+                  style={{ backgroundColor: `${s.cor}20`, color: s.cor }}>{s.num}</div>
+                <div>
+                  <p className="text-xs font-bold text-gray-900">{s.titulo}</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5 leading-snug">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-50"><h2 className="font-bold text-gray-900 text-sm">Extrato</h2></div>
-          {transacoes.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-10">Nenhuma transação ainda.</p>
+        {/* ── EXTRATO ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-black text-gray-900">Extrato</h2>
+            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+              {[
+                { id: 'todos', label: 'Todos' },
+                { id: 'credito', label: 'Entradas' },
+                { id: 'debito', label: 'Saídas' },
+              ].map(f => (
+                <button key={f.id}
+                  onClick={() => setFiltro(f.id as 'todos' | 'credito' | 'debito')}
+                  className={[
+                    'px-2.5 py-1 rounded-lg text-xs font-semibold transition-all',
+                    filtro === f.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700',
+                  ].join(' ')}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {extrato.length === 0 ? (
+            <div className="py-12 text-center">
+              <Gift size={36} className="text-gray-200 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm">Nenhuma transação ainda</p>
+              <p className="text-gray-300 text-xs mt-1">Faça sua primeira compra para começar a ganhar cashback!</p>
+              <a href="/produtos"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl"
+                style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
+                <Zap size={14} /> Ver produtos
+              </a>
+            </div>
           ) : (
             <div className="divide-y divide-gray-50">
-              {transacoes.map(t => (
-                <div key={t.id} className="flex items-center justify-between px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${t.tipo === 'credito' ? 'bg-green-50' : 'bg-red-50'}`}>
-                      {t.tipo === 'credito' ? <TrendingUp size={14} className="text-green-600" /> : <TrendingDown size={14} className="text-red-500" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{t.descricao ?? (t.tipo === 'credito' ? 'Cashback creditado' : 'Cashback utilizado')}</p>
-                      <p className="text-xs text-gray-400">{new Date(t.createdAt).toLocaleDateString('pt-BR')}</p>
-                    </div>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {extrato.map((t: any, i: number) => (
+                <div key={i} className="flex items-center gap-3 py-3 hover:bg-gray-50/50 px-2 rounded-xl transition-colors">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${t.tipo === 'credito' ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                    {t.tipo === 'credito'
+                      ? <ArrowDownLeft size={16} className="text-emerald-600" />
+                      : <ArrowUpRight size={16} className="text-red-500" />
+                    }
                   </div>
-                  <span className={`text-sm font-bold ${t.tipo === 'credito' ? 'text-green-600' : 'text-red-500'}`}>
-                    {t.tipo === 'credito' ? '+' : '-'}R$ {fmt(t.valor)}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-gray-900 truncate">
+                      {t.descricao || (t.tipo === 'credito' ? 'Cashback recebido' : 'Cashback usado')}
+                    </p>
+                    <p className="text-[10px] text-gray-400">{formatData(t.createdAt)}</p>
+                  </div>
+                  <p className={`text-sm font-black shrink-0 ${t.tipo === 'credito' ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {t.tipo === 'credito' ? '+' : '-'}{formatValor(t.valor)}
+                  </p>
                 </div>
               ))}
             </div>

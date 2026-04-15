@@ -60,7 +60,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-3xl shadow-2xl p-8">
 
           <div className="text-center mb-7">
-            <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Bem-vindo de volta!</h1>
+            <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Bem-vindo!</h1>
             <p className="text-sm text-gray-500">Entre na sua conta para continuar</p>
           </div>
 
