@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     }),
   }
 
-  const [pedidos, total] = await Promise.all([
+  const [pedidos, total, statsPendentes, statsEnviados, statsReceita] = await Promise.all([
     prisma.pedido.findMany({
       where,
       skip: (page - 1) * limit,
@@ -52,7 +52,18 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.pedido.count({ where }),
+    prisma.pedido.count({ where: { ...where, status: 'pendente' } }),
+    prisma.pedido.count({ where: { ...where, status: 'enviado' } }),
+    prisma.pedido.aggregate({ where, _sum: { total: true } }),
   ])
 
-  return NextResponse.json({ pedidos, total, page, limit })
+  return NextResponse.json({
+    pedidos, total, page, limit,
+    stats: {
+      total,
+      pendentes: statsPendentes,
+      enviados:  statsEnviados,
+      receita:   Number(statsReceita._sum.total ?? 0),
+    },
+  })
 }

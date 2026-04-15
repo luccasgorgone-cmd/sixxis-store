@@ -6,7 +6,7 @@ import React from 'react'
 import {
   ChevronDown, ChevronRight, Loader2, ShoppingCart,
   Search, Package, MapPin, CreditCard, Truck, CheckCircle,
-  Clock, AlertCircle, Save,
+  Clock, AlertCircle, Save, DollarSign,
 } from 'lucide-react'
 import { Toast } from '@/components/admin/Toast'
 
@@ -33,6 +33,8 @@ interface Pedido {
   codigoRastreio: string | null; createdAt: string
   cliente: Cliente; endereco: Endereco; itens: ItemPedido[]
 }
+
+interface Stats { total: number; pendentes: number; enviados: number; receita: number }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -264,6 +266,7 @@ function PedidoDetalhe({
 export default function AdminPedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [total, setTotal] = useState(0)
+  const [stats, setStats] = useState<Stats | null>(null)
   const [page, setPage] = useState(1)
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('')
@@ -284,6 +287,7 @@ export default function AdminPedidosPage() {
     const data = await res.json()
     setPedidos(data.pedidos ?? [])
     setTotal(data.total ?? 0)
+    if (data.stats) setStats(data.stats)
     setLoading(false)
   }, [page, q, status, pagamento, from, to])
 
@@ -310,12 +314,36 @@ export default function AdminPedidosPage() {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div>
-        <div className="flex items-center justify-between mb-6">
+      <div className="space-y-5 pb-8">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
             <p className="text-gray-500 text-sm mt-0.5">{total} pedido{total !== 1 ? 's' : ''}</p>
           </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Total no período', value: stats?.total ?? '—', icon: ShoppingCart, iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500' },
+            { label: 'Pendentes',        value: stats?.pendentes ?? '—', icon: Clock,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-500' },
+            { label: 'Enviados',         value: stats?.enviados ?? '—',  icon: Truck,    iconBg: 'bg-purple-50', iconColor: 'text-purple-500' },
+            {
+              label: 'Receita',
+              value: stats ? stats.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—',
+              icon: DollarSign, iconBg: 'bg-[#3cbfb3]/10', iconColor: 'text-[#3cbfb3]',
+            },
+          ].map(({ label, value, icon: Icon, iconBg, iconColor }) => (
+            <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+                <Icon className={`w-4 h-4 ${iconColor}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 truncate">{label}</p>
+                <p className="text-lg font-bold text-gray-900 truncate">{value}</p>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Filtros */}

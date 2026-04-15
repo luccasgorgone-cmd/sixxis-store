@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     ...(ativoParam !== '' && { ativo: ativoParam === 'true' }),
   }
 
-  const [produtos, total] = await Promise.all([
+  const [produtos, total, statsTotal, statsAtivos, statsCriticos] = await Promise.all([
     prisma.produto.findMany({
       where,
       skip: (page - 1) * limit,
@@ -42,9 +42,15 @@ export async function GET(request: NextRequest) {
       include: { variacoes: { orderBy: { createdAt: 'asc' } } },
     }),
     prisma.produto.count({ where }),
+    prisma.produto.count(),
+    prisma.produto.count({ where: { ativo: true } }),
+    prisma.produto.count({ where: { estoque: { lte: 5 } } }),
   ])
 
-  return NextResponse.json({ produtos, total, page, limit })
+  return NextResponse.json({
+    produtos, total, page, limit,
+    stats: { total: statsTotal, ativos: statsAtivos, criticos: statsCriticos },
+  })
 }
 
 interface VariacaoInput {

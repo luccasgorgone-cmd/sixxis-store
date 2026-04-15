@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
         // Incrementar uso do cupom
         if (pedido.cupomCodigo) {
-          await prisma.cupom.update({ where: { codigo: pedido.cupomCodigo }, data: { usoAtual: { increment: 1 } } }).catch(() => {})
+          await prisma.cupom.update({ where: { codigo: pedido.cupomCodigo }, data: { totalUsos: { increment: 1 } } }).catch(() => {})
         }
 
         // Email de confirmação

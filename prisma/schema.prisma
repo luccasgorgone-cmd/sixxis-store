@@ -27,6 +27,7 @@ model Cliente {
   bloqueios        BloqueioFraude[]
   carrinho         Carrinho?
   cashback         CashbackTransacao[]
+  cupomUsos        CupomUso[]
   enderecos        Endereco[]
   historicoPontos  HistoricoPontos[]
   pedidos          Pedido[]
@@ -200,16 +201,37 @@ model Configuracao {
 }
 
 model Cupom {
-  id          String    @id @default(cuid())
-  codigo      String    @unique
-  tipo        String    @default("percentual")
-  valor       Decimal   @db.Decimal(10, 2)
-  usoMaximo   Int?
-  usoAtual    Int       @default(0)
-  valorMinimo Decimal?  @db.Decimal(10, 2)
-  expiresAt   DateTime?
-  ativo       Boolean   @default(true)
-  createdAt   DateTime  @default(now())
+  id             String     @id @default(cuid())
+  codigo         String     @unique
+  tipo           String     // "PERCENTUAL" | "VALOR_FIXO" | "FRETE_GRATIS"
+  valor          Float
+  usoMaximo      Int?
+  totalUsos      Int        @default(0)
+  pedidoMinimo   Float      @default(0)
+  validade       DateTime?
+  ativo          Boolean    @default(true)
+  descricao      String?
+  primeiraCompra Boolean    @default(false)
+  usos           CupomUso[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model CupomUso {
+  id            String    @id @default(cuid())
+  cupomId       String
+  cupom         Cupom     @relation(fields: [cupomId], references: [id], onDelete: Cascade)
+  clienteId     String?
+  cliente       Cliente?  @relation(fields: [clienteId], references: [id])
+  pedidoId      String?
+  emailCliente  String?
+  nomeCliente   String?
+  valorDesconto Float     @default(0)
+  valorPedido   Float     @default(0)
+  usadoEm       DateTime  @default(now())
+
+  @@index([cupomId])
+  @@index([clienteId])
 }
 
 model HistoricoPontos {

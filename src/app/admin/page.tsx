@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   DollarSign, ShoppingBag, TrendingUp, Package,
   Clock, Users, ArrowUpRight, ArrowDownRight,
-  AlertTriangle, Pencil, Tag,
+  AlertTriangle, Pencil, Tag, ChevronRight, Bell,
 } from 'lucide-react'
 
 // Recharts precisa de ssr: false — importamos cada gráfico separadamente
@@ -177,6 +177,21 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 pb-8 max-w-[1400px] mx-auto">
+      {/* Alert banner — pedidos pendentes */}
+      {!loading && m && m.pedidosPendentes > 0 && (
+        <Link
+          href="/admin/pedidos?status=pendente"
+          className="flex items-center gap-3 rounded-2xl px-5 py-3.5 border transition hover:shadow-sm group"
+          style={{ backgroundColor: '#fffbeb', borderColor: '#fcd34d' }}
+        >
+          <Bell className="w-4 h-4 text-amber-500 shrink-0" />
+          <p className="flex-1 text-sm font-medium text-amber-800">
+            Você tem <span className="font-bold">{m.pedidosPendentes} pedido{m.pedidosPendentes !== 1 ? 's' : ''} pendente{m.pedidosPendentes !== 1 ? 's' : ''}</span> aguardando atenção
+          </p>
+          <ChevronRight className="w-4 h-4 text-amber-400 group-hover:text-amber-600 transition" />
+        </Link>
+      )}
+
       {/* Header + filtro */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -278,32 +293,51 @@ export default function AdminDashboard() {
       </div>
 
       {/* Ações rápidas */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link href="/admin/produtos/novo"
-          className="flex items-center gap-3 rounded-2xl px-5 py-4 text-white font-semibold text-sm transition hover:-translate-y-0.5 hover:shadow-lg"
-          style={{ backgroundColor: '#0f2e2b' }}>
-          <Package className="w-5 h-5 shrink-0" />
-          <div>
-            <p className="font-bold">Adicionar Produto</p>
-            <p className="text-white/60 text-xs font-normal">Cadastrar novo item no catálogo</p>
-          </div>
-        </Link>
-        <Link href="/admin/pedidos"
-          className="flex items-center gap-3 rounded-2xl px-5 py-4 text-white font-semibold text-sm transition hover:-translate-y-0.5 hover:shadow-lg bg-indigo-600">
-          <ShoppingBag className="w-5 h-5 shrink-0" />
-          <div>
-            <p className="font-bold">Ver Pedidos</p>
-            <p className="text-white/60 text-xs font-normal">Gerenciar pedidos pendentes</p>
-          </div>
-        </Link>
-        <Link href="/admin/cupons"
-          className="flex items-center gap-3 rounded-2xl px-5 py-4 text-white font-semibold text-sm transition hover:-translate-y-0.5 hover:shadow-lg bg-violet-600">
-          <Tag className="w-5 h-5 shrink-0" />
-          <div>
-            <p className="font-bold">Criar Cupom</p>
-            <p className="text-white/60 text-xs font-normal">Configurar desconto promocional</p>
-          </div>
-        </Link>
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Ações rápidas</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            {
+              href: '/admin/produtos/novo',
+              icon: Package,
+              iconBg: 'bg-[#3cbfb3]/10',
+              iconColor: 'text-[#3cbfb3]',
+              label: 'Adicionar Produto',
+              sub: 'Cadastrar novo item no catálogo',
+            },
+            {
+              href: '/admin/pedidos',
+              icon: ShoppingBag,
+              iconBg: 'bg-indigo-50',
+              iconColor: 'text-indigo-500',
+              label: 'Ver Pedidos',
+              sub: 'Gerenciar pedidos pendentes',
+            },
+            {
+              href: '/admin/cupons',
+              icon: Tag,
+              iconBg: 'bg-violet-50',
+              iconColor: 'text-violet-500',
+              label: 'Criar Cupom',
+              sub: 'Configurar desconto promocional',
+            },
+          ].map(({ href, icon: Icon, iconBg, iconColor, label, sub }) => (
+            <Link
+              key={href}
+              href={href}
+              className="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 transition hover:shadow-md hover:-translate-y-0.5 group"
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+                <Icon className={`w-5 h-5 ${iconColor}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900">{label}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition shrink-0" />
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Atividade recente + Estoque crítico */}
