@@ -30,6 +30,7 @@ import { Toast } from '@/components/admin/Toast'
 const ESTADOS_BR = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
 const DEFAULTS: Record<string, string> = {
+  favicon_url: '',
   loja_nome: 'Sixxis Store',
   loja_descricao: 'Loja oficial Sixxis. Climatizadores, aspiradores e spinning.',
   loja_email: 'brasil.sixxis@gmail.com',
@@ -645,6 +646,118 @@ export default function ConfiguracoesPage() {
     return (
       <div className="space-y-5">
 
+        {/* ── Favicon ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Favicon</h3>
+              <p className="text-xs text-gray-400 mt-1">
+                Ícone exibido na aba do navegador e favoritos. Recomendado: 32×32px ou 64×64px, PNG ou ICO.
+              </p>
+            </div>
+            {configs.favicon_url && (
+              <div className="flex items-center gap-1.5 bg-gray-50 rounded-xl px-3 py-2 border border-gray-100 shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={configs.favicon_url} alt="favicon" className="w-4 h-4 object-contain" />
+                <span className="text-xs text-gray-500">Ativo</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-start gap-4 flex-col sm:flex-row">
+            {/* Preview de aba do browser */}
+            <div className="shrink-0">
+              <p className="text-xs text-gray-400 mb-1.5">Preview</p>
+              <div className="flex items-center gap-1.5 bg-gray-100 rounded-t-lg px-3 py-2 w-36 border border-gray-200">
+                {configs.favicon_url
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={configs.favicon_url} alt="favicon" className="w-4 h-4 object-contain shrink-0" />
+                  : <div className="w-4 h-4 rounded bg-gray-300 shrink-0" />
+                }
+                <span className="text-[10px] text-gray-500 truncate flex-1">Sixxis Store</span>
+                <span className="text-gray-400 text-[10px] ml-auto">×</span>
+              </div>
+              <div className="h-1 bg-white border-x border-b border-gray-200 w-36 rounded-b-sm" />
+            </div>
+
+            {/* Upload */}
+            <div className="flex-1 w-full">
+              <label className="block cursor-pointer">
+                <div className={`border-2 border-dashed rounded-xl p-5 text-center transition-colors ${
+                  configs.favicon_url
+                    ? 'border-[#3cbfb3]/40 bg-[#3cbfb3]/5 hover:border-[#3cbfb3]'
+                    : 'border-gray-200 hover:border-[#3cbfb3] hover:bg-gray-50'
+                }`}>
+                  {configs.favicon_url ? (
+                    <div className="flex items-center justify-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={configs.favicon_url} alt="favicon atual" className="w-8 h-8 object-contain" />
+                      <div className="text-left">
+                        <p className="text-sm font-medium text-gray-700">Favicon configurado</p>
+                        <p className="text-xs text-[#3cbfb3]">Clique para substituir</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2"/>
+                          <path d="M3 9h18M9 21V9"/>
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-gray-600">Clique para enviar o favicon</p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, ICO, SVG — 32×32px ou 64×64px — máx. 500KB</p>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/png,image/x-icon,image/svg+xml,image/jpeg"
+                  className="hidden"
+                  onChange={async e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    if (file.size > 500 * 1024) { alert('Arquivo muito grande. Máximo 500KB.'); return }
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    try {
+                      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+                      const { url } = await res.json()
+                      await fetch('/api/admin/configuracoes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chave: 'favicon_url', valor: url }),
+                      })
+                      set('favicon_url', url)
+                      const link = (document.querySelector("link[rel~='icon']") || document.createElement('link')) as HTMLLinkElement
+                      link.rel = 'icon'; link.href = url
+                      document.head.appendChild(link)
+                      alert('✅ Favicon atualizado! Será aplicado em todo o site.')
+                    } catch { alert('Erro ao fazer upload. Tente novamente.') }
+                  }}
+                />
+              </label>
+              {configs.favicon_url && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!confirm('Remover o favicon atual?')) return
+                    await fetch('/api/admin/configuracoes', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ chave: 'favicon_url', valor: '' }),
+                    })
+                    set('favicon_url', '')
+                  }}
+                  className="mt-2 text-xs text-red-400 hover:text-red-600 transition-colors"
+                >
+                  Remover favicon
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Fonte */}
         <Card title="Fonte principal">
           <div className="space-y-3">
@@ -844,7 +957,7 @@ export default function ConfiguracoesPage() {
           </div>
         </Card>
 
-        <SaveButton loading={saving} onClick={() => save(['fonte_principal', ...coresKeys])} />
+        <SaveButton loading={saving} onClick={() => save(['favicon_url', 'fonte_principal', ...coresKeys])} />
       </div>
     )
   }
@@ -2220,9 +2333,22 @@ export default function ConfiguracoesPage() {
         <p className="text-gray-500 text-sm mt-0.5">Gerencie as configurações da Sixxis Store</p>
       </div>
 
+      {/* Mobile — select dropdown */}
+      <div className="lg:hidden mb-4">
+        <select
+          value={activeTab}
+          onChange={e => setActiveTab(e.target.value)}
+          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
+        >
+          {TABS.map(({ id, label }) => (
+            <option key={id} value={id}>{label}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex gap-6 items-start">
-        {/* Tab nav — vertical */}
-        <nav className="w-52 shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-2 sticky top-6">
+        {/* Tab nav — vertical (desktop only) */}
+        <nav className="hidden lg:block w-52 shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-2 sticky top-6">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}

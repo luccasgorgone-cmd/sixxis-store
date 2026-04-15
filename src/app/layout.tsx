@@ -61,7 +61,7 @@ export const metadata: Metadata = {
 }
 
 const COR_KEYS = [
-  'logo_url', 'fonte_principal',
+  'logo_url', 'fonte_principal', 'favicon_url',
   'cor_principal', 'cor_principal_dark', 'cor_destaque',
   'cor_header', 'cor_header_texto', 'cor_anuncio_fundo', 'cor_anuncio_texto',
   'cor_fundo', 'cor_fundo_alt', 'cor_stats_fundo', 'cor_wa_fundo', 'cor_footer_fundo',
@@ -84,6 +84,7 @@ const COR_KEYS = [
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let logoUrl        = '/logo-sixxis.png'
+  let faviconUrl     = ''
   let fontePrincipal = 'Inter'
   let cfg: Record<string, string> = {}
 
@@ -94,6 +95,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
     if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
+    if (cfg.favicon_url)     faviconUrl     = cfg.favicon_url
 
     // ── Migração lazy: corrige valores antigos do esquema de cores ────────────
     // Se o DB ainda tem os defaults antigos, atualiza para o novo esquema.
@@ -187,6 +189,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Sixxis Store" />
+        {faviconUrl
+          ? <link rel="icon" href={faviconUrl} sizes="any" />
+          : <link rel="icon" href="/favicon.ico" sizes="any" />
+        }
       </head>
       <body
         className="min-h-full flex flex-col"

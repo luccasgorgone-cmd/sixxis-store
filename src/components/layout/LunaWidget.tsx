@@ -439,7 +439,7 @@ export default function LunaWidget() {
       {/* ── Chat expandido ──────────────────────────────────────────────────── */}
       {aberto && (
         <div
-          className={`bg-white rounded-3xl border border-gray-100 flex flex-col overflow-hidden transition-all duration-300 ease-out w-[340px] sm:w-[370px] ${minimizado ? 'h-[60px]' : 'h-[530px]'}`}
+          className={`bg-white rounded-3xl border border-gray-100 flex flex-col overflow-hidden transition-all duration-300 ease-out w-[calc(100vw-2rem)] sm:w-[370px] max-w-[370px] ${minimizado ? 'h-[60px]' : 'h-[530px]'}`}
           style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.18)' }}
         >
           {/* Header */}
@@ -617,7 +617,8 @@ export default function LunaWidget() {
                     onKeyDown={handleKeyDown}
                     placeholder={atendimentoEncerrado ? 'Inicie uma nova conversa acima' : 'Digite sua mensagem...'}
                     disabled={enviando || atendimentoEncerrado}
-                    className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none disabled:opacity-60"
+                    className="flex-1 bg-transparent text-gray-800 placeholder-gray-400 outline-none disabled:opacity-60"
+                    style={{ fontSize: '16px' }}
                   />
                   <button
                     onClick={enviarMensagem}
