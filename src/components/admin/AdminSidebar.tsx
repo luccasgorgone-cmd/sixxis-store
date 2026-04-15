@@ -52,6 +52,12 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Agente Luna',
+    items: [
+      { href: '/admin/luna-relatorio', label: 'Relatório Luna', icon: MessageSquare, exact: false },
+    ],
+  },
+  {
     label: 'Conteúdo',
     items: [
       { href: '/admin/editor-home', label: 'Editor da Home',  icon: Home,          exact: false },

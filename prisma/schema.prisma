@@ -472,3 +472,41 @@ model EnvioLog {
 
   @@index([campanhaId])
 }
+
+model LunaConversa {
+  id                String         @id @default(cuid())
+  sessaoId          String         @unique
+  paginaOrigem      String?        @db.Text
+  userAgent         String?        @db.Text
+  ip                String?
+  clienteId         String?
+  status            String         @default("ativa")
+  totalMensagens    Int            @default(0)
+  primeiraMensagem  DateTime?
+  ultimaMensagem    DateTime?
+  duracaoSegundos   Int?
+  leadGerado        Boolean        @default(false)
+  produtoInteresse  String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  mensagens         LunaMensagem[]
+
+  @@index([sessaoId])
+  @@index([clienteId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+model LunaMensagem {
+  id          String       @id @default(cuid())
+  conversaId  String
+  role        String
+  conteudo    String       @db.LongText
+  tokens      Int?
+  latenciaMs  Int?
+  createdAt   DateTime     @default(now())
+  conversa    LunaConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+
+  @@index([conversaId])
+  @@index([createdAt])
+}

@@ -23,11 +23,20 @@ function getBaseUrl(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { mensagens, sessionId } = await req.json()
+    const body = await req.json()
+    const { mensagens } = body
+    const sessaoId: string = body.sessaoId || body.sessionId || `luna_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+    const paginaOrigem: string | null = body.paginaOrigem || req.headers.get('referer') || null
+    const userAgent = req.headers.get('user-agent')?.substring(0, 500) || null
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || req.headers.get('x-real-ip')
+      || null
 
     if (!mensagens || !Array.isArray(mensagens)) {
       return Response.json({ erro: 'Mensagens inválidas' }, { status: 400 })
     }
+
+    const startTime = Date.now()
 
     // Buscar configs do banco
     const configs = await prisma.configuracao.findMany({
@@ -208,10 +217,55 @@ ${catalogoTexto}
         ? response.content[0].text
         : 'Desculpe, não consegui processar sua mensagem.'
 
-    // Suprimir aviso de sessionId não usado
-    void sessionId
+    const latenciaMs = Date.now() - startTime
 
-    return Response.json({ resposta })
+    // ── Salvar conversa e mensagens (não bloqueia resposta em caso de erro) ───
+    try {
+      const mensagensUsuario = mensagens.filter((m: { role: string }) => m.role === 'user')
+      const ultimaMsgUsuario = mensagensUsuario[mensagensUsuario.length - 1]
+      const agora = new Date()
+
+      const conversa = await prisma.lunaConversa.upsert({
+        where: { sessaoId },
+        create: {
+          sessaoId,
+          paginaOrigem,
+          userAgent,
+          ip,
+          status: 'ativa',
+          totalMensagens: mensagensUsuario.length + 1,
+          primeiraMensagem: agora,
+          ultimaMensagem: agora,
+        },
+        update: {
+          totalMensagens: { increment: 2 },
+          ultimaMensagem: agora,
+        },
+      })
+
+      if (ultimaMsgUsuario?.content) {
+        await prisma.lunaMensagem.create({
+          data: {
+            conversaId: conversa.id,
+            role: 'user',
+            conteudo: String(ultimaMsgUsuario.content),
+          },
+        })
+      }
+
+      await prisma.lunaMensagem.create({
+        data: {
+          conversaId: conversa.id,
+          role: 'assistant',
+          conteudo: resposta,
+          latenciaMs,
+        },
+      })
+    } catch (logErr) {
+      console.error('[Luna] Erro ao salvar conversa:', logErr)
+    }
+
+    return Response.json({ resposta, sessaoId })
   } catch (error) {
     console.error('[AGENTE]', error)
     return Response.json({

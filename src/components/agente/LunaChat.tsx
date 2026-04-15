@@ -165,9 +165,17 @@ export default function LunaChat({
 
   const messagesEndRef     = useRef<HTMLDivElement>(null)
   const textareaRef        = useRef<HTMLTextAreaElement>(null)
-  const sessionId          = useRef(`luna_${Date.now()}`)
+  const sessaoIdRef        = useRef<string>(`luna_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`)
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const followUpSentRef    = useRef(false)
+
+  // Recuperar sessaoId persistido entre aberturas do chat na mesma visita
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const persistido = sessionStorage.getItem('luna_sessao_id')
+    if (persistido) sessaoIdRef.current = persistido
+    else sessionStorage.setItem('luna_sessao_id', sessaoIdRef.current)
+  }, [])
 
   // Bolha de boas-vindas após 4 s
   useEffect(() => {
@@ -263,9 +271,17 @@ export default function LunaChat({
       const res = await fetch('/api/agente', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ mensagens: historico, sessionId: sessionId.current }),
+        body:    JSON.stringify({
+          mensagens: historico,
+          sessaoId: sessaoIdRef.current,
+          paginaOrigem: typeof window !== 'undefined' ? window.location.href : undefined,
+        }),
       })
       const data = await res.json()
+      if (data.sessaoId && typeof window !== 'undefined') {
+        sessaoIdRef.current = data.sessaoId
+        sessionStorage.setItem('luna_sessao_id', data.sessaoId)
+      }
       setMensagens(prev => [
         ...prev,
         {
