@@ -49,6 +49,7 @@ interface ProdutoFormProps {
     variacoes?: VariacaoInput[]
     especificacoes?: EspecificacaoRow[] | null
     faqs?: FaqRow[] | null
+    imagensPorVariacao?: Record<string, string[]> | null
   }
   produtoId?: string
   mode: 'novo' | 'editar'
@@ -112,6 +113,31 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
   const [saving, setSaving] = useState(false)
   const [erro, setErro] = useState('')
   const [deleting, setDeleting] = useState(false)
+
+  // ── imagensPorVariacao (color tabs) ─────────────────────────────────────────
+  const COR_NOMES = ['branco', 'preto', 'cinza', 'azul', 'vermelho', 'verde', 'amarelo', 'rosa', 'laranja', 'roxo', 'marrom', 'prata', 'dourado', 'grafite', 'bege']
+  const COR_HEX: Record<string, string> = {
+    branco: '#f5f5f5', preto: '#1a1a1a', cinza: '#9ca3af', azul: '#2563eb',
+    vermelho: '#dc2626', verde: '#16a34a', amarelo: '#facc15', rosa: '#ec4899',
+    laranja: '#f97316', roxo: '#7c3aed', marrom: '#92400e', prata: '#cbd5e1',
+    dourado: '#d97706', grafite: '#4b5563', bege: '#d6b896',
+  }
+  const variacoesCor = variacoes.filter(v =>
+    COR_NOMES.some(c => v.nome.toLowerCase().includes(c))
+  )
+  const temVariacoesCor = temVariacoes && variacoesCor.length > 0
+
+  const [imagensPorVariacao, setImagensPorVariacao] = useState<Record<string, string[]>>(
+    () => {
+      const raw = initialData?.imagensPorVariacao
+      if (!raw || typeof raw !== 'object') return {}
+      return raw as Record<string, string[]>
+    }
+  )
+  const [abaFotoAtiva, setAbaFotoAtiva] = useState<string>(
+    () => variacoesCor[0]?.nome ?? ''
+  )
+  const [uploadingCor, setUploadingCor] = useState(false)
 
   // Estoque calculado automaticamente quando temVariacoes
   const estoqueCalculado = variacoes.reduce((s, v) => s + Number(v.estoque || 0), 0)
@@ -192,6 +218,45 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     setImagens(novas)
   }
 
+  // ─── Upload por cor ──────────────────────────────────────────────────────────
+
+  async function uploadFilesCor(corNome: string, files: FileList) {
+    setUploadingCor(true)
+    const novasUrls: string[] = []
+    for (const file of Array.from(files)) {
+      const fd = new FormData()
+      fd.append('file', file)
+      try {
+        const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+        if (res.ok) {
+          const { url } = await res.json()
+          novasUrls.push(url)
+        }
+      } catch { /* ignore */ }
+    }
+    setImagensPorVariacao(prev => ({
+      ...prev,
+      [corNome]: [...(prev[corNome] ?? []), ...novasUrls],
+    }))
+    setUploadingCor(false)
+  }
+
+  function removerFotoCor(corNome: string, idx: number) {
+    setImagensPorVariacao(prev => ({
+      ...prev,
+      [corNome]: (prev[corNome] ?? []).filter((_, i) => i !== idx),
+    }))
+  }
+
+  function reordenarFotosCor(corNome: string, fromIdx: number, toIdx: number) {
+    setImagensPorVariacao(prev => {
+      const fotos = [...(prev[corNome] ?? [])]
+      const [movida] = fotos.splice(fromIdx, 1)
+      fotos.splice(toIdx, 0, movida)
+      return { ...prev, [corNome]: fotos }
+    })
+  }
+
   // ─── Submit ──────────────────────────────────────────────────────────────────
 
   async function handleSubmit(e: React.FormEvent) {
@@ -235,12 +300,16 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
       preco: Number(form.preco),
       precoPromocional: form.precoPromocional ? Number(form.precoPromocional) : null,
       estoque: temVariacoes ? estoqueCalculado : Number(form.estoque),
-      imagens,
+      // When product has color variants, combine all per-color photos as the general imagens array
+      imagens: temVariacoesCor
+        ? Object.values(imagensPorVariacao).flat()
+        : imagens,
       videoUrl: form.videoUrl,
       temVariacoes,
       variacoes: temVariacoes ? variacoes : [],
       especificacoes: especificacoesParsed,
       faqs: faqsParsed,
+      imagensPorVariacao: temVariacoesCor ? imagensPorVariacao : null,
     }
 
     const url = mode === 'novo' ? '/api/admin/produtos' : `/api/admin/produtos/${produtoId}`
@@ -623,145 +692,261 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               Fotos do produto
             </h2>
 
-            {/* Drop zone */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
-                dragging
-                  ? 'border-[#3cbfb3] bg-[#3cbfb3]/5'
-                  : 'border-gray-200 hover:border-[#3cbfb3] hover:bg-gray-50'
-              }`}
-            >
-              {uploading ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 text-[#3cbfb3] animate-spin" />
-                  <p className="text-sm text-gray-500">
-                    {uploadProgress.join(', ') || 'Enviando...'}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="w-8 h-8 text-gray-400" />
-                  <p className="text-sm font-medium text-gray-700">
-                    Arraste fotos aqui ou clique para selecionar
-                  </p>
-                  <p className="text-xs text-gray-400">JPG, PNG, WebP — múltiplos arquivos</p>
-                </div>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
-
-            {/* Preview grid com drag-and-drop */}
-            {imagens.length > 0 && (
-              <div className="mt-4">
-                <p className="text-xs text-gray-400 mb-3 flex items-center gap-1.5">
-                  <GripVertical size={12} />
-                  Arraste as fotos para reordenar. A primeira foto é a capa do produto.
+            {temVariacoesCor ? (
+              /* ── ABAS POR COR ─────────────────────────────────────────────── */
+              <div>
+                <p className="text-xs text-gray-400 mb-4">
+                  Este produto tem variações de cor. Faça upload das fotos separadas para cada cor — ao clicar na cor na loja, as fotos correspondentes são exibidas.
                 </p>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {imagens.map((url, index) => (
-                    <div
-                      key={url}
-                      draggable
-                      onDragStart={e => {
-                        e.dataTransfer.effectAllowed = 'move'
-                        e.dataTransfer.setData('text/plain', String(index))
-                      }}
-                      onDragOver={e => {
-                        e.preventDefault()
-                        e.dataTransfer.dropEffect = 'move'
-                        setImagensDragOver(index)
-                      }}
-                      onDragLeave={() => setImagensDragOver(null)}
-                      onDrop={e => {
-                        e.preventDefault()
-                        const fromIndex = Number(e.dataTransfer.getData('text/plain'))
-                        if (fromIndex !== index) reordenarImagens(fromIndex, index)
-                        setImagensDragOver(null)
-                      }}
-                      onDragEnd={() => setImagensDragOver(null)}
-                      className={`relative group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden border-2 transition-all duration-150 aspect-square ${
-                        imagensDragOver === index
-                          ? 'border-[#3cbfb3] scale-[1.03] shadow-lg'
-                          : index === 0
-                          ? 'border-[#3cbfb3] ring-2 ring-[#3cbfb3] ring-offset-1'
-                          : 'border-gray-200 hover:border-[#3cbfb3]/50'
-                      }`}
-                    >
-                      <img
-                        src={url}
-                        alt={`Foto ${index + 1}`}
-                        className="w-full h-full object-contain p-1.5 bg-gray-50 pointer-events-none"
-                        draggable={false}
-                      />
 
-                      {/* Badge posição */}
-                      <div className="absolute top-1.5 left-1.5">
-                        {index === 0 ? (
-                          <span className="bg-[#3cbfb3] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow">CAPA</span>
+                {/* Tabs */}
+                <div className="flex gap-0 border-b border-gray-100 mb-4">
+                  {variacoesCor.map(v => {
+                    const corNome = COR_NOMES.find(c => v.nome.toLowerCase().includes(c))
+                    const hex = corNome ? COR_HEX[corNome] : '#888'
+                    const count = (imagensPorVariacao[v.nome] ?? []).length
+                    return (
+                      <button
+                        key={v.id ?? v.nome}
+                        type="button"
+                        onClick={() => setAbaFotoAtiva(v.nome)}
+                        className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                          abaFotoAtiva === v.nome
+                            ? 'border-[#3cbfb3] text-[#3cbfb3]'
+                            : 'border-transparent text-gray-500 hover:text-gray-900'
+                        }`}
+                      >
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border border-gray-300 shrink-0"
+                          style={{ backgroundColor: hex }}
+                        />
+                        {v.nome}
+                        <span className="text-[10px] text-gray-400">({count})</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Upload area + grid per active tab */}
+                {variacoesCor.map(v => abaFotoAtiva === v.nome && (
+                  <div key={v.id ?? v.nome}>
+                    {/* Drop zone */}
+                    <label className="block cursor-pointer mb-4">
+                      <div className={`border-2 border-dashed rounded-xl p-6 text-center transition ${
+                        uploadingCor ? 'border-[#3cbfb3] bg-[#3cbfb3]/5' : 'border-gray-200 hover:border-[#3cbfb3] hover:bg-gray-50'
+                      }`}>
+                        {uploadingCor ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader2 className="w-7 h-7 text-[#3cbfb3] animate-spin" />
+                            <p className="text-sm text-gray-500">Enviando...</p>
+                          </div>
                         ) : (
-                          <span className="bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{index + 1}</span>
+                          <div className="flex flex-col items-center gap-2">
+                            <Upload className="w-7 h-7 text-gray-400" />
+                            <p className="text-sm font-medium text-gray-700">
+                              Fotos da cor <strong>{v.nome}</strong>
+                            </p>
+                            <p className="text-xs text-gray-400">JPG, PNG, WebP — múltiplos arquivos</p>
+                          </div>
                         )}
                       </div>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => { if (e.target.files?.length) uploadFilesCor(v.nome, e.target.files) }}
+                      />
+                    </label>
 
-                      {/* Handle drag */}
-                      <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="bg-black/50 rounded-md p-0.5">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                            <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
-                            <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
-                            <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
-                          </svg>
-                        </div>
-                      </div>
-
-                      {/* Remover */}
-                      <button
-                        type="button"
-                        onClick={() => setImagens(imagens.filter((_, i) => i !== index))}
-                        className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
-                        title="Remover foto"
-                      >
-                        ×
-                      </button>
-
-                      {/* Overlay drop target */}
-                      {imagensDragOver === index && (
-                        <div className="absolute inset-0 bg-[#3cbfb3]/20 flex items-center justify-center rounded-xl">
-                          <div className="bg-[#3cbfb3] text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-                            Soltar aqui
+                    {/* Grid */}
+                    {(imagensPorVariacao[v.nome] ?? []).length > 0 ? (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {(imagensPorVariacao[v.nome] ?? []).map((url, idx) => (
+                          <div
+                            key={url + idx}
+                            draggable
+                            onDragStart={e => {
+                              e.dataTransfer.effectAllowed = 'move'
+                              e.dataTransfer.setData('text/plain', String(idx))
+                            }}
+                            onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
+                            onDrop={e => {
+                              e.preventDefault()
+                              const from = Number(e.dataTransfer.getData('text/plain'))
+                              if (from !== idx) reordenarFotosCor(v.nome, from, idx)
+                            }}
+                            className="relative group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden border-2 aspect-square transition-all border-gray-200 hover:border-[#3cbfb3]/50"
+                          >
+                            <img
+                              src={url}
+                              alt={`${v.nome} ${idx + 1}`}
+                              className="w-full h-full object-contain p-1.5 bg-gray-50 pointer-events-none"
+                              draggable={false}
+                            />
+                            <div className="absolute top-1.5 left-1.5">
+                              {idx === 0
+                                ? <span className="bg-[#3cbfb3] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow">CAPA</span>
+                                : <span className="bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{idx + 1}</span>
+                              }
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removerFotoCor(v.nome, idx)}
+                              className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
+                            >×</button>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                  <p className="text-xs text-blue-600 font-medium flex items-center gap-1.5">
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100">
+                        <p className="text-sm text-gray-400">Nenhuma foto da cor <strong>{v.nome}</strong></p>
+                        <p className="text-xs text-gray-300 mt-1">Use a área acima para fazer upload</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                  <p className="text-xs text-blue-600 flex items-center gap-1.5">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"/>
                     </svg>
-                    A foto na posição 1 é a capa (aparece primeiro na loja). Arraste para reorganizar e salve o produto.
+                    As fotos de cada cor aparecem quando o cliente seleciona aquela cor na loja. Salve o produto para aplicar.
                   </p>
                 </div>
               </div>
-            )}
 
-            {imagens.length === 0 && !uploading && (
-              <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
-                <ImageIcon className="w-4 h-4" />
-                Nenhuma foto adicionada
-              </div>
+            ) : (
+              /* ── FOTOS GERAIS (sem variação de cor) ──────────────────────── */
+              <>
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
+                    dragging
+                      ? 'border-[#3cbfb3] bg-[#3cbfb3]/5'
+                      : 'border-gray-200 hover:border-[#3cbfb3] hover:bg-gray-50'
+                  }`}
+                >
+                  {uploading ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="w-8 h-8 text-[#3cbfb3] animate-spin" />
+                      <p className="text-sm text-gray-500">
+                        {uploadProgress.join(', ') || 'Enviando...'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload className="w-8 h-8 text-gray-400" />
+                      <p className="text-sm font-medium text-gray-700">
+                        Arraste fotos aqui ou clique para selecionar
+                      </p>
+                      <p className="text-xs text-gray-400">JPG, PNG, WebP — múltiplos arquivos</p>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </div>
+
+                {imagens.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs text-gray-400 mb-3 flex items-center gap-1.5">
+                      <GripVertical size={12} />
+                      Arraste as fotos para reordenar. A primeira foto é a capa do produto.
+                    </p>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      {imagens.map((url, index) => (
+                        <div
+                          key={url}
+                          draggable
+                          onDragStart={e => {
+                            e.dataTransfer.effectAllowed = 'move'
+                            e.dataTransfer.setData('text/plain', String(index))
+                          }}
+                          onDragOver={e => {
+                            e.preventDefault()
+                            e.dataTransfer.dropEffect = 'move'
+                            setImagensDragOver(index)
+                          }}
+                          onDragLeave={() => setImagensDragOver(null)}
+                          onDrop={e => {
+                            e.preventDefault()
+                            const fromIndex = Number(e.dataTransfer.getData('text/plain'))
+                            if (fromIndex !== index) reordenarImagens(fromIndex, index)
+                            setImagensDragOver(null)
+                          }}
+                          onDragEnd={() => setImagensDragOver(null)}
+                          className={`relative group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden border-2 transition-all duration-150 aspect-square ${
+                            imagensDragOver === index
+                              ? 'border-[#3cbfb3] scale-[1.03] shadow-lg'
+                              : index === 0
+                              ? 'border-[#3cbfb3] ring-2 ring-[#3cbfb3] ring-offset-1'
+                              : 'border-gray-200 hover:border-[#3cbfb3]/50'
+                          }`}
+                        >
+                          <img
+                            src={url}
+                            alt={`Foto ${index + 1}`}
+                            className="w-full h-full object-contain p-1.5 bg-gray-50 pointer-events-none"
+                            draggable={false}
+                          />
+                          <div className="absolute top-1.5 left-1.5">
+                            {index === 0 ? (
+                              <span className="bg-[#3cbfb3] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow">CAPA</span>
+                            ) : (
+                              <span className="bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{index + 1}</span>
+                            )}
+                          </div>
+                          <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="bg-black/50 rounded-md p-0.5">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                                <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                                <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setImagens(imagens.filter((_, i) => i !== index))}
+                            className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
+                            title="Remover foto"
+                          >×</button>
+                          {imagensDragOver === index && (
+                            <div className="absolute inset-0 bg-[#3cbfb3]/20 flex items-center justify-center rounded-xl">
+                              <div className="bg-[#3cbfb3] text-white text-xs font-bold px-3 py-1 rounded-full shadow">Soltar aqui</div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                      <p className="text-xs text-blue-600 font-medium flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"/>
+                        </svg>
+                        A foto na posição 1 é a capa (aparece primeiro na loja). Arraste para reorganizar e salve o produto.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {imagens.length === 0 && !uploading && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+                    <ImageIcon className="w-4 h-4" />
+                    Nenhuma foto adicionada
+                  </div>
+                )}
+              </>
             )}
           </div>
 

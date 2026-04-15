@@ -47,6 +47,14 @@ export default async function EditarProdutoPage({
             estoque: String(v.estoque),
             ativo: v.ativo,
           })),
+          imagensPorVariacao: (() => {
+            try {
+              const raw = (produto as unknown as { imagensPorVariacao?: unknown }).imagensPorVariacao
+              if (!raw) return null
+              if (typeof raw === 'object' && !Array.isArray(raw)) return raw as Record<string, string[]>
+              return JSON.parse(raw as string) as Record<string, string[]>
+            } catch { return null }
+          })(),
         }}
       />
       <AvaliacoesAdminProduto produtoId={produto.id} />

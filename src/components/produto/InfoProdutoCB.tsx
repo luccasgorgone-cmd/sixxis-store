@@ -100,11 +100,30 @@ function inferirTipoVariacao(nomes: string[]): string {
 export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, onVariacaoChange }: Props) {
   const router = useRouter()
   const { adicionarItem, setDrawerAberto } = useCarrinho()
-  const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
+
+  // Derived from props — computed before useState so we can use them in initializers
+  const variacoesAtivas = variacoes.filter(v => v.ativo)
+  const tipoVariacao = inferirTipoVariacao(variacoesAtivas.map(v => v.nome))
+  const isCor = tipoVariacao === 'Cor'
+
+  // Pre-select first color variant (prefer Branco)
+  const defaultVariacao = isCor
+    ? (variacoesAtivas.find(v => v.nome.toLowerCase().includes('branco')) ?? variacoesAtivas[0] ?? null)
+    : null
+
+  const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(defaultVariacao)
   const [adicionado, setAdicionado] = useState(false)
   const [parcelasAberto, setParcelasAberto] = useState(false)
   const [quantidade, setQuantidade] = useState(1)
   const [visitantes, setVisitantes] = useState(0)
+
+  // On mount, sync the default color selection with the gallery
+  useEffect(() => {
+    if (defaultVariacao && onVariacaoChange) {
+      onVariacaoChange(defaultVariacao.nome)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     // Fake visitor counter — seed from productId for consistency per page
@@ -130,11 +149,6 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
   const taxa = taxaJuros / 100
   const estoqueAtual = variacaoSelecionada ? variacaoSelecionada.estoque : produto.estoque
   const esgotado = estoqueAtual === 0
-  const variacoesAtivas = variacoes.filter(v => v.ativo)
-
-  // Detect if all active variants are color-based
-  const tipoVariacao = inferirTipoVariacao(variacoesAtivas.map(v => v.nome))
-  const isCor = tipoVariacao === 'Cor'
 
   function selecionarVariacao(v: Variacao | null) {
     setVariacaoSelecionada(v)

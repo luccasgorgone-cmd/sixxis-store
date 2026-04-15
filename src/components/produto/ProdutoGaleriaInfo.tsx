@@ -46,7 +46,18 @@ export default function ProdutoGaleriaInfo({
   imagensPorVariacao,
   especificacoes,
 }: Props) {
-  const [itensGaleria, setItensGaleria] = useState<GaleriaItemCB[]>(itensIniciais)
+  const [itensGaleria, setItensGaleria] = useState<GaleriaItemCB[]>(() => {
+    if (!imagensPorVariacao) return itensIniciais
+    // Find default variant (prefer branco) to initialize gallery with correct color photos
+    const ativas = variacoes.filter(v => v.ativo)
+    const defaultNome =
+      ativas.find(v => v.nome.toLowerCase().includes('branco'))?.nome ??
+      ativas[0]?.nome
+    if (!defaultNome) return itensIniciais
+    const imgs = imagensPorVariacao[defaultNome]
+    if (imgs && imgs.length > 0) return imgs.map(url => ({ tipo: 'imagem' as const, url }))
+    return itensIniciais
+  })
 
   function handleVariacaoChange(variacaoNome: string | null) {
     if (!imagensPorVariacao || !variacaoNome) {

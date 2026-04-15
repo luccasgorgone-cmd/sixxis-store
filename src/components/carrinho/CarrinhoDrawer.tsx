@@ -45,10 +45,18 @@ export default function CarrinhoDrawer() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [drawerAberto, setDrawerAberto])
 
-  // body scroll lock
+  // body scroll lock + drawer signal
   useEffect(() => {
     document.body.style.overflow = drawerAberto ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    if (drawerAberto) {
+      document.body.setAttribute('data-drawer-open', 'true')
+    } else {
+      document.body.removeAttribute('data-drawer-open')
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.removeAttribute('data-drawer-open')
+    }
   }, [drawerAberto])
 
   const faltaFrete   = Math.max(0, FRETE_GRATIS - total)
