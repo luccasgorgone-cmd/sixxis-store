@@ -128,9 +128,8 @@ export default function GaleriaProduto({ itens, nomeProduto }: Props) {
         </div>
 
         {itemAtivo?.tipo === 'imagem' && !zoom && (
-          <p className="text-center text-xs text-gray-400 mt-2 flex items-center justify-center gap-1">
+          <p className="text-center text-xs text-gray-400 mt-2 flex items-center justify-center gap-1" aria-hidden="true">
             <ZoomIn size={11} />
-            Passe o mouse para ampliar
           </p>
         )}
       </div>

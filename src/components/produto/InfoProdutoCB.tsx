@@ -341,6 +341,34 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         </button>
       </div>
 
+      {/* Selo envio + segurança */}
+      <div className="flex items-center gap-3 mb-4 pt-3 border-t border-gray-100 flex-wrap">
+        <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1"/>
+            <path d="M16 8h4l3 5v4h-7V8z"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/>
+            <circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+          Pedidos até 14h enviados hoje
+        </div>
+        <div className="w-px h-4 bg-gray-200"/>
+        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Compra 100% segura
+        </div>
+        <div className="w-px h-4 bg-gray-200"/>
+        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+          Devolução em 7 dias
+        </div>
+      </div>
+
       {/* Badges de segurança */}
       <div className="mt-4 mb-5">
         {/* Grid 2x2 */}
@@ -443,7 +471,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
 
       {/* Compartilhar */}
       <a
-        href={`https://wa.me/?text=${encodeURIComponent(`Olha esse produto na Sixxis Store: ${produto.nome} — https://sixxisstore.com.br/produtos/${produto.slug}`)}`}
+        href={`https://wa.me/?text=${encodeURIComponent(`Olha esse produto na Sixxis Store: ${produto.nome} — ${typeof window !== 'undefined' ? window.location.origin : 'https://sixxis-store-production.up.railway.app'}/produtos/${produto.slug}`)}`}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#25D366] border border-gray-200 hover:border-[#25D366] rounded-lg px-3 py-2 transition-colors"

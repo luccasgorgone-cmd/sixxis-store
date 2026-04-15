@@ -79,7 +79,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
           {!zoom && itemAtivo?.tipo === 'imagem' && (
             <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white text-xs px-2.5 py-1.5 rounded-full pointer-events-none">
               <ZoomIn size={11} />
-              Passe o mouse
+              <span className="sr-only">Passe o mouse para zoom</span>
             </div>
           )}
 

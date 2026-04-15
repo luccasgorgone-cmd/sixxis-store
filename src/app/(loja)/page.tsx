@@ -9,6 +9,7 @@ import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
 import OfertasRelampago from '@/components/home/OfertasRelampago'
+import Depoimentos from '@/components/home/Depoimentos'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -161,6 +162,9 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ── 5. Depoimentos ───────────────────────────────────────── */}
+      <Depoimentos />
 
       {/* ── 6. Banners duplos ─────────────────────────────────────── */}
       <section className="bg-transparent border-b border-white/10 pb-8 pt-8">
