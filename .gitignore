@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .claude/worktrees/
+
+# Raw product assets (images + docs) — uploaded to R2, not needed in repo
+_produtos-novos/
+
+# Generated R2 URL mapping
+scripts/urls-r2.json

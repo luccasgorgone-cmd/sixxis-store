@@ -16,6 +16,47 @@ interface Variacao {
   ativo: boolean
 }
 
+// Color map for known color names
+const COLOR_MAP: Record<string, string> = {
+  preto: '#1a1a1a',
+  black: '#1a1a1a',
+  branco: '#f5f5f5',
+  white: '#f5f5f5',
+  azul: '#2563eb',
+  blue: '#2563eb',
+  vermelho: '#dc2626',
+  red: '#dc2626',
+  verde: '#16a34a',
+  green: '#16a34a',
+  amarelo: '#facc15',
+  yellow: '#facc15',
+  rosa: '#ec4899',
+  pink: '#ec4899',
+  cinza: '#9ca3af',
+  gray: '#9ca3af',
+  laranja: '#f97316',
+  orange: '#f97316',
+  roxo: '#7c3aed',
+  purple: '#7c3aed',
+  marrom: '#92400e',
+  brown: '#92400e',
+  prata: '#cbd5e1',
+  silver: '#cbd5e1',
+  dourado: '#d97706',
+  gold: '#d97706',
+  grafite: '#4b5563',
+  bege: '#d6b896',
+  beige: '#d6b896',
+}
+
+function getCorHex(nome: string): string | null {
+  const lower = nome.toLowerCase()
+  for (const [key, hex] of Object.entries(COLOR_MAP)) {
+    if (lower.includes(key)) return hex
+  }
+  return null
+}
+
 interface Props {
   produto: {
     id: string
@@ -32,6 +73,8 @@ interface Props {
   taxaJuros: number
   mediaAvaliacoes: number
   totalAvaliacoes: number
+  imagensPorVariacao?: Record<string, string[]>
+  onVariacaoChange?: (variacaoNome: string | null) => void
 }
 
 function fmt(v: number) {
@@ -54,7 +97,7 @@ function inferirTipoVariacao(nomes: string[]): string {
   return 'Variação'
 }
 
-export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAvaliacoes, totalAvaliacoes }: Props) {
+export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, onVariacaoChange }: Props) {
   const router = useRouter()
   const { adicionarItem, setDrawerAberto } = useCarrinho()
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
@@ -88,6 +131,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
   const estoqueAtual = variacaoSelecionada ? variacaoSelecionada.estoque : produto.estoque
   const esgotado = estoqueAtual === 0
   const variacoesAtivas = variacoes.filter(v => v.ativo)
+
+  // Detect if all active variants are color-based
+  const tipoVariacao = inferirTipoVariacao(variacoesAtivas.map(v => v.nome))
+  const isCor = tipoVariacao === 'Cor'
+
+  function selecionarVariacao(v: Variacao | null) {
+    setVariacaoSelecionada(v)
+    if (onVariacaoChange) onVariacaoChange(v?.nome ?? null)
+  }
 
   function handleAddToCart() {
     if (produto.temVariacoes && !variacaoSelecionada) return
@@ -279,26 +331,74 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       {variacoesAtivas.length > 0 && (
         <div className="mb-5">
           <p className="text-sm font-bold text-gray-700 mb-2">
-            {inferirTipoVariacao(variacoesAtivas.map(v => v.nome))}:
+            {tipoVariacao}
+            {variacaoSelecionada && (
+              <span className="text-[#3cbfb3] font-normal ml-1">— {variacaoSelecionada.nome}</span>
+            )}
+            :
           </p>
-          <div className="flex flex-wrap gap-2">
-            {variacoesAtivas.map(v => (
-              <button
-                key={v.id}
-                onClick={() => setVariacaoSelecionada(v)}
-                disabled={v.estoque === 0}
-                className={`px-5 py-2.5 rounded-2xl text-sm font-bold border-2 transition-all ${
-                  variacaoSelecionada?.id === v.id
-                    ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#1a4f4a]'
-                    : v.estoque === 0
-                      ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
-                      : 'border-gray-200 text-gray-600 hover:border-[#3cbfb3]/50'
-                }`}
-              >
-                {v.nome}
-              </button>
-            ))}
-          </div>
+
+          {isCor ? (
+            /* ── Color circle selector (MercadoLivre style) ── */
+            <div className="flex flex-wrap gap-3">
+              {variacoesAtivas.map(v => {
+                const hex = getCorHex(v.nome) ?? '#9ca3af'
+                const isBranco = hex === '#f5f5f5'
+                const isSelected = variacaoSelecionada?.id === v.id
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => selecionarVariacao(v)}
+                    disabled={v.estoque === 0}
+                    title={v.nome}
+                    className={`relative w-10 h-10 rounded-full transition-all duration-150 focus:outline-none ${
+                      v.estoque === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'
+                    } ${isSelected ? 'ring-2 ring-offset-2 ring-[#3cbfb3] scale-110' : 'ring-1 ring-gray-200'}`}
+                    style={{ backgroundColor: hex, border: isBranco ? '1px solid #e5e7eb' : 'none' }}
+                    aria-label={v.nome}
+                  >
+                    {isSelected && (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <polyline points="20 6 9 17 4 12"
+                            stroke={isBranco || hex === '#facc15' || hex === '#cbd5e1' || hex === '#d6b896' ? '#374151' : '#ffffff'}
+                            strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                    )}
+                    {v.estoque === 0 && (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <svg width="28" height="28" viewBox="0 0 40 40">
+                          <line x1="4" y1="36" x2="36" y2="4" stroke="#6b7280" strokeWidth="2"/>
+                        </svg>
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            /* ── Standard pill selector ── */
+            <div className="flex flex-wrap gap-2">
+              {variacoesAtivas.map(v => (
+                <button
+                  key={v.id}
+                  onClick={() => selecionarVariacao(v)}
+                  disabled={v.estoque === 0}
+                  className={`px-5 py-2.5 rounded-2xl text-sm font-bold border-2 transition-all ${
+                    variacaoSelecionada?.id === v.id
+                      ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#1a4f4a]'
+                      : v.estoque === 0
+                        ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
+                        : 'border-gray-200 text-gray-600 hover:border-[#3cbfb3]/50'
+                  }`}
+                >
+                  {v.nome}
+                </button>
+              ))}
+            </div>
+          )}
+
           {produto.temVariacoes && !variacaoSelecionada && (
             <p className="text-amber-600 text-xs font-medium mt-2">Selecione a opção para continuar</p>
           )}

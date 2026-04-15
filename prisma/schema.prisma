@@ -60,6 +60,7 @@ model Produto {
   videoUrl         String?           @default("")
   especificacoes   Json?
   faqs             Json?
+  imagensPorVariacao Json?
   vendidos            Int               @default(0)
   mediaAvaliacoes     Float             @default(0)
   totalAvaliacoes     Int               @default(0)

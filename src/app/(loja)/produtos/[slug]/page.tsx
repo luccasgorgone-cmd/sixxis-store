@@ -4,13 +4,11 @@ import type { Metadata } from 'next'
 import { ShieldCheck, Award, Headphones, Package } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import Breadcrumb from '@/components/ui/Breadcrumb'
-import GaleriaCB from '@/components/produto/GaleriaCB'
 import type { GaleriaItemCB } from '@/components/produto/GaleriaCB'
-import InfoProdutoCB from '@/components/produto/InfoProdutoCB'
+import ProdutoGaleriaInfo from '@/components/produto/ProdutoGaleriaInfo'
 import DescricaoRica from '@/components/produto/DescricaoRica'
 import AbasProduto from '@/components/produto/AbasProduto'
 import CardProduto from '@/components/produto/CardProduto'
-import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,6 +70,16 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     ...(videoUrl ? [{ tipo: 'video' as const, url: videoUrl }] : []),
   ]
 
+  // imagensPorVariacao — used for color variant gallery switching (e.g. SX200 Prime Branco/Preto)
+  const imagensPorVariacao = (() => {
+    try {
+      const raw = (produto as unknown as { imagensPorVariacao?: unknown }).imagensPorVariacao
+      if (!raw) return undefined
+      if (typeof raw === 'object' && !Array.isArray(raw)) return raw as Record<string, string[]>
+      return JSON.parse(raw as string) as Record<string, string[]>
+    } catch { return undefined }
+  })()
+
   const preco = Number(produto.preco)
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
 
@@ -129,18 +137,15 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Galeria + Info */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10 lg:overflow-visible">
-          <div className="relative">
-            <GaleriaCB itens={itens} nome={produto.nome} />
-            {especificacoes.length > 0 && (
-              <SpecsExpandiveis especificacoes={especificacoes} />
-            )}
-          </div>
-          <InfoProdutoCB
+          <ProdutoGaleriaInfo
             produto={produtoParaInfo}
             variacoes={variacoes}
             taxaJuros={taxaJuros}
             mediaAvaliacoes={mediaAv}
             totalAvaliacoes={totalAv}
+            itensIniciais={itens}
+            imagensPorVariacao={imagensPorVariacao}
+            especificacoes={especificacoes.length > 0 ? especificacoes : undefined}
           />
         </div>
 
