@@ -8,7 +8,7 @@ import {
   LogOut, Image as ImageIcon, Tag, Star, Gift,
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, Handshake, ShieldOff,
-  Target, MessageSquare,
+  Target, MessageSquare, Clock,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -68,8 +68,9 @@ const NAV_GROUPS = [
   {
     label: 'Configurações',
     items: [
-      { href: '/admin/analytics',     label: 'Analytics',      icon: BarChart2,      exact: false },
-      { href: '/admin/configuracoes', label: 'Configurações',  icon: Settings,       exact: false },
+      { href: '/admin/analytics',       label: 'Analytics',         icon: BarChart2,      exact: false },
+      { href: '/admin/vendas-horario',  label: 'Horários de Venda', icon: Clock,          exact: false },
+      { href: '/admin/configuracoes',   label: 'Configurações',     icon: Settings,       exact: false },
     ],
   },
 ]

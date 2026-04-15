@@ -510,3 +510,66 @@ model LunaMensagem {
   @@index([conversaId])
   @@index([createdAt])
 }
+
+model SessaoVisitante {
+  id              String           @id @default(cuid())
+  sessaoId        String           @unique
+  userId          String?
+  ip              String?
+  pais            String?
+  cidade          String?
+  userAgent       String?          @db.Text
+  dispositivo     String?
+  browser         String?
+  os              String?
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmContent      String?
+  utmTerm         String?
+  referer         String?          @db.Text
+  landingPage     String?          @db.Text
+  totalPaginas    Int              @default(0)
+  duracaoSegundos Int              @default(0)
+  converteu       Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  eventos         EventoTracking[]
+
+  @@index([sessaoId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([utmSource])
+}
+
+model EventoTracking {
+  id          String          @id @default(cuid())
+  sessaoId    String
+  tipo        String
+  pagina      String?         @db.Text
+  produtoId   String?
+  produtoSlug String?
+  valor       Float?
+  dados       Json?
+  createdAt   DateTime        @default(now())
+  sessao      SessaoVisitante @relation(fields: [sessaoId], references: [sessaoId], onDelete: Cascade)
+
+  @@index([sessaoId])
+  @@index([tipo])
+  @@index([produtoSlug])
+  @@index([createdAt])
+}
+
+model RelatorioVendaHora {
+  id           String   @id @default(cuid())
+  data         DateTime
+  hora         Int
+  diaSemana    Int
+  totalPedidos Int      @default(0)
+  totalReceita Float    @default(0)
+  totalItens   Int      @default(0)
+  updatedAt    DateTime @updatedAt
+
+  @@unique([data, hora])
+  @@index([data])
+}

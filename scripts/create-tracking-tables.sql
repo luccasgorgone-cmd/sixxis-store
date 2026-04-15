@@ -1,0 +1,62 @@
+CREATE TABLE IF NOT EXISTS `SessaoVisitante` (
+  `id` VARCHAR(191) NOT NULL,
+  `sessaoId` VARCHAR(191) NOT NULL,
+  `userId` VARCHAR(191) NULL,
+  `ip` VARCHAR(191) NULL,
+  `pais` VARCHAR(191) NULL,
+  `cidade` VARCHAR(191) NULL,
+  `userAgent` TEXT NULL,
+  `dispositivo` VARCHAR(191) NULL,
+  `browser` VARCHAR(191) NULL,
+  `os` VARCHAR(191) NULL,
+  `utmSource` VARCHAR(191) NULL,
+  `utmMedium` VARCHAR(191) NULL,
+  `utmCampaign` VARCHAR(191) NULL,
+  `utmContent` VARCHAR(191) NULL,
+  `utmTerm` VARCHAR(191) NULL,
+  `referer` TEXT NULL,
+  `landingPage` TEXT NULL,
+  `totalPaginas` INT NOT NULL DEFAULT 0,
+  `duracaoSegundos` INT NOT NULL DEFAULT 0,
+  `converteu` BOOLEAN NOT NULL DEFAULT false,
+  `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` DATETIME(3) NOT NULL,
+  UNIQUE INDEX `SessaoVisitante_sessaoId_key`(`sessaoId`),
+  INDEX `SessaoVisitante_sessaoId_idx`(`sessaoId`),
+  INDEX `SessaoVisitante_userId_idx`(`userId`),
+  INDEX `SessaoVisitante_createdAt_idx`(`createdAt`),
+  INDEX `SessaoVisitante_utmSource_idx`(`utmSource`),
+  PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `EventoTracking` (
+  `id` VARCHAR(191) NOT NULL,
+  `sessaoId` VARCHAR(191) NOT NULL,
+  `tipo` VARCHAR(191) NOT NULL,
+  `pagina` TEXT NULL,
+  `produtoId` VARCHAR(191) NULL,
+  `produtoSlug` VARCHAR(191) NULL,
+  `valor` DOUBLE NULL,
+  `dados` JSON NULL,
+  `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  INDEX `EventoTracking_sessaoId_idx`(`sessaoId`),
+  INDEX `EventoTracking_tipo_idx`(`tipo`),
+  INDEX `EventoTracking_produtoSlug_idx`(`produtoSlug`),
+  INDEX `EventoTracking_createdAt_idx`(`createdAt`),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `EventoTracking_sessaoId_fkey` FOREIGN KEY (`sessaoId`) REFERENCES `SessaoVisitante`(`sessaoId`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `RelatorioVendaHora` (
+  `id` VARCHAR(191) NOT NULL,
+  `data` DATETIME(3) NOT NULL,
+  `hora` INT NOT NULL,
+  `diaSemana` INT NOT NULL,
+  `totalPedidos` INT NOT NULL DEFAULT 0,
+  `totalReceita` DOUBLE NOT NULL DEFAULT 0,
+  `totalItens` INT NOT NULL DEFAULT 0,
+  `updatedAt` DATETIME(3) NOT NULL,
+  UNIQUE INDEX `RelatorioVendaHora_data_hora_key`(`data`, `hora`),
+  INDEX `RelatorioVendaHora_data_idx`(`data`),
+  PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

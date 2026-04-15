@@ -9,8 +9,12 @@ import {
   Open_Sans,
 } from 'next/font/google'
 import './globals.css'
+import Script from 'next/script'
 import { SessionProvider } from 'next-auth/react'
 import { prisma } from '@/lib/prisma'
+import { TrackingProvider } from '@/components/TrackingProvider'
+
+const SITE_URL = 'https://sixxis-store-production.up.railway.app'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -42,22 +46,71 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default:  'Sixxis Store — Climatizadores, Aspiradores e Spinning',
+    default:  'Sixxis Store — Climatizadores, Aspiradores e Spinning | Araçatuba SP',
     template: '%s | Sixxis Store',
   },
   description:
-    'Loja oficial Sixxis. Climatizadores, aspiradores e equipamentos de spinning com qualidade premium e entrega rápida para todo o Brasil.',
-  keywords: ['climatizador', 'aspirador', 'spinning', 'sixxis', 'loja sixxis', 'climatizadores sixxis'],
-  authors: [{ name: 'Sixxis' }],
+    'Loja oficial Sixxis em Araçatuba-SP. Climatizadores evaporativos, aspiradores sem fio e bicicletas spinning com 30 anos de qualidade. Garantia real de 12 meses. Frete para todo o Brasil.',
+  keywords: [
+    'climatizador sixxis', 'climatizador evaporativo', 'aspirador sem fio sixxis',
+    'spinning sixxis', 'sixxis araçatuba', 'loja sixxis',
+    'climatizador residencial', 'climatizador industrial',
+  ],
+  authors: [{ name: 'Sixxis Store', url: SITE_URL }],
+  creator: 'Sixxis Store',
+  publisher: 'Sixxis Store',
+  robots: {
+    index: true, follow: true,
+    googleBot: {
+      index: true, follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     type:        'website',
     locale:      'pt_BR',
+    url:         SITE_URL,
     siteName:    'Sixxis Store',
     title:       'Sixxis Store — Climatizadores, Aspiradores e Spinning',
-    description: 'Loja oficial Sixxis. Climatizadores, aspiradores e equipamentos de spinning com qualidade e garantia.',
+    description: 'Loja oficial Sixxis em Araçatuba-SP. 30 anos de qualidade em climatização.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Sixxis Store' }],
   },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sixxis Store — Climatizadores e Aspiradores',
+    description: 'Loja oficial Sixxis. 30 anos de qualidade.',
+    images: ['/og-image.jpg'],
+  },
+}
+
+const schemaOrg = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: 'Sixxis Store',
+  description: 'Loja oficial Sixxis — Climatizadores, Aspiradores e Spinning',
+  url: SITE_URL,
+  telephone: '+551899747-4701',
+  email: 'brasil.sixxis@gmail.com',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'R. Anhanguera, 1711',
+    addressLocality: 'Araçatuba',
+    addressRegion: 'SP',
+    postalCode: '16015-480',
+    addressCountry: 'BR',
+  },
+  openingHoursSpecification: [
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday'], opens: '08:00', closes: '18:00' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Saturday'], opens: '08:00', closes: '12:00' },
+  ],
+  priceRange: 'R$500 - R$9.250',
+  currenciesAccepted: 'BRL',
+  paymentAccepted: 'Cash, Credit Card, Debit Card, PIX',
+  logo: `${SITE_URL}/logo-sixxis.png`,
 }
 
 const COR_KEYS = [
@@ -199,8 +252,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={bodyStyle}
       >
         <SessionProvider>
-          {children}
+          <TrackingProvider>
+            {children}
+          </TrackingProvider>
         </SessionProvider>
+        <Script
+          id="schema-org"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
+        />
       </body>
     </html>
   )

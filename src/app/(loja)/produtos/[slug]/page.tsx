@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { ShieldCheck, Award, Headphones, Zap, Wind, Droplets } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import Breadcrumb from '@/components/ui/Breadcrumb'
@@ -13,6 +14,19 @@ import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
 
 export const dynamic = 'force-dynamic'
+
+const SITE_URL = 'https://sixxis-store-production.up.railway.app'
+
+// Limpa HTML e limita a N caracteres
+function limparHTML(html: string | null | undefined, max = 160): string {
+  if (!html) return ''
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&[a-z#0-9]+;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .substring(0, max)
+}
 
 function getNomeCategoria(cat: string | null): string {
   if (!cat) return 'Produtos'
@@ -35,11 +49,66 @@ interface FaqRow { pergunta: string; resposta: string }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
-  const produto = await prisma.produto.findUnique({ where: { slug }, select: { nome: true, descricao: true } })
-  if (!produto) return {}
+  const produto = await prisma.produto.findUnique({
+    where: { slug },
+    select: {
+      nome: true, descricao: true, imagens: true, categoria: true,
+      preco: true, precoPromocional: true, especificacoes: true,
+    },
+  })
+  if (!produto) return { title: 'Produto não encontrado' }
+
+  const categoria = getNomeCategoria(produto.categoria)
+  const preco = Number(produto.precoPromocional || produto.preco)
+  const imagens = produto.imagens as string[] | null
+  const imagemPrincipal = imagens?.[0]
+  const urlProduto = `${SITE_URL}/produtos/${slug}`
+
+  // Specs resumidas (label: valor)
+  let specsText = ''
+  try {
+    const raw = produto.especificacoes as unknown
+    const arr: unknown[] = Array.isArray(raw) ? raw : (raw ? JSON.parse(String(raw)) : [])
+    specsText = arr.slice(0, 3).map((item) => {
+      if (Array.isArray(item)) return `${item[0]}: ${item[1]}`
+      const o = item as Record<string, unknown>
+      return `${o.label}: ${o.valor}`
+    }).join(', ')
+  } catch {}
+
+  // Meta description SEM HTML
+  const descBase = limparHTML(produto.descricao, 80)
+  const descSEO = `Compre ${produto.nome} na Sixxis Store. ${
+    specsText ? specsText + '. ' : descBase ? descBase + '. ' : ''
+  }${preco > 0 ? `A partir de R$ ${preco.toLocaleString('pt-BR')}. ` : ''}Garantia 12 meses, frete para todo o Brasil.`.substring(0, 160)
+
   return {
-    title: produto.nome,
-    description: produto.descricao?.slice(0, 160) ?? undefined,
+    title: `${produto.nome} — ${categoria}`,
+    description: descSEO,
+    keywords: [
+      produto.nome,
+      `${produto.nome} preço`,
+      `${produto.nome} comprar`,
+      'Sixxis', 'Sixxis Store', categoria, 'Araçatuba',
+    ].join(', '),
+    openGraph: {
+      title: `${produto.nome}${preco > 0 ? ` — R$ ${preco.toLocaleString('pt-BR')}` : ''}`,
+      description: descSEO,
+      url: urlProduto,
+      type: 'website',
+      siteName: 'Sixxis Store',
+      locale: 'pt_BR',
+      images: imagemPrincipal
+        ? [{ url: imagemPrincipal, width: 1200, height: 630, alt: produto.nome }]
+        : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: produto.nome,
+      description: descSEO,
+      images: imagemPrincipal ? [imagemPrincipal] : [],
+    },
+    alternates: { canonical: urlProduto },
   }
 }
 
@@ -132,8 +201,39 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     imagem: imagens[0] ?? undefined,
   }
 
+  const schemaProduct = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: produto.nome,
+    description: limparHTML(produto.descricao, 300),
+    image: imagens?.length ? imagens : undefined,
+    sku: produto.sku || produto.slug,
+    brand: { '@type': 'Brand', name: 'Sixxis' },
+    offers: {
+      '@type': 'Offer',
+      url: `${SITE_URL}/produtos/${produto.slug}`,
+      priceCurrency: 'BRL',
+      price: (promocional ?? preco).toFixed(2),
+      priceValidUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+      availability: produto.estoque > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: 'Sixxis Store' },
+    },
+    ...(totalAv > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: mediaAv.toFixed(1),
+        reviewCount: totalAv,
+      },
+    }),
+  }
+
   return (
     <div className="min-h-screen bg-white">
+      <Script
+        id={`schema-produto-${produto.slug}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaProduct) }}
+      />
       <RevealInit />
       <Breadcrumb items={[
         { label: 'Início', href: '/' },
