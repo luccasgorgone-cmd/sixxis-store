@@ -6,7 +6,7 @@ import Image from 'next/image'
 import {
   LayoutDashboard, Package, ShoppingBag, Settings, LogOut,
   Image as ImageIcon, Tag, Star, Trophy, LayoutTemplate, Mail,
-  X, BarChart2, Users, Smartphone, Home, Gift, ExternalLink, Handshake,
+  X, BarChart2, Users, Smartphone, Home, Gift, ExternalLink, Handshake, ShieldOff,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -30,6 +30,8 @@ const NAV_GROUPS = [
   {
     label: 'Clientes',
     items: [
+      { href: '/admin/clientes',            label: 'Clientes',        icon: Users,     exact: false },
+      { href: '/admin/bloqueios',           label: 'Bloqueios',       icon: ShieldOff, exact: false },
       { href: '/admin/cupons',              label: 'Cupons',          icon: Tag,       exact: false },
       { href: '/admin/avaliacoes',          label: 'Avaliações',      icon: Star,      exact: false },
       { href: '/admin/avaliacoes-parceiros',label: 'Aval. Parceiros', icon: Handshake, exact: false },

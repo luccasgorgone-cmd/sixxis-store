@@ -2,110 +2,104 @@ import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import LayoutConta from '@/components/conta/LayoutConta'
+import { ShoppingBag, Coins, Package, MapPin } from 'lucide-react'
 import Link from 'next/link'
-import { User, MapPin, ShoppingBag, Trophy } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
-
 export const metadata: Metadata = { title: 'Minha Conta' }
+
+function fmt(v: number) {
+  return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+}
+
+const STATUS_LABEL: Record<string, string> = { pendente: 'Pendente', pago: 'Pago', enviado: 'Enviado', entregue: 'Entregue', cancelado: 'Cancelado' }
+const STATUS_COLOR: Record<string, string> = { pendente: 'bg-amber-50 text-amber-700', pago: 'bg-blue-50 text-blue-700', enviado: 'bg-purple-50 text-purple-700', entregue: 'bg-green-50 text-green-700', cancelado: 'bg-gray-100 text-gray-500' }
 
 export default async function MinhaContaPage() {
   const session = await auth()
-  if (!session?.user) redirect('/login')
+  if (!session?.user?.id) redirect('/login?next=/minha-conta')
 
   const cliente = await prisma.cliente.findUnique({
-    where:   { email: session.user.email! },
-    include: { enderecos: true, pontos: true },
+    where:  { id: session.user.id },
+    select: { nome: true, email: true, cashbackSaldo: true, totalGasto: true, totalPedidos: true },
   })
-
   if (!cliente) redirect('/login')
 
-  return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-      <h1 className="text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-8">Minha Conta</h1>
+  const pedidosRecentes = await prisma.pedido.findMany({
+    where:   { clienteId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+    take:    3,
+    select:  { id: true, status: true, total: true, createdAt: true },
+  })
 
-      {/* Dados pessoais */}
-      <section className="bg-white border border-gray-200 rounded-xl p-6 mb-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-[#e8f8f7] flex items-center justify-center">
-            <User size={18} className="text-[#3cbfb3]" />
-          </div>
-          <h2 className="text-base font-bold text-[#0a0a0a]">Dados Pessoais</h2>
+  return (
+    <LayoutConta>
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#0f2e2b] to-[#1a4f4a] rounded-2xl px-6 py-5 text-white">
+          <p className="text-sm text-white/60">Olá,</p>
+          <p className="text-xl font-extrabold">{cliente.nome}</p>
+          <p className="text-xs text-white/50 mt-0.5">{cliente.email}</p>
         </div>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
-            { label: 'Nome',     value: cliente.nome },
-            { label: 'Email',    value: cliente.email },
-            { label: 'CPF',      value: cliente.cpf ?? '—' },
-            { label: 'Telefone', value: cliente.telefone ?? '—' },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <dt className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-0.5">{label}</dt>
-              <dd className="font-semibold text-[#0a0a0a]">{value}</dd>
+            { icon: ShoppingBag, label: 'Pedidos',    value: String(cliente.totalPedidos),         color: 'text-blue-500',  bg: 'bg-blue-50'   },
+            { icon: Coins,       label: 'Cashback',   value: `R$ ${fmt(cliente.cashbackSaldo)}`,   color: 'text-[#3cbfb3]', bg: 'bg-[#f0fffe]' },
+            { icon: Package,     label: 'Total Gasto',value: `R$ ${fmt(cliente.totalGasto)}`,      color: 'text-amber-500', bg: 'bg-amber-50'  },
+          ].map(({ icon: Icon, label, value, color, bg }) => (
+            <div key={label} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+              <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center mb-3`}>
+                <Icon size={16} className={color} />
+              </div>
+              <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+              <p className="text-base font-extrabold text-gray-900">{value}</p>
             </div>
           ))}
-        </dl>
-      </section>
-
-      {/* Endereços */}
-      <section className="bg-white border border-gray-200 rounded-xl p-6 mb-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-[#e8f8f7] flex items-center justify-center">
-            <MapPin size={18} className="text-[#3cbfb3]" />
-          </div>
-          <h2 className="text-base font-bold text-[#0a0a0a]">Endereços</h2>
         </div>
 
-        {cliente.enderecos.length === 0 ? (
-          <p className="text-gray-500 text-sm">Nenhum endereço cadastrado.</p>
-        ) : (
-          <ul className="space-y-3">
-            {cliente.enderecos.map((end: { id: string; logradouro: string; numero: string; complemento: string | null; bairro: string; cidade: string; estado: string; cep: string; principal: boolean }) => (
-              <li key={end.id} className="text-sm border border-gray-200 rounded-lg p-3 bg-gray-50">
-                {end.logradouro}, {end.numero}
-                {end.complemento ? `, ${end.complemento}` : ''} — {end.bairro},{' '}
-                {end.cidade}/{end.estado} — CEP {end.cep}
-                {end.principal && (
-                  <span className="ml-2 text-xs bg-[#e8f8f7] text-[#3cbfb3] font-semibold px-2 py-0.5 rounded-full">
-                    Principal
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        {/* Pedidos recentes */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+            <h2 className="font-extrabold text-gray-900">Pedidos Recentes</h2>
+            <Link href="/minha-conta/pedidos" className="text-xs text-[#3cbfb3] hover:text-[#2a9d8f] font-semibold">Ver todos →</Link>
+          </div>
+          {pedidosRecentes.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">Nenhum pedido ainda.</p>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {pedidosRecentes.map(p => (
+                <div key={p.id} className="flex items-center justify-between px-5 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">#{p.id.slice(-8).toUpperCase()}</p>
+                    <p className="text-xs text-gray-400">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLOR[p.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                      {STATUS_LABEL[p.status] ?? p.status}
+                    </span>
+                    <span className="text-sm font-bold text-gray-900">R$ {fmt(Number(p.total))}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Quick-access cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Link
-          href="/pedidos"
-          className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-5 hover:border-[#3cbfb3] hover:bg-[#e8f8f7] transition group"
-        >
-          <div className="w-10 h-10 rounded-full bg-[#e8f8f7] group-hover:bg-white flex items-center justify-center">
-            <ShoppingBag size={18} className="text-[#3cbfb3]" />
-          </div>
-          <div>
-            <p className="font-bold text-sm text-[#0a0a0a]">Meus Pedidos</p>
-            <p className="text-xs text-gray-500">Ver histórico de compras</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/fidelidade"
-          className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-5 hover:border-[#3cbfb3] hover:bg-[#e8f8f7] transition group"
-        >
-          <div className="w-10 h-10 rounded-full bg-[#e8f8f7] group-hover:bg-white flex items-center justify-center">
-            <Trophy size={18} className="text-[#3cbfb3]" />
-          </div>
-          <div>
-            <p className="font-bold text-sm text-[#0a0a0a]">Programa Fidelidade</p>
-            <p className="text-xs text-gray-500">
-              {cliente.pontos ? `${cliente.pontos.pontos} pontos disponíveis` : 'Acumule e troque pontos'}
-            </p>
-          </div>
-        </Link>
+        {/* Quick links */}
+        <div className="grid grid-cols-2 gap-3">
+          <Link href="/minha-conta/enderecos" className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition">
+            <MapPin size={18} className="text-[#3cbfb3]" />
+            <div><p className="text-sm font-semibold text-gray-900">Endereços</p><p className="text-xs text-gray-400">Gerenciar</p></div>
+          </Link>
+          <Link href="/minha-conta/cashback" className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition">
+            <Coins size={18} className="text-[#3cbfb3]" />
+            <div><p className="text-sm font-semibold text-gray-900">Cashback</p><p className="text-xs text-gray-400">Ver extrato</p></div>
+          </Link>
+        </div>
       </div>
-    </main>
+    </LayoutConta>
   )
 }

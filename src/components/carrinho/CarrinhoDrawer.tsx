@@ -1,9 +1,20 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { X, ShoppingBag, Minus, Plus, Trash2, Truck, Package } from 'lucide-react'
+import { X, ShoppingBag, Minus, Plus, Trash2, Truck, Package, Zap } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
+
+interface UpsellItem {
+  id: string
+  nome: string
+  slug: string
+  preco: number
+  precoFinal: number
+  desconto: number | null
+  imagem: string | null
+  pixPreco: string
+}
 
 const FRETE_GRATIS = 500
 
@@ -12,7 +23,18 @@ function fmt(v: number) {
 }
 
 export default function CarrinhoDrawer() {
-  const { itens, drawerAberto, setDrawerAberto, removerItem, atualizarQuantidade, total } = useCarrinho()
+  const { itens, drawerAberto, setDrawerAberto, removerItem, atualizarQuantidade, total, adicionarItem } = useCarrinho()
+  const [upsell, setUpsell] = useState<UpsellItem[]>([])
+
+  // Fetch upsell products whenever cart opens or items change
+  useEffect(() => {
+    if (!drawerAberto || itens.length === 0) { setUpsell([]); return }
+    const exclude = itens.map(i => i.produtoId).join(',')
+    fetch(`/api/produtos/upsell?limit=3&exclude=${exclude}`)
+      .then(r => r.json())
+      .then(d => setUpsell(d.produtos || []))
+      .catch(() => setUpsell([]))
+  }, [drawerAberto, itens])
 
   // ESC close
   useEffect(() => {
@@ -169,6 +191,49 @@ export default function CarrinhoDrawer() {
                 </div>
               </div>
             ))
+          )}
+
+          {/* Upsell — você também pode gostar */}
+          {itens.length > 0 && upsell.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Você também pode gostar</p>
+              <div className="space-y-2.5">
+                {upsell.map(p => (
+                  <div key={p.id} className="flex items-center gap-3 bg-gray-50 rounded-xl p-2.5 border border-gray-100">
+                    <Link href={`/produtos/${p.slug}`} onClick={() => setDrawerAberto(false)} className="shrink-0">
+                      <div className="w-12 h-12 bg-white rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center">
+                        {p.imagem ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.imagem} alt={p.nome} className="w-full h-full object-contain p-1" />
+                        ) : (
+                          <Package size={18} className="text-gray-200" />
+                        )}
+                      </div>
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/produtos/${p.slug}`} onClick={() => setDrawerAberto(false)}>
+                        <p className="text-xs font-semibold text-gray-800 line-clamp-1 hover:text-[#3cbfb3] transition-colors">{p.nome}</p>
+                      </Link>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-sm font-black text-gray-900">R$ {fmt(p.precoFinal)}</span>
+                        {p.desconto && (
+                          <span className="inline-flex items-center gap-0.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                            <Zap size={8} /> -{p.desconto}%
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-[#3cbfb3]">R$ {fmt(Number(p.pixPreco))} no PIX</p>
+                    </div>
+                    <button
+                      onClick={() => adicionarItem({ produtoId: p.id, nome: p.nome, preco: p.precoFinal, quantidade: 1, imagem: p.imagem ?? undefined })}
+                      className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 

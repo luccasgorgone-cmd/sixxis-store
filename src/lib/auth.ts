@@ -28,6 +28,8 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
         const senhaValida = await bcrypt.compare(parsed.data.password, cliente.senha)
         if (!senhaValida) return null
 
+        if (cliente.bloqueado) throw new Error('Conta bloqueada. Entre em contato com o suporte.')
+
         return { id: cliente.id, name: cliente.nome, email: cliente.email }
       },
     }),

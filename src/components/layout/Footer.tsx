@@ -42,10 +42,11 @@ export default async function Footer() {
 
   try {
     const configs = await prisma.configuracao.findMany({
-      where: { chave: { in: ['logo_url', 'social_whatsapp', 'social_whatsapp_suporte'] } },
+      where: { chave: { in: ['logo_url', 'logo_rodape_url', 'social_whatsapp', 'social_whatsapp_suporte'] } },
     })
     const cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
-    if (cfg.logo_url)                logoUrl          = cfg.logo_url
+    if (cfg.logo_rodape_url)         logoUrl          = cfg.logo_rodape_url
+    else if (cfg.logo_url)           logoUrl          = cfg.logo_url
     if (cfg.social_whatsapp)         whatsappVendas   = cfg.social_whatsapp
     if (cfg.social_whatsapp_suporte) whatsappSuporte  = cfg.social_whatsapp_suporte
   } catch {}

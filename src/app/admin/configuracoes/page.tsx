@@ -45,6 +45,7 @@ const DEFAULTS: Record<string, string> = {
   cor_textos: '#0a0a0a',
   cor_fundo: '#ffffff',
   logo_url: '/logo-sixxis.png',
+  logo_rodape_url: '',
   frete_minimo_gratis: '500',
   frete_cep_origem: '16020355',
   pagamento_pix: 'true',
@@ -392,6 +393,8 @@ export default function ConfiguracoesPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const logoRodapeInputRef = useRef<HTMLInputElement>(null)
+  const [uploadingLogoRodape, setUploadingLogoRodape] = useState(false)
   const heroInputRef = useRef<HTMLInputElement>(null)
   const [uploadingHero, setUploadingHero] = useState(false)
   const [uploadingBg, setUploadingBg] = useState(false)
@@ -479,6 +482,29 @@ export default function ConfiguracoesPage() {
       showToast('Erro ao fazer upload da logo.', 'error')
     }
     setUploadingLogo(false)
+    e.target.value = ''
+  }
+
+  async function handleLogoRodapeUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingLogoRodape(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    if (res.ok) {
+      const { url } = await res.json()
+      set('logo_rodape_url', url)
+      await fetch('/api/admin/configuracoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chave: 'logo_rodape_url', valor: url }),
+      })
+      showToast('Logo do rodapé atualizada!')
+    } else {
+      showToast('Erro ao fazer upload.', 'error')
+    }
+    setUploadingLogoRodape(false)
     e.target.value = ''
   }
 
@@ -758,6 +784,40 @@ export default function ConfiguracoesPage() {
               </button>
               <p className="text-xs text-gray-400 mt-2">PNG ou SVG, fundo transparente recomendado</p>
               <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+            </div>
+          </div>
+        </Card>
+
+        {/* Logo Rodapé */}
+        <Card title="Logo do Rodapé">
+          <p className="text-xs text-gray-400 mb-4">Se não definida, usa a logo principal. Ideal para versão clara ou variante menor.</p>
+          <div className="flex items-center gap-6">
+            <div className="w-44 h-16 bg-[#0f1f1e] rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
+              {configs.logo_rodape_url ? (
+                <Image
+                  src={configs.logo_rodape_url}
+                  alt="Logo Rodapé"
+                  width={160}
+                  height={54}
+                  className="object-contain"
+                  unoptimized
+                />
+              ) : (
+                <span className="text-xs text-gray-500">Sem logo</span>
+              )}
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => logoRodapeInputRef.current?.click()}
+                disabled={uploadingLogoRodape}
+                className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+              >
+                {uploadingLogoRodape ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                Trocar Logo Rodapé
+              </button>
+              <p className="text-xs text-gray-400 mt-2">PNG ou SVG, versão clara recomendada</p>
+              <input ref={logoRodapeInputRef} type="file" accept="image/*" onChange={handleLogoRodapeUpload} className="hidden" />
             </div>
           </div>
         </Card>
