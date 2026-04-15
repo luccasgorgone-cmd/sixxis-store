@@ -20,6 +20,9 @@ const CATEGORIAS: Record<string, string> = {
 
 const LIMIT = 12
 
+// All spec/filter param keys managed by FiltrosHorizontais
+const FILTER_KEYS = ['voltagem', 'capacidade', 'cobertura', 'vazao', 'velocidades', 'resistencia', 'peso_max', 'tipo', 'preco'] as const
+
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ProductSkeleton() {
@@ -112,6 +115,14 @@ export default function ProdutosClient() {
   const precoMin  = searchParams.get('precoMin')  || ''
   const precoMax  = searchParams.get('precoMax')  || ''
 
+  // Collect all active spec/filter values as a stable string for dependency tracking
+  const specFilters = FILTER_KEYS.reduce<Record<string, string>>((acc, k) => {
+    const v = searchParams.get(k)
+    if (v) acc[k] = v
+    return acc
+  }, {})
+  const specFiltersStr = FILTER_KEYS.map(k => specFilters[k] ? `${k}=${specFilters[k]}` : '').filter(Boolean).join('&')
+
   // Fetch filter groups dynamically from /api/filtros
   useEffect(() => {
     const url = `/api/filtros${categoria ? `?categoria=${encodeURIComponent(categoria)}` : ''}`
@@ -121,7 +132,7 @@ export default function ProdutosClient() {
       .catch(() => setGrupos([]))
   }, [categoria])
 
-  useEffect(() => { setPagina(1) }, [categoria, ordem, busca, precoMin, precoMax])
+  useEffect(() => { setPagina(1) }, [categoria, ordem, busca, precoMin, precoMax, specFiltersStr])
 
   useEffect(() => {
     setLoading(true)
@@ -131,6 +142,10 @@ export default function ProdutosClient() {
     if (busca)     p.set('q', busca)
     if (precoMin)  p.set('precoMin', precoMin)
     if (precoMax)  p.set('precoMax', precoMax)
+    // Forward all active spec/filter params to the API
+    for (const [k, v] of Object.entries(specFilters)) {
+      p.set(k, v)
+    }
     p.set('page',  String(pagina))
     p.set('limit', String(LIMIT))
 
@@ -142,7 +157,8 @@ export default function ProdutosClient() {
       })
       .catch(() => setProdutos([]))
       .finally(() => setLoading(false))
-  }, [categoria, ordem, busca, precoMin, precoMax, pagina])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoria, ordem, busca, precoMin, precoMax, specFiltersStr, pagina])
 
   const categoriaLabel = categoria ? (CATEGORIAS[categoria] ?? categoria) : null
   const titulo = busca ? `Resultados para "${busca}"` : categoriaLabel ?? 'Todos os Produtos'

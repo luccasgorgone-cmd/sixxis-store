@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, X, SlidersHorizontal, Check } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
@@ -21,7 +22,7 @@ interface Props {
   total: number
 }
 
-// ─── Dropdown individual ──────────────────────────────────────────────────────
+// ─── Dropdown individual (com createPortal) ───────────────────────────────────
 
 function FiltroDropdown({
   grupo,
@@ -33,18 +34,42 @@ function FiltroDropdown({
   onChange: (id: string, valores: string[]) => void
 }) {
   const [aberto, setAberto] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
   const temSelecionado = valoresSelecionados.length > 0
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setAberto(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+  useEffect(() => { setMounted(true) }, [])
+
+  const calcPos = useCallback(() => {
+    if (!btnRef.current) return
+    const rect = btnRef.current.getBoundingClientRect()
+    setPos({
+      top:  rect.bottom + 6,
+      left: Math.min(rect.left, window.innerWidth - 204),
+    })
   }, [])
 
-  const toggle = (valor: string) => {
+  // Update position on scroll/resize while open
+  useEffect(() => {
+    if (!aberto) return
+    calcPos()
+    window.addEventListener('scroll', calcPos, { passive: true })
+    window.addEventListener('resize', calcPos, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', calcPos)
+      window.removeEventListener('resize', calcPos)
+    }
+  }, [aberto, calcPos])
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setAberto(false) }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [])
+
+  function toggle(valor: string) {
     if (grupo.multiple) {
       const novo = valoresSelecionados.includes(valor)
         ? valoresSelecionados.filter(v => v !== valor)
@@ -56,15 +81,27 @@ function FiltroDropdown({
     }
   }
 
+  function handleBtnClick() {
+    if (aberto) {
+      setAberto(false)
+    } else {
+      calcPos()
+      setAberto(true)
+    }
+  }
+
   return (
-    <div ref={ref} className="relative shrink-0">
+    <>
       <button
-        onClick={() => setAberto(!aberto)}
+        ref={btnRef}
+        onClick={handleBtnClick}
         className={[
-          'flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-semibold transition-all whitespace-nowrap',
+          'flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-semibold transition-all whitespace-nowrap shrink-0',
           temSelecionado
             ? 'bg-[#0f2e2b] border-[#0f2e2b] text-white'
-            : 'bg-white border-gray-200 text-gray-700 hover:border-[#3cbfb3] hover:text-[#3cbfb3]',
+            : aberto
+              ? 'bg-gray-50 border-gray-300 text-gray-900'
+              : 'bg-white border-gray-200 text-gray-700 hover:border-[#3cbfb3] hover:text-[#3cbfb3]',
         ].join(' ')}
       >
         {grupo.label}
@@ -79,26 +116,55 @@ function FiltroDropdown({
         />
       </button>
 
-      {aberto && (
-        <div className="absolute top-full left-0 mt-1.5 bg-white rounded-2xl border border-gray-100 shadow-xl z-50 min-w-[180px] py-2 overflow-hidden">
-          {grupo.opcoes.map(op => {
-            const selecionado = valoresSelecionados.includes(op.valor)
-            return (
-              <button
-                key={op.valor}
-                onClick={() => toggle(op.valor)}
-                className="w-full flex items-center justify-between px-4 py-2.5 text-sm hover:bg-gray-50 transition"
-              >
-                <span className={`font-medium ${selecionado ? 'text-[#0f2e2b]' : 'text-gray-700'}`}>
-                  {op.label}
-                </span>
-                {selecionado && <Check size={14} style={{ color: '#3cbfb3' }} strokeWidth={2.5} />}
-              </button>
-            )
-          })}
-        </div>
+      {/* Dropdown via createPortal — escapa do overflow-x-auto */}
+      {mounted && aberto && pos && createPortal(
+        <>
+          {/* Overlay transparente — fecha ao clicar fora */}
+          <div
+            className="fixed inset-0"
+            style={{ zIndex: 9998 }}
+            onClick={() => setAberto(false)}
+          />
+
+          {/* Dropdown */}
+          <div
+            className="fixed bg-white rounded-2xl border border-gray-100 shadow-2xl overflow-hidden"
+            style={{
+              top:      pos.top,
+              left:     pos.left,
+              minWidth: '180px',
+              zIndex:   9999,
+            }}
+          >
+            <div className="p-1.5">
+              {grupo.opcoes.map(op => {
+                const selecionado = valoresSelecionados.includes(op.valor)
+                return (
+                  <button
+                    key={op.valor}
+                    onClick={() => toggle(op.valor)}
+                    className={`
+                      w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-left transition-colors
+                      ${selecionado
+                        ? 'bg-[#3cbfb3]/10 text-[#3cbfb3] font-semibold'
+                        : 'text-gray-700 hover:bg-gray-50'
+                      }
+                    `}
+                  >
+                    {selecionado
+                      ? <Check size={13} className="shrink-0 text-[#3cbfb3]" />
+                      : <span className="w-[13px] shrink-0" />
+                    }
+                    {op.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </>,
+        document.body
       )}
-    </div>
+    </>
   )
 }
 
@@ -136,7 +202,6 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
 
   const aplicar = (novosFiltros: Record<string, string[]>, novaOrdem?: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    // limpa filtros velhos dos grupos
     grupos.forEach(g => params.delete(g.id))
 
     Object.entries(novosFiltros).forEach(([k, vals]) => {
@@ -185,7 +250,7 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
             <span className="text-xs font-semibold text-gray-400 hidden sm:inline">Filtros</span>
           </div>
 
-          {/* Dropdowns */}
+          {/* Dropdowns com createPortal */}
           {grupos.map(grupo => (
             <FiltroDropdown
               key={grupo.id}
