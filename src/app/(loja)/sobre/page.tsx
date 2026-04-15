@@ -2,10 +2,12 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Breadcrumb from '@/components/ui/Breadcrumb'
+import SectionKicker from '@/components/ui/SectionKicker'
 import {
   Shield, Truck, Award, Users, MapPin, Phone,
   Mail, Heart, Zap, Star, ArrowRight,
-  Wind, Bike, TrendingUp, Building2, Globe, HeartHandshake
+  Wind, Bike, TrendingUp, Building2, Globe, HeartHandshake,
+  BadgeCheck, PackageCheck,
 } from 'lucide-react'
 
 function useAnimateOnView(threshold = 0.15) {
@@ -120,7 +122,7 @@ export default function SobrePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Nossa trajetória</span>
+            <SectionKicker texto="Nossa trajetória" />
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-4">
               30 anos de história e crescimento
             </h2>
@@ -173,7 +175,7 @@ export default function SobrePage() {
       <section className="py-20" style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 60%, #1a4f4a 100%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-12">
-            <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Propósito</span>
+            <SectionKicker texto="Propósito" dark />
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2 mb-3">O que nos move todos os dias</h2>
             <p className="text-white/55 text-sm max-w-xl mx-auto leading-relaxed">
               Nossa missão, visão e valores definem quem somos e como tomamos cada decisão dentro da empresa.
@@ -216,31 +218,101 @@ export default function SobrePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Por que Sixxis</span>
+            <SectionKicker texto="Por que Sixxis" />
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-3">O que nos diferencia no mercado</h2>
             <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
               Mais de 30 anos construindo relacionamentos baseados em confiança, qualidade e resultados reais para os nossos clientes.
             </p>
           </AnimSection>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: Shield,  titulo: 'Garantia Real de 12 Meses',    texto: 'Suporte técnico especializado em todo o Brasil, sem burocracia e sem letras miúdas. Você compra com segurança e conta com assistência real quando precisar.',             cor: '#16a34a' },
-              { icon: Award,   titulo: '100% Produtos Originais',       texto: 'Importadores diretos de fábrica. Todos os produtos chegam com nota fiscal, certificação INMETRO e documentação completa. Qualidade comprovada em cada unidade.',         cor: '#3cbfb3' },
-              { icon: Truck,   titulo: 'Entrega para Todo o Brasil',    texto: 'Parcerias com Correios e principais transportadoras nacionais. Rastreamento em tempo real, embalagem reforçada e prazo garantido para qualquer cidade do país.',          cor: '#2563eb' },
-              { icon: Users,   titulo: 'Atendimento Humanizado',        texto: 'Equipe real, disponível via WhatsApp e telefone. Nenhum chatbot, nenhuma fila interminável. Resolvemos seu problema com agilidade e cuidado humano de verdade.',         cor: '#f59e0b' },
-              { icon: Zap,     titulo: 'Inovação Constante',            texto: 'Linha de produtos em evolução contínua, incorporando as melhores tecnologias globais de eficiência energética, silêncio e durabilidade para o mercado brasileiro.',     cor: '#8b5cf6' },
-              { icon: Heart,   titulo: 'Empresa 100% Brasileira',       texto: 'Sediada em Araçatuba, SP, com mais de 30 anos gerando empregos locais. Crescemos junto com o Brasil e temos orgulho de contribuir com a economia nacional.',              cor: '#ef4444' },
+              {
+                icone: BadgeCheck,
+                titulo: 'Garantia Real de 12 Meses',
+                subtitulo: 'Proteção total, sem letras miúdas',
+                texto: 'Garantia integral de 12 meses contra defeitos de fabricação em todos os produtos Sixxis. Mais de 50 pontos de assistência técnica no Brasil, logística reversa gratuita e resolução em até 7 dias úteis.',
+                destaque: '12 meses',
+                corIcone: '#3cbfb3',
+              },
+              {
+                icone: PackageCheck,
+                titulo: '100% Produtos Originais',
+                subtitulo: 'Certificação INMETRO em toda a linha',
+                texto: 'Todos os produtos saem diretamente da nossa importação oficial com nota fiscal, certificação INMETRO e rastreabilidade completa. Zero produtos paralelos ou adulterados — nunca.',
+                destaque: 'INMETRO',
+                corIcone: '#0f2e2b',
+              },
+              {
+                icone: MapPin,
+                titulo: 'Entrega para Todo o Brasil',
+                subtitulo: 'Todos os 5.570 municípios',
+                texto: 'Entregamos em todo o território nacional com transportadoras parceiras rastreadas. Prazo médio de 3 a 5 dias úteis. Embalagem reforçada e seguro de transporte inclusos.',
+                destaque: '5.570 cidades',
+                corIcone: '#3cbfb3',
+              },
+              {
+                icone: HeartHandshake,
+                titulo: 'Atendimento Humanizado',
+                subtitulo: 'Pessoas reais, respostas rápidas',
+                texto: 'Equipe de atendimento real — sem bots. Respondemos via WhatsApp e e-mail com tempo médio de resposta de 2 horas. Pós-venda dedicado e resolução com empatia.',
+                destaque: '2h resposta',
+                corIcone: '#0f2e2b',
+              },
+              {
+                icone: Zap,
+                titulo: 'Inovação Constante',
+                subtitulo: 'P&D contínuo em climatização',
+                texto: 'Investimos continuamente em pesquisa e desenvolvimento. Nossa linha é atualizada anualmente com melhorias reais baseadas no feedback de clientes e parceiros.',
+                destaque: 'Atualização anual',
+                corIcone: '#3cbfb3',
+              },
+              {
+                icone: Building2,
+                titulo: 'Empresa 100% Brasileira',
+                subtitulo: 'Fundada em Araçatuba, SP',
+                texto: 'Fundada e operada por brasileiros. Entendemos o clima, o mercado e as necessidades do consumidor brasileiro como ninguém. 30 anos gerando empregos e crescendo no país.',
+                destaque: '30 anos',
+                corIcone: '#0f2e2b',
+              },
             ].map((item, i) => {
-              const Icon = item.icon
+              const Icon = item.icone
               return (
-                <AnimSection key={item.titulo} delay={i * 60}
-                  className="bg-white border border-gray-100 rounded-2xl p-8 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300"
-                    style={{ backgroundColor: '#e8f8f7' }}>
-                    <Icon size={28} style={{ color: item.cor }} />
+                <AnimSection key={i} delay={i * 80}>
+                  <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-8 h-full flex flex-col relative overflow-hidden">
+                    {/* Decoração de fundo */}
+                    <div
+                      className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-5 transition-opacity group-hover:opacity-10"
+                      style={{ backgroundColor: item.corIcone }}
+                    />
+                    {/* Ícone */}
+                    <div
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 shrink-0 group-hover:scale-110 transition-transform duration-300"
+                      style={{ backgroundColor: `${item.corIcone}15` }}
+                    >
+                      <Icon size={30} style={{ color: item.corIcone }} strokeWidth={1.8} />
+                    </div>
+                    {/* Badge destaque */}
+                    <span
+                      className="self-start text-[11px] font-black px-2.5 py-1 rounded-full mb-3 uppercase tracking-wide"
+                      style={{ backgroundColor: `${item.corIcone}15`, color: item.corIcone }}
+                    >
+                      {item.destaque}
+                    </span>
+                    {/* Título */}
+                    <h3 className="text-lg font-extrabold text-gray-900 mb-1 leading-snug">
+                      {item.titulo}
+                    </h3>
+                    {/* Subtítulo */}
+                    <p className="text-sm font-semibold mb-3" style={{ color: item.corIcone }}>
+                      {item.subtitulo}
+                    </p>
+                    {/* Linha divisória */}
+                    <div className="w-8 h-0.5 rounded-full mb-4" style={{ backgroundColor: item.corIcone }} />
+                    {/* Descrição */}
+                    <p className="text-sm text-gray-500 leading-relaxed flex-1">
+                      {item.texto}
+                    </p>
                   </div>
-                  <h3 className="text-base font-extrabold text-gray-900 mb-2">{item.titulo}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{item.texto}</p>
                 </AnimSection>
               )
             })}
@@ -254,7 +326,7 @@ export default function SobrePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <AnimSection>
-              <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Transparência</span>
+              <SectionKicker texto="Transparência" dark />
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-2 mb-6">
                 Dados da empresa
               </h2>

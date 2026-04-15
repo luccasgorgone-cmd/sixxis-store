@@ -8,6 +8,7 @@ import {
   BarChart3, Zap, Clock, HeartHandshake, Globe,
   Building2, Quote, BadgeCheck, Flame
 } from 'lucide-react'
+import SectionKicker from '@/components/ui/SectionKicker'
 
 // ── Hook de animação com IntersectionObserver ──
 function useAnimateOnView(threshold = 0.15) {
@@ -309,9 +310,7 @@ export default function SejaRevendedorPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#3cbfb3' }}>
-              Vantagens reais
-            </span>
+            <SectionKicker texto="Vantagens reais" />
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
               Por que ser parceiro Sixxis?
             </h2>
@@ -356,9 +355,7 @@ export default function SejaRevendedorPage() {
       <section className="py-20" style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#3cbfb3' }}>
-              Mercado em expansão
-            </span>
+            <SectionKicker texto="Mercado em expansão" dark />
             <h2 className="text-3xl sm:text-4xl font-black text-white mt-2">
               O segmento que só cresce
             </h2>
@@ -419,9 +416,7 @@ export default function SejaRevendedorPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#3cbfb3' }}>
-              Resultados comprovados
-            </span>
+            <SectionKicker texto="Resultados comprovados" />
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
               Quem já é parceiro, recomenda
             </h2>
@@ -520,9 +515,7 @@ export default function SejaRevendedorPage() {
       <section id="processo" className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#3cbfb3' }}>
-              Simples e rápido
-            </span>
+            <SectionKicker texto="Simples e rápido" />
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
               Comece a faturar em 4 passos
             </h2>
@@ -574,9 +567,7 @@ export default function SejaRevendedorPage() {
       <section id="cadastro" className="py-20" style={{ background: 'linear-gradient(180deg, #f8fafc, #fff)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-12">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#3cbfb3' }}>
-              Sem taxa de adesão
-            </span>
+            <SectionKicker texto="Sem taxa de adesão" />
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
               Quero ser parceiro Sixxis
             </h2>
