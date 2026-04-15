@@ -85,6 +85,7 @@ export default async function HomePage() {
     <main className="min-h-screen bg-transparent">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
+      <div className="py-4 sm:py-5">
       {banners.length > 0 ? (
         <BannerCarousel banners={banners} />
       ) : (
@@ -114,6 +115,7 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+      </div>
 
       {/* ── 2. TrustBar ───────────────────────────────────────────── */}
       <TrustBar
@@ -126,10 +128,7 @@ export default async function HomePage() {
         ]}
       />
 
-      {/* ── 3. Ofertas Relâmpago ──────────────────────────────────── */}
-      <OfertasRelampago produtos={produtosOferta} />
-
-      {/* ── 4. Mais Vendidos ─────────────────────────────────────── */}
+      {/* ── 3. Mais Vendidos ─────────────────────────────────────── */}
       <section className="bg-transparent border-b border-white/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
@@ -162,6 +161,9 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ── 4. Ofertas Relâmpago ──────────────────────────────────── */}
+      <OfertasRelampago produtos={produtosOferta} />
 
       {/* ── 5. Depoimentos ───────────────────────────────────────── */}
       <Depoimentos />

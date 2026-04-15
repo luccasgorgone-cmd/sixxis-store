@@ -45,7 +45,7 @@ export default async function OfertasPage() {
           </span>
           <div className="flex items-center justify-center gap-3 mb-2">
             <RaioIcon size={34} comFundo={false} animate={true} />
-            <h1 className="text-4xl font-extrabold text-white">Ofertas da Semana</h1>
+            <h1 className="text-4xl font-extrabold text-white">Oferta Relâmpago</h1>
             <RaioIcon size={34} comFundo={false} animate={true} mirror={true} className="[animation-delay:0.4s]" />
           </div>
           <p className="text-white/60 mb-6">Preços imperdíveis por tempo limitado</p>
