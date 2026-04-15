@@ -128,23 +128,28 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       )}
 
       {/* Avaliações */}
-      <div className="flex flex-nowrap items-center gap-2 mb-4 pb-4 border-b border-gray-100">
+      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: 0, marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid #f3f4f6' }}>
         {totalAvaliacoes > 0 ? (
           <>
             <EstrelasNota nota={mediaAvaliacoes} size={14} />
-            <span className="text-xs leading-none font-bold text-gray-800">{mediaAvaliacoes.toFixed(1)}</span>
-            <a href="#avaliacoes" className="text-xs leading-none text-[#0066cc] hover:underline whitespace-nowrap">
-              {totalAvaliacoes} avaliação{totalAvaliacoes !== 1 ? 'ões' : ''}
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', lineHeight: 1, minHeight: 0 }}>
+              {mediaAvaliacoes.toFixed(1)}
+            </span>
+            <a href="#avaliacoes" style={{ fontSize: 12, color: '#0066cc', lineHeight: 1, minHeight: 0, height: 'auto', display: 'inline', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              ({totalAvaliacoes} avaliações)
             </a>
           </>
         ) : (
-          <span className="text-xs leading-none text-gray-400">Seja o primeiro a avaliar</span>
+          <span style={{ fontSize: 12, color: '#9ca3af', lineHeight: 1, minHeight: 0 }}>Seja o primeiro a avaliar</span>
         )}
-        <div className="w-px h-3.5 bg-gray-200 mx-1 shrink-0" />
-        <a href={`https://wa.me/5518997474701?text=Tenho%20uma%20dúvida%20sobre%20${encodeURIComponent(produto.nome)}`}
-          target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs leading-none text-[#0066cc] hover:underline whitespace-nowrap">
-          <MessageCircle size={12} />
+        <span style={{ color: '#D1D5DB', fontSize: 12, lineHeight: 1, minHeight: 0 }}>|</span>
+        <a
+          href={`https://wa.me/5518997474701?text=Olá!%20Tenho%20uma%20dúvida%20sobre%20${encodeURIComponent(produto.nome)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: 12, color: '#3cbfb3', lineHeight: 1, minHeight: 0, height: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}
+        >
+          <MessageCircle size={12} style={{ flexShrink: 0 }} />
           Tire sua dúvida
         </a>
       </div>

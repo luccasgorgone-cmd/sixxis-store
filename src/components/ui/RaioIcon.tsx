@@ -1,12 +1,47 @@
 interface Props {
   size?: number
-  comFundo?: boolean
   className?: string
+  comFundo?: boolean
   animate?: boolean
+  mirror?: boolean
 }
 
-export default function RaioIcon({ size = 20, comFundo = false, className = '', animate = true }: Props) {
+export default function RaioIcon({
+  size = 20,
+  comFundo = false,
+  className = '',
+  animate = true,
+  mirror = false,
+}: Props) {
   const animClass = animate ? 'raio-flash' : ''
+  const mirrorStyle: React.CSSProperties = mirror ? { transform: 'scaleX(-1)' } : {}
+
+  const svgEl = (
+    <svg
+      width={size * 1.2}
+      height={size * 1.2}
+      viewBox="0 0 24 24"
+      fill="none"
+      style={mirrorStyle}
+    >
+      {/* Brilho/sombra atrás */}
+      <path
+        d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
+        fill="#FFD700"
+        opacity="0.2"
+        transform="translate(0.6, 0.6)"
+      />
+      {/* Raio principal */}
+      <path
+        d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
+        fill="#FFD700"
+        stroke="#1a1a00"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
 
   if (comFundo) {
     return (
@@ -20,37 +55,17 @@ export default function RaioIcon({ size = 20, comFundo = false, className = '', 
           flexShrink: 0,
         }}
       >
-        <svg width={size * 1.1} height={size * 1.1} viewBox="0 0 24 24" fill="none">
-          <path
-            d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
-            fill="#FFD700"
-            stroke="#111111"
-            strokeWidth="1.4"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-        </svg>
+        {svgEl}
       </div>
     )
   }
 
   return (
-    <span className={`inline-flex items-center ${animClass} ${className}`} style={{ flexShrink: 0 }}>
-      <svg
-        width={size * 1.2}
-        height={size * 1.2}
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        <path
-          d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
-          fill="#FFD700"
-          stroke="#111111"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-      </svg>
+    <span
+      className={`inline-flex items-center ${animClass} ${className}`}
+      style={{ flexShrink: 0 }}
+    >
+      {svgEl}
     </span>
   )
 }

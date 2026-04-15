@@ -205,35 +205,31 @@ main {
   }
 
   /* ── Raio animations ── */
-  @keyframes raio-pulse {
-    0%, 100% { transform: scale(1) rotate(-5deg); }
-    50%       { transform: scale(1.2) rotate(5deg); }
-  }
-  .raio-pulse {
-    animation: raio-pulse 1.5s ease-in-out infinite;
-    display: inline-block;
-  }
   @keyframes raio-flash {
-    0%, 100% {
-      transform: scale(1) rotate(-8deg);
-      filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
-    }
-    25% { transform: scale(1.3) rotate(0deg);  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); }
-    50% { transform: scale(1.15) rotate(8deg); filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7)); }
-    75% { transform: scale(1.2) rotate(-4deg); filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)); }
+    0%   { transform: scale(1) rotate(-8deg) translateY(0);    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5)); }
+    20%  { transform: scale(1.35) rotate(0deg) translateY(-2px); filter: drop-shadow(0 0 14px rgba(255, 215, 0, 1)) drop-shadow(0 0 28px rgba(255, 165, 0, 0.7)); }
+    40%  { transform: scale(1.1) rotate(6deg) translateY(1px);  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7)); }
+    60%  { transform: scale(1.25) rotate(-4deg) translateY(-1px); filter: drop-shadow(0 0 18px rgba(255, 215, 0, 0.9)); }
+    80%  { transform: scale(1.05) rotate(3deg) translateY(0);   filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6)); }
+    100% { transform: scale(1) rotate(-8deg) translateY(0);    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5)); }
   }
-  @keyframes raio-glow {
-    0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)); }
-    50%       { filter: drop-shadow(0 0 14px rgba(255, 215, 0, 1)) drop-shadow(0 0 28px rgba(255, 165, 0, 0.6)); }
+  @keyframes raio-glow-pulse {
+    0%, 100% { opacity: 0.7; filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6)); }
+    50%       { opacity: 1;   filter: drop-shadow(0 0 16px rgba(255, 215, 0, 1)) drop-shadow(0 0 32px rgba(255, 180, 0, 0.6)); }
   }
   .raio-flash {
-    animation: raio-flash 2s ease-in-out infinite;
+    animation: raio-flash 2.2s ease-in-out infinite;
     display: inline-block;
-    transform-origin: center bottom;
+    transform-origin: center 70%;
   }
   .raio-glow {
-    animation: raio-glow 1.8s ease-in-out infinite;
+    animation: raio-glow-pulse 1.8s ease-in-out infinite;
     display: inline-block;
+  }
+  .raio-pulse {
+    animation: raio-flash 1.6s ease-in-out infinite;
+    display: inline-block;
+    transform-origin: center 70%;
   }
 
   /* ── Scrollbar hide utility ── */
@@ -305,12 +301,32 @@ main {
   }
 }
 
-/* ── Touch targets mínimos ────────────────────────────────────────────────── */
-button, a {
-  min-height: 44px;
+/* ── Touch targets mínimos (APENAS botões de ação em mobile) ─────────────── */
+/* NUNCA aplicar min-height em <a> globalmente — quebra alinhamentos inline  */
+@media (max-width: 640px) {
+  button:not(.no-min-h):not([class*="breadcrumb"]):not([class*="nav-link"]):not([class*="atalho"]),
+  [role="button"]:not(.no-min-h) {
+    min-height: 44px;
+  }
 }
 .btn-sm {
   min-height: 36px !important;
+}
+
+/* Reset explícito para links de navegação/texto que NUNCA devem ter min-height */
+nav a,
+ol a,
+ul a,
+.breadcrumb-link,
+[class*="breadcrumb"] a,
+[class*="rating"] a,
+[class*="avalia"] a,
+a[href="#avaliacoes"],
+a.text-xs,
+a[style*="display: inline"],
+a[style*="display:inline"] {
+  min-height: 0 !important;
+  height: auto !important;
 }
 
 /* ── Mobile — fontes muito pequenas override ──────────────────────────────── */
