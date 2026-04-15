@@ -6,37 +6,14 @@ import WhatsAppBotao from './WhatsAppBotao'
 const LunaWidget = dynamic(() => import('./LunaWidget'), { ssr: false, loading: () => null })
 
 interface Props {
-  agenteAtivo:       boolean
-  nome?:             string
-  saudacao?:         string
-  corPrimaria?:      string
-  corSecundaria?:    string
-  whatsappVendas?:   string
-  whatsappSuporte?:  string
+  agenteAtivo: boolean
 }
 
-export default function FloatingButtons({
-  agenteAtivo,
-  nome,
-  saudacao,
-  corPrimaria,
-  corSecundaria,
-  whatsappVendas,
-  whatsappSuporte,
-}: Props) {
+export default function FloatingButtons({ agenteAtivo }: Props) {
   return (
     <div className="fixed bottom-6 right-6 z-[999] flex flex-col-reverse items-end gap-3">
       <WhatsAppBotao />
-      {agenteAtivo && (
-        <LunaWidget
-          nome={nome}
-          saudacao={saudacao}
-          corPrimaria={corPrimaria}
-          corSecundaria={corSecundaria}
-          whatsappVendas={whatsappVendas}
-          whatsappSuporte={whatsappSuporte}
-        />
-      )}
+      {agenteAtivo && <LunaWidget />}
     </div>
   )
 }

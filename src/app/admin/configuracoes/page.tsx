@@ -200,8 +200,15 @@ const DEFAULTS: Record<string, string> = {
   agente_temperatura:      '0.7',
   agente_whatsapp_vendas:  '5518997474701',
   agente_whatsapp_suporte: '5511934102621',
-  agente_system_prompt:    '',
-  anthropic_api_key:       '',
+  agente_system_prompt:         '',
+  anthropic_api_key:            '',
+  agente_followup_ativo:        'true',
+  agente_followup_delay_1:      '30',
+  agente_followup_mensagem_1:   'Ficou alguma dúvida sobre o produto que indiquei? Posso também calcular o frete até você — é só me informar o CEP. 😊',
+  agente_followup_delay_2:      '30',
+  agente_followup_mensagem_2:   'Se preferir falar com nossa equipe diretamente, estamos disponíveis pelo WhatsApp: (18) 99747-4701. Foi um prazer atender você!',
+  agente_encerramento_auto:     'true',
+  agente_mensagem_encerramento: '👋 Encerrando o atendimento por inatividade. Se precisar de ajuda, é só abrir o chat novamente.',
 }
 
 const TABS = [
@@ -1880,6 +1887,9 @@ export default function ConfiguracoesPage() {
       'agente_modelo', 'agente_max_tokens', 'agente_temperatura',
       'agente_whatsapp_vendas', 'agente_whatsapp_suporte',
       'agente_system_prompt', 'anthropic_api_key',
+      'agente_followup_ativo', 'agente_followup_delay_1', 'agente_followup_mensagem_1',
+      'agente_followup_delay_2', 'agente_followup_mensagem_2',
+      'agente_encerramento_auto', 'agente_mensagem_encerramento',
     ]
 
     const corPrim = configs.agente_cor_primaria || '#3cbfb3'
@@ -2067,6 +2077,101 @@ export default function ConfiguracoesPage() {
                 placeholder="5511934102621"
               />
             </Field>
+          </div>
+        </Card>
+
+        {/* Follow-up automático */}
+        <Card title="Follow-up automático">
+          <div className="space-y-4">
+            <Toggle
+              label="Follow-up ativo"
+              description="Luna envia mensagens de acompanhamento após períodos de inatividade do cliente"
+              checked={configs.agente_followup_ativo !== 'false'}
+              onChange={(v) => set('agente_followup_ativo', v ? 'true' : 'false')}
+            />
+
+            <div className="mt-2 space-y-5">
+              {/* Follow-up 1 */}
+              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#3cbfb3]/20 text-[#3cbfb3] text-xs font-bold flex items-center justify-center">1</span>
+                  <p className="text-sm font-semibold text-gray-700">Primeiro follow-up</p>
+                </div>
+                <Field label="Aguardar (segundos)" hint="Tempo de inatividade antes de enviar">
+                  <Input
+                    type="number"
+                    value={configs.agente_followup_delay_1}
+                    onChange={(v) => set('agente_followup_delay_1', v)}
+                    placeholder="30"
+                  />
+                </Field>
+                <Field label="Mensagem">
+                  <textarea
+                    value={configs.agente_followup_mensagem_1}
+                    onChange={(e) => set('agente_followup_mensagem_1', e.target.value)}
+                    rows={2}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-none"
+                  />
+                </Field>
+              </div>
+
+              {/* Follow-up 2 */}
+              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#3cbfb3]/20 text-[#3cbfb3] text-xs font-bold flex items-center justify-center">2</span>
+                  <p className="text-sm font-semibold text-gray-700">Segundo follow-up</p>
+                </div>
+                <Field label="Aguardar após o 1º (segundos)">
+                  <Input
+                    type="number"
+                    value={configs.agente_followup_delay_2}
+                    onChange={(v) => set('agente_followup_delay_2', v)}
+                    placeholder="30"
+                  />
+                </Field>
+                <Field label="Mensagem">
+                  <textarea
+                    value={configs.agente_followup_mensagem_2}
+                    onChange={(e) => set('agente_followup_mensagem_2', e.target.value)}
+                    rows={2}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-none"
+                  />
+                </Field>
+              </div>
+
+              {/* Encerramento */}
+              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
+                <Toggle
+                  label="Encerramento automático"
+                  description="Encerra o atendimento após os dois follow-ups sem resposta"
+                  checked={configs.agente_encerramento_auto !== 'false'}
+                  onChange={(v) => set('agente_encerramento_auto', v ? 'true' : 'false')}
+                />
+                <Field label="Mensagem de encerramento">
+                  <textarea
+                    value={configs.agente_mensagem_encerramento}
+                    onChange={(e) => set('agente_mensagem_encerramento', e.target.value)}
+                    rows={2}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-none"
+                  />
+                </Field>
+              </div>
+
+              {/* Fluxo visual */}
+              <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+                <span className="bg-white border border-gray-200 rounded-lg px-2 py-1">Última resposta</span>
+                <span>→</span>
+                <span className="bg-white border border-gray-200 rounded-lg px-2 py-1">{configs.agente_followup_delay_1 || '30'}s</span>
+                <span>→</span>
+                <span className="bg-[#3cbfb3]/10 border border-[#3cbfb3]/30 text-[#3cbfb3] rounded-lg px-2 py-1">Follow-up 1</span>
+                <span>→</span>
+                <span className="bg-white border border-gray-200 rounded-lg px-2 py-1">{configs.agente_followup_delay_2 || '30'}s</span>
+                <span>→</span>
+                <span className="bg-[#3cbfb3]/10 border border-[#3cbfb3]/30 text-[#3cbfb3] rounded-lg px-2 py-1">Follow-up 2</span>
+                <span>→</span>
+                <span className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1">Encerramento</span>
+              </div>
+            </div>
           </div>
         </Card>
 

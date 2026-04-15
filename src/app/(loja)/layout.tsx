@@ -21,9 +21,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
           'logo_url',
           'bg_body_url', 'bg_body_ativo', 'bg_body_size',
           'bg_body_attachment', 'bg_body_position', 'bg_body_overlay',
-          'agente_ativo', 'agente_nome', 'agente_saudacao',
-          'agente_cor_primaria', 'agente_cor_secundaria',
-          'agente_whatsapp_vendas', 'agente_whatsapp_suporte',
+          'agente_ativo',
         ],
       },
     },
@@ -65,15 +63,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         <Header logoUrl={logoUrl} />
         <div className="flex-1">{children}</div>
         <Footer />
-        <FloatingButtons
-          agenteAtivo={cfg.agente_ativo === 'true'}
-          nome={cfg.agente_nome}
-          saudacao={cfg.agente_saudacao}
-          corPrimaria={cfg.agente_cor_primaria}
-          corSecundaria={cfg.agente_cor_secundaria}
-          whatsappVendas={cfg.agente_whatsapp_vendas}
-          whatsappSuporte={cfg.agente_whatsapp_suporte}
-        />
+        <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />
         <CookieBanner />
       </div>
     </div>

@@ -2,43 +2,91 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import {
-  X, Send, ChevronDown, Loader2, ExternalLink,
+  X, Send, ChevronDown, Loader2, ExternalLink, ShoppingCart, ShoppingBag, Eye,
 } from 'lucide-react'
 import Link from 'next/link'
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 interface Mensagem {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
+  id:             string
+  role:           'user' | 'assistant'
+  content:        string
+  timestamp:      Date
+  isFollowup?:    boolean
+  isEncerramento?: boolean
 }
 
-interface Props {
-  saudacao?:        string
-  nome?:            string
-  corPrimaria?:     string
-  corSecundaria?:   string
-  whatsappVendas?:  string
-  whatsappSuporte?: string
+interface LunaConfig {
+  ativo:                boolean
+  nome:                 string
+  saudacao:             string
+  corPrimaria:          string
+  corSecundaria:        string
+  whatsappVendas:       string
+  whatsappSuporte:      string
+  followupAtivo:        boolean
+  followupDelay1:       number
+  followupMensagem1:    string
+  followupDelay2:       number
+  followupMensagem2:    string
+  encerramentoAuto:     boolean
+  mensagemEncerramento: string
+}
+
+interface CTAData {
+  slug:  string
+  nome:  string
+  preco: string
+}
+
+const DEFAULT_CONFIG: LunaConfig = {
+  ativo:                true,
+  nome:                 'Luna',
+  saudacao:             'Olá! Sou a Luna, assistente da Sixxis 👋 Como posso te ajudar hoje?',
+  corPrimaria:          '#3cbfb3',
+  corSecundaria:        '#0f2e2b',
+  whatsappVendas:       '5518997474701',
+  whatsappSuporte:      '5511934102621',
+  followupAtivo:        true,
+  followupDelay1:       30,
+  followupMensagem1:    'Ficou alguma dúvida sobre o produto que indiquei? Posso também calcular o frete até você — é só me informar o CEP. 😊',
+  followupDelay2:       30,
+  followupMensagem2:    'Se preferir falar com nossa equipe diretamente, estamos disponíveis pelo WhatsApp: (18) 99747-4701. Foi um prazer atender você!',
+  encerramentoAuto:     true,
+  mensagemEncerramento: '👋 Encerrando o atendimento por inatividade. Se precisar de ajuda, é só abrir o chat novamente.',
+}
+
+// ── CTA parser ────────────────────────────────────────────────────────────────
+
+function parsearCTA(content: string): { text: string; cta: CTAData | null } {
+  const match = content.match(/\[CTA\](\{[^}]+\})\[\/CTA\]/)
+  if (!match) return { text: content, cta: null }
+  try {
+    const cta = JSON.parse(match[1]) as CTAData
+    const text = content.replace(/\s*\[CTA\]\{[^}]+\}\[\/CTA\]/, '').trim()
+    return { text, cta }
+  } catch {
+    return { text: content, cta: null }
+  }
 }
 
 // ── Markdown renderer ─────────────────────────────────────────────────────────
 
 function parseInline(text: string, corPrimaria: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = []
-  const re = /\*\*(.+?)\*\*|\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\)]*)\)/g
+  const re = /\*\*(.+?)\*\*|\[([^\]]+)\]\(((?:https?:\/\/|\/)[^)]*)\)/g
   let last = 0
   let m: RegExpExecArray | null
-
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) nodes.push(text.slice(last, m.index))
     if (m[1] !== undefined) {
       nodes.push(<strong key={m.index} className="font-bold text-gray-900">{m[1]}</strong>)
     } else {
-      const href = m[3]
+      const href  = m[3]
       const label = m[2]
-      const isExternal = href.startsWith('http')
-      if (isExternal) {
+      const isExt = href.startsWith('http')
+      if (isExt) {
         nodes.push(
           <a key={m.index} href={href} target="_blank" rel="noopener noreferrer"
             className="font-semibold hover:underline inline-flex items-center gap-0.5"
@@ -75,14 +123,74 @@ function MarkdownMessage({ content, corPrimaria }: { content: string; corPrimari
       elements.push(<ul key={`ul-${i}`} className="list-disc list-inside space-y-0.5 my-1 pl-1">{items}</ul>)
       continue
     }
-    if (line.trim() === '') {
-      elements.push(<div key={`sp-${i}`} className="h-1" />)
-      i++; continue
-    }
+    if (line.trim() === '') { elements.push(<div key={`sp-${i}`} className="h-1" />); i++; continue }
     elements.push(<p key={i} className="leading-relaxed">{parseInline(line, corPrimaria)}</p>)
     i++
   }
   return <div className="text-sm space-y-1">{elements}</div>
+}
+
+// ── CTA Card ──────────────────────────────────────────────────────────────────
+
+function CTACard({ cta, corPrimaria }: { cta: CTAData; corPrimaria: string }) {
+  const [adicionando, setAdicionando] = useState(false)
+  const [adicionado,  setAdicionado]  = useState(false)
+
+  async function handleCarrinho() {
+    setAdicionando(true)
+    try {
+      const res = await fetch('/api/carrinho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: cta.slug, quantidade: 1 }),
+      })
+      if (res.ok) {
+        setAdicionado(true)
+        setTimeout(() => setAdicionado(false), 2000)
+      } else {
+        window.location.href = `/produtos/${cta.slug}?acao=carrinho`
+      }
+    } catch {
+      window.location.href = `/produtos/${cta.slug}?acao=carrinho`
+    } finally {
+      setAdicionando(false)
+    }
+  }
+
+  return (
+    <div className="mt-2.5 rounded-xl border border-gray-100 bg-gray-50 overflow-hidden">
+      <div className="px-3 py-2.5 border-b border-gray-100">
+        <p className="text-[11px] font-bold text-gray-800 leading-snug line-clamp-2">{cta.nome}</p>
+        <p className="text-base font-black mt-0.5" style={{ color: corPrimaria }}>R$ {cta.preco}</p>
+      </div>
+      <div className="flex gap-1.5 p-2">
+        <a
+          href={`/produtos/${cta.slug}?acao=comprar`}
+          onClick={(e) => { e.preventDefault(); window.location.href = `/produtos/${cta.slug}?acao=comprar` }}
+          className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-bold text-white transition active:scale-95"
+          style={{ backgroundColor: corPrimaria }}
+        >
+          <ShoppingBag size={11} />
+          Comprar
+        </a>
+        <button
+          onClick={handleCarrinho}
+          disabled={adicionando}
+          className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-semibold border transition active:scale-95 disabled:opacity-60"
+          style={{ borderColor: adicionado ? '#10b981' : corPrimaria, color: adicionado ? '#10b981' : corPrimaria }}
+        >
+          {adicionando ? <Loader2 size={11} className="animate-spin" /> : <ShoppingCart size={11} />}
+          {adicionado ? 'Adicionado!' : 'Carrinho'}
+        </button>
+        <Link
+          href={`/produtos/${cta.slug}`}
+          className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-gray-200 text-gray-500 hover:border-gray-300 transition"
+        >
+          <Eye size={11} />
+        </Link>
+      </div>
+    </div>
+  )
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
@@ -121,115 +229,165 @@ const ATALHOS = [
 
 // ── LunaWidget ────────────────────────────────────────────────────────────────
 
-export default function LunaWidget({
-  saudacao       = 'Olá! Sou a Luna, assistente da Sixxis 👋 Como posso te ajudar hoje?',
-  nome           = 'Luna',
-  corPrimaria    = '#3cbfb3',
-  corSecundaria  = '#0f2e2b',
-  whatsappVendas = '5518997474701',
-}: Props) {
-  const [aberto,       setAberto]       = useState(false)
-  const [minimizado,   setMinimizado]   = useState(false)
-  const [mensagens,    setMensagens]    = useState<Mensagem[]>([])
-  const [input,        setInput]        = useState('')
-  const [enviando,     setEnviando]     = useState(false)
+export default function LunaWidget() {
+  const [config,      setConfig]      = useState<LunaConfig>(DEFAULT_CONFIG)
+  const [aberto,      setAberto]      = useState(false)
+  const [minimizado,  setMinimizado]  = useState(false)
+  const [mensagens,   setMensagens]   = useState<Mensagem[]>([])
+  const [input,       setInput]       = useState('')
+  const [enviando,    setEnviando]    = useState(false)
   const [mostrarBolha, setMostrarBolha] = useState(false)
+  const [atendimentoEncerrado, setAtendimentoEncerrado] = useState(false)
+  const [naoLidas,    setNaoLidas]    = useState(0)
 
-  const messagesEndRef      = useRef<HTMLDivElement>(null)
-  const inputRef            = useRef<HTMLInputElement>(null)
-  const sessionId           = useRef(`luna_${Date.now()}`)
-  const inactivityTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastMsgRoleRef      = useRef<'user' | 'assistant' | null>(null)
-  const followUpSentRef     = useRef(false)
+  const messagesEndRef    = useRef<HTMLDivElement>(null)
+  const inputRef          = useRef<HTMLInputElement>(null)
+  const sessionId         = useRef(`luna_${Date.now()}`)
+  const fu1TimerRef       = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const fu2TimerRef       = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const followupStepRef   = useRef(0)   // 0=none 1=fu1sent 2=fu2sent 3=encerrado
+  const encerramentoRef   = useRef(false)
 
-  // Bolha de boas-vindas após 4 s
+  // ── Carregar config do backend ────────────────────────────────────────────
+
+  useEffect(() => {
+    fetch('/api/agente/config')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setConfig(data) })
+      .catch(() => {})
+  }, [])
+
+  // ── Bolha de boas-vindas após 4 s ─────────────────────────────────────────
+
   useEffect(() => {
     const t = setTimeout(() => setMostrarBolha(true), 4000)
     return () => clearTimeout(t)
   }, [])
 
-  // Mensagem inicial ao abrir
+  // ── Mensagem inicial ao abrir ─────────────────────────────────────────────
+
   useEffect(() => {
     if (aberto && mensagens.length === 0) {
-      setMensagens([{ id: '0', role: 'assistant', content: saudacao, timestamp: new Date() }])
+      setMensagens([{ id: '0', role: 'assistant', content: config.saudacao, timestamp: new Date() }])
     }
-  }, [aberto, saudacao, mensagens.length])
+    if (aberto) setNaoLidas(0)
+  }, [aberto, config.saudacao, mensagens.length])
 
-  // Scroll automático
+  // ── Scroll automático ─────────────────────────────────────────────────────
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensagens, enviando])
 
-  // Foco no input ao abrir
+  // ── Foco no input ao abrir ────────────────────────────────────────────────
+
   useEffect(() => {
     if (aberto && !minimizado) setTimeout(() => inputRef.current?.focus(), 300)
   }, [aberto, minimizado])
 
-  // ── Timer de inatividade — follow-up automático após 30s sem resposta ────────
+  // ── Limpar timers de follow-up ────────────────────────────────────────────
 
-  const FOLLOWUP_MESSAGES = [
-    'Ficou alguma dúvida sobre os modelos que indiquei? 😊 Se quiser, posso calcular o frete até você — é só me informar o CEP.',
-    'Posso te ajudar com mais alguma coisa? Se já escolheu o modelo, me passa o CEP que calculo prazo e valor do frete.',
-    'Precisa de mais informações para decidir? Estou aqui! Ou, se preferir, nossa equipe de vendas atende pelo WhatsApp: (18) 99747-4701 😊',
-  ]
-
-  const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current)
-    followUpSentRef.current = false
+  const limparTimers = useCallback(() => {
+    if (fu1TimerRef.current) { clearTimeout(fu1TimerRef.current); fu1TimerRef.current = null }
+    if (fu2TimerRef.current) { clearTimeout(fu2TimerRef.current); fu2TimerRef.current = null }
   }, [])
 
-  const triggerFollowUp = useCallback(() => {
-    if (
-      lastMsgRoleRef.current !== 'assistant' ||
-      followUpSentRef.current ||
-      !aberto
-    ) return
-    followUpSentRef.current = true
-    const msg = FOLLOWUP_MESSAGES[Math.floor(Math.random() * FOLLOWUP_MESSAGES.length)]
-    setMensagens(prev => [
-      ...prev,
-      { id: `fu_${Date.now()}`, role: 'assistant', content: msg, timestamp: new Date() },
-    ])
+  // ── Enviar mensagem de follow-up ──────────────────────────────────────────
+
+  const enviarFollowup = useCallback((step: 1 | 2) => {
+    if (!config.followupAtivo || encerramentoRef.current) return
+    const msg    = step === 1 ? config.followupMensagem1 : config.followupMensagem2
+    const novaId = `fu${step}_${Date.now()}`
+    followupStepRef.current = step
+
+    setMensagens(prev => [...prev, {
+      id: novaId, role: 'assistant', content: msg,
+      timestamp: new Date(), isFollowup: true,
+    }])
+
+    if (!aberto) setNaoLidas(n => n + 1)
+
+    if (step === 1) {
+      fu2TimerRef.current = setTimeout(() => {
+        if (followupStepRef.current === 1) enviarFollowup(2)
+      }, (config.followupDelay2 || 30) * 1000)
+    } else if (step === 2 && config.encerramentoAuto) {
+      setTimeout(() => {
+        if (followupStepRef.current === 2 && !encerramentoRef.current) {
+          encerramentoRef.current = true
+          followupStepRef.current = 3
+          setMensagens(prev => [...prev, {
+            id: `enc_${Date.now()}`, role: 'assistant',
+            content: config.mensagemEncerramento,
+            timestamp: new Date(), isEncerramento: true,
+          }])
+          setAtendimentoEncerrado(true)
+          if (!aberto) setNaoLidas(n => n + 1)
+        }
+      }, 3000)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aberto])
+  }, [config, aberto])
+
+  // ── Reagir às mensagens para iniciar/cancelar timers ─────────────────────
 
   useEffect(() => {
     if (mensagens.length === 0) return
     const last = mensagens[mensagens.length - 1]
-    lastMsgRoleRef.current = last.role as 'user' | 'assistant'
-    if (last.role === 'assistant') {
-      resetInactivityTimer()
-      inactivityTimerRef.current = setTimeout(triggerFollowUp, 30000)
-    } else {
-      resetInactivityTimer()
+
+    if (last.role === 'user') {
+      // Usuário respondeu — cancelar follow-ups e encerramento
+      limparTimers()
+      followupStepRef.current = 0
+      encerramentoRef.current = false
+      setAtendimentoEncerrado(false)
+      return
     }
-    return () => { if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current) }
-  }, [mensagens, resetInactivityTimer, triggerFollowUp])
+
+    if (last.isFollowup || last.isEncerramento) return
+
+    // Mensagem normal da Luna — armar timer do follow-up 1
+    limparTimers()
+    followupStepRef.current = 0
+    if (config.followupAtivo) {
+      fu1TimerRef.current = setTimeout(() => {
+        if (followupStepRef.current === 0) enviarFollowup(1)
+      }, (config.followupDelay1 || 30) * 1000)
+    }
+
+    return () => { limparTimers() }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mensagens])
 
   useEffect(() => {
-    if (!aberto) resetInactivityTimer()
-  }, [aberto, resetInactivityTimer])
+    if (!aberto) return
+    setNaoLidas(0)
+  }, [aberto])
+
+  // ── Chamar API ────────────────────────────────────────────────────────────
 
   async function chamarAPI(historico: { role: 'user' | 'assistant'; content: string }[]) {
     setEnviando(true)
     try {
-      const res = await fetch('/api/agente', {
-        method: 'POST',
+      const res  = await fetch('/api/agente', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mensagens: historico, sessionId: sessionId.current }),
+        body:    JSON.stringify({ mensagens: historico, sessionId: sessionId.current }),
       })
       const data = await res.json()
-      setMensagens((prev) => [...prev, {
-        id: `${Date.now()}_r`,
-        role: 'assistant',
-        content: data.resposta || 'Desculpe, não consegui responder.',
+      const nova: Mensagem = {
+        id:        `${Date.now()}_r`,
+        role:      'assistant',
+        content:   data.resposta || 'Desculpe, não consegui responder.',
         timestamp: new Date(),
-      }])
+      }
+      setMensagens(prev => [...prev, nova])
+      if (!aberto) setNaoLidas(n => n + 1)
     } catch {
-      setMensagens((prev) => [...prev, {
-        id: `${Date.now()}_err`,
-        role: 'assistant',
-        content: `Tive um problema técnico 😅 Fale com nossa equipe: [WhatsApp Vendas](https://wa.me/${whatsappVendas})`,
+      setMensagens(prev => [...prev, {
+        id:        `${Date.now()}_err`,
+        role:      'assistant',
+        content:   `Tive um problema técnico 😅 Fale com nossa equipe: [WhatsApp Vendas](https://wa.me/${config.whatsappVendas})`,
         timestamp: new Date(),
       }])
     } finally {
@@ -238,28 +396,42 @@ export default function LunaWidget({
   }
 
   const enviarMensagem = useCallback(async () => {
-    if (!input.trim() || enviando) return
+    if (!input.trim() || enviando || atendimentoEncerrado) return
     const nova: Mensagem = { id: Date.now().toString(), role: 'user', content: input.trim(), timestamp: new Date() }
-    const novoHistorico = [...mensagens, nova].map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
-    setMensagens((prev) => [...prev, nova])
+    const hist = [...mensagens, nova].map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+    setMensagens(prev => [...prev, nova])
     setInput('')
-    await chamarAPI(novoHistorico)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, enviando, mensagens])
+    await chamarAPI(hist)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, enviando, mensagens, atendimentoEncerrado])
 
   function handleAtalho(msg: string) {
-    if (enviando) return
+    if (enviando || atendimentoEncerrado) return
     const nova: Mensagem = { id: Date.now().toString(), role: 'user', content: msg, timestamp: new Date() }
-    const novoHistorico = [...mensagens, nova].map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
-    setMensagens((prev) => [...prev, nova])
-    chamarAPI(novoHistorico)
+    const hist = [...mensagens, nova].map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+    setMensagens(prev => [...prev, nova])
+    chamarAPI(hist)
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagem() }
   }
 
-  const gradHeader = `linear-gradient(135deg, ${corSecundaria}, ${corPrimaria})`
+  function novaConversa() {
+    limparTimers()
+    setMensagens([])
+    setAtendimentoEncerrado(false)
+    encerramentoRef.current = false
+    followupStepRef.current = 0
+    sessionId.current = `luna_${Date.now()}`
+    setTimeout(() => {
+      setMensagens([{ id: '0', role: 'assistant', content: config.saudacao, timestamp: new Date() }])
+    }, 50)
+  }
+
+  const corPrimaria   = config.corPrimaria   || '#3cbfb3'
+  const corSecundaria = config.corSecundaria || '#0f2e2b'
+  const gradHeader    = `linear-gradient(135deg, ${corSecundaria}, ${corPrimaria})`
 
   return (
     <div className="flex flex-col items-end gap-3">
@@ -274,27 +446,29 @@ export default function LunaWidget({
           <div
             className="flex items-center gap-3 px-4 py-3.5 cursor-pointer shrink-0"
             style={{ background: gradHeader }}
-            onClick={() => setMinimizado((m) => !m)}
+            onClick={() => setMinimizado(m => !m)}
           >
             <div className="relative shrink-0">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border-2 border-white/30">
                 <LunaAvatar />
               </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+              <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-bold text-sm leading-none">{nome}</p>
-              <p className="text-white/70 text-[11px] mt-0.5">Assistente Sixxis • Online</p>
+              <p className="text-white font-bold text-sm leading-none">{config.nome}</p>
+              <p className="text-white/70 text-[11px] mt-0.5">
+                {atendimentoEncerrado ? 'Atendimento encerrado' : 'Assistente Sixxis • Online'}
+              </p>
             </div>
             <div className="flex items-center gap-1">
               <button
-                onClick={(e) => { e.stopPropagation(); setMinimizado((m) => !m) }}
+                onClick={e => { e.stopPropagation(); setMinimizado(m => !m) }}
                 className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
               >
                 <ChevronDown size={14} className={`text-white transition-transform duration-200 ${minimizado ? 'rotate-180' : ''}`} />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); setAberto(false) }}
+                onClick={e => { e.stopPropagation(); setAberto(false) }}
                 className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
               >
                 <X size={13} className="text-white" />
@@ -306,31 +480,65 @@ export default function LunaWidget({
             <>
               {/* Mensagens */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
-                {mensagens.map((msg) => (
-                  <div key={msg.id} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    {msg.role === 'assistant' && (
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 overflow-hidden" style={{ background: gradHeader }}>
-                        <LunaAvatar small />
+                {mensagens.map(msg => {
+                  const { text, cta } = parsearCTA(msg.content)
+                  const isUser        = msg.role === 'user'
+                  const isEnc         = msg.isEncerramento
+                  const isFu          = msg.isFollowup
+
+                  return (
+                    <div key={msg.id} className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                      {!isUser && (
+                        <div
+                          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 overflow-hidden"
+                          style={{ background: isEnc ? '#e5e7eb' : gradHeader }}
+                        >
+                          {isEnc
+                            ? <span className="text-xs">👋</span>
+                            : <LunaAvatar small />
+                          }
+                        </div>
+                      )}
+                      <div className={`max-w-[78%] ${isUser ? '' : 'flex flex-col'}`}>
+                        <div
+                          className={`rounded-2xl px-4 py-2.5 leading-relaxed ${
+                            isUser
+                              ? 'text-white rounded-br-sm'
+                              : isEnc
+                                ? 'bg-gray-100 text-gray-500 rounded-bl-sm border border-dashed border-gray-200 text-sm italic'
+                                : isFu
+                                  ? 'bg-white text-gray-700 rounded-bl-sm shadow-sm border border-dashed'
+                                  : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100'
+                          }`}
+                          style={
+                            isUser
+                              ? { background: corPrimaria }
+                              : isFu
+                                ? { borderColor: `${corPrimaria}55` }
+                                : {}
+                          }
+                        >
+                          {isFu && (
+                            <p className="text-[9px] font-semibold uppercase tracking-wide mb-1" style={{ color: corPrimaria }}>
+                              Follow-up
+                            </p>
+                          )}
+                          {isUser
+                            ? <p className="text-sm">{msg.content}</p>
+                            : isEnc
+                              ? <p className="text-sm">{text}</p>
+                              : <MarkdownMessage content={text} corPrimaria={corPrimaria} />
+                          }
+                          <p className={`text-[9px] mt-1.5 ${isUser ? 'text-white/60 text-right' : 'text-gray-400'}`}>
+                            {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        {cta && !isUser && <CTACard cta={cta} corPrimaria={corPrimaria} />}
                       </div>
-                    )}
-                    <div
-                      className={`max-w-[78%] rounded-2xl px-4 py-2.5 leading-relaxed ${
-                        msg.role === 'user'
-                          ? 'text-white rounded-br-sm'
-                          : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100'
-                      }`}
-                      style={msg.role === 'user' ? { background: corPrimaria } : {}}
-                    >
-                      {msg.role === 'assistant'
-                        ? <MarkdownMessage content={msg.content} corPrimaria={corPrimaria} />
-                        : <p className="text-sm">{msg.content}</p>
-                      }
-                      <p className={`text-[9px] mt-1.5 ${msg.role === 'user' ? 'text-white/60 text-right' : 'text-gray-400'}`}>
-                        {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
+
                 {enviando && (
                   <div className="flex gap-2.5 items-end">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ background: gradHeader }}>
@@ -338,8 +546,8 @@ export default function LunaWidget({
                     </div>
                     <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
                       <div className="flex gap-1">
-                        {[0, 150, 300].map((delay) => (
-                          <div key={delay} className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: `${delay}ms` }} />
+                        {[0, 150, 300].map(d => (
+                          <div key={d} className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
                         ))}
                       </div>
                     </div>
@@ -348,56 +556,74 @@ export default function LunaWidget({
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Atalhos */}
-              <div className="px-3 py-2 border-t border-gray-100 bg-white shrink-0">
-                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
-                  {ATALHOS.map((a) => (
+              {/* Banner de encerramento */}
+              {atendimentoEncerrado && (
+                <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 shrink-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs text-gray-500">Atendimento encerrado por inatividade</p>
                     <button
-                      key={a.label}
-                      onClick={() => handleAtalho(a.msg)}
-                      disabled={enviando}
-                      className="shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-gray-200 hover:text-white text-gray-500 transition whitespace-nowrap bg-white disabled:opacity-50"
-                      onMouseEnter={(e) => {
-                        const el = e.currentTarget
-                        el.style.borderColor = corPrimaria
-                        el.style.backgroundColor = corPrimaria
-                        el.style.color = 'white'
-                      }}
-                      onMouseLeave={(e) => {
-                        const el = e.currentTarget
-                        el.style.borderColor = ''
-                        el.style.backgroundColor = ''
-                        el.style.color = ''
-                      }}
+                      onClick={novaConversa}
+                      className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full text-white transition"
+                      style={{ backgroundColor: corPrimaria }}
                     >
-                      {a.label}
+                      Nova conversa
                     </button>
-                  ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Atalhos */}
+              {!atendimentoEncerrado && (
+                <div className="px-3 py-2 border-t border-gray-100 bg-white shrink-0">
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
+                    {ATALHOS.map(a => (
+                      <button
+                        key={a.label}
+                        onClick={() => handleAtalho(a.msg)}
+                        disabled={enviando}
+                        className="shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-gray-200 text-gray-500 transition whitespace-nowrap bg-white disabled:opacity-50"
+                        onMouseEnter={e => {
+                          const el = e.currentTarget
+                          el.style.borderColor = corPrimaria
+                          el.style.backgroundColor = corPrimaria
+                          el.style.color = 'white'
+                        }}
+                        onMouseLeave={e => {
+                          const el = e.currentTarget
+                          el.style.borderColor = ''
+                          el.style.backgroundColor = ''
+                          el.style.color = ''
+                        }}
+                      >
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Input */}
               <div className="p-3 bg-white border-t border-gray-100 shrink-0">
                 <div
                   className="flex items-center gap-2 bg-gray-50 rounded-2xl border border-gray-200 transition px-4 py-2.5"
-                  onFocus={(e) => (e.currentTarget.style.borderColor = corPrimaria)}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = '')}
+                  onFocus={e => (e.currentTarget.style.borderColor = corPrimaria)}
+                  onBlur={e => (e.currentTarget.style.borderColor = '')}
                 >
                   <input
                     ref={inputRef}
                     type="text"
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Digite sua mensagem..."
-                    disabled={enviando}
+                    placeholder={atendimentoEncerrado ? 'Inicie uma nova conversa acima' : 'Digite sua mensagem...'}
+                    disabled={enviando || atendimentoEncerrado}
                     className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none disabled:opacity-60"
                   />
                   <button
                     onClick={enviarMensagem}
-                    disabled={!input.trim() || enviando}
+                    disabled={!input.trim() || enviando || atendimentoEncerrado}
                     className="w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 active:scale-95"
-                    style={{ background: !input.trim() || enviando ? '#e5e7eb' : corPrimaria }}
+                    style={{ background: !input.trim() || enviando || atendimentoEncerrado ? '#e5e7eb' : corPrimaria }}
                   >
                     {enviando
                       ? <Loader2 size={14} className="text-gray-400 animate-spin" />
@@ -406,7 +632,7 @@ export default function LunaWidget({
                   </button>
                 </div>
                 <p className="text-center text-[9px] text-gray-300 mt-1.5">
-                  {nome} — Assistente Sixxis • Powered by AI
+                  {config.nome} — Assistente Sixxis • Powered by AI
                 </p>
               </div>
             </>
@@ -438,15 +664,20 @@ export default function LunaWidget({
       {/* ── Botão flutuante Luna ────────────────────────────────────────────── */}
       {!aberto && (
         <button
-          onClick={() => { setAberto(true); setMostrarBolha(false) }}
+          onClick={() => { setAberto(true); setMostrarBolha(false); setNaoLidas(0) }}
           className="relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-all duration-200 active:scale-95"
           style={{ background: gradHeader }}
-          aria-label={`Abrir chat com ${nome}`}
+          aria-label={`Abrir chat com ${config.nome}`}
         >
           <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
             <LunaAvatar />
           </div>
-          <div className="absolute top-1 right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+          <div className={`absolute top-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
+          {naoLidas > 0 && (
+            <span className="absolute -top-1 -left-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
+              {naoLidas > 9 ? '9+' : naoLidas}
+            </span>
+          )}
         </button>
       )}
     </div>
