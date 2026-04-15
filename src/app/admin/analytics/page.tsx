@@ -71,6 +71,11 @@ interface DadosAnalytics {
   visitasPorDia?: { date: string; visitas: number }[]
   horariosPico?: { hora: number; visitas: number }[]
   paginasPorSessao?: number
+  demograficos?: {
+    generoPie: { nome: string; count: number }[]
+    faixaEtaria: { faixa: string; count: number }[]
+    aniversariantesMes: { nome: string; email: string; dia: number }[]
+  }
 }
 
 type TabId = 'visao-geral' | 'carrinho' | 'visitantes' | 'eventos'
@@ -572,6 +577,88 @@ export default function AdminAnalyticsPage() {
 
           {/* ── Tab: Visitantes ───────────────────────────────────────────────── */}
           {tab === 'visitantes' && (
+            <div className="space-y-4">
+            {/* Demográficos */}
+            {dados?.demograficos && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Gênero */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                  <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+                    <Users size={14} className="text-[#3cbfb3]" /> Gênero
+                  </h3>
+                  {dados.demograficos.generoPie.length === 0 ? (
+                    <p className="text-xs text-gray-400 py-4">Sem dados de gênero ainda.</p>
+                  ) : (() => {
+                    const GCORES = ['#3cbfb3','#f43f5e','#8b5cf6','#94a3b8']
+                    const total = dados.demograficos!.generoPie.reduce((s,g) => s + g.count, 0)
+                    return (
+                      <div className="flex items-center gap-4">
+                        <ResponsiveContainer width="50%" height={120}>
+                          <PieChart>
+                            <Pie data={dados.demograficos!.generoPie} cx="50%" cy="50%"
+                              innerRadius={30} outerRadius={50} dataKey="count" paddingAngle={3}>
+                              {dados.demograficos!.generoPie.map((_, i) => <Cell key={i} fill={GCORES[i % GCORES.length]} />)}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className="space-y-1.5 flex-1">
+                          {dados.demograficos!.generoPie.map((g, i) => (
+                            <div key={g.nome} className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: GCORES[i % GCORES.length] }} />
+                              <span className="text-xs text-gray-600 flex-1 capitalize">{g.nome}</span>
+                              <span className="text-xs font-black text-gray-900">{total > 0 ? Math.round((g.count/total)*100) : 0}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+
+                {/* Faixa etária */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                  <h3 className="text-sm font-extrabold text-gray-900 mb-4">Faixa Etária</h3>
+                  {dados.demograficos.faixaEtaria.every(f => f.count === 0) ? (
+                    <p className="text-xs text-gray-400 py-4">Sem dados de data de nascimento ainda.</p>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={120}>
+                      <BarChart data={dados.demograficos.faixaEtaria} margin={{ top:0, right:0, left:-20, bottom:0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                        <XAxis dataKey="faixa" tick={{ fontSize:9, fill:'#9ca3af' }} tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fontSize:9, fill:'#9ca3af' }} tickLine={false} axisLine={false} />
+                        <Tooltip content={<TTip moeda={false} />} />
+                        <Bar dataKey="count" name="Clientes" fill="#3cbfb3" radius={[4,4,0,0]} maxBarSize={28} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+
+                {/* Aniversariantes */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                  <h3 className="text-sm font-extrabold text-gray-900 mb-1">🎂 Aniversariantes do Mês</h3>
+                  <p className="text-[10px] text-gray-400 mb-3">{new Date().toLocaleDateString('pt-BR', { month:'long' })}</p>
+                  {dados.demograficos.aniversariantesMes.length === 0 ? (
+                    <p className="text-xs text-gray-400 py-2">Nenhum este mês.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+                      {dados.demograficos.aniversariantesMes.map((a, i) => (
+                        <div key={i} className="flex items-center gap-2 py-1.5 border-b border-gray-50 last:border-0">
+                          <span className="w-7 h-7 rounded-full bg-[#3cbfb3]/10 flex items-center justify-center text-[10px] font-black text-[#3cbfb3] shrink-0">
+                            {a.dia}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-800 truncate">{a.nome}</p>
+                            <p className="text-[10px] text-gray-400 truncate">{a.email}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tabela de visitantes */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-100">
                 <h3 className="text-sm font-extrabold text-gray-900">Visitantes ({dados?.clientes?.length ?? 0})</h3>
@@ -617,6 +704,7 @@ export default function AdminAnalyticsPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
             </div>
           )}
 

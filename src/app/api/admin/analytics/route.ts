@@ -198,9 +198,64 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // ── Demográficos (clientes cadastrados) ─────────────────────────────────
+    const [generoDist, aniversariantes] = await Promise.all([
+      prisma.cliente.groupBy({
+        by: ['genero'],
+        _count: { genero: true },
+      }),
+      prisma.cliente.findMany({
+        where: {
+          dataNascimento: { not: null },
+          AND: [
+            { dataNascimento: { not: null } },
+          ],
+        },
+        select: { nome: true, email: true, dataNascimento: true },
+      }),
+    ])
+
+    // Gênero pie
+    const generoMap: Record<string, number> = { masculino: 0, feminino: 0, outro: 0, 'não informado': 0 }
+    generoDist.forEach((g: { genero: string | null; _count: { genero: number } }) => {
+      const key = g.genero || 'não informado'
+      generoMap[key] = (generoMap[key] || 0) + g._count.genero
+    })
+    const generoPie = Object.entries(generoMap)
+      .filter(([, v]) => v > 0)
+      .map(([nome, count]) => ({ nome, count }))
+
+    // Faixa etária
+    const hoje = new Date()
+    const faixas: Record<string, number> = {
+      '< 18': 0, '18-24': 0, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0,
+    }
+    const anivMes = hoje.getMonth() + 1
+    const anivHoje: { nome: string; email: string; dia: number }[] = []
+
+    aniversariantes.forEach((c: { nome: string; email: string; dataNascimento: Date | null }) => {
+      if (!c.dataNascimento) return
+      const nasc = new Date(c.dataNascimento)
+      const idade = hoje.getFullYear() - nasc.getFullYear() -
+        (hoje < new Date(hoje.getFullYear(), nasc.getMonth(), nasc.getDate()) ? 1 : 0)
+      if (idade < 18) faixas['< 18']++
+      else if (idade <= 24) faixas['18-24']++
+      else if (idade <= 34) faixas['25-34']++
+      else if (idade <= 44) faixas['35-44']++
+      else if (idade <= 54) faixas['45-54']++
+      else faixas['55+']++
+
+      if (nasc.getMonth() + 1 === anivMes) {
+        anivHoje.push({ nome: c.nome, email: c.email, dia: nasc.getDate() })
+      }
+    })
+    anivHoje.sort((a, b) => a.dia - b.dia)
+    const faixaEtaria = Object.entries(faixas).map(([faixa, count]) => ({ faixa, count }))
+
     return Response.json({
       ok: true,
       periodo,
+      demograficos: { generoPie, faixaEtaria, aniversariantesMes: anivHoje },
       resumo: {
         totalVisitas,
         aceitaram,
