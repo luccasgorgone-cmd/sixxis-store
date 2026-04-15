@@ -301,32 +301,16 @@ main {
   }
 }
 
-/* ── Touch targets mínimos (APENAS botões de ação em mobile) ─────────────── */
-/* NUNCA aplicar min-height em <a> globalmente — quebra alinhamentos inline  */
+/* ── Touch targets — apenas botões de ação em mobile ─────────────────────── */
+/* NUNCA adicionar min-height a <a> globalmente — quebra alinhamentos inline */
 @media (max-width: 640px) {
-  button:not(.no-min-h):not([class*="breadcrumb"]):not([class*="nav-link"]):not([class*="atalho"]),
-  [role="button"]:not(.no-min-h) {
+  button:not(.btn-text):not(.link-text),
+  [role="button"]:not(.link-text) {
     min-height: 44px;
   }
 }
 .btn-sm {
   min-height: 36px !important;
-}
-
-/* Reset explícito para links de navegação/texto que NUNCA devem ter min-height */
-nav a,
-ol a,
-ul a,
-.breadcrumb-link,
-[class*="breadcrumb"] a,
-[class*="rating"] a,
-[class*="avalia"] a,
-a[href="#avaliacoes"],
-a.text-xs,
-a[style*="display: inline"],
-a[style*="display:inline"] {
-  min-height: 0 !important;
-  height: auto !important;
 }
 
 /* ── Mobile — fontes muito pequenas override ──────────────────────────────── */

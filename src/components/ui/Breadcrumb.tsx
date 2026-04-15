@@ -4,112 +4,105 @@ interface BreadcrumbItem {
   label: string
   href?: string
 }
-
 interface Props {
   items: BreadcrumbItem[]
 }
 
 export default function Breadcrumb({ items }: Props) {
-  if (!items?.length) return null
   return (
-    <nav
-      aria-label="Caminho da página"
+    <div
       style={{
-        backgroundColor: '#0f2e2b',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
         width: '100%',
+        backgroundColor: '#ffffff',
+        borderBottom: '1px solid #e5e7eb',
       }}
     >
-      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1.5rem' }}>
-        <ol
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            listStyle: 'none',
-            margin: 0,
-            padding: '8px 0',
-            whiteSpace: 'nowrap',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            gap: 0,
-            height: 32,
-            minHeight: 0,
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          {items.map((item, i) => (
-            <li
-              key={i}
-              style={{
-                display: 'inline-flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                flexShrink: 0,
-                lineHeight: 1,
-                minHeight: 0,
-                height: 'auto',
-                padding: 0,
-                margin: 0,
-              }}
-            >
-              {i > 0 && (
-                <span
-                  aria-hidden="true"
-                  style={{
-                    color: 'rgba(255,255,255,0.25)',
-                    fontSize: 10,
-                    margin: '0 6px',
-                    flexShrink: 0,
-                    lineHeight: 1,
-                    minHeight: 0,
-                    display: 'inline',
-                    userSelect: 'none',
-                  }}
-                >
-                  /
-                </span>
-              )}
-              {item.href && i < items.length - 1 ? (
-                <Link
-                  href={item.href}
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: 'rgba(255,255,255,0.45)',
-                    lineHeight: 1,
-                    whiteSpace: 'nowrap',
-                    textDecoration: 'none',
-                    display: 'inline',
-                    minHeight: 0,
-                    height: 'auto',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                >
-                  {item.label}
-                </Link>
-              ) : (
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: 'rgba(255,255,255,0.9)',
-                    lineHeight: 1,
-                    whiteSpace: 'nowrap',
-                    display: 'inline',
-                    minHeight: 0,
-                  }}
-                >
-                  {item.label}
-                </span>
-              )}
-            </li>
-          ))}
-        </ol>
+      <div
+        style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          height: 36,
+          gap: 0,
+          listStyle: 'none',
+          flexWrap: 'nowrap',
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
+        }}
+        role="list"
+      >
+        {items.map((item, i) => (
+          <div
+            key={i}
+            role="listitem"
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexShrink: 0,
+              minHeight: 0,
+              height: 'auto',
+              lineHeight: 1,
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            {i > 0 && (
+              <span
+                aria-hidden="true"
+                style={{
+                  margin: '0 6px',
+                  color: '#9ca3af',
+                  fontSize: 11,
+                  lineHeight: 1,
+                  minHeight: 0,
+                  display: 'inline',
+                  userSelect: 'none',
+                }}
+              >
+                /
+              </span>
+            )}
+            {item.href && i < items.length - 1 ? (
+              <Link
+                href={item.href}
+                style={{
+                  fontSize: 11,
+                  color: '#6b7280',
+                  textDecoration: 'none',
+                  lineHeight: 1,
+                  minHeight: 0,
+                  height: 'auto',
+                  display: 'inline',
+                  padding: 0,
+                  margin: 0,
+                  fontWeight: 400,
+                }}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <span
+                style={{
+                  fontSize: 11,
+                  color: '#111827',
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  minHeight: 0,
+                  display: 'inline',
+                }}
+              >
+                {item.label}
+              </span>
+            )}
+          </div>
+        ))}
       </div>
-    </nav>
+    </div>
   )
 }
