@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { User, ShoppingBag, Coins, MapPin, Lock, LayoutDashboard } from 'lucide-react'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 const MENU = [
   { href: '/minha-conta',           label: 'Dashboard',  icon: LayoutDashboard, exact: true  },
@@ -13,6 +14,15 @@ const MENU = [
   { href: '/minha-conta/seguranca', label: 'Segurança',  icon: Lock,            exact: false },
 ]
 
+const BREADCRUMB_LABELS: Record<string, string> = {
+  '/minha-conta':           'Dashboard',
+  '/minha-conta/pedidos':   'Pedidos',
+  '/minha-conta/cashback':  'Cashback',
+  '/minha-conta/perfil':    'Perfil',
+  '/minha-conta/enderecos': 'Endereços',
+  '/minha-conta/seguranca': 'Segurança',
+}
+
 export default function LayoutConta({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
@@ -20,8 +30,14 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
   }
 
+  const subLabel = BREADCRUMB_LABELS[pathname] ?? 'Minha Conta'
+  const breadcrumbItems = pathname === '/minha-conta'
+    ? [{ label: 'Início', href: '/' }, { label: 'Minha Conta' }]
+    : [{ label: 'Início', href: '/' }, { label: 'Minha Conta', href: '/minha-conta' }, { label: subLabel }]
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <Breadcrumb items={breadcrumbItems} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
 

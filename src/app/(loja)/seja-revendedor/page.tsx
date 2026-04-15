@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import {
   TrendingUp, Shield, Users, Package, Star, CheckCircle,
   ArrowRight, Phone, Mail, MapPin, Award,
@@ -229,6 +230,7 @@ export default function SejaRevendedorPage() {
 
   return (
     <div>
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Seja um Parceiro' }]} />
       {/* ── HERO ── */}
       <section
         className="relative min-h-[85vh] flex items-center justify-center overflow-hidden"

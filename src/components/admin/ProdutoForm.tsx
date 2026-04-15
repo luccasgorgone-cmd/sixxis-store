@@ -12,6 +12,7 @@ import {
   ImageIcon,
   ChevronLeft,
   Plus,
+  GripVertical,
 } from 'lucide-react'
 
 interface VariacaoInput {
@@ -105,6 +106,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
   )
 
   const [imagens, setImagens] = useState<string[]>(initialData?.imagens ?? [])
+  const [imagensDragOver, setImagensDragOver] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
@@ -181,6 +183,13 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
 
   function moverImagemParaInicio(url: string) {
     setImagens(prev => [url, ...prev.filter(u => u !== url)])
+  }
+
+  function reordenarImagens(fromIndex: number, toIndex: number) {
+    const novas = [...imagens]
+    const [movida] = novas.splice(fromIndex, 1)
+    novas.splice(toIndex, 0, movida)
+    setImagens(novas)
   }
 
   // ─── Submit ──────────────────────────────────────────────────────────────────
@@ -652,40 +661,99 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               />
             </div>
 
-            {/* Preview grid */}
+            {/* Preview grid com drag-and-drop */}
             {imagens.length > 0 && (
-              <div className="grid grid-cols-4 gap-3 mt-4">
-                {imagens.map((url, i) => (
-                  <div key={url} className="relative group aspect-square">
-                    <Image
-                      src={url}
-                      alt={`Foto ${i + 1}`}
-                      fill
-                      className="object-cover rounded-xl"
-                    />
-                    {i === 0 && (
-                      <span className="absolute top-1.5 left-1.5 bg-[#3cbfb3] text-white text-[10px] font-bold rounded-md px-1.5 py-0.5">
-                        CAPA
-                      </span>
-                    )}
-                    {i !== 0 && (
+              <div className="mt-4">
+                <p className="text-xs text-gray-400 mb-3 flex items-center gap-1.5">
+                  <GripVertical size={12} />
+                  Arraste as fotos para reordenar. A primeira foto é a capa do produto.
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {imagens.map((url, index) => (
+                    <div
+                      key={url}
+                      draggable
+                      onDragStart={e => {
+                        e.dataTransfer.effectAllowed = 'move'
+                        e.dataTransfer.setData('text/plain', String(index))
+                      }}
+                      onDragOver={e => {
+                        e.preventDefault()
+                        e.dataTransfer.dropEffect = 'move'
+                        setImagensDragOver(index)
+                      }}
+                      onDragLeave={() => setImagensDragOver(null)}
+                      onDrop={e => {
+                        e.preventDefault()
+                        const fromIndex = Number(e.dataTransfer.getData('text/plain'))
+                        if (fromIndex !== index) reordenarImagens(fromIndex, index)
+                        setImagensDragOver(null)
+                      }}
+                      onDragEnd={() => setImagensDragOver(null)}
+                      className={`relative group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden border-2 transition-all duration-150 aspect-square ${
+                        imagensDragOver === index
+                          ? 'border-[#3cbfb3] scale-[1.03] shadow-lg'
+                          : index === 0
+                          ? 'border-[#3cbfb3] ring-2 ring-[#3cbfb3] ring-offset-1'
+                          : 'border-gray-200 hover:border-[#3cbfb3]/50'
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Foto ${index + 1}`}
+                        className="w-full h-full object-contain p-1.5 bg-gray-50 pointer-events-none"
+                        draggable={false}
+                      />
+
+                      {/* Badge posição */}
+                      <div className="absolute top-1.5 left-1.5">
+                        {index === 0 ? (
+                          <span className="bg-[#3cbfb3] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow">CAPA</span>
+                        ) : (
+                          <span className="bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{index + 1}</span>
+                        )}
+                      </div>
+
+                      {/* Handle drag */}
+                      <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-black/50 rounded-md p-0.5">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                            <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                            <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                            <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Remover */}
                       <button
                         type="button"
-                        onClick={() => moverImagemParaInicio(url)}
-                        className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-[#3cbfb3] text-white text-[9px] font-black px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+                        onClick={() => setImagens(imagens.filter((_, i) => i !== index))}
+                        className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
+                        title="Remover foto"
                       >
-                        Tornar capa
+                        ×
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removeImagem(url)}
-                      className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+
+                      {/* Overlay drop target */}
+                      {imagensDragOver === index && (
+                        <div className="absolute inset-0 bg-[#3cbfb3]/20 flex items-center justify-center rounded-xl">
+                          <div className="bg-[#3cbfb3] text-white text-xs font-bold px-3 py-1 rounded-full shadow">
+                            Soltar aqui
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                  <p className="text-xs text-blue-600 font-medium flex items-center gap-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"/>
+                    </svg>
+                    A foto na posição 1 é a capa (aparece primeiro na loja). Arraste para reorganizar e salve o produto.
+                  </p>
+                </div>
               </div>
             )}
 

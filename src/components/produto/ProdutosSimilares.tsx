@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, Zap, ChevronRight } from 'lucide-react'
+import { Zap, ChevronRight } from 'lucide-react'
 
 interface Similar {
   id: string
@@ -104,13 +104,12 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
             const temOferta  = !!p.precoPromocional && !!p.desconto && p.desconto > 0
 
             return (
-              <Link
+              <div
                 key={p.id}
-                href={`/produtos/${p.slug}`}
                 className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden"
               >
-                {/* Imagem */}
-                <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                {/* Imagem — clicável para a página do produto */}
+                <Link href={`/produtos/${p.slug}`} className="relative aspect-square bg-gray-50 overflow-hidden block">
                   <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
                     {temOferta && (
                       <span className="inline-flex items-center gap-0.5 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -138,7 +137,7 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
                       <div className="w-16 h-16 bg-gray-100 rounded-xl" />
                     </div>
                   )}
-                </div>
+                </Link>
 
                 {/* Conteúdo */}
                 <div className="flex flex-col flex-1 p-3 sm:p-4">
@@ -192,12 +191,61 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
                     </p>
                   </div>
 
-                  <button className="mt-3 w-full flex items-center justify-center gap-1.5 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-xs font-semibold py-2 rounded-xl transition-colors">
-                    <ShoppingCart size={12} />
-                    Ver produto
+                  {/* Comprar Agora */}
+                  <a
+                    href={`/produtos/${p.slug}?acao=comprar`}
+                    onClick={e => { e.preventDefault(); window.location.href = `/produtos/${p.slug}?acao=comprar` }}
+                    className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
+                    style={{ backgroundColor: '#3cbfb3', color: '#fff' }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                      <line x1="3" y1="6" x2="21" y2="6"/>
+                      <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    Comprar Agora
+                  </a>
+
+                  {/* Adicionar ao Carrinho */}
+                  <button
+                    onClick={async e => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      try {
+                        if (p.voltagens && p.voltagens.length > 1) {
+                          window.location.href = `/produtos/${p.slug}?acao=carrinho`
+                          return
+                        }
+                        const res = await fetch('/api/carrinho', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ produtoId: p.id, quantidade: 1, variacaoId: null }),
+                        })
+                        const btn = e.currentTarget as HTMLButtonElement
+                        const original = btn.innerHTML
+                        if (res.ok) {
+                          btn.innerHTML = '✓ Adicionado!'
+                          btn.style.color = '#10b981'
+                          btn.style.borderColor = '#10b981'
+                          setTimeout(() => { btn.innerHTML = original; btn.style.color = ''; btn.style.borderColor = '' }, 1500)
+                        } else {
+                          window.location.href = `/produtos/${p.slug}`
+                        }
+                      } catch {
+                        window.location.href = `/produtos/${p.slug}`
+                      }
+                    }}
+                    className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-all border hover:bg-[#3cbfb3]/5"
+                    style={{ borderColor: '#3cbfb3', color: '#3cbfb3', backgroundColor: 'transparent' }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    Adicionar ao Carrinho
                   </button>
                 </div>
-              </Link>
+              </div>
             )
           })}
         </div>

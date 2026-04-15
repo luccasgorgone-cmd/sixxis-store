@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import CountdownTimer from '@/components/layout/CountdownTimer'
 import RaioIcon from '@/components/ui/RaioIcon'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,9 @@ export default async function OfertasPage() {
   fimOfertas.setHours(23, 59, 59, 0)
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <main>
+      <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Ofertas Relâmpago' }]} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       {/* Hero */}
       <section
         className="relative rounded-2xl overflow-hidden mb-10 text-center py-14 px-6"
@@ -70,6 +73,7 @@ export default async function OfertasPage() {
           </div>
         </>
       )}
+      </div>
     </main>
   )
 }
