@@ -108,7 +108,7 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
       {/* Aviso se não selecionou */}
       {!selecionada && (
         <p className="text-sm text-amber-600 font-medium mb-4">
-          ⚡ Selecione a variação para continuar
+          Selecione a variação para continuar
         </p>
       )}
 

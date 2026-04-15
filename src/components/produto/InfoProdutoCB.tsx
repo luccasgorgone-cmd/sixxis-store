@@ -270,7 +270,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
             ))}
           </div>
           {produto.temVariacoes && !variacaoSelecionada && (
-            <p className="text-amber-600 text-xs font-medium mt-2">⚡ Selecione a opção para continuar</p>
+            <p className="text-amber-600 text-xs font-medium mt-2">Selecione a opção para continuar</p>
           )}
         </div>
       )}

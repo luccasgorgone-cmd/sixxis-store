@@ -145,7 +145,7 @@ export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Pro
             ))}
           </div>
           {produto.temVariacoes && !variacaoSelecionada && (
-            <p className="text-amber-600 text-xs font-medium mt-2">⚡ Selecione a variação para continuar</p>
+            <p className="text-amber-600 text-xs font-medium mt-2">Selecione a variação para continuar</p>
           )}
         </div>
       )}
