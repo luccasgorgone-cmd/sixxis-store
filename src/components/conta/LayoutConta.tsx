@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { AvatarComArco } from '@/components/ui/AvatarComArco'
 import { IconeNivel } from '@/components/ui/NivelIcons'
-import { calcularNivel } from '@/lib/avatares'
+import { calcularNivel, NIVEIS_CONFIG, getNivelSVGString, normalizarNivel } from '@/lib/avatares'
 
 const MENU_ITENS = [
   { href: '/minha-conta',           label: 'Dashboard', icone: LayoutDashboard, exact: true },
@@ -122,18 +122,38 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
 
             {/* Card de perfil */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-              {/* Header gradiente */}
-              <div
-                className="rounded-t-2xl px-5 pt-5 pb-14 relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #0b2220 0%, #0f2e2b 50%, #1a4f4a 100%)' }}
-              >
-                <div className="absolute inset-0 opacity-[0.04]"
-                  style={{
-                    backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                    backgroundSize: '16px 16px',
-                  }}
-                />
-              </div>
+              {/* Header — cor dinâmica do nível */}
+              {(() => {
+                const nivelNorm = normalizarNivel(nivel || 'Cristal')
+                const cfgNivel = NIVEIS_CONFIG[nivelNorm] || NIVEIS_CONFIG.Cristal
+                return (
+                  <div
+                    className="rounded-t-2xl px-4 pt-4 pb-12 relative overflow-hidden"
+                    style={{ background: cfgNivel.corBanner }}
+                  >
+                    <div className="absolute inset-0 opacity-[0.07]"
+                      style={{
+                        backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                        backgroundSize: '12px 12px',
+                      }}
+                    />
+                    <div className="relative flex items-center justify-between">
+                      <div>
+                        <p className="text-white/60 text-[9px] font-black uppercase tracking-widest">Seu nível</p>
+                        <p className="text-white font-black text-sm leading-tight mt-0.5">{cfgNivel.label}</p>
+                      </div>
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center"
+                        style={{
+                          backgroundColor: `${cfgNivel.cor}30`,
+                          border: `1.5px solid ${cfgNivel.cor}55`,
+                        }}
+                        dangerouslySetInnerHTML={{ __html: getNivelSVGString(nivelNorm, 20) }}
+                      />
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Conteúdo — avatar overlap */}
               <div className="relative px-5 pb-5">

@@ -32,6 +32,14 @@ export default function PerfilPage() {
   const [nivelAtual, setNivelAtual] = useState('Cristal')
   const [totalGasto, setTotalGasto] = useState(0)
 
+  // Auto-abrir aba avatar se ?aba=avatar na URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('aba') === 'avatar') setAbaAtiva('avatar')
+    }
+  }, [])
+
   useEffect(() => {
     Promise.all([
       fetch('/api/conta/perfil').then(r => r.json()),
