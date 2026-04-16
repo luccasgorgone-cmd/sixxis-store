@@ -9,11 +9,11 @@ export async function GET(request: NextRequest) {
   const config = await prisma.configuracao.findUnique({ where: { chave: 'cashback_config' } })
 
   const defaults = {
-    Bronze:   0.02,
-    Prata:    0.03,
-    Ouro:     0.04,
-    Diamante: 0.05,
-    Black:    0.06,
+    Cristal:    0.02,
+    Topázio:    0.03,
+    Safira:     0.04,
+    Diamante:   0.05,
+    Esmeralda:  0.07,
     valorMinimo:       10,
     limitePorcentagem: 20,
   }

@@ -9,7 +9,6 @@ import {
   Menu, X, Navigation, Clock, Mail, Store, HelpCircle,
   Wind, Fan, Bike, Info, Phone, UserPlus,
 } from 'lucide-react'
-import RaioIcon from '@/components/ui/RaioIcon'
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'

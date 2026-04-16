@@ -12,8 +12,8 @@ function buildSegmentFilter(filtro: any) {
   if (filtro.semCompras) where.pedidos = { none: {} }
   if (filtro.nivel) {
     const limites: Record<string, [number, number]> = {
-      Bronze: [0, 499], Prata: [500, 1999], Ouro: [2000, 4999],
-      Diamante: [5000, 9999], Black: [10000, 9999999],
+      Cristal: [0, 999], Topázio: [1000, 2999], Safira: [3000, 7999],
+      Diamante: [8000, 14999], Esmeralda: [15000, 9999999],
     }
     const [min, max] = limites[filtro.nivel] || [0, 9999999]
     where.totalGasto = { gte: min, lte: max }
