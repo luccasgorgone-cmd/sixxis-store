@@ -1,46 +1,54 @@
 // ════════════════════════════════════════════════════════════
-// SIXXIS — SISTEMA DE AVATARES ILUSTRADOS
-// Powered by DiceBear Micah (api.dicebear.com/9.x/micah)
+// SIXXIS — SISTEMA DE AVATARES 3D CLAY
+// Avatares SVG inline renderizados via <UserAvatar3D />
+// O avatar da Luna é EXCLUSIVO (<LunaAvatar />) e NÃO aparece aqui.
 // ════════════════════════════════════════════════════════════
 
-const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/micah/svg'
+import type { UserAvatarConfig } from '@/components/ui/UserAvatar3D'
 
-// Parâmetros de qualidade aplicados a todos — garante expressão positiva
-const PARAMS = 'mouth=smile&scale=90'
+export const AVATARES_PREDEFINIDOS_CONFIG: UserAvatarConfig[] = [
+  // ─── ROW 1: verde Sixxis ───
+  { id: 'sx-v01', label: 'Aurora',    skinTone: 'light',        hairColor: 'brown',      hairStyle: 'bob',            shirtColor: '#0f2e2b', shirtAccent: '#0a1f1d', bgColor: '#1a5a52', bgColor2: '#0a2820' },
+  { id: 'sx-v02', label: 'Clara',     skinTone: 'medium-light', hairColor: 'black',      hairStyle: 'short-straight', shirtColor: '#1a3a38', shirtAccent: '#0f2520', bgColor: '#0f3d35', bgColor2: '#071f1a' },
+  { id: 'sx-v03', label: 'Sofia',     skinTone: 'light',        hairColor: 'blonde',     hairStyle: 'ponytail',       shirtColor: '#0a2820', shirtAccent: '#061510', bgColor: '#164d45', bgColor2: '#08281f' },
+  { id: 'sx-v04', label: 'Natalia',   skinTone: 'medium',       hairColor: 'dark-brown', hairStyle: 'bun',            shirtColor: '#0d3330', shirtAccent: '#071e1c', bgColor: '#0f4a40', bgColor2: '#062518' },
+  // ─── ROW 2: azul / índigo ───
+  { id: 'sx-a01', label: 'Marina',    skinTone: 'medium',       hairColor: 'black',      hairStyle: 'long-straight',  shirtColor: '#1e1b4b', shirtAccent: '#0c0a2a', bgColor: '#22205a', bgColor2: '#0c0a2e' },
+  { id: 'sx-a02', label: 'Valentina', skinTone: 'medium-light', hairColor: 'auburn',     hairStyle: 'bob',            shirtColor: '#0c4a6e', shirtAccent: '#072d42', bgColor: '#0e5278', bgColor2: '#07304a' },
+  { id: 'sx-a03', label: 'Beatriz',   skinTone: 'light',        hairColor: 'black',      hairStyle: 'curly-short',    shirtColor: '#0a1628', shirtAccent: '#060e18', bgColor: '#0e1e38', bgColor2: '#060e1e' },
+  { id: 'sx-a04', label: 'Helena',    skinTone: 'medium',       hairColor: 'dark-brown', hairStyle: 'ponytail',       shirtColor: '#0f172a', shirtAccent: '#070d18', bgColor: '#141c38', bgColor2: '#080d20' },
+  // ─── ROW 3: quentes ───
+  { id: 'sx-q01', label: 'Juliana',   skinTone: 'medium-dark',  hairColor: 'black',      hairStyle: 'short-straight', shirtColor: '#78350f', shirtAccent: '#4a1f05', bgColor: '#8a3d10', bgColor2: '#4a1e05' },
+  { id: 'sx-q02', label: 'Fernanda',  skinTone: 'dark',         hairColor: 'black',      hairStyle: 'curly-short',    shirtColor: '#7c2d12', shirtAccent: '#4a1808', bgColor: '#8f3215', bgColor2: '#4a1a08' },
+  { id: 'sx-q03', label: 'Camila',    skinTone: 'medium-dark',  hairColor: 'dark-brown', hairStyle: 'bun',            shirtColor: '#92400e', shirtAccent: '#5a2808', bgColor: '#9a4510', bgColor2: '#5a2808' },
+  { id: 'sx-q04', label: 'Isabella',  skinTone: 'medium',       hairColor: 'auburn',     hairStyle: 'long-straight',  shirtColor: '#44403c', shirtAccent: '#282420', bgColor: '#4e4a44', bgColor2: '#28241e' },
+  // ─── ROW 4: premium escuro ───
+  { id: 'sx-p01', label: 'Gabriela',  skinTone: 'dark',         hairColor: 'black',      hairStyle: 'bob',            shirtColor: '#1c1917', shirtAccent: '#100e0c', bgColor: '#242019', bgColor2: '#100e0a' },
+  { id: 'sx-p02', label: 'Mariana',   skinTone: 'medium-light', hairColor: 'black',      hairStyle: 'short-straight', shirtColor: '#1e293b', shirtAccent: '#0f1826', bgColor: '#253048', bgColor2: '#10182a' },
+  { id: 'sx-p03', label: 'Larissa',   skinTone: 'medium',       hairColor: 'brown',      hairStyle: 'ponytail',       shirtColor: '#14532d', shirtAccent: '#08301a', bgColor: '#185e34', bgColor2: '#0a3018' },
+  { id: 'sx-p04', label: 'Patricia',  skinTone: 'medium-dark',  hairColor: 'dark-brown', hairStyle: 'curly-short',    shirtColor: '#083344', shirtAccent: '#041c28', bgColor: '#0a3d52', bgColor2: '#041e2c' },
+]
 
-// ── 16 AVATARES PREDEFINIDOS
-// Todos com mouth=smile para garantir expressão positiva.
-// O avatar da Luna é EXCLUSIVO (LunaAvatar) e NÃO aparece aqui.
+export function isAvatar3D(id: string): boolean {
+  return !!id && id.startsWith('sx-')
+}
+
+export function getAvatarConfig(id: string): UserAvatarConfig | null {
+  return AVATARES_PREDEFINIDOS_CONFIG.find(c => c.id === id) || null
+}
+
+// ── 16 AVATARES PREDEFINIDOS (formato legado, mapeado dos 3D configs)
 export const AVATARES_PREDEFINIDOS: Array<{
   id: string
   label: string
-  url: string
+  url: string | null
   bgColor: string
-}> = [
-  // ── ROW 1: Verde Sixxis (identidade da marca)
-  { id: 'sixxis-verde-01', label: 'Viajante',   url: `${DICEBEAR_BASE}?seed=SixxisV01Green&backgroundColor=0f2e2b&${PARAMS}`, bgColor: '#0f2e2b' },
-  { id: 'sixxis-verde-02', label: 'Criativo',   url: `${DICEBEAR_BASE}?seed=SixxisV02Teal&backgroundColor=1a4f4a&${PARAMS}`,  bgColor: '#1a4f4a' },
-  { id: 'sixxis-verde-03', label: 'Moderno',    url: `${DICEBEAR_BASE}?seed=SixxisV03Mid&backgroundColor=0d3b44&${PARAMS}`,   bgColor: '#0d3b44' },
-  { id: 'sixxis-verde-04', label: 'Focado',     url: `${DICEBEAR_BASE}?seed=SixxisV04Pro&backgroundColor=162032&${PARAMS}`,   bgColor: '#162032' },
-
-  // ── ROW 2: Azul / Índigo (confiança)
-  { id: 'sixxis-azul-01',  label: 'Confiante',  url: `${DICEBEAR_BASE}?seed=SixxisA01Blue&backgroundColor=1e1b4b&${PARAMS}`,  bgColor: '#1e1b4b' },
-  { id: 'sixxis-azul-02',  label: 'Sereno',     url: `${DICEBEAR_BASE}?seed=SixxisA02Calm&backgroundColor=0c4a6e&${PARAMS}`,  bgColor: '#0c4a6e' },
-  { id: 'sixxis-azul-03',  label: 'Visionário', url: `${DICEBEAR_BASE}?seed=SixxisA03Vis&backgroundColor=0a1628&${PARAMS}`,   bgColor: '#0a1628' },
-  { id: 'sixxis-azul-04',  label: 'Noturno',    url: `${DICEBEAR_BASE}?seed=SixxisA04Night&backgroundColor=0f172a&${PARAMS}`, bgColor: '#0f172a' },
-
-  // ── ROW 3: Quente (energia / entusiasmo)
-  { id: 'sixxis-quente-01', label: 'Solar',     url: `${DICEBEAR_BASE}?seed=SixxisQ01Solar&backgroundColor=78350f&${PARAMS}`, bgColor: '#78350f' },
-  { id: 'sixxis-quente-02', label: 'Vibrante',  url: `${DICEBEAR_BASE}?seed=SixxisQ02Warm&backgroundColor=7c2d12&${PARAMS}`,  bgColor: '#7c2d12' },
-  { id: 'sixxis-quente-03', label: 'Caloroso',  url: `${DICEBEAR_BASE}?seed=SixxisQ03Amber&backgroundColor=92400e&${PARAMS}`, bgColor: '#92400e' },
-  { id: 'sixxis-quente-04', label: 'Intenso',   url: `${DICEBEAR_BASE}?seed=SixxisQ04Fire&backgroundColor=44403c&${PARAMS}`,  bgColor: '#44403c' },
-
-  // ── ROW 4: Premium escuro (sofisticação)
-  { id: 'sixxis-prem-01',   label: 'Elegante',   url: `${DICEBEAR_BASE}?seed=SixxisP01Onyx&backgroundColor=1c1917&${PARAMS}`,  bgColor: '#1c1917' },
-  { id: 'sixxis-prem-02',   label: 'Tempestade', url: `${DICEBEAR_BASE}?seed=SixxisP02Storm&backgroundColor=1e293b&${PARAMS}`, bgColor: '#1e293b' },
-  { id: 'sixxis-prem-03',   label: 'Floresta',   url: `${DICEBEAR_BASE}?seed=SixxisP03Forest&backgroundColor=14532d&${PARAMS}`, bgColor: '#14532d' },
-  { id: 'sixxis-prem-04',   label: 'Oceano',     url: `${DICEBEAR_BASE}?seed=SixxisP04Ocean&backgroundColor=083344&${PARAMS}`,  bgColor: '#083344' },
-]
+}> = AVATARES_PREDEFINIDOS_CONFIG.map(c => ({
+  id: c.id,
+  label: c.label,
+  url: null,
+  bgColor: c.bgColor,
+}))
 
 // Avatar padrão (inicial do nome)
 export const AVATAR_INICIAL = {

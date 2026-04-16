@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import LayoutConta from '@/components/conta/LayoutConta'
 import { AvatarComArco } from '@/components/ui/AvatarComArco'
+import { UserAvatar3D } from '@/components/ui/UserAvatar3D'
 import {
-  AVATARES_PREDEFINIDOS, TODOS_AVATARES, NIVEIS_CONFIG,
+  AVATARES_PREDEFINIDOS_CONFIG, TODOS_AVATARES, NIVEIS_CONFIG,
   calcularNivel,
 } from '@/lib/avatares'
 import { User, Palette, Bell, Save, Loader2 } from 'lucide-react'
@@ -270,16 +271,16 @@ export default function PerfilPage() {
                   <div className="flex-1 h-px bg-gray-100" />
                 </div>
 
-                {/* Grid 4×4 DiceBear */}
+                {/* Grid 4×4 — avatares 3D clay inline */}
                 <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
-                  {AVATARES_PREDEFINIDOS.map(av => {
-                    const ativo = avatarId === av.id
+                  {AVATARES_PREDEFINIDOS_CONFIG.map(config => {
+                    const ativo = avatarId === config.id
                     return (
                       <button
-                        key={av.id}
+                        key={config.id}
                         type="button"
-                        onClick={() => setAvatarId(av.id)}
-                        title={av.label}
+                        onClick={() => setAvatarId(config.id)}
+                        title={config.label}
                         className={[
                           'group flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2',
                           'transition-all hover:border-[#3cbfb3]/40 hover:bg-[#3cbfb3]/5',
@@ -290,18 +291,8 @@ export default function PerfilPage() {
                         ].join(' ')}
                       >
                         <div className="relative">
-                          <div
-                            className={`w-11 h-11 rounded-full overflow-hidden ring-2 transition-all ${ativo ? 'ring-[#3cbfb3]' : 'ring-transparent'}`}
-                            style={{ backgroundColor: av.bgColor }}
-                          >
-                            <img
-                              src={av.url}
-                              alt={av.label}
-                              width={44}
-                              height={44}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
+                          <div className={`w-12 h-12 rounded-full overflow-hidden shadow-sm ring-2 transition-all ${ativo ? 'ring-[#3cbfb3]' : 'ring-transparent'}`}>
+                            <UserAvatar3D config={config} size={48} />
                           </div>
                           {ativo && (
                             <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#3cbfb3] flex items-center justify-center">
@@ -314,7 +305,7 @@ export default function PerfilPage() {
                         <p className={`text-[9px] font-semibold truncate w-full text-center ${
                           ativo ? 'text-[#3cbfb3]' : 'text-gray-400 group-hover:text-gray-600'
                         }`}>
-                          {av.label}
+                          {config.label}
                         </p>
                       </button>
                     )
@@ -323,7 +314,7 @@ export default function PerfilPage() {
               </div>
 
               <p className="text-[9px] text-gray-300 text-center">
-                Avatares gerados por DiceBear · Carregam via internet
+                Avatares 3D renderizados localmente — sem dependência externa
               </p>
             </>
           )}

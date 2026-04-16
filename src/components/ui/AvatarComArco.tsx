@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { NIVEIS_CONFIG, calcularNivel, getAvatarUrl, getAvatarBgColor, getInitialBgColor } from '@/lib/avatares'
+import { NIVEIS_CONFIG, calcularNivel, getAvatarUrl, getAvatarBgColor, getInitialBgColor, isAvatar3D, getAvatarConfig } from '@/lib/avatares'
+import { UserAvatar3D } from '@/components/ui/UserAvatar3D'
 
 interface AvatarComArcoProps {
   nome: string
@@ -31,7 +32,9 @@ export function AvatarComArco({
 
   const config = NIVEIS_CONFIG[nivelAtual] || NIVEIS_CONFIG.Cristal
 
-  const avatarUrl = getAvatarUrl(avatarId || 'inicial')
+  const is3D = avatarId ? isAvatar3D(avatarId) : false
+  const avatarConfig3D = is3D && avatarId ? getAvatarConfig(avatarId) : null
+  const avatarUrl = is3D ? null : getAvatarUrl(avatarId || 'inicial')
   const bgColor = avatarId && avatarId !== 'inicial'
     ? getAvatarBgColor(avatarId)
     : getInitialBgColor(nome)
@@ -55,7 +58,9 @@ export function AvatarComArco({
           fontSize: size * 0.38,
         }}
       >
-        {avatarUrl ? (
+        {avatarConfig3D ? (
+          <UserAvatar3D config={avatarConfig3D} size={size} />
+        ) : avatarUrl ? (
           <img
             src={avatarUrl}
             alt={nome}
