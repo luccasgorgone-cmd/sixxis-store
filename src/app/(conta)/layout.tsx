@@ -23,6 +23,7 @@ export default async function ContaLayout({ children }: { children: React.ReactN
   return (
     <div className="relative min-h-screen flex flex-col" style={{ backgroundColor: '#f8fafc' }}>
       <Header logoUrl={logoUrl} />
+      <div aria-hidden="true" style={{ height: 'var(--sixxis-header-h, 140px)' }} />
       <div className="flex-1">{children}</div>
       <Footer />
       <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />

@@ -13,6 +13,7 @@ import RaioIcon from '@/components/ui/RaioIcon'
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
 import { useSession, signOut } from 'next-auth/react'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { useScrollHeader } from '@/hooks/useScrollHeader'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Sugestao {
@@ -165,26 +166,34 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   const [cepResultado,  setCepResultado]  = useState<{ mensagem: string } | null>(null)
   const [cepErro,       setCepErro]       = useState('')
 
-  // ── Smart header: compact on scroll, hide down, reveal up ───────────────────
-  const [scrolled, setScrolled] = useState(false)
-  const [hidden, setHidden]     = useState(false)
-  const lastScrollY = useRef(0)
+  // ── Smart header: state machine via hook ───────────────────────────────────
+  const headerState = useScrollHeader(120)
+  const isTop     = headerState === 'top'
+  const isHidden  = headerState === 'hidden'
+  const isCompact = !isTop
 
+  // Ref for measuring header height → CSS var for the layout spacer
+  const headerRef = useRef<HTMLElement>(null)
   useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY
-      const delta = y - lastScrollY.current
-      setScrolled(y > 10)
-      if (y > 120 && delta > 4) {
-        setHidden(true)
-      } else if (delta < -4 || y <= 10) {
-        setHidden(false)
+    const update = () => {
+      if (headerRef.current) {
+        document.documentElement.style.setProperty(
+          '--sixxis-header-h',
+          `${headerRef.current.offsetHeight}px`,
+        )
       }
-      lastScrollY.current = y
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    update()
+    const ro = typeof ResizeObserver !== 'undefined' && headerRef.current
+      ? new ResizeObserver(update)
+      : null
+    if (ro && headerRef.current) ro.observe(headerRef.current)
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      ro?.disconnect()
+    }
+  }, [headerState])
 
   const { data: session } = useSession()
   const { totalItens, setDrawerAberto } = useCarrinho()
@@ -298,13 +307,24 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
   return (
     <>
+      <header
+        ref={headerRef}
+        className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isHidden ? '-translate-y-full' : 'translate-y-0'
+        } ${isCompact ? 'shadow-xl shadow-black/30' : 'shadow-md'}`}
+      >
       {/* Linha cinza ACIMA do announcement */}
       <div className="w-full h-px bg-gray-200" />
 
       {/* ═══════════════════════════════════════════════════════
-          CAMADA 1 — ANNOUNCEMENT BAR
+          CAMADA 1 — ANNOUNCEMENT BAR (some ao scrollar)
       ═══════════════════════════════════════════════════════ */}
-      <div className="bg-[#3cbfb3] w-full">
+      <div
+        className={`bg-[#3cbfb3] w-full overflow-hidden transition-all duration-500 ease-in-out ${
+          isTop ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+        }`}
+        aria-hidden={!isTop}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-11">
 
@@ -363,20 +383,16 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       <div className="w-full border-b border-[#0f2e2b]/20" />
 
       {/* ═══════════════════════════════════════════════════════
-          CAMADA 2 — HEADER PRINCIPAL (smart sticky)
+          CAMADA 2 — HEADER PRINCIPAL
       ═══════════════════════════════════════════════════════ */}
-      <header
-        className={`sticky top-0 z-40 bg-[#0f2e2b] transition-all duration-300 ease-in-out ${
-          hidden ? '-translate-y-full' : 'translate-y-0'
-        } ${scrolled ? 'shadow-xl shadow-black/20' : 'shadow-md'}`}
-      >
+      <div className="bg-[#0f2e2b]">
 
         <div style={{ backgroundColor: '#0f2e2b' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
             {/* ── Desktop ────────────────────────────────────── */}
             <div className={`hidden md:flex items-center gap-4 transition-all duration-300 ${
-              scrolled ? 'h-[52px]' : 'h-[68px]'
+              isCompact ? 'h-[52px]' : 'h-[68px]'
             }`}>
 
               {/* Logo */}
@@ -386,7 +402,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                   src={logoUrl || '/logo-sixxis.png'}
                   alt="Sixxis"
                   style={{
-                    height: scrolled ? '28px' : '36px',
+                    height: isCompact ? '28px' : '36px',
                     width: 'auto',
                     objectFit: 'contain',
                     transition: 'height 300ms ease-in-out',
@@ -448,7 +464,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
             {/* ── Mobile ─────────────────────────────────────── */}
             <div className={`flex md:hidden items-center gap-3 transition-all duration-300 ${
-              scrolled ? 'h-12' : 'h-16'
+              isCompact ? 'h-12' : 'h-16'
             }`}>
               <button
                 onClick={() => setDrawerOpen(true)}
@@ -491,7 +507,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         <nav className="hidden lg:block" style={{ backgroundColor: '#0f2e2b' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className={`flex items-center justify-center gap-0 transition-all duration-300 ${
-              scrolled ? 'py-1' : 'py-2'
+              isCompact ? 'py-1' : 'py-2'
             }`}>
               {NAV_LINKS.map((link, i) => (
                 <div key={link.href} className="flex items-center">
@@ -509,6 +525,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             </div>
           </div>
         </nav>
+      </div>
 
       </header>
 

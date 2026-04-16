@@ -61,6 +61,8 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
       )}
       <div className="relative flex flex-col min-h-screen" style={{ zIndex: 1 }}>
         <Header logoUrl={logoUrl} />
+        {/* Spacer: reserva o espaço do header fixed; altura real via CSS var --sixxis-header-h */}
+        <div aria-hidden="true" style={{ height: 'var(--sixxis-header-h, 140px)' }} />
         <div className="flex-1">{children}</div>
         <Footer />
         <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />
