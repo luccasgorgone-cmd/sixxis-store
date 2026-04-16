@@ -125,11 +125,8 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
         )}
 
         <button onClick={comprarAgora}
-          className="w-full py-3 rounded-xl font-black text-sm transition-all hover:shadow-lg hover:-translate-y-px active:translate-y-0 flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl font-black text-sm transition-all hover:shadow-lg hover:-translate-y-px active:translate-y-0"
           style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
-          <svg width="14" height="14" viewBox="0 0 60 100" fill="currentColor">
-            <path d="M35 0L5 55H30L15 100L55 40H28L35 0Z" />
-          </svg>
           Comprar Agora
         </button>
       </div>
@@ -168,10 +165,12 @@ export default function OfertasRelampago({ produtos }: Props) {
   const produtosOferta = produtos.slice(0, 3)
 
   return (
-    <section className="relative overflow-hidden py-12 sm:py-16"
-      style={{ background: 'linear-gradient(135deg, #0b1f1d 0%, #0f2e2b 40%, #111 100%)' }}>
+    <section className="relative overflow-hidden py-12 sm:py-16 border-t border-b border-white/10">
 
-      {/* Decorações de fundo */}
+      {/* Overlay escuro suave para contraste com o wallpaper */}
+      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+
+      {/* Grid decorativa sutil */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute right-0 top-0 w-1/2 h-full opacity-10"
           style={{ background: 'radial-gradient(ellipse at right center, #3cbfb3 0%, transparent 70%)' }} />
@@ -180,12 +179,6 @@ export default function OfertasRelampago({ produtos }: Props) {
             backgroundImage: 'linear-gradient(#3cbfb3 1px, transparent 1px), linear-gradient(90deg, #3cbfb3 1px, transparent 1px)',
             backgroundSize: '40px 40px',
           }} />
-        <svg className="absolute left-6 top-6 opacity-15" width="60" height="100" viewBox="0 0 60 100" fill="#ffd700">
-          <path d="M35 0L5 55H30L15 100L55 40H28L35 0Z" />
-        </svg>
-        <svg className="absolute right-8 bottom-8 opacity-10" width="40" height="70" viewBox="0 0 60 100" fill="#3cbfb3">
-          <path d="M35 0L5 55H30L15 100L55 40H28L35 0Z" />
-        </svg>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
@@ -201,21 +194,13 @@ export default function OfertasRelampago({ produtos }: Props) {
             </div>
 
             <div className="mb-2">
-              <div className="flex items-center gap-2 justify-center lg:justify-start mb-1">
-                <svg width="22" height="36" viewBox="0 0 60 100" fill="#ffd700">
-                  <path d="M35 0L5 55H30L15 100L55 40H28L35 0Z" />
-                </svg>
-                <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                  Oferta Relâmpago
-                </h2>
-                <svg width="22" height="36" viewBox="0 0 60 100" fill="#ffd700">
-                  <path d="M35 0L5 55H30L15 100L55 40H28L35 0Z" />
-                </svg>
-              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-1">
+                Oferta Relâmpago
+              </h2>
               <p className="text-white/50 text-sm">Aproveite antes que o estoque acabe!</p>
             </div>
 
-            <div className="w-16 h-0.5 bg-[#3cbfb3] rounded-full mb-6 mx-auto lg:mx-0" />
+            <div className="w-12 h-1 bg-[#3cbfb3] rounded-full mb-6 mx-auto lg:mx-0" />
 
             {/* Timer */}
             <div className="mb-6">

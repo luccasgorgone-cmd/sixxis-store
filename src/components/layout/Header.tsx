@@ -467,9 +467,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                     className="flex items-center gap-1 px-4 py-1.5 text-[13px] font-bold text-white hover:text-[#3cbfb3] tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
                   >
                     {link.label}
-                    {link.hot && (
-                      <RaioIcon size={20} comFundo={false} className="ml-0.5" />
-                    )}
                   </Link>
                 </div>
               ))}
@@ -619,9 +616,6 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             >
               <Icon size={20} className={hot ? 'text-amber-300' : 'text-white/50'} />
               {label}
-              {hot && (
-                <RaioIcon size={18} comFundo={false} className="ml-auto" />
-              )}
             </Link>
           ))}
 
