@@ -68,9 +68,10 @@ const NAV_GROUPS = [
   {
     label: 'Configurações',
     items: [
-      { href: '/admin/analytics',       label: 'Analytics',         icon: BarChart2,      exact: false },
-      { href: '/admin/vendas-horario',  label: 'Horários de Venda', icon: Clock,          exact: false },
-      { href: '/admin/configuracoes',   label: 'Configurações',     icon: Settings,       exact: false },
+      { href: '/admin/analytics',            label: 'Analytics',         icon: BarChart2, exact: false },
+      { href: '/admin/vendas-horario',     label: 'Horários de Venda', icon: Clock,    exact: false },
+      { href: '/admin/configuracoes',      label: 'Configurações',     icon: Settings, exact: false },
+      { href: '/admin/configuracoes-loja', label: 'Config. da Loja',   icon: Settings, exact: false },
     ],
   },
 ]
