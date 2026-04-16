@@ -278,8 +278,8 @@ export default function PerfilPage() {
                   <div className="flex-1 h-px bg-gray-100" />
                 </div>
 
-                {/* Grid 4×4 — avatares DiceBear diversificados */}
-                <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                {/* Grid 5×mobile 8×desktop — avatares DiceBear sem label */}
+                <div className="grid grid-cols-5 sm:grid-cols-8 gap-2.5">
                   {AVATARES_PREDEFINIDOS.map(av => {
                     const ativo = avatarId === av.id
                     return (
@@ -289,43 +289,28 @@ export default function PerfilPage() {
                         onClick={() => setAvatarId(av.id)}
                         title={av.label}
                         className={[
-                          'group flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2',
-                          'transition-all hover:border-[#3cbfb3]/40 hover:bg-[#3cbfb3]/5',
+                          'p-1.5 rounded-2xl border-2 transition-all',
                           'hover:scale-105 active:scale-95',
                           ativo
-                            ? 'border-[#3cbfb3] bg-[#3cbfb3]/10 shadow-md scale-105'
-                            : 'border-gray-100',
+                            ? 'border-[#3cbfb3] bg-[#3cbfb3]/10 scale-105'
+                            : 'border-gray-100 hover:border-gray-200',
                         ].join(' ')}
                       >
-                        <div className="relative">
-                          <div
-                            className={`w-11 h-11 rounded-full overflow-hidden ring-2 transition-all ${ativo ? 'ring-[#3cbfb3]' : 'ring-transparent'}`}
-                            style={{ backgroundColor: av.bgColor }}
-                          >
-                            {av.url && (
-                              <img
-                                src={av.url}
-                                alt={av.label}
-                                width={44}
-                                height={44}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            )}
-                          </div>
-                          {ativo && (
-                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#3cbfb3] flex items-center justify-center">
-                              <svg width="8" height="8" viewBox="0 0 12 12" fill="none">
-                                <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            </div>
+                        <div
+                          className="w-12 h-12 rounded-full overflow-hidden"
+                          style={{ backgroundColor: av.bgColor }}
+                        >
+                          {av.url && (
+                            <img
+                              src={av.url}
+                              alt={av.label}
+                              width={48}
+                              height={48}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              loading="lazy"
+                            />
                           )}
                         </div>
-                        <p className={`text-[9px] font-semibold truncate w-full text-center ${
-                          ativo ? 'text-[#3cbfb3]' : 'text-gray-400 group-hover:text-gray-600'
-                        }`}>
-                          {av.label}
-                        </p>
                       </button>
                     )
                   })}

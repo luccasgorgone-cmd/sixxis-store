@@ -240,19 +240,30 @@ export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Pro
         </button>
       </div>
 
-      {/* Benefícios */}
-      <div className="grid grid-cols-2 gap-2">
-        {[
-          { text: 'Frete grátis acima de R$ 500' },
-          { text: 'Garantia de 12 meses Sixxis' },
-          { text: 'Troca em até 7 dias úteis' },
-          { text: 'Entrega para todo o Brasil' },
-        ].map(({ text }) => (
-          <div key={text} className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
-            <span className="text-[#3cbfb3] font-bold text-base leading-none shrink-0">✓</span>
-            <span className="text-xs text-gray-600 font-medium">{text}</span>
-          </div>
-        ))}
+      {/* Selos de confiança — 6 itens */}
+      <div className="mt-5 pt-5 border-t border-gray-100">
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', titulo: '12 meses de garantia', desc: 'Garantia real e documentada' },
+            { icon: 'M1 3h15a2 2 0 0 1 2 2v10h5l2 4v3h-7V8H16v8h-5.5M5.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z', titulo: 'Entrega para todo o Brasil', desc: 'Grátis acima de R$ 500' },
+            { icon: 'M1 4v6h6M3.51 15a9 9 0 1 0 .49-4.95', titulo: 'Troca em 7 dias', desc: 'Sem burocracia' },
+            { icon: 'M2 5h20a2 2 0 0 1 0 4H2a2 2 0 0 1 0-4zM2 10h20v9H2z', titulo: '6x sem juros', desc: 'No cartão de crédito' },
+            { icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4', titulo: 'Produto 100% original', desc: '30 anos de tradição Sixxis' },
+            { icon: 'M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.82A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.95-.96a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16z', titulo: 'Suporte especializado', desc: 'Seg–Sex 8h às 18h' },
+          ].map((s, i) => (
+            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#3cbfb3]/30 hover:bg-[#f0fffe] transition-all">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#e8f8f7' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d={s.icon} />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-extrabold text-gray-800 leading-tight">{s.titulo}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{s.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
