@@ -165,6 +165,27 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   const [cepResultado,  setCepResultado]  = useState<{ mensagem: string } | null>(null)
   const [cepErro,       setCepErro]       = useState('')
 
+  // ── Smart header: compact on scroll, hide down, reveal up ───────────────────
+  const [scrolled, setScrolled] = useState(false)
+  const [hidden, setHidden]     = useState(false)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY
+      const delta = y - lastScrollY.current
+      setScrolled(y > 10)
+      if (y > 120 && delta > 4) {
+        setHidden(true)
+      } else if (delta < -4 || y <= 10) {
+        setHidden(false)
+      }
+      lastScrollY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const { data: session } = useSession()
   const { totalItens, setDrawerAberto } = useCarrinho()
 
@@ -342,15 +363,21 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
       <div className="w-full border-b border-[#0f2e2b]/20" />
 
       {/* ═══════════════════════════════════════════════════════
-          CAMADA 2 — HEADER PRINCIPAL (sticky)
+          CAMADA 2 — HEADER PRINCIPAL (smart sticky)
       ═══════════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-40 bg-[#0f2e2b] shadow-md">
+      <header
+        className={`sticky top-0 z-40 bg-[#0f2e2b] transition-all duration-300 ease-in-out ${
+          hidden ? '-translate-y-full' : 'translate-y-0'
+        } ${scrolled ? 'shadow-xl shadow-black/20' : 'shadow-md'}`}
+      >
 
         <div style={{ backgroundColor: '#0f2e2b' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
             {/* ── Desktop ────────────────────────────────────── */}
-            <div className="hidden md:flex items-center h-[68px] gap-4">
+            <div className={`hidden md:flex items-center gap-4 transition-all duration-300 ${
+              scrolled ? 'h-[52px]' : 'h-[68px]'
+            }`}>
 
               {/* Logo */}
               <Link href="/" className="shrink-0 flex items-center">
@@ -358,7 +385,12 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <img
                   src={logoUrl || '/logo-sixxis.png'}
                   alt="Sixxis"
-                  style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+                  style={{
+                    height: scrolled ? '28px' : '36px',
+                    width: 'auto',
+                    objectFit: 'contain',
+                    transition: 'height 300ms ease-in-out',
+                  }}
                   loading="eager"
                 />
               </Link>
@@ -415,7 +447,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             </div>
 
             {/* ── Mobile ─────────────────────────────────────── */}
-            <div className="flex md:hidden items-center h-16 gap-3">
+            <div className={`flex md:hidden items-center gap-3 transition-all duration-300 ${
+              scrolled ? 'h-12' : 'h-16'
+            }`}>
               <button
                 onClick={() => setDrawerOpen(true)}
                 className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/20 transition"
@@ -456,7 +490,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         {/* ── NAV CATEGORIAS ──────────────────────────────────── */}
         <nav className="hidden lg:block" style={{ backgroundColor: '#0f2e2b' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="flex items-center justify-center gap-0 py-2">
+            <div className={`flex items-center justify-center gap-0 transition-all duration-300 ${
+              scrolled ? 'py-1' : 'py-2'
+            }`}>
               {NAV_LINKS.map((link, i) => (
                 <div key={link.href} className="flex items-center">
                   {i > 0 && (
