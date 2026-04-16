@@ -198,7 +198,7 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
           },
           {
             icon: Clock,
-            label: 'Payback',
+            label: 'Retorno do investimento',
             valor: mesesPay < 12
               ? `${mesesPay} meses`
               : `${(mesesPay / 12).toFixed(1)} anos`,

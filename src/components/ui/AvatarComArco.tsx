@@ -1,8 +1,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import { NIVEIS_CONFIG, calcularNivel, getAvatarUrl, getAvatarBgColor, getInitialBgColor, isAvatar3D, getAvatarConfig } from '@/lib/avatares'
-import { UserAvatar3D } from '@/components/ui/UserAvatar3D'
+import {
+  NIVEIS_CONFIG, calcularNivel, normalizarNivel,
+  getAvatarUrl, getAvatarBgColor, getInitialBgColor,
+  getNivelSVGString,
+} from '@/lib/avatares'
 
 interface AvatarComArcoProps {
   nome: string
@@ -16,51 +19,39 @@ interface AvatarComArcoProps {
 }
 
 export function AvatarComArco({
-  nome,
-  avatarId,
-  nivel,
-  totalGasto = 0,
-  size = 48,
-  mostrarBadge = true,
-  mostrarTooltip = false,
-  className = '',
+  nome, avatarId, nivel, totalGasto = 0,
+  size = 48, mostrarBadge = true,
+  mostrarTooltip = false, className = '',
 }: AvatarComArcoProps) {
-  const nivelAtual = useMemo(() => {
-    if (nivel) return nivel
-    return calcularNivel(totalGasto)
-  }, [nivel, totalGasto])
+  const nivelAtual = useMemo(() =>
+    normalizarNivel(nivel || calcularNivel(totalGasto))
+  , [nivel, totalGasto])
 
   const config = NIVEIS_CONFIG[nivelAtual] || NIVEIS_CONFIG.Cristal
-
-  const is3D = avatarId ? isAvatar3D(avatarId) : false
-  const avatarConfig3D = is3D && avatarId ? getAvatarConfig(avatarId) : null
-  const avatarUrl = is3D ? null : getAvatarUrl(avatarId || 'inicial')
-  const bgColor = avatarId && avatarId !== 'inicial'
+  const avatarUrl = getAvatarUrl(avatarId || 'inicial')
+  const bgColor = (avatarId && avatarId !== 'inicial')
     ? getAvatarBgColor(avatarId)
     : getInitialBgColor(nome)
-  const inicial = nome?.[0]?.toUpperCase() || '?'
-
+  const inicial = (nome?.[0] || '?').toUpperCase()
   const badgeSize = Math.max(18, Math.round(size * 0.40))
-  const badgeFontSize = Math.max(10, Math.round(badgeSize * 0.62))
+  const badgeIconSize = Math.max(10, Math.round(badgeSize * 0.68))
 
   return (
     <div
       className={`relative inline-flex items-center justify-center flex-shrink-0 ${className}`}
       style={{ width: size, height: size }}
-      title={mostrarTooltip ? `${nivelAtual} · R$ ${totalGasto.toLocaleString('pt-BR')}` : undefined}
+      title={mostrarTooltip ? nivelAtual : undefined}
     >
-      {/* ── AVATAR CIRCLE (sem ring) ── */}
       <div
-        className="rounded-full overflow-hidden flex items-center justify-center font-black text-white select-none w-full h-full"
+        className="rounded-full overflow-hidden flex items-center justify-center
+                   font-black text-white select-none w-full h-full"
         style={{
           backgroundColor: bgColor,
-          boxShadow: `0 2px 10px rgba(0,0,0,0.20)`,
           fontSize: size * 0.38,
+          boxShadow: '0 2px 10px rgba(0,0,0,0.22)',
         }}
       >
-        {avatarConfig3D ? (
-          <UserAvatar3D config={avatarConfig3D} size={size} />
-        ) : avatarUrl ? (
+        {avatarUrl ? (
           <img
             src={avatarUrl}
             alt={nome}
@@ -68,14 +59,11 @@ export function AvatarComArco({
             height={size}
             className="w-full h-full object-cover"
             loading="lazy"
-            onError={(e) => {
-              const target = e.currentTarget
-              target.style.display = 'none'
-              const parent = target.parentElement
-              if (parent) {
-                parent.style.fontSize = `${size * 0.38}px`
-                parent.textContent = inicial
-              }
+            onError={e => {
+              const t = e.currentTarget
+              t.style.display = 'none'
+              const p = t.parentElement
+              if (p) { p.textContent = inicial }
             }}
           />
         ) : (
@@ -83,24 +71,21 @@ export function AvatarComArco({
         )}
       </div>
 
-      {/* ── BADGE DO NÍVEL (inferior direito) ── */}
       {mostrarBadge && (
         <div
-          className="absolute flex items-center justify-center rounded-full border-2 border-white select-none"
+          className="absolute flex items-center justify-center rounded-full border-2 border-white"
           style={{
             width: badgeSize,
             height: badgeSize,
-            fontSize: badgeFontSize,
-            lineHeight: 1,
             bottom: -2,
             right: -2,
             backgroundColor: config.cor,
             boxShadow: `0 2px 8px ${config.corSombra}`,
           }}
-          title={nivelAtual}
-        >
-          <span style={{ lineHeight: 1 }}>{config.emoji}</span>
-        </div>
+          dangerouslySetInnerHTML={{
+            __html: getNivelSVGString(nivelAtual, badgeIconSize),
+          }}
+        />
       )}
     </div>
   )

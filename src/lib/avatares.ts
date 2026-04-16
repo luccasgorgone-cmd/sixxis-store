@@ -1,105 +1,97 @@
 // ════════════════════════════════════════════════════════════
-// SIXXIS — SISTEMA DE AVATARES 3D CLAY
-// Avatares SVG inline renderizados via <UserAvatar3D />
+// SIXXIS — SISTEMA DE AVATARES + NÍVEIS DE FIDELIDADE
 // O avatar da Luna é EXCLUSIVO (<LunaAvatar />) e NÃO aparece aqui.
 // ════════════════════════════════════════════════════════════
 
-import type { UserAvatarConfig } from '@/components/ui/UserAvatar3D'
+const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/micah/svg'
+const MK = '&mouth=smile&scale=88'
 
-export const AVATARES_PREDEFINIDOS_CONFIG: UserAvatarConfig[] = [
-  // ─── ROW 1: verde Sixxis ───
-  { id: 'sx-v01', label: 'Aurora',    skinTone: 'light',        hairColor: 'brown',      hairStyle: 'bob',            shirtColor: '#0f2e2b', shirtAccent: '#0a1f1d', bgColor: '#1a5a52', bgColor2: '#0a2820' },
-  { id: 'sx-v02', label: 'Clara',     skinTone: 'medium-light', hairColor: 'black',      hairStyle: 'short-straight', shirtColor: '#1a3a38', shirtAccent: '#0f2520', bgColor: '#0f3d35', bgColor2: '#071f1a' },
-  { id: 'sx-v03', label: 'Sofia',     skinTone: 'light',        hairColor: 'blonde',     hairStyle: 'ponytail',       shirtColor: '#0a2820', shirtAccent: '#061510', bgColor: '#164d45', bgColor2: '#08281f' },
-  { id: 'sx-v04', label: 'Natalia',   skinTone: 'medium',       hairColor: 'dark-brown', hairStyle: 'bun',            shirtColor: '#0d3330', shirtAccent: '#071e1c', bgColor: '#0f4a40', bgColor2: '#062518' },
-  // ─── ROW 2: azul / índigo ───
-  { id: 'sx-a01', label: 'Marina',    skinTone: 'medium',       hairColor: 'black',      hairStyle: 'long-straight',  shirtColor: '#1e1b4b', shirtAccent: '#0c0a2a', bgColor: '#22205a', bgColor2: '#0c0a2e' },
-  { id: 'sx-a02', label: 'Valentina', skinTone: 'medium-light', hairColor: 'auburn',     hairStyle: 'bob',            shirtColor: '#0c4a6e', shirtAccent: '#072d42', bgColor: '#0e5278', bgColor2: '#07304a' },
-  { id: 'sx-a03', label: 'Beatriz',   skinTone: 'light',        hairColor: 'black',      hairStyle: 'curly-short',    shirtColor: '#0a1628', shirtAccent: '#060e18', bgColor: '#0e1e38', bgColor2: '#060e1e' },
-  { id: 'sx-a04', label: 'Helena',    skinTone: 'medium',       hairColor: 'dark-brown', hairStyle: 'ponytail',       shirtColor: '#0f172a', shirtAccent: '#070d18', bgColor: '#141c38', bgColor2: '#080d20' },
-  // ─── ROW 3: quentes ───
-  { id: 'sx-q01', label: 'Juliana',   skinTone: 'medium-dark',  hairColor: 'black',      hairStyle: 'short-straight', shirtColor: '#78350f', shirtAccent: '#4a1f05', bgColor: '#8a3d10', bgColor2: '#4a1e05' },
-  { id: 'sx-q02', label: 'Fernanda',  skinTone: 'dark',         hairColor: 'black',      hairStyle: 'curly-short',    shirtColor: '#7c2d12', shirtAccent: '#4a1808', bgColor: '#8f3215', bgColor2: '#4a1a08' },
-  { id: 'sx-q03', label: 'Camila',    skinTone: 'medium-dark',  hairColor: 'dark-brown', hairStyle: 'bun',            shirtColor: '#92400e', shirtAccent: '#5a2808', bgColor: '#9a4510', bgColor2: '#5a2808' },
-  { id: 'sx-q04', label: 'Isabella',  skinTone: 'medium',       hairColor: 'auburn',     hairStyle: 'long-straight',  shirtColor: '#44403c', shirtAccent: '#282420', bgColor: '#4e4a44', bgColor2: '#28241e' },
-  // ─── ROW 4: premium escuro ───
-  { id: 'sx-p01', label: 'Gabriela',  skinTone: 'dark',         hairColor: 'black',      hairStyle: 'bob',            shirtColor: '#1c1917', shirtAccent: '#100e0c', bgColor: '#242019', bgColor2: '#100e0a' },
-  { id: 'sx-p02', label: 'Mariana',   skinTone: 'medium-light', hairColor: 'black',      hairStyle: 'short-straight', shirtColor: '#1e293b', shirtAccent: '#0f1826', bgColor: '#253048', bgColor2: '#10182a' },
-  { id: 'sx-p03', label: 'Larissa',   skinTone: 'medium',       hairColor: 'brown',      hairStyle: 'ponytail',       shirtColor: '#14532d', shirtAccent: '#08301a', bgColor: '#185e34', bgColor2: '#0a3018' },
-  { id: 'sx-p04', label: 'Patricia',  skinTone: 'medium-dark',  hairColor: 'dark-brown', hairStyle: 'curly-short',    shirtColor: '#083344', shirtAccent: '#041c28', bgColor: '#0a3d52', bgColor2: '#041e2c' },
+// ── 16 AVATARES — 50% masculinos, 50% femininos, diversidade real
+export const AVATARES_PREDEFINIDOS: Array<{
+  id: string; label: string; url: string; bgColor: string
+}> = [
+  { id: 'sx-m01', label: 'Carlos',  url: `${DICEBEAR_BASE}?seed=SixxisManA1&backgroundColor=0f2e2b${MK}`,  bgColor: '#0f2e2b' },
+  { id: 'sx-f01', label: 'Ana',     url: `${DICEBEAR_BASE}?seed=SixxisFemA1&backgroundColor=1a4f4a${MK}`,  bgColor: '#1a4f4a' },
+  { id: 'sx-m02', label: 'Pedro',   url: `${DICEBEAR_BASE}?seed=SixxisManB2&backgroundColor=1e1b4b${MK}`,  bgColor: '#1e1b4b' },
+  { id: 'sx-f02', label: 'Maria',   url: `${DICEBEAR_BASE}?seed=SixxisFemB2&backgroundColor=7c2d12${MK}`,  bgColor: '#7c2d12' },
+  { id: 'sx-m03', label: 'João',    url: `${DICEBEAR_BASE}?seed=SixxisManC3&backgroundColor=78350f${MK}`,  bgColor: '#78350f' },
+  { id: 'sx-f03', label: 'Julia',   url: `${DICEBEAR_BASE}?seed=SixxisFemC3&backgroundColor=14532d${MK}`,  bgColor: '#14532d' },
+  { id: 'sx-m04', label: 'Lucas',   url: `${DICEBEAR_BASE}?seed=SixxisManD4&backgroundColor=0c4a6e${MK}`,  bgColor: '#0c4a6e' },
+  { id: 'sx-f04', label: 'Sara',    url: `${DICEBEAR_BASE}?seed=SixxisFemD4&backgroundColor=2e1065${MK}`,  bgColor: '#2e1065' },
+  { id: 'sx-n01', label: 'Davi',    url: `${DICEBEAR_BASE}?seed=SixxisNeutA1&backgroundColor=162032${MK}`, bgColor: '#162032' },
+  { id: 'sx-n02', label: 'Tais',    url: `${DICEBEAR_BASE}?seed=SixxisNeutB2&backgroundColor=44403c${MK}`, bgColor: '#44403c' },
+  { id: 'sx-n03', label: 'Bruno',   url: `${DICEBEAR_BASE}?seed=SixxisNeutC3&backgroundColor=083344${MK}`, bgColor: '#083344' },
+  { id: 'sx-n04', label: 'Lara',    url: `${DICEBEAR_BASE}?seed=SixxisNeutD4&backgroundColor=1c1917${MK}`, bgColor: '#1c1917' },
+  { id: 'sx-p01', label: 'Rafael',  url: `${DICEBEAR_BASE}?seed=SixxisPremA1&backgroundColor=0a1628${MK}`, bgColor: '#0a1628' },
+  { id: 'sx-p02', label: 'Clara',   url: `${DICEBEAR_BASE}?seed=SixxisPremB2&backgroundColor=92400e${MK}`, bgColor: '#92400e' },
+  { id: 'sx-p03', label: 'Miguel',  url: `${DICEBEAR_BASE}?seed=SixxisPremC3&backgroundColor=0d3b44${MK}`, bgColor: '#0d3b44' },
+  { id: 'sx-p04', label: 'Bia',     url: `${DICEBEAR_BASE}?seed=SixxisPremD4&backgroundColor=1e293b${MK}`, bgColor: '#1e293b' },
 ]
 
-export function isAvatar3D(id: string): boolean {
-  return !!id && id.startsWith('sx-')
-}
-
-export function getAvatarConfig(id: string): UserAvatarConfig | null {
-  return AVATARES_PREDEFINIDOS_CONFIG.find(c => c.id === id) || null
-}
-
-// ── 16 AVATARES PREDEFINIDOS (formato legado, mapeado dos 3D configs)
-export const AVATARES_PREDEFINIDOS: Array<{
-  id: string
-  label: string
-  url: string | null
-  bgColor: string
-}> = AVATARES_PREDEFINIDOS_CONFIG.map(c => ({
-  id: c.id,
-  label: c.label,
-  url: null,
-  bgColor: c.bgColor,
-}))
-
-// Avatar padrão (inicial do nome)
 export const AVATAR_INICIAL = {
   id: 'inicial',
   label: 'Inicial do Nome',
-  url: null as null,
+  url: null as string | null,
   bgColor: '#0f2e2b',
 }
 
-// ── TODOS os avatares (inicial primeiro, depois os 16)
 export const TODOS_AVATARES = [AVATAR_INICIAL, ...AVATARES_PREDEFINIDOS]
 
-// ── Configuração dos Níveis — 5 gemas
+// ── Configuração dos Níveis — 5 gemas com svgIcon + corBanner
 export const NIVEIS_CONFIG: Record<string, {
   cor: string; corSec: string; corSombra: string; corTexto: string; bg: string
+  corBanner: string
   espessura: number; label: string; emoji: string
+  svgIcon: (s?: number) => string
   cashbackPct: number; minGasto: number; maxGasto: number; proximoNivel: string | null
 }> = {
   Cristal: {
-    cor: '#38bdf8', corSec: '#bae6fd', corSombra: 'rgba(56,189,248,0.4)',
+    cor: '#22d3ee', corSec: '#a5f3fc', corSombra: 'rgba(34,211,238,0.55)',
     corTexto: '#0c4a6e', bg: '#f0f9ff',
+    corBanner: 'linear-gradient(135deg, #083344 0%, #0e7490 45%, #06b6d4 75%, #67e8f9 100%)',
     espessura: 3, label: 'Cristal', emoji: '🔷',
+    svgIcon: (s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M16 1L31 9.5V22.5L16 31L1 22.5V9.5L16 1Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.88)" stroke-width="1.5" stroke-linejoin="round"/><path d="M16 6L26 12V20L16 26L6 20V12L16 6Z" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.38)" stroke-width="0.8"/><circle cx="16" cy="16" r="2.8" fill="rgba(255,255,255,0.92)"/></svg>`,
     cashbackPct: 0.02, minGasto: 0, maxGasto: 999, proximoNivel: 'Topázio',
   },
   Topázio: {
-    cor: '#f59e0b', corSec: '#fde68a', corSombra: 'rgba(245,158,11,0.45)',
+    cor: '#f97316', corSec: '#fed7aa', corSombra: 'rgba(249,115,22,0.55)',
     corTexto: '#78350f', bg: '#fffbeb',
-    espessura: 3.5, label: 'Topázio', emoji: '🟡',
+    corBanner: 'linear-gradient(135deg, #431407 0%, #9a3412 40%, #ea580c 70%, #fb923c 100%)',
+    espessura: 3.5, label: 'Topázio', emoji: '🔶',
+    svgIcon: (s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M16 2L29 10V22L16 30L3 22V10L16 2Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.82)" stroke-width="1.5"/><path d="M16 2L3 10L16 16L29 10L16 2Z" fill="rgba(255,255,255,0.20)"/><circle cx="16" cy="16" r="3.2" fill="rgba(255,255,255,0.88)"/></svg>`,
     cashbackPct: 0.03, minGasto: 1000, maxGasto: 2999, proximoNivel: 'Safira',
   },
   Safira: {
-    cor: '#2563eb', corSec: '#bfdbfe', corSombra: 'rgba(37,99,235,0.5)',
+    cor: '#3b82f6', corSec: '#bfdbfe', corSombra: 'rgba(59,130,246,0.55)',
     corTexto: '#1e3a8a', bg: '#eff6ff',
-    espessura: 4, label: 'Safira', emoji: '💙',
+    corBanner: 'linear-gradient(135deg, #0c1445 0%, #1e3a8a 40%, #2563eb 70%, #93c5fd 100%)',
+    espessura: 4, label: 'Safira', emoji: '💠',
+    svgIcon: (s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M16 2L30 10.5L26 30H6L2 10.5L16 2Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.82)" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 10.5H30M16 2L9 10.5M16 2L23 10.5" stroke="rgba(255,255,255,0.45)" stroke-width="1"/><path d="M13 7L16 2L19 7H13Z" fill="rgba(255,255,255,0.65)"/></svg>`,
     cashbackPct: 0.04, minGasto: 3000, maxGasto: 7999, proximoNivel: 'Diamante',
   },
   Diamante: {
-    cor: '#818cf8', corSec: '#e0e7ff', corSombra: 'rgba(129,140,248,0.55)',
+    cor: '#a855f7', corSec: '#e9d5ff', corSombra: 'rgba(168,85,247,0.55)',
     corTexto: '#3730a3', bg: '#eef2ff',
+    corBanner: 'linear-gradient(135deg, #2e1065 0%, #6b21a8 38%, #9333ea 68%, #d8b4fe 100%)',
     espessura: 4.5, label: 'Diamante', emoji: '💎',
+    svgIcon: (s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M8 2H24L31 12L16 30L1 12L8 2Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.82)" stroke-width="1.5" stroke-linejoin="round"/><path d="M1 12H31M8 2L14 12M24 2L18 12M14 12L16 30M18 12L16 30" stroke="rgba(255,255,255,0.35)" stroke-width="1"/><path d="M11 7H21L24 12H8L11 7Z" fill="rgba(255,255,255,0.28)"/></svg>`,
     cashbackPct: 0.05, minGasto: 8000, maxGasto: 14999, proximoNivel: 'Esmeralda',
   },
   Esmeralda: {
-    cor: '#10b981', corSec: '#a7f3d0', corSombra: 'rgba(16,185,129,0.6)',
+    cor: '#10b981', corSec: '#a7f3d0', corSombra: 'rgba(16,185,129,0.55)',
     corTexto: '#064e3b', bg: '#ecfdf5',
+    corBanner: 'linear-gradient(135deg, #022c22 0%, #065f46 38%, #059669 65%, #6ee7b7 100%)',
     espessura: 5, label: 'Esmeralda', emoji: '💚',
+    svgIcon: (s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M16 1L31 9.5V22.5L16 31L1 22.5V9.5L16 1Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.88)" stroke-width="1.5" stroke-linejoin="round"/><path d="M16 5L27 11V21L16 27L5 21V11L16 5Z" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.38)" stroke-width="0.8"/><circle cx="16" cy="16" r="2.5" fill="rgba(255,255,255,0.92)"/><path d="M16 11L17.8 15H22L18.5 17.5L20 22L16 19.5L12 22L13.5 17.5L10 15H14.2L16 11Z" fill="rgba(255,255,255,0.28)" stroke="rgba(255,255,255,0.55)" stroke-width="0.5"/></svg>`,
     cashbackPct: 0.07, minGasto: 15000, maxGasto: Infinity, proximoNivel: null,
   },
 }
 
 export const ORDEM_NIVEIS_GEM = ['Cristal', 'Topázio', 'Safira', 'Diamante', 'Esmeralda'] as const
+
+export function getNivelSVGString(nivel: string, size = 20): string {
+  return NIVEIS_CONFIG[nivel]?.svgIcon(size) || NIVEIS_CONFIG.Cristal.svgIcon(size)
+}
 
 export function calcularNivel(totalGasto: number): string {
   if (totalGasto >= 15000) return 'Esmeralda'
@@ -107,6 +99,15 @@ export function calcularNivel(totalGasto: number): string {
   if (totalGasto >= 3000)  return 'Safira'
   if (totalGasto >= 1000)  return 'Topázio'
   return 'Cristal'
+}
+
+export function normalizarNivel(n: string): string {
+  if (NIVEIS_CONFIG[n]) return n
+  const mapa: Record<string, string> = {
+    Bronze: 'Cristal', Prata: 'Topázio', Ouro: 'Safira',
+    Diamante: 'Diamante', Black: 'Esmeralda',
+  }
+  return mapa[n] || 'Cristal'
 }
 
 export function calcularNivelCompleto(totalGasto: number) {
@@ -119,17 +120,9 @@ export function calcularNivelCompleto(totalGasto: number) {
     ? Math.min(100, Math.round(((totalGasto - cfg.minGasto) / (NIVEIS_CONFIG[cfg.proximoNivel].minGasto - cfg.minGasto)) * 100))
     : 100
   return {
-    atual: nome,
-    proximoNivel: cfg.proximoNivel,
-    progressoPercent,
-    faltam,
-    cor: cfg.cor,
-    corSec: cfg.corSec,
-    corTexto: cfg.corTexto,
-    bg: cfg.bg,
-    cashbackPct: cfg.cashbackPct,
-    minGasto: cfg.minGasto,
-    maxGasto: cfg.maxGasto,
+    atual: nome, proximoNivel: cfg.proximoNivel, progressoPercent, faltam,
+    cor: cfg.cor, corSec: cfg.corSec, corTexto: cfg.corTexto, bg: cfg.bg,
+    cashbackPct: cfg.cashbackPct, minGasto: cfg.minGasto, maxGasto: cfg.maxGasto,
   }
 }
 
@@ -145,7 +138,6 @@ export function getAvatarBgColor(avatarId: string, nome?: string): string {
   return AVATARES_PREDEFINIDOS.find(a => a.id === avatarId)?.bgColor || '#0f2e2b'
 }
 
-// ── Cores de background para avatares de inicial (variadas por nome)
 const CORES_INICIAL = [
   '#0f2e2b', '#1a4f4a', '#162032', '#1e1b4b',
   '#2d1b69', '#0a1628', '#78350f', '#7c2d12',
