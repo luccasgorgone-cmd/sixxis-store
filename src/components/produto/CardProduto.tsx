@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Check, Zap, Package } from 'lucide-react'
+import { ShoppingCart, Check, Package } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useState } from 'react'
@@ -176,7 +176,6 @@ export default function CardProduto({ produto }: Props) {
                   onClick={handleComprarAgora}
                   className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
                 >
-                  <Zap size={14} />
                   Comprar Agora
                 </button>
               )}

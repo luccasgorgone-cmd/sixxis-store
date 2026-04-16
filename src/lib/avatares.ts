@@ -3,29 +3,33 @@
 // O avatar da Luna é EXCLUSIVO (<LunaAvatar />) e NÃO aparece aqui.
 // ════════════════════════════════════════════════════════════
 
-const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/micah/svg'
-const MK = '&mouth=smile&scale=88'
+const DB = 'https://api.dicebear.com/9.x/micah/svg'
+const SM = '&mouth=smile&scale=88'
 
-// ── 16 AVATARES — 50% masculinos, 50% femininos, diversidade real
+// ── 16 AVATARES — 50% masculinos (hairStyle curto), 50% femininos (hairStyle longo)
 export const AVATARES_PREDEFINIDOS: Array<{
   id: string; label: string; url: string; bgColor: string
 }> = [
-  { id: 'sx-m01', label: 'Carlos',  url: `${DICEBEAR_BASE}?seed=SixxisManA1&backgroundColor=0f2e2b${MK}`,  bgColor: '#0f2e2b' },
-  { id: 'sx-f01', label: 'Ana',     url: `${DICEBEAR_BASE}?seed=SixxisFemA1&backgroundColor=1a4f4a${MK}`,  bgColor: '#1a4f4a' },
-  { id: 'sx-m02', label: 'Pedro',   url: `${DICEBEAR_BASE}?seed=SixxisManB2&backgroundColor=1e1b4b${MK}`,  bgColor: '#1e1b4b' },
-  { id: 'sx-f02', label: 'Maria',   url: `${DICEBEAR_BASE}?seed=SixxisFemB2&backgroundColor=7c2d12${MK}`,  bgColor: '#7c2d12' },
-  { id: 'sx-m03', label: 'João',    url: `${DICEBEAR_BASE}?seed=SixxisManC3&backgroundColor=78350f${MK}`,  bgColor: '#78350f' },
-  { id: 'sx-f03', label: 'Julia',   url: `${DICEBEAR_BASE}?seed=SixxisFemC3&backgroundColor=14532d${MK}`,  bgColor: '#14532d' },
-  { id: 'sx-m04', label: 'Lucas',   url: `${DICEBEAR_BASE}?seed=SixxisManD4&backgroundColor=0c4a6e${MK}`,  bgColor: '#0c4a6e' },
-  { id: 'sx-f04', label: 'Sara',    url: `${DICEBEAR_BASE}?seed=SixxisFemD4&backgroundColor=2e1065${MK}`,  bgColor: '#2e1065' },
-  { id: 'sx-n01', label: 'Davi',    url: `${DICEBEAR_BASE}?seed=SixxisNeutA1&backgroundColor=162032${MK}`, bgColor: '#162032' },
-  { id: 'sx-n02', label: 'Tais',    url: `${DICEBEAR_BASE}?seed=SixxisNeutB2&backgroundColor=44403c${MK}`, bgColor: '#44403c' },
-  { id: 'sx-n03', label: 'Bruno',   url: `${DICEBEAR_BASE}?seed=SixxisNeutC3&backgroundColor=083344${MK}`, bgColor: '#083344' },
-  { id: 'sx-n04', label: 'Lara',    url: `${DICEBEAR_BASE}?seed=SixxisNeutD4&backgroundColor=1c1917${MK}`, bgColor: '#1c1917' },
-  { id: 'sx-p01', label: 'Rafael',  url: `${DICEBEAR_BASE}?seed=SixxisPremA1&backgroundColor=0a1628${MK}`, bgColor: '#0a1628' },
-  { id: 'sx-p02', label: 'Clara',   url: `${DICEBEAR_BASE}?seed=SixxisPremB2&backgroundColor=92400e${MK}`, bgColor: '#92400e' },
-  { id: 'sx-p03', label: 'Miguel',  url: `${DICEBEAR_BASE}?seed=SixxisPremC3&backgroundColor=0d3b44${MK}`, bgColor: '#0d3b44' },
-  { id: 'sx-p04', label: 'Bia',     url: `${DICEBEAR_BASE}?seed=SixxisPremD4&backgroundColor=1e293b${MK}`, bgColor: '#1e293b' },
+  // Masculinos (shortCombover, buzz, fonze, shortComboverChops)
+  { id: 'sx-m01', label: 'Carlos',  url: `${DB}?seed=CarlosM01&backgroundColor=0f2e2b&hairStyle=shortCombover${SM}`,      bgColor: '#0f2e2b' },
+  { id: 'sx-m02', label: 'Pedro',   url: `${DB}?seed=PedroM02&backgroundColor=1e1b4b&hairStyle=buzz${SM}`,               bgColor: '#1e1b4b' },
+  { id: 'sx-m03', label: 'João',    url: `${DB}?seed=JoaoM03&backgroundColor=78350f&hairStyle=fonze${SM}`,               bgColor: '#78350f' },
+  { id: 'sx-m04', label: 'Lucas',   url: `${DB}?seed=LucasM04&backgroundColor=0c4a6e&hairStyle=shortComboverChops${SM}`, bgColor: '#0c4a6e' },
+  // Femininos (pigtails, bun, full, pixie)
+  { id: 'sx-f01', label: 'Ana',     url: `${DB}?seed=AnaF01&backgroundColor=1a4f4a&hairStyle=pigtails${SM}`,  bgColor: '#1a4f4a' },
+  { id: 'sx-f02', label: 'Maria',   url: `${DB}?seed=MariaF02&backgroundColor=7c2d12&hairStyle=bun${SM}`,    bgColor: '#7c2d12' },
+  { id: 'sx-f03', label: 'Julia',   url: `${DB}?seed=JuliaF03&backgroundColor=14532d&hairStyle=full${SM}`,   bgColor: '#14532d' },
+  { id: 'sx-f04', label: 'Sara',    url: `${DB}?seed=SaraF04&backgroundColor=2e1065&hairStyle=pixie${SM}`,   bgColor: '#2e1065' },
+  // Diversos (variados)
+  { id: 'sx-n01', label: 'Davi',    url: `${DB}?seed=DaviN01&backgroundColor=162032&hairStyle=afro${SM}`,            bgColor: '#162032' },
+  { id: 'sx-n02', label: 'Tais',    url: `${DB}?seed=TaisN02&backgroundColor=44403c&hairStyle=dannyPhantom${SM}`,    bgColor: '#44403c' },
+  { id: 'sx-n03', label: 'Bruno',   url: `${DB}?seed=BrunoN03&backgroundColor=083344&hairStyle=shortCombover${SM}`,  bgColor: '#083344' },
+  { id: 'sx-n04', label: 'Lara',    url: `${DB}?seed=LaraN04&backgroundColor=1c1917&hairStyle=full${SM}`,            bgColor: '#1c1917' },
+  // Premium (variados)
+  { id: 'sx-p01', label: 'Rafael',  url: `${DB}?seed=RafaelP01&backgroundColor=0a1628&hairStyle=buzz${SM}`,       bgColor: '#0a1628' },
+  { id: 'sx-p02', label: 'Clara',   url: `${DB}?seed=ClaraP02&backgroundColor=92400e&hairStyle=bun${SM}`,        bgColor: '#92400e' },
+  { id: 'sx-p03', label: 'Miguel',  url: `${DB}?seed=MiguelP03&backgroundColor=0d3b44&hairStyle=fonze${SM}`,     bgColor: '#0d3b44' },
+  { id: 'sx-p04', label: 'Bia',     url: `${DB}?seed=BiaP04&backgroundColor=1e293b&hairStyle=pigtails${SM}`,     bgColor: '#1e293b' },
 ]
 
 export const AVATAR_INICIAL = {
