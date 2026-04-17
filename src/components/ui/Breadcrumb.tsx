@@ -10,99 +10,45 @@ interface Props {
 
 export default function Breadcrumb({ items }: Props) {
   return (
-    <div
-      style={{
-        width: '100%',
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid #e5e7eb',
-      }}
+    <nav
+      className="w-full bg-transparent py-3 px-4"
+      aria-label="Breadcrumb"
     >
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: '0 auto',
-          padding: '0 24px',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          height: 36,
-          gap: 0,
-          listStyle: 'none',
-          flexWrap: 'nowrap',
-          overflowX: 'auto',
-          whiteSpace: 'nowrap',
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none',
-        }}
-        role="list"
+      <ol
+        className="max-w-7xl mx-auto flex items-center flex-nowrap overflow-x-auto whitespace-nowrap text-[11px] leading-none"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {items.map((item, i) => (
-          <div
-            key={i}
-            role="listitem"
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              flexShrink: 0,
-              minHeight: 0,
-              height: 'auto',
-              lineHeight: 1,
-              margin: 0,
-              padding: 0,
-            }}
-          >
-            {i > 0 && (
-              <span
-                aria-hidden="true"
-                style={{
-                  margin: '0 6px',
-                  color: '#9ca3af',
-                  fontSize: 11,
-                  lineHeight: 1,
-                  minHeight: 0,
-                  display: 'inline',
-                  userSelect: 'none',
-                }}
-              >
-                /
-              </span>
-            )}
-            {item.href && i < items.length - 1 ? (
-              <Link
-                href={item.href}
-                style={{
-                  fontSize: 11,
-                  color: '#6b7280',
-                  textDecoration: 'none',
-                  lineHeight: 1,
-                  minHeight: 0,
-                  height: 'auto',
-                  display: 'inline',
-                  padding: 0,
-                  margin: 0,
-                  fontWeight: 400,
-                }}
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <span
-                style={{
-                  fontSize: 11,
-                  color: '#111827',
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  minHeight: 0,
-                  display: 'inline',
-                }}
-              >
-                {item.label}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+        {items.map((item, i) => {
+          const isLast = i === items.length - 1
+          return (
+            <li key={i} className="flex items-center shrink-0 leading-none">
+              {i > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="inline-flex items-center leading-none shrink-0 mx-1.5 text-current opacity-40 text-xs select-none"
+                >
+                  /
+                </span>
+              )}
+              {item.href && !isLast ? (
+                <Link
+                  href={item.href}
+                  className="inline-flex items-center leading-none whitespace-nowrap shrink-0 text-current opacity-60 hover:opacity-100 hover:text-[#3cbfb3] transition-all"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <span
+                  className="inline-flex items-center leading-none whitespace-nowrap shrink-0 font-bold text-current opacity-90"
+                  aria-current={isLast ? 'page' : undefined}
+                >
+                  {item.label}
+                </span>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+    </nav>
   )
 }
