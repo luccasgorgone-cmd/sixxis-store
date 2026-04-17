@@ -33,6 +33,8 @@ interface LunaConfig {
   followupMensagem2:    string
   encerramentoAuto:     boolean
   mensagemEncerramento: string
+  avatarUrl?:           string
+  avatarTipo?:          string
 }
 
 interface CTAData {
@@ -56,6 +58,28 @@ const DEFAULT_CONFIG: LunaConfig = {
   followupMensagem2:    'Se preferir falar com nossa equipe diretamente, estamos disponíveis pelo WhatsApp: (18) 99747-4701. Foi um prazer atender você!',
   encerramentoAuto:     true,
   mensagemEncerramento: '👋 Encerrando o atendimento por inatividade. Se precisar de ajuda, é só abrir o chat novamente.',
+  avatarUrl:            '',
+  avatarTipo:           'svg',
+}
+
+// Renderiza o avatar da Luna — imagem personalizada quando configurada, senão SVG padrão
+function LunaAvatarSmart({
+  config, size, animated = false, mini = false,
+}: { config: LunaConfig; size: number; animated?: boolean; mini?: boolean }) {
+  if (config.avatarTipo === 'imagem' && config.avatarUrl) {
+    return (
+      <div
+        className="rounded-full overflow-hidden shrink-0"
+        style={{ width: size, height: size }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={config.avatarUrl} alt={config.nome} className="w-full h-full object-cover" />
+      </div>
+    )
+  }
+  return mini
+    ? <LunaAvatarMini size={size} animated={animated} />
+    : <LunaAvatar size={size} animated={animated} />
 }
 
 // ── CTA parser ────────────────────────────────────────────────────────────────
@@ -431,7 +455,7 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
             onClick={() => setMinimizado(m => !m)}
           >
             <div className="relative shrink-0">
-              <LunaAvatar size={44} animated={false} />
+              <LunaAvatarSmart config={config} size={44} />
               <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#0f2e2b] ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-green-400 animate-pulse'}`} />
             </div>
             <div className="flex-1 min-w-0">
@@ -475,7 +499,7 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
                           </div>
                         ) : (
                           <div className="shrink-0 mt-0.5">
-                            <LunaAvatarMini size={28} />
+                            <LunaAvatarSmart config={config} size={28} mini />
                           </div>
                         )
                       )}
@@ -522,7 +546,7 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
                 {enviando && (
                   <div className="flex gap-2.5 items-end">
                     <div className="shrink-0">
-                      <LunaAvatarMini size={28} />
+                      <LunaAvatarSmart config={config} size={28} mini />
                     </div>
                     <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
                       <div className="flex gap-1.5 items-center">
@@ -631,7 +655,7 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
           >
             {/* Header com avatar mini + status */}
             <div className="flex items-center gap-2.5 mb-2 pb-2 border-b border-gray-100">
-              <LunaAvatarMini size={28} />
+              <LunaAvatarSmart config={config} size={28} mini />
               <div>
                 <p className="text-xs font-black text-gray-900 leading-none">{config.nome}</p>
                 <p className="text-[9px] text-emerald-500 font-semibold flex items-center gap-1 mt-0.5">
@@ -678,7 +702,7 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
             }}
             aria-label={`Abrir chat com ${config.nome}`}
           >
-            <LunaAvatar size={64} animated={false} />
+            <LunaAvatarSmart config={config} size={64} />
             <span className={`absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`}>
               {!atendimentoEncerrado && (
                 <span className="w-2 h-2 rounded-full bg-white animate-ping opacity-75" />

@@ -8,7 +8,7 @@ import {
   LogOut, Image as ImageIcon, Tag, Star, Gift,
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, Handshake, ShieldOff,
-  Target, MessageSquare, Clock,
+  Target, MessageSquare, Clock, Bot,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -54,7 +54,7 @@ const NAV_GROUPS = [
   {
     label: 'Agente Luna',
     items: [
-      { href: '/admin/luna-relatorio', label: 'Relatório Luna', icon: MessageSquare, exact: false },
+      { href: '/admin/luna', label: 'Agente Luna', icon: Bot, exact: false },
     ],
   },
   {
