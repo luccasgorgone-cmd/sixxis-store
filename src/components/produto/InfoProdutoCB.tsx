@@ -2,11 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart } from 'lucide-react'
+import {
+  ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart,
+  ShieldCheck, Truck, RefreshCw, CreditCard, BadgeCheck, Headphones,
+} from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos } from '@/hooks/useListas'
+
+const SELOS_CONFIANCA = [
+  { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
+  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Grátis acima de R$ 500' },
+  { icon: RefreshCw,   titulo: 'Troca em 7 dias',          sub: 'Sem burocracia' },
+  { icon: CreditCard,  titulo: '6x sem juros',             sub: 'No cartão de crédito' },
+  { icon: BadgeCheck,  titulo: 'Produto 100% original',    sub: 'Importadora oficial Sixxis' },
+  { icon: Headphones,  titulo: 'Suporte especializado',    sub: 'Seg–Sex 8h às 18h' },
+] as const
 
 interface Variacao {
   id: string
@@ -489,129 +501,26 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         </button>
       </div>
 
-      {/* Selo envio + segurança */}
-      <div className="flex items-center gap-3 mb-4 pt-3 border-t border-gray-100 flex-wrap">
-        <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="1" y="3" width="15" height="13" rx="1"/>
-            <path d="M16 8h4l3 5v4h-7V8z"/>
-            <circle cx="5.5" cy="18.5" r="2.5"/>
-            <circle cx="18.5" cy="18.5" r="2.5"/>
-          </svg>
-          Pedidos até 14h enviados hoje
-        </div>
-        <div className="w-px h-4 bg-gray-200"/>
-        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          Compra 100% segura
-        </div>
-        <div className="w-px h-4 bg-gray-200"/>
-        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-            <polyline points="17 6 23 6 23 12"/>
-          </svg>
-          Devolução em 7 dias
-        </div>
-      </div>
-
-      {/* Badges de segurança */}
-      <div className="mt-4 mb-5">
-        {/* Grid 2x2 */}
-        <div className="grid grid-cols-2 gap-2 mb-2">
-
-          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
-            <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-green-100 transition">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <polyline points="9 12 11 14 15 10"/>
-              </svg>
+      {/* 6 Selos de confiança — grid 2x3 */}
+      <div className="grid grid-cols-2 gap-2 mt-4 mb-5 border-t border-gray-100 pt-4">
+        {SELOS_CONFIANCA.map(({ icon: Icon, titulo, sub }) => (
+          <div
+            key={titulo}
+            className="flex items-start gap-2.5 p-2.5 rounded-xl border border-gray-100 bg-white hover:border-[#3cbfb3]/30 hover:bg-[#3cbfb3]/5 transition-all duration-200"
+          >
+            <div className="shrink-0 w-8 h-8 rounded-lg bg-[#3cbfb3]/10 flex items-center justify-center">
+              <Icon size={15} className="text-[#3cbfb3]" />
             </div>
-            <div>
-              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Compra Segura</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Dados protegidos SSL</p>
+            <div className="min-w-0">
+              <p className="text-[12px] font-semibold text-gray-800 leading-tight">
+                {titulo}
+              </p>
+              <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
+                {sub}
+              </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
-            <div className="w-8 h-8 bg-[#e8f8f7] rounded-lg flex items-center justify-center shrink-0 group-hover:bg-[#d0f4f1] transition">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <circle cx="12" cy="12" r="3" fill="#0f9488" stroke="none"/>
-              </svg>
-            </div>
-            <div>
-              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Garantia 12 Meses</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Suporte técnico Sixxis</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
-            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="1" y="3" width="15" height="13" rx="1"/>
-                <path d="M16 8h4l3 3v5h-7V8z"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-              </svg>
-            </div>
-            <div>
-              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Entrega Rápida</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Para todo o Brasil</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-[#3cbfb3]/40 transition group">
-            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-purple-100 transition">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="1 4 1 10 7 10"/>
-                <path d="M3.51 15a9 9 0 1 0 .49-4.46"/>
-              </svg>
-            </div>
-            <div>
-              <p className="text-[11px] font-extrabold text-gray-800 leading-none">Troca Fácil</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-none">Até 7 dias corridos</p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Selos de confiança */}
-        <div className="flex items-center justify-center gap-3 bg-gray-50/80 border border-gray-100 rounded-xl py-2.5 px-3 flex-wrap">
-          <div className="flex items-center gap-1.5">
-            {/* Mercado Pago SVG logo */}
-            <svg width="24" height="16" viewBox="0 0 200 130" fill="none">
-              <rect width="200" height="130" rx="12" fill="#009ee3"/>
-              <text x="100" y="87" textAnchor="middle" fill="white" fontSize="65" fontWeight="bold" fontFamily="Arial, sans-serif">MP</text>
-            </svg>
-            <span className="text-[10px] text-gray-600 font-semibold">Mercado Pago</span>
-          </div>
-          <div className="w-px h-4 bg-gray-200" />
-          <div className="flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            <span className="text-[10px] text-gray-600 font-semibold">Loja Verificada</span>
-          </div>
-          <div className="w-px h-4 bg-gray-200" />
-          <div className="flex items-center gap-1.5">
-            <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            <span className="text-[10px] text-gray-600 font-semibold">SSL Ativo</span>
-          </div>
-          <div className="w-px h-4 bg-gray-200" />
-          <div className="flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="8" r="6"/>
-              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
-            </svg>
-            <span className="text-[10px] text-gray-600 font-semibold">100% Original</span>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Frete */}

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { Zap, TrendingDown, Clock, BadgePercent } from 'lucide-react'
+import { TrendingDown, AirVent, Wind, Zap } from 'lucide-react'
 
 // ── Dados de AC por modelo (consumo real em watts)
 const AC_POR_MODELO: Record<string, { btu: number; consumoW: number; descricaoAC: string }> = {
@@ -14,8 +14,10 @@ const AC_POR_MODELO: Record<string, { btu: number; consumoW: number; descricaoAC
   'sx200-prime': { btu: 30000, consumoW: 2800, descricaoAC: '30.000 BTU Inverter' },
 }
 
-const TARIFA = 0.85
-const HORAS_MES = 240 // 8h/dia × 30 dias
+// ── REGRAS DE ECONOMIA — NUNCA ALTERAR
+const TARIFA = 0.85     // R$/kWh
+const HORAS_DIA = 8
+const DIAS_MES = 30
 
 function resolverChave(slug: string): string {
   const s = slug.toLowerCase()
@@ -31,11 +33,11 @@ function resolverChave(slug: string): string {
 }
 
 const fmt = (v: number) =>
-  'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 interface Props {
   slug: string
-  consumoW: number
+  consumoW: number   // Potência em Watts (do campo Potência, NUNCA da Vazão de Ar)
   preco: number
 }
 
@@ -43,7 +45,6 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
   const [visivel, setVisivel] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  // Animar entrada via IntersectionObserver
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) { setVisivel(true); obs.disconnect() }
@@ -56,178 +57,112 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
   const ac = AC_POR_MODELO[chave]
   if (!ac || !consumoW) return null
 
-  const custoAC   = (ac.consumoW   / 1000) * HORAS_MES * TARIFA
-  const custoClim = (consumoW      / 1000) * HORAS_MES * TARIFA
-  const econMes   = custoAC - custoClim
-  const econAno   = econMes * 12
-  const pctEcon   = Math.round((econMes / custoAC) * 100)
-  const mesesPay  = econMes > 0 ? Math.ceil(preco / econMes) : 0
+  const custoAC      = (ac.consumoW / 1000) * HORAS_DIA * DIAS_MES * TARIFA
+  const custoProduto = (consumoW    / 1000) * HORAS_DIA * DIAS_MES * TARIFA
+  const economiaMes  = custoAC - custoProduto
+  const economiaAno  = economiaMes * 12
+  const percentual   = Math.round((economiaMes / custoAC) * 100)
+  const retornoAnos  = economiaAno > 0 ? (preco / economiaAno).toFixed(1) : '—'
 
   return (
     <div
       ref={ref}
-      className="my-8 transition-all duration-700"
+      className="rounded-2xl border border-gray-100 bg-white overflow-hidden mt-8 transition-all duration-700"
       style={{
         opacity: visivel ? 1 : 0,
-        transform: visivel ? 'translateY(0)' : 'translateY(24px)'
+        transform: visivel ? 'translateY(0)' : 'translateY(24px)',
       }}
     >
-      {/* HEADER */}
-      <div className="flex items-center gap-3 mb-5">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: '#e8f8f7' }}
-        >
-          <Zap size={17} style={{ color: '#3cbfb3' }} />
-        </div>
-        <div>
-          <h3 className="text-base font-black text-gray-900 leading-tight">
+      {/* Topo escuro com título */}
+      <div className="bg-gradient-to-r from-[#0f2e2b] to-[#1a4f4a] px-5 py-4">
+        <div className="flex items-center gap-2">
+          <TrendingDown size={18} className="text-[#3cbfb3]" />
+          <h3 className="text-white font-bold text-base">
             Quanto você economiza por mês?
           </h3>
-          <p className="text-xs text-gray-400 mt-0.5">
-            vs Split {ac.descricaoAC} · 8h/dia · tarifa R$0,85/kWh
-          </p>
         </div>
+        <p className="text-white/60 text-xs mt-1">
+          vs Split {ac.descricaoAC} · {HORAS_DIA}h/dia · tarifa R$ {TARIFA.toFixed(2)}/kWh
+        </p>
       </div>
 
-      {/* GRID PRINCIPAL — 3 colunas: AC | VS | Sixxis */}
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center mb-4">
-
-        {/* AC */}
-        <div className="rounded-2xl border border-red-100 p-4 text-center"
-          style={{ backgroundColor: '#fff5f5' }}>
-          <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-2">
-            Ar-condicionado
-          </p>
-          <p className="text-[11px] text-red-300 mb-3 leading-tight">{ac.descricaoAC}</p>
-          <p className="text-2xl font-black text-red-500 leading-none">
-            {fmt(custoAC)}
-          </p>
-          <p className="text-[10px] text-red-300 mt-1">por mês</p>
-          <p className="text-[9px] text-red-200 mt-0.5">
-            {(ac.consumoW / 1000).toFixed(2).replace('.', ',')} kW/h
-          </p>
-        </div>
-
-        {/* VS */}
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs font-black text-gray-300 bg-gray-100 rounded-full px-2 py-1">
-            VS
-          </span>
-        </div>
-
-        {/* Climatizador */}
-        <div
-          className="rounded-2xl border p-4 text-center"
-          style={{ backgroundColor: '#f0fffe', borderColor: '#b2e8e4' }}
-        >
-          <p className="text-[10px] font-black uppercase tracking-widest mb-2"
-            style={{ color: '#0f6b64' }}>
-            Climatizador Sixxis
-          </p>
-          <p className="text-[11px] mb-3 leading-tight" style={{ color: '#3cbfb3' }}>
-            Este produto
-          </p>
-          <p className="text-2xl font-black leading-none" style={{ color: '#0f2e2b' }}>
-            {fmt(custoClim)}
-          </p>
-          <p className="text-[10px] mt-1" style={{ color: '#3cbfb3' }}>por mês</p>
-          <p className="text-[9px] mt-0.5" style={{ color: '#7dd3cc' }}>
-            {(consumoW / 1000).toFixed(3).replace(/\.?0+$/, '').replace('.', ',')} kW/h
-          </p>
-        </div>
-      </div>
-
-      {/* BARRA DE ECONOMIA */}
-      <div
-        className="rounded-2xl border p-4 mb-4"
-        style={{ backgroundColor: '#f0fff8', borderColor: '#a7f3d0' }}
-      >
-        {/* Valor de economia */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">
-              Você economiza
-            </p>
-            <p className="text-2xl font-black text-emerald-700 leading-none">
-              {fmt(econMes)}
-              <span className="text-sm font-semibold text-emerald-500 ml-1">/mês</span>
-            </p>
+      {/* Comparação lado a lado */}
+      <div className="grid grid-cols-2 divide-x divide-gray-100">
+        {/* Lado AC */}
+        <div className="p-4 text-center bg-gray-50">
+          <div className="flex items-center justify-center gap-1.5 mb-2">
+            <AirVent size={14} className="text-gray-400" />
+            <span className="text-xs font-medium text-gray-500">Ar-condicionado</span>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] text-emerald-500 mb-0.5">Por ano</p>
-            <p className="text-lg font-black text-emerald-700">{fmt(econAno)}</p>
+          <p className="text-xs text-gray-400 mb-1">Split {ac.descricaoAC}</p>
+          <p className="text-2xl font-bold text-gray-700">
+            R$ {fmt(custoAC)}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">por mês</p>
+          <div className="mt-2 inline-flex items-center gap-1 bg-red-50 text-red-500 text-[11px] font-medium px-2 py-0.5 rounded-full">
+            <Zap size={10} />
+            {ac.consumoW}W de consumo
           </div>
         </div>
 
-        {/* Barra visual */}
-        <div className="mb-2">
-          <div className="h-2.5 bg-white rounded-full overflow-hidden border border-emerald-100">
-            <div
-              className="h-full rounded-full transition-all duration-1000"
-              style={{
-                width: visivel ? `${100 - pctEcon}%` : '0%',
-                background: 'linear-gradient(90deg, #10b981, #3cbfb3)',
-                transitionDelay: '300ms'
-              }}
-            />
+        {/* Lado Sixxis */}
+        <div className="p-4 text-center bg-white">
+          <div className="flex items-center justify-center gap-1.5 mb-2">
+            <Wind size={14} className="text-[#3cbfb3]" />
+            <span className="text-xs font-medium text-[#3cbfb3]">Climatizador Sixxis</span>
           </div>
-          <div className="flex justify-between text-[9px] text-emerald-400 mt-1">
-            <span>Climatizador: {fmt(custoClim)}</span>
-            <span>{pctEcon}% mais barato</span>
+          <p className="text-xs text-gray-400 mb-1">Este produto</p>
+          <p className="text-2xl font-bold text-[#3cbfb3]">
+            R$ {fmt(custoProduto)}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">por mês</p>
+          <div className="mt-2 inline-flex items-center gap-1 bg-[#3cbfb3]/10 text-[#3cbfb3] text-[11px] font-medium px-2 py-0.5 rounded-full">
+            <Zap size={10} />
+            {consumoW}W de consumo
           </div>
         </div>
       </div>
 
-      {/* MÉTRICAS EM CARDS HORIZONTAIS */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        {[
-          {
-            icon: TrendingDown,
-            label: 'Redução na conta',
-            valor: `${pctEcon}%`,
-            cor: '#10b981',
-            bg: '#f0fff8'
-          },
-          {
-            icon: BadgePercent,
-            label: 'Economia/ano',
-            valor: fmt(econAno).replace('R$ ', 'R$'),
-            cor: '#3cbfb3',
-            bg: '#f0fffe'
-          },
-          {
-            icon: Clock,
-            label: 'Retorno do investimento',
-            valor: mesesPay < 12
-              ? `${mesesPay} meses`
-              : `${(mesesPay / 12).toFixed(1)} anos`,
-            cor: '#0f2e2b',
-            bg: '#f8fafc'
-          },
-        ].map((m, i) => (
-          <div
-            key={i}
-            className="rounded-xl border border-gray-100 p-3 text-center"
-            style={{ backgroundColor: m.bg }}
-          >
-            <m.icon size={14} className="mx-auto mb-1.5" style={{ color: m.cor }} />
-            <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wide leading-none mb-1">
-              {m.label}
-            </p>
-            <p className="text-sm font-black leading-none" style={{ color: m.cor }}>
-              {m.valor}
-            </p>
-          </div>
-        ))}
+      {/* Banner de economia */}
+      <div className="bg-[#3cbfb3] px-5 py-3 flex items-center justify-between">
+        <div>
+          <p className="text-white/80 text-xs">Você economiza</p>
+          <p className="text-white text-xl font-bold">
+            R$ {fmt(economiaMes)}/mês
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-white/80 text-xs">Por ano</p>
+          <p className="text-white text-xl font-bold">
+            R$ {fmt(economiaAno)}
+          </p>
+        </div>
       </div>
 
-      {/* NOTA DE TRANSPARÊNCIA */}
-      <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-2.5">
-        <p className="text-[9px] text-gray-400 text-center leading-relaxed">
-          * Consumo do AC calculado para Split Inverter {ac.descricaoAC} ({ac.consumoW}W).
-          Cálculo baseado em 8h/dia × 30 dias × R$0,85/kWh (tarifa média ANEEL 2024).
-          Consumo real pode variar.
+      {/* Métricas em 3 colunas */}
+      <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
+        <div className="p-3 text-center">
+          <p className="text-[11px] text-gray-400">Redução na conta</p>
+          <p className="text-lg font-bold text-[#3cbfb3]">{percentual}%</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-[11px] text-gray-400">Economia/ano</p>
+          <p className="text-lg font-bold text-gray-700">
+            R${(economiaAno / 1000).toFixed(1)}k
+          </p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-[11px] text-gray-400">Produto se paga em</p>
+          <p className="text-lg font-bold text-gray-700">{retornoAnos} anos</p>
+        </div>
+      </div>
+
+      {/* Rodapé de disclaimer */}
+      <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100">
+        <p className="text-[10px] text-gray-400 leading-relaxed">
+          * Consumo AC calculado para Split Inverter {ac.descricaoAC} ({ac.consumoW}W).
+          Baseado em {HORAS_DIA}h/dia × {DIAS_MES} dias × R$ {TARIFA.toFixed(2)}/kWh (tarifa ANEEL 2024).
+          Consumo real pode variar conforme uso.
         </p>
       </div>
     </div>
