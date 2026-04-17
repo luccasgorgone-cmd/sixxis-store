@@ -237,6 +237,7 @@ interface LunaWidgetProps {
 
 export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
   const [config,      setConfig]      = useState<LunaConfig>(DEFAULT_CONFIG)
+  const [loaded,      setLoaded]      = useState(false)
   const [aberto,      setAberto]      = useState(false)
   const [minimizado,  setMinimizado]  = useState(false)
   const [mensagens,   setMensagens]   = useState<Mensagem[]>([])
@@ -257,10 +258,16 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
   // ── Carregar config do backend ────────────────────────────────────────────
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ['luna-config', 'luna-avatar', 'lunaConfig', 'lunaAvatar'].forEach(k => {
+        try { localStorage.removeItem(k) } catch {}
+      })
+    }
     fetch('/api/agente/config')
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setConfig(data) })
       .catch(() => {})
+      .finally(() => setLoaded(true))
   }, [])
 
   // ── Bolha de boas-vindas após 4 s ─────────────────────────────────────────
@@ -438,6 +445,8 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
   const corPrimaria   = config.corPrimaria   || '#3cbfb3'
   const corSecundaria = config.corSecundaria || '#0f2e2b'
   const gradHeader    = `linear-gradient(135deg, ${corSecundaria}, ${corPrimaria})`
+
+  if (!loaded) return null
 
   return (
     <div className="flex flex-col items-end gap-3">
@@ -693,6 +702,8 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
               ×
             </button>
           )}
+          {/* Bolinha de status — fora do button para não ser cortada pelo overflow-hidden */}
+          <span className={`absolute -top-1 -left-1 z-10 w-3 h-3 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`} />
           <button
             onClick={() => { setAberto(true); setMostrarBolha(false); setNaoLidas(0) }}
             className="relative w-16 h-16 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none overflow-hidden"
@@ -703,9 +714,8 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
             aria-label={`Abrir chat com ${config.nome}`}
           >
             <LunaAvatarSmart config={config} size={64} />
-            <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`} />
             {naoLidas > 0 && (
-              <span className="absolute -top-1 -left-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
+              <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
                 {naoLidas > 9 ? '9+' : naoLidas}
               </span>
             )}
