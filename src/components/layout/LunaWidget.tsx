@@ -703,11 +703,7 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
             aria-label={`Abrir chat com ${config.nome}`}
           >
             <LunaAvatarSmart config={config} size={64} />
-            <span className={`absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`}>
-              {!atendimentoEncerrado && (
-                <span className="w-2 h-2 rounded-full bg-white animate-ping opacity-75" />
-              )}
-            </span>
+            <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`} />
             {naoLidas > 0 && (
               <span className="absolute -top-1 -left-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
                 {naoLidas > 9 ? '9+' : naoLidas}
