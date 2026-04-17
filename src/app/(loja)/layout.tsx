@@ -3,6 +3,7 @@ import Footer from '@/components/layout/Footer'
 import FloatingButtons from '@/components/layout/FloatingButtons'
 import { prisma } from '@/lib/prisma'
 import CookieBanner from '@/components/cookies/CookieBanner'
+import ComparadorBar from '@/components/layout/ComparadorBar'
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   let logoUrl = '/logo-sixxis.png'
@@ -66,6 +67,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         <div className="flex-1">{children}</div>
         <Footer />
         <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />
+        <ComparadorBar />
         <CookieBanner />
       </div>
     </div>

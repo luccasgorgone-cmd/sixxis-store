@@ -3,9 +3,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Check, Package } from 'lucide-react'
+import { ShoppingCart, Check, Package, Heart, GitCompare } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { useFavoritos, useComparador } from '@/hooks/useListas'
 import { useState } from 'react'
 import type { Produto } from '@/types'
 
@@ -21,6 +22,12 @@ function fmt(v: number) {
 export default function CardProduto({ produto, priority = false }: Props) {
   const router = useRouter()
   const { adicionarItem, setDrawerAberto } = useCarrinho()
+  const favIds = useFavoritos((s) => s.ids)
+  const toggleFav = useFavoritos((s) => s.toggle)
+  const cmpIds = useComparador((s) => s.ids)
+  const toggleCmp = useComparador((s) => s.toggle)
+  const isFav = favIds.includes(produto.id)
+  const isCmp = cmpIds.includes(produto.id)
   const [adicionado, setAdicionado] = useState(false)
   const [imgError, setImgError] = useState(false)
 
@@ -105,6 +112,19 @@ export default function CardProduto({ produto, priority = false }: Props) {
             </div>
           )}
 
+          {/* Favoritar — canto superior direito */}
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFav(produto.id) }}
+            className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white shadow-sm transition-all"
+            title={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+            aria-label={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          >
+            <Heart
+              size={15}
+              className={isFav ? 'text-red-500 fill-red-500' : 'text-gray-400'}
+            />
+          </button>
+
           {imagemCapa ? (
             <Image
               src={imagemCapa}
@@ -115,6 +135,8 @@ export default function CardProduto({ produto, priority = false }: Props) {
               unoptimized
               priority={priority}
               loading={priority ? 'eager' : 'lazy'}
+              placeholder="blur"
+              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
               onError={() => setImgError(true)}
             />
           ) : (
@@ -205,6 +227,17 @@ export default function CardProduto({ produto, priority = false }: Props) {
                 {esgotado ? 'Esgotado' : adicionado ? (
                   <><Check size={14} /> Adicionado!</>
                 ) : 'Adicionar ao Carrinho'}
+              </button>
+
+              {/* Comparar */}
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCmp(produto.id) }}
+                className={`text-xs font-medium flex items-center justify-center gap-1 w-full transition-colors ${
+                  isCmp ? 'text-[#3cbfb3]' : 'text-gray-500 hover:text-[#3cbfb3]'
+                }`}
+              >
+                <GitCompare size={12} />
+                {isCmp ? 'Remover da comparação' : 'Comparar'}
               </button>
             </div>
           </div>

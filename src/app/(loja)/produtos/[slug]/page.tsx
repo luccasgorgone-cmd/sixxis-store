@@ -12,6 +12,8 @@ import { EconomiaBloco } from '@/components/produto/EconomiaBloco'
 import { PorQueComprarSixxis } from '@/components/produto/PorQueComprarSixxis'
 import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
+import VistosTracker from '@/components/produto/VistosTracker'
+import VistosRecentemente from '@/components/produto/VistosRecentemente'
 
 export const dynamic = 'force-dynamic'
 
@@ -235,6 +237,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaProduct) }}
       />
       <RevealInit />
+      <VistosTracker produtoId={produto.id} />
       <Breadcrumb items={[
         { label: 'Início', href: '/' },
         { label: categoriaLabel, href: `/produtos?categoria=${produto.categoria}` },
@@ -261,6 +264,9 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           slugAtual={produto.slug}
           categoriaAtual={produto.categoria ?? ''}
         />
+
+        {/* Vistos recentemente */}
+        <VistosRecentemente excluirId={produto.id} />
 
         {/* Descrição */}
         <DescricaoRica descricao={produto.descricao} />
