@@ -311,6 +311,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
           isHidden ? '-translate-y-full' : 'translate-y-0'
         } ${isCompact ? 'shadow-xl shadow-black/30' : 'shadow-md'}`}
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
       {/* Linha cinza ACIMA do announcement */}
       <div className="w-full h-px bg-gray-200" />

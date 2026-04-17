@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { X, Wind, Fan, Bike, HelpCircle, Info, Phone, User, UserPlus, Tag, Mail, Clock } from 'lucide-react'
+import { X, Wind, Fan, Bike, HelpCircle, Info, Phone, User, UserPlus, Zap, Mail, Clock } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 
 interface Props {
@@ -15,7 +15,7 @@ const links = [
   { href: '/produtos?categoria=climatizadores', label: 'Climatizadores', icon: Wind,       destaque: false },
   { href: '/produtos?categoria=aspiradores',    label: 'Aspiradores',    icon: Fan,        destaque: false },
   { href: '/produtos?categoria=spinning',       label: 'Spinning',       icon: Bike,       destaque: false },
-{ href: '/ofertas',                           label: 'Ofertas',         icon: Tag,        destaque: true  },
+  { href: '/ofertas',                           label: 'Ofertas Relâmpago', icon: Zap,      destaque: true  },
   { href: '/sobre',                             label: 'Sobre',           icon: Info,       destaque: false },
   { href: '/contato',                           label: 'Contato',         icon: Phone,      destaque: false },
   { href: '/faq',                               label: 'FAQ',             icon: HelpCircle, destaque: false },
@@ -49,7 +49,7 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
         className={`fixed top-0 left-0 z-50 h-full flex flex-col shadow-2xl transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ width: '85%', maxWidth: '320px', backgroundColor: '#1a4f4a' }}
+        style={{ width: '85%', maxWidth: '320px', backgroundColor: '#0f2e2b' }}
       >
         {/* Header do drawer */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
@@ -81,11 +81,11 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
               onClick={onClose}
               className={`flex items-center gap-4 py-4 px-6 text-base font-semibold transition-colors ${
                 destaque
-                  ? 'text-yellow-300'
+                  ? 'text-[#3cbfb3]'
                   : 'text-white/90 hover:text-white hover:bg-white/10'
               }`}
             >
-              <Icon size={20} className={destaque ? 'text-yellow-300' : 'text-white/60'} />
+              <Icon size={20} className={destaque ? 'text-[#3cbfb3]' : 'text-white/60'} />
               {label}
               {destaque && (
                 <span className="ml-auto text-[10px] bg-red-500 text-white font-bold px-1.5 py-0.5 rounded-full">

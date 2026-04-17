@@ -8,7 +8,7 @@ function TimerBloco({ valor, label }: { valor: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
       <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center relative overflow-hidden"
+        className="w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center relative overflow-hidden"
         style={{
           background: 'linear-gradient(145deg, #1a3d38, #0f2e2b)',
           border: '1px solid rgba(60,191,179,0.2)',
@@ -17,7 +17,7 @@ function TimerBloco({ valor, label }: { valor: number; label: string }) {
       >
         <div className="absolute inset-x-0 top-1/2 h-px bg-black/30 z-10" />
         <div className="absolute top-0 inset-x-0 h-1/2 bg-white/5 rounded-t-2xl" />
-        <span className="text-2xl font-black text-white relative z-20 tracking-widest tabular-nums leading-none">
+        <span className="text-xl md:text-2xl font-black text-white relative z-20 tracking-widest tabular-nums leading-none">
           {str}
         </span>
       </div>
@@ -45,7 +45,7 @@ export default function OfertasHero({ targetDate }: { targetDate: string }) {
 
   return (
     <section
-      className="relative rounded-2xl overflow-hidden mb-10 text-center py-14 px-6"
+      className="relative rounded-2xl overflow-hidden mb-10 text-center py-10 md:py-14 px-4 md:px-6"
       style={{ background: 'linear-gradient(135deg, #0b1f1d 0%, #0f2e2b 40%, #111 100%)' }}
     >
       {/* Decorações de fundo */}
@@ -75,12 +75,14 @@ export default function OfertasHero({ targetDate }: { targetDate: string }) {
         </div>
 
         {/* Título */}
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <Zap size={28} className="text-[#3cbfb3]" strokeWidth={2.5} />
-          <h1 className="text-4xl font-black text-white tracking-tight">Oferta Relâmpago</h1>
-          <Zap size={28} className="text-[#3cbfb3]" strokeWidth={2.5} />
+        <div className="flex items-center justify-center gap-2 md:gap-3 mb-2">
+          <Zap size={22} className="text-[#3cbfb3] md:hidden" strokeWidth={2.5} />
+          <Zap size={28} className="text-[#3cbfb3] hidden md:block" strokeWidth={2.5} />
+          <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">Oferta Relâmpago</h1>
+          <Zap size={22} className="text-[#3cbfb3] md:hidden" strokeWidth={2.5} />
+          <Zap size={28} className="text-[#3cbfb3] hidden md:block" strokeWidth={2.5} />
         </div>
-        <p className="text-white/50 mb-6">Preços imperdíveis por tempo limitado</p>
+        <p className="text-sm md:text-base text-white/50 mb-6">Preços imperdíveis por tempo limitado</p>
 
         {/* Timer */}
         <div>
