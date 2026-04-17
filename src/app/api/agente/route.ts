@@ -32,6 +32,22 @@ export async function POST(req: NextRequest) {
       || req.headers.get('x-real-ip')
       || null
 
+    // Rate limit: 30 req/min por IP
+    const rlKey = `rl_${ip || 'anon'}`
+    const now = Date.now()
+    const g = global as unknown as { _rl?: Map<string, { n: number; t: number }> }
+    if (!g._rl) g._rl = new Map()
+    const entry = g._rl.get(rlKey) || { n: 0, t: now + 60000 }
+    if (now > entry.t) { entry.n = 0; entry.t = now + 60000 }
+    entry.n++
+    g._rl.set(rlKey, entry)
+    if (entry.n > 30) {
+      return Response.json(
+        { erro: 'Muitas requisições. Tente novamente em 1 minuto.' },
+        { status: 429 }
+      )
+    }
+
     if (!mensagens || !Array.isArray(mensagens)) {
       return Response.json({ erro: 'Mensagens inválidas' }, { status: 400 })
     }

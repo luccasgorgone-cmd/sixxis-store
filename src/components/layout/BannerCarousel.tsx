@@ -27,7 +27,24 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
     return () => clearInterval(t)
   }, [current, paused, banners, next])
 
-  if (!banners.length) return null
+  if (!banners.length) {
+    return (
+      <section className="w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div
+            className="w-full rounded-2xl animate-pulse"
+            style={{
+              background:
+                'linear-gradient(135deg, #0b2220 0%, #0f2e2b 50%, #1a4f4a 100%)',
+              aspectRatio: '1920/560',
+              maxHeight: '560px',
+              minHeight: '220px',
+            }}
+          />
+        </div>
+      </section>
+    )
+  }
 
   const banner = banners[current]
 

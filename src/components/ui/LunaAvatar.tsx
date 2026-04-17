@@ -6,11 +6,8 @@ interface LunaAvatarProps {
   animated?: boolean
 }
 
-// Avatar EXCLUSIVO da Luna — 3D clay render. Não está em AVATARES_PREDEFINIDOS.
-// Mulher com cabelo preto bob, headset preto profissional com LED tiffany,
-// polo preta com logo Sixxis, sorriso suave e olhos expressivos com profundidade.
 export function LunaAvatar({ size = 56, className = '', animated = true }: LunaAvatarProps) {
-  const id = `luna_${Math.random().toString(36).slice(2, 7)}`
+  const u = `luna${size}`
   return (
     <svg
       viewBox="0 0 200 200"
@@ -22,192 +19,192 @@ export function LunaAvatar({ size = 56, className = '', animated = true }: LunaA
       style={{ display: 'block', flexShrink: 0 }}
     >
       <defs>
-        <radialGradient id={`${id}_face`} cx="42%" cy="32%" r="68%">
-          <stop offset="0%"   stopColor="#FFE8D0" />
-          <stop offset="45%"  stopColor="#F5C5A0" />
-          <stop offset="80%"  stopColor="#E8A87C" />
-          <stop offset="100%" stopColor="#D4915E" />
+        <radialGradient id={`${u}bg`} cx="50%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#1a5a52"/>
+          <stop offset="100%" stopColor="#0a2820"/>
         </radialGradient>
-        <radialGradient id={`${id}_hair`} cx="40%" cy="20%" r="70%">
-          <stop offset="0%"   stopColor="#2a2a2a" />
-          <stop offset="60%"  stopColor="#111111" />
-          <stop offset="100%" stopColor="#050505" />
+        <radialGradient id={`${u}face`} cx="40%" cy="28%" r="70%">
+          <stop offset="0%" stopColor="#FFE4C8"/>
+          <stop offset="45%" stopColor="#F5C09A"/>
+          <stop offset="85%" stopColor="#E8A07A"/>
+          <stop offset="100%" stopColor="#D4885A"/>
         </radialGradient>
-        <linearGradient id={`${id}_hairshine`} x1="30%" y1="0%" x2="70%" y2="100%">
-          <stop offset="0%"   stopColor="#555" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#111" stopOpacity="0" />
+        <radialGradient id={`${u}hair`} cx="38%" cy="18%" r="70%">
+          <stop offset="0%" stopColor="#2e2e2e"/>
+          <stop offset="60%" stopColor="#111"/>
+          <stop offset="100%" stopColor="#050505"/>
+        </radialGradient>
+        <linearGradient id={`${u}body`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#1a1a1a"/>
+          <stop offset="100%" stopColor="#0a0a0a"/>
         </linearGradient>
-        <linearGradient id={`${id}_body`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%"   stopColor="#1a1a1a" />
-          <stop offset="100%" stopColor="#0a0a0a" />
-        </linearGradient>
-        <radialGradient id={`${id}_bg`} cx="50%" cy="40%" r="65%">
-          <stop offset="0%"   stopColor="#1a5a52" />
-          <stop offset="100%" stopColor="#0a2820" />
+        <radialGradient id={`${u}iris`} cx="38%" cy="32%" r="68%">
+          <stop offset="0%" stopColor="#6b4020"/>
+          <stop offset="100%" stopColor="#1a0800"/>
         </radialGradient>
-        <linearGradient id={`${id}_neck`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor="#E0A075" />
-          <stop offset="40%"  stopColor="#F5C5A0" />
-          <stop offset="100%" stopColor="#DFA070" />
-        </linearGradient>
-        <linearGradient id={`${id}_hs`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%"   stopColor="#3a3a3a" />
-          <stop offset="100%" stopColor="#111" />
-        </linearGradient>
-        <radialGradient id={`${id}_iris`} cx="40%" cy="35%" r="70%">
-          <stop offset="0%"   stopColor="#7a5030" />
-          <stop offset="100%" stopColor="#2a1008" />
+        <radialGradient id={`${u}blush`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FF9070" stopOpacity="0.22"/>
+          <stop offset="100%" stopColor="#FF5050" stopOpacity="0"/>
         </radialGradient>
-        <radialGradient id={`${id}_blush`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="#FF9070" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#FF6050" stopOpacity="0" />
-        </radialGradient>
-        <filter id={`${id}_shadow`} x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#000" floodOpacity="0.35" />
+        <filter id={`${u}sh`}>
+          <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#000" floodOpacity="0.30"/>
         </filter>
-        <filter id={`${id}_softshadow`} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.2" />
-        </filter>
-        <clipPath id={`${id}_circle`}>
-          <circle cx="100" cy="100" r="100" />
+        <clipPath id={`${u}clip`}>
+          <circle cx="100" cy="100" r="100"/>
         </clipPath>
       </defs>
 
-      {/* Fundo */}
-      <circle cx="100" cy="100" r="100" fill={`url(#${id}_bg)`} />
-      <circle cx="100" cy="100" r="100" fill="none" stroke="rgba(60,191,179,0.08)" strokeWidth="40" />
-      <circle cx="100" cy="100" r="70"  fill="none" stroke="rgba(60,191,179,0.05)" strokeWidth="30" />
+      <circle cx="100" cy="100" r="100" fill={`url(#${u}bg)`}/>
+      <circle cx="100" cy="100" r="100" fill="none"
+        stroke="rgba(60,191,179,0.06)" strokeWidth="36"/>
 
-      <g clipPath={`url(#${id}_circle)`}>
-        {/* Corpo / polo */}
-        <ellipse cx="100" cy="198" rx="70" ry="20" fill="rgba(0,0,0,0.4)" />
-        <ellipse cx="100" cy="195" rx="72" ry="55" fill={`url(#${id}_body)`} />
-        <ellipse cx="100" cy="180" rx="55" ry="38" fill="rgba(255,255,255,0.03)" />
-        <path d="M88 147 L100 162 L112 147 Q100 154 88 147Z" fill="#0f0f0f" />
-        <path d="M90 147 L100 160 L110 147" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none" />
-
+      <g clipPath={`url(#${u}clip)`}>
+        {/* Corpo — polo preta */}
+        <ellipse cx="100" cy="198" rx="72" ry="55" fill={`url(#${u}body)`}/>
+        <ellipse cx="100" cy="182" rx="52" ry="36" fill="rgba(255,255,255,0.03)"/>
+        {/* Gola V */}
+        <path d="M88 148 L100 163 L112 148 Q100 155 88 148Z" fill="#0f0f0f"/>
         {/* Logo SIXXIS */}
-        <rect x="116" y="168" width="26" height="14" rx="4" fill="#3cbfb3" opacity="0.95" />
-        <rect x="117" y="169" width="24" height="12" rx="3" fill="#3cbfb3" opacity="0.3" />
-        <text x="129" y="178.5" textAnchor="middle" fontSize="5.5" fontWeight="900"
-          fontFamily="system-ui,-apple-system,Arial,sans-serif" fill="#0a2820" letterSpacing="-0.2">SIXXIS</text>
-
+        <rect x="115" y="167" width="28" height="15" rx="4" fill="#3cbfb3" opacity="0.92"/>
+        <text x="129" y="177.5" textAnchor="middle" fontSize="5.8" fontWeight="900"
+          fontFamily="system-ui,-apple-system,Arial,sans-serif"
+          fill="#062220" letterSpacing="-0.2">SIXXIS</text>
         {/* Pescoço */}
-        <rect x="85" y="136" width="30" height="22" rx="12" fill={`url(#${id}_neck)`} filter={`url(#${id}_softshadow)`} />
-        <ellipse cx="100" cy="157" rx="14" ry="4" fill="rgba(0,0,0,0.25)" />
-
+        <rect x="86" y="136" width="28" height="22" rx="12" fill="#F0AE85"/>
+        <ellipse cx="100" cy="157" rx="12" ry="4" fill="rgba(0,0,0,0.18)"/>
         {/* Orelhas */}
-        <ellipse cx="58" cy="103" rx="8" ry="10" fill="#E8B085" />
-        <ellipse cx="59" cy="103" rx="5" ry="7" fill="#D49870" opacity="0.5" />
-        <ellipse cx="59.5" cy="103" rx="2.5" ry="4" fill="#C07858" opacity="0.3" />
-        <ellipse cx="142" cy="103" rx="8" ry="10" fill="#E8B085" />
-        <ellipse cx="141" cy="103" rx="5" ry="7" fill="#D49870" opacity="0.5" />
-        <ellipse cx="140.5" cy="103" rx="2.5" ry="4" fill="#C07858" opacity="0.3" />
-
+        <ellipse cx="58" cy="102" rx="8" ry="10" fill="#EDB082"/>
+        <ellipse cx="59.5" cy="102" rx="5" ry="7" fill="#D4946A" opacity="0.5"/>
+        <ellipse cx="142" cy="102" rx="8" ry="10" fill="#EDB082"/>
+        <ellipse cx="140.5" cy="102" rx="5" ry="7" fill="#D4946A" opacity="0.5"/>
         {/* Cabeça */}
-        <ellipse cx="100" cy="97" rx="45" ry="49" fill={`url(#${id}_face)`} filter={`url(#${id}_shadow)`} />
+        <ellipse cx="100" cy="96" rx="45" ry="49"
+          fill={`url(#${u}face)`} filter={`url(#${u}sh)`}/>
 
-        {/* Cabelo bob */}
-        <ellipse cx="100" cy="63" rx="45" ry="32" fill={`url(#${id}_hair)`} />
-        <path d="M55 82 C53 98 55 116 60 128 C63 134 61 132 59 126 C54 110 53 95 55 82Z" fill="#111" />
-        <path d="M145 82 C147 98 145 116 140 128 C137 134 139 132 141 126 C146 110 147 95 145 82Z" fill="#111" />
-        <path d="M59 126 C62 130 70 132 78 130" stroke="#111" strokeWidth="5" fill="none" strokeLinecap="round" />
-        <path d="M141 126 C138 130 130 132 122 130" stroke="#111" strokeWidth="5" fill="none" strokeLinecap="round" />
-        <path d="M58 80 C62 68 76 61 100 60 C124 61 138 68 142 80 C130 70 118 67 100 67 C82 67 70 70 58 80Z" fill="#0d0d0d" />
-        <path d="M65 75 C70 69 80 66 90 67" stroke="#2a2a2a" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
-        <path d="M78 59 C85 55 100 53 116 57" stroke={`url(#${id}_hairshine)`} strokeWidth="5" fill="none" strokeLinecap="round" />
-        <path d="M82 62 C90 59 108 59 116 63" stroke="rgba(100,100,100,0.3)" strokeWidth="2" fill="none" strokeLinecap="round" />
+        {/* CABELO PRETO BOB LISO */}
+        <ellipse cx="100" cy="62" rx="45" ry="29" fill={`url(#${u}hair)`}/>
+        <path d="M56 82C54 96 55 116 60 128C58 120 54 100 56 82Z" fill="#111"/>
+        <path d="M144 82C146 96 145 116 140 128C142 120 146 100 144 82Z" fill="#111"/>
+        <path d="M60 128C64 133 76 135 100 134C124 135 136 133 140 128"
+          stroke="#111" strokeWidth="6" fill="none" strokeLinecap="round"/>
+        <path d="M60 79C64 68 78 62 100 61C122 62 136 68 140 79
+                 C128 70 114 67 100 67C86 67 72 70 60 79Z"
+          fill="#0d0d0d"/>
+        <path d="M80 59C88 55 108 55 120 60"
+          stroke="#3a3a3a" strokeWidth="4" fill="none"
+          strokeLinecap="round" opacity="0.55"/>
 
-        {/* Headset */}
-        <path d="M62 88 C62 48 138 48 138 88" stroke="#1c1c1c" strokeWidth="7" fill="none" strokeLinecap="round" filter={`url(#${id}_softshadow)`} />
-        <path d="M64 88 C64 51 136 51 136 88" stroke="rgba(80,80,80,0.4)" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <rect x="50" y="88" width="18" height="24" rx="8" fill={`url(#${id}_hs)`} filter={`url(#${id}_softshadow)`} />
-        <rect x="52" y="90" width="14" height="20" rx="6" fill="#333" />
-        <ellipse cx="59" cy="100" rx="5" ry="6" fill="#222" />
-        <ellipse cx="59" cy="100" rx="3.5" ry="4.5" fill="#2a2a2a" />
-        <path d="M52 91 C53 89 57 88 60 89" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        <rect x="132" y="88" width="18" height="24" rx="8" fill={`url(#${id}_hs)`} filter={`url(#${id}_softshadow)`} />
-        <rect x="134" y="90" width="14" height="20" rx="6" fill="#333" />
-        <ellipse cx="141" cy="100" rx="5" ry="6" fill="#222" />
-        <ellipse cx="141" cy="100" rx="3.5" ry="4.5" fill="#2a2a2a" />
-        <path d="M134 91 C135 89 139 88 142 89" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        <rect x="55" y="80" width="4" height="12" rx="2" fill="#2a2a2a" />
-        <rect x="141" y="80" width="4" height="12" rx="2" fill="#2a2a2a" />
+        {/* HEADSET PROFISSIONAL */}
+        <path d="M63 86C63 46 137 46 137 86"
+          stroke="#1c1c1c" strokeWidth="7"
+          fill="none" strokeLinecap="round" filter={`url(#${u}sh)`}/>
+        <path d="M65 86C65 49 135 49 135 86"
+          stroke="rgba(80,80,80,0.38)" strokeWidth="2"
+          fill="none" strokeLinecap="round"/>
+        {/* Cup esquerdo */}
+        <rect x="50" y="87" width="18" height="24" rx="8"
+          fill="#1e1e1e" filter={`url(#${u}sh)`}/>
+        <rect x="52" y="89" width="14" height="20" rx="6" fill="#2e2e2e"/>
+        <ellipse cx="59" cy="99" rx="4.5" ry="5.5" fill="#1a1a1a"/>
+        <path d="M52 90C53.5 88 57 87 60 88"
+          stroke="rgba(255,255,255,0.11)" strokeWidth="1.5"
+          fill="none" strokeLinecap="round"/>
+        {/* Cup direito */}
+        <rect x="132" y="87" width="18" height="24" rx="8"
+          fill="#1e1e1e" filter={`url(#${u}sh)`}/>
+        <rect x="134" y="89" width="14" height="20" rx="6" fill="#2e2e2e"/>
+        <ellipse cx="141" cy="99" rx="4.5" ry="5.5" fill="#1a1a1a"/>
+        <path d="M134 90C135.5 88 139 87 142 88"
+          stroke="rgba(255,255,255,0.11)" strokeWidth="1.5"
+          fill="none" strokeLinecap="round"/>
+        {/* Hastes */}
+        <rect x="55" y="79" width="4" height="11" rx="2" fill="#252525"/>
+        <rect x="141" y="79" width="4" height="11" rx="2" fill="#252525"/>
 
-        {/* Microfone */}
-        <path d="M150 97 C156 97 161 103 161 112" stroke="#1a1a1a" strokeWidth="3.5" fill="none" strokeLinecap="round" filter={`url(#${id}_softshadow)`} />
-        <path d="M152 97 C158 97 163 103 163 112" stroke="rgba(70,70,70,0.5)" strokeWidth="1" fill="none" strokeLinecap="round" />
-        <ellipse cx="161" cy="116" rx="6" ry="6.5" fill="#1a1a1a" filter={`url(#${id}_softshadow)`} />
-        <ellipse cx="161" cy="116" rx="4" ry="4.5" fill="#2a2a2a" />
-        <circle cx="161" cy="114.5" r="2.5" fill="#3cbfb3" opacity="0.9">
+        {/* MICROFONE + LED TIFFANY */}
+        <path d="M150 96C156 96 162 102 162 112"
+          stroke="#1a1a1a" strokeWidth="3.5"
+          fill="none" strokeLinecap="round"/>
+        <ellipse cx="162" cy="116" rx="5.5" ry="6"
+          fill="#1a1a1a" filter={`url(#${u}sh)`}/>
+        <ellipse cx="162" cy="116" rx="3.5" ry="4.5" fill="#2a2a2a"/>
+        <circle cx="162" cy="114" r="2.5" fill="#3cbfb3" opacity="0.9">
           {animated && (
-            <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.5s" repeatCount="indefinite" />
+            <animate attributeName="opacity"
+              values="0.9;0.3;0.9" dur="2.4s"
+              repeatCount="indefinite"/>
           )}
         </circle>
-        <circle cx="161" cy="114.5" r="1.2" fill="#7fefea" opacity="0.8" />
+        <circle cx="162" cy="114" r="1.2" fill="#8fefea" opacity="0.9"/>
 
-        {/* Sobrancelhas */}
-        <path d="M79 89 C83 85.5 90 84.5 95 86.5" stroke="#3d1f08" strokeWidth="3" fill="none" strokeLinecap="round" />
-        <path d="M79 89 C83 85.5 90 84.5 95 86.5" stroke="#5a3015" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.6" />
-        <path d="M105 86.5 C110 84.5 117 85.5 121 89" stroke="#3d1f08" strokeWidth="3" fill="none" strokeLinecap="round" />
-        <path d="M105 86.5 C110 84.5 117 85.5 121 89" stroke="#5a3015" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.6" />
+        {/* SOBRANCELHAS */}
+        <path d="M80 88C84 84.5 91 83.5 96 85.5"
+          stroke="#3d1f08" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
+        <path d="M104 85.5C109 83.5 116 84.5 120 88"
+          stroke="#3d1f08" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
 
-        {/* Olho esquerdo */}
-        <ellipse cx="90" cy="100" rx="11" ry="12" fill="rgba(0,0,0,0.08)" />
-        <ellipse cx="90" cy="99" rx="10" ry="11" fill="white" />
-        <ellipse cx="90" cy="99" rx="10" ry="11" fill="rgba(180,140,100,0.08)" />
-        <circle cx="90" cy="100" r="7" fill={`url(#${id}_iris)`} />
-        <circle cx="90" cy="100" r="5" fill="#0d0500" />
-        <ellipse cx="93" cy="96.5" rx="2.5" ry="2.5" fill="white" opacity="0.95" />
-        <circle cx="87.5" cy="102" r="1.2" fill="white" opacity="0.5" />
-        <path d="M81 93 C84 89 90 87 96 90" stroke="#1a0a00" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M82 106 C86 108 92 108 97 106" stroke="#8a5030" strokeWidth="0.8" fill="none" strokeLinecap="round" opacity="0.4" />
+        {/* OLHOS com reflexos 3D */}
+        <ellipse cx="90" cy="98" rx="9.5" ry="10.5" fill="white"/>
+        <circle cx="90" cy="98" r="7" fill={`url(#${u}iris)`}/>
+        <circle cx="90" cy="98" r="5" fill="#0d0500"/>
+        <ellipse cx="93.5" cy="94.5" rx="2.5" ry="2.5" fill="white" opacity="0.96"/>
+        <circle cx="87.5" cy="100" r="1.2" fill="white" opacity="0.5"/>
+        <path d="M82 91C85 87 91 85.5 96 88.5"
+          stroke="#1a0800" strokeWidth="2" fill="none" strokeLinecap="round"/>
 
-        {/* Olho direito */}
-        <ellipse cx="110" cy="100" rx="11" ry="12" fill="rgba(0,0,0,0.08)" />
-        <ellipse cx="110" cy="99" rx="10" ry="11" fill="white" />
-        <ellipse cx="110" cy="99" rx="10" ry="11" fill="rgba(180,140,100,0.08)" />
-        <circle cx="110" cy="100" r="7" fill={`url(#${id}_iris)`} />
-        <circle cx="110" cy="100" r="5" fill="#0d0500" />
-        <ellipse cx="113" cy="96.5" rx="2.5" ry="2.5" fill="white" opacity="0.95" />
-        <circle cx="107.5" cy="102" r="1.2" fill="white" opacity="0.5" />
-        <path d="M104 90 C110 87 116 89 119 93" stroke="#1a0a00" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M103 106 C108 108 114 108 118 106" stroke="#8a5030" strokeWidth="0.8" fill="none" strokeLinecap="round" opacity="0.4" />
+        <ellipse cx="110" cy="98" rx="9.5" ry="10.5" fill="white"/>
+        <circle cx="110" cy="98" r="7" fill={`url(#${u}iris)`}/>
+        <circle cx="110" cy="98" r="5" fill="#0d0500"/>
+        <ellipse cx="113.5" cy="94.5" rx="2.5" ry="2.5" fill="white" opacity="0.96"/>
+        <circle cx="107.5" cy="100" r="1.2" fill="white" opacity="0.5"/>
+        <path d="M104 88.5C109 85.5 115 87 118 91"
+          stroke="#1a0800" strokeWidth="2" fill="none" strokeLinecap="round"/>
 
-        {/* Nariz */}
-        <path d="M97 113 C98.5 117 101.5 117 103 113" stroke="#C07855" strokeWidth="1.8" fill="none" strokeLinecap="round" opacity="0.7" />
-        <circle cx="95.5" cy="115" r="1.8" fill="#C07855" opacity="0.25" />
-        <circle cx="104.5" cy="115" r="1.8" fill="#C07855" opacity="0.25" />
-        <ellipse cx="100" cy="117" rx="5" ry="2" fill="#D09060" opacity="0.15" />
+        {/* NARIZ */}
+        <path d="M97 112C98.5 116 101.5 116 103 112"
+          stroke="#C07855" strokeWidth="1.8" fill="none"
+          strokeLinecap="round" opacity="0.7"/>
+        <circle cx="95.5" cy="114" r="1.8" fill="#C07855" opacity="0.22"/>
+        <circle cx="104.5" cy="114" r="1.8" fill="#C07855" opacity="0.22"/>
 
-        {/* Bochechas */}
-        <ellipse cx="79" cy="114" rx="12" ry="9" fill={`url(#${id}_blush)`} />
-        <ellipse cx="121" cy="114" rx="12" ry="9" fill={`url(#${id}_blush)`} />
+        {/* BOCHECHAS */}
+        <ellipse cx="79" cy="113" rx="12" ry="9" fill={`url(#${u}blush)`}/>
+        <ellipse cx="121" cy="113" rx="12" ry="9" fill={`url(#${u}blush)`}/>
 
-        {/* Boca */}
-        <ellipse cx="100" cy="126" rx="14" ry="5" fill="rgba(0,0,0,0.08)" />
-        <path d="M87 124 C90 120 96 118 100 118 C104 118 110 120 113 124 C110 130 90 130 87 124Z" fill="#D4705A" />
-        <path d="M87 124 C90 122 96 121 100 121 C104 121 110 122 113 124" stroke="#B85040" strokeWidth="0.7" fill="none" />
-        <path d="M87 124 C90 129 110 129 113 124" stroke="#B85040" strokeWidth="0.8" fill="none" strokeLinecap="round" />
-        <path d="M90 124 Q100 123 110 124 Q110 126.5 100 126.5 Q90 126.5 90 124Z" fill="white" opacity="0.85" />
-        <circle cx="84" cy="123" r="1.5" fill="#C06050" opacity="0.3" />
-        <circle cx="116" cy="123" r="1.5" fill="#C06050" opacity="0.3" />
+        {/* SORRISO natural */}
+        <path d="M88 122C91 118 97 116 100 116C103 116 109 118 112 122
+                 C109 128 91 128 88 122Z" fill="#C8685A"/>
+        <path d="M88 122C91 120 97 119 100 119C103 119 109 120 112 122"
+          stroke="#AE4A3C" strokeWidth="0.8" fill="none"/>
+        <path d="M88 122C91 127 109 127 112 122"
+          stroke="#AE4A3C" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+        <path d="M91 122 Q100 121 109 122 Q109 124.5 100 124.5 Q91 124.5 91 122Z"
+          fill="white" opacity="0.82"/>
+        <circle cx="85" cy="122" r="1.5" fill="#B85A4A" opacity="0.28"/>
+        <circle cx="115" cy="122" r="1.5" fill="#B85A4A" opacity="0.28"/>
 
-        <ellipse cx="100" cy="141" rx="28" ry="6" fill="rgba(0,0,0,0.12)" />
-
-        {/* Piscar animado */}
+        {/* PISCAR ANIMADO */}
         {animated && (
           <>
-            <ellipse cx="90" cy="99" rx="10" ry="11" fill={`url(#${id}_face)`} opacity="0">
-              <animate attributeName="ry" values="0;11;0" dur="5s" begin="2s" repeatCount="indefinite"
-                calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" />
-              <animate attributeName="opacity" values="0;1;0" dur="5s" begin="2s" repeatCount="indefinite" />
+            <ellipse cx="90" cy="97" rx="9.5" ry="10.5"
+              fill={`url(#${u}face)`} opacity="0">
+              <animate attributeName="ry"
+                values="0;10.5;0" dur="5s" begin="2.5s"
+                repeatCount="indefinite" calcMode="spline"
+                keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+              <animate attributeName="opacity"
+                values="0;1;0" dur="5s" begin="2.5s"
+                repeatCount="indefinite"/>
             </ellipse>
-            <ellipse cx="110" cy="99" rx="10" ry="11" fill={`url(#${id}_face)`} opacity="0">
-              <animate attributeName="ry" values="0;11;0" dur="5s" begin="2s" repeatCount="indefinite"
-                calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" />
-              <animate attributeName="opacity" values="0;1;0" dur="5s" begin="2s" repeatCount="indefinite" />
+            <ellipse cx="110" cy="97" rx="9.5" ry="10.5"
+              fill={`url(#${u}face)`} opacity="0">
+              <animate attributeName="ry"
+                values="0;10.5;0" dur="5s" begin="2.5s"
+                repeatCount="indefinite" calcMode="spline"
+                keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+              <animate attributeName="opacity"
+                values="0;1;0" dur="5s" begin="2.5s"
+                repeatCount="indefinite"/>
             </ellipse>
           </>
         )}
@@ -217,5 +214,5 @@ export function LunaAvatar({ size = 56, className = '', animated = true }: LunaA
 }
 
 export function LunaAvatarMini({ size = 40, animated = false }: { size?: number; animated?: boolean }) {
-  return <LunaAvatar size={size} animated={animated} />
+  return <LunaAvatar size={size} animated={animated}/>
 }

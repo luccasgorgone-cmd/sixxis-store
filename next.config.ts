@@ -54,7 +54,13 @@ const nextConfig: NextConfig = {
       {
         source: '/api/produtos',
         headers: [
-          { key: 'Cache-Control', value: 'public, s-maxage=30, stale-while-revalidate=120' },
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
+      {
+        source: '/api/filtros',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
         ],
       },
     ]

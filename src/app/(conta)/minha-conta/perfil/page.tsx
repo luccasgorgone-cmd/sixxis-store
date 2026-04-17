@@ -110,7 +110,11 @@ export default function PerfilPage() {
         {/* Header */}
         <div
           className="px-6 pt-6 pb-8 relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #0b2220 0%, #0f2e2b 50%, #1a4f4a 100%)' }}
+          style={{
+            background:
+              NIVEIS_CONFIG[nivelAtual]?.corBanner ||
+              'linear-gradient(135deg, #083344, #0e7490, #06b6d4)',
+          }}
         >
           <div className="absolute inset-0 opacity-[0.04]"
             style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '16px 16px' }} />

@@ -245,15 +245,15 @@ export default function BlocoPrecoProduto({ produto, variacoes, taxaJuros }: Pro
         <div className="grid grid-cols-2 gap-2">
           {[
             { icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', titulo: '12 meses de garantia', desc: 'Garantia real e documentada' },
-            { icon: 'M1 3h15a2 2 0 0 1 2 2v10h5l2 4v3h-7V8H16v8h-5.5M5.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z', titulo: 'Entrega para todo o Brasil', desc: 'Grátis acima de R$ 500' },
+            { icon: 'M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01', titulo: 'Entrega para todo o Brasil', desc: 'Grátis acima de R$ 500' },
             { icon: 'M1 4v6h6M3.51 15a9 9 0 1 0 .49-4.95', titulo: 'Troca em 7 dias', desc: 'Sem burocracia' },
-            { icon: 'M2 5h20a2 2 0 0 1 0 4H2a2 2 0 0 1 0-4zM2 10h20v9H2z', titulo: '6x sem juros', desc: 'No cartão de crédito' },
+            { icon: 'M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zM2 10h20', titulo: '6x sem juros', desc: 'No cartão de crédito' },
             { icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4', titulo: 'Produto 100% original', desc: '30 anos de tradição Sixxis' },
-            { icon: 'M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.82A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.95-.96a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16z', titulo: 'Suporte especializado', desc: 'Seg–Sex 8h às 18h' },
+            { icon: 'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16z', titulo: 'Suporte especializado', desc: 'Seg–Sex 8h às 18h' },
           ].map((s, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#3cbfb3]/30 hover:bg-[#f0fffe] transition-all">
+            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#3cbfb3]/30 hover:bg-[#f0fffe] transition-all duration-200">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#e8f8f7' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d={s.icon} />
                 </svg>
               </div>

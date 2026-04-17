@@ -9,34 +9,10 @@ import {
   Package, Star, Zap, Clock, CheckCircle, Truck,
 } from 'lucide-react'
 import { IconeNivel } from '@/components/ui/NivelIcons'
-import { NIVEIS_CONFIG, ORDEM_NIVEIS_GEM } from '@/lib/avatares'
+import { NIVEIS_CONFIG, ORDEM_NIVEIS_GEM, normalizarNivel, getNivelSVGString } from '@/lib/avatares'
 
 function formatValor(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
-
-// ── Padrões geométricos SVG por gema ─────────────────────────────────────────
-const BANNER_POR_NIVEL: Record<string, { pattern: string; gradient: string }> = {
-  Cristal: {
-    gradient: 'linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 60%, #38bdf8 100%)',
-    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><polygon points='20,2 38,11 38,29 20,38 2,29 2,11' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
-  },
-  Topázio: {
-    gradient: 'linear-gradient(135deg, #78350f 0%, #d97706 55%, #fbbf24 100%)',
-    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='40'><ellipse cx='16' cy='20' rx='12' ry='16' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
-  },
-  Safira: {
-    gradient: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #60a5fa 100%)',
-    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><polygon points='20,2 38,12 32,32 8,32 2,12' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
-  },
-  Diamante: {
-    gradient: 'linear-gradient(135deg, #3730a3 0%, #818cf8 55%, #e0e7ff 100%)',
-    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='16' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/><polygon points='20,4 36,20 20,36 4,20' fill='none' stroke='white' stroke-width='0.4' opacity='0.1'/></svg>`,
-  },
-  Esmeralda: {
-    gradient: 'linear-gradient(135deg, #064e3b 0%, #10b981 55%, #6ee7b7 100%)',
-    pattern: `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><polygon points='8,2 32,2 38,8 38,32 32,38 8,38 2,32 2,8' fill='none' stroke='white' stroke-width='0.5' opacity='0.12'/></svg>`,
-  },
 }
 
 const VANTAGENS_NIVEL: Record<string, string[]> = {
@@ -84,6 +60,8 @@ export default function MinhaContaPage() {
   }, [])
 
   const nivel = dados?.nivel || { atual: 'Cristal', cor: '#38bdf8', progressoPercent: 0, proximoNivel: 'Topázio', faltam: 1000, cashbackPct: 0.02 }
+  const nivelNorm = normalizarNivel(nivel.atual || 'Cristal')
+  const cfgNivel = NIVEIS_CONFIG[nivelNorm] || NIVEIS_CONFIG.Cristal
   const stats = dados?.estatisticas || {}
 
   if (loading) {
@@ -104,10 +82,11 @@ export default function MinhaContaPage() {
 
         {/* ── BANNER HERO ── */}
         <div className="relative overflow-hidden rounded-2xl"
-          style={{ background: (BANNER_POR_NIVEL[nivel.atual] ?? BANNER_POR_NIVEL.Cristal).gradient }}>
-          <div className="absolute inset-0 opacity-100"
+          style={{ background: cfgNivel.corBanner }}>
+          <div className="absolute inset-0 opacity-[0.07]"
             style={{
-              backgroundImage: `url("data:image/svg+xml,${encodeURIComponent((BANNER_POR_NIVEL[nivel.atual] ?? BANNER_POR_NIVEL.Cristal).pattern)}")`,
+              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+              backgroundSize: '14px 14px',
             }} />
           <div className="relative p-6 sm:p-8">
             <div className="flex items-start justify-between gap-4">
@@ -119,10 +98,18 @@ export default function MinhaContaPage() {
                 <p className="text-white/50 text-sm">{session?.user?.email}</p>
               </div>
               <div className="flex flex-col items-center gap-2 shrink-0">
-                <IconeNivel nivel={nivel.atual} size={52} />
-                <span className="text-xs font-black px-2.5 py-1 rounded-full"
-                  style={{ backgroundColor: `${nivel.cor}25`, color: nivel.cor }}>
-                  {nivel.atual}
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                  style={{
+                    backgroundColor: `${cfgNivel.cor}35`,
+                    border: `2px solid ${cfgNivel.cor}70`,
+                    boxShadow: `0 4px 20px ${cfgNivel.corSombra}`,
+                  }}
+                  dangerouslySetInnerHTML={{ __html: getNivelSVGString(nivelNorm, 36) }}
+                />
+                <span className="text-xs font-black px-3 py-1 rounded-full"
+                  style={{ backgroundColor: cfgNivel.cor, color: '#0a2820' }}>
+                  {cfgNivel.label}
                 </span>
               </div>
             </div>
