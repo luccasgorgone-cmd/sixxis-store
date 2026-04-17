@@ -549,6 +549,29 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           {isFav ? 'Salvo' : 'Salvar'}
         </button>
       </div>
+
+      {/* Barra fixa de compra — somente mobile */}
+      <div
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-3 py-2.5 flex gap-2"
+        style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <button
+          onClick={handleAddToCart}
+          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          className="flex-1 border-2 border-[#3cbfb3] text-[#3cbfb3] text-sm font-bold rounded-xl py-3 flex items-center justify-center gap-1.5 disabled:opacity-40 transition active:scale-[0.98]"
+        >
+          <ShoppingCart size={16} />
+          Carrinho
+        </button>
+        <button
+          onClick={handleComprar}
+          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          className="flex-[1.3] bg-[#3cbfb3] text-white text-sm font-bold rounded-xl py-3 disabled:opacity-40 transition active:scale-[0.98]"
+          style={{ boxShadow: '0 4px 12px rgba(60,191,179,0.35)' }}
+        >
+          {esgotado ? 'Esgotado' : 'Comprar Agora'}
+        </button>
+      </div>
     </div>
   )
 }

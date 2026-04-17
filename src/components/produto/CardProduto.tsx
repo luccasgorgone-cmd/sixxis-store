@@ -190,7 +190,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               R$ {fmt(precoFinal)}
             </p>
 
-            <p className="text-xs text-gray-500 mb-1">
+            <p className="hidden sm:block text-xs text-gray-500 mb-1">
               em até 6x de <span className="font-semibold">R$ {fmt(precoFinal / 6)}</span> sem juros
             </p>
 
@@ -227,10 +227,10 @@ export default function CardProduto({ produto, priority = false }: Props) {
                 ) : 'Adicionar ao Carrinho'}
               </button>
 
-              {/* Comparar */}
+              {/* Comparar — oculto em mobile */}
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCmp(produto.id) }}
-                className={`text-xs font-medium flex items-center justify-center gap-1 w-full transition-colors ${
+                className={`hidden md:flex text-xs font-medium items-center justify-center gap-1 w-full transition-colors ${
                   isCmp ? 'text-[#3cbfb3]' : 'text-gray-500 hover:text-[#3cbfb3]'
                 }`}
               >
