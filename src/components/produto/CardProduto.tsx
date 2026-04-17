@@ -135,8 +135,6 @@ export default function CardProduto({ produto, priority = false }: Props) {
               unoptimized
               priority={priority}
               loading={priority ? 'eager' : 'lazy'}
-              placeholder="blur"
-              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
               onError={() => setImgError(true)}
             />
           ) : (
