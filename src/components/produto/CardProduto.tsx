@@ -11,13 +11,14 @@ import type { Produto } from '@/types'
 
 interface Props {
   produto: Produto
+  priority?: boolean
 }
 
 function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-export default function CardProduto({ produto }: Props) {
+export default function CardProduto({ produto, priority = false }: Props) {
   const router = useRouter()
   const { adicionarItem, setDrawerAberto } = useCarrinho()
   const [adicionado, setAdicionado] = useState(false)
@@ -35,6 +36,7 @@ export default function CardProduto({ produto }: Props) {
   const precoPix = precoFinal * 0.97
   const esgotado = (produto.estoque ?? 1) <= 0
   const isNovo = !desconto
+  const isSX040 = /sx040|sx-040/i.test(produto.slug || '') || /sx040|sx-040/i.test(produto.nome || '')
 
   const mediaAvaliacoes = (produto as { mediaAvaliacoes?: number }).mediaAvaliacoes ?? 0
   const totalAvaliacoes = (produto as { totalAvaliacoes?: number }).totalAvaliacoes ?? 0
@@ -111,7 +113,8 @@ export default function CardProduto({ produto }: Props) {
               className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
               unoptimized
-              loading="lazy"
+              priority={priority}
+              loading={priority ? 'eager' : 'lazy'}
               onError={() => setImgError(true)}
             />
           ) : (
@@ -145,6 +148,13 @@ export default function CardProduto({ produto }: Props) {
               <EstrelasNota nota={mediaAvaliacoes} size={12} />
               <span className="text-xs text-gray-500">({totalAvaliacoes})</span>
             </div>
+          )}
+
+          {/* Urgência — últimas unidades */}
+          {isSX040 && !esgotado && (
+            <span className="inline-block text-xs text-orange-500 font-medium mb-2">
+              Últimas unidades
+            </span>
           )}
 
           {/* Preços */}

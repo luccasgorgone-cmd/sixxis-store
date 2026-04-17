@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import {
-  X, Send, ChevronDown, Loader2, ExternalLink, ShoppingCart, ShoppingBag, Eye,
+  X, Send, ChevronDown, Loader2, ExternalLink, ShoppingCart, ShoppingBag, Eye, Power,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LunaAvatar, LunaAvatarMini } from '@/components/ui/LunaAvatar'
@@ -46,7 +46,7 @@ interface CTAData {
 const DEFAULT_CONFIG: LunaConfig = {
   ativo:                true,
   nome:                 'Luna',
-  saudacao:             'Olá! Sou a Luna, assistente da Sixxis 👋 Como posso te ajudar hoje?',
+  saudacao:             'Olá! Sou a Luna, assistente da Sixxis. Como posso te ajudar hoje?',
   corPrimaria:          '#3cbfb3',
   corSecundaria:        '#0f2e2b',
   whatsappVendas:       '5518997474701',
@@ -57,7 +57,7 @@ const DEFAULT_CONFIG: LunaConfig = {
   followupDelay2:       30,
   followupMensagem2:    'Se preferir falar com nossa equipe diretamente, estamos disponíveis pelo WhatsApp: (18) 99747-4701. Foi um prazer atender você!',
   encerramentoAuto:     true,
-  mensagemEncerramento: '👋 Encerrando o atendimento por inatividade. Se precisar de ajuda, é só abrir o chat novamente.',
+  mensagemEncerramento: 'Encerrando o atendimento por inatividade. Se precisar de ajuda, é só abrir o chat novamente.',
   avatarUrl:            '',
   avatarTipo:           'svg',
 }
@@ -504,7 +504,7 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
                       {!isUser && (
                         isEnc ? (
                           <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gray-200">
-                            <span className="text-xs">👋</span>
+                            <Power size={12} className="text-gray-500" />
                           </div>
                         ) : (
                           <div className="shrink-0 mt-0.5">

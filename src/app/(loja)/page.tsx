@@ -148,8 +148,8 @@ export default async function HomePage() {
 
           {produtosMostrar.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {produtosMostrar.map((produto) => (
-                <CardProduto key={produto.id} produto={produto} />
+              {produtosMostrar.map((produto, i) => (
+                <CardProduto key={produto.id} produto={produto} priority={i < 3} />
               ))}
             </div>
           ) : (
@@ -289,9 +289,10 @@ export default async function HomePage() {
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
             </h2>
             <p className="text-white/70 text-sm mb-6">
-              {cfg.newsletter_subtitulo || 'Sem spam. Cancele quando quiser.'}
+              {cfg.newsletter_subtitulo || 'Cadastre-se e ganhe 5% OFF na próxima compra + ofertas exclusivas em primeira mão.'}
             </p>
             <NewsletterForm />
+            <p className="text-xs text-gray-400 mt-2">Sem spam. Cancele quando quiser.</p>
           </div>
         </section>
       )}

@@ -367,7 +367,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </span>
             </div>
 
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <div className="w-px h-5 bg-[#0f2e2b]/20" />
               <MapPin size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
               <span className="text-[#0f2e2b]/85 text-sm font-semibold">

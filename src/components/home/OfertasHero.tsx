@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Zap } from 'lucide-react'
 
 function TimerBloco({ valor, label }: { valor: number; label: string }) {
   const str = String(valor).padStart(2, '0')
@@ -75,13 +76,9 @@ export default function OfertasHero({ targetDate }: { targetDate: string }) {
 
         {/* Título */}
         <div className="flex items-center justify-center gap-3 mb-2">
-          <svg width="28" height="46" viewBox="0 0 60 100" fill="#ffd700">
-            <path d="M35 0L5 55H30L15 100L55 40H28L35 0Z" />
-          </svg>
+          <Zap size={28} className="text-[#3cbfb3]" strokeWidth={2.5} />
           <h1 className="text-4xl font-black text-white tracking-tight">Oferta Relâmpago</h1>
-          <svg width="28" height="46" viewBox="0 0 60 100" fill="#ffd700">
-            <path d="M35 0L5 55H30L15 100L55 40H28L35 0Z" />
-          </svg>
+          <Zap size={28} className="text-[#3cbfb3]" strokeWidth={2.5} />
         </div>
         <p className="text-white/50 mb-6">Preços imperdíveis por tempo limitado</p>
 

@@ -35,7 +35,7 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
       {aberto && (
         <div className="flex flex-col gap-2">
           <a
-            href="https://wa.me/5518997474701"
+            href="https://wa.me/5518997474701?text=Ol%C3%A1!%20Vim%20pelo%20site%20Sixxis%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es."
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 bg-white text-gray-800 text-sm px-4 py-3 rounded-2xl shadow-2xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,.15)] border border-gray-100 min-w-[190px] animate-fade-in-up"
@@ -49,7 +49,7 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
             </div>
           </a>
           <a
-            href="https://wa.me/5511934102621"
+            href="https://wa.me/5511934102621?text=Ol%C3%A1!%20Vim%20pelo%20site%20Sixxis%20e%20preciso%20de%20suporte%20t%C3%A9cnico."
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 bg-white text-gray-800 text-sm px-4 py-3 rounded-2xl shadow-2xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,.15)] border border-gray-100 min-w-[190px] animate-fade-in-up"
