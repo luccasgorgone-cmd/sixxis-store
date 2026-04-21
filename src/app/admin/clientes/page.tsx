@@ -26,6 +26,7 @@ interface Cliente {
 export default function AdminClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [total, setTotal]       = useState(0)
+  const [totalGeral, setTotalGeral] = useState(0)
   const [loading, setLoading]   = useState(true)
   const [estados, setEstados]   = useState<string[]>([])
 
@@ -62,10 +63,11 @@ export default function AdminClientesPage() {
 
       if (estado) params.set('estado', estado)
 
-      const res  = await fetch(`/api/admin/clientes?${params}`)
+      const res  = await fetch(`/api/admin/clientes?${params}`, { cache: 'no-store' })
       const data = await res.json()
       setClientes(data.clientes || [])
       setTotal(data.total || 0)
+      setTotalGeral(data.totalGeral ?? data.total ?? 0)
       if (data.estados?.length) setEstados(data.estados)
     } catch (err) {
       console.error(err)
@@ -112,7 +114,7 @@ export default function AdminClientesPage() {
             <Users size={22} className="text-[#3cbfb3]" /> Clientes
           </h1>
           <p className="text-xs md:text-sm text-gray-500 mt-0.5">
-            {loading ? 'Carregando...' : `${total} cliente${total !== 1 ? 's' : ''} cadastrado${total !== 1 ? 's' : ''}`}
+            {loading ? 'Carregando...' : `${totalGeral} cliente${totalGeral !== 1 ? 's' : ''} cadastrado${totalGeral !== 1 ? 's' : ''}`}
           </p>
         </div>
         <button
@@ -126,7 +128,7 @@ export default function AdminClientesPage() {
       {/* STATS RÁPIDAS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total de clientes',  valor: total,                                          icone: Users,      cor: '#3cbfb3' },
+          { label: 'Total de clientes',  valor: totalGeral,                                     icone: Users,      cor: '#3cbfb3' },
           { label: 'Ativos',             valor: clientes.filter(c => !c.bloqueado).length,      icone: UserCheck,  cor: '#10b981' },
           { label: 'Bloqueados',         valor: clientes.filter(c =>  c.bloqueado).length,      icone: UserX,      cor: '#ef4444' },
           { label: 'Com compras',        valor: clientes.filter(c => c.totalPedidos > 0).length, icone: ShoppingBag, cor: '#8b5cf6' },

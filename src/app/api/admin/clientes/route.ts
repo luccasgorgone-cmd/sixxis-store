@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { contarClientes } from '@/lib/clientes-count'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,8 +49,9 @@ export async function GET(req: NextRequest) {
   const validOrdenar = ['totalGasto', 'totalPedidos', 'ultimaCompra', 'createdAt']
   const orderField = validOrdenar.includes(ordenar) ? ordenar : 'createdAt'
 
-  const [total, clientes, estadosRaw] = await Promise.all([
+  const [total, totalGeral, clientes, estadosRaw] = await Promise.all([
     prisma.cliente.count({ where }),
+    contarClientes(),
     prisma.cliente.findMany({
       where,
       skip,
@@ -82,6 +84,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     clientes,
     total,
+    totalGeral,
     page,
     limit,
     pagination: { total, page, limit, pages: Math.ceil(total / limit) },

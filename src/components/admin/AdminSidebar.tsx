@@ -38,22 +38,22 @@ const NAV_GROUPS = [
   {
     label: 'Fidelidade',
     items: [
-      { href: '/admin/avaliacoes',           label: 'Avaliações',     icon: Star,      exact: false },
-      { href: '/admin/avaliacoes-parceiros', label: 'Aval. Parceiros',icon: Handshake, exact: false },
-      { href: '/admin/emails',               label: 'E-mails',        icon: Mail,      exact: false },
+      { href: '/admin/avaliacoes',           label: 'Avaliações',      icon: Star,      exact: false },
+      { href: '/admin/avaliacoes-parceiros', label: 'Aval. Parceiros', icon: Handshake, exact: false },
+    ],
+  },
+  {
+    label: 'Comunicação',
+    items: [
+      { href: '/admin/emails', label: 'E-mails', icon: Mail, exact: false },
+      { href: '/admin/luna',   label: 'Luna',    icon: Bot,  exact: false },
     ],
   },
   {
     label: 'Marketing',
     items: [
-      { href: '/admin/campanhas',                    label: 'Campanhas', icon: Target,        exact: false },
-      { href: '/admin/configuracoes/whatsapp',       label: 'WhatsApp',  icon: MessageSquare, exact: false },
-    ],
-  },
-  {
-    label: 'Agente Luna',
-    items: [
-      { href: '/admin/luna', label: 'Agente Luna', icon: Bot, exact: false },
+      { href: '/admin/campanhas',              label: 'Campanhas', icon: Target,        exact: false },
+      { href: '/admin/configuracoes/whatsapp', label: 'WhatsApp',  icon: MessageSquare, exact: false },
     ],
   },
   {
@@ -67,10 +67,10 @@ const NAV_GROUPS = [
   {
     label: 'Configurações',
     items: [
-      { href: '/admin/analytics',            label: 'Analytics',         icon: BarChart2, exact: false },
-      { href: '/admin/vendas-horario',     label: 'Horários de Venda', icon: Clock,    exact: false },
-      { href: '/admin/configuracoes',      label: 'Configurações',     icon: Settings, exact: false },
-      { href: '/admin/configuracoes-loja', label: 'Config. da Loja',   icon: Settings, exact: false },
+      { href: '/admin/analytics',          label: 'Analytics',             icon: BarChart2, exact: false },
+      { href: '/admin/vendas-horario',     label: 'Horários de Venda',     icon: Clock,     exact: false },
+      { href: '/admin/configuracoes-loja', label: 'Configurações da Loja', icon: Settings,  exact: false },
+      { href: '/admin/configuracoes',      label: 'Configurações Gerais',  icon: Settings,  exact: false },
     ],
   },
 ]

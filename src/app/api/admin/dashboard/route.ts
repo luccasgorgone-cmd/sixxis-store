@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
+import { contarClientes } from '@/lib/clientes-count'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
@@ -75,8 +79,8 @@ export async function GET(request: NextRequest) {
     prisma.pedido.aggregate({ where: prevPaidWhere, _sum: { total: true }, _count: true }),
     prisma.cliente.count({ where: { createdAt: { gte: prevFrom, lte: prevTo } } }),
     prisma.produto.count({ where: { ativo: true } }),
-    // Mantém em sincronia com /api/admin/clientes (contagem total sem filtros).
-    prisma.cliente.count({ where: {} }),
+    // Fonte única compartilhada com /api/admin/clientes — ver src/lib/clientes-count.ts
+    contarClientes(),
     prisma.pedido.count({ where: { status: { in: ['pendente', 'PENDENTE'] } } }),
     prisma.itemPedido.findMany({
       where: { pedido: { createdAt: { gte: from, lte: to }, status: { notIn: ['cancelado', 'CANCELADO'] } } },
