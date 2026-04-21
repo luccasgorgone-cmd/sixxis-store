@@ -185,6 +185,12 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
   })
 
   const [ordem, setOrdem] = useState(searchParams.get('ordem') || '')
+  const [drawerAberto, setDrawerAberto] = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = drawerAberto ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [drawerAberto])
 
   // Sync when grupos or searchParams change
   useEffect(() => {
@@ -240,17 +246,16 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
   return (
     <div className="bg-white border-b border-gray-100 sticky z-30" style={{ top: 'var(--header-height, 0)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5">
+        {/* DESKTOP: barra horizontal de dropdowns */}
         <div
-          className="flex items-center gap-2 overflow-x-auto"
+          className="hidden md:flex items-center gap-2 overflow-x-auto"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {/* Ícone */}
           <div className="flex items-center gap-1.5 shrink-0 mr-1">
             <SlidersHorizontal size={15} strokeWidth={2} className="text-gray-400" />
-            <span className="text-xs font-semibold text-gray-400 hidden sm:inline">Filtros</span>
+            <span className="text-xs font-semibold text-gray-400">Filtros</span>
           </div>
 
-          {/* Dropdowns com createPortal */}
           {grupos.map(grupo => (
             <FiltroDropdown
               key={grupo.id}
@@ -260,10 +265,8 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
             />
           ))}
 
-          {/* Separador */}
           <div className="w-px h-6 bg-gray-200 shrink-0 mx-1" />
 
-          {/* Ordenação */}
           <select
             value={ordem}
             onChange={e => {
@@ -279,7 +282,6 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
             <option value="preco_desc">Maior preço</option>
           </select>
 
-          {/* Limpar */}
           {(totalAtivos > 0 || ordem) && (
             <button
               onClick={limparTudo}
@@ -290,12 +292,130 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
             </button>
           )}
 
-          {/* Contador */}
           <span className="text-xs text-gray-400 ml-auto shrink-0 whitespace-nowrap">
             {total} produto{total !== 1 ? 's' : ''}
           </span>
         </div>
+
+        {/* MOBILE: botão Filtros abre drawer + select ordenação inline */}
+        <div className="flex md:hidden items-center gap-2">
+          <button
+            onClick={() => setDrawerAberto(true)}
+            className="flex items-center gap-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl px-3 py-2 shrink-0 hover:border-[#3cbfb3] transition"
+          >
+            <SlidersHorizontal size={15} />
+            Filtros
+            {totalAtivos > 0 && (
+              <span className="bg-[#3cbfb3] text-[#0f2e2b] text-[10px] font-black rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                {totalAtivos}
+              </span>
+            )}
+          </button>
+          <select
+            value={ordem}
+            onChange={e => {
+              setOrdem(e.target.value)
+              aplicar(filtros, e.target.value)
+            }}
+            className="ml-auto text-sm border border-gray-200 rounded-xl px-3 py-2 text-gray-700 outline-none bg-white shrink-0"
+          >
+            <option value="">Ordenar</option>
+            <option value="popularidade">Popularidade</option>
+            <option value="vendidos">Mais vendidos</option>
+            <option value="preco_asc">Menor preço</option>
+            <option value="preco_desc">Maior preço</option>
+          </select>
+          <span className="text-[11px] text-gray-400 shrink-0 whitespace-nowrap">
+            {total} produto{total !== 1 ? 's' : ''}
+          </span>
+        </div>
       </div>
+
+      {/* DRAWER MOBILE */}
+      {drawerAberto && (
+        <>
+          <div
+            className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            onClick={() => setDrawerAberto(false)}
+            aria-hidden
+          />
+          <div className="md:hidden fixed inset-y-0 right-0 z-50 w-[86%] max-w-sm bg-white flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal size={18} className="text-[#3cbfb3]" />
+                <h3 className="text-base font-bold text-gray-900">Filtros</h3>
+                {totalAtivos > 0 && (
+                  <span className="bg-[#3cbfb3] text-[#0f2e2b] text-[10px] font-black rounded-full px-2 py-0.5">
+                    {totalAtivos}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => setDrawerAberto(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition"
+                aria-label="Fechar filtros"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+              {grupos.map(grupo => (
+                <div key={grupo.id}>
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                    {grupo.label}
+                  </p>
+                  <div className="space-y-1.5">
+                    {grupo.opcoes.map(op => {
+                      const sel = (filtros[grupo.id] || []).includes(op.valor)
+                      return (
+                        <button
+                          key={op.valor}
+                          onClick={() => {
+                            const atual = filtros[grupo.id] || []
+                            let novo: string[]
+                            if (grupo.multiple) {
+                              novo = sel ? atual.filter(v => v !== op.valor) : [...atual, op.valor]
+                            } else {
+                              novo = sel ? [] : [op.valor]
+                            }
+                            handleFiltroChange(grupo.id, novo)
+                          }}
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-sm transition ${
+                            sel
+                              ? 'bg-[#e8f8f7] border-[#3cbfb3] text-[#0f2e2b] font-semibold'
+                              : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          <span>{op.label}</span>
+                          {sel && <Check size={14} className="text-[#3cbfb3]" />}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-gray-100 p-4 flex gap-2">
+              {(totalAtivos > 0 || ordem) && (
+                <button
+                  onClick={() => { limparTudo(); setDrawerAberto(false) }}
+                  className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                >
+                  Limpar
+                </button>
+              )}
+              <button
+                onClick={() => setDrawerAberto(false)}
+                className="flex-1 py-3 rounded-xl bg-[#3cbfb3] text-white text-sm font-bold hover:bg-[#2a9d8f] transition"
+              >
+                Ver {total} produto{total !== 1 ? 's' : ''}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

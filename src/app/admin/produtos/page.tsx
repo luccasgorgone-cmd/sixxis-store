@@ -233,6 +233,7 @@ export default function AdminProdutosPage() {
                                 width={48}
                                 height={48}
                                 className="w-full h-full object-cover"
+                                unoptimized
                               />
                             ) : (
                               <ImageOff size={16} className="text-gray-400" />

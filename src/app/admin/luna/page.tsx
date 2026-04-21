@@ -337,7 +337,7 @@ export default function LunaAdminPage() {
     setConfigEditada((prev) => ({ ...prev, [chave]: valor }))
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4 flex-wrap">
@@ -385,13 +385,13 @@ export default function LunaAdminPage() {
       </div>
 
       {/* Abas */}
-      <div className="flex gap-1 bg-gray-100/80 rounded-2xl p-1.5">
+      <div className="flex gap-1 bg-gray-100/80 rounded-2xl p-1.5 overflow-x-auto scrollbar-hide">
         {ABAS.map((aba) => (
           <button
             key={aba.id}
             onClick={() => setAbaAtiva(aba.id)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                        transition-all flex-1 justify-center ${
+                        transition-all shrink-0 md:flex-1 justify-center whitespace-nowrap ${
                           abaAtiva === aba.id
                             ? 'bg-white shadow-sm text-gray-900'
                             : 'text-gray-500 hover:text-gray-700'

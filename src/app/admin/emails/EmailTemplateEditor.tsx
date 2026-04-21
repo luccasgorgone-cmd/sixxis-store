@@ -136,29 +136,31 @@ export default function EmailTemplateEditor({ templates: initialTemplates }: Pro
         </div>
       )}
 
-      <div className="flex gap-6">
-        {/* Sidebar de tabs */}
-        <div className="w-56 shrink-0">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            {templates.map((t) => (
-              <button
-                key={t.tipo}
-                onClick={() => { setActiveTab(t.tipo); setShowPreview(false); setShowTestInput(false) }}
-                className={`w-full text-left px-4 py-3 text-sm border-b border-gray-100 last:border-0 flex items-center justify-between gap-2 transition-colors ${
-                  activeTab === t.tipo
-                    ? 'bg-[#e8f8f7] text-[#1a4f4a] font-semibold'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <span className="flex items-center gap-2 truncate">
-                  <Mail size={14} className={activeTab === t.tipo ? 'text-[#3cbfb3]' : 'text-gray-400'} />
-                  <span className="truncate">{t.label}</span>
-                </span>
-                <span
-                  className={`w-2 h-2 rounded-full shrink-0 ${t.ativo ? 'bg-green-400' : 'bg-gray-300'}`}
-                />
-              </button>
-            ))}
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+        {/* Sidebar de tabs — lista em mobile, coluna em desktop */}
+        <div className="w-full md:w-56 md:shrink-0">
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden md:overflow-visible">
+            <div className="flex md:flex-col overflow-x-auto md:overflow-visible">
+              {templates.map((t) => (
+                <button
+                  key={t.tipo}
+                  onClick={() => { setActiveTab(t.tipo); setShowPreview(false); setShowTestInput(false) }}
+                  className={`shrink-0 md:shrink md:w-full text-left px-4 py-3 text-sm border-b md:border-b md:border-r-0 border-r border-gray-100 last:border-0 flex items-center justify-between gap-2 transition-colors ${
+                    activeTab === t.tipo
+                      ? 'bg-[#e8f8f7] text-[#1a4f4a] font-semibold'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <Mail size={14} className={activeTab === t.tipo ? 'text-[#3cbfb3]' : 'text-gray-400'} />
+                    <span className="truncate">{t.label}</span>
+                  </span>
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 ${t.ativo ? 'bg-green-400' : 'bg-gray-300'}`}
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

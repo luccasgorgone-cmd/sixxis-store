@@ -103,23 +103,23 @@ export default function AdminClientesPage() {
   const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
 
       {/* HEADER */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <Users size={24} className="text-[#3cbfb3]" /> Clientes
+      <div className="flex items-start justify-between gap-3 mb-6 md:mb-8">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
+            <Users size={22} className="text-[#3cbfb3]" /> Clientes
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-xs md:text-sm text-gray-500 mt-0.5">
             {loading ? 'Carregando...' : `${total} cliente${total !== 1 ? 's' : ''} cadastrado${total !== 1 ? 's' : ''}`}
           </p>
         </div>
         <button
           onClick={buscarClientes}
-          className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+          className="shrink-0 flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-xl px-3 md:px-4 py-2 md:py-2.5 text-xs md:text-sm font-medium transition-colors"
         >
-          <RefreshCcw size={15} /> Atualizar
+          <RefreshCcw size={15} /> <span className="hidden sm:inline">Atualizar</span>
         </button>
       </div>
 
@@ -146,8 +146,8 @@ export default function AdminClientesPage() {
 
       {/* BARRA DE BUSCA + FILTROS */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
-        <div className="flex gap-3">
-          <div className="relative flex-1">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1 w-full">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -158,34 +158,36 @@ export default function AdminClientesPage() {
             />
           </div>
 
-          <select
-            value={ordenar}
-            onChange={e => setOrdenar(e.target.value)}
-            className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white min-w-[160px]"
-          >
-            <option value="createdAt">Mais recentes</option>
-            <option value="totalGasto">Maior gasto</option>
-            <option value="totalPedidos">Mais pedidos</option>
-            <option value="ultimaCompra">Última compra</option>
-          </select>
+          <div className="flex gap-3 w-full md:w-auto">
+            <select
+              value={ordenar}
+              onChange={e => setOrdenar(e.target.value)}
+              className="flex-1 md:flex-initial border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white md:min-w-[160px]"
+            >
+              <option value="createdAt">Mais recentes</option>
+              <option value="totalGasto">Maior gasto</option>
+              <option value="totalPedidos">Mais pedidos</option>
+              <option value="ultimaCompra">Última compra</option>
+            </select>
 
-          <button
-            onClick={() => setFiltrosAbertos(!filtrosAbertos)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-              filtrosAtivos > 0
-                ? 'bg-[#0f2e2b] text-white border-[#0f2e2b]'
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            <Filter size={15} />
-            Filtros
-            {filtrosAtivos > 0 && (
-              <span className="bg-[#3cbfb3] text-[#0f2e2b] text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                {filtrosAtivos}
-              </span>
-            )}
-            <ChevronDown size={14} className={`transition-transform ${filtrosAbertos ? 'rotate-180' : ''}`} />
-          </button>
+            <button
+              onClick={() => setFiltrosAbertos(!filtrosAbertos)}
+              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                filtrosAtivos > 0
+                  ? 'bg-[#0f2e2b] text-white border-[#0f2e2b]'
+                  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <Filter size={15} />
+              Filtros
+              {filtrosAtivos > 0 && (
+                <span className="bg-[#3cbfb3] text-[#0f2e2b] text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                  {filtrosAtivos}
+                </span>
+              )}
+              <ChevronDown size={14} className={`transition-transform ${filtrosAbertos ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
         </div>
 
         {filtrosAbertos && (

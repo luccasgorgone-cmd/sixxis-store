@@ -53,10 +53,10 @@ export default async function EmailsAdminPage() {
   })
 
   return (
-    <div className="p-8 max-w-full overflow-hidden">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0a0a0a]">E-mails Transacionais</h1>
-        <p className="text-gray-500 text-sm mt-1">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold text-[#0a0a0a]">E-mails Transacionais</h1>
+        <p className="text-gray-500 text-xs md:text-sm mt-1">
           Configure os templates de email enviados automaticamente pela loja.
           {dbTemplates.length === 0 && (
             <span className="ml-2 text-amber-600 font-medium">

@@ -275,7 +275,27 @@ export async function GET(request: NextRequest) {
     .reduce((sum, s) => sum + s._count._all, 0)
 
   // ── Sessions carrinho ──────────────────────────────────────────────────────
-  const totalSessoesCarrinho = 0 // analytics data, not tracked here
+  // Conta sessões únicas que adicionaram algo ao carrinho no período. Pedidos
+  // pagos também contam como "adicionou ao carrinho" para o funil ficar consistente.
+  let totalSessoesCarrinho = 0
+  try {
+    const [cartEvents, purchaseEvents] = await Promise.all([
+      prisma.eventoAnalitico.findMany({
+        where: { tipo: 'add_to_cart', createdAt: { gte: from, lte: to } },
+        select: { sessionId: true },
+      }),
+      prisma.eventoAnalitico.findMany({
+        where: { tipo: 'purchase', createdAt: { gte: from, lte: to } },
+        select: { sessionId: true },
+      }),
+    ])
+    const sessoes = new Set<string>()
+    cartEvents.forEach((e) => { if (e.sessionId) sessoes.add(e.sessionId) })
+    purchaseEvents.forEach((e) => { if (e.sessionId) sessoes.add(e.sessionId) })
+    totalSessoesCarrinho = Math.max(sessoes.size, totalPedidos)
+  } catch {
+    totalSessoesCarrinho = totalPedidos
+  }
 
   return NextResponse.json({
     metrics: {
