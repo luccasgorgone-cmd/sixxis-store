@@ -270,9 +270,10 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
       .finally(() => setLoaded(true))
   }, [])
 
-  // ── Bolha de boas-vindas após 4 s ─────────────────────────────────────────
+  // ── Bolha de boas-vindas após 4 s (desktop apenas) ───────────────────────
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return
     const t = setTimeout(() => setMostrarBolha(true), 4000)
     return () => clearTimeout(t)
   }, [])

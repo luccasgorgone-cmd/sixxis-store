@@ -204,7 +204,12 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
   useEffect(() => {
     const saved = localStorage.getItem('sixxis_cep')
-    if (saved) setCepSalvo(saved)
+    if (!saved) return
+    if (/^16015-?480$/.test(saved)) {
+      localStorage.removeItem('sixxis_cep')
+      return
+    }
+    setCepSalvo(saved)
   }, [])
 
   useEffect(() => {

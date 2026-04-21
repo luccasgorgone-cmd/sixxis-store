@@ -445,7 +445,9 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
                 <input
                   name="slug"
                   value={form.slug}
-                  onChange={handleChange}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))
+                  }
                   required
                   placeholder="climatizador-sixxis-pro-2000"
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"

@@ -399,12 +399,19 @@ export default function AdminPedidosPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full table-auto">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
-                    {['', '#ID', 'Cliente', 'Data', 'Itens', 'Frete', 'Total', 'Pagamento', 'Status', ''].map((h, i) => (
-                      <th key={i} className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-3.5">{h}</th>
-                    ))}
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5 w-8"></th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5">#ID</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5">Cliente</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5 whitespace-nowrap">Data</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5 hidden xl:table-cell">Itens</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5 hidden 2xl:table-cell">Frete</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5">Total</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5 hidden xl:table-cell">Pagamento</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5">Status</th>
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5 hidden 2xl:table-cell">Rastreio</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -416,34 +423,34 @@ export default function AdminPedidosPage() {
                           className={`border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer ${isOpen ? 'bg-gray-50' : ''}`}
                           onClick={() => toggleExpand(p.id)}
                         >
-                          <td className="px-4 py-4 w-8">
+                          <td className="px-3 py-4 w-8">
                             {isOpen
                               ? <ChevronDown className="w-4 h-4 text-[#3cbfb3]" />
                               : <ChevronRight className="w-4 h-4 text-gray-400" />
                             }
                           </td>
-                          <td className="px-4 py-4">
+                          <td className="px-3 py-4">
                             <span className="text-xs font-mono font-semibold text-gray-600 bg-gray-100 rounded-lg px-2 py-1">
                               #{p.id.slice(-8).toUpperCase()}
                             </span>
                           </td>
-                          <td className="px-4 py-4">
-                            <p className="text-sm font-medium text-gray-900">{p.cliente.nome}</p>
-                            <p className="text-xs text-gray-400">{p.cliente.email}</p>
+                          <td className="px-3 py-4 max-w-[180px]">
+                            <p className="text-sm font-medium text-gray-900 truncate" title={p.cliente.nome}>{p.cliente.nome}</p>
+                            <p className="text-xs text-gray-400 truncate" title={p.cliente.email}>{p.cliente.email}</p>
                           </td>
-                          <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">{fmtDate(p.createdAt)}</td>
-                          <td className="px-4 py-4 text-sm text-gray-500">{p.itens.length} item{p.itens.length !== 1 ? 's' : ''}</td>
-                          <td className="px-4 py-4 text-sm text-gray-500">{fmt(Number(p.frete))}</td>
-                          <td className="px-4 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">{fmt(Number(p.total))}</td>
-                          <td className="px-4 py-4">
+                          <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{fmtDate(p.createdAt)}</td>
+                          <td className="px-3 py-4 text-sm text-gray-500 hidden xl:table-cell">{p.itens.length} item{p.itens.length !== 1 ? 's' : ''}</td>
+                          <td className="px-3 py-4 text-sm text-gray-500 hidden 2xl:table-cell">{fmt(Number(p.frete))}</td>
+                          <td className="px-3 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">{fmt(Number(p.total))}</td>
+                          <td className="px-3 py-4 hidden xl:table-cell">
                             <span className="text-xs capitalize text-gray-500">{p.formaPagamento}</span>
                           </td>
-                          <td className="px-4 py-4">
-                            <span className={`text-xs font-semibold rounded-full px-2.5 py-1 border capitalize ${STATUS_BADGE[p.status] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                          <td className="px-3 py-4">
+                            <span className={`text-xs font-semibold rounded-full px-2.5 py-1 border capitalize whitespace-nowrap ${STATUS_BADGE[p.status] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                               {STATUS_LABELS[p.status] ?? p.status}
                             </span>
                           </td>
-                          <td className="px-4 py-4">
+                          <td className="px-3 py-4 hidden 2xl:table-cell">
                             {p.codigoRastreio && (
                               <span className="text-xs font-mono text-purple-600 bg-purple-50 px-2 py-1 rounded-lg">
                                 {p.codigoRastreio}

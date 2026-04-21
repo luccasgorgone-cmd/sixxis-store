@@ -85,7 +85,7 @@ export default async function HomePage() {
     <main className="min-h-screen bg-transparent">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
-      <div className="py-4 sm:py-5">
+      <div className="py-4 sm:py-5 min-h-[220px] md:min-h-[360px]">
       {banners.length > 0 ? (
         <BannerCarousel banners={banners} />
       ) : (
@@ -129,7 +129,7 @@ export default async function HomePage() {
       />
 
       {/* ── 3. Mais Vendidos ─────────────────────────────────────── */}
-      <section className="bg-transparent border-b border-white/10 py-8">
+      <section className="bg-transparent border-b border-white/10 py-8 min-h-[280px] md:min-h-[420px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header da seção */}

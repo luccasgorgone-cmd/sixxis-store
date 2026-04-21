@@ -165,7 +165,7 @@ export default function OfertasRelampago({ produtos }: Props) {
   const produtosOferta = produtos.slice(0, 3)
 
   return (
-    <section className="relative overflow-hidden py-12 sm:py-16 border-t border-b border-white/10">
+    <section className="relative overflow-hidden py-12 sm:py-16 border-t border-b border-white/10 min-h-[400px]">
 
       {/* Overlay escuro suave para contraste com o wallpaper */}
       <div className="absolute inset-0 bg-black/30 pointer-events-none" />

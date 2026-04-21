@@ -33,7 +33,7 @@ const depoimentos = [
 
 export default function Depoimentos() {
   return (
-    <section className="bg-transparent border-b border-white/10 py-10">
+    <section className="bg-transparent border-b border-white/10 py-10 min-h-[260px] md:min-h-[340px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mb-6">
           <h2 className="text-xl font-extrabold text-white">O que nossos clientes dizem</h2>

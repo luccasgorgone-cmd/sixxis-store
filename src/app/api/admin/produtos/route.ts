@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
   const {
     sku,
     nome,
-    slug,
+    slug: slugRaw,
     descricao,
     categoria,
     modelo,
@@ -87,8 +87,13 @@ export async function POST(request: NextRequest) {
     faqs,
   } = body
 
-  if (!nome || !slug || !categoria || preco == null) {
+  if (!nome || !slugRaw || !categoria || preco == null) {
     return NextResponse.json({ error: 'Campos obrigatórios faltando' }, { status: 400 })
+  }
+
+  const slug = String(slugRaw).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+  if (!slug) {
+    return NextResponse.json({ error: 'Slug inválido' }, { status: 400 })
   }
 
   const erpProdutoId = `ADMIN-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`

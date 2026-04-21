@@ -6,7 +6,7 @@ import FooterAtendimentoBtn from './FooterAtendimentoBtn'
 function PaymentBadge({ label, cor, circular = false }: { label: string; cor: string; circular?: boolean }) {
   return (
     <span
-      className={`inline-flex items-center justify-center text-white text-[10px] font-bold ${
+      className={`inline-flex items-center justify-center text-white text-[10px] font-bold shrink-0 whitespace-nowrap ${
         circular ? 'rounded-full w-7 h-7' : 'px-2.5 py-1 rounded-lg'
       }`}
       style={{ backgroundColor: cor }}
@@ -258,7 +258,7 @@ export default async function Footer() {
               <span className="text-white/60 text-xs font-semibold uppercase tracking-wide shrink-0">
                 Formas de Pagamento:
               </span>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <PaymentBadge label="PIX"        cor="#32bcad" />
                 <PaymentBadge label="VISA"       cor="#1a1f71" />
                 <PaymentBadge label="MC"         cor="#eb001b" circular />

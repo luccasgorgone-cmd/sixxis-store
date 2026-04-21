@@ -49,6 +49,7 @@ interface Props {
 export default function FloatingButtons({ agenteAtivo }: Props) {
   const [drawerAberto, setDrawerAberto] = useState(false)
   const [oculto, setOculto] = useState<BotaoOcultado>({ wa: false, luna: false, expiresAt: null })
+  const [footerVisivel, setFooterVisivel] = useState(false)
   const observerRef = useRef<MutationObserver | null>(null)
 
   // Migrate old keys + load state
@@ -82,6 +83,19 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
     return () => observerRef.current?.disconnect()
   }, [])
 
+  // Esconde os botões flutuantes quando o footer está visível para não sobrepor
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const footer = document.querySelector('footer')
+    if (!footer) return
+    const io = new IntersectionObserver(
+      ([entry]) => setFooterVisivel(entry.isIntersecting),
+      { threshold: 0.1 },
+    )
+    io.observe(footer)
+    return () => io.disconnect()
+  }, [])
+
   // Expose restore function globally
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,10 +125,12 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
     limparEstado()
   }
 
+  const ocultarPorFooter = footerVisivel ? 'opacity-0 pointer-events-none' : 'opacity-100'
+
   return (
     <>
       <div
-        className="fixed bottom-6 z-[999] flex flex-col-reverse items-end gap-3"
+        className={`fixed bottom-6 z-[999] flex flex-col-reverse items-end gap-3 transition-opacity duration-300 ${ocultarPorFooter}`}
         style={containerStyle}
       >
         {!oculto.wa && (
@@ -128,7 +144,10 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
 
       {/* MINI-TAB LATERAL */}
       {(oculto.wa || oculto.luna) && (
-        <div className="fixed z-[998] right-0 transition-all duration-300" style={{ bottom: '120px' }}>
+        <div
+          className={`fixed z-[998] right-0 transition-all duration-300 ${ocultarPorFooter}`}
+          style={{ bottom: '120px' }}
+        >
           <button
             onClick={restaurarTodos}
             className="flex flex-col items-center gap-1.5 bg-white rounded-l-2xl shadow-xl px-2.5 py-3 border border-r-0 border-gray-100 hover:shadow-2xl hover:bg-[#f0fffe] transition-all duration-200 group"

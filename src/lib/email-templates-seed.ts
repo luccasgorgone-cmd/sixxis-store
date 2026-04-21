@@ -14,7 +14,7 @@ const BASE_HEADER = `
 const BASE_FOOTER = `
   <div style="background:#111827;padding:24px 40px;text-align:center;">
     <p style="color:#9ca3af;font-size:12px;margin:0 0 8px;">
-      © 2025 Sixxis — CNPJ: 54.978.947/0001-09
+      © {{ano}} Sixxis — CNPJ: 54.978.947/0001-09
     </p>
     <p style="color:#6b7280;font-size:11px;margin:0;">
       R. Anhanguera, 1711 - Icaray, Araçatuba - SP | (18) 99747-4701
@@ -35,13 +35,13 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'boas_vindas',
     ativo: true,
-    assunto: 'Bem-vindo à Sixxis, {{nome}}! 🎉',
+    assunto: 'Bem-vindo à Sixxis, {{nome}}',
     prazo: 0,
     unidadePrazo: 'horas',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <h1 style="color:#0a0a0a;font-size:28px;font-weight:700;margin:0 0 16px;">
-    Olá, {{nome}}! Bem-vindo à Sixxis 🎉
+    Olá, {{nome}}! Bem-vindo à Sixxis
   </h1>
   <p style="color:#4b5563;font-size:16px;line-height:1.7;margin:0 0 24px;">
     Sua conta foi criada com sucesso. Agora você tem acesso a produtos originais Sixxis com entrega rápida para todo o Brasil.
@@ -65,14 +65,14 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'confirmacao_pedido',
     ativo: true,
-    assunto: 'Pedido #{{pedido_id}} confirmado! ✅',
+    assunto: 'Pedido #{{pedido_id}} confirmado',
     prazo: 0,
     unidadePrazo: 'horas',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <div style="text-align:center;margin-bottom:32px;">
     <div style="width:72px;height:72px;background:#e8f8f7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
-      <span style="font-size:32px;">✅</span>
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
     </div>
     <h1 style="color:#0a0a0a;font-size:26px;font-weight:700;margin:0 0 8px;">Pedido confirmado!</h1>
     <p style="color:#4b5563;font-size:16px;margin:0;">Obrigado por comprar na Sixxis, {{nome}}!</p>
@@ -104,15 +104,15 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'pedido_enviado',
     ativo: true,
-    assunto: 'Seu pedido #{{pedido_id}} saiu para entrega! 🚚',
+    assunto: 'Seu pedido #{{pedido_id}} saiu para entrega',
     prazo: 0,
     unidadePrazo: 'horas',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <div style="text-align:center;margin-bottom:32px;">
-    <span style="font-size:48px;">🚚</span>
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
     <h1 style="color:#0a0a0a;font-size:26px;font-weight:700;margin:16px 0 8px;">
-      Seu pedido está a caminho!
+      Seu pedido está a caminho
     </h1>
     <p style="color:#4b5563;font-size:16px;margin:0;">{{nome}}, seu pedido foi enviado.</p>
   </div>
@@ -135,20 +135,20 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'followup_entrega',
     ativo: true,
-    assunto: 'Seu pedido chegou, {{nome}}? Como foi a experiência? ⭐',
+    assunto: 'Seu pedido chegou, {{nome}}? Como foi a experiência',
     prazo: 15,
     unidadePrazo: 'dias',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <h1 style="color:#0a0a0a;font-size:24px;font-weight:700;margin:0 0 16px;">
-    Olá, {{nome}}! Tudo certo com seu pedido? 😊
+    Olá, {{nome}}! Tudo certo com seu pedido?
   </h1>
   <p style="color:#4b5563;font-size:16px;line-height:1.7;margin:0 0 24px;">
     Já faz alguns dias desde que você recebeu seu pedido #{{pedido_id}}. Gostaríamos de saber se tudo chegou perfeitamente e se você está satisfeito!
   </p>
   <div style="background:#fef3c7;border-radius:12px;padding:24px;margin-bottom:28px;text-align:center;">
     <p style="color:#92400e;font-weight:700;font-size:16px;margin:0 0 16px;">
-      Sua opinião é muito importante para nós ⭐
+      Sua opinião é muito importante para nós
     </p>
     <a href="{{site_url}}/produtos/{{produto_slug}}#avaliacoes"
        style="display:inline-block;background:#f59e0b;color:white;font-size:15px;font-weight:700;padding:14px 32px;border-radius:10px;text-decoration:none;">
@@ -171,13 +171,13 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'abandono_carrinho',
     ativo: true,
-    assunto: '{{nome}}, você esqueceu algo no carrinho! 🛒',
+    assunto: '{{nome}}, você esqueceu algo no carrinho',
     prazo: 2,
     unidadePrazo: 'horas',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <h1 style="color:#0a0a0a;font-size:24px;font-weight:700;margin:0 0 8px;">
-    Psst... você esqueceu algo! 🛒
+    Você esqueceu algo
   </h1>
   <p style="color:#4b5563;font-size:16px;line-height:1.7;margin:0 0 28px;">
     {{nome}}, você deixou alguns itens no seu carrinho. Eles ainda estão te esperando!
@@ -185,7 +185,7 @@ export const EMAIL_TEMPLATES = [
   {{ITENS_CARRINHO}}
   <div style="background:#e8f8f7;border-radius:12px;padding:20px;margin:24px 0;text-align:center;">
     <p style="color:#1a4f4a;font-size:14px;font-weight:600;margin:0 0 12px;">
-      ⚡ Estoque limitado — garanta o seu agora!
+      Estoque limitado — garanta o seu agora
     </p>
     <a href="{{site_url}}/carrinho" style="display:inline-block;background:#3cbfb3;color:white;font-size:16px;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;">
       Finalizar Compra →
@@ -199,15 +199,15 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'volta_estoque',
     ativo: true,
-    assunto: '{{produto_nome}} está disponível novamente! ⚡',
+    assunto: '{{produto_nome}} está disponível novamente',
     prazo: 0,
     unidadePrazo: 'horas',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <div style="text-align:center;margin-bottom:32px;">
-    <span style="font-size:48px;">⚡</span>
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
     <h1 style="color:#0a0a0a;font-size:24px;font-weight:700;margin:16px 0 8px;">
-      Voltou ao estoque!
+      Voltou ao estoque
     </h1>
     <p style="color:#4b5563;font-size:16px;">{{nome}}, você pediu para ser avisado.</p>
   </div>
@@ -217,7 +217,7 @@ export const EMAIL_TEMPLATES = [
       Comprar Agora →
     </a>
     <p style="color:#ef4444;font-size:13px;margin-top:12px;font-weight:600;">
-      ⚠️ Estoque limitado — pode esgotar novamente!
+      Estoque limitado — pode esgotar novamente
     </p>
   </div>
 </div>`),
@@ -225,15 +225,15 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'cupom_especial',
     ativo: true,
-    assunto: '{{nome}}, temos um cupom exclusivo para você! 🎁',
+    assunto: '{{nome}}, temos um cupom exclusivo para você',
     prazo: 0,
     unidadePrazo: 'horas',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <div style="text-align:center;margin-bottom:32px;">
-    <span style="font-size:48px;">🎁</span>
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
     <h1 style="color:#0a0a0a;font-size:26px;font-weight:700;margin:16px 0 8px;">
-      Um presente especial para você!
+      Um presente especial para você
     </h1>
     <p style="color:#4b5563;font-size:16px;">{{nome}}, preparamos um cupom exclusivo.</p>
   </div>
@@ -256,13 +256,15 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'solicitacao_avaliacao',
     ativo: true,
-    assunto: 'Avalie seu pedido #{{pedido_id}} e ganhe pontos! ⭐',
+    assunto: 'Avalie seu pedido #{{pedido_id}} e ganhe pontos',
     prazo: 7,
     unidadePrazo: 'dias',
     corpo: wrapTemplate(`
 <div style="padding:40px;background:#ffffff;">
   <div style="text-align:center;margin-bottom:32px;">
-    <div style="font-size:48px;margin-bottom:16px;">⭐⭐⭐⭐⭐</div>
+    <div style="margin-bottom:16px;">
+      ${Array(5).fill(`<svg width="36" height="36" viewBox="0 0 24 24" fill="#facc15" stroke="#facc15" stroke-width="1" stroke-linejoin="round" style="display:inline-block;margin:0 2px;"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`).join('')}
+    </div>
     <h1 style="color:#0a0a0a;font-size:24px;font-weight:700;margin:0 0 8px;">
       Como foi sua experiência?
     </h1>

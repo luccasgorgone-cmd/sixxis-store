@@ -75,7 +75,8 @@ export async function GET(request: NextRequest) {
     prisma.pedido.aggregate({ where: prevPaidWhere, _sum: { total: true }, _count: true }),
     prisma.cliente.count({ where: { createdAt: { gte: prevFrom, lte: prevTo } } }),
     prisma.produto.count({ where: { ativo: true } }),
-    prisma.cliente.count(),
+    // Mantém em sincronia com /api/admin/clientes (contagem total sem filtros).
+    prisma.cliente.count({ where: {} }),
     prisma.pedido.count({ where: { status: { in: ['pendente', 'PENDENTE'] } } }),
     prisma.itemPedido.findMany({
       where: { pedido: { createdAt: { gte: from, lte: to }, status: { notIn: ['cancelado', 'CANCELADO'] } } },

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   Plus, Search, Pencil, Trash2, Loader2,
-  ChevronLeft, ChevronRight, Package,
+  ChevronLeft, ChevronRight, Package, ImageOff,
   CheckCircle, AlertTriangle,
 } from 'lucide-react'
 import { getCategoriaBadge } from '@/lib/admin-tokens'
@@ -235,11 +235,11 @@ export default function AdminProdutosPage() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <Package className="w-5 h-5 text-gray-300" />
+                              <ImageOff size={16} className="text-gray-400" />
                             )}
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 line-clamp-1">{p.nome}</p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-900 line-clamp-1" title={p.nome}>{p.nome}</p>
                             {p.modelo && <p className="text-xs text-gray-400 mt-0.5">{p.modelo}</p>}
                           </div>
                         </div>

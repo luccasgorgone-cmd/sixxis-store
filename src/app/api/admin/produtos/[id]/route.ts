@@ -47,7 +47,7 @@ export async function PUT(
   const {
     sku,
     nome,
-    slug,
+    slug: slugRaw,
     descricao,
     categoria,
     modelo,
@@ -63,6 +63,10 @@ export async function PUT(
     faqs,
     imagensPorVariacao,
   } = body
+
+  const slug = slugRaw
+    ? String(slugRaw).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+    : slugRaw
 
   // Validar SKUs únicos das variações
   const variacoesInput: VariacaoInput[] = temVariacoes ? (variacoes ?? []) : []

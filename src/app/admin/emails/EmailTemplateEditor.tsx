@@ -123,7 +123,7 @@ export default function EmailTemplateEditor({ templates: initialTemplates }: Pro
   if (!current) return null
 
   return (
-    <div className="flex flex-col gap-0">
+    <div className="flex flex-col gap-0 max-w-full overflow-hidden">
       {/* Toast */}
       {toast && (
         <div
@@ -338,7 +338,8 @@ export default function EmailTemplateEditor({ templates: initialTemplates }: Pro
                     onChange={(e) => updateCurrent({ corpo: e.target.value })}
                     rows={20}
                     spellCheck={false}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] resize-y leading-relaxed"
+                    style={{ maxWidth: '100%' }}
+                    className="w-full max-w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] resize-y leading-relaxed"
                     placeholder="HTML do email..."
                   />
                   <p className="text-xs text-gray-400 mt-1">

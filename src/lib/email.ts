@@ -101,7 +101,8 @@ export function gerarHtmlTemplate(tipo: string, variaveis: Record<string, any>):
 // ─── Template helpers ────────────────────────────────────────────────────────
 
 export function renderTemplate(corpo: string, vars: Record<string, string>): string {
-  return Object.entries(vars).reduce((html, [key, val]) => {
+  const varsComAno = { ano: String(new Date().getFullYear()), ...vars }
+  return Object.entries(varsComAno).reduce((html, [key, val]) => {
     return html.replaceAll(`{{${key}}}`, val ?? '')
   }, corpo)
 }

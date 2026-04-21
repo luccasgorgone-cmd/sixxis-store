@@ -22,12 +22,15 @@ export default function CalcFrete({ produtoId, peso = 15 }: Props) {
 
   useEffect(() => {
     const cepSalvo = localStorage.getItem('sixxis_cep') || ''
-    if (cepSalvo) {
-      const cepLimpo = cepSalvo.replace(/\D/g, '')
-      setCep(cepLimpo)
-      if (cepLimpo.length === 8) {
-        calcularFrete(cepLimpo)
-      }
+    if (!cepSalvo) return
+    if (/^16015-?480$/.test(cepSalvo)) {
+      localStorage.removeItem('sixxis_cep')
+      return
+    }
+    const cepLimpo = cepSalvo.replace(/\D/g, '')
+    setCep(cepLimpo)
+    if (cepLimpo.length === 8) {
+      calcularFrete(cepLimpo)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

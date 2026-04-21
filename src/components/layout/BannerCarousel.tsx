@@ -35,7 +35,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
             className="w-full rounded-2xl animate-pulse"
             style={{
               background:
-                'linear-gradient(135deg, #0b2220 0%, #0f2e2b 50%, #1a4f4a 100%)',
+                'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 60%, rgba(15,46,43,0.7) 100%)',
               aspectRatio: '1920/560',
               maxHeight: '560px',
               minHeight: '220px',
@@ -53,8 +53,13 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
     <section className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div
-          className="relative w-full overflow-hidden rounded-2xl bg-[#0f2e2b] select-none"
-          style={{ aspectRatio: '1920/560', maxHeight: '560px' }}
+          className="relative w-full overflow-hidden rounded-2xl select-none"
+          style={{
+            aspectRatio: '1920/560',
+            maxHeight: '560px',
+            background:
+              'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 100%)',
+          }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >

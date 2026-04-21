@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   LayoutDashboard, Package, ShoppingBag, Settings,
-  LogOut, Image as ImageIcon, Tag, Star, Gift,
+  LogOut, Image as ImageIcon, Tag, Star,
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, Handshake, ShieldOff,
   Target, MessageSquare, Clock, Bot,
@@ -38,7 +38,6 @@ const NAV_GROUPS = [
   {
     label: 'Fidelidade',
     items: [
-      { href: '/admin/fidelidade',           label: 'Pontos',         icon: Gift,      exact: false },
       { href: '/admin/avaliacoes',           label: 'Avaliações',     icon: Star,      exact: false },
       { href: '/admin/avaliacoes-parceiros', label: 'Aval. Parceiros',icon: Handshake, exact: false },
       { href: '/admin/emails',               label: 'E-mails',        icon: Mail,      exact: false },

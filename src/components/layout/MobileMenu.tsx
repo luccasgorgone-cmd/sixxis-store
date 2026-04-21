@@ -31,7 +31,8 @@ function WaIcon() {
 }
 
 export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.png' }: Props) {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const logado = status === 'authenticated' && !!session?.user
 
   return (
     <>
@@ -98,7 +99,7 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
           <div className="mx-6 my-2 border-t border-white/10" />
 
           {/* Auth links */}
-          {session ? (
+          {logado ? (
             <>
               <Link
                 href="/minha-conta"

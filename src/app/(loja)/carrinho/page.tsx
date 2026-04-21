@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ShoppingCart, Trash2, Plus, Minus, Tag, ChevronRight,
-  Shield, Truck, RotateCcw, CreditCard, Zap, Package,
-  CheckCircle, AlertCircle, X, Star, Lock, Clock
+  ShieldCheck, Truck, RefreshCw, CreditCard, Zap, Package,
+  CheckCircle, AlertCircle, X, Star, Clock, BadgeCheck, Headphones
 } from 'lucide-react'
 
 // ─── TIPOS ───────────────────────────────────────────────────
@@ -105,9 +105,13 @@ export default function CarrinhoPage() {
 
     lerCarrinho()
 
-    // CEP salvo
+    // CEP salvo (descarta valor dummy "16015-480")
     const cepSalvo = localStorage.getItem('sixxis_cep') || ''
-    if (cepSalvo) setCepInput(cepSalvo)
+    if (cepSalvo && !/^16015-?480$/.test(cepSalvo)) {
+      setCepInput(cepSalvo)
+    } else if (cepSalvo) {
+      localStorage.removeItem('sixxis_cep')
+    }
 
     // Ouvir evento de atualização do carrinho (quando drawer adiciona item)
     window.addEventListener('carrinho-atualizado', lerCarrinho)
@@ -626,20 +630,24 @@ export default function CarrinhoPage() {
                 ← Continuar comprando
               </Link>
 
-              {/* TRUST BADGES */}
-              <div className="mt-5 pt-4 border-t border-gray-50 grid grid-cols-3 gap-3">
+              {/* TRUST BADGES — 6 selos definitivos */}
+              <div className="mt-5 pt-4 border-t border-gray-50 grid grid-cols-2 gap-2">
                 {[
-                  { icon: Lock, label: 'Compra segura', sub: 'SSL 256-bit' },
-                  { icon: RotateCcw, label: 'Troca fácil', sub: '7 dias' },
-                  { icon: Shield, label: 'Garantia', sub: '12 meses' },
-                ].map((b, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1 text-center">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: '#e8f8f7' }}>
-                      <b.icon size={15} style={{ color: '#3cbfb3' }} />
+                  { icon: ShieldCheck, titulo: '12 meses de garantia',       sub: 'Garantia real e documentada' },
+                  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Grátis acima de R$ 500' },
+                  { icon: RefreshCw,   titulo: 'Troca em 7 dias',            sub: 'Sem burocracia' },
+                  { icon: CreditCard,  titulo: '6x sem juros',               sub: 'No cartão de crédito' },
+                  { icon: BadgeCheck,  titulo: 'Produto 100% original',      sub: 'Importadora oficial Sixxis' },
+                  { icon: Headphones,  titulo: 'Suporte especializado',      sub: 'Seg–Sex 8h às 18h' },
+                ].map(({ icon: Icon, titulo, sub }) => (
+                  <div key={titulo} className="flex items-start gap-2.5 p-2.5 rounded-xl border border-gray-100 bg-white">
+                    <div className="shrink-0 w-8 h-8 rounded-lg bg-[#3cbfb3]/10 flex items-center justify-center">
+                      <Icon size={15} className="text-[#3cbfb3]" />
                     </div>
-                    <p className="text-[9px] font-bold text-gray-700 leading-none">{b.label}</p>
-                    <p className="text-[9px] text-gray-400 leading-none">{b.sub}</p>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-gray-800 leading-tight">{titulo}</p>
+                      <p className="text-[11px] text-gray-500 leading-tight mt-0.5">{sub}</p>
+                    </div>
                   </div>
                 ))}
               </div>
