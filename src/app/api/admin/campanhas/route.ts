@@ -71,7 +71,11 @@ export async function POST(req: NextRequest) {
   if (auth) return auth
 
   const body = await req.json()
-  const { tipo, nome, assunto, mensagem, agendadoPara, destinatariosIds, filtroSegmento, whatsappNumeroId } = body
+  const {
+    tipo, nome, assunto, mensagem, agendadoPara, destinatariosIds, filtroSegmento, whatsappNumeroId,
+    publicoAlvo, tituloCopy, corpoCopy, ctaTexto, ctaUrl, produtoDestaqueId, cupomId,
+    canais, emailAssunto, whatsappTexto, dataAgendamento, status,
+  } = body
 
   if (!tipo || !nome || !mensagem) {
     return NextResponse.json({ error: 'tipo, nome e mensagem são obrigatórios' }, { status: 400 })
@@ -102,16 +106,28 @@ export async function POST(req: NextRequest) {
 
   const campanha = await prisma.campanha.create({
     data: {
-      tipo: tipo.toUpperCase(),
+      tipo: String(tipo),
       nome,
-      assunto: assunto || null,
+      assunto: assunto || emailAssunto || null,
       mensagem,
-      agendadoPara: agendadoPara ? new Date(agendadoPara) : null,
-      status: agendadoPara ? 'AGENDADA' : 'RASCUNHO',
+      agendadoPara: agendadoPara ? new Date(agendadoPara) : (dataAgendamento ? new Date(dataAgendamento) : null),
+      status: status ?? (agendadoPara || dataAgendamento ? 'agendada' : 'rascunho'),
       totalDestinatarios: destinatarios.length,
-      filtroSegmento: filtroSegmento || null,
+      totalAlvo: destinatarios.length,
+      filtroSegmento: filtroSegmento || publicoAlvo || null,
       whatsappNumeroId: whatsappNumeroId || null,
       destinatarios: { create: destinatarios },
+      publicoAlvo:       publicoAlvo       ?? null,
+      tituloCopy:        tituloCopy        ?? null,
+      corpoCopy:         corpoCopy         ?? null,
+      ctaTexto:          ctaTexto          ?? null,
+      ctaUrl:            ctaUrl            ?? null,
+      produtoDestaqueId: produtoDestaqueId ?? null,
+      cupomId:           cupomId           ?? null,
+      canais:            canais            ?? null,
+      emailAssunto:      emailAssunto      ?? null,
+      whatsappTexto:     whatsappTexto     ?? null,
+      dataAgendamento:   dataAgendamento ? new Date(dataAgendamento) : null,
     },
     include: { _count: { select: { destinatarios: true } } },
   })

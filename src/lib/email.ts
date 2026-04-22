@@ -43,53 +43,56 @@ export function gerarHtmlTemplate(tipo: string, variaveis: Record<string, any>):
         pedidoId: variaveis.pedido_id || variaveis.pedidoId || 'PEDIDO',
         codigoRastreio: variaveis.codigo_rastreio || variaveis.codigoRastreio || 'Em processamento',
         transportadora: variaveis.transportadora || 'Correios',
-        previsaoEntrega: variaveis.previsao_entrega || variaveis.previsaoEntrega || '5 a 8 dias úteis',
-        linkRastreio: variaveis.link_rastreio || variaveis.linkRastreio || `${siteUrl}/minha-conta/pedidos`,
+        prazoEstimado: variaveis.previsao_entrega || variaveis.previsaoEntrega || '5 a 8 dias úteis',
+        urlRastreio: variaveis.link_rastreio || variaveis.linkRastreio || `${siteUrl}/minha-conta/pedidos`,
         siteUrl,
       })
 
-    case 'abandono_carrinho':
+    case 'abandono_carrinho': {
+      const primeiroItem = (variaveis.itens && variaveis.itens[0]) || {}
+      const totalCarrinho = Number(variaveis.total_carrinho) || Number(variaveis.totalCarrinho) || Number(primeiroItem.preco) || 0
       return templateAbandonoCarrinho({
         nome: variaveis.nome || 'Cliente',
-        itens: variaveis.itens || [],
-        totalCarrinho: Number(variaveis.total_carrinho) || Number(variaveis.totalCarrinho) || 0,
-        cupom: variaveis.cupom,
-        siteUrl,
+        produto: primeiroItem.nome || variaveis.produto || 'seu produto',
+        imagemProduto: primeiroItem.img || variaveis.produto_img,
+        preco: totalCarrinho,
+        carrinhoUrl: `${siteUrl}/carrinho`,
+        cupom: variaveis.cupom || 'SIXXIS10',
       })
+    }
 
     case 'followup_entrega':
       return templateFollowupEntrega({
         nome: variaveis.nome || 'Cliente',
-        pedidoId: variaveis.pedido_id || variaveis.pedidoId || 'PEDIDO',
         produto: variaveis.produto || 'seu produto',
+        produtoSlug: variaveis.produto_slug || variaveis.produtoSlug || '',
         siteUrl,
       })
 
     case 'cupom_especial':
       return templateCupomEspecial({
         nome: variaveis.nome || 'Cliente',
-        cupomCodigo: variaveis.cupom_codigo || variaveis.cupomCodigo || variaveis.codigo || '',
-        desconto: variaveis.desconto || variaveis.cupom_desconto || '10%',
+        codigoCupom: variaveis.cupom_codigo || variaveis.cupomCodigo || variaveis.codigo || '',
+        percentualDesconto: Number(String(variaveis.desconto ?? variaveis.cupom_desconto ?? '10').replace(/\D/g, '')) || 10,
         validade: variaveis.validade || variaveis.cupom_validade || '7 dias',
-        pedidoMinimo: variaveis.pedido_minimo || variaveis.pedidoMinimo,
         siteUrl,
       })
 
     case 'volta_estoque':
       return templateVoltaEstoque({
         nome: variaveis.nome || 'Cliente',
-        produtoNome: variaveis.produto_nome || variaveis.produtoNome || variaveis.produto || '',
-        produtoImg: variaveis.produto_img || variaveis.produtoImg,
-        produtoPreco: variaveis.produto_preco || variaveis.produtoPreco || 'Consultar',
-        produtoUrl: variaveis.produto_url || variaveis.produtoUrl || siteUrl,
+        produto: variaveis.produto_nome || variaveis.produtoNome || variaveis.produto || '',
+        produtoSlug: variaveis.produto_slug || variaveis.produtoSlug || '',
+        imagemProduto: variaveis.produto_img || variaveis.produtoImg,
+        preco: Number(String(variaveis.produto_preco ?? variaveis.produtoPreco ?? 0).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0,
         siteUrl,
       })
 
     case 'solicitacao_avaliacao':
       return templateSolicitacaoAvaliacao({
         nome: variaveis.nome || 'Cliente',
-        pedidoId: variaveis.pedido_id || variaveis.pedidoId || 'PEDIDO',
         produto: variaveis.produto || 'seu produto',
+        produtoSlug: variaveis.produto_slug || variaveis.produtoSlug || '',
         siteUrl,
       })
 
@@ -271,8 +274,8 @@ export async function enviarEmailRastreio(para: string, opts: {
       pedidoId,
       codigoRastreio,
       transportadora: 'Correios',
-      previsaoEntrega: '5 a 10 dias úteis',
-      linkRastreio: 'https://www.correios.com.br/rastreamento',
+      prazoEstimado: '5 a 10 dias úteis',
+      urlRastreio: 'https://www.correios.com.br/rastreamento',
       siteUrl: SITE_URL,
     })
     assunto = `Seu pedido #${idCurto} está a caminho!`
@@ -332,11 +335,13 @@ export async function enviarEmailAbandonoCarrinho(para: string, opts: {
     assunto = renderTemplate(template.assunto, { nome: nomeCliente })
   } else {
     const totalCarrinho = itens.reduce((s, i) => s + i.preco * i.quantidade, 0)
+    const primeiro = itens[0]
     html = templateAbandonoCarrinho({
       nome: nomeCliente,
-      itens: itens.map(i => ({ nome: i.nome, preco: i.preco * i.quantidade })),
-      totalCarrinho,
-      siteUrl: SITE_URL,
+      produto: primeiro?.nome ?? 'seu produto',
+      preco: totalCarrinho,
+      carrinhoUrl: `${SITE_URL}/carrinho`,
+      cupom: 'SIXXIS10',
     })
     assunto = `${nomeCliente}, seu carrinho ainda está esperando`
   }
@@ -372,9 +377,9 @@ export async function enviarEmailVoltaEstoque(para: string, opts: {
   } else {
     html = templateVoltaEstoque({
       nome: 'Cliente',
-      produtoNome: nomeProduto,
-      produtoPreco: 'Consultar',
-      produtoUrl: `${SITE_URL}/produtos/${slugProduto}`,
+      produto: nomeProduto,
+      produtoSlug: slugProduto,
+      preco: 0,
       siteUrl: SITE_URL,
     })
     assunto = `${nomeProduto} está disponível novamente!`
@@ -408,8 +413,8 @@ export async function enviarEmailFollowUp(para: string, opts: {
   } else {
     html = templateFollowupEntrega({
       nome: nomeCliente,
-      pedidoId,
       produto: itens[0]?.nome ?? 'seu produto',
+      produtoSlug: itens[0]?.slug ?? '',
       siteUrl: SITE_URL,
     })
     assunto = `Como foi a entrega do seu pedido, ${nomeCliente}?`

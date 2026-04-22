@@ -408,11 +408,11 @@ model BloqueioFraude {
 
 model Campanha {
   id          String   @id @default(cuid())
-  tipo        String   // 'EMAIL' | 'WHATSAPP'
+  tipo        String   // 'promocional' | 'sazonal' | 'recuperacao' | 'aniversario' | 'lancamento' | 'reengajamento' | 'EMAIL' | 'WHATSAPP'
   nome        String
   assunto     String?
   mensagem    String   @db.Text
-  status      String   @default("RASCUNHO")
+  status      String   @default("rascunho")
   agendadoPara DateTime?
   enviadaEm   DateTime?
   totalDestinatarios Int @default(0)
@@ -423,8 +423,38 @@ model Campanha {
   whatsappNumeroId String?
   whatsappNumero   WhatsappNumero? @relation(fields: [whatsappNumeroId], references: [id])
   destinatarios    CampanhaDestinatario[]
+
+  // Wizard fields (PR3)
+  publicoAlvo       Json?
+  tituloCopy        String?
+  corpoCopy         String?   @db.Text
+  ctaTexto          String?
+  ctaUrl            String?
+  produtoDestaqueId String?
+  cupomId           String?
+  canais            Json?
+  emailAssunto      String?
+  whatsappTexto     String?   @db.Text
+  dataAgendamento   DateTime?
+  totalAlvo         Int       @default(0)
+  totalAbertos      Int       @default(0)
+  totalCliques      Int       @default(0)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model NivelFidelidade {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  nome        String
+  iconeUrl    String?
+  iconeLucide String?
+  cor         String
+  gastoMin    Float
+  gastoMax    Float?
+  cashbackPc  Float
+  ordem       Int     @default(0)
 }
 
 model CampanhaDestinatario {

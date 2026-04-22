@@ -1,106 +1,79 @@
-import { emailBase, emailBotao, emailDivisor, BRAND } from './sixxis-email-design'
+import { emailBase, emailBotao, emailDivisor, svg, BRAND } from './sixxis-email-design'
+
+const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif"
+const fmtValor = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+function hero({
+  eyebrow, titulo, subtitulo, bg = `linear-gradient(135deg, ${BRAND.corEscura}, ${BRAND.corMedia})`,
+}: { eyebrow?: string; titulo: string; subtitulo?: string; bg?: string }) {
+  return `
+    <div class="email-hero-pad" style="background:${bg};padding:44px 40px;text-align:center;">
+      ${eyebrow ? `<p style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;font-family:${FONT};">${eyebrow}</p>` : ''}
+      <h1 style="color:#ffffff;font-size:26px;font-weight:900;line-height:1.25;margin-bottom:${subtitulo ? '8px' : '0'};font-family:${FONT};">${titulo}</h1>
+      ${subtitulo ? `<p style="color:rgba(255,255,255,0.75);font-size:15px;margin:0;font-family:${FONT};">${subtitulo}</p>` : ''}
+    </div>`
+}
+
+function paragrafo(texto: string) {
+  return `<p style="font-size:15px;color:#1f2937;line-height:1.7;margin-bottom:20px;font-family:${FONT};">${texto}</p>`
+}
+
+function selosGrid() {
+  const selo = (icone: string, titulo: string) => `
+    <td width="33%" align="center" class="email-col-half" style="padding:8px;">
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:14px 8px;">
+        ${svg(icone, BRAND.corEscura, 22)}
+        <p style="font-size:11px;color:${BRAND.corEscura};font-weight:700;margin-top:6px;font-family:${FONT};">${titulo}</p>
+      </div>
+    </td>`
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0;">
+      <tr>
+        ${selo('shield', 'SSL seguro')}
+        ${selo('truck', 'Frete grátis')}
+        ${selo('star', 'Garantia 12m')}
+      </tr>
+      <tr>
+        ${selo('credit', '6x sem juros')}
+        ${selo('heart', 'Cashback')}
+        ${selo('package', '30 anos')}
+      </tr>
+    </table>`
+}
 
 // ══════════════════════════════════════════════
 // 1. BOAS-VINDAS
 // ══════════════════════════════════════════════
 export function templateBoasVindas({
-  nome, siteUrl
+  nome, siteUrl,
 }: { nome: string; siteUrl: string }) {
   const conteudo = `
-    <!-- HERO -->
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 60%, #3cbfb3 100%);padding:48px 40px;text-align:center;">
-      <p style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Bem-vindo à família</p>
-      <h1 style="color:#ffffff;font-size:32px;font-weight:900;line-height:1.2;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Olá, ${nome}!
-      </h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:16px;margin-bottom:0;">
-        Estamos muito felizes em ter você aqui.
-      </p>
-    </div>
+    ${hero({
+      eyebrow: 'Bem-vindo à família',
+      titulo: `Olá, ${nome}`,
+      subtitulo: 'Seu desconto de 10% já está ativo',
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Sua conta na <strong>Sixxis Store</strong> foi criada. Já liberamos um cupom exclusivo de boas-vindas para você usar na sua primeira compra.`)}
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div class="email-content-pad" style="padding:40px;">
-
-      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Sua conta na <strong style="color:#0f2e2b;">Sixxis Store</strong> foi criada com sucesso.
-        A partir de agora você tem acesso a toda a nossa linha de climatizadores, aspiradores e
-        spinning — produtos de alta qualidade, direto de Araçatuba para todo o Brasil.
-      </p>
-
-      <!-- Benefícios em destaque -->
-      <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:32px;border:1px solid #e5e7eb;">
-        <p style="font-size:12px;font-weight:800;color:#3cbfb3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">O que você ganha sendo cliente Sixxis</p>
-        ${[
-          '&#127873; Cupom SIXXIS10 — 10% OFF na primeira compra',
-          '&#128176; Cashback de 2% a 6% em todas as compras',
-          '&#128666; Frete grátis acima de R$ 500',
-          '&#128179; 6x sem juros no cartão de crédito',
-          '&#128274; Garantia real de 12 meses em todos os produtos',
-          '&#127775; Programa de fidelidade com níveis Cristal &#8594; Esmeralda'
-        ].map(item => `
-          <div style="margin-bottom:10px;">
-            <p style="font-size:14px;color:#374151;margin:0;line-height:1.5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${item}</p>
-          </div>
-        `).join('')}
+      <div style="background:linear-gradient(135deg, ${BRAND.corEscura}, ${BRAND.corMedia});border-radius:16px;padding:28px;text-align:center;margin-bottom:28px;">
+        ${svg('gift', BRAND.corPrincipal, 32)}
+        <p style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin:10px 0 4px;font-family:${FONT};">Seu cupom de boas-vindas</p>
+        <p style="color:${BRAND.corPrincipal};font-size:32px;font-weight:900;letter-spacing:0.08em;margin-bottom:6px;font-family:${FONT};">SIXXIS10</p>
+        <p style="color:#ffffff;font-size:14px;margin:0;font-family:${FONT};">10% OFF na primeira compra</p>
       </div>
 
-      <!-- CTA Principal -->
-      <div style="text-align:center;margin-bottom:32px;">
-        ${emailBotao({ texto: '&#9889; Explorar produtos agora', href: siteUrl + '/produtos' })}
-        <p style="font-size:12px;color:#9ca3af;margin-top:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-          Use o cupom <strong style="color:#3cbfb3;">SIXXIS10</strong> no checkout para 10% OFF!
-        </p>
+      <div style="text-align:center;margin-bottom:24px;">
+        ${emailBotao({ texto: 'Explorar produtos agora', href: `${siteUrl}/produtos` })}
       </div>
-
+      ${selosGrid()}
       ${emailDivisor()}
-
-      <!-- Categorias -->
-      <div style="margin-top:32px;">
-        <p style="font-size:14px;font-weight:700;color:#0f2e2b;margin-bottom:16px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Explore nossas categorias</p>
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-          <tr>
-            <td width="33%" align="center" style="padding:8px;">
-              <a href="${siteUrl}/produtos?categoria=climatizadores"
-                style="display:block;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px 8px;text-decoration:none;">
-                <p style="font-size:24px;margin-bottom:6px;">&#10052;&#65039;</p>
-                <p style="font-size:12px;font-weight:700;color:#0f2e2b;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Climatizadores</p>
-              </a>
-            </td>
-            <td width="33%" align="center" style="padding:8px;">
-              <a href="${siteUrl}/produtos?categoria=aspiradores"
-                style="display:block;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px 8px;text-decoration:none;">
-                <p style="font-size:24px;margin-bottom:6px;">&#127744;</p>
-                <p style="font-size:12px;font-weight:700;color:#0f2e2b;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Aspiradores</p>
-              </a>
-            </td>
-            <td width="33%" align="center" style="padding:8px;">
-              <a href="${siteUrl}/produtos?categoria=spinning"
-                style="display:block;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px 8px;text-decoration:none;">
-                <p style="font-size:24px;margin-bottom:6px;">&#128692;</p>
-                <p style="font-size:12px;font-weight:700;color:#0f2e2b;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Spinning</p>
-              </a>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-    </div>
-
-    <!-- RODAPÉ SECUNDÁRIO -->
-    <div style="background:#f8fafc;padding:24px 40px;text-align:center;border-top:1px solid #e5e7eb;">
-      <p style="font-size:13px;color:#6b7280;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Dúvidas? Fale conosco:</p>
-      <a href="https://wa.me/${BRAND.whatsapp}"
-        style="display:inline-block;background:#25D366;color:#ffffff;font-weight:700;font-size:13px;
-               padding:10px 24px;border-radius:24px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        &#128172; WhatsApp (18) 99747-4701
-      </a>
-    </div>
-  `
-
+      ${paragrafo(`Dúvidas? Fale com nossa equipe humana via WhatsApp <strong>(18) 99747-4701</strong>.`)}
+    </div>`
   return emailBase({
-    assunto: `Bem-vindo(a) à Sixxis, ${nome}! Seu cupom de boas-vindas está aqui`,
-    preview: `Sua conta foi criada. Aproveite 10% OFF na primeira compra com SIXXIS10.`,
-    conteudo
+    assunto: `Bem-vindo à Sixxis, ${nome} — seu desconto de 10% já está ativo`,
+    preview: `Sua conta foi criada. Aproveite 10% OFF com SIXXIS10.`,
+    conteudo,
   })
 }
 
@@ -108,117 +81,66 @@ export function templateBoasVindas({
 // 2. CONFIRMAÇÃO DE PEDIDO
 // ══════════════════════════════════════════════
 export function templateConfirmacaoPedido({
-  nome, pedidoId, itens, subtotal, frete, total, formaPagamento, siteUrl
+  nome, pedidoId, itens, subtotal, frete, total, formaPagamento, enderecoResumo, siteUrl,
 }: {
   nome: string
   pedidoId: string
-  itens: Array<{nome: string; qtd: number; preco: number; img?: string}>
+  itens: Array<{ nome: string; qtd: number; preco: number; img?: string }>
   subtotal: number
   frete: number
   total: number
   formaPagamento: string
+  enderecoResumo?: string
   siteUrl: string
 }) {
-  const fmtValor = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
   const idCurto = pedidoId.slice(-8).toUpperCase()
+  const linhas = itens.map(i => `
+    <tr>
+      <td width="64" style="padding:8px 0;">
+        ${i.img ? `<img src="${i.img}" width="56" height="56" alt="" style="border-radius:8px;background:#f8fafc;object-fit:contain;"/>` : `<div style="width:56px;height:56px;background:#f8fafc;border-radius:8px;"></div>`}
+      </td>
+      <td style="padding:8px 12px;font-family:${FONT};">
+        <p style="font-size:14px;color:${BRAND.corEscura};font-weight:700;margin:0 0 2px;">${i.nome}</p>
+        <p style="font-size:12px;color:#6b7280;margin:0;">Qtd ${i.qtd} · ${fmtValor(i.preco)}</p>
+      </td>
+      <td align="right" style="padding:8px 0;font-family:${FONT};">
+        <p style="font-size:14px;color:${BRAND.corEscura};font-weight:800;margin:0;">${fmtValor(i.preco * i.qtd)}</p>
+      </td>
+    </tr>`).join('')
 
   const conteudo = `
-    <!-- HERO SUCCESS -->
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b, #1a4f4a);padding:40px;text-align:center;">
-      <p style="font-size:40px;margin-bottom:12px;">&#9989;</p>
-      <p style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Pedido confirmado</p>
-      <h1 style="color:#ffffff;font-size:28px;font-weight:900;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Pedido #${idCurto}
-      </h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Recebemos seu pedido e já estamos preparando tudo.
-      </p>
-    </div>
+    ${hero({
+      eyebrow: 'Pedido confirmado',
+      titulo: `Obrigado pela compra, ${nome}`,
+      subtitulo: `Pedido #${idCurto} · ${formaPagamento}`,
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Recebemos seu pagamento e seu pedido entrou na fila de separação. Em breve você receberá o código de rastreio.`)}
 
-    <div class="email-content-pad" style="padding:40px;">
-
-      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Olá, <strong>${nome}</strong>! Seu pedido foi confirmado com sucesso.
-        Você receberá uma notificação assim que ele for enviado.
-      </p>
-
-      <!-- Itens do pedido -->
-      <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:28px;border:1px solid #e5e7eb;">
-        <p style="font-size:12px;font-weight:800;color:#3cbfb3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Resumo do pedido</p>
-        ${itens.map(item => `
-          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-bottom:1px solid #e5e7eb;margin-bottom:8px;padding-bottom:8px;">
-            <tr>
-              ${item.img ? `<td width="56" style="padding-right:12px;vertical-align:middle;"><img src="${item.img}" width="48" height="48" style="border-radius:8px;object-fit:contain;background:#fff;border:1px solid #e5e7eb;display:block;" alt="${item.nome}"/></td>` : ''}
-              <td style="vertical-align:middle;">
-                <p style="font-size:14px;font-weight:600;color:#1a202c;margin-bottom:2px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${item.nome}</p>
-                <p style="font-size:12px;color:#9ca3af;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Qtd: ${item.qtd}</p>
-              </td>
-              <td align="right" style="vertical-align:middle;">
-                <p style="font-size:14px;font-weight:700;color:#1a202c;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${fmtValor(item.preco * item.qtd)}</p>
-              </td>
-            </tr>
-          </table>
-        `).join('')}
-
-        <!-- Totais -->
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:16px;">
-          <tr>
-            <td style="font-size:13px;color:#6b7280;padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Subtotal</td>
-            <td align="right" style="font-size:13px;color:#374151;padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${fmtValor(subtotal)}</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;color:#6b7280;padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Frete</td>
-            <td align="right" style="font-size:13px;color:${frete === 0 ? '#059669' : '#374151'};padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${frete === 0 ? '&#127881; Grátis' : fmtValor(frete)}</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;color:#6b7280;padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Pagamento</td>
-            <td align="right" style="font-size:13px;color:#374151;padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${formaPagamento}</td>
-          </tr>
-          <tr>
-            <td colspan="2" style="padding-top:12px;border-top:2px solid #e5e7eb;"></td>
-          </tr>
-          <tr>
-            <td style="font-size:16px;font-weight:900;color:#0f2e2b;padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Total</td>
-            <td align="right" style="font-size:18px;font-weight:900;color:#3cbfb3;padding:3px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${fmtValor(total)}</td>
-          </tr>
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:20px 16px;margin-bottom:24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">${linhas}</table>
+        <div style="height:1px;background:#e5e7eb;margin:12px 0;"></div>
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="font-family:${FONT};">
+          <tr><td style="font-size:13px;color:#6b7280;padding:2px 0;">Subtotal</td><td align="right" style="font-size:13px;color:${BRAND.corEscura};padding:2px 0;">${fmtValor(subtotal)}</td></tr>
+          <tr><td style="font-size:13px;color:#6b7280;padding:2px 0;">Frete</td><td align="right" style="font-size:13px;color:${BRAND.corEscura};padding:2px 0;">${fmtValor(frete)}</td></tr>
+          <tr><td style="font-size:14px;color:${BRAND.corEscura};font-weight:800;padding-top:8px;">Total</td><td align="right" style="font-size:18px;color:${BRAND.corEscura};font-weight:900;padding-top:8px;">${fmtValor(total)}</td></tr>
         </table>
       </div>
 
-      <!-- O que acontece agora -->
-      <div style="margin-bottom:32px;">
-        <p style="font-size:14px;font-weight:800;color:#0f2e2b;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">O que acontece agora?</p>
-        ${[
-          { num: '01', titulo: 'Preparação', desc: 'Seu pedido está sendo separado com cuidado.' },
-          { num: '02', titulo: 'Envio', desc: 'Você receberá o código de rastreamento por e-mail.' },
-          { num: '03', titulo: 'Entrega', desc: 'Produto chega em 3 a 8 dias úteis.' },
-        ].map(step => `
-          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:12px;">
-            <tr>
-              <td width="40" style="vertical-align:top;">
-                <div style="width:32px;height:32px;border-radius:50%;background:#3cbfb3;text-align:center;line-height:32px;">
-                  <span style="font-size:11px;font-weight:900;color:#0f2e2b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${step.num}</span>
-                </div>
-              </td>
-              <td style="vertical-align:top;padding-left:8px;">
-                <p style="font-size:14px;font-weight:700;color:#1a202c;margin-bottom:2px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${step.titulo}</p>
-                <p style="font-size:13px;color:#6b7280;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${step.desc}</p>
-              </td>
-            </tr>
-          </table>
-        `).join('')}
-      </div>
+      ${enderecoResumo ? `
+        <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:24px;">
+          <p style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;font-family:${FONT};">Endereço de entrega</p>
+          <p style="font-size:13px;color:${BRAND.corEscura};line-height:1.5;margin:0;font-family:${FONT};">${enderecoResumo}</p>
+        </div>` : ''}
 
-      <!-- CTA -->
-      <div style="text-align:center;">
-        ${emailBotao({ texto: '&#128230; Acompanhar pedido', href: `${siteUrl}/minha-conta/pedidos` })}
+      <div style="text-align:center;margin-bottom:24px;">
+        ${emailBotao({ texto: 'Acompanhar pedido', href: `${siteUrl}/minha-conta/pedidos/${pedidoId}` })}
       </div>
-
-    </div>
-  `
+    </div>`
   return emailBase({
-    assunto: `Pedido #${idCurto} confirmado — Obrigado, ${nome}!`,
-    preview: `Seu pedido foi recebido. Acompanhe em tempo real.`,
-    conteudo
+    assunto: `Pedido #${idCurto} confirmado — em breve no seu endereço`,
+    preview: `Seu pedido foi confirmado. Total: ${fmtValor(total)}.`,
+    conteudo,
   })
 }
 
@@ -226,420 +148,271 @@ export function templateConfirmacaoPedido({
 // 3. PEDIDO ENVIADO
 // ══════════════════════════════════════════════
 export function templatePedidoEnviado({
-  nome, pedidoId, codigoRastreio, transportadora, previsaoEntrega, linkRastreio, siteUrl
+  nome, pedidoId, codigoRastreio, transportadora, urlRastreio, prazoEstimado, siteUrl,
 }: {
   nome: string
   pedidoId: string
   codigoRastreio: string
   transportadora: string
-  previsaoEntrega: string
-  linkRastreio: string
+  urlRastreio?: string
+  prazoEstimado?: string
   siteUrl: string
 }) {
   const idCurto = pedidoId.slice(-8).toUpperCase()
-
   const conteudo = `
-    <!-- HERO ENVIO -->
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b, #1a4f4a);padding:40px;text-align:center;">
-      <p style="font-size:40px;margin-bottom:12px;">&#128666;</p>
-      <p style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Em trânsito</p>
-      <h1 style="color:#ffffff;font-size:28px;font-weight:900;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Seu pedido saiu!</h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Previsão de entrega: <strong style="color:#3cbfb3;">${previsaoEntrega}</strong></p>
-    </div>
+    ${hero({
+      eyebrow: 'Pedido a caminho',
+      titulo: `${nome}, seu pedido saiu para entrega`,
+      subtitulo: `Pedido #${idCurto}`,
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Despachamos seu pedido pela <strong>${transportadora}</strong>. Use o código abaixo para acompanhar em tempo real.`)}
 
-    <div class="email-content-pad" style="padding:40px;">
-      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Ótima notícia, <strong>${nome}</strong>! Seu pedido <strong>#${idCurto}</strong>
-        foi enviado e já está a caminho.
-      </p>
-
-      <!-- Box de rastreamento -->
-      <div style="background:#f8fafc;border:2px solid #3cbfb3;border-radius:16px;padding:24px;margin-bottom:32px;text-align:center;">
-        <p style="font-size:12px;font-weight:800;color:#3cbfb3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Código de rastreamento</p>
-        <p style="font-size:24px;font-weight:900;color:#0f2e2b;font-family:monospace;letter-spacing:0.15em;margin-bottom:16px;">${codigoRastreio}</p>
-        <p style="font-size:13px;color:#6b7280;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Transportadora: <strong>${transportadora}</strong></p>
-        ${emailBotao({ texto: '&#128269; Rastrear meu pedido', href: linkRastreio })}
+      <div style="background:#0f2e2b;border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
+        ${svg('truck', BRAND.corPrincipal, 28)}
+        <p style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin:10px 0 6px;font-family:${FONT};">Código de rastreio</p>
+        <p style="color:#ffffff;font-size:22px;font-weight:900;letter-spacing:0.1em;margin:0 0 4px;font-family:${FONT};">${codigoRastreio}</p>
+        ${prazoEstimado ? `<p style="color:${BRAND.corPrincipal};font-size:13px;margin:6px 0 0;font-family:${FONT};">Previsão: ${prazoEstimado}</p>` : ''}
       </div>
 
-      <!-- Timeline visual -->
-      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
-        ${[
-          { icon: '&#9989;', label: 'Pedido confirmado', status: 'done' },
-          { icon: '&#128230;', label: 'Em preparação', status: 'done' },
-          { icon: '&#128666;', label: 'Enviado — em trânsito', status: 'active' },
-          { icon: '&#127968;', label: 'Aguardando entrega', status: 'pending' },
-        ].map(step => `
-          <tr>
-            <td width="20" style="vertical-align:middle;padding:6px 0;">
-              <div style="width:14px;height:14px;border-radius:50%;background:${step.status === 'done' ? '#3cbfb3' : step.status === 'active' ? '#f59e0b' : '#e5e7eb'};"></div>
-            </td>
-            <td style="vertical-align:middle;padding:6px 0 6px 12px;">
-              <p style="font-size:14px;font-weight:${step.status === 'active' ? '700' : '500'};
-                         color:${step.status === 'pending' ? '#9ca3af' : '#374151'};margin:0;
-                         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-                ${step.icon} ${step.label}
-              </p>
-            </td>
-          </tr>
-        `).join('')}
-      </table>
-
-      <div style="text-align:center;">
-        ${emailBotao({ texto: 'Ver meus pedidos', href: `${siteUrl}/minha-conta/pedidos` })}
-      </div>
-    </div>
-  `
-  return emailBase({
-    assunto: `Seu pedido #${idCurto} está a caminho!`,
-    preview: `Seu produto está a caminho. Rastreie agora.`,
-    conteudo
-  })
-}
-
-// ══════════════════════════════════════════════
-// 4. ABANDONO DE CARRINHO
-// ══════════════════════════════════════════════
-export function templateAbandonoCarrinho({
-  nome, itens, totalCarrinho, cupom, siteUrl
-}: {
-  nome: string
-  itens: Array<{nome: string; preco: number; img?: string}>
-  totalCarrinho: number
-  cupom?: string
-  siteUrl: string
-}) {
-  const fmtValor = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-
-  const conteudo = `
-    <!-- HERO -->
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b, #1a4f4a);padding:40px;text-align:center;">
-      <p style="font-size:40px;margin-bottom:12px;">&#128722;</p>
-      <h1 style="color:#ffffff;font-size:26px;font-weight:900;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${nome}, você esqueceu algo!</h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Seu carrinho ainda está esperando por você.</p>
-    </div>
-
-    <div class="email-content-pad" style="padding:40px;">
-
-      <!-- Itens do carrinho -->
-      <p style="font-size:14px;font-weight:800;color:#0f2e2b;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Os itens no seu carrinho:</p>
-      <div style="background:#f8fafc;border-radius:16px;padding:20px;margin-bottom:24px;border:1px solid #e5e7eb;">
-        ${itens.slice(0, 3).map(item => `
-          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-bottom:1px solid #e5e7eb;padding-bottom:8px;margin-bottom:8px;">
-            <tr>
-              ${item.img ? `<td width="56" style="padding-right:12px;vertical-align:middle;"><img src="${item.img}" width="48" height="48" style="border-radius:8px;object-fit:contain;display:block;" alt="${item.nome}"/></td>` : ''}
-              <td style="vertical-align:middle;">
-                <p style="font-size:14px;font-weight:600;color:#1a202c;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${item.nome}</p>
-              </td>
-              <td align="right" style="vertical-align:middle;">
-                <p style="font-size:14px;font-weight:700;color:#3cbfb3;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${fmtValor(item.preco)}</p>
-              </td>
-            </tr>
-          </table>
-        `).join('')}
-        <div style="text-align:right;margin-top:12px;">
-          <p style="font-size:15px;font-weight:900;color:#0f2e2b;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Total: ${fmtValor(totalCarrinho)}</p>
-        </div>
-      </div>
-
-      ${cupom ? `
-        <!-- Cupom de urgência -->
-        <div style="background:linear-gradient(135deg, #3cbfb3, #2a9d8f);border-radius:16px;padding:20px;margin-bottom:28px;text-align:center;">
-          <p style="color:rgba(255,255,255,0.9);font-size:13px;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">&#127873; Criamos um cupom exclusivo para você:</p>
-          <p style="color:#ffffff;font-size:22px;font-weight:900;font-family:monospace;letter-spacing:0.15em;margin-bottom:4px;">${cupom}</p>
-          <p style="color:rgba(255,255,255,0.8);font-size:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Use no checkout e ganhe desconto exclusivo!</p>
-        </div>
-      ` : ''}
-
-      <!-- Urgência -->
-      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:16px;margin-bottom:28px;text-align:center;">
-        <p style="font-size:13px;color:#c2410c;font-weight:600;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">&#9200; Atenção: seu carrinho pode expirar em breve!</p>
-      </div>
-
-      <!-- CTA -->
       <div style="text-align:center;margin-bottom:24px;">
-        ${emailBotao({ texto: '&#128722; Finalizar minha compra', href: `${siteUrl}/checkout` })}
+        ${emailBotao({ texto: 'Rastrear entrega', href: urlRastreio || `${siteUrl}/minha-conta/pedidos/${pedidoId}` })}
       </div>
 
-      <!-- Garantias -->
-      <div style="text-align:center;">
-        <p style="font-size:12px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">&#128274; Compra segura · &#128666; Frete grátis acima de R$500 · &#11088; 12 meses de garantia</p>
-      </div>
-
-    </div>
-  `
+      ${paragrafo(`Fique atento aos próximos dias. Se precisar de ajuda, responda este email ou chame no WhatsApp.`)}
+    </div>`
   return emailBase({
-    assunto: `${nome}, seu carrinho ainda está esperando`,
-    preview: `Você deixou itens no carrinho. Finalize agora com frete grátis.`,
-    conteudo
+    assunto: `Seu pedido #${idCurto} saiu para entrega`,
+    preview: `Rastreio: ${codigoRastreio} · ${transportadora}`,
+    conteudo,
   })
 }
 
 // ══════════════════════════════════════════════
-// 5. FOLLOW-UP PÓS-ENTREGA
+// 4. FOLLOW-UP PÓS-ENTREGA (3 dias)
 // ══════════════════════════════════════════════
 export function templateFollowupEntrega({
-  nome, pedidoId, produto, siteUrl
+  nome, produto, produtoSlug, siteUrl, valorCashback = 10,
 }: {
   nome: string
-  pedidoId: string
   produto: string
+  produtoSlug: string
   siteUrl: string
+  valorCashback?: number
 }) {
-  const idCurto = pedidoId.slice(-8).toUpperCase()
-
   const conteudo = `
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b, #1a4f4a);padding:40px;text-align:center;">
-      <p style="font-size:40px;margin-bottom:12px;">&#127968;</p>
-      <h1 style="color:#ffffff;font-size:26px;font-weight:900;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Chegou tudo bem?</h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Queremos saber como foi a sua experiência.</p>
-    </div>
+    ${hero({
+      eyebrow: 'Queremos saber',
+      titulo: `${nome}, tá gostando do seu Sixxis?`,
+      subtitulo: `Sua opinião ajuda outros clientes e te dá cashback`,
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Já faz alguns dias que o <strong>${produto}</strong> chegou aí. Conta pra gente: tá atendendo suas expectativas? Sua avaliação honesta vale R$ ${valorCashback} em cashback na próxima compra.`)}
 
-    <div class="email-content-pad" style="padding:40px;">
-      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Olá, <strong>${nome}</strong>! Seu pedido <strong>#${idCurto}</strong> —
-        <em>${produto}</em> — foi entregue.
-        Esperamos que esteja amando seu produto!
-      </p>
-
-      <p style="font-size:15px;font-weight:700;color:#0f2e2b;margin-bottom:16px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Como foi a sua experiência?
-      </p>
-
-      <!-- Estrelas clicáveis -->
-      <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 28px;">
-        <tr>
-          ${[5,4,3,2,1].map(n => `
-            <td style="padding:0 6px;">
-              <a href="${siteUrl}/minha-conta/avaliar?pedido=${pedidoId}&nota=${n}"
-                style="display:block;width:48px;height:48px;background:#fef9c3;border-radius:12px;
-                       font-size:24px;text-align:center;line-height:48px;text-decoration:none;
-                       border:2px solid #fde68a;">
-                &#11088;
-              </a>
-            </td>
-          `).join('')}
-        </tr>
-        <tr>
-          ${[5,4,3,2,1].map(n => `
-            <td style="padding:4px 6px;text-align:center;font-size:10px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${n}&#9733;</td>
-          `).join('')}
-        </tr>
-      </table>
-
-      <div style="text-align:center;margin-bottom:28px;">
-        ${emailBotao({ texto: '&#9997;&#65039; Deixar uma avaliação', href: `${siteUrl}/minha-conta/avaliar?pedido=${pedidoId}` })}
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
+        ${svg('star', BRAND.corPrincipal, 28)}
+        <p style="font-size:14px;color:${BRAND.corEscura};font-weight:700;margin:10px 0 4px;font-family:${FONT};">Avaliar em 30 segundos</p>
+        <p style="font-size:12px;color:#6b7280;margin-bottom:16px;font-family:${FONT};">Você ganha R$ ${valorCashback} em cashback ao publicar</p>
+        ${emailBotao({ texto: 'Avaliar produto', href: `${siteUrl}/produtos/${produtoSlug}#avaliacoes` })}
       </div>
 
-      ${emailDivisor()}
-
-      <div style="margin-top:28px;text-align:center;">
-        <p style="font-size:14px;color:#374151;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Gostou? Confira outros produtos:</p>
-        ${emailBotao({ texto: 'Ver produtos', href: `${siteUrl}/produtos`, cor: BRAND.corEscura, corTexto: '#ffffff' })}
-      </div>
-    </div>
-  `
+      ${paragrafo(`Se algo não saiu como esperava, responda este email. Nosso time resolve rápido.`)}
+    </div>`
   return emailBase({
-    assunto: `Como foi a entrega do seu pedido, ${nome}?`,
-    preview: `Avalie sua experiência e ajude outros clientes.`,
-    conteudo
+    assunto: `${nome}, tá gostando do seu Sixxis? Queremos saber`,
+    preview: `Sua avaliação honesta vale R$ ${valorCashback} em cashback.`,
+    conteudo,
   })
 }
 
 // ══════════════════════════════════════════════
-// 6. CUPOM ESPECIAL
+// 5. ABANDONO DE CARRINHO (1h)
 // ══════════════════════════════════════════════
-export function templateCupomEspecial({
-  nome, cupomCodigo, desconto, validade, pedidoMinimo, siteUrl
+export function templateAbandonoCarrinho({
+  nome, produto, imagemProduto, preco, carrinhoUrl, cupom = 'SIXXIS10',
 }: {
   nome: string
-  cupomCodigo: string
-  desconto: string
-  validade: string
-  pedidoMinimo?: string
-  siteUrl: string
+  produto: string
+  imagemProduto?: string
+  preco: number
+  carrinhoUrl: string
+  cupom?: string
 }) {
   const conteudo = `
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b, #1a4f4a);padding:40px;text-align:center;">
-      <p style="font-size:40px;margin-bottom:12px;">&#127873;</p>
-      <p style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Exclusivo para você</p>
-      <h1 style="color:#ffffff;font-size:28px;font-weight:900;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Presente especial, ${nome}!</h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Um cupom exclusivo está esperando por você.</p>
-    </div>
+    ${hero({
+      eyebrow: 'Seu carrinho',
+      titulo: `${nome}, esqueceu algo?`,
+      subtitulo: `Guardamos seu ${produto} por algumas horas`,
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Seu carrinho te espera. Para facilitar, liberamos um cupom exclusivo para você finalizar hoje.`)}
 
-    <div class="email-content-pad" style="padding:40px;">
-
-      <!-- Box do cupom -->
-      <div style="text-align:center;margin-bottom:32px;">
-        <p style="font-size:14px;color:#6b7280;margin-bottom:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Seu cupom exclusivo:</p>
-        <div style="background:linear-gradient(135deg, #3cbfb3, #2a9d8f);border-radius:20px;padding:28px 32px;">
-          <p style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">USE O CÓDIGO</p>
-          <p style="color:#ffffff;font-size:32px;font-weight:900;font-family:monospace;letter-spacing:0.2em;margin-bottom:8px;">${cupomCodigo}</p>
-          <p style="color:rgba(255,255,255,0.9);font-size:20px;font-weight:900;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${desconto} de desconto</p>
-        </div>
-      </div>
-
-      <!-- Detalhes do cupom -->
-      <div style="background:#f8fafc;border-radius:16px;padding:20px;margin-bottom:32px;border:1px solid #e5e7eb;">
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:24px;">
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
-            <td style="font-size:13px;color:#6b7280;padding:6px 0;border-bottom:1px solid #e5e7eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Desconto</td>
-            <td align="right" style="font-size:13px;font-weight:700;color:#3cbfb3;padding:6px 0;border-bottom:1px solid #e5e7eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${desconto}</td>
+            <td width="96" style="vertical-align:top;">
+              ${imagemProduto ? `<img src="${imagemProduto}" width="88" height="88" alt="" style="border-radius:12px;background:#ffffff;object-fit:contain;"/>` : `<div style="width:88px;height:88px;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;"></div>`}
+            </td>
+            <td style="padding-left:16px;font-family:${FONT};">
+              <p style="font-size:15px;color:${BRAND.corEscura};font-weight:800;margin:0 0 6px;">${produto}</p>
+              <p style="font-size:18px;color:${BRAND.corPrincipal};font-weight:900;margin:0 0 4px;">${fmtValor(preco)}</p>
+              <p style="font-size:11px;color:#6b7280;margin:0;">Use o cupom <strong style="color:${BRAND.corEscura};">${cupom}</strong> e ganhe 10% OFF</p>
+            </td>
           </tr>
-          <tr>
-            <td style="font-size:13px;color:#6b7280;padding:6px 0;border-bottom:1px solid #e5e7eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Válido até</td>
-            <td align="right" style="font-size:13px;font-weight:700;color:#374151;padding:6px 0;border-bottom:1px solid #e5e7eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${validade}</td>
-          </tr>
-          ${pedidoMinimo ? `
-          <tr>
-            <td style="font-size:13px;color:#6b7280;padding:6px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Pedido mínimo</td>
-            <td align="right" style="font-size:13px;font-weight:700;color:#374151;padding:6px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${pedidoMinimo}</td>
-          </tr>` : ''}
         </table>
       </div>
 
-      <div style="text-align:center;margin-bottom:16px;">
-        ${emailBotao({ texto: '&#128717; Usar cupom agora', href: `${siteUrl}/produtos` })}
+      <div style="text-align:center;margin-bottom:24px;">
+        ${emailBotao({ texto: 'Voltar ao carrinho', href: carrinhoUrl })}
       </div>
-      <p style="font-size:12px;color:#9ca3af;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">O desconto é aplicado automaticamente no checkout.</p>
-    </div>
-  `
+      ${paragrafo(`Estoque limitado. Não deixe para depois.`)}
+    </div>`
   return emailBase({
-    assunto: `Um cupom exclusivo para você, ${nome}`,
-    preview: `${desconto} de desconto até ${validade}. Use o código ${cupomCodigo}.`,
-    conteudo
+    assunto: `${nome}, esqueceu algo no carrinho? Guardamos para você`,
+    preview: `Finalize seu pedido com ${cupom} e ganhe 10% OFF.`,
+    conteudo,
   })
 }
 
 // ══════════════════════════════════════════════
-// 7. VOLTA AO ESTOQUE
+// 6. VOLTA AO ESTOQUE
 // ══════════════════════════════════════════════
 export function templateVoltaEstoque({
-  nome, produtoNome, produtoImg, produtoPreco, produtoUrl, siteUrl: _siteUrl
+  nome, produto, produtoSlug, imagemProduto, preco, siteUrl,
 }: {
   nome: string
-  produtoNome: string
-  produtoImg?: string
-  produtoPreco: string
-  produtoUrl: string
-  siteUrl: string
-}) {
-  const conteudo = `
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b, #1a4f4a);padding:40px;text-align:center;">
-      <p style="font-size:40px;margin-bottom:12px;">&#9889;</p>
-      <p style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Está de volta!</p>
-      <h1 style="color:#ffffff;font-size:26px;font-weight:900;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Produto disponível!</h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${nome}, você pediu para ser avisado.</p>
-    </div>
-
-    <div class="email-content-pad" style="padding:40px;">
-      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        O produto que você estava acompanhando voltou ao estoque e está disponível para compra!
-        Aproveite antes que esgote novamente.
-      </p>
-
-      <!-- Card do produto -->
-      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:28px;text-align:center;">
-        ${produtoImg ? `<img src="${produtoImg}" width="160" height="160" style="border-radius:12px;object-fit:contain;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" alt="${produtoNome}"/>` : ''}
-        <p style="font-size:16px;font-weight:800;color:#0f2e2b;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${produtoNome}</p>
-        <p style="font-size:22px;font-weight:900;color:#3cbfb3;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${produtoPreco}</p>
-        ${emailBotao({ texto: '&#128722; Comprar agora', href: produtoUrl })}
-      </div>
-
-      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px;text-align:center;">
-        <p style="font-size:13px;color:#c2410c;font-weight:600;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">&#9888;&#65039; Estoque limitado — corra!</p>
-      </div>
-    </div>
-  `
-  return emailBase({
-    assunto: `${produtoNome} está disponível novamente!`,
-    preview: `${nome}, o produto que você esperava voltou ao estoque!`,
-    conteudo
-  })
-}
-
-// ══════════════════════════════════════════════
-// 8. SOLICITAÇÃO DE AVALIAÇÃO
-// ══════════════════════════════════════════════
-export function templateSolicitacaoAvaliacao({
-  nome, pedidoId, produto, siteUrl
-}: {
-  nome: string
-  pedidoId: string
   produto: string
+  produtoSlug: string
+  imagemProduto?: string
+  preco: number
   siteUrl: string
 }) {
-  const idCurto = pedidoId.slice(-8).toUpperCase()
-
   const conteudo = `
-    <div class="email-hero-pad" style="background:linear-gradient(135deg, #0f2e2b, #1a4f4a);padding:40px;text-align:center;">
-      <p style="font-size:40px;margin-bottom:12px;">&#11088;</p>
-      <h1 style="color:#ffffff;font-size:26px;font-weight:900;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Sua opinião importa!</h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Ajude outros clientes a fazer a escolha certa.</p>
-    </div>
+    ${hero({
+      eyebrow: 'Disponível de novo',
+      titulo: `${produto} voltou ao estoque`,
+      subtitulo: `${nome}, corre que voa`,
+      bg: `linear-gradient(135deg, ${BRAND.corPrincipal}, ${BRAND.corEscura})`,
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Você pediu para avisarmos quando este produto voltasse — ele está disponível por tempo limitado.`)}
 
-    <div class="email-content-pad" style="padding:40px;">
-      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Olá, <strong>${nome}</strong>! O que achou do <strong>${produto}</strong>?
-        Sua avaliação ajuda outros clientes a fazer a melhor escolha — e é muito importante para nós!
-      </p>
-
-      <!-- Como avaliar -->
-      <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:28px;border:1px solid #e5e7eb;text-align:center;">
-        <p style="font-size:14px;font-weight:700;color:#0f2e2b;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Clique para avaliar seu produto:</p>
-        <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 16px;">
+      <div style="background:#ffffff;border:2px solid ${BRAND.corPrincipal};border-radius:16px;padding:20px;margin-bottom:24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
-            ${[
-              { nota: 5, emoji: '&#128525;', label: 'Amei!' },
-              { nota: 4, emoji: '&#128522;', label: 'Gostei' },
-              { nota: 3, emoji: '&#128528;', label: 'Regular' },
-              { nota: 2, emoji: '&#128533;', label: 'Ruim' },
-              { nota: 1, emoji: '&#128542;', label: 'Péssimo' },
-            ].map(r => `
-              <td style="padding:0 6px;text-align:center;">
-                <a href="${siteUrl}/minha-conta/avaliar?pedido=${pedidoId}&nota=${r.nota}"
-                  style="display:block;text-decoration:none;">
-                  <div style="width:52px;height:52px;border-radius:14px;background:#f0fffe;border:2px solid #3cbfb3;font-size:24px;text-align:center;line-height:52px;margin-bottom:4px;">
-                    ${r.emoji}
-                  </div>
-                  <p style="font-size:10px;color:#6b7280;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${r.label}</p>
-                </a>
-              </td>
-            `).join('')}
+            <td width="120" style="vertical-align:top;">
+              ${imagemProduto ? `<img src="${imagemProduto}" width="110" height="110" alt="" style="border-radius:12px;object-fit:contain;"/>` : `<div style="width:110px;height:110px;background:#f8fafc;border-radius:12px;"></div>`}
+            </td>
+            <td style="padding-left:16px;font-family:${FONT};">
+              <p style="font-size:16px;color:${BRAND.corEscura};font-weight:900;margin:0 0 8px;">${produto}</p>
+              <p style="font-size:22px;color:${BRAND.corPrincipal};font-weight:900;margin:0 0 10px;">${fmtValor(preco)}</p>
+              <p style="font-size:11px;color:#6b7280;margin:0;">Estoque limitado</p>
+            </td>
           </tr>
         </table>
-        ${emailBotao({ texto: '&#9997;&#65039; Escrever avaliação completa', href: `${siteUrl}/minha-conta/avaliar?pedido=${pedidoId}` })}
       </div>
 
-      <p style="font-size:13px;color:#9ca3af;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        &#127873; Avalie e acumule pontos no programa de fidelidade Sixxis!
-      </p>
-    </div>
-  `
+      <div style="text-align:center;">
+        ${emailBotao({ texto: 'Garantir o meu agora', href: `${siteUrl}/produtos/${produtoSlug}` })}
+      </div>
+    </div>`
   return emailBase({
-    assunto: `Avalie seu pedido ${idCurto} e ajude outros clientes`,
-    preview: `Como foi a sua experiência? Sua opinião vale muito.`,
-    conteudo
+    assunto: `${produto} disponível de novo — corre que voa`,
+    preview: `Você foi avisado. Garanta o seu antes que esgote de novo.`,
+    conteudo,
   })
 }
 
 // ══════════════════════════════════════════════
-// 9. UPGRADE DE NÍVEL — GEMAS
+// 7. CUPOM ESPECIAL
 // ══════════════════════════════════════════════
+export function templateCupomEspecial({
+  nome, codigoCupom, percentualDesconto, validade, siteUrl, descricao,
+}: {
+  nome: string
+  codigoCupom: string
+  percentualDesconto: number
+  validade: string
+  siteUrl: string
+  descricao?: string
+}) {
+  const conteudo = `
+    ${hero({
+      eyebrow: 'Cupom exclusivo',
+      titulo: `${nome}, este é só para você`,
+      subtitulo: `Válido até ${validade}`,
+      bg: `linear-gradient(135deg, ${BRAND.corEscura}, ${BRAND.corPrincipal})`,
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(descricao || `Um cupom especial saiu do nosso sistema direto para você. Use onde quiser da loja.`)}
 
-const GEM_GRADIENTS: Record<string, string> = {
-  Cristal:   'linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 60%, #38bdf8 100%)',
-  Topázio:   'linear-gradient(135deg, #78350f 0%, #d97706 55%, #fbbf24 100%)',
-  Safira:    'linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #60a5fa 100%)',
-  Diamante:  'linear-gradient(135deg, #3730a3 0%, #818cf8 55%, #e0e7ff 100%)',
-  Esmeralda: 'linear-gradient(135deg, #064e3b 0%, #10b981 55%, #6ee7b7 100%)',
+      <div style="background:${BRAND.corEscura};border:2px dashed ${BRAND.corPrincipal};border-radius:16px;padding:28px;text-align:center;margin-bottom:24px;">
+        ${svg('tag', BRAND.corPrincipal, 28)}
+        <p style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin:10px 0 6px;font-family:${FONT};">Código</p>
+        <p style="color:${BRAND.corPrincipal};font-size:28px;font-weight:900;letter-spacing:0.12em;margin:0 0 6px;font-family:${FONT};">${codigoCupom}</p>
+        <p style="color:#ffffff;font-size:15px;margin:0;font-family:${FONT};"><strong>${percentualDesconto}% OFF</strong></p>
+      </div>
+
+      <div style="text-align:center;margin-bottom:20px;">
+        ${emailBotao({ texto: 'Usar cupom agora', href: `${siteUrl}/produtos` })}
+      </div>
+      <p style="font-size:11px;color:#9ca3af;text-align:center;font-family:${FONT};">Válido até ${validade}. Não cumulativo com outros cupons.</p>
+    </div>`
+  return emailBase({
+    assunto: `${nome}, seu cupom exclusivo de ${percentualDesconto}% — válido até ${validade}`,
+    preview: `Use ${codigoCupom} e ganhe ${percentualDesconto}% OFF.`,
+    conteudo,
+  })
 }
 
-const GEM_CASHBACK: Record<string, string> = {
-  Cristal: '2%', Topázio: '3%', Safira: '4%', Diamante: '5%', Esmeralda: '7%',
+// ══════════════════════════════════════════════
+// 8. SOLICITAÇÃO DE AVALIAÇÃO (7 dias)
+// ══════════════════════════════════════════════
+export function templateSolicitacaoAvaliacao({
+  nome, produto, produtoSlug, siteUrl, valorCashback = 10,
+}: {
+  nome: string
+  produto: string
+  produtoSlug: string
+  siteUrl: string
+  valorCashback?: number
+}) {
+  const conteudo = `
+    ${hero({
+      eyebrow: 'Sua opinião vale dinheiro',
+      titulo: `Sua opinião vale R$ ${valorCashback} em cashback`,
+      subtitulo: `${nome}, conta como foi sua experiência`,
+    })}
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Você recebeu seu <strong>${produto}</strong> semana passada. Uma avaliação honesta ajuda novos clientes a decidirem, e te rende crédito de volta para usar aqui.`)}
+
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;margin-bottom:10px;">${svg('star', '#f59e0b', 24)} ${svg('star', '#f59e0b', 24)} ${svg('star', '#f59e0b', 24)} ${svg('star', '#f59e0b', 24)} ${svg('star', '#f59e0b', 24)}</div>
+        <p style="font-size:13px;color:${BRAND.corEscura};font-weight:700;margin:0 0 4px;font-family:${FONT};">Leva menos de 30 segundos</p>
+        <p style="font-size:12px;color:#6b7280;margin:0 0 16px;font-family:${FONT};">Texto + nota. Fotos são bônus.</p>
+        ${emailBotao({ texto: `Avaliar e ganhar R$ ${valorCashback}`, href: `${siteUrl}/produtos/${produtoSlug}#avaliacoes` })}
+      </div>
+    </div>`
+  return emailBase({
+    assunto: `Sua opinião vale R$ ${valorCashback} em cashback`,
+    preview: `Avalie seu ${produto} e ganhe R$ ${valorCashback} de cashback.`,
+    conteudo,
+  })
+}
+
+// ══════════════════════════════════════════════
+// 9. UPGRADE DE NÍVEL
+// ══════════════════════════════════════════════
+const NIVEL_CORES: Record<string, { grad: string; cashback: string; icone: string }> = {
+  Cristal:   { grad: 'linear-gradient(135deg,#9ca3af,#4b5563)', cashback: '2%', icone: 'sparkles' },
+  Topázio:   { grad: 'linear-gradient(135deg,#f59e0b,#d97706)', cashback: '3%', icone: 'star' },
+  Safira:    { grad: 'linear-gradient(135deg,#2563eb,#1e40af)', cashback: '4%', icone: 'sparkles' },
+  Diamante:  { grad: 'linear-gradient(135deg,#06b6d4,#0891b2)', cashback: '5%', icone: 'sparkles' },
+  Esmeralda: { grad: 'linear-gradient(135deg,#10b981,#047857)', cashback: '6%', icone: 'crown' },
 }
 
 export function templateUpgradeNivel({
-  nome, nivelAnterior, nivelNovo, totalGasto, siteUrl
+  nome, nivelAnterior, nivelNovo, totalGasto, siteUrl,
 }: {
   nome: string
   nivelAnterior: string
@@ -647,66 +420,38 @@ export function templateUpgradeNivel({
   totalGasto: number
   siteUrl: string
 }) {
-  const gradient = GEM_GRADIENTS[nivelNovo] ?? GEM_GRADIENTS.Cristal
-  const cashback = GEM_CASHBACK[nivelNovo] ?? '2%'
-  const fmtValor = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-
+  const cfg = NIVEL_CORES[nivelNovo] ?? NIVEL_CORES.Cristal
   const conteudo = `
-    <!-- HERO -->
-    <div class="email-hero-pad" style="background:${gradient};padding:52px 40px;text-align:center;">
-      <p style="color:rgba(255,255,255,0.75);font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">&#127775; Parabéns, ${nome}!</p>
-      <h1 style="color:#ffffff;font-size:34px;font-weight:900;line-height:1.15;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Você subiu para<br/>nível <span style="text-shadow:0 0 20px rgba(255,255,255,0.6);">${nivelNovo}</span>!
-      </h1>
-      <p style="color:rgba(255,255,255,0.7);font-size:15px;margin-bottom:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        De ${nivelAnterior} para ${nivelNovo} — você chegou lá!
-      </p>
+    <div class="email-hero-pad" style="background:${cfg.grad};padding:48px 40px;text-align:center;">
+      <div style="background:rgba(255,255,255,0.15);width:96px;height:96px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
+        ${svg(cfg.icone, '#ffffff', 48)}
+      </div>
+      <p style="color:rgba(255,255,255,0.75);font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;font-family:${FONT};">Parabéns, ${nome}</p>
+      <h1 style="color:#ffffff;font-size:30px;font-weight:900;line-height:1.2;margin:0;font-family:${FONT};">Você virou ${nivelNovo} na Sixxis Club</h1>
     </div>
+    <div class="email-content-pad" style="padding:40px 32px;">
+      ${paragrafo(`Com <strong>${fmtValor(totalGasto)}</strong> em compras acumuladas, você passou de ${nivelAnterior} para <strong>${nivelNovo}</strong>. Seu cashback automático também subiu.`)}
 
-    <!-- CONTEÚDO -->
-    <div class="email-content-pad" style="padding:40px;">
-
-      <p style="font-size:16px;color:#374151;line-height:1.7;margin-bottom:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Olá, <strong>${nome}</strong>! Com <strong>${fmtValor(totalGasto)}</strong> em compras acumuladas,
-        você conquistou o nível <strong style="color:#0f2e2b;">${nivelNovo}</strong> no programa de fidelidade Sixxis.
-        Continue comprando para aproveitar ainda mais benefícios!
-      </p>
-
-      <!-- Destaque cashback -->
-      <div style="background:${gradient};border-radius:20px;padding:28px;margin-bottom:28px;text-align:center;">
-        <p style="color:rgba(255,255,255,0.75);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Seu novo cashback</p>
-        <p style="color:#ffffff;font-size:52px;font-weight:900;line-height:1;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${cashback}</p>
-        <p style="color:rgba(255,255,255,0.75);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">em todas as suas compras</p>
+      <div style="background:${cfg.grad};border-radius:20px;padding:28px;text-align:center;margin-bottom:24px;">
+        <p style="color:rgba(255,255,255,0.75);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;font-family:${FONT};">Seu novo cashback</p>
+        <p style="color:#ffffff;font-size:48px;font-weight:900;line-height:1;margin:0;font-family:${FONT};">${cfg.cashback}</p>
+        <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:6px 0 0;font-family:${FONT};">em todas as suas compras</p>
       </div>
 
-      <!-- Benefícios -->
-      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:28px;">
-        <p style="font-size:12px;font-weight:800;color:#3cbfb3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">O que você ganhou</p>
-        ${[
-          `&#128176; ${cashback} cashback automático em toda compra`,
-          '&#128666; Benefícios exclusivos de frete e descontos',
-          '&#9889; Acesso prioritário a lançamentos e ofertas',
-        ].map(item => `
-          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
-            <p style="font-size:14px;color:#374151;margin:0;line-height:1.5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${item}</p>
-          </div>
-        `).join('')}
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:24px;">
+        <p style="font-size:11px;font-weight:800;color:${BRAND.corPrincipal};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;font-family:${FONT};">Novos benefícios</p>
+        <p style="font-size:13px;color:${BRAND.corTexto};margin:0 0 8px;font-family:${FONT};">${svg('check', BRAND.corPrincipal, 16)} &nbsp; Cashback de ${cfg.cashback} em toda compra</p>
+        <p style="font-size:13px;color:${BRAND.corTexto};margin:0 0 8px;font-family:${FONT};">${svg('check', BRAND.corPrincipal, 16)} &nbsp; Acesso prioritário a lançamentos</p>
+        <p style="font-size:13px;color:${BRAND.corTexto};margin:0;font-family:${FONT};">${svg('check', BRAND.corPrincipal, 16)} &nbsp; Ofertas exclusivas de nível</p>
       </div>
 
-      <!-- CTA -->
-      <div style="text-align:center;margin-bottom:24px;">
-        ${emailBotao({ texto: '&#128722; Aproveitar meu novo nível', href: `${siteUrl}/minha-conta/cashback` })}
+      <div style="text-align:center;">
+        ${emailBotao({ texto: 'Ver meus benefícios', href: `${siteUrl}/minha-conta/cashback` })}
       </div>
-
-      <p style="font-size:12px;color:#9ca3af;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        Confira seus benefícios completos em Minha Conta → Cashback.
-      </p>
-    </div>
-  `
-
+    </div>`
   return emailBase({
-    assunto: `🎉 Parabéns! Você é ${nivelNovo} na Sixxis, ${nome}!`,
-    preview: `De ${nivelAnterior} para ${nivelNovo}! Seu cashback subiu para ${cashback}. Confira seus novos benefícios.`,
+    assunto: `Parabéns ${nome}, você virou ${nivelNovo} na Sixxis Club`,
+    preview: `Novo nível: ${nivelNovo}. Cashback subiu para ${cfg.cashback}.`,
     conteudo,
   })
 }

@@ -48,6 +48,8 @@ const ABAS = [
   { id: 'config',    label: 'Configurações', icon: Settings },
   { id: 'avatar',    label: 'Avatar',        icon: ImageIcon },
   { id: 'conversas', label: 'Conversas',     icon: MessageSquare },
+  { id: 'prompt',    label: 'Prompt System', icon: Sliders },
+  { id: 'logs',      label: 'Logs',          icon: AlertCircle },
 ]
 
 const fmtData = (d: string) =>
@@ -547,6 +549,11 @@ export default function LunaAdminPage() {
               icone: ExternalLink,
               campos: ['agente_whatsapp_fallback', 'agente_delay_resposta'],
             },
+            {
+              titulo: 'Humanização & Handoff',
+              icone: User,
+              campos: ['agente_humanizacao', 'agente_trigger_palavras', 'agente_trigger_silencio_min', 'agente_intents'],
+            },
           ].map((grupo) => {
             const labelMap: Record<string, string> = {
               agente_nome: 'Nome da agente',
@@ -565,6 +572,10 @@ export default function LunaAdminPage() {
               agente_msg_fora_horario: 'Mensagem fora do horário',
               agente_whatsapp_fallback: 'WhatsApp de fallback (só números)',
               agente_delay_resposta: 'Delay de resposta (ms)',
+              agente_humanizacao: 'Humanização (0-10)',
+              agente_trigger_palavras: 'Palavras que disparam handoff',
+              agente_trigger_silencio_min: 'Silêncio máximo (min) antes de handoff',
+              agente_intents: 'Intents pré-programadas (JSON)',
             }
             const descMap: Record<string, string> = {
               agente_nome: 'Nome exibido no chat e no balloon',
@@ -572,6 +583,10 @@ export default function LunaAdminPage() {
               agente_system_prompt: 'Instruções de comportamento enviadas para a IA a cada conversa.',
               agente_temperatura: '0 = mais preciso | 1 = mais criativo. Recomendado: 0.7',
               agente_delay_resposta: 'Milissegundos de espera antes de mostrar resposta (humaniza). Ex: 800',
+              agente_humanizacao: '0 = formal/robô, 10 = super casual e com emojis. Recomendado: 4',
+              agente_trigger_palavras: 'Lista separada por vírgula: se o cliente mencionar, encaminha para humano. Ex: atendente, pessoa, humano',
+              agente_trigger_silencio_min: 'Se o cliente ficar calado por mais que X minutos após uma pergunta repetida, encaminha.',
+              agente_intents: 'JSON com FAQ pré-programada (bypass API). Ex: [{"pergunta":"qual o prazo de entrega","resposta":"5 a 10 dias úteis"}]',
             }
             const tipoMap: Record<string, string> = {
               agente_ativo: 'boolean',
@@ -584,6 +599,10 @@ export default function LunaAdminPage() {
               agente_msg_fora_horario: 'textarea',
               agente_system_prompt: 'textarea',
               agente_modelo: 'select',
+              agente_humanizacao: 'numero',
+              agente_trigger_silencio_min: 'numero',
+              agente_trigger_palavras: 'textarea',
+              agente_intents: 'textarea',
             }
 
             return (
@@ -983,6 +1002,113 @@ export default function LunaAdminPage() {
           )}
         </div>
       )}
+
+      {/* Prompt System */}
+      {abaAtiva === 'prompt' && (
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div>
+                <p className="font-black text-gray-900">Prompt System</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Variáveis disponíveis: <code className="text-[#3cbfb3] font-mono">{`{{produto}}`}</code>, <code className="text-[#3cbfb3] font-mono">{`{{cliente}}`}</code>, <code className="text-[#3cbfb3] font-mono">{`{{nome}}`}</code>, <code className="text-[#3cbfb3] font-mono">{`{{site}}`}</code>
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    const entrada = prompt('Testar com qual pergunta?') || ''
+                    if (!entrada) return
+                    try {
+                      const r = await fetch('/api/agente/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mensagem: entrada, testMode: true }),
+                      })
+                      const d = await r.json().catch(() => ({}))
+                      alert(d.resposta || d.message || 'Sem resposta')
+                    } catch { alert('Falha ao testar prompt') }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-gray-100 text-sm font-semibold hover:bg-gray-200 transition"
+                >
+                  Testar prompt
+                </button>
+                <button
+                  onClick={salvar}
+                  disabled={salvando}
+                  className="px-5 py-2 rounded-xl font-black text-sm transition hover:shadow-md disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}
+                >
+                  {salvando ? 'Salvando...' : salvoOk ? 'Salvo!' : 'Salvar'}
+                </button>
+              </div>
+            </div>
+            <textarea
+              value={configEditada.agente_system_prompt ?? ''}
+              onChange={(e) => editarConfig('agente_system_prompt', e.target.value)}
+              rows={22}
+              spellCheck={false}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-mono leading-relaxed
+                         focus:outline-none focus:border-[#3cbfb3] transition resize-y"
+              style={{ background: '#0f1f1e', color: '#a7f3d0' }}
+              placeholder="Você é a Luna, atendente da Sixxis..."
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Logs */}
+      {abaAtiva === 'logs' && <LogsLuna />}
+    </div>
+  )
+}
+
+function LogsLuna() {
+  const [dados, setDados] = useState<{ hoje: number; mes: number; projecao: number; tokens: number; erros: Array<{ id: string; mensagem: string; createdAt: string }> }>({
+    hoje: 0, mes: 0, projecao: 0, tokens: 0, erros: [],
+  })
+  useEffect(() => {
+    fetch('/api/admin/luna/logs').then(r => r.ok ? r.json() : null).then(d => { if (d) setDados(d) }).catch(() => {})
+  }, [])
+  const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <p className="text-[11px] uppercase font-bold text-gray-500 tracking-wider">Hoje</p>
+          <p className="text-2xl font-black mt-1" style={{ color: '#0f2e2b' }}>{fmt(dados.hoje)}</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <p className="text-[11px] uppercase font-bold text-gray-500 tracking-wider">Mês</p>
+          <p className="text-2xl font-black mt-1" style={{ color: '#0f2e2b' }}>{fmt(dados.mes)}</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <p className="text-[11px] uppercase font-bold text-gray-500 tracking-wider">Projeção</p>
+          <p className="text-2xl font-black mt-1" style={{ color: '#3cbfb3' }}>{fmt(dados.projecao)}</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <p className="text-[11px] uppercase font-bold text-gray-500 tracking-wider">Tokens</p>
+          <p className="text-2xl font-black mt-1" style={{ color: '#0f2e2b' }}>{dados.tokens.toLocaleString('pt-BR')}</p>
+        </div>
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+          <AlertCircle size={14} style={{ color: '#ef4444' }} />
+          <p className="font-black text-gray-900">Erros recentes</p>
+        </div>
+        {dados.erros.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-10">Nenhum erro registrado.</p>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {dados.erros.map((e) => (
+              <div key={e.id} className="px-5 py-3">
+                <p className="text-sm text-gray-800">{e.mensagem}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{new Date(e.createdAt).toLocaleString('pt-BR')}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -8,7 +8,7 @@ import {
   LogOut, Image as ImageIcon, Tag, Star,
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, ShieldOff,
-  Target, MessageSquare, Clock, Bot,
+  Target, MessageSquare, Clock, Bot, UserCog,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -58,9 +58,10 @@ const NAV_GROUPS = [
   {
     label: 'Conteúdo',
     items: [
-      { href: '/admin/editor-home', label: 'Editor da Home',  icon: Home,          exact: false },
-      { href: '/admin/mobile',      label: 'Editor Mobile',   icon: Smartphone,    exact: false },
-      { href: '/admin/banners',     label: 'Banners',         icon: ImageIcon,     exact: false },
+      { href: '/admin/editor-home',        label: 'Editor da Home',    icon: Home,       exact: false },
+      { href: '/admin/mobile',             label: 'Editor Mobile',     icon: Smartphone, exact: false },
+      { href: '/admin/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,   exact: false },
+      { href: '/admin/banners',            label: 'Banners',           icon: ImageIcon,  exact: false },
     ],
   },
   {
