@@ -45,14 +45,14 @@ const NAV_GROUPS = [
   {
     label: 'Comunicação',
     items: [
-      { href: '/admin/emails', label: 'E-mails', icon: Mail, exact: false },
-      { href: '/admin/luna',   label: 'Luna',    icon: Bot,  exact: false },
+      { href: '/admin/luna', label: 'Luna', icon: Bot, exact: false },
     ],
   },
   {
     label: 'Marketing',
     items: [
       { href: '/admin/campanhas',              label: 'Campanhas', icon: Target,        exact: false },
+      { href: '/admin/emails',                 label: 'E-mails',   icon: Mail,          exact: false },
       { href: '/admin/configuracoes/whatsapp', label: 'WhatsApp',  icon: MessageSquare, exact: false },
     ],
   },

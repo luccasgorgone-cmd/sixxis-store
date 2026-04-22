@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { TrendingDown, AirVent, Wind, Zap } from 'lucide-react'
+import { TrendingDown, AirVent, Wind, Zap, BadgeCheck } from 'lucide-react'
 
 // ── Dados de AC por modelo (consumo real em watts)
 const AC_POR_MODELO: Record<string, { btu: number; consumoW: number; descricaoAC: string }> = {
@@ -67,103 +67,123 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
   return (
     <div
       ref={ref}
-      className="rounded-2xl border border-gray-100 bg-white overflow-hidden mt-8 transition-all duration-700"
+      className="mt-8 transition-all duration-700"
       style={{
         opacity: visivel ? 1 : 0,
         transform: visivel ? 'translateY(0)' : 'translateY(24px)',
       }}
     >
-      {/* Topo escuro com título */}
-      <div className="bg-gradient-to-r from-[#0f2e2b] to-[#1a4f4a] px-5 py-4">
-        <div className="flex items-center gap-2">
-          <TrendingDown size={18} className="text-[#3cbfb3]" />
-          <h3 className="text-white font-bold text-base">
-            Quanto você economiza por mês?
-          </h3>
-        </div>
-        <p className="text-white/60 text-xs mt-1">
-          vs Split {ac.descricaoAC} · {HORAS_DIA}h/dia · tarifa R$ {TARIFA.toFixed(2)}/kWh
-        </p>
-      </div>
-
-      {/* Comparação lado a lado */}
-      <div className="grid grid-cols-2 divide-x divide-gray-100">
-        {/* Lado AC */}
-        <div className="p-4 text-center bg-gray-50">
-          <div className="flex items-center justify-center gap-1.5 mb-2">
-            <AirVent size={14} className="text-gray-400" />
-            <span className="text-xs font-medium text-gray-500">Ar-condicionado</span>
+      {/* Card interno sobre o wallpaper */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{ backgroundColor: '#ffffff', border: '2px solid #0f2e2b' }}
+      >
+        {/* Cabeçalho com título + badge */}
+        <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <TrendingDown size={24} strokeWidth={2} color="#0f2e2b" />
+              <h3 className="font-bold text-base" style={{ color: '#0f2e2b' }}>
+                Faça as contas: quanto você deixa de pagar por mês
+              </h3>
+            </div>
+            <p className="text-xs mt-1" style={{ color: '#0f2e2b', opacity: 0.75 }}>
+              Comparação real com ar-condicionado split 9.000 BTU, 8h/dia, 30 dias — tarifa R$ 0,85/kWh
+            </p>
           </div>
-          <p className="text-xs text-gray-400 mb-1">Split {ac.descricaoAC}</p>
-          <p className="text-2xl font-bold text-gray-700">
-            R$ {fmt(custoAC)}
+          <span
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold shrink-0"
+            style={{ backgroundColor: '#0f2e2b', color: '#3cbfb3' }}
+          >
+            <BadgeCheck size={14} strokeWidth={2.5} />
+            Economia comprovada
+          </span>
+        </div>
+
+        {/* Valor em destaque */}
+        <div className="px-5 pb-5 text-center">
+          <p className="font-bold leading-none" style={{ color: '#0f2e2b', fontSize: 56 }}>
+            R$ {fmt(economiaMes)}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">por mês</p>
-          <div className="mt-2 inline-flex items-center gap-1 bg-red-50 text-red-500 text-[11px] font-medium px-2 py-0.5 rounded-full">
-            <Zap size={10} />
-            {ac.consumoW}W de consumo
+          <p className="text-sm font-semibold mt-2" style={{ color: '#0f2e2b' }}>
+            você economiza <span className="opacity-80">por mês</span>
+          </p>
+        </div>
+
+        {/* Tabela Climatizador vs Ar-condicionado */}
+        <div className="px-5 pb-5">
+          <div className="overflow-hidden rounded-xl" style={{ border: '1px solid rgba(15,46,43,0.30)' }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
+                  <th className="text-left px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}></th>
+                  <th className="text-center px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}>
+                    <div className="inline-flex items-center gap-1.5 justify-center">
+                      <AirVent size={24} strokeWidth={2} color="#0f2e2b" />
+                      Ar-condicionado
+                    </div>
+                  </th>
+                  <th className="text-center px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}>
+                    <div className="inline-flex items-center gap-1.5 justify-center">
+                      <Wind size={24} strokeWidth={2} color="#0f2e2b" />
+                      Climatizador Sixxis
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
+                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Consumo</td>
+                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>{ac.consumoW}W</td>
+                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>{consumoW}W</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
+                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Custo por mês</td>
+                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC)}</td>
+                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto)}</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
+                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Custo por ano</td>
+                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC * 12)}</td>
+                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto * 12)}</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Redução</td>
+                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>—</td>
+                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>{percentual}%</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Lado Sixxis */}
-        <div className="p-4 text-center bg-white">
-          <div className="flex items-center justify-center gap-1.5 mb-2">
-            <Wind size={14} className="text-[#3cbfb3]" />
-            <span className="text-xs font-medium text-[#3cbfb3]">Climatizador Sixxis</span>
+        {/* Métricas em 3 colunas */}
+        <div className="grid grid-cols-3" style={{ borderTop: '1px solid rgba(15,46,43,0.30)' }}>
+          <div className="p-3 text-center" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
+            <p className="text-[11px]" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/mês</p>
+            <p className="text-lg font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(economiaMes)}</p>
           </div>
-          <p className="text-xs text-gray-400 mb-1">Este produto</p>
-          <p className="text-2xl font-bold text-[#3cbfb3]">
-            R$ {fmt(custoProduto)}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">por mês</p>
-          <div className="mt-2 inline-flex items-center gap-1 bg-[#3cbfb3]/10 text-[#3cbfb3] text-[11px] font-medium px-2 py-0.5 rounded-full">
-            <Zap size={10} />
-            {consumoW}W de consumo
+          <div className="p-3 text-center" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
+            <p className="text-[11px]" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/ano</p>
+            <p className="text-lg font-bold" style={{ color: '#3cbfb3' }}>
+              R$ {(economiaAno / 1000).toFixed(1)}k
+            </p>
+          </div>
+          <div className="p-3 text-center">
+            <p className="text-[11px]" style={{ color: '#0f2e2b', opacity: 0.75 }}>Produto se paga em</p>
+            <p className="text-lg font-bold" style={{ color: '#0f2e2b' }}>{retornoAnos} anos</p>
           </div>
         </div>
-      </div>
 
-      {/* Banner de economia */}
-      <div className="bg-[#3cbfb3] px-5 py-3 flex items-center justify-between">
-        <div>
-          <p className="text-white/80 text-xs">Você economiza</p>
-          <p className="text-white text-xl font-bold">
-            R$ {fmt(economiaMes)}/mês
+        {/* Rodapé de disclaimer */}
+        <div className="px-4 py-2.5" style={{ borderTop: '1px solid rgba(15,46,43,0.30)', backgroundColor: 'rgba(15,46,43,0.04)' }}>
+          <p className="text-[10px] leading-relaxed flex items-center gap-1.5" style={{ color: '#0f2e2b', opacity: 0.70 }}>
+            <Zap size={24} strokeWidth={2} color="#0f2e2b" style={{ width: 12, height: 12, flexShrink: 0 }} />
+            Consumo AC calculado para Split Inverter {ac.descricaoAC} ({ac.consumoW}W).
+            Baseado em {HORAS_DIA}h/dia × {DIAS_MES} dias × R$ {TARIFA.toFixed(2)}/kWh (tarifa ANEEL 2024).
+            Consumo real pode variar conforme uso.
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-white/80 text-xs">Por ano</p>
-          <p className="text-white text-xl font-bold">
-            R$ {fmt(economiaAno)}
-          </p>
-        </div>
-      </div>
-
-      {/* Métricas em 3 colunas */}
-      <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
-        <div className="p-3 text-center">
-          <p className="text-[11px] text-gray-400">Redução na conta</p>
-          <p className="text-lg font-bold text-[#3cbfb3]">{percentual}%</p>
-        </div>
-        <div className="p-3 text-center">
-          <p className="text-[11px] text-gray-400">Economia/ano</p>
-          <p className="text-lg font-bold text-gray-700">
-            R${(economiaAno / 1000).toFixed(1)}k
-          </p>
-        </div>
-        <div className="p-3 text-center">
-          <p className="text-[11px] text-gray-400">Produto se paga em</p>
-          <p className="text-lg font-bold text-gray-700">{retornoAnos} anos</p>
-        </div>
-      </div>
-
-      {/* Rodapé de disclaimer */}
-      <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100">
-        <p className="text-[10px] text-gray-400 leading-relaxed">
-          * Consumo AC calculado para Split Inverter {ac.descricaoAC} ({ac.consumoW}W).
-          Baseado em {HORAS_DIA}h/dia × {DIAS_MES} dias × R$ {TARIFA.toFixed(2)}/kWh (tarifa ANEEL 2024).
-          Consumo real pode variar conforme uso.
-        </p>
       </div>
     </div>
   )
