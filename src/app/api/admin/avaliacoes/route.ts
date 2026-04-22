@@ -32,7 +32,11 @@ export async function GET(request: NextRequest) {
       produto: { select: { id: true, nome: true, imagens: true, slug: true } },
       cliente: { select: { nome: true } },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [
+      { destaque: 'desc' },
+      { ordem:    'asc'  },
+      { createdAt: 'desc' },
+    ],
   })
 
   return Response.json({ avaliacoes })

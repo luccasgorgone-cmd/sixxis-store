@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, Settings,
   LogOut, Image as ImageIcon, Tag, Star,
   LayoutTemplate, Mail, X, BarChart2, Users,
-  Smartphone, Home, ExternalLink, Handshake, ShieldOff,
+  Smartphone, Home, ExternalLink, ShieldOff,
   Target, MessageSquare, Clock, Bot,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -38,8 +38,7 @@ const NAV_GROUPS = [
   {
     label: 'Fidelidade',
     items: [
-      { href: '/admin/avaliacoes',           label: 'Avaliações',      icon: Star,      exact: false },
-      { href: '/admin/avaliacoes-parceiros', label: 'Aval. Parceiros', icon: Handshake, exact: false },
+      { href: '/admin/avaliacoes', label: 'Avaliações', icon: Star, exact: false },
     ],
   },
   {

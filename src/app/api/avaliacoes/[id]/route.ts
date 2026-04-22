@@ -24,6 +24,7 @@ export async function PATCH(
       ...(body.nomeAutor   !== undefined && { nomeAutor:  body.nomeAutor }),
       ...(body.aprovada    !== undefined && { aprovada:   Boolean(body.aprovada) }),
       ...(body.destaque    !== undefined && { destaque:   Boolean(body.destaque) }),
+      ...(body.ordem       !== undefined && { ordem:      Number(body.ordem) || 0 }),
       ...(body.resposta    !== undefined && {
         resposta:   body.resposta || null,
         respostaEm: body.resposta ? new Date() : null,

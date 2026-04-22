@@ -167,6 +167,7 @@ model Avaliacao {
   comentario  String?         @db.Text
   aprovada    Boolean         @default(false)
   destaque    Boolean         @default(false)
+  ordem       Int             @default(0)
   resposta    String?         @db.Text
   respostaEm  DateTime?
   createdAt   DateTime        @default(now())

@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
       fotos: true,
       cliente: { select: { nome: true } },
     },
-    orderBy: [{ destaque: 'desc' }, { createdAt: 'desc' }],
+    orderBy: [
+      { destaque:  'desc' },
+      { ordem:     'asc'  },
+      { createdAt: 'desc' },
+    ],
   })
 
   const total = avaliacoes.length
