@@ -194,7 +194,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
     }
   }, [headerState])
 
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
+  const logado = sessionStatus === 'authenticated' && !!session?.user
+  const sessaoCarregando = sessionStatus === 'loading'
   const { totalItens, setDrawerAberto } = useCarrinho()
 
   useEffect(() => {
@@ -439,12 +441,12 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
                 {/* Entrar / Conta */}
                 <Link
-                  href={session ? '/minha-conta' : '/login'}
+                  href={logado ? '/minha-conta' : '/login'}
                   className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-xl transition min-w-[60px]"
                 >
                   <User size={21} strokeWidth={1.5} />
                   <span className="text-[11px] font-medium leading-none">
-                    {session ? (session.user?.name?.split(' ')[0] || 'Conta') : 'Entrar'}
+                    {logado ? (session?.user?.name?.split(' ')[0] || 'Conta') : 'Entrar'}
                   </span>
                 </Link>
 
@@ -690,7 +692,11 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
           <div className="mx-6 my-3 border-t border-white/10" />
 
-          {session ? (
+          {sessaoCarregando ? (
+            <div className="px-6 py-4">
+              <div className="h-5 w-24 bg-white/10 rounded animate-pulse" />
+            </div>
+          ) : logado ? (
             <>
               <Link href="/minha-conta" onClick={() => setDrawerOpen(false)} className="flex items-center gap-4 px-6 py-4 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors border-b border-white/5">
                 <User size={20} className="text-white/50" />
@@ -711,7 +717,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </Link>
               <Link href="/cadastro" onClick={() => setDrawerOpen(false)} className="flex items-center gap-4 px-6 py-4 text-base font-semibold text-[#3cbfb3] hover:bg-white/10 transition-colors border-b border-white/5">
                 <UserPlus size={20} className="text-[#3cbfb3]" />
-                Criar Conta
+                Criar Conta Grátis
               </Link>
             </>
           )}
