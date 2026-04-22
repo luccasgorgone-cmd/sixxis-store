@@ -351,7 +351,7 @@ export default function EmailTemplateEditor({ templates: initialTemplates }: Pro
               </div>
             )}
 
-            {/* Preview */}
+            {/* Preview — usa o template premium renderizado via API (gerarHtmlTemplate) */}
             {showPreview && (
               <div className="p-6">
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -361,10 +361,9 @@ export default function EmailTemplateEditor({ templates: initialTemplates }: Pro
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden">
                   <iframe
-                    srcDoc={current.corpo}
+                    src={`/api/admin/email-templates/preview?tipo=${current.tipo}`}
                     className="w-full h-[600px]"
                     title="Preview do email"
-                    sandbox="allow-same-origin"
                   />
                 </div>
               </div>
