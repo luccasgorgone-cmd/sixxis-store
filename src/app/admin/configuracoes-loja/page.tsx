@@ -16,15 +16,17 @@ interface ConfigMeta {
 
 const CONFIG_LABELS: Record<string, ConfigMeta> = {
   // Aparência — cores
-  cor_principal:         { label: 'Cor Principal (Tiffany)', descricao: 'Cor primária da marca', tipo: 'cor', grupo: 'Aparência' },
-  cor_header:            { label: 'Cor do Header',           tipo: 'cor', grupo: 'Aparência' },
-  cor_textos:            { label: 'Cor dos Textos',          tipo: 'cor', grupo: 'Aparência' },
-  cor_destaque:          { label: 'Cor de Destaque',         tipo: 'cor', grupo: 'Aparência' },
-  cor_trustbar_fundo:    { label: 'Fundo da Trust Bar',      tipo: 'cor', grupo: 'Aparência' },
-  cor_trustbar_icones:   { label: 'Ícones da Trust Bar',     tipo: 'cor', grupo: 'Aparência' },
-  cor_badge_novo:        { label: 'Cor Badge "Novo"',        tipo: 'cor', grupo: 'Aparência' },
-  cor_badge_esgotado:    { label: 'Cor Badge "Esgotado"',    tipo: 'cor', grupo: 'Aparência' },
-  cor_stats_fundo:       { label: 'Fundo das Estatísticas',  tipo: 'cor', grupo: 'Aparência' },
+  cor_principal:            { label: 'Cor Principal (Tiffany)',  descricao: 'Cor primária da marca', tipo: 'cor', grupo: 'Aparência' },
+  cor_header:               { label: 'Cor do Header',            tipo: 'cor', grupo: 'Aparência' },
+  cor_textos:               { label: 'Cor dos Textos',           tipo: 'cor', grupo: 'Aparência' },
+  cor_destaque:             { label: 'Cor de Destaque',          tipo: 'cor', grupo: 'Aparência' },
+  cor_trustbar_fundo:       { label: 'Fundo da Trust Bar',       tipo: 'cor', grupo: 'Aparência' },
+  cor_trustbar_icones:      { label: 'Ícones da Trust Bar',      tipo: 'cor', grupo: 'Aparência' },
+  cor_badge_novo:           { label: 'Cor Badge "Novo"',         tipo: 'cor', grupo: 'Aparência' },
+  cor_badge_esgotado:       { label: 'Cor Badge "Esgotado"',     tipo: 'cor', grupo: 'Aparência' },
+  cor_stats_fundo:          { label: 'Fundo das Estatísticas',   tipo: 'cor', grupo: 'Aparência' },
+  aparencia_cor_primaria:   { label: 'Aparência — Cor Primária',   descricao: 'Cor primária global (padrão: #3cbfb3)',   tipo: 'cor', grupo: 'Aparência' },
+  aparencia_cor_secundaria: { label: 'Aparência — Cor Secundária', descricao: 'Cor secundária global (padrão: #1a4f4a)', tipo: 'cor', grupo: 'Aparência' },
 
   // Hero
   hero_titulo: { label: 'Título do Hero', tipo: 'texto', grupo: 'Hero/Banner Principal' },
@@ -160,6 +162,11 @@ const GRUPO_ORDEM = [
   'Outros',
 ]
 
+const DEFAULT_VALORES: Record<string, string> = {
+  aparencia_cor_primaria:   '#3cbfb3',
+  aparencia_cor_secundaria: '#1a4f4a',
+}
+
 export default function ConfiguracoesLojaPage() {
   const [items, setItems]       = useState<ConfigItem[]>([])
   const [valores, setValores]   = useState<Record<string, string>>({})
@@ -174,7 +181,8 @@ export default function ConfiguracoesLojaPage() {
       const res = await fetch('/api/admin/configuracoes')
       const data: Record<string, string> = await res.json()
       const novos: ConfigItem[] = Object.entries(data).map(([chave, v]) => {
-        const valor = String(v ?? '')
+        const raw = String(v ?? '')
+        const valor = raw.trim() === '' ? (DEFAULT_VALORES[chave] ?? '') : raw
         const meta = CONFIG_LABELS[chave]
         return {
           chave,
