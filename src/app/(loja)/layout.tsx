@@ -4,6 +4,7 @@ import FloatingButtons from '@/components/layout/FloatingButtons'
 import { prisma } from '@/lib/prisma'
 import CookieBanner from '@/components/cookies/CookieBanner'
 import ComparadorBar from '@/components/layout/ComparadorBar'
+import LojaWallpaper from '@/components/layout/LojaWallpaper'
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   let logoUrl = '/logo-sixxis.png'
@@ -52,14 +53,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
   } : { backgroundColor: '#0f1f1d' }
 
   return (
-    <div className="relative min-h-screen" style={wallpaperStyle}>
-      {bgAtivo && bgOverlay > 0 && (
-        <div
-          className="fixed inset-0 pointer-events-none"
-          style={{ backgroundColor: `rgba(0,0,0,${bgOverlay / 100})`, zIndex: 0 }}
-          aria-hidden="true"
-        />
-      )}
+    <LojaWallpaper wallpaperStyle={wallpaperStyle} bgAtivo={bgAtivo} bgOverlay={bgOverlay}>
       <div className="relative flex flex-col min-h-screen" style={{ zIndex: 1 }}>
         <Header logoUrl={logoUrl} />
         {/* Spacer: reserva o espaço do header fixed; altura real via CSS var --sixxis-header-h */}
@@ -70,6 +64,6 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         <ComparadorBar />
         <CookieBanner />
       </div>
-    </div>
+    </LojaWallpaper>
   )
 }
