@@ -77,9 +77,9 @@ export default function SobrePage() {
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5 max-w-4xl mx-auto">
-              <span className="block">30 anos levando</span>
-              <span className="block" style={{ color: '#3cbfb3' }}>qualidade e conforto</span>
-              <span className="block">para o Brasil</span>
+              30 anos levando{' '}
+              <span style={{ color: '#3cbfb3' }}>qualidade e conforto</span>
+              {' '}para o Brasil
             </h1>
             <p className="text-white/65 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
               De uma pequena importadora no interior de São Paulo a mais de 1 milhão de

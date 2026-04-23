@@ -256,8 +256,8 @@ export default function SejaRevendedorPage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
-            <span className="block">Cresça com a marca</span>
-            <span className="block" style={{ color: '#3cbfb3' }}>que o Brasil confia há 30 anos</span>
+            Cresça com a marca{' '}
+            <span style={{ color: '#3cbfb3' }}>que o Brasil confia há 30 anos</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-4 leading-relaxed">

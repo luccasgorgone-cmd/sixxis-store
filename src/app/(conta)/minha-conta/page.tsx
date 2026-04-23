@@ -50,23 +50,27 @@ export default function MinhaContaPage() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Redirect quando a sessão resolve como não autenticada
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.replace('/login?callbackUrl=/minha-conta')
     }
   }, [status, router])
 
+  // Fetch dos dados — sempre roda; catch zera loading para não travar a UI
   useEffect(() => {
-    if (status !== 'authenticated') return
+    let alive = true
     Promise.all([
-      fetch('/api/cashback').then(r => r.json()),
-      fetch('/api/pedidos?limit=3').then(r => r.json()),
+      fetch('/api/cashback').then(r => r.ok ? r.json() : null),
+      fetch('/api/pedidos?limit=3').then(r => r.ok ? r.json() : null),
     ]).then(([cashback, ped]) => {
-      setDados(cashback)
-      setPedidos(Array.isArray(ped.pedidos) ? ped.pedidos.slice(0, 3) : [])
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [status])
+      if (!alive) return
+      if (cashback) setDados(cashback)
+      if (ped) setPedidos(Array.isArray(ped.pedidos) ? ped.pedidos.slice(0, 3) : [])
+    }).catch(() => {})
+    .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [])
 
   const nivel = dados?.nivel || { atual: 'Cristal', cor: '#38bdf8', progressoPercent: 0, proximoNivel: 'Topázio', faltam: 1000, cashbackPct: 0.02 }
   const nivelNorm = normalizarNivel(nivel.atual || 'Cristal')
