@@ -58,7 +58,14 @@ function StockBar({ estoque }: { estoque: number }) {
 export default function AdminProdutosPage() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [total, setTotal] = useState(0)
-  const [stats, setStats] = useState<Stats>({ total: 0, ativos: 0, criticos: 0 })
+  const [stats, _setStats] = useState<Stats>({ total: 0, ativos: 0, criticos: 0 })
+  // Wrapper diagnóstico — loga TODA chamada a setStats com stack trace.
+  const setStats = (v: Stats | ((prev: Stats) => Stats)) => {
+    const resolved = typeof v === 'function' ? (v as (p: Stats) => Stats)(stats) : v
+    const trace = new Error().stack?.split('\n').slice(1, 5).join('\n') ?? '(sem stack)'
+    console.log('[admin/produtos] setStats CALLED', JSON.stringify(resolved), '\n' + trace)
+    _setStats(resolved)
+  }
   const [page, setPage] = useState(1)
   const [q, setQ] = useState('')
   const [categoria, setCategoria] = useState('')
