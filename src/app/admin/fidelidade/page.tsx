@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Loader2, Gift, TrendingUp, Users, DollarSign, Save } from 'lucide-react'
+import { Loader2, Gift, TrendingUp, Users, DollarSign, Save, Trophy, Medal, Award } from 'lucide-react'
 import { NIVEIS_CONFIG, ORDEM_NIVEIS_GEM } from '@/lib/avatares'
 import { IconeNivel } from '@/components/ui/NivelIcons'
 
@@ -33,7 +33,12 @@ function formatValor(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-const MEDALHAS = ['🥇', '🥈', '🥉']
+function MedalhaRank({ idx }: { idx: number }) {
+  if (idx === 0) return <Trophy size={16} className="text-amber-500" />
+  if (idx === 1) return <Medal size={16} className="text-gray-400" />
+  if (idx === 2) return <Award size={16} className="text-orange-500" />
+  return <span className="text-gray-400">#{idx + 1}</span>
+}
 
 export default function AdminFidelidadePage() {
   const [clientes, setClientes]   = useState<ClienteFidelidade[]>([])
@@ -159,8 +164,8 @@ export default function AdminFidelidadePage() {
                   return (
                     <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition">
                       <td className="px-4 py-3">
-                        <span className="text-sm font-bold">
-                          {idx < 3 ? MEDALHAS[idx] : <span className="text-gray-400">#{idx + 1}</span>}
+                        <span className="text-sm font-bold inline-flex items-center">
+                          <MedalhaRank idx={idx} />
                         </span>
                       </td>
                       <td className="px-4 py-3">

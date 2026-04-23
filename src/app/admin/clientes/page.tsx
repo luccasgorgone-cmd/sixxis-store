@@ -44,8 +44,8 @@ export default function AdminClientesPage() {
 
   const buscarClientes = useCallback(async () => {
     setLoading(true)
+    const params = new URLSearchParams()
     try {
-      const params = new URLSearchParams()
       if (busca)   params.set('busca', busca)
       if (status)  params.set('status', status)
       if (ordenar) params.set('ordenar', ordenar)
@@ -64,13 +64,17 @@ export default function AdminClientesPage() {
       if (estado) params.set('estado', estado)
 
       const res  = await fetch(`/api/admin/clientes?${params}`, { cache: 'no-store' })
+      if (!res.ok) throw new Error('Erro ' + res.status)
       const data = await res.json()
-      setClientes(data.clientes || [])
-      setTotal(data.total || 0)
-      setTotalGeral(data.totalGeral ?? data.total ?? 0)
-      if (data.estados?.length) setEstados(data.estados)
+      setClientes(Array.isArray(data.clientes) ? data.clientes : [])
+      setTotal(Number(data.total) || 0)
+      setTotalGeral(Number(data.totalGeral ?? data.total) || 0)
+      if (Array.isArray(data.estados) && data.estados.length) setEstados(data.estados)
     } catch (err) {
-      console.error(err)
+      console.error('[clientes] fetch falhou:', err)
+      setClientes([])
+      setTotal(0)
+      setTotalGeral(0)
     } finally {
       setLoading(false)
     }

@@ -6,6 +6,8 @@ import CookieBanner from '@/components/cookies/CookieBanner'
 import ComparadorBar from '@/components/layout/ComparadorBar'
 import LojaWallpaper from '@/components/layout/LojaWallpaper'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   let logoUrl = '/logo-sixxis.png'
   let bgUrl   = ''

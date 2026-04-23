@@ -159,6 +159,9 @@ function AdminAvaliacoesInner() {
       })
 
       setItens(unificadas)
+    } catch (err) {
+      console.error('[avaliacoes] fetch falhou:', err)
+      setItens([])
     } finally {
       setLoading(false)
     }

@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import ProductImage from '@/components/ui/ProductImage'
 import {
   Plus, Search, Pencil, Trash2, Loader2,
-  ChevronLeft, ChevronRight, Package, ImageOff,
+  ChevronLeft, ChevronRight, Package,
   CheckCircle, AlertTriangle,
 } from 'lucide-react'
 import { getCategoriaBadge } from '@/lib/admin-tokens'
@@ -58,7 +58,7 @@ function StockBar({ estoque }: { estoque: number }) {
 export default function AdminProdutosPage() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [total, setTotal] = useState(0)
-  const [stats, setStats] = useState<Stats | null>(null)
+  const [stats, setStats] = useState<Stats>({ total: 0, ativos: 0, criticos: 0 })
   const [page, setPage] = useState(1)
   const [q, setQ] = useState('')
   const [categoria, setCategoria] = useState('')
@@ -106,7 +106,7 @@ export default function AdminProdutosPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Produtos</h1>
           <p className="text-gray-500 text-sm mt-0.5">
-            {total} produto{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
+            {total || stats.total} produto{(total || stats.total) !== 1 ? 's' : ''} encontrado{(total || stats.total) !== 1 ? 's' : ''}
           </p>
         </div>
         <Link
@@ -123,24 +123,24 @@ export default function AdminProdutosPage() {
         {[
           {
             label: 'Total de produtos',
-            value: stats?.total ?? '—',
+            value: stats.total,
             icon: Package,
             iconBg: 'bg-blue-50',
             iconColor: 'text-blue-500',
           },
           {
             label: 'Ativos',
-            value: stats?.ativos ?? '—',
+            value: stats.ativos,
             icon: CheckCircle,
             iconBg: 'bg-[#3cbfb3]/10',
             iconColor: 'text-[#3cbfb3]',
           },
           {
             label: 'Estoque crítico',
-            value: stats?.criticos ?? '—',
+            value: stats.criticos,
             icon: AlertTriangle,
-            iconBg: stats?.criticos ? 'bg-amber-50' : 'bg-gray-50',
-            iconColor: stats?.criticos ? 'text-amber-500' : 'text-gray-300',
+            iconBg: stats.criticos > 0 ? 'bg-amber-50' : 'bg-gray-50',
+            iconColor: stats.criticos > 0 ? 'text-amber-500' : 'text-gray-300',
           },
         ].map(({ label, value, icon: Icon, iconBg, iconColor }) => (
           <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
@@ -225,20 +225,13 @@ export default function AdminProdutosPage() {
                     <tr key={p.id} className="hover:bg-gray-50 transition">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                            {thumb ? (
-                              <Image
-                                src={thumb}
-                                alt={p.nome}
-                                width={48}
-                                height={48}
-                                className="w-full h-full object-cover"
-                                unoptimized
-                              />
-                            ) : (
-                              <ImageOff size={16} className="text-gray-400" />
-                            )}
-                          </div>
+                          <ProductImage
+                            src={thumb}
+                            alt={p.nome}
+                            w={48}
+                            h={48}
+                            className="w-12 h-12 rounded-xl object-cover shrink-0"
+                          />
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-900 line-clamp-1" title={p.nome}>{p.nome}</p>
                             {p.modelo && <p className="text-xs text-gray-400 mt-0.5">{p.modelo}</p>}

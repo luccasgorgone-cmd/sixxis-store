@@ -266,7 +266,7 @@ function PedidoDetalhe({
 export default function AdminPedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [total, setTotal] = useState(0)
-  const [stats, setStats] = useState<Stats | null>(null)
+  const [stats, setStats] = useState<Stats>({ total: 0, pendentes: 0, enviados: 0, receita: 0 })
   const [page, setPage] = useState(1)
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('')
@@ -318,19 +318,19 @@ export default function AdminPedidosPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{total} pedido{total !== 1 ? 's' : ''}</p>
+            <p className="text-gray-500 text-sm mt-0.5">{total || stats.total} pedido{(total || stats.total) !== 1 ? 's' : ''}</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Total no período', value: stats?.total ?? '—', icon: ShoppingCart, iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500' },
-            { label: 'Pendentes',        value: stats?.pendentes ?? '—', icon: Clock,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-500' },
-            { label: 'Enviados',         value: stats?.enviados ?? '—',  icon: Truck,    iconBg: 'bg-purple-50', iconColor: 'text-purple-500' },
+            { label: 'Total no período', value: stats.total,     icon: ShoppingCart, iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500' },
+            { label: 'Pendentes',        value: stats.pendentes, icon: Clock,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-500' },
+            { label: 'Enviados',         value: stats.enviados,  icon: Truck,    iconBg: 'bg-purple-50', iconColor: 'text-purple-500' },
             {
               label: 'Receita',
-              value: stats ? stats.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—',
+              value: stats.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
               icon: DollarSign, iconBg: 'bg-[#3cbfb3]/10', iconColor: 'text-[#3cbfb3]',
             },
           ].map(({ label, value, icon: Icon, iconBg, iconColor }) => (

@@ -8,7 +8,7 @@ import {
 import {
   TrendingUp, TrendingDown, ShoppingBag, Package, Users, Clock,
   Truck, CheckCircle, AlertTriangle, ArrowUpRight, Minus, BarChart3,
-  Zap, RefreshCcw, ChevronRight,
+  Zap, RefreshCcw, ChevronRight, Trophy, Medal, Award,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -397,7 +397,10 @@ export default function AdminDashboard() {
                     <div className={`w-7 h-7 rounded-lg text-xs font-black flex items-center justify-center ${
                       i===0?'bg-amber-100 text-amber-700':i===1?'bg-gray-100 text-gray-600':i===2?'bg-orange-100 text-orange-700':'bg-gray-50 text-gray-400'
                     }`}>
-                      {i<3?['🥇','🥈','🥉'][i]:i+1}
+                      {i===0 ? <Trophy size={14} />
+                        : i===1 ? <Medal size={14} />
+                        : i===2 ? <Award size={14} />
+                        : <span>{i+1}</span>}
                     </div>
                     <div className="w-8 h-8 rounded-lg bg-gray-50 border overflow-hidden shrink-0">
                       {(p.imagens as string[])?.[0] && (

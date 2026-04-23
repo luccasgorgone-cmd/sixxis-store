@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import LayoutConta from '@/components/conta/LayoutConta'
 import {
@@ -41,7 +42,8 @@ const TODOS_NIVEIS = ORDEM_NIVEIS_GEM.map(nome => ({
 }))
 
 export default function MinhaContaPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const router = useRouter()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [dados, setDados] = useState<any>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,6 +51,13 @@ export default function MinhaContaPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login?callbackUrl=/minha-conta')
+    }
+  }, [status, router])
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
     Promise.all([
       fetch('/api/cashback').then(r => r.json()),
       fetch('/api/pedidos?limit=3').then(r => r.json()),
@@ -57,7 +66,7 @@ export default function MinhaContaPage() {
       setPedidos(Array.isArray(ped.pedidos) ? ped.pedidos.slice(0, 3) : [])
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [])
+  }, [status])
 
   const nivel = dados?.nivel || { atual: 'Cristal', cor: '#38bdf8', progressoPercent: 0, proximoNivel: 'Topázio', faltam: 1000, cashbackPct: 0.02 }
   const nivelNorm = normalizarNivel(nivel.atual || 'Cristal')

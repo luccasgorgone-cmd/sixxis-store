@@ -59,12 +59,19 @@ export default function CampanhasPage() {
 
   async function carregar() {
     setLoading(true)
-    const p = new URLSearchParams()
-    if (filtroStatus) p.set('status', filtroStatus)
-    const r = await fetch(`/api/admin/campanhas?${p}`)
-    const d = await r.json().catch(() => ({ campanhas: [] }))
-    setCampanhas(d.campanhas ?? [])
-    setLoading(false)
+    try {
+      const p = new URLSearchParams()
+      if (filtroStatus) p.set('status', filtroStatus)
+      const r = await fetch(`/api/admin/campanhas?${p}`)
+      if (!r.ok) throw new Error('Erro ' + r.status)
+      const d = await r.json().catch(() => ({ campanhas: [] }))
+      setCampanhas(Array.isArray(d.campanhas) ? d.campanhas : [])
+    } catch (err) {
+      console.error('[campanhas] fetch falhou:', err)
+      setCampanhas([])
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => { carregar() }, [filtroStatus]) // eslint-disable-line
 

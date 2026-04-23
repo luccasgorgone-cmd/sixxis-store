@@ -156,6 +156,8 @@ const TICKER_ITEMS = [
 ]
 
 export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: string }) {
+  const [logoErro, setLogoErro] = useState(false)
+  const logoFinal = logoErro || !logoUrl ? '/logo-sixxis.png' : logoUrl
   const [drawerOpen,    setDrawerOpen]    = useState(false)
   const [cepModalOpen,  setCepModalOpen]  = useState(false)
   const [tickerIdx,     setTickerIdx]     = useState(0)
@@ -406,7 +408,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <Link href="/" className="shrink-0 flex items-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={logoUrl || '/logo-sixxis.png'}
+                  src={logoFinal}
                   alt="Sixxis"
                   style={{
                     height: isCompact ? '28px' : '36px',
@@ -415,6 +417,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                     transition: 'height 300ms ease-in-out',
                   }}
                   loading="eager"
+                  onError={() => setLogoErro(true)}
                 />
               </Link>
 
@@ -482,7 +485,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </button>
 
               <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-                <Image src={logoUrl} alt="Sixxis" width={115} height={38} className="object-contain" priority />
+                <Image src={logoFinal} alt="Sixxis" width={115} height={38} className="object-contain" priority onError={() => setLogoErro(true)} />
               </Link>
 
               <button
@@ -643,7 +646,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         {/* Header drawer */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0" style={{ backgroundColor: '#0f2e2b' }}>
           <Link href="/" onClick={() => setDrawerOpen(false)}>
-            <Image src={logoUrl} alt="Sixxis" width={100} height={34} className="object-contain brightness-0 invert" unoptimized />
+            <Image src={logoFinal} alt="Sixxis" width={100} height={34} className="object-contain brightness-0 invert" unoptimized onError={() => setLogoErro(true)} />
           </Link>
           <button onClick={() => setDrawerOpen(false)} className="p-2 rounded-lg hover:bg-white/10 transition" aria-label="Fechar menu">
             <X size={22} className="text-white" />
