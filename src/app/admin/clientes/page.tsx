@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Users, Search, Filter, X, ChevronDown,
   Eye, ShieldOff, ShieldCheck,
@@ -82,7 +82,19 @@ export default function AdminClientesPage() {
     }
   }, [busca, status, gastoFaixa, recorrencia, estado, ordenar, page])
 
+  // Mount: fetch imediato + safety-net que força loading=false em 5s se algo travar.
   useEffect(() => {
+    let alive = true
+    buscarClientes()
+    const safety = setTimeout(() => { if (alive) setLoading(false) }, 5000)
+    return () => { alive = false; clearTimeout(safety) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Debounce para filtros subsequentes.
+  const primeiroRender = useRef(true)
+  useEffect(() => {
+    if (primeiroRender.current) { primeiroRender.current = false; return }
     const t = setTimeout(buscarClientes, busca ? 400 : 0)
     return () => clearTimeout(t)
   }, [buscarClientes])
