@@ -10,9 +10,8 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import Script from 'next/script'
-import { SessionProvider } from 'next-auth/react'
 import { prisma } from '@/lib/prisma'
-import { TrackingProvider } from '@/components/TrackingProvider'
+import Providers from '@/components/Providers'
 
 const SITE_URL = 'https://sixxis-store-production.up.railway.app'
 
@@ -240,11 +239,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className="min-h-full flex flex-col"
         style={bodyStyle}
       >
-        <SessionProvider>
-          <TrackingProvider>
-            {children}
-          </TrackingProvider>
-        </SessionProvider>
+        <Providers>
+          {children}
+        </Providers>
         <Script
           id="schema-org"
           type="application/ld+json"
