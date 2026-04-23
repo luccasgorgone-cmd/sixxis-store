@@ -73,10 +73,6 @@ export default async function Footer() {
                 alt="Sixxis"
                 loading="lazy"
                 style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
-                onError={(e) => {
-                  const img = e.currentTarget as HTMLImageElement
-                  if (!img.src.endsWith('/logo-sixxis.png')) img.src = '/logo-sixxis.png'
-                }}
               />
 
               {/* Slogan */}
