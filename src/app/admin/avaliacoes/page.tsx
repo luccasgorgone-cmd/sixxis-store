@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Star, Search, Check, X, Trash2, Edit2, XCircle, Package as PackageIcon, Handshake } from 'lucide-react'
 import Link from 'next/link'
 
@@ -68,32 +67,36 @@ function Estrelas({ nota, size = 12 }: { nota: number; size?: number }) {
   )
 }
 
-function AdminAvaliacoesInner() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-
-  const tipoInicial = (searchParams.get('tipo') as 'todas' | 'produto' | 'parceiro' | null) ?? 'todas'
-
+export default function AdminAvaliacoesPage() {
   const [itens, setItens] = useState<AvaliacaoUnificada[]>([])
   const [loading, setLoading] = useState(true)
   const [selecionadas, setSelecionadas] = useState<string[]>([])
   const [editando, setEditando] = useState<AvaliacaoUnificada | null>(null)
   const [salvando, setSalvando] = useState(false)
 
-  const [tab, setTab] = useState<'todas' | 'produto' | 'parceiro'>(tipoInicial)
+  const [tab, setTab] = useState<'todas' | 'produto' | 'parceiro'>('todas')
   const [filtroBusca, setFiltroBusca] = useState('')
   const [filtroNota, setFiltroNota] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('')
   const [paginaAtual, setPaginaAtual] = useState(1)
 
+  // Lê ?tipo= uma vez no mount (client-only, sem useSearchParams para evitar
+  // Suspense que bloqueia hidratação em Next 16 + React 19 em prod).
   useEffect(() => {
-    // sincroniza URL quando tab muda
-    const params = new URLSearchParams(searchParams.toString())
-    if (tab === 'todas') params.delete('tipo')
-    else params.set('tipo', tab)
-    const qs = params.toString()
-    router.replace(qs ? `/admin/avaliacoes?${qs}` : '/admin/avaliacoes', { scroll: false })
-  }, [tab]) // eslint-disable-line react-hooks/exhaustive-deps
+    const sp = new URLSearchParams(window.location.search)
+    const t = sp.get('tipo')
+    if (t === 'produto' || t === 'parceiro' || t === 'todas') setTab(t)
+  }, [])
+
+  // Sincroniza tab -> URL via history.replaceState (sem useRouter).
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search)
+    if (tab === 'todas') sp.delete('tipo')
+    else sp.set('tipo', tab)
+    const qs = sp.toString()
+    const newUrl = qs ? `/admin/avaliacoes?${qs}` : '/admin/avaliacoes'
+    window.history.replaceState(null, '', newUrl)
+  }, [tab])
 
   const carregar = useCallback(async () => {
     try {
@@ -723,13 +726,5 @@ function AdminAvaliacoesInner() {
         </div>
       )}
     </div>
-  )
-}
-
-export default function AdminAvaliacoesPage() {
-  return (
-    <Suspense fallback={<p className="text-center text-gray-400 py-10 text-sm">Carregando...</p>}>
-      <AdminAvaliacoesInner />
-    </Suspense>
   )
 }

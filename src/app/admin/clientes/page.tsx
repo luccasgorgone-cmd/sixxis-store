@@ -1,9 +1,9 @@
 'use client'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Users, Search, Filter, X, ChevronDown,
   Eye, ShieldOff, ShieldCheck,
-  ShoppingBag, Coins, UserCheck, UserX,
+  ShoppingBag, UserCheck, UserX,
   RefreshCcw, ChevronLeft, ChevronRight
 } from 'lucide-react'
 
@@ -43,8 +43,9 @@ export default function AdminClientesPage() {
   const filtrosAtivos = [status, gastoFaixa, recorrencia, estado].filter(Boolean).length
 
   const buscarClientes = useCallback(async () => {
-    const params = new URLSearchParams()
+    setLoading(true)
     try {
+      const params = new URLSearchParams()
       if (busca)   params.set('busca', busca)
       if (status)  params.set('status', status)
       if (ordenar) params.set('ordenar', ordenar)
@@ -63,10 +64,8 @@ export default function AdminClientesPage() {
       if (estado) params.set('estado', estado)
 
       const res  = await fetch(`/api/admin/clientes?${params}`, { cache: 'no-store', credentials: 'include' })
-      console.log('[admin/clientes] response:', { ok: res.ok, status: res.status })
       if (!res.ok) throw new Error('HTTP ' + res.status)
       const data = await res.json()
-      console.log('[admin/clientes] data:', { clientes: data.clientes?.length, total: data.total, totalGeral: data.totalGeral })
       setClientes(Array.isArray(data.clientes) ? data.clientes : [])
       setTotal(Number(data.total) || 0)
       setTotalGeral(Number(data.totalGeral ?? data.total) || 0)
@@ -77,26 +76,16 @@ export default function AdminClientesPage() {
       setTotal(0)
       setTotalGeral(0)
     } finally {
-      console.log('[admin/clientes] setLoading(false)')
       setLoading(false)
     }
   }, [busca, status, gastoFaixa, recorrencia, estado, ordenar, page])
 
-  // Mount: fetch imediato + safety-net que força loading=false em 5s se algo travar.
+  // Mesma estrutura de /admin/produtos (que hidrata OK em prod):
+  // um único useEffect, debounce 300ms, sem useRef + safety-net split.
   useEffect(() => {
     let alive = true
-    buscarClientes()
-    const safety = setTimeout(() => { if (alive) setLoading(false) }, 5000)
-    return () => { alive = false; clearTimeout(safety) }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Debounce para filtros subsequentes.
-  const primeiroRender = useRef(true)
-  useEffect(() => {
-    if (primeiroRender.current) { primeiroRender.current = false; return }
-    const t = setTimeout(buscarClientes, busca ? 400 : 0)
-    return () => clearTimeout(t)
+    const t = setTimeout(() => { if (alive) buscarClientes() }, 300)
+    return () => { alive = false; clearTimeout(t) }
   }, [buscarClientes])
 
   function limparFiltros() {
