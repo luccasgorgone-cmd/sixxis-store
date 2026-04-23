@@ -43,7 +43,6 @@ export default function AdminClientesPage() {
   const filtrosAtivos = [status, gastoFaixa, recorrencia, estado].filter(Boolean).length
 
   const buscarClientes = useCallback(async () => {
-    setLoading(true)
     const params = new URLSearchParams()
     try {
       if (busca)   params.set('busca', busca)
@@ -65,7 +64,7 @@ export default function AdminClientesPage() {
 
       const res  = await fetch(`/api/admin/clientes?${params}`, { cache: 'no-store', credentials: 'include' })
       console.log('[admin/clientes] response:', { ok: res.ok, status: res.status })
-      if (!res.ok) throw new Error('Erro ' + res.status)
+      if (!res.ok) throw new Error('HTTP ' + res.status)
       const data = await res.json()
       console.log('[admin/clientes] data:', { clientes: data.clientes?.length, total: data.total, totalGeral: data.totalGeral })
       setClientes(Array.isArray(data.clientes) ? data.clientes : [])
@@ -73,11 +72,12 @@ export default function AdminClientesPage() {
       setTotalGeral(Number(data.totalGeral ?? data.total) || 0)
       if (Array.isArray(data.estados) && data.estados.length) setEstados(data.estados)
     } catch (err) {
-      console.error('[clientes] fetch falhou:', err)
+      console.error('[admin/clientes] fetch falhou:', err)
       setClientes([])
       setTotal(0)
       setTotalGeral(0)
     } finally {
+      console.log('[admin/clientes] setLoading(false)')
       setLoading(false)
     }
   }, [busca, status, gastoFaixa, recorrencia, estado, ordenar, page])

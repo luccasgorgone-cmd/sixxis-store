@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Star, Search, Check, X, Trash2, Edit2, XCircle, Package as PackageIcon, Handshake } from 'lucide-react'
 import Link from 'next/link'
@@ -95,18 +95,19 @@ function AdminAvaliacoesInner() {
     router.replace(qs ? `/admin/avaliacoes?${qs}` : '/admin/avaliacoes', { scroll: false })
   }, [tab]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function carregar() {
-    setLoading(true)
+  const carregar = useCallback(async () => {
     try {
       const [rProd, rParc] = await Promise.all([
-        fetch('/api/admin/avaliacoes?limit=500'),
-        fetch('/api/admin/avaliacoes-parceiros'),
+        fetch('/api/admin/avaliacoes?limit=500', { credentials: 'include', cache: 'no-store' }),
+        fetch('/api/admin/avaliacoes-parceiros',  { credentials: 'include', cache: 'no-store' }),
       ])
-      const dataProd = await rProd.json().catch(() => ({ avaliacoes: [] }))
-      const dataParc = await rParc.json().catch(() => [])
+      console.log('[admin/avaliacoes] response:', { prodOk: rProd.ok, prodStatus: rProd.status, parcOk: rParc.ok, parcStatus: rParc.status })
+      const dataProd = rProd.ok ? await rProd.json().catch(() => ({ avaliacoes: [] })) : { avaliacoes: [] }
+      const dataParc = rParc.ok ? await rParc.json().catch(() => [])                    : []
 
-      const lProd: ApiAvProduto[] = dataProd.avaliacoes ?? []
+      const lProd: ApiAvProduto[] = Array.isArray(dataProd?.avaliacoes) ? dataProd.avaliacoes : []
       const lParc: ApiAvParceiro[] = Array.isArray(dataParc) ? dataParc : []
+      console.log('[admin/avaliacoes] data:', { produto: lProd.length, parceiro: lParc.length })
 
       const mapProd: AvaliacaoUnificada[] = lProd.map(av => {
         const nome = av.nomeAutor || av.cliente?.nome || 'Anônimo'
@@ -160,14 +161,21 @@ function AdminAvaliacoesInner() {
 
       setItens(unificadas)
     } catch (err) {
-      console.error('[avaliacoes] fetch falhou:', err)
+      console.error('[admin/avaliacoes] fetch falhou:', err)
       setItens([])
     } finally {
+      console.log('[admin/avaliacoes] setLoading(false)')
       setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { carregar() }, [])
+  // Mount: fetch imediato + safety-net que força loading=false em 5s se algo travar.
+  useEffect(() => {
+    let alive = true
+    carregar()
+    const safety = setTimeout(() => { if (alive) setLoading(false) }, 5000)
+    return () => { alive = false; clearTimeout(safety) }
+  }, [carregar])
 
   const countTodas = itens.length
   const countProduto = useMemo(() => itens.filter(i => i.tipo === 'produto').length, [itens])

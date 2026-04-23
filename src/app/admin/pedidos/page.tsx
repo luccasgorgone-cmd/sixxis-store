@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import React from 'react'
 import {
@@ -281,34 +281,48 @@ export default function AdminPedidosPage() {
   const totalPages = Math.ceil(total / limit)
 
   const fetch_ = useCallback(async () => {
-    setLoading(true)
     try {
       const params = new URLSearchParams({ page: String(page), q, status, pagamento, from, to })
       const res = await fetch(`/api/admin/pedidos?${params}`, { credentials: 'include', cache: 'no-store' })
+      console.log('[admin/pedidos] response:', { ok: res.ok, status: res.status })
       if (!res.ok) throw new Error('Erro ' + res.status)
       const data = await res.json()
+      console.log('[admin/pedidos] data:', { pedidos: data.pedidos?.length, total: data.total, stats: data.stats })
       setPedidos(Array.isArray(data.pedidos) ? data.pedidos : [])
       setTotal(Number(data.total) || 0)
       setStats({
-        total:     Number(data.stats?.total)     || 0,
+        total:     Number(data.stats?.total)     || Number(data.total) || 0,
         pendentes: Number(data.stats?.pendentes) || 0,
         enviados:  Number(data.stats?.enviados)  || 0,
         receita:   Number(data.stats?.receita)   || 0,
       })
     } catch (err) {
-      console.error('[pedidos] fetch falhou:', err)
+      console.error('[admin/pedidos] fetch falhou:', err)
       setPedidos([])
       setTotal(0)
+      setStats({ total: 0, pendentes: 0, enviados: 0, receita: 0 })
     } finally {
       setLoading(false)
     }
   }, [page, q, status, pagamento, from, to])
 
+  // Mount: fetch imediato + safety-net que força loading=false em 5s se algo travar.
   useEffect(() => {
     let alive = true
-    const t = setTimeout(() => { if (alive) fetch_() }, 300)
-    return () => { alive = false; clearTimeout(t) }
+    fetch_()
+    const safety = setTimeout(() => { if (alive) setLoading(false) }, 5000)
+    return () => { alive = false; clearTimeout(safety) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Debounce para filtros subsequentes.
+  const primeiroRender = useRef(true)
+  useEffect(() => {
+    if (primeiroRender.current) { primeiroRender.current = false; return }
+    const t = setTimeout(fetch_, 400)
+    return () => clearTimeout(t)
   }, [fetch_])
+
   useEffect(() => setPage(1), [q, status, pagamento, from, to])
 
   function toggleExpand(id: string) {
