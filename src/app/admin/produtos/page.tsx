@@ -71,18 +71,31 @@ export default function AdminProdutosPage() {
 
   const fetchProdutos = useCallback(async () => {
     setLoading(true)
-    const params = new URLSearchParams({ page: String(page), q, categoria, ativo })
-    const res = await fetch(`/api/admin/produtos?${params}`)
-    const data = await res.json()
-    setProdutos(data.produtos ?? [])
-    setTotal(data.total ?? 0)
-    if (data.stats) setStats(data.stats)
-    setLoading(false)
+    try {
+      const params = new URLSearchParams({ page: String(page), q, categoria, ativo })
+      const res = await fetch(`/api/admin/produtos?${params}`, { credentials: 'include', cache: 'no-store' })
+      if (!res.ok) throw new Error('Erro ' + res.status)
+      const data = await res.json()
+      setProdutos(Array.isArray(data.produtos) ? data.produtos : [])
+      setTotal(Number(data.total) || 0)
+      setStats({
+        total:    Number(data.stats?.total)    || 0,
+        ativos:   Number(data.stats?.ativos)   || 0,
+        criticos: Number(data.stats?.criticos) || 0,
+      })
+    } catch (err) {
+      console.error('[produtos] fetch falhou:', err)
+      setProdutos([])
+      setTotal(0)
+    } finally {
+      setLoading(false)
+    }
   }, [page, q, categoria, ativo])
 
   useEffect(() => {
-    const t = setTimeout(fetchProdutos, 300)
-    return () => clearTimeout(t)
+    let alive = true
+    const t = setTimeout(() => { if (alive) fetchProdutos() }, 300)
+    return () => { alive = false; clearTimeout(t) }
   }, [fetchProdutos])
 
   useEffect(() => { setPage(1) }, [q, categoria, ativo])
@@ -106,7 +119,7 @@ export default function AdminProdutosPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Produtos</h1>
           <p className="text-gray-500 text-sm mt-0.5">
-            {total || stats.total} produto{(total || stats.total) !== 1 ? 's' : ''} encontrado{(total || stats.total) !== 1 ? 's' : ''}
+            {stats.total} produto{stats.total !== 1 ? 's' : ''} encontrado{stats.total !== 1 ? 's' : ''}
           </p>
         </div>
         <Link

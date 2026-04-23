@@ -135,6 +135,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
               height={36}
               className="object-contain"
               unoptimized
+              onError={() => setLogoUrl('/logo-sixxis.png')}
             />
           </Link>
           <button

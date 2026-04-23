@@ -282,16 +282,33 @@ export default function AdminPedidosPage() {
 
   const fetch_ = useCallback(async () => {
     setLoading(true)
-    const params = new URLSearchParams({ page: String(page), q, status, pagamento, from, to })
-    const res = await fetch(`/api/admin/pedidos?${params}`)
-    const data = await res.json()
-    setPedidos(data.pedidos ?? [])
-    setTotal(data.total ?? 0)
-    if (data.stats) setStats(data.stats)
-    setLoading(false)
+    try {
+      const params = new URLSearchParams({ page: String(page), q, status, pagamento, from, to })
+      const res = await fetch(`/api/admin/pedidos?${params}`, { credentials: 'include', cache: 'no-store' })
+      if (!res.ok) throw new Error('Erro ' + res.status)
+      const data = await res.json()
+      setPedidos(Array.isArray(data.pedidos) ? data.pedidos : [])
+      setTotal(Number(data.total) || 0)
+      setStats({
+        total:     Number(data.stats?.total)     || 0,
+        pendentes: Number(data.stats?.pendentes) || 0,
+        enviados:  Number(data.stats?.enviados)  || 0,
+        receita:   Number(data.stats?.receita)   || 0,
+      })
+    } catch (err) {
+      console.error('[pedidos] fetch falhou:', err)
+      setPedidos([])
+      setTotal(0)
+    } finally {
+      setLoading(false)
+    }
   }, [page, q, status, pagamento, from, to])
 
-  useEffect(() => { const t = setTimeout(fetch_, 300); return () => clearTimeout(t) }, [fetch_])
+  useEffect(() => {
+    let alive = true
+    const t = setTimeout(() => { if (alive) fetch_() }, 300)
+    return () => { alive = false; clearTimeout(t) }
+  }, [fetch_])
   useEffect(() => setPage(1), [q, status, pagamento, from, to])
 
   function toggleExpand(id: string) {
@@ -318,7 +335,7 @@ export default function AdminPedidosPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{total || stats.total} pedido{(total || stats.total) !== 1 ? 's' : ''}</p>
+            <p className="text-gray-500 text-sm mt-0.5">{stats.total} pedido{stats.total !== 1 ? 's' : ''}</p>
           </div>
         </div>
 

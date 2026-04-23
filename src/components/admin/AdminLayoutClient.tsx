@@ -35,6 +35,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             width={90}
             height={30}
             className="object-contain"
+            unoptimized
+            priority
           />
 
           {/* Espaço para balancear o layout (espelho do hamburger) */}

@@ -63,7 +63,7 @@ export default function AdminClientesPage() {
 
       if (estado) params.set('estado', estado)
 
-      const res  = await fetch(`/api/admin/clientes?${params}`, { cache: 'no-store' })
+      const res  = await fetch(`/api/admin/clientes?${params}`, { cache: 'no-store', credentials: 'include' })
       if (!res.ok) throw new Error('Erro ' + res.status)
       const data = await res.json()
       setClientes(Array.isArray(data.clientes) ? data.clientes : [])
