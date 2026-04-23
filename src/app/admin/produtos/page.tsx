@@ -74,17 +74,21 @@ export default function AdminProdutosPage() {
     try {
       const params = new URLSearchParams({ page: String(page), q, categoria, ativo })
       const res = await fetch(`/api/admin/produtos?${params}`, { credentials: 'include', cache: 'no-store' })
+      console.log('[admin/produtos] response:', { ok: res.ok, status: res.status })
       if (!res.ok) throw new Error('Erro ' + res.status)
       const data = await res.json()
-      setProdutos(Array.isArray(data.produtos) ? data.produtos : [])
-      setTotal(Number(data.total) || 0)
-      setStats({
+      console.log('[admin/produtos] data:', { produtos: data.produtos?.length, total: data.total, stats: data.stats })
+      const novoStats = {
         total:    Number(data.stats?.total)    || 0,
         ativos:   Number(data.stats?.ativos)   || 0,
         criticos: Number(data.stats?.criticos) || 0,
-      })
+      }
+      console.log('[admin/produtos] applying stats:', novoStats)
+      setProdutos(Array.isArray(data.produtos) ? data.produtos : [])
+      setTotal(Number(data.total) || 0)
+      setStats(novoStats)
     } catch (err) {
-      console.error('[produtos] fetch falhou:', err)
+      console.error('[admin/produtos] fetch failed:', err)
       setProdutos([])
       setTotal(0)
     } finally {

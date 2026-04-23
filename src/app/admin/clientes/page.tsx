@@ -64,8 +64,10 @@ export default function AdminClientesPage() {
       if (estado) params.set('estado', estado)
 
       const res  = await fetch(`/api/admin/clientes?${params}`, { cache: 'no-store', credentials: 'include' })
+      console.log('[admin/clientes] response:', { ok: res.ok, status: res.status })
       if (!res.ok) throw new Error('Erro ' + res.status)
       const data = await res.json()
+      console.log('[admin/clientes] data:', { clientes: data.clientes?.length, total: data.total, totalGeral: data.totalGeral })
       setClientes(Array.isArray(data.clientes) ? data.clientes : [])
       setTotal(Number(data.total) || 0)
       setTotalGeral(Number(data.totalGeral ?? data.total) || 0)
