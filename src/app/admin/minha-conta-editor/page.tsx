@@ -65,9 +65,21 @@ type Config = Record<string, string>
 export default function MinhaContaEditorPage() {
   const [aba, setAba] = useState<typeof ABAS[number]['id']>('banners')
 
-  // Config (banners + conteudo)
-  const [config, setConfig] = useState<Config>({})
-  const [loadingConfig, setLoadingConfig] = useState(true)
+  // Config (banners + conteudo) — começa com defaults, nunca bloqueia render.
+  // O fetch apenas sobrescreve com valores reais quando disponíveis.
+  const [config, setConfig] = useState<Config>(() => ({
+    minha_conta_banner_desktop:             '',
+    minha_conta_banner_mobile:              '',
+    minha_conta_hero_titulo:                'Minha Conta',
+    minha_conta_hero_subtitulo:             'Gerencie pedidos, cashback, endereços e preferências',
+    minha_conta_mensagem_boasvindas:        '',
+    minha_conta_mostra_pedidos:             'true',
+    minha_conta_mostra_cashback:            'true',
+    minha_conta_mostra_enderecos:           'true',
+    minha_conta_mostra_avaliacoes_pendentes:'true',
+    minha_conta_mostra_cupons:              'true',
+    minha_conta_cor_destaque:               '#3cbfb3',
+  }))
 
   // Níveis — estado desacoplado com loading/error
   const [niveis, setNiveis] = useState<NivelFidelidade[] | null>(null)
@@ -77,14 +89,16 @@ export default function MinhaContaEditorPage() {
   const [salvando, setSalvando] = useState(false)
   const [salvoOk, setSalvoOk] = useState(false)
 
-  // Fetch config (uma vez)
+  // Fetch config: faz merge sobre os defaults. Nunca bloqueia o render.
   useEffect(() => {
     let alive = true
     fetch('/api/admin/minha-conta-editor')
-      .then(r => r.ok ? r.json() : Promise.reject(new Error('Erro ' + r.status)))
-      .then((data: { config?: Config }) => { if (alive) setConfig(data.config ?? {}) })
-      .catch(() => { if (alive) setConfig({}) })
-      .finally(() => { if (alive) setLoadingConfig(false) })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { config?: Config } | null) => {
+        if (!alive || !data?.config) return
+        setConfig(prev => ({ ...prev, ...data.config }))
+      })
+      .catch(() => {})
     return () => { alive = false }
   }, [])
 
@@ -176,7 +190,6 @@ export default function MinhaContaEditorPage() {
 
       {aba === 'banners' && (
         <BannersPanel
-          loading={loadingConfig}
           config={config}
           editarConfig={editarConfig}
           upload={upload}
@@ -199,7 +212,6 @@ export default function MinhaContaEditorPage() {
 
       {aba === 'conteudo' && (
         <ConteudoPanel
-          loading={loadingConfig}
           config={config}
           editarConfig={editarConfig}
           salvarConfig={salvarConfig}
@@ -215,9 +227,8 @@ export default function MinhaContaEditorPage() {
 // Painel Banners
 // ────────────────────────────────────────────────────────────────────────────
 function BannersPanel({
-  loading, config, editarConfig, upload, salvarConfig, salvando, salvoOk,
+  config, editarConfig, upload, salvarConfig, salvando, salvoOk,
 }: {
-  loading: boolean
   config: Config
   editarConfig: (k: string, v: string) => void
   upload: (f: File) => Promise<string | null>
@@ -225,8 +236,6 @@ function BannersPanel({
   salvando: boolean
   salvoOk: boolean
 }) {
-  if (loading) return <LoaderBox>Carregando configurações...</LoaderBox>
-
   return (
     <div className="space-y-5">
       {(['desktop', 'mobile'] as const).map(tipo => {
@@ -489,17 +498,14 @@ function NivelCard({
 // Painel Conteúdo
 // ────────────────────────────────────────────────────────────────────────────
 function ConteudoPanel({
-  loading, config, editarConfig, salvarConfig, salvando, salvoOk,
+  config, editarConfig, salvarConfig, salvando, salvoOk,
 }: {
-  loading: boolean
   config: Config
   editarConfig: (k: string, v: string) => void
   salvarConfig: () => void
   salvando: boolean
   salvoOk: boolean
 }) {
-  if (loading) return <LoaderBox>Carregando configurações...</LoaderBox>
-
   return (
     <div className="space-y-4">
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5 space-y-4">
