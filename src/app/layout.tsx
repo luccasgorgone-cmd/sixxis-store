@@ -149,23 +149,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     if (cfg.logo_url)        logoUrl        = cfg.logo_url
     if (cfg.fonte_principal) fontePrincipal = cfg.fonte_principal
     if (cfg.favicon_url)     faviconUrl     = cfg.favicon_url
-
-    // ── Migração lazy: corrige valores antigos do esquema de cores ────────────
-    // Se o DB ainda tem os defaults antigos, atualiza para o novo esquema.
-    // Após a 1ª requisição pós-deploy o DB fica correto e isso nunca mais roda.
-    const colorMigrations: { chave: string; antigo: string; novo: string }[] = [
-      { chave: 'bg_header_cor',     antigo: '#1a4f4a', novo: '#0f2e2b' },
-      { chave: 'bg_header_nav_cor', antigo: '#0f2e2b', novo: '#1a4f4a' },
-      { chave: 'bg_anuncio_cor',    antigo: '#0f2e2b', novo: '#1a4f4a' },
-    ]
-    for (const { chave, antigo, novo } of colorMigrations) {
-      if (cfg[chave] === antigo) {
-        await prisma.configuracao.update({ where: { chave }, data: { valor: novo } })
-        cfg[chave] = novo  // atualiza in-memory para o restante desta requisição
-      }
-    }
-    // ─────────────────────────────────────────────────────────────────────────
-  } catch {
+  } catch (err) {
+    console.error('[root-layout] configs fetch failed:', err)
     // silently use defaults
   }
 
