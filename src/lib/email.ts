@@ -9,6 +9,7 @@ import {
   templateCupomEspecial,
   templateVoltaEstoque,
   templateSolicitacaoAvaliacao,
+  templateUpgradeNivel,
 } from './email-templates-premium'
 
 const FROM = process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br'
@@ -93,6 +94,16 @@ export function gerarHtmlTemplate(tipo: string, variaveis: Record<string, any>):
         nome: variaveis.nome || 'Cliente',
         produto: variaveis.produto || 'seu produto',
         produtoSlug: variaveis.produto_slug || variaveis.produtoSlug || '',
+        siteUrl,
+      })
+
+    case 'upgrade_nivel':
+    case 'upgrade_fidelidade':
+      return templateUpgradeNivel({
+        nome: variaveis.nome || 'Cliente',
+        nivelAnterior: variaveis.nivel_anterior || variaveis.nivelAnterior || 'Cristal',
+        nivelNovo: variaveis.nivel_novo || variaveis.nivelNovo || variaveis.novoNivel || 'Topázio',
+        totalGasto: Number(variaveis.total_gasto ?? variaveis.totalGasto) || 0,
         siteUrl,
       })
 

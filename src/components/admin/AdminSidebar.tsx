@@ -53,10 +53,10 @@ const NAV_GROUPS = [
   {
     label: 'Conteúdo',
     items: [
-      { href: '/admin/editor-home',        label: 'Editor da Home',    icon: Home,       exact: false },
-      { href: '/admin/mobile',             label: 'Editor Mobile',     icon: Smartphone, exact: false },
-      { href: '/admin/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,   exact: false },
-      { href: '/admin/banners',            label: 'Banners',           icon: ImageIcon,  exact: false },
+      { href: '/admin/editor-home',        label: 'Editor da Home',     icon: Home,       exact: false },
+      { href: '/admin/mobile',             label: 'Editor Mobile',      icon: Smartphone, exact: false },
+      { href: '/admin/banners',            label: 'Banners',            icon: ImageIcon,  exact: false },
+      { href: '/admin/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,    exact: false },
     ],
   },
   {

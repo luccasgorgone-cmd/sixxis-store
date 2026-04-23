@@ -25,6 +25,9 @@ const DADOS_DEMO = {
   desconto:         '15% OFF',
   validade:         '07/05/2026',
   total_carrinho:   599.90,
+  nivel_anterior:   'Topázio',
+  nivel_novo:       'Diamante',
+  total_gasto:      5240.50,
   itens: [{ nome: 'Climatizador Sixxis Pro', qtd: 1, preco: 599.90 }],
 }
 
