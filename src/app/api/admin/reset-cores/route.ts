@@ -45,10 +45,9 @@ const DEFAULTS = [
 ]
 
 export async function POST(request: NextRequest) {
-  const secret = request.nextUrl.searchParams.get('secret')
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const { requireAdmin } = await import('@/lib/adminAuth')
+  const unauth = await requireAdmin(request)
+  if (unauth) return unauth
 
   for (const { chave, valor } of DEFAULTS) {
     await prisma.configuracao.upsert({

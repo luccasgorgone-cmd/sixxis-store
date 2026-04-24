@@ -379,7 +379,7 @@ export default function EditorHomePage() {
             )}
           </div>
           <Link
-            href="/admin/banners"
+            href="/adm-a7f9c2b4/banners"
             className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-xs font-bold px-4 py-2 rounded-xl transition"
           >
             {contadorBanners > 0 ? 'Gerenciar banners →' : 'Adicionar banners →'}

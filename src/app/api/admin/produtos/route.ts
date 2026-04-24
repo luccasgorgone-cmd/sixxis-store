@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
+import { auditLog } from '@/lib/audit'
 
 const NO_CACHE = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -141,6 +142,13 @@ export async function POST(request: NextRequest) {
         : undefined,
     },
     include: { variacoes: true },
+  })
+
+  await auditLog({
+    req: request,
+    action: 'produto.create',
+    target: produto.id,
+    metadata: { nome: produto.nome, slug: produto.slug, categoria: produto.categoria, preco: String(produto.preco) },
   })
 
   return NextResponse.json({ produto }, { status: 201, headers: NO_CACHE })

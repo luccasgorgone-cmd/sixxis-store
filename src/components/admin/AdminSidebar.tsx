@@ -8,7 +8,7 @@ import {
   LogOut, Image as ImageIcon, Tag, Star,
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, ShieldOff,
-  Target, MessageSquare, Clock, Bot, UserCog,
+  Target, MessageSquare, Clock, Bot, UserCog, History,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -17,55 +17,56 @@ const NAV_GROUPS = [
   {
     label: 'Visão Geral',
     items: [
-      { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+      { href: '/adm-a7f9c2b4', label: 'Dashboard', icon: LayoutDashboard, exact: true },
     ],
   },
   {
     label: 'Catálogo',
     items: [
-      { href: '/admin/produtos', label: 'Produtos', icon: Package, exact: false },
+      { href: '/adm-a7f9c2b4/produtos', label: 'Produtos', icon: Package, exact: false },
     ],
   },
   {
     label: 'Vendas',
     items: [
-      { href: '/admin/pedidos',   label: 'Pedidos',        icon: ShoppingBag, exact: false },
-      { href: '/admin/cupons',    label: 'Cupons',         icon: Tag,         exact: false },
-      { href: '/admin/clientes',  label: 'Clientes',       icon: Users,       exact: false },
-      { href: '/admin/bloqueios', label: 'Bloqueios',      icon: ShieldOff,   exact: false },
+      { href: '/adm-a7f9c2b4/pedidos',   label: 'Pedidos',        icon: ShoppingBag, exact: false },
+      { href: '/adm-a7f9c2b4/cupons',    label: 'Cupons',         icon: Tag,         exact: false },
+      { href: '/adm-a7f9c2b4/clientes',  label: 'Clientes',       icon: Users,       exact: false },
+      { href: '/adm-a7f9c2b4/bloqueios', label: 'Bloqueios',      icon: ShieldOff,   exact: false },
     ],
   },
   {
     label: 'Fidelidade',
     items: [
-      { href: '/admin/avaliacoes', label: 'Avaliações', icon: Star, exact: false },
+      { href: '/adm-a7f9c2b4/avaliacoes', label: 'Avaliações', icon: Star, exact: false },
     ],
   },
   {
     label: 'Marketing',
     items: [
-      { href: '/admin/campanhas',              label: 'Campanhas', icon: Target,        exact: false },
-      { href: '/admin/emails',                 label: 'E-mails',   icon: Mail,          exact: false },
-      { href: '/admin/configuracoes/whatsapp', label: 'WhatsApp',  icon: MessageSquare, exact: false },
-      { href: '/admin/luna',                   label: 'Luna',      icon: Bot,           exact: false },
+      { href: '/adm-a7f9c2b4/campanhas',              label: 'Campanhas', icon: Target,        exact: false },
+      { href: '/adm-a7f9c2b4/emails',                 label: 'E-mails',   icon: Mail,          exact: false },
+      { href: '/adm-a7f9c2b4/configuracoes/whatsapp', label: 'WhatsApp',  icon: MessageSquare, exact: false },
+      { href: '/adm-a7f9c2b4/luna',                   label: 'Luna',      icon: Bot,           exact: false },
     ],
   },
   {
     label: 'Conteúdo',
     items: [
-      { href: '/admin/editor-home',        label: 'Editor da Home',     icon: Home,       exact: false },
-      { href: '/admin/mobile',             label: 'Editor Mobile',      icon: Smartphone, exact: false },
-      { href: '/admin/banners',            label: 'Banners',            icon: ImageIcon,  exact: false },
-      { href: '/admin/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,    exact: false },
+      { href: '/adm-a7f9c2b4/editor-home',        label: 'Editor da Home',     icon: Home,       exact: false },
+      { href: '/adm-a7f9c2b4/mobile',             label: 'Editor Mobile',      icon: Smartphone, exact: false },
+      { href: '/adm-a7f9c2b4/banners',            label: 'Banners',            icon: ImageIcon,  exact: false },
+      { href: '/adm-a7f9c2b4/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,    exact: false },
     ],
   },
   {
     label: 'Configurações',
     items: [
-      { href: '/admin/analytics',          label: 'Analytics',             icon: BarChart2, exact: false },
-      { href: '/admin/vendas-horario',     label: 'Horários de Venda',     icon: Clock,     exact: false },
-      { href: '/admin/configuracoes-loja', label: 'Configurações da Loja', icon: Settings,  exact: false },
-      { href: '/admin/configuracoes',      label: 'Configurações Gerais',  icon: Settings,  exact: false },
+      { href: '/adm-a7f9c2b4/analytics',          label: 'Analytics',             icon: BarChart2, exact: false },
+      { href: '/adm-a7f9c2b4/vendas-horario',     label: 'Horários de Venda',     icon: Clock,     exact: false },
+      { href: '/adm-a7f9c2b4/configuracoes-loja', label: 'Configurações da Loja', icon: Settings,  exact: false },
+      { href: '/adm-a7f9c2b4/configuracoes',      label: 'Configurações Gerais',  icon: Settings,  exact: false },
+      { href: '/adm-a7f9c2b4/auditoria',          label: 'Auditoria',             icon: History,   exact: false },
     ],
   },
 ]
@@ -102,7 +103,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
   async function handleLogout() {
     setLoggingOut(true)
     await fetch('/api/admin/logout', { method: 'POST' })
-    router.push('/admin/login')
+    router.push('/adm-a7f9c2b4/login')
   }
 
   return (
@@ -127,7 +128,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
       >
         {/* Logo */}
         <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: A.sidebarBorder }}>
-          <Link href="/admin" className="block">
+          <Link href="/adm-a7f9c2b4" className="block">
             <Image
               src={logoUrl}
               alt="Sixxis"

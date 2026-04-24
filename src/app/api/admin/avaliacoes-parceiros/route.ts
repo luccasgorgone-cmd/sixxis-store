@@ -1,12 +1,13 @@
 import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { verifyAdminToken } from '@/lib/adminToken'
 
 export const dynamic = 'force-dynamic'
 
 async function verificarAdmin() {
   const cookieStore = await cookies()
-  return cookieStore.get('admin_session')?.value === process.env.ADMIN_SECRET
+  return !!verifyAdminToken(cookieStore.get('admin_token')?.value)
 }
 
 export async function GET() {

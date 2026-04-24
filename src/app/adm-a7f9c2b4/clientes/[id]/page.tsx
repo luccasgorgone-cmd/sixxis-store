@@ -121,7 +121,7 @@ export default function ClienteDetalhe() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => router.push('/admin/clientes')}
+            onClick={() => router.push('/adm-a7f9c2b4/clientes')}
             className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition"
           >
             <ArrowLeft size={18} />

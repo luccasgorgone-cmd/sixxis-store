@@ -604,3 +604,42 @@ model RelatorioVendaHora {
   @@unique([data, hora])
   @@index([data])
 }
+
+// ─── Sprint 1 Infra · segurança admin ────────────────────────────────
+
+model TentativaLogin {
+  id         String   @id @default(cuid())
+  ip         String
+  userAgent  String?  @db.Text
+  sucesso    Boolean
+  rota       String
+  createdAt  DateTime @default(now())
+
+  @@index([ip, createdAt])
+  @@index([createdAt])
+}
+
+model BloqueioIp {
+  id           String   @id @default(cuid())
+  ip           String   @unique
+  motivo       String
+  bloqueadoAte DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([bloqueadoAte])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actor      String
+  action     String
+  target     String?
+  metadata   Json?
+  ip         String?
+  userAgent  String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([actor, createdAt])
+  @@index([action])
+  @@index([createdAt])
+}

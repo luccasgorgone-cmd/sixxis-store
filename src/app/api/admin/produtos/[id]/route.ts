@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { deleteFromR2 } from '@/lib/r2'
 import { requireAdmin } from '@/lib/adminAuth'
+import { auditLog } from '@/lib/audit'
 
 export async function GET(
   request: NextRequest,
@@ -151,6 +152,13 @@ export async function PUT(
   revalidatePath('/produtos')
   revalidatePath('/ofertas')
 
+  await auditLog({
+    req: request,
+    action: 'produto.update',
+    target: id,
+    metadata: { nome: produto?.nome, slug: produto?.slug, preco: String(produto?.preco ?? '') },
+  })
+
   return NextResponse.json({ produto })
 }
 
@@ -185,6 +193,13 @@ export async function DELETE(
   revalidatePath('/')
   revalidatePath('/produtos')
   revalidatePath('/ofertas')
+
+  await auditLog({
+    req: request,
+    action: 'produto.delete',
+    target: id,
+    metadata: { nome: produto.nome, slug: produto.slug },
+  })
 
   return NextResponse.json({ ok: true })
 }

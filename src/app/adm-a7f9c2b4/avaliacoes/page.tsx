@@ -94,7 +94,7 @@ export default function AdminAvaliacoesPage() {
     if (tab === 'todas') sp.delete('tipo')
     else sp.set('tipo', tab)
     const qs = sp.toString()
-    const newUrl = qs ? `/admin/avaliacoes?${qs}` : '/admin/avaliacoes'
+    const newUrl = qs ? `/adm-a7f9c2b4/avaliacoes?${qs}` : '/adm-a7f9c2b4/avaliacoes'
     window.history.replaceState(null, '', newUrl)
   }, [tab])
 
@@ -127,7 +127,7 @@ export default function AdminAvaliacoesPage() {
           resposta: av.resposta,
           createdAt: av.createdAt,
           contextoLabel: av.produto?.nome ?? '—',
-          contextoHref: av.produto ? `/admin/produtos/${av.produto.id}` : null,
+          contextoHref: av.produto ? `/adm-a7f9c2b4/produtos/${av.produto.id}` : null,
           produtoImagem: av.produto?.imagens?.[0] ?? null,
           avatarIniciais: iniciaisDe(nome),
           avatarCor: corPorNome(nome),

@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
       })
 
       if (res.ok) {
-        router.push('/admin')
+        router.push('/adm-a7f9c2b4')
         router.refresh()
       } else {
         let msg = 'Senha incorreta. Tente novamente.'

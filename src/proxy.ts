@@ -1,27 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// O proxy roda no Edge Runtime onde process.env pode ser indisponível.
-// A segurança é garantida pela rota de auth (Node.js) que só seta este
-// cookie httpOnly após validar a senha contra ADMIN_SECRET.
-// O proxy apenas verifica se o cookie existe.
-const PUBLIC_PATHS = ['/admin/login', '/api/admin/auth', '/api/admin/logout', '/api/admin/fix-configs', '/api/admin/reset-cores']
+// O middleware roda no Edge Runtime — não pode importar crypto/prisma.
+// Aqui só verifica a EXISTÊNCIA do cookie. A validação HMAC do token JWT
+// acontece nos route handlers (Node runtime) via verifyAdminToken().
+const PUBLIC_PATHS = [
+  '/adm-a7f9c2b4/login',
+  '/api/admin/auth',
+  '/api/admin/logout',
+]
+
+function isPublic(pathname: string): boolean {
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
+}
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
-    return NextResponse.next()
-  }
+  if (isPublic(pathname)) return NextResponse.next()
 
   const token = request.cookies.get('admin_token')?.value
-
   if (!token) {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+    return NextResponse.redirect(new URL('/adm-a7f9c2b4/login', request.url))
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/adm-a7f9c2b4/:path*', '/api/admin/:path*'],
 }

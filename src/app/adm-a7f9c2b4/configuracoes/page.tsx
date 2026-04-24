@@ -949,7 +949,7 @@ export default function ConfiguracoesPage() {
               Gerencie os banners do carrossel da home (imagens, ordem, links) em uma página dedicada.
             </p>
             <a
-              href="/admin/banners"
+              href="/adm-a7f9c2b4/banners"
               className="inline-flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition"
             >
               Gerenciar Banners →
@@ -1248,9 +1248,9 @@ export default function ConfiguracoesPage() {
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
           <p className="text-sm font-semibold text-amber-800 mb-1">Importante</p>
           <p className="text-sm text-amber-700">
-            Após alterar a senha, ela fica salva no banco de dados e substitui a variável de ambiente
-            <code className="bg-amber-100 px-1.5 py-0.5 rounded text-xs mx-1">ADMIN_SECRET</code>.
-            Guarde a nova senha em local seguro.
+            Ao alterar a senha, o hash bcrypt da nova senha é salvo no banco e substitui a env var
+            <code className="bg-amber-100 px-1.5 py-0.5 rounded text-xs mx-1">ADMIN_PASSWORD_HASH</code>.
+            A senha original nunca é armazenada. Guarde a nova senha em local seguro.
           </p>
         </div>
       </div>
@@ -1412,7 +1412,7 @@ export default function ConfiguracoesPage() {
         <Card title="Texto do Hero (exibido quando não há banners)">
           <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
             Estes textos aparecem somente quando não há banners cadastrados.{' '}
-            <a href="/admin/banners" className="font-semibold underline">Gerenciar banners →</a>
+            <a href="/adm-a7f9c2b4/banners" className="font-semibold underline">Gerenciar banners →</a>
           </p>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">

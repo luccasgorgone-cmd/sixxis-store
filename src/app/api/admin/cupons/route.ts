@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
+import { auditLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,5 +92,13 @@ export async function POST(req: NextRequest) {
       primeiraCompra: primeiraCompra || false,
     },
   })
+
+  await auditLog({
+    req,
+    action: 'cupom.create',
+    target: cupom.id,
+    metadata: { codigo: cupom.codigo, tipo: cupom.tipo, valor: String(cupom.valor) },
+  })
+
   return NextResponse.json(cupom, { status: 201 })
 }

@@ -324,7 +324,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     setSaving(false)
 
     if (res.ok) {
-      router.push('/admin/produtos')
+      router.push('/adm-a7f9c2b4/produtos')
       router.refresh()
     } else {
       const data = await res.json()
@@ -337,7 +337,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     if (!confirm('Deletar este produto permanentemente?')) return
     setDeleting(true)
     await fetch(`/api/admin/produtos/${produtoId}`, { method: 'DELETE' })
-    router.push('/admin/produtos')
+    router.push('/adm-a7f9c2b4/produtos')
     router.refresh()
   }
 

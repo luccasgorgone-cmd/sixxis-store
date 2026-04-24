@@ -1,12 +1,11 @@
 import { NextRequest } from 'next/server'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
-  const secret = request.nextUrl.searchParams.get('secret')
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const unauth = await requireAdmin(request)
+  if (unauth) return unauth
 
   const { prisma } = await import('@/lib/prisma')
 

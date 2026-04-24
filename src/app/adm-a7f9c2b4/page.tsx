@@ -134,12 +134,12 @@ export default function AdminDashboard() {
   const var_ = dados?.variacao || {}
 
   const CARDS = [
-    { label:'Receita Total',      valor:m.receita||0,          moeda:true,  variacao:var_.receita,    Icon:TrendingUp,  bg:'#dcfce7', fg:'#16a34a', href:'/admin/pedidos', sub:`${m.totalPedidos||0} pedidos` },
+    { label:'Receita Total',      valor:m.receita||0,          moeda:true,  variacao:var_.receita,    Icon:TrendingUp,  bg:'#dcfce7', fg:'#16a34a', href:'/adm-a7f9c2b4/pedidos', sub:`${m.totalPedidos||0} pedidos` },
     { label:'Ticket Médio',       valor:m.ticketMedio||0,      moeda:true,  variacao:var_.ticketMedio,Icon:BarChart3,   bg:'#fef9c3', fg:'#ca8a04' },
-    { label:'Total de Pedidos',   valor:m.totalPedidos||0,     moeda:false, variacao:var_.pedidos,    Icon:ShoppingBag, bg:'#dbeafe', fg:'#2563eb', href:'/admin/pedidos' },
-    { label:'Clientes',           valor:m.totalClientes||0,    moeda:false, variacao:var_.clientes,   Icon:Users,       bg:'#e8f8f7', fg:DARK, href:'/admin/clientes', sub:`${dados?.clientesPerfil?.novos||0} novos` },
-    { label:'Produtos Ativos',    valor:m.produtosAtivos||0,   moeda:false, Icon:Package,  bg:'#e0e7ff', fg:'#4f46e5', href:'/admin/produtos' },
-    { label:'Pedidos Pendentes',  valor:m.pedidosPendentes||0, moeda:false, Icon:Clock,    bg:'#fef3c7', fg:'#d97706', href:'/admin/pedidos?status=PENDENTE' },
+    { label:'Total de Pedidos',   valor:m.totalPedidos||0,     moeda:false, variacao:var_.pedidos,    Icon:ShoppingBag, bg:'#dbeafe', fg:'#2563eb', href:'/adm-a7f9c2b4/pedidos' },
+    { label:'Clientes',           valor:m.totalClientes||0,    moeda:false, variacao:var_.clientes,   Icon:Users,       bg:'#e8f8f7', fg:DARK, href:'/adm-a7f9c2b4/clientes', sub:`${dados?.clientesPerfil?.novos||0} novos` },
+    { label:'Produtos Ativos',    valor:m.produtosAtivos||0,   moeda:false, Icon:Package,  bg:'#e0e7ff', fg:'#4f46e5', href:'/adm-a7f9c2b4/produtos' },
+    { label:'Pedidos Pendentes',  valor:m.pedidosPendentes||0, moeda:false, Icon:Clock,    bg:'#fef3c7', fg:'#d97706', href:'/adm-a7f9c2b4/pedidos?status=PENDENTE' },
     { label:'Pedidos Entregues',  valor:m.pedidosEntregues||0, moeda:false, Icon:CheckCircle, bg:'#d1fae5', fg:'#059669' },
     { label:'Pedidos Enviados',   valor:m.pedidosEnviados||0,  moeda:false, Icon:Truck,    bg:'#ede9fe', fg:'#7c3aed' },
   ] as const
@@ -214,14 +214,14 @@ export default function AdminDashboard() {
             <p className="text-sm font-bold text-amber-800">
               {dados.estoqueCritico.length} produto{dados.estoqueCritico.length > 1 ? 's' : ''} com estoque crítico
             </p>
-            <Link href="/admin/produtos" className="ml-auto text-xs text-amber-600 hover:underline flex items-center gap-1">
+            <Link href="/adm-a7f9c2b4/produtos" className="ml-auto text-xs text-amber-600 hover:underline flex items-center gap-1">
               Ver todos <ArrowUpRight size={11} />
             </Link>
           </div>
           <div className="flex flex-wrap gap-2">
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {dados.estoqueCritico.map((p: any) => (
-              <Link key={p.id} href={`/admin/produtos/${p.id}`}
+              <Link key={p.id} href={`/adm-a7f9c2b4/produtos/${p.id}`}
                 className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-amber-100 hover:border-amber-300 transition-colors">
                 <div className="w-6 h-6 rounded-lg bg-gray-100 overflow-hidden shrink-0">
                   {(p.imagens as string[])?.[0] && (
@@ -360,7 +360,7 @@ export default function AdminDashboard() {
               <h2 className="text-sm font-black text-gray-900">Produtos mais vendidos</h2>
               <p className="text-xs text-gray-400">No período selecionado</p>
             </div>
-            <Link href="/admin/produtos" className="text-xs text-[#3cbfb3] hover:underline flex items-center gap-1">
+            <Link href="/adm-a7f9c2b4/produtos" className="text-xs text-[#3cbfb3] hover:underline flex items-center gap-1">
               Ver todos <ChevronRight size={11} />
             </Link>
           </div>
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
               <p className="text-xs text-gray-400 mb-3 italic">Sem vendas no período. Catálogo:</p>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {(dados?.catalogo||[]).slice(0,5).map((p: any, i: number) => (
-                <Link key={p.id} href={`/admin/produtos/${p.id}`}
+                <Link key={p.id} href={`/adm-a7f9c2b4/produtos/${p.id}`}
                   className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors">
                   <div className="w-7 h-7 bg-gray-100 rounded-lg text-xs font-black text-gray-400 flex items-center justify-center">{i+1}</div>
                   <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
@@ -567,7 +567,7 @@ export default function AdminDashboard() {
               <h2 className="text-sm font-black text-gray-900">Pedidos Recentes</h2>
               <p className="text-xs text-gray-400">Últimas transações</p>
             </div>
-            <Link href="/admin/pedidos" className="text-xs text-[#3cbfb3] hover:underline flex items-center gap-1">
+            <Link href="/adm-a7f9c2b4/pedidos" className="text-xs text-[#3cbfb3] hover:underline flex items-center gap-1">
               Ver todos <ChevronRight size={11} />
             </Link>
           </div>
@@ -591,7 +591,7 @@ export default function AdminDashboard() {
                 }
                 const st = SC[p.status]||SC.pendente
                 return (
-                  <Link key={p.id} href={`/admin/pedidos/${p.id}`}
+                  <Link key={p.id} href={`/adm-a7f9c2b4/pedidos/${p.id}`}
                     className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black"
                       style={{ backgroundColor:st.bg, color:st.cor }}>
@@ -621,10 +621,10 @@ export default function AdminDashboard() {
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Ações Rápidas</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { href:'/admin/produtos/novo', label:'Novo Produto',   cor:TIFFANY    },
-            { href:'/admin/pedidos',       label:'Ver Pedidos',    cor:'#2563eb'  },
-            { href:'/admin/cupons',        label:'Criar Cupom',    cor:'#7c3aed'  },
-            { href:'/admin/configuracoes', label:'Configurações',  cor:DARK       },
+            { href:'/adm-a7f9c2b4/produtos/novo', label:'Novo Produto',   cor:TIFFANY    },
+            { href:'/adm-a7f9c2b4/pedidos',       label:'Ver Pedidos',    cor:'#2563eb'  },
+            { href:'/adm-a7f9c2b4/cupons',        label:'Criar Cupom',    cor:'#7c3aed'  },
+            { href:'/adm-a7f9c2b4/configuracoes', label:'Configurações',  cor:DARK       },
           ].map((a,i) => (
             <Link key={i} href={a.href}
               className="flex items-center gap-3 bg-white border border-gray-100 rounded-2xl p-4

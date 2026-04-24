@@ -127,7 +127,7 @@ export default function AdminProdutosPage() {
           </p>
         </div>
         <Link
-          href="/admin/produtos/novo"
+          href="/adm-a7f9c2b4/produtos/novo"
           className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-semibold rounded-xl px-4 py-2.5 text-sm transition"
         >
           <Plus className="w-4 h-4" />
@@ -214,7 +214,7 @@ export default function AdminProdutosPage() {
           <div className="text-center py-20">
             <Package className="w-12 h-12 mx-auto mb-3 text-gray-200" />
             <p className="text-sm text-gray-400">Nenhum produto encontrado</p>
-            <Link href="/admin/produtos/novo"
+            <Link href="/adm-a7f9c2b4/produtos/novo"
               className="inline-flex items-center gap-1.5 mt-3 text-sm text-[#3cbfb3] font-medium hover:underline">
               <Plus className="w-3.5 h-3.5" /> Cadastrar produto
             </Link>
@@ -285,7 +285,7 @@ export default function AdminProdutosPage() {
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
                           <Link
-                            href={`/admin/produtos/${p.id}`}
+                            href={`/adm-a7f9c2b4/produtos/${p.id}`}
                             className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-[#3cbfb3]/10 hover:text-[#3cbfb3] text-gray-400 flex items-center justify-center transition"
                           >
                             <Pencil className="w-3.5 h-3.5" />
