@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
             produto: { select: { nome: true, sku: true, imagens: true } },
           },
         },
+        pagamentos: { orderBy: { createdAt: 'desc' } },
       },
     }),
     prisma.pedido.count({ where }),

@@ -27,11 +27,27 @@ interface ItemPedido {
 
 interface Cliente { nome: string; email: string; telefone?: string | null }
 
+interface Pagamento {
+  id: string
+  mpPaymentId: string | null
+  mpStatus: string
+  mpStatusDetail: string | null
+  metodo: string
+  valor: number
+  parcelas: number | null
+  bandeira: string | null
+  ultimosDigitos: string | null
+  createdAt: string
+  aprovadoEm: string | null
+  rejeitadoEm: string | null
+}
+
 interface Pedido {
   id: string; status: string; total: number; frete: number
   formaPagamento: string; mpPaymentId: string | null
   codigoRastreio: string | null; createdAt: string
   cliente: Cliente; endereco: Endereco; itens: ItemPedido[]
+  pagamentos?: Pagamento[]
 }
 
 interface Stats { total: number; pendentes: number; enviados: number; receita: number }
@@ -205,10 +221,10 @@ function PedidoDetalhe({
                 </div>
               </div>
 
-              {/* Pagamento */}
+              {/* Pagamento (resumo) */}
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                  <CreditCard className="w-3.5 h-3.5" /> Pagamento
+                  <CreditCard className="w-3.5 h-3.5" /> Forma de pagamento
                 </p>
                 <div className="bg-white rounded-xl border border-gray-100 px-4 py-3 text-sm space-y-1">
                   <p className="capitalize font-medium text-gray-700">{pedido.formaPagamento}</p>
@@ -219,6 +235,75 @@ function PedidoDetalhe({
               </div>
             </div>
           </div>
+
+          {/* Lista de tentativas de pagamento */}
+          {pedido.pagamentos && pedido.pagamentos.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                <CreditCard className="w-3.5 h-3.5" /> Pagamentos ({pedido.pagamentos.length})
+              </p>
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 text-gray-500">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold">Data</th>
+                      <th className="px-3 py-2 text-left font-semibold">Método</th>
+                      <th className="px-3 py-2 text-left font-semibold">Valor</th>
+                      <th className="px-3 py-2 text-left font-semibold">Status</th>
+                      <th className="px-3 py-2 text-left font-semibold">Detalhes</th>
+                      <th className="px-3 py-2 text-left font-semibold">MP</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pedido.pagamentos.map((pg) => (
+                      <tr key={pg.id} className="border-t border-gray-100">
+                        <td className="px-3 py-2 text-gray-600 whitespace-nowrap">
+                          {fmtDate(pg.createdAt)}
+                        </td>
+                        <td className="px-3 py-2 capitalize text-gray-700">
+                          {pg.metodo === 'pix' ? 'PIX' : pg.metodo === 'credit_card' ? 'Cartão' : pg.metodo === 'debit_card' ? 'Débito' : pg.metodo}
+                        </td>
+                        <td className="px-3 py-2 font-semibold text-gray-900">
+                          {fmt(pg.valor / 100)}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            pg.mpStatus === 'approved' ? 'bg-green-50 text-green-700 border-green-200' :
+                            pg.mpStatus === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' :
+                            pg.mpStatus === 'cancelled' ? 'bg-gray-50 text-gray-600 border-gray-200' :
+                            pg.mpStatus === 'refunded' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                            'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
+                            {pg.mpStatus}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-gray-500">
+                          {pg.parcelas && pg.parcelas > 1 ? `${pg.parcelas}x` : ''}
+                          {pg.bandeira ? ` ${pg.bandeira}` : ''}
+                          {pg.ultimosDigitos ? ` ••${pg.ultimosDigitos}` : ''}
+                          {pg.mpStatusDetail ? <p className="text-[10px] text-gray-400">{pg.mpStatusDetail}</p> : null}
+                        </td>
+                        <td className="px-3 py-2">
+                          {pg.mpPaymentId ? (
+                            <a
+                              href={`https://www.mercadopago.com.br/activities/detail/${pg.mpPaymentId}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[#3cbfb3] hover:underline font-mono text-[10px]"
+                            >
+                              {pg.mpPaymentId}
+                            </a>
+                          ) : (
+                            <span className="text-gray-300">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Ações */}
           <div className="bg-white rounded-xl border border-gray-100 p-4">

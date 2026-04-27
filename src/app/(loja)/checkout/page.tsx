@@ -1,21 +1,24 @@
 'use client'
 
 import { Suspense, useState, useCallback, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
-  CheckCircle, ShoppingBag, Truck, CreditCard, Zap, FileText,
+  CheckCircle, ShoppingBag, Truck, CreditCard, Zap,
   Tag, X, Check, Loader2, Lock, Shield, Award, ChevronDown,
   User, MapPin, ChevronRight, Package, Star,
 } from 'lucide-react'
 import { type ItemCarrinho } from '@/hooks/useCarrinho'
 
+const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type FormaPagamento = 'pix' | 'cartao' | 'boleto'
 type Etapa = 1 | 2 | 3
+type Fase = 'checkout' | 'bricks' | 'sucesso'
 
 interface OpcaoFrete {
   name:          string
@@ -149,16 +152,6 @@ function StepIndicator({ etapa, onBack }: { etapa: Etapa; onBack?: () => void })
   )
 }
 
-// ─── PixIcon ─────────────────────────────────────────────────────────────────
-
-function PixIcon() {
-  return (
-    <svg viewBox="0 0 512 512" className="w-5 h-5 fill-current" aria-hidden="true">
-      <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.6 488.6C280.3 518.9 231.1 518.9 200.8 488.6L103.3 391.2H118.4C138.4 391.2 157.3 383.4 171.5 369.2L242.4 292.5zM262.5 219.5C257.1 224.9 247.8 224.9 242.4 219.5L171.5 142.8C157.3 128.6 138.4 120.8 118.4 120.8H103.3L200.7 23.4C231 -6.9 280.2 -6.9 310.5 23.4L407.6 120.5H392.5C372.5 120.5 353.6 128.3 339.4 142.5L262.5 219.5zM112 144.4C96.6 144.3 81.8 150.5 70.9 161.4L16.8 215.4C-5.6 237.8-5.6 274.3 16.8 296.7L70.9 350.7C81.8 361.6 96.6 367.8 112 367.7H118.3C132.3 367.7 145.7 362.1 155.5 352.2L232.5 275.2C236 271.7 240 270 244 270C248 270 252 271.7 255.5 275.2L332.5 352.2C342.3 362.1 355.7 367.7 369.7 367.7H392.6C407.9 367.7 422.8 361.5 433.7 350.6L487.8 296.6C510.2 274.2 510.2 237.7 487.8 215.3L433.7 161.3C422.8 150.4 407.9 144.2 392.6 144.2H369.7C355.7 144.2 342.3 149.8 332.5 159.7L255.5 236.7C252.1 240.1 248 241.9 244 241.9C240 241.9 235.9 240.2 232.5 236.7L155.5 159.7C145.7 149.8 132.3 144.3 118.3 144.3L112 144.4z"/>
-    </svg>
-  )
-}
-
 // ─── ResumoSidebar ───────────────────────────────────────────────────────────
 
 interface ResumoProps {
@@ -168,16 +161,10 @@ interface ResumoProps {
   freteSel:    number | null
   desconto:    number
   cupom:       { codigo: string; desconto: number } | null
-  forma:       FormaPagamento
-  pixDesconto: number
   totalFinal:  number
-  parcelas:    number
-  calcParcela: (n: number) => number
 }
 
-function ResumoSidebar({
-  itens, total, freteSel, frete, desconto, cupom, forma, pixDesconto, totalFinal, parcelas, calcParcela,
-}: ResumoProps) {
+function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFinal }: ResumoProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -188,7 +175,6 @@ function ResumoSidebar({
         <Package size={16} className="text-gray-300" />
       </div>
 
-      {/* Itens */}
       <div className="p-4 space-y-3 max-h-52 overflow-y-auto">
         {itens.map(item => (
           <div key={item.produtoId + (item.variacaoId ?? '')} className="flex items-start gap-3">
@@ -213,18 +199,11 @@ function ResumoSidebar({
         ))}
       </div>
 
-      {/* Totais */}
       <div className="px-5 pb-5 pt-3 space-y-2 border-t border-gray-100">
         <div className="flex justify-between text-xs text-gray-500">
           <span>Subtotal</span>
           <span>R$ {moeda(total)}</span>
         </div>
-        {forma === 'pix' && pixDesconto > 0 && (
-          <div className="flex justify-between text-xs text-green-600 font-semibold">
-            <span>Desconto PIX (3%)</span>
-            <span>-R$ {moeda(pixDesconto)}</span>
-          </div>
-        )}
         {freteSel !== null && (
           <div className="flex justify-between text-xs text-gray-500">
             <span>Frete</span>
@@ -243,14 +222,8 @@ function ResumoSidebar({
           <span>Total</span>
           <span className="text-[#3cbfb3]">R$ {moeda(totalFinal)}</span>
         </div>
-        {forma === 'cartao' && parcelas > 1 && (
-          <p className="text-[10px] text-gray-400 text-right">
-            {parcelas}x de R$ {moeda(calcParcela(parcelas))}
-          </p>
-        )}
       </div>
 
-      {/* Selos */}
       <div className="px-5 pb-4 flex items-center justify-between">
         <span className="flex items-center gap-1 text-gray-300 text-[10px]"><Lock size={9} /> SSL 256-bit</span>
         <span className="flex items-center gap-1 text-gray-300 text-[10px]"><Shield size={9} /> Compra segura</span>
@@ -263,7 +236,7 @@ function ResumoSidebar({
 // ─── CupomField ──────────────────────────────────────────────────────────────
 
 function CupomField({
-  cupom, cupomInput, setCupomInput, cupomErro, cupomLoading, aplicarCupom, remover, total,
+  cupom, cupomInput, setCupomInput, cupomErro, cupomLoading, aplicarCupom, remover,
 }: {
   cupom: { codigo: string; desconto: number } | null
   cupomInput: string
@@ -272,9 +245,7 @@ function CupomField({
   cupomLoading: boolean
   aplicarCupom: () => void
   remover: () => void
-  total: number
 }) {
-  void total
   if (cupom) {
     return (
       <div className="flex items-center justify-between bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl px-4 py-3">
@@ -325,15 +296,15 @@ function CupomField({
 
 function CheckoutContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const compraDireta = searchParams.get('compra_direta') === '1'
   const { itens, total, limparCarrinho } = useCarrinho()
 
   const [etapa, setEtapa] = useState<Etapa>(1)
+  const [fase, setFase] = useState<Fase>('checkout')
 
-  // Identificação
   const [ident, setIdent] = useState<IdentData>({ nome: '', cpf: '', email: '', telefone: '' })
 
-  // Endereço
   const [end, setEnd] = useState<EnderecoData>({
     cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '',
   })
@@ -342,39 +313,18 @@ function CheckoutContent() {
   const [freteSel, setFreteSel]               = useState<number | null>(null)
   const [carregandoFrete, setCarregandoFrete] = useState(false)
 
-  // Cupom
   const [cupomInput, setCupomInput] = useState('')
   const [cupom, setCupom]           = useState<{ codigo: string; desconto: number } | null>(null)
   const [cupomErro, setCupomErro]   = useState('')
   const [cupomLoading, setCupomLoading] = useState(false)
 
-  // Pagamento
-  const [forma, setForma]       = useState<FormaPagamento>('pix')
-  const [parcelas, setParcelas] = useState(1)
-
-  // Flow
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro]             = useState('')
   const [pedidoId, setPedidoId]     = useState<string | null>(null)
-  const [fase, setFase]             = useState<'checkout' | 'sucesso'>('checkout')
 
-  // Cartão fields (só visual — MercadoPago gerencia)
-  const [cardNome,   setCardNome]   = useState('')
-  const [cardNum,    setCardNum]    = useState('')
-  const [cardVal,    setCardVal]    = useState('')
-  const [cardCvv,    setCardCvv]    = useState('')
-
-  // Valores derivados
   const frete       = freteSel ?? 0
   const desconto    = cupom?.desconto ?? 0
-  const pixDesconto = forma === 'pix' ? total * 0.03 : 0
-  const totalFinal  = Math.max(0, total - pixDesconto + frete - desconto)
-
-  function calcParcela(n: number): number {
-    if (n <= 1) return totalFinal
-    const taxa = 0.0299
-    return totalFinal * (taxa * Math.pow(1 + taxa, n)) / (Math.pow(1 + taxa, n) - 1)
-  }
+  const totalFinal  = Math.max(0, total + frete - desconto)
 
   const buscarCep = useCallback(async (cepRaw: string) => {
     const cepLimpo = cepRaw.replace(/\D/g, '')
@@ -425,7 +375,6 @@ function CheckoutContent() {
     finally { setCupomLoading(false) }
   }
 
-  // Validação por etapa
   function proximaEtapa() {
     setErro('')
     if (etapa === 1) {
@@ -448,7 +397,7 @@ function CheckoutContent() {
     }
   }
 
-  async function finalizar() {
+  async function irParaPagamento() {
     setErro('')
     setCarregando(true)
     try {
@@ -465,7 +414,7 @@ function CheckoutContent() {
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           enderecoId,
-          formaPagamento: forma,
+          formaPagamento: 'mercado_pago',
           frete,
           itens: itens.map(i => ({
             produtoId:    i.produtoId,
@@ -477,25 +426,13 @@ function CheckoutContent() {
           desconto:    cupom?.desconto ?? 0,
         }),
       })
-      if (!pr.ok) throw new Error('Erro ao criar pedido')
-      const pedidoData = await pr.json()
-
-      if (forma !== 'cartao') {
-        const pagr = await fetch('/api/pagamento', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ pedidoId: pedidoData.pedido.id }),
-        })
-        const pagd = await pagr.json()
-        if (pagd.initPoint) {
-          window.location.href = pagd.initPoint
-          return
-        }
+      if (!pr.ok) {
+        const d = await pr.json().catch(() => ({}))
+        throw new Error(d.error || 'Erro ao criar pedido')
       }
-
+      const pedidoData = await pr.json()
       setPedidoId(pedidoData.pedido.id)
-      limparCarrinho()
-      setFase('sucesso')
+      setFase('bricks')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao processar pedido. Tente novamente.')
     } finally {
@@ -503,8 +440,8 @@ function CheckoutContent() {
     }
   }
 
-  // ── Carrinho vazio ───────────────────────────────────────────────────────────
-  if (itens.length === 0 && fase !== 'sucesso' && !compraDireta) {
+  // ── Carrinho vazio ──
+  if (itens.length === 0 && fase === 'checkout' && !compraDireta) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 py-20">
         <div className="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-6">
@@ -520,7 +457,7 @@ function CheckoutContent() {
     )
   }
 
-  // ── Sucesso ──────────────────────────────────────────────────────────────────
+  // ── Sucesso fallback (caso o redirect falhe) ──
   if (fase === 'sucesso') {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 py-20">
@@ -530,37 +467,18 @@ function CheckoutContent() {
             <CheckCircle size={40} className="text-[#3cbfb3]" />
           </div>
         </div>
-        <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Pedido realizado!</h2>
-        <p className="text-gray-500 text-sm mb-1">
-          Pedido{' '}
-          <span className="font-mono font-bold text-[#3cbfb3]">#{pedidoId?.slice(-8).toUpperCase()}</span>{' '}
-          confirmado com sucesso.
-        </p>
-        <p className="text-gray-400 text-xs mb-8">Você receberá atualizações por e-mail.</p>
-        <div className="flex gap-3 flex-wrap justify-center">
-          <Link href="/pedidos"
-            className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm shadow-lg shadow-[#3cbfb3]/20">
-            Meus Pedidos
-          </Link>
-          <Link href="/produtos"
-            className="border border-gray-200 text-gray-600 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm">
-            Continuar Comprando
-          </Link>
-        </div>
+        <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Pagamento aprovado!</h2>
+        <p className="text-gray-500 text-sm mb-8">Redirecionando...</p>
       </div>
     )
   }
 
-  // ── Shared resume props ───────────────────────────────────────────────────────
   const resumoProps: ResumoProps = {
-    itens, total, frete, freteSel, desconto, cupom, forma, pixDesconto, totalFinal, parcelas, calcParcela,
+    itens, total, frete, freteSel, desconto, cupom, totalFinal,
   }
 
-  // ── Layout ───────────────────────────────────────────────────────────────────
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-20">
-
-      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <h1 className="text-xl font-extrabold text-gray-900">Finalizar Compra</h1>
         {compraDireta && (
@@ -571,328 +489,240 @@ function CheckoutContent() {
       </div>
 
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px] gap-6 items-start">
-
-        {/* ── Coluna esquerda ────────────────────────────────────────────────── */}
         <div>
-          <StepIndicator etapa={etapa} onBack={etapa > 1 ? () => setEtapa((etapa - 1) as Etapa) : undefined} />
-
-          {/* ── ETAPA 1 — Identificação ───────────────────────────────────────── */}
-          {etapa === 1 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-5">
-              <div>
-                <h2 className="font-extrabold text-gray-900 mb-0.5">Seus dados</h2>
-                <p className="text-xs text-gray-400">Utilizados para identificação e envio do pedido.</p>
+          {fase === 'bricks' ? (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Lock size={14} className="text-[#3cbfb3]" /> Pagamento seguro · Mercado Pago
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFase('checkout')}
+                  className="text-xs text-gray-400 hover:text-gray-600"
+                >
+                  ← Voltar
+                </button>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <Campo
-                    label="Nome completo" required
-                    value={ident.nome}
-                    onChange={v => setIdent(d => ({ ...d, nome: v }))}
-                    placeholder="João da Silva"
-                  />
-                </div>
-                <Campo
-                  label="CPF"
-                  value={ident.cpf}
-                  onChange={v => setIdent(d => ({ ...d, cpf: maskCpf(v) }))}
-                  placeholder="000.000.000-00"
-                  inputMode="numeric"
+              {pedidoId && (
+                <CheckoutBricks
+                  pedidoId={pedidoId}
+                  valor={totalFinal}
+                  payerEmail={ident.email}
+                  payerNome={ident.nome}
+                  payerCpf={ident.cpf}
+                  onSucesso={() => {
+                    limparCarrinho()
+                    router.push(`/pedido/${pedidoId}/sucesso`)
+                  }}
                 />
-                <Campo
-                  label="Telefone / WhatsApp"
-                  value={ident.telefone}
-                  onChange={v => setIdent(d => ({ ...d, telefone: maskTel(v) }))}
-                  placeholder="(11) 99999-9999"
-                  inputMode="tel"
-                />
-                <div className="sm:col-span-2">
-                  <Campo
-                    label="E-mail" required type="email"
-                    value={ident.email}
-                    onChange={v => setIdent(d => ({ ...d, email: v }))}
-                    placeholder="seu@email.com"
-                  />
-                </div>
-              </div>
-
-              {erro && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">{erro}</p>}
-
-              <button
-                type="button"
-                onClick={proximaEtapa}
-                className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
-              >
-                Continuar para Entrega <ChevronRight size={15} />
-              </button>
-            </div>
-          )}
-
-          {/* ── ETAPA 2 — Entrega ────────────────────────────────────────────── */}
-          {etapa === 2 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-5">
-              <div>
-                <h2 className="font-extrabold text-gray-900 mb-0.5">Endereço de entrega</h2>
-                <p className="text-xs text-gray-400">Digite o CEP para preenchimento automático.</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* CEP */}
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    CEP <span className="text-[#3cbfb3]">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={end.cep}
-                      onChange={e => setEnd(ev => ({ ...ev, cep: maskCep(e.target.value) }))}
-                      onBlur={e => buscarCep(e.target.value)}
-                      placeholder="00000-000"
-                      maxLength={9}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/40 focus:border-[#3cbfb3] transition pr-10 placeholder:text-gray-300"
-                    />
-                    {buscandoCep && <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3cbfb3] animate-spin" />}
-                  </div>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <Campo label="Logradouro" required value={end.logradouro}
-                    onChange={v => setEnd(e => ({ ...e, logradouro: v }))} />
-                </div>
-                <Campo label="Número" required value={end.numero}
-                  onChange={v => setEnd(e => ({ ...e, numero: v }))} inputMode="numeric" />
-                <Campo label="Complemento" value={end.complemento}
-                  onChange={v => setEnd(e => ({ ...e, complemento: v }))} placeholder="Apto, bloco..." />
-                <Campo label="Bairro" required value={end.bairro}
-                  onChange={v => setEnd(e => ({ ...e, bairro: v }))} />
-                <Campo label="Cidade" required value={end.cidade}
-                  onChange={v => setEnd(e => ({ ...e, cidade: v }))} />
-                <Campo label="Estado (UF)" required value={end.estado}
-                  onChange={v => setEnd(e => ({ ...e, estado: v.toUpperCase().slice(0, 2) }))} placeholder="SP" />
-              </div>
-
-              {/* Frete */}
-              {carregandoFrete && (
-                <div className="flex items-center gap-2 text-xs text-[#3cbfb3]">
-                  <Loader2 size={12} className="animate-spin" /> Calculando frete...
-                </div>
               )}
-              {opcoesFrete.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                    <Truck size={11} /> Opção de Frete
-                  </p>
-                  <div className="space-y-2">
-                    {opcoesFrete.map((op, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setFreteSel(op.price)}
-                        className={`w-full flex items-center gap-3 border rounded-xl px-4 py-3 text-left transition ${
-                          freteSel === op.price
-                            ? 'border-[#3cbfb3] bg-[#e8f8f7]'
-                            : 'border-gray-200 hover:border-[#3cbfb3]/40 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                          freteSel === op.price ? 'border-[#3cbfb3]' : 'border-gray-300'
-                        }`}>
-                          {freteSel === op.price && <div className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900">{op.name}</p>
-                          <p className="text-xs text-gray-400">{op.delivery_time} dias úteis</p>
-                        </div>
-                        <p className={`text-sm font-bold ${op.price === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                          {op.price === 0 ? 'Grátis' : `R$ ${moeda(op.price)}`}
-                        </p>
-                      </button>
-                    ))}
+            </>
+          ) : (
+            <>
+              <StepIndicator etapa={etapa} onBack={etapa > 1 ? () => setEtapa((etapa - 1) as Etapa) : undefined} />
+
+              {etapa === 1 && (
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-5">
+                  <div>
+                    <h2 className="font-extrabold text-gray-900 mb-0.5">Seus dados</h2>
+                    <p className="text-xs text-gray-400">Utilizados para identificação e envio do pedido.</p>
                   </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2">
+                      <Campo label="Nome completo" required value={ident.nome}
+                        onChange={v => setIdent(d => ({ ...d, nome: v }))}
+                        placeholder="João da Silva" />
+                    </div>
+                    <Campo label="CPF" value={ident.cpf}
+                      onChange={v => setIdent(d => ({ ...d, cpf: maskCpf(v) }))}
+                      placeholder="000.000.000-00" inputMode="numeric" />
+                    <Campo label="Telefone / WhatsApp" value={ident.telefone}
+                      onChange={v => setIdent(d => ({ ...d, telefone: maskTel(v) }))}
+                      placeholder="(11) 99999-9999" inputMode="tel" />
+                    <div className="sm:col-span-2">
+                      <Campo label="E-mail" required type="email" value={ident.email}
+                        onChange={v => setIdent(d => ({ ...d, email: v }))}
+                        placeholder="seu@email.com" />
+                    </div>
+                  </div>
+
+                  {erro && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">{erro}</p>}
+
+                  <button
+                    type="button"
+                    onClick={proximaEtapa}
+                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
+                  >
+                    Continuar para Entrega <ChevronRight size={15} />
+                  </button>
                 </div>
               )}
 
-              {erro && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">{erro}</p>}
-
-              <button
-                type="button"
-                onClick={proximaEtapa}
-                className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
-              >
-                Continuar para Pagamento <ChevronRight size={15} />
-              </button>
-            </div>
-          )}
-
-          {/* ── ETAPA 3 — Pagamento ───────────────────────────────────────────── */}
-          {etapa === 3 && (
-            <div className="space-y-4">
-
-              {/* Cupom */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                  <Tag size={11} /> Cupom de Desconto
-                </p>
-                <CupomField
-                  cupom={cupom} cupomInput={cupomInput} setCupomInput={v => { setCupomInput(v); setCupomErro('') }}
-                  cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom}
-                  remover={() => { setCupom(null); setCupomInput('') }} total={total}
-                />
-              </div>
-
-              {/* Forma de pagamento */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <CreditCard size={11} /> Forma de Pagamento
-                </p>
-
-                {/* Seletores */}
-                <div className="grid grid-cols-3 gap-2.5">
-                  {(
-                    [
-                      { v: 'pix'    as const, label: 'PIX',    icon: <PixIcon />,              badge: '-3%' },
-                      { v: 'cartao' as const, label: 'Cartão', icon: <CreditCard size={19} />, badge: null  },
-                      { v: 'boleto' as const, label: 'Boleto', icon: <FileText   size={19} />, badge: null  },
-                    ]
-                  ).map(({ v, label, icon, badge }) => (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => setForma(v)}
-                      className={`relative flex flex-col items-center gap-2 py-4 px-2 rounded-2xl border-2 transition ${
-                        forma === v
-                          ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#3cbfb3]'
-                          : 'border-gray-100 bg-gray-50 text-gray-400 hover:border-[#3cbfb3]/30 hover:bg-[#f0fffe]'
-                      }`}
-                    >
-                      {badge && (
-                        <span className="absolute -top-2 -right-2 text-[9px] bg-green-500 text-white font-bold px-1.5 py-0.5 rounded-full leading-none">
-                          {badge}
-                        </span>
-                      )}
-                      {icon}
-                      <span className="text-xs font-bold">{label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* PIX */}
-                {forma === 'pix' && (
-                  <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                      <PixIcon />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-green-800">3% de desconto no PIX</p>
-                      <p className="text-xs text-green-600 mt-0.5">
-                        Economia de R$ {moeda(total * 0.03)} · Aprovação instantânea após o pagamento.
-                      </p>
-                    </div>
+              {etapa === 2 && (
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-5">
+                  <div>
+                    <h2 className="font-extrabold text-gray-900 mb-0.5">Endereço de entrega</h2>
+                    <p className="text-xs text-gray-400">Digite o CEP para preenchimento automático.</p>
                   </div>
-                )}
 
-                {/* Cartão */}
-                {forma === 'cartao' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="sm:col-span-2">
-                        <Campo label="Nome no cartão" value={cardNome} onChange={setCardNome} placeholder="Como aparece no cartão" />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <Campo label="Número do cartão" value={cardNum} onChange={setCardNum} placeholder="0000 0000 0000 0000" inputMode="numeric" />
-                      </div>
-                      <Campo label="Validade" value={cardVal} onChange={setCardVal} placeholder="MM/AA" inputMode="numeric" />
-                      <Campo label="CVV" value={cardCvv} onChange={setCardCvv} placeholder="123" inputMode="numeric" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Parcelas</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        CEP <span className="text-[#3cbfb3]">*</span>
+                      </label>
                       <div className="relative">
-                        <select
-                          value={parcelas}
-                          onChange={e => setParcelas(Number(e.target.value))}
-                          className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/40 focus:border-[#3cbfb3] transition bg-white pr-10"
-                        >
-                          {Array.from({ length: 6 }, (_, i) => i + 1).map(n => {
-                            const vlr = calcParcela(n)
-                            return (
-                              <option key={n} value={n}>
-                                {n === 1
-                                  ? `1x de R$ ${moeda(vlr)} (sem juros)`
-                                  : `${n}x de R$ ${moeda(vlr)} (2,99% a.m.)`}
-                              </option>
-                            )
-                          })}
-                        </select>
-                        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={end.cep}
+                          onChange={e => setEnd(ev => ({ ...ev, cep: maskCep(e.target.value) }))}
+                          onBlur={e => buscarCep(e.target.value)}
+                          placeholder="00000-000"
+                          maxLength={9}
+                          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/40 focus:border-[#3cbfb3] transition pr-10 placeholder:text-gray-300"
+                        />
+                        {buscandoCep && <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3cbfb3] animate-spin" />}
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Boleto */}
-                {forma === 'boleto' && (
-                  <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                      <FileText size={14} className="text-amber-600" />
+                    <div className="sm:col-span-2">
+                      <Campo label="Logradouro" required value={end.logradouro}
+                        onChange={v => setEnd(e => ({ ...e, logradouro: v }))} />
                     </div>
+                    <Campo label="Número" required value={end.numero}
+                      onChange={v => setEnd(e => ({ ...e, numero: v }))} inputMode="numeric" />
+                    <Campo label="Complemento" value={end.complemento}
+                      onChange={v => setEnd(e => ({ ...e, complemento: v }))} placeholder="Apto, bloco..." />
+                    <Campo label="Bairro" required value={end.bairro}
+                      onChange={v => setEnd(e => ({ ...e, bairro: v }))} />
+                    <Campo label="Cidade" required value={end.cidade}
+                      onChange={v => setEnd(e => ({ ...e, cidade: v }))} />
+                    <Campo label="Estado (UF)" required value={end.estado}
+                      onChange={v => setEnd(e => ({ ...e, estado: v.toUpperCase().slice(0, 2) }))} placeholder="SP" />
+                  </div>
+
+                  {carregandoFrete && (
+                    <div className="flex items-center gap-2 text-xs text-[#3cbfb3]">
+                      <Loader2 size={12} className="animate-spin" /> Calculando frete...
+                    </div>
+                  )}
+                  {opcoesFrete.length > 0 && (
                     <div>
-                      <p className="text-sm font-bold text-amber-800">Boleto Bancário</p>
-                      <p className="text-xs text-amber-600 mt-0.5">
-                        Vencimento em 3 dias úteis. Compensação bancária em 1–2 dias após o pagamento.
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <Truck size={11} /> Opção de Frete
                       </p>
+                      <div className="space-y-2">
+                        {opcoesFrete.map((op, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setFreteSel(op.price)}
+                            className={`w-full flex items-center gap-3 border rounded-xl px-4 py-3 text-left transition ${
+                              freteSel === op.price
+                                ? 'border-[#3cbfb3] bg-[#e8f8f7]'
+                                : 'border-gray-200 hover:border-[#3cbfb3]/40 hover:bg-gray-50'
+                            }`}
+                          >
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                              freteSel === op.price ? 'border-[#3cbfb3]' : 'border-gray-300'
+                            }`}>
+                              {freteSel === op.price && <div className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-gray-900">{op.name}</p>
+                              <p className="text-xs text-gray-400">{op.delivery_time} dias úteis</p>
+                            </div>
+                            <p className={`text-sm font-bold ${op.price === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                              {op.price === 0 ? 'Grátis' : `R$ ${moeda(op.price)}`}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
 
-              {/* Erro global */}
-              {erro && (
-                <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-xs text-red-600">
-                  {erro}
+                  {erro && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">{erro}</p>}
+
+                  <button
+                    type="button"
+                    onClick={proximaEtapa}
+                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
+                  >
+                    Continuar para Pagamento <ChevronRight size={15} />
+                  </button>
                 </div>
               )}
 
-              {/* CTA */}
-              <button
-                type="button"
-                onClick={finalizar}
-                disabled={carregando}
-                className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold py-4 rounded-2xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/25 flex items-center justify-center gap-2"
-              >
-                {carregando ? (
-                  <><Loader2 size={16} className="animate-spin" /> Processando...</>
-                ) : (
-                  <><Lock size={14} /> Finalizar Pedido · R$ {moeda(totalFinal)}</>
-                )}
-              </button>
+              {etapa === 3 && (
+                <div className="space-y-4">
+                  <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Tag size={11} /> Cupom de Desconto
+                    </p>
+                    <CupomField
+                      cupom={cupom} cupomInput={cupomInput} setCupomInput={v => { setCupomInput(v); setCupomErro('') }}
+                      cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom}
+                      remover={() => { setCupom(null); setCupomInput('') }}
+                    />
+                  </div>
 
-              {/* Selos */}
-              <div className="flex items-center justify-center gap-6 pt-1">
-                <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Lock size={9} /> SSL 256-bit</span>
-                <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Shield size={9} /> Compra segura</span>
-                <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Star size={9} /> 100% original</span>
-              </div>
-            </div>
+                  <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <CreditCard size={11} /> Forma de Pagamento
+                    </p>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      Você poderá escolher entre <strong className="text-[#0f2e2b]">PIX</strong>,{' '}
+                      <strong className="text-[#0f2e2b]">cartão de crédito</strong> ou{' '}
+                      <strong className="text-[#0f2e2b]">cartão de débito</strong> na próxima etapa, com checkout
+                      transparente e seguro do Mercado Pago.
+                    </p>
+                    <div className="flex items-center gap-3 text-[11px] text-gray-400">
+                      <span className="flex items-center gap-1"><Lock size={10} /> SSL 256-bit</span>
+                      <span className="flex items-center gap-1"><Shield size={10} /> Antifraude MP</span>
+                    </div>
+                  </div>
+
+                  {erro && (
+                    <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-xs text-red-600">
+                      {erro}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={irParaPagamento}
+                    disabled={carregando}
+                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold py-4 rounded-2xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/25 flex items-center justify-center gap-2"
+                  >
+                    {carregando ? (
+                      <><Loader2 size={16} className="animate-spin" /> Criando pedido...</>
+                    ) : (
+                      <><Lock size={14} /> Ir para pagamento · R$ {moeda(totalFinal)}</>
+                    )}
+                  </button>
+
+                  <div className="flex items-center justify-center gap-6 pt-1">
+                    <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Lock size={9} /> SSL 256-bit</span>
+                    <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Shield size={9} /> Compra segura</span>
+                    <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Star size={9} /> 100% original</span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
-        {/* ── Coluna direita — Resumo (sticky) ──────────────────────────────── */}
         <aside className="hidden lg:block lg:sticky lg:top-6 self-start">
           <ResumoSidebar {...resumoProps} />
         </aside>
-
       </div>
 
-      {/* Resumo mobile (colapsável) — apenas no topo em mobile */}
       <MobileResumo {...resumoProps} />
     </div>
   )
 }
-
-// ─── Resumo colapsável mobile ─────────────────────────────────────────────────
 
 function MobileResumo(props: ResumoProps) {
   const [open, setOpen] = useState(false)
@@ -917,8 +747,6 @@ function MobileResumo(props: ResumoProps) {
     </div>
   )
 }
-
-// ─── Wrapper com Suspense ─────────────────────────────────────────────────────
 
 export default function CheckoutPage() {
   return (

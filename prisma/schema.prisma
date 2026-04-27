@@ -7,41 +7,40 @@ datasource db {
 }
 
 model Cliente {
-  id               String               @id @default(cuid())
-  nome             String
-  email            String               @unique
-  senha            String
-  cpf              String?              @unique
-  telefone         String?
-  erpClienteId     String?              @unique
-  createdAt        DateTime             @default(now())
-  bloqueado        Boolean              @default(false)
-  motivoBloqueio   String?
-  bloqueadoEm      DateTime?
-  cashbackSaldo    Float                @default(0)
-  totalGasto       Float                @default(0)
-  totalPedidos     Int                  @default(0)
-  ultimaCompra     DateTime?
-  carrinhoAbandon  Json?
+  id                    String                 @id @default(cuid())
+  nome                  String
+  email                 String                 @unique
+  senha                 String
+  cpf                   String?                @unique
+  telefone              String?
+  erpClienteId          String?                @unique
+  createdAt             DateTime               @default(now())
+  bloqueado             Boolean                @default(false)
+  motivoBloqueio        String?
+  bloqueadoEm           DateTime?
+  cashbackSaldo         Float                  @default(0)
+  totalGasto            Float                  @default(0)
+  totalPedidos          Int                    @default(0)
+  ultimaCompra          DateTime?
+  carrinhoAbandon       Json?
   // Dados demográficos
-  dataNascimento   DateTime?
-  genero           String?
-  avatar           String?
-  avatarGradiente  String?              @default("tiffany")
-  notifEmail       Boolean              @default(true)
-  notifWhatsapp    Boolean              @default(false)
-  avaliacoes           Avaliacao[]
-  bloqueios            BloqueioFraude[]
-  carrinho             Carrinho?
-  cashback             CashbackTransacao[]
-  cupomUsos            CupomUso[]
-  enderecos            Endereco[]
-  historicoPontos      HistoricoPontos[]
-  pedidos              Pedido[]
-  pontos               PontosCliente?
+  dataNascimento        DateTime?
+  genero                String?
+  avatar                String?
+  avatarGradiente       String?                @default("tiffany")
+  notifEmail            Boolean                @default(true)
+  notifWhatsapp         Boolean                @default(false)
+  avaliacoes            Avaliacao[]
+  bloqueios             BloqueioFraude[]
+  carrinho              Carrinho?
+  cashback              CashbackTransacao[]
+  cupomUsos             CupomUso[]
+  enderecos             Endereco[]
+  historicoPontos       HistoricoPontos[]
+  pedidos               Pedido[]
+  pontos                PontosCliente?
   campanhasDestinatario CampanhaDestinatario[]
 }
-
 
 model Endereco {
   id          String   @id @default(cuid())
@@ -61,34 +60,34 @@ model Endereco {
 }
 
 model Produto {
-  id               String            @id @default(cuid())
-  erpProdutoId     String            @unique
-  nome             String
-  slug             String            @unique
-  descricao        String?           @db.Text
-  preco            Decimal           @db.Decimal(10, 2)
-  precoPromocional Decimal?          @db.Decimal(10, 2)
-  imagens          Json
-  estoque          Int               @default(0)
-  categoria        String
-  modelo           String?
-  ativo            Boolean           @default(true)
-  createdAt        DateTime          @default(now())
-  sku              String?           @unique
-  temVariacoes     Boolean           @default(false)
-  videoUrl         String?           @default("")
-  especificacoes   Json?
-  faqs             Json?
+  id                 String            @id @default(cuid())
+  erpProdutoId       String            @unique
+  nome               String
+  slug               String            @unique
+  descricao          String?           @db.Text
+  preco              Decimal           @db.Decimal(10, 2)
+  precoPromocional   Decimal?          @db.Decimal(10, 2)
+  imagens            Json
+  estoque            Int               @default(0)
+  categoria          String
+  modelo             String?
+  ativo              Boolean           @default(true)
+  createdAt          DateTime          @default(now())
+  sku                String?           @unique
+  temVariacoes       Boolean           @default(false)
+  videoUrl           String?           @default("")
+  especificacoes     Json?
+  faqs               Json?
   imagensPorVariacao Json?
-  vendidos            Int               @default(0)
-  mediaAvaliacoes     Float             @default(0)
-  totalAvaliacoes     Int               @default(0)
-  avaliacoes       Avaliacao[]
-  itensCarrinho    ItemCarrinho[]
-  itensPedido      ItemPedido[]
-  listaEspera      ListaEspera[]
-  destaques        ProdutoDestaque[]
-  variacoes        VariacaoProduto[]
+  vendidos           Int               @default(0)
+  mediaAvaliacoes    Float             @default(0)
+  totalAvaliacoes    Int               @default(0)
+  avaliacoes         Avaliacao[]
+  itensCarrinho      ItemCarrinho[]
+  itensPedido        ItemPedido[]
+  listaEspera        ListaEspera[]
+  destaques          ProdutoDestaque[]
+  variacoes          VariacaoProduto[]
 
   @@index([categoria])
   @@index([slug])
@@ -106,16 +105,56 @@ model Pedido {
   enderecoId     String
   erpPedidoId    String?      @unique
   createdAt      DateTime     @default(now())
+  pagoEm         DateTime?
   codigoRastreio String?
   cupomCodigo    String?
   desconto       Decimal      @default(0.00) @db.Decimal(10, 2)
   itens          ItemPedido[]
   cliente        Cliente      @relation(fields: [clienteId], references: [id])
   endereco       Endereco     @relation(fields: [enderecoId], references: [id])
+  pagamentos     Pagamento[]
 
   @@index([clienteId])
   @@index([status])
   @@index([enderecoId], map: "Pedido_enderecoId_fkey")
+}
+
+model Pagamento {
+  id       String @id @default(cuid())
+  pedidoId String
+  pedido   Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  mpPaymentId    String? @unique
+  mpPreferenceId String?
+  mpStatus       String  @default("pending")
+  mpStatusDetail String?
+
+  metodo String
+  valor  Int
+
+  qrCodeBase64     String?   @db.Text
+  qrCodeCopiaECola String?   @db.Text
+  pixExpiraEm      DateTime?
+
+  parcelas       Int?
+  bandeira       String?
+  ultimosDigitos String?
+
+  payerEmail String?
+  payerCpf   String?
+  payerNome  String?
+
+  rawResponse Json?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  aprovadoEm  DateTime?
+  rejeitadoEm DateTime?
+
+  @@index([pedidoId])
+  @@index([mpPaymentId])
+  @@index([mpStatus])
+  @@index([createdAt])
 }
 
 model ItemPedido {
@@ -157,24 +196,24 @@ model ItemCarrinho {
 }
 
 model Avaliacao {
-  id          String          @id @default(cuid())
-  produtoId   String
-  clienteId   String?
-  nomeAutor   String          @default("")
-  emailAutor  String?
-  nota        Int
-  titulo      String?
-  comentario  String?         @db.Text
-  aprovada    Boolean         @default(false)
-  destaque    Boolean         @default(false)
-  ordem       Int             @default(0)
-  resposta    String?         @db.Text
-  respostaEm  DateTime?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  fotos       AvaliacaoFoto[]
-  cliente     Cliente?        @relation(fields: [clienteId], references: [id])
-  produto     Produto         @relation(fields: [produtoId], references: [id])
+  id         String          @id @default(cuid())
+  produtoId  String
+  clienteId  String?
+  nomeAutor  String          @default("")
+  emailAutor String?
+  nota       Int
+  titulo     String?
+  comentario String?         @db.Text
+  aprovada   Boolean         @default(false)
+  destaque   Boolean         @default(false)
+  ordem      Int             @default(0)
+  resposta   String?         @db.Text
+  respostaEm DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  fotos      AvaliacaoFoto[]
+  cliente    Cliente?        @relation(fields: [clienteId], references: [id])
+  produto    Produto         @relation(fields: [produtoId], references: [id])
 
   @@index([clienteId], map: "Avaliacao_clienteId_fkey")
   @@index([produtoId, aprovada])
@@ -212,7 +251,7 @@ model Configuracao {
 model Cupom {
   id             String     @id @default(cuid())
   codigo         String     @unique
-  tipo           String     // "PERCENTUAL" | "VALOR_FIXO" | "FRETE_GRATIS"
+  tipo           String // "PERCENTUAL" | "VALOR_FIXO" | "FRETE_GRATIS"
   valor          Float
   usoMaximo      Int?
   totalUsos      Int        @default(0)
@@ -227,17 +266,17 @@ model Cupom {
 }
 
 model CupomUso {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   cupomId       String
-  cupom         Cupom     @relation(fields: [cupomId], references: [id], onDelete: Cascade)
+  cupom         Cupom    @relation(fields: [cupomId], references: [id], onDelete: Cascade)
   clienteId     String?
-  cliente       Cliente?  @relation(fields: [clienteId], references: [id])
+  cliente       Cliente? @relation(fields: [clienteId], references: [id])
   pedidoId      String?
   emailCliente  String?
   nomeCliente   String?
-  valorDesconto Float     @default(0)
-  valorPedido   Float     @default(0)
-  usadoEm       DateTime  @default(now())
+  valorDesconto Float    @default(0)
+  valorPedido   Float    @default(0)
+  usadoEm       DateTime @default(now())
 
   @@index([cupomId])
   @@index([clienteId])
@@ -383,7 +422,7 @@ model AvaliacaoParceiro {
 model CashbackTransacao {
   id        String   @id @default(cuid())
   clienteId String
-  tipo      String   // "credito" | "debito"
+  tipo      String // "credito" | "debito"
   valor     Float
   descricao String?
   pedidoId  String?
@@ -398,7 +437,7 @@ model BloqueioFraude {
   id        String   @id @default(cuid())
   clienteId String
   motivo    String
-  criadoPor String?  // admin email
+  criadoPor String? // admin email
   createdAt DateTime @default(now())
   cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
@@ -407,22 +446,22 @@ model BloqueioFraude {
 }
 
 model Campanha {
-  id          String   @id @default(cuid())
-  tipo        String   // 'promocional' | 'sazonal' | 'recuperacao' | 'aniversario' | 'lancamento' | 'reengajamento' | 'EMAIL' | 'WHATSAPP'
-  nome        String
-  assunto     String?
-  mensagem    String   @db.Text
-  status      String   @default("rascunho")
-  agendadoPara DateTime?
-  enviadaEm   DateTime?
-  totalDestinatarios Int @default(0)
-  totalEnviados      Int @default(0)
-  totalErros         Int @default(0)
-  taxaAbertura       Float @default(0)
-  filtroSegmento  Json?
-  whatsappNumeroId String?
-  whatsappNumero   WhatsappNumero? @relation(fields: [whatsappNumeroId], references: [id])
-  destinatarios    CampanhaDestinatario[]
+  id                 String                 @id @default(cuid())
+  tipo               String // 'promocional' | 'sazonal' | 'recuperacao' | 'aniversario' | 'lancamento' | 'reengajamento' | 'EMAIL' | 'WHATSAPP'
+  nome               String
+  assunto            String?
+  mensagem           String                 @db.Text
+  status             String                 @default("rascunho")
+  agendadoPara       DateTime?
+  enviadaEm          DateTime?
+  totalDestinatarios Int                    @default(0)
+  totalEnviados      Int                    @default(0)
+  totalErros         Int                    @default(0)
+  taxaAbertura       Float                  @default(0)
+  filtroSegmento     Json?
+  whatsappNumeroId   String?
+  whatsappNumero     WhatsappNumero?        @relation(fields: [whatsappNumeroId], references: [id])
+  destinatarios      CampanhaDestinatario[]
 
   // Wizard fields (PR3)
   publicoAlvo       Json?
@@ -440,8 +479,8 @@ model Campanha {
   totalAbertos      Int       @default(0)
   totalCliques      Int       @default(0)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model NivelFidelidade {
@@ -476,51 +515,51 @@ model CampanhaDestinatario {
 }
 
 model WhatsappNumero {
-  id          String   @id @default(cuid())
-  nome        String
-  numero      String
-  instanceId  String?
-  apiUrl      String?
-  apiKey      String?
-  ativo       Boolean  @default(true)
-  status      String   @default("DESCONECTADO")
-  qrCode      String?  @db.Text
-  ehPadrao    Boolean  @default(false)
-  totalEnviados Int    @default(0)
-  campanhas   Campanha[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String     @id @default(cuid())
+  nome          String
+  numero        String
+  instanceId    String?
+  apiUrl        String?
+  apiKey        String?
+  ativo         Boolean    @default(true)
+  status        String     @default("DESCONECTADO")
+  qrCode        String?    @db.Text
+  ehPadrao      Boolean    @default(false)
+  totalEnviados Int        @default(0)
+  campanhas     Campanha[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
 model EnvioLog {
-  id         String   @id @default(cuid())
-  campanhaId String?
-  tipo       String
+  id           String   @id @default(cuid())
+  campanhaId   String?
+  tipo         String
   destinatario String
-  status     String
-  erroMsg    String?
-  createdAt  DateTime @default(now())
+  status       String
+  erroMsg      String?
+  createdAt    DateTime @default(now())
 
   @@index([campanhaId])
 }
 
 model LunaConversa {
-  id                String         @id @default(cuid())
-  sessaoId          String         @unique
-  paginaOrigem      String?        @db.Text
-  userAgent         String?        @db.Text
-  ip                String?
-  clienteId         String?
-  status            String         @default("ativa")
-  totalMensagens    Int            @default(0)
-  primeiraMensagem  DateTime?
-  ultimaMensagem    DateTime?
-  duracaoSegundos   Int?
-  leadGerado        Boolean        @default(false)
-  produtoInteresse  String?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  mensagens         LunaMensagem[]
+  id               String         @id @default(cuid())
+  sessaoId         String         @unique
+  paginaOrigem     String?        @db.Text
+  userAgent        String?        @db.Text
+  ip               String?
+  clienteId        String?
+  status           String         @default("ativa")
+  totalMensagens   Int            @default(0)
+  primeiraMensagem DateTime?
+  ultimaMensagem   DateTime?
+  duracaoSegundos  Int?
+  leadGerado       Boolean        @default(false)
+  produtoInteresse String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  mensagens        LunaMensagem[]
 
   @@index([sessaoId])
   @@index([clienteId])
@@ -529,14 +568,14 @@ model LunaConversa {
 }
 
 model LunaMensagem {
-  id          String       @id @default(cuid())
-  conversaId  String
-  role        String
-  conteudo    String       @db.LongText
-  tokens      Int?
-  latenciaMs  Int?
-  createdAt   DateTime     @default(now())
-  conversa    LunaConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  conversaId String
+  role       String
+  conteudo   String       @db.LongText
+  tokens     Int?
+  latenciaMs Int?
+  createdAt  DateTime     @default(now())
+  conversa   LunaConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
 
   @@index([conversaId])
   @@index([createdAt])
@@ -608,12 +647,12 @@ model RelatorioVendaHora {
 // ─── Sprint 1 Infra · segurança admin ────────────────────────────────
 
 model TentativaLogin {
-  id         String   @id @default(cuid())
-  ip         String
-  userAgent  String?  @db.Text
-  sucesso    Boolean
-  rota       String
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  ip        String
+  userAgent String?  @db.Text
+  sucesso   Boolean
+  rota      String
+  createdAt DateTime @default(now())
 
   @@index([ip, createdAt])
   @@index([createdAt])
@@ -630,14 +669,14 @@ model BloqueioIp {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  actor      String
-  action     String
-  target     String?
-  metadata   Json?
-  ip         String?
-  userAgent  String?  @db.Text
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  target    String?
+  metadata  Json?
+  ip        String?
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
 
   @@index([actor, createdAt])
   @@index([action])
