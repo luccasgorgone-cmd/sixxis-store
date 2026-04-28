@@ -60,39 +60,39 @@ model Endereco {
 }
 
 model Produto {
-  id                 String            @id @default(cuid())
-  erpProdutoId       String            @unique
-  nome               String
-  slug               String            @unique
-  descricao          String?           @db.Text
-  preco              Decimal           @db.Decimal(10, 2)
-  precoPromocional   Decimal?          @db.Decimal(10, 2)
-  imagens            Json
-  estoque            Int               @default(0)
-  categoria          String
-  modelo             String?
-  ativo              Boolean           @default(true)
-  createdAt          DateTime          @default(now())
-  sku                String?           @unique
-  temVariacoes       Boolean           @default(false)
-  videoUrl           String?           @default("")
-  especificacoes     Json?
-  faqs               Json?
-  imagensPorVariacao Json?
-  vendidos           Int               @default(0)
-  mediaAvaliacoes    Float             @default(0)
-  totalAvaliacoes    Int               @default(0)
+  id                       String              @id @default(cuid())
+  erpProdutoId             String              @unique
+  nome                     String
+  slug                     String              @unique
+  descricao                String?             @db.Text
+  preco                    Decimal             @db.Decimal(10, 2)
+  precoPromocional         Decimal?            @db.Decimal(10, 2)
+  imagens                  Json
+  estoque                  Int                 @default(0)
+  categoria                String
+  modelo                   String?
+  ativo                    Boolean             @default(true)
+  createdAt                DateTime            @default(now())
+  sku                      String?             @unique
+  temVariacoes             Boolean             @default(false)
+  videoUrl                 String?             @default("")
+  especificacoes           Json?
+  faqs                     Json?
+  imagensPorVariacao       Json?
+  vendidos                 Int                 @default(0)
+  mediaAvaliacoes          Float               @default(0)
+  totalAvaliacoes          Int                 @default(0)
   // Garantia
-  garantiaFabricaMeses     Int      @default(12)
-  garantiaEstendida12Preco Decimal? @db.Decimal(10, 2)
-  garantiaEstendida24Preco Decimal? @db.Decimal(10, 2)
-  avaliacoes         Avaliacao[]
-  itensCarrinho      ItemCarrinho[]
-  itensPedido        ItemPedido[]
-  listaEspera        ListaEspera[]
-  destaques          ProdutoDestaque[]
-  variacoes          VariacaoProduto[]
-  garantias          GarantiaEstendida[]
+  garantiaFabricaMeses     Int                 @default(12)
+  garantiaEstendida12Preco Decimal?            @db.Decimal(10, 2)
+  garantiaEstendida24Preco Decimal?            @db.Decimal(10, 2)
+  avaliacoes               Avaliacao[]
+  itensCarrinho            ItemCarrinho[]
+  itensPedido              ItemPedido[]
+  listaEspera              ListaEspera[]
+  destaques                ProdutoDestaque[]
+  variacoes                VariacaoProduto[]
+  garantias                GarantiaEstendida[]
 
   @@index([categoria])
   @@index([slug])
@@ -100,23 +100,23 @@ model Produto {
 }
 
 model Pedido {
-  id             String       @id @default(cuid())
+  id             String              @id @default(cuid())
   clienteId      String
-  status         String       @default("pendente")
-  total          Decimal      @db.Decimal(10, 2)
-  frete          Decimal      @db.Decimal(10, 2)
+  status         String              @default("pendente")
+  total          Decimal             @db.Decimal(10, 2)
+  frete          Decimal             @db.Decimal(10, 2)
   formaPagamento String
   mpPaymentId    String?
   enderecoId     String
-  erpPedidoId    String?      @unique
-  createdAt      DateTime     @default(now())
+  erpPedidoId    String?             @unique
+  createdAt      DateTime            @default(now())
   pagoEm         DateTime?
   codigoRastreio String?
   cupomCodigo    String?
-  desconto       Decimal      @default(0.00) @db.Decimal(10, 2)
+  desconto       Decimal             @default(0.00) @db.Decimal(10, 2)
   itens          ItemPedido[]
-  cliente        Cliente      @relation(fields: [clienteId], references: [id])
-  endereco       Endereco     @relation(fields: [enderecoId], references: [id])
+  cliente        Cliente             @relation(fields: [clienteId], references: [id])
+  endereco       Endereco            @relation(fields: [enderecoId], references: [id])
   pagamentos     Pagamento[]
   garantias      GarantiaEstendida[]
 
@@ -126,24 +126,24 @@ model Pedido {
 }
 
 model GarantiaEstendida {
-  id              String   @id @default(cuid())
-  pedidoId        String
-  pedido          Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  pedidoItemId    String?
-  produtoId       String
-  produto         Produto  @relation(fields: [produtoId], references: [id])
+  id           String  @id @default(cuid())
+  pedidoId     String
+  pedido       Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  pedidoItemId String?
+  produtoId    String
+  produto      Produto @relation(fields: [produtoId], references: [id])
 
   mesesAdicionais Int
-  valorPago       Decimal  @db.Decimal(10, 2)
+  valorPago       Decimal @db.Decimal(10, 2)
 
-  inicioVigencia  DateTime
-  fimVigencia     DateTime
+  inicioVigencia DateTime
+  fimVigencia    DateTime
 
-  status          String   @default("ativa") // ativa | acionada | expirada | cancelada
-  acionamentos    Json?
+  status       String @default("ativa") // ativa | acionada | expirada | cancelada
+  acionamentos Json?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([pedidoId])
   @@index([produtoId])
@@ -698,6 +698,34 @@ model BloqueioIp {
   createdAt    DateTime @default(now())
 
   @@index([bloqueadoAte])
+}
+
+// Pop-up inicial editável — sempre 1 row (id="singleton"), gerenciada pelo
+// admin em /adm-a7f9c2b4/popup-inicial. Quando ativado=true, /api/popup-inicial
+// devolve a config; quando false, devolve apenas { ativado: false }.
+model PopupInicial {
+  id      String  @id @default("singleton")
+  ativado Boolean @default(false)
+
+  bannerDesktop String?
+  bannerMobile  String?
+  altText       String?
+
+  linkDestino  String?
+  abrirNovaAba Boolean @default(false)
+
+  titulo     String?
+  texto      String? @db.Text
+  corBotao   String? @default("#3cbfb3")
+  textoBotao String?
+
+  delaySegundos Int    @default(3)
+  frequencia    String @default("sessao") // "sessao" | "dia" | "semana"
+
+  paginas Json? // ["home", "produtos", "*"]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AuditLog {

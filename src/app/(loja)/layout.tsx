@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import CookieBanner from '@/components/cookies/CookieBanner'
 import ComparadorBar from '@/components/layout/ComparadorBar'
 import LojaWallpaper from '@/components/layout/LojaWallpaper'
+import PopupInicial from '@/components/popup/PopupInicial'
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   let logoUrl = '/logo-sixxis.png'
@@ -63,6 +64,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />
         <ComparadorBar />
         <CookieBanner />
+        <PopupInicial />
       </div>
     </LojaWallpaper>
   )

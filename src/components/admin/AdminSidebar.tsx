@@ -9,7 +9,7 @@ import {
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, ShieldOff,
   Target, MessageSquare, Clock, Bot, UserCog, History,
-  CreditCard, ShieldCheck,
+  CreditCard, ShieldCheck, Bell,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -59,6 +59,7 @@ const NAV_GROUPS = [
       { href: '/adm-a7f9c2b4/editor-home',        label: 'Editor da Home',     icon: Home,       exact: false },
       { href: '/adm-a7f9c2b4/mobile',             label: 'Editor Mobile',      icon: Smartphone, exact: false },
       { href: '/adm-a7f9c2b4/banners',            label: 'Banners',            icon: ImageIcon,  exact: false },
+      { href: '/adm-a7f9c2b4/popup-inicial',      label: 'Pop-up Inicial',     icon: Bell,       exact: false },
       { href: '/adm-a7f9c2b4/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,    exact: false },
     ],
   },
