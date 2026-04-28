@@ -49,10 +49,12 @@ export default function SelectVariacaoModal({
     if (aberto) {
       document.addEventListener('keydown', onKey)
       document.body.style.overflow = 'hidden'
+      document.body.setAttribute('data-drawer-open', 'true')
     }
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
+      document.body.removeAttribute('data-drawer-open')
     }
   }, [aberto, fechar])
 

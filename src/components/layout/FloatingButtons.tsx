@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
 import WhatsAppBotao from './WhatsAppBotao'
 
 const LunaWidget = dynamic(() => import('./LunaWidget'), { ssr: false, loading: () => null })
@@ -51,6 +52,15 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
   const [oculto, setOculto] = useState<BotaoOcultado>({ wa: false, luna: false, expiresAt: null })
   const [footerVisivel, setFooterVisivel] = useState(false)
   const observerRef = useRef<MutationObserver | null>(null)
+  const pathname = usePathname() ?? ''
+
+  // Em rotas de fluxo de compra, Luna/WhatsApp não devem competir com o CTA principal.
+  // Ficam transparentes e sem capturar cliques.
+  const emFluxoCompra =
+    pathname.startsWith('/carrinho') ||
+    pathname.startsWith('/checkout') ||
+    /^\/pedido\/[^/]+\/sucesso/.test(pathname)
+  const desativado = drawerAberto || emFluxoCompra
 
   // Migrate old keys + load state
   useEffect(() => {
@@ -126,11 +136,12 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
   }
 
   const ocultarPorFooter = footerVisivel ? 'opacity-0 pointer-events-none' : 'opacity-100'
+  const atenuadoFluxo = desativado ? 'opacity-30 pointer-events-none' : ''
 
   return (
     <>
       <div
-        className={`fixed bottom-6 z-[999] flex flex-col-reverse items-end gap-3 transition-opacity duration-300 ${ocultarPorFooter}`}
+        className={`fixed bottom-6 z-[999] flex flex-col-reverse items-end gap-3 transition-opacity duration-300 ${ocultarPorFooter} ${atenuadoFluxo}`}
         style={containerStyle}
       >
         {!oculto.wa && (
@@ -138,7 +149,7 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
         )}
 
         {agenteAtivo && !oculto.luna && (
-          <LunaWidget onOcultar={() => ocultarBotao('luna')} />
+          <LunaWidget onOcultar={() => ocultarBotao('luna')} discreto={desativado} />
         )}
       </div>
 

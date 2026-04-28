@@ -233,9 +233,12 @@ const ATALHOS = [
 
 interface LunaWidgetProps {
   onOcultar?: () => void
+  /** Quando true, suprime a bolha de boas-vindas (em rotas de fluxo de compra
+   * ou com cart drawer aberto, a bolha distrai do CTA principal). */
+  discreto?: boolean
 }
 
-export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
+export default function LunaWidget({ onOcultar, discreto = false }: LunaWidgetProps) {
   const [config,      setConfig]      = useState<LunaConfig>(DEFAULT_CONFIG)
   const [loaded,      setLoaded]      = useState(false)
   const [aberto,      setAberto]      = useState(false)
@@ -270,13 +273,27 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
       .finally(() => setLoaded(true))
   }, [])
 
-  // ── Bolha de boas-vindas após 4 s (desktop apenas) ───────────────────────
+  // ── Bolha de boas-vindas — 1× por sessão, auto-hide em 8 s ───────────────
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) return
-    const t = setTimeout(() => setMostrarBolha(true), 4000)
-    return () => clearTimeout(t)
+    if (typeof window === 'undefined') return
+    let mostrouNestaSessao = false
+    try { mostrouNestaSessao = sessionStorage.getItem('luna_balao_mostrado') === '1' } catch {}
+    if (mostrouNestaSessao) return
+
+    const tShow = setTimeout(() => {
+      setMostrarBolha(true)
+      try { sessionStorage.setItem('luna_balao_mostrado', '1') } catch {}
+    }, 4000)
+
+    return () => clearTimeout(tShow)
   }, [])
+
+  useEffect(() => {
+    if (!mostrarBolha) return
+    const t = setTimeout(() => setMostrarBolha(false), 8000)
+    return () => clearTimeout(t)
+  }, [mostrarBolha])
 
   // ── Mensagem inicial ao abrir ─────────────────────────────────────────────
 
@@ -657,10 +674,10 @@ export default function LunaWidget({ onOcultar }: LunaWidgetProps) {
       )}
 
       {/* ── Bolha de boas-vindas ────────────────────────────────────────────── */}
-      {!aberto && mostrarBolha && (
+      {!aberto && mostrarBolha && !discreto && (
         <div className="relative animate-bounce-gentle">
           <div
-            className="bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3.5 max-w-[240px]"
+            className="bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3.5 max-w-[80vw] sm:max-w-[240px]"
             style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
           >
             {/* Header com avatar mini + status */}
