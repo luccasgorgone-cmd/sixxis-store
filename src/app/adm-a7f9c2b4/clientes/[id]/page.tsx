@@ -7,6 +7,8 @@ import {
   TrendingUp, Clock, CheckCircle, XCircle, Package,
   Truck, AlertCircle, RotateCcw
 } from 'lucide-react'
+import NivelLoyaltyIcon from '@/components/loyalty/NivelLoyaltyIcon'
+import { calcularNivel, nivelPorId } from '@/lib/loyalty'
 
 const STATUS_PEDIDO: Record<string, { label: string; cor: string; bg: string; icone: React.ElementType }> = {
   PENDENTE:    { label: 'Aguardando',   cor: '#d97706', bg: '#fef3c7', icone: Clock         },
@@ -149,11 +151,24 @@ export default function ClienteDetalhe() {
 
           {/* Perfil */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-black mx-auto mb-4"
-              style={{ backgroundColor: cliente.bloqueado ? '#ef4444' : '#0f2e2b' }}>
-              {(cliente.nome || cliente.email)?.[0]?.toUpperCase() || '?'}
+            <div className="relative w-20 h-20 mx-auto mb-4">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-black"
+                style={{ backgroundColor: cliente.bloqueado ? '#ef4444' : '#0f2e2b' }}>
+                {(cliente.nome || cliente.email)?.[0]?.toUpperCase() || '?'}
+              </div>
+              <div className="absolute -bottom-1 -right-1">
+                <NivelLoyaltyIcon nivel={calcularNivel(cliente.totalGasto || 0)} size={28} />
+              </div>
             </div>
             <h2 className="text-base font-bold text-gray-900 mb-1">{cliente.nome || 'Sem nome'}</h2>
+            {(() => {
+              const cfg = nivelPorId(calcularNivel(cliente.totalGasto || 0))
+              return (
+                <p className="text-xs font-bold mb-1" style={{ color: cfg.cor }}>
+                  Nível {cfg.nome}
+                </p>
+              )
+            })()}
             <p className="text-sm text-gray-400 mb-4">{cliente.email}</p>
             <div className="space-y-2 text-left">
               {cliente.telefone && (

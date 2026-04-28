@@ -6,6 +6,8 @@ import {
   ShoppingBag, UserCheck, UserX,
   RefreshCcw, ChevronLeft, ChevronRight
 } from 'lucide-react'
+import NivelLoyaltyIcon from '@/components/loyalty/NivelLoyaltyIcon'
+import { calcularNivel } from '@/lib/loyalty'
 
 interface Cliente {
   id: string
@@ -304,9 +306,14 @@ export default function AdminClientesPage() {
               >
                 {/* Cliente */}
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-                    style={{ backgroundColor: c.bloqueado ? '#ef4444' : '#0f2e2b' }}>
-                    {(c.nome || c.email)?.[0]?.toUpperCase() || '?'}
+                  <div className="relative shrink-0">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                      style={{ backgroundColor: c.bloqueado ? '#ef4444' : '#0f2e2b' }}>
+                      {(c.nome || c.email)?.[0]?.toUpperCase() || '?'}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1">
+                      <NivelLoyaltyIcon nivel={calcularNivel(c.totalGasto)} size={18} />
+                    </div>
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#3cbfb3] transition-colors">
