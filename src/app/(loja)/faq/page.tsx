@@ -38,7 +38,7 @@ const faqs = [
   },
   {
     q: 'Os produtos são originais?',
-    a: 'Sim! A Sixxis é importadora oficial dos produtos que comercializa. Todos os produtos são 100% originais, com nota fiscal e garantia. Não trabalhamos com produtos falsificados ou paralelos.',
+    a: 'Sim! Todos os produtos comercializados pela Sixxis são 100% originais, com nota fiscal e garantia. Trabalhamos direto da fábrica, sem intermediários e sem produtos falsificados ou paralelos.',
   },
   {
     q: 'Vocês têm assistência técnica?',

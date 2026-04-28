@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart,
-  ShieldCheck, Truck, RefreshCw, CreditCard, BadgeCheck, Headphones,
+  ShieldCheck, Truck, Lock, CreditCard, BadgeCheck, Headphones,
 } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
@@ -15,9 +15,9 @@ import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/pro
 const SELOS_CONFIANCA = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
   { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Grátis acima de R$ 500' },
-  { icon: RefreshCw,   titulo: 'Troca em 7 dias',          sub: 'Sem burocracia' },
+  { icon: Lock,        titulo: 'Compra 100% segura',       sub: 'SSL 256-bit + Antifraude' },
   { icon: CreditCard,  titulo: '6x sem juros',             sub: 'No cartão de crédito' },
-  { icon: BadgeCheck,  titulo: 'Produto 100% original',    sub: 'Importadora oficial Sixxis' },
+  { icon: BadgeCheck,  titulo: 'Produto 100% original',    sub: 'Direto da fábrica' },
   { icon: Headphones,  titulo: 'Suporte especializado',    sub: 'Seg–Sex 8h às 18h' },
 ] as const
 

@@ -17,8 +17,8 @@ const RAZOES: Razao[] = [
   },
   {
     icone: Package,
-    titulo: 'Importadora oficial',
-    desc: 'Somos nós que trazemos o produto para o Brasil. Sem intermediários, sem marca reembalada. Você compra direto da fonte.',
+    titulo: 'Direto da fábrica',
+    desc: 'Sem intermediários, sem marca reembalada. Você compra direto da fonte com a equipe que conhece o produto a fundo.',
   },
   {
     icone: ShieldCheck,
