@@ -13,6 +13,8 @@ import {
 } from 'lucide-react'
 import { type ItemCarrinho } from '@/hooks/useCarrinho'
 import GarantiaEstendidaStep, { type SelecaoGarantia } from '@/components/checkout/GarantiaEstendidaStep'
+import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/EnderecosSalvos'
+import { useViaCep } from '@/hooks/useViaCep'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 
@@ -333,10 +335,12 @@ function CheckoutContent() {
   const [end, setEnd] = useState<EnderecoData>({
     cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '',
   })
-  const [buscandoCep, setBuscandoCep]         = useState(false)
+  const [enderecoSalvoId, setEnderecoSalvoId] = useState<string | null>(null)
+  const [mostrandoFormEnd, setMostrandoFormEnd] = useState(false)
   const [opcoesFrete, setOpcoesFrete]         = useState<OpcaoFrete[]>([])
   const [freteSel, setFreteSel]               = useState<number | null>(null)
   const [carregandoFrete, setCarregandoFrete] = useState(false)
+  const viaCep = useViaCep()
 
   const [cupomInput, setCupomInput] = useState('')
   const [cupom, setCupom]           = useState<{ codigo: string; desconto: number } | null>(null)
@@ -383,33 +387,65 @@ function CheckoutContent() {
   const desconto    = cupom?.desconto ?? 0
   const totalFinal  = Math.max(0, total + frete + totalGarantias - desconto)
 
-  const buscarCep = useCallback(async (cepRaw: string) => {
-    const cepLimpo = cepRaw.replace(/\D/g, '')
-    if (cepLimpo.length !== 8) return
-    setBuscandoCep(true)
+  // Calcular frete por CEP (chamado quando endereço fica completo).
+  const calcularFretePorCep = useCallback(async (cepLimpo: string) => {
+    if (cepLimpo.length !== 8 || itens.length === 0) return
+    setCarregandoFrete(true)
     try {
-      const r = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
-      const d = await r.json()
-      if (!d.erro) {
-        setEnd(e => ({ ...e, logradouro: d.logradouro ?? '', bairro: d.bairro ?? '', cidade: d.localidade ?? '', estado: d.uf ?? '' }))
-      }
-      if (itens.length > 0) {
-        setCarregandoFrete(true)
-        try {
-          const fr = await fetch('/api/frete', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ cepDestino: cepLimpo, produtos: itens.map(i => ({ id: i.produtoId, quantidade: i.quantidade })) }),
-          })
-          const fd = await fr.json()
-          setOpcoesFrete(fd.opcoes ?? [])
-          setFreteSel(null)
-        } catch { setOpcoesFrete([]) }
-        finally { setCarregandoFrete(false) }
-      }
-    } catch { /* ignore */ }
-    finally { setBuscandoCep(false) }
+      const fr = await fetch('/api/frete', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          cepDestino: cepLimpo,
+          produtos: itens.map(i => ({
+            id: i.produtoId,
+            quantidade: i.quantidade,
+            preco: i.preco,
+          })),
+        }),
+      })
+      const fd = await fr.json()
+      const opcoes: OpcaoFrete[] = (fd.opcoes ?? []).map(
+        (o: { name?: string; nome?: string; price?: number; preco?: number; delivery_time?: number; prazo?: string }) => ({
+          name: o.name ?? o.nome ?? 'Frete',
+          price: typeof o.price === 'number' ? o.price : Number(o.preco ?? 0),
+          delivery_time: o.delivery_time ?? 0,
+        }),
+      )
+      setOpcoesFrete(opcoes)
+      setFreteSel(opcoes[0]?.price ?? null)
+    } catch { setOpcoesFrete([]) }
+    finally { setCarregandoFrete(false) }
   }, [itens])
+
+  // Quando o hook ViaCEP encontra um endereço, popular o formulário.
+  useEffect(() => {
+    if (!viaCep.result || viaCep.result.notFound) return
+    const r = viaCep.result
+    setEnd((e) => ({
+      ...e,
+      logradouro: e.logradouro || r.logradouro,
+      bairro: e.bairro || r.bairro,
+      cidade: e.cidade || r.cidade,
+      estado: e.estado || r.estado,
+    }))
+    calcularFretePorCep(r.cep)
+  }, [viaCep.result, calcularFretePorCep])
+
+  function handleSelecionarEnderecoSalvo(e: EnderecoSalvo) {
+    setEnderecoSalvoId(e.id)
+    setMostrandoFormEnd(false)
+    setEnd({
+      cep: maskCep(e.cep),
+      logradouro: e.logradouro,
+      numero: e.numero,
+      complemento: e.complemento ?? '',
+      bairro: e.bairro,
+      cidade: e.cidade,
+      estado: e.estado,
+    })
+    calcularFretePorCep(e.cep.replace(/\D/g, ''))
+  }
 
   async function aplicarCupom() {
     if (!cupomInput.trim()) { setCupomErro('Digite um código'); return }
@@ -461,13 +497,21 @@ function CheckoutContent() {
     setErro('')
     setCarregando(true)
     try {
-      const er = await fetch('/api/enderecos', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...end, cep: end.cep.replace(/\D/g, ''), principal: false }),
-      })
-      if (!er.ok) throw new Error('Erro ao salvar endereço')
-      const { enderecoId } = await er.json()
+      let enderecoId = enderecoSalvoId
+      // Endereço salvo: reaproveita. Caso contrário, cria um novo.
+      if (!enderecoId) {
+        const er = await fetch('/api/enderecos', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ ...end, cep: end.cep.replace(/\D/g, ''), principal: false }),
+        })
+        if (!er.ok) {
+          const ed = await er.json().catch(() => ({}))
+          throw new Error(ed.error === 'Não autorizado' ? 'Faça login para continuar' : 'Erro ao salvar endereço')
+        }
+        const data = await er.json()
+        enderecoId = data.enderecoId
+      }
 
       const garantiasPayload = Object.entries(garantiaSelecao)
         .filter(([, meses]) => meses === 12 || meses === 24)
@@ -643,8 +687,19 @@ function CheckoutContent() {
                 <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-5">
                   <div>
                     <h2 className="font-extrabold text-gray-900 mb-0.5">Endereço de entrega</h2>
-                    <p className="text-xs text-gray-400">Digite o CEP para preenchimento automático.</p>
+                    <p className="text-xs text-gray-400">Selecione um endereço salvo ou digite o CEP para preenchimento automático.</p>
                   </div>
+
+                  <EnderecosSalvos
+                    selecionadoId={enderecoSalvoId}
+                    onSelecionar={handleSelecionarEnderecoSalvo}
+                    onNovoEndereco={() => {
+                      setEnderecoSalvoId(null)
+                      setMostrandoFormEnd(true)
+                      setEnd({ cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '' })
+                    }}
+                    mostrandoFormulario={mostrandoFormEnd || enderecoSalvoId === null}
+                  />
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
@@ -656,14 +711,20 @@ function CheckoutContent() {
                           type="text"
                           inputMode="numeric"
                           value={end.cep}
-                          onChange={e => setEnd(ev => ({ ...ev, cep: maskCep(e.target.value) }))}
-                          onBlur={e => buscarCep(e.target.value)}
+                          onChange={e => {
+                            const v = maskCep(e.target.value)
+                            setEnd(ev => ({ ...ev, cep: v }))
+                            viaCep.buscar(v)
+                          }}
                           placeholder="00000-000"
                           maxLength={9}
                           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/40 focus:border-[#3cbfb3] transition pr-10 placeholder:text-gray-300"
                         />
-                        {buscandoCep && <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3cbfb3] animate-spin" />}
+                        {viaCep.loading && <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3cbfb3] animate-spin" />}
                       </div>
+                      {viaCep.error && (
+                        <p className="text-[11px] text-amber-600 mt-1.5">{viaCep.error}</p>
+                      )}
                     </div>
 
                     <div className="sm:col-span-2">
