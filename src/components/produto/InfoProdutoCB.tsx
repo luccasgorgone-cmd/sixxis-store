@@ -10,6 +10,7 @@ import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos } from '@/hooks/useListas'
+import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 
 const SELOS_CONFIANCA = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
@@ -132,6 +133,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
   const [parcelasAberto, setParcelasAberto] = useState(false)
   const [quantidade, setQuantidade] = useState(1)
   const [visitantes, setVisitantes] = useState(0)
+  const [modalVariacaoAberto, setModalVariacaoAberto] = useState(false)
 
   // On mount, sync the default color selection with the gallery
   useEffect(() => {
@@ -172,7 +174,10 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
   }
 
   function handleAddToCart() {
-    if (produto.temVariacoes && !variacaoSelecionada) return
+    if (produto.temVariacoes && !variacaoSelecionada) {
+      setModalVariacaoAberto(true)
+      return
+    }
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
@@ -190,7 +195,10 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
   }
 
   function handleComprar() {
-    if (produto.temVariacoes && !variacaoSelecionada) return
+    if (produto.temVariacoes && !variacaoSelecionada) {
+      setModalVariacaoAberto(true)
+      return
+    }
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
@@ -203,6 +211,36 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       }),
     })
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
+  }
+
+  function handleModalConfirmarCheckout(v: VariacaoSelecionavel, qty: number) {
+    const preco = v.preco ?? precoBase
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco,
+      quantidade: qty,
+      imagem: produto.imagem,
+      variacaoId: v.id,
+      variacaoNome: v.nome,
+    })
+    setModalVariacaoAberto(false)
+    router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
+  }
+
+  function handleModalConfirmarCarrinho(v: VariacaoSelecionavel, qty: number) {
+    const preco = v.preco ?? precoBase
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco,
+      quantidade: qty,
+      imagem: produto.imagem,
+      variacaoId: v.id,
+      variacaoNome: v.nome,
+    })
+    setModalVariacaoAberto(false)
+    setDrawerAberto(true)
   }
 
   return (
@@ -473,7 +511,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         {/* COMPRAR AGORA — principal, sempre sólido */}
         <button
           onClick={handleComprar}
-          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          disabled={esgotado}
           className="w-full text-white font-extrabold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
           style={{
             backgroundColor: '#3cbfb3',
@@ -493,7 +531,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         {/* ADICIONAR AO CARRINHO — secundário, outline */}
         <button
           onClick={handleAddToCart}
-          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          disabled={esgotado}
           className="w-full font-bold text-base py-3.5 rounded-2xl border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7] disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5"
         >
           {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}
@@ -557,7 +595,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       >
         <button
           onClick={handleAddToCart}
-          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          disabled={esgotado}
           className="flex-1 border-2 border-[#3cbfb3] text-[#3cbfb3] text-sm font-bold rounded-xl py-3 flex items-center justify-center gap-1.5 disabled:opacity-40 transition active:scale-[0.98]"
         >
           <ShoppingCart size={16} />
@@ -565,13 +603,25 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         </button>
         <button
           onClick={handleComprar}
-          disabled={esgotado || (produto.temVariacoes && !variacaoSelecionada)}
+          disabled={esgotado}
           className="flex-[1.3] bg-[#3cbfb3] text-white text-sm font-bold rounded-xl py-3 disabled:opacity-40 transition active:scale-[0.98]"
           style={{ boxShadow: '0 4px 12px rgba(60,191,179,0.35)' }}
         >
           {esgotado ? 'Esgotado' : 'Comprar Agora'}
         </button>
       </div>
+
+      {/* Modal de seleção de variação — abre quando user clica Comprar/Adicionar sem escolher */}
+      <SelectVariacaoModal
+        aberto={modalVariacaoAberto}
+        fechar={() => setModalVariacaoAberto(false)}
+        produto={{ id: produto.id, nome: produto.nome, imagem: produto.imagem }}
+        variacoes={variacoesAtivas}
+        precoBase={precoBase}
+        tipoVariacao={tipoVariacao}
+        onConfirmarCheckout={handleModalConfirmarCheckout}
+        onConfirmarCarrinho={handleModalConfirmarCarrinho}
+      />
     </div>
   )
 }
