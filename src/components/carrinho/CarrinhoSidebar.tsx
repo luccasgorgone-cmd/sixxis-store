@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { X, Trash2, ShoppingCart, ArrowRight } from 'lucide-react'
-import { useCarrinho } from '@/hooks/useCarrinho'
+import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 
 interface Props {
   aberto: boolean
@@ -10,7 +10,8 @@ interface Props {
 }
 
 export default function CarrinhoSidebar({ aberto, fechar }: Props) {
-  const { itens, removerItem, total } = useCarrinho()
+  const { itens, removerItem } = useCarrinho()
+  const total = useTotalCarrinho()
 
   return (
     <>

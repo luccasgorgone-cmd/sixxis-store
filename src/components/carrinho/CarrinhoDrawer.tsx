@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { X, ShoppingBag, Minus, Plus, Trash2, Truck, Package, Zap } from 'lucide-react'
-import { useCarrinho } from '@/hooks/useCarrinho'
+import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 
 interface UpsellItem {
   id: string
@@ -23,7 +23,8 @@ function fmt(v: number) {
 }
 
 export default function CarrinhoDrawer() {
-  const { itens, drawerAberto, setDrawerAberto, removerItem, atualizarQuantidade, total, adicionarItem } = useCarrinho()
+  const { itens, drawerAberto, setDrawerAberto, removerItem, atualizarQuantidade, adicionarItem } = useCarrinho()
+  const total = useTotalCarrinho()
   const [upsell, setUpsell] = useState<UpsellItem[]>([])
 
   // Fetch upsell products whenever cart opens or items change

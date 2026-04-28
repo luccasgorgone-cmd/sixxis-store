@@ -3,11 +3,11 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { ShoppingCart, User } from 'lucide-react'
-import { useCarrinho } from '@/hooks/useCarrinho'
+import { useTotalItens } from '@/hooks/useCarrinho'
 
 export default function Nav() {
   const { data: session } = useSession()
-  const { totalItens } = useCarrinho()
+  const totalItens = useTotalItens()
 
   return (
     <nav className="flex items-center gap-6 text-sm font-medium">

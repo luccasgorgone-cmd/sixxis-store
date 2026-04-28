@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
 import { useSession, signOut } from 'next-auth/react'
-import { useCarrinho } from '@/hooks/useCarrinho'
+import { useCarrinho, useTotalItens } from '@/hooks/useCarrinho'
 import { useScrollHeader } from '@/hooks/useScrollHeader'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -199,7 +199,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
   const { data: session, status: sessionStatus } = useSession()
   const logado = sessionStatus === 'authenticated' && !!session?.user
   const sessaoCarregando = sessionStatus === 'loading'
-  const { totalItens, setDrawerAberto } = useCarrinho()
+  const { setDrawerAberto } = useCarrinho()
+  const totalItens = useTotalItens()
 
   useEffect(() => {
     document.body.style.overflow = (drawerOpen || cepModalOpen) ? 'hidden' : ''

@@ -3,7 +3,7 @@
 import { Suspense, useState, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useCarrinho } from '@/hooks/useCarrinho'
+import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -298,7 +298,8 @@ function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const compraDireta = searchParams.get('compra_direta') === '1'
-  const { itens, total, limparCarrinho } = useCarrinho()
+  const { itens, limparCarrinho } = useCarrinho()
+  const total = useTotalCarrinho()
 
   const [etapa, setEtapa] = useState<Etapa>(1)
   const [fase, setFase] = useState<Fase>('checkout')
