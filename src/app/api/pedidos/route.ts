@@ -2,12 +2,19 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
+import { criarGarantiasPedido } from '@/lib/garantia'
 
 const itemSchema = z.object({
   produtoId:    z.string(),
   quantidade:   z.number().int().positive(),
   variacaoId:   z.string().optional(),
   variacaoNome: z.string().optional(),
+})
+
+const garantiaSchema = z.object({
+  produtoId: z.string(),
+  mesesAdicionais: z.union([z.literal(12), z.literal(24)]),
+  valorPago: z.number().nonnegative(),
 })
 
 const criarPedidoSchema = z.object({
@@ -17,6 +24,7 @@ const criarPedidoSchema = z.object({
   itens:          z.array(itemSchema).min(1),
   cupomCodigo:    z.string().optional(),
   desconto:       z.number().nonnegative().optional(),
+  garantias:      z.array(garantiaSchema).optional(),
 })
 
 export async function GET() {
@@ -50,7 +58,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { enderecoId, formaPagamento, frete, itens, cupomCodigo, desconto: descontoReq } = parsed.data
+  const { enderecoId, formaPagamento, frete, itens, cupomCodigo, desconto: descontoReq, garantias } = parsed.data
   const desconto = descontoReq ?? 0
 
   // Buscar produtos e variações para calcular preços
@@ -99,6 +107,36 @@ export async function POST(request: NextRequest) {
     })
   }
 
+  // Validar e calcular custo das garantias contratadas (se houver)
+  const garantiasItens = garantias ?? []
+  let totalGarantias = 0
+  if (garantiasItens.length > 0) {
+    const garantiaProdutos = await prisma.produto.findMany({
+      where: { id: { in: garantiasItens.map((g) => g.produtoId) } },
+      select: {
+        id: true,
+        garantiaEstendida12Preco: true,
+        garantiaEstendida24Preco: true,
+      },
+    })
+    const garantiaPorId = new Map(garantiaProdutos.map((p) => [p.id, p]))
+    for (const g of garantiasItens) {
+      const p = garantiaPorId.get(g.produtoId)
+      const precoOferecido = g.mesesAdicionais === 12
+        ? p?.garantiaEstendida12Preco
+        : p?.garantiaEstendida24Preco
+      if (!p || precoOferecido == null) {
+        return Response.json(
+          { error: `Garantia +${g.mesesAdicionais}m não disponível para o produto ${g.produtoId}` },
+          { status: 400 },
+        )
+      }
+      // Confiar no servidor — sobrescreve qualquer valor que tenha vindo do client.
+      g.valorPago = Number(precoOferecido)
+      totalGarantias += g.valorPago
+    }
+  }
+
   const pedido = await prisma.pedido.create({
     data: {
       clienteId:      session.user.id,
@@ -107,7 +145,7 @@ export async function POST(request: NextRequest) {
       frete,
       desconto,
       cupomCodigo:    cupomCodigo ?? null,
-      total:          Math.max(0, subtotal + frete - desconto),
+      total:          Math.max(0, subtotal + frete + totalGarantias - desconto),
       status:         'pendente',
       itens: {
         create: itensPedido.map((item) => ({
@@ -144,6 +182,19 @@ export async function POST(request: NextRequest) {
         data: { estoque: { decrement: item.quantidade } },
       })
     }
+  }
+
+  // Criar garantias estendidas vinculadas ao pedido
+  if (garantiasItens.length > 0) {
+    await criarGarantiasPedido(
+      pedido.id,
+      pedido.createdAt,
+      garantiasItens.map((g) => ({
+        produtoId: g.produtoId,
+        mesesAdicionais: g.mesesAdicionais as 12 | 24,
+        valorPago: g.valorPago,
+      })),
+    )
   }
 
   return Response.json({ pedido }, { status: 201 })

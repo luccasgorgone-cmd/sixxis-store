@@ -63,6 +63,9 @@ export async function PUT(
     especificacoes,
     faqs,
     imagensPorVariacao,
+    garantiaFabricaMeses,
+    garantiaEstendida12Preco,
+    garantiaEstendida24Preco,
   } = body
 
   const slug = slugRaw
@@ -139,6 +142,21 @@ export async function PUT(
         especificacoes: especificacoes ?? undefined,
         faqs: faqs ?? undefined,
         ...(imagensPorVariacao !== undefined && { imagensPorVariacao: imagensPorVariacao ?? null }),
+        ...(garantiaFabricaMeses !== undefined && {
+          garantiaFabricaMeses: Number(garantiaFabricaMeses) || 12,
+        }),
+        ...(garantiaEstendida12Preco !== undefined && {
+          garantiaEstendida12Preco:
+            garantiaEstendida12Preco === null || garantiaEstendida12Preco === ''
+              ? null
+              : Number(garantiaEstendida12Preco),
+        }),
+        ...(garantiaEstendida24Preco !== undefined && {
+          garantiaEstendida24Preco:
+            garantiaEstendida24Preco === null || garantiaEstendida24Preco === ''
+              ? null
+              : Number(garantiaEstendida24Preco),
+        }),
       },
     })
   })

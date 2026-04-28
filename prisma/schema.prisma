@@ -82,12 +82,17 @@ model Produto {
   vendidos           Int               @default(0)
   mediaAvaliacoes    Float             @default(0)
   totalAvaliacoes    Int               @default(0)
+  // Garantia
+  garantiaFabricaMeses     Int      @default(12)
+  garantiaEstendida12Preco Decimal? @db.Decimal(10, 2)
+  garantiaEstendida24Preco Decimal? @db.Decimal(10, 2)
   avaliacoes         Avaliacao[]
   itensCarrinho      ItemCarrinho[]
   itensPedido        ItemPedido[]
   listaEspera        ListaEspera[]
   destaques          ProdutoDestaque[]
   variacoes          VariacaoProduto[]
+  garantias          GarantiaEstendida[]
 
   @@index([categoria])
   @@index([slug])
@@ -113,10 +118,37 @@ model Pedido {
   cliente        Cliente      @relation(fields: [clienteId], references: [id])
   endereco       Endereco     @relation(fields: [enderecoId], references: [id])
   pagamentos     Pagamento[]
+  garantias      GarantiaEstendida[]
 
   @@index([clienteId])
   @@index([status])
   @@index([enderecoId], map: "Pedido_enderecoId_fkey")
+}
+
+model GarantiaEstendida {
+  id              String   @id @default(cuid())
+  pedidoId        String
+  pedido          Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  pedidoItemId    String?
+  produtoId       String
+  produto         Produto  @relation(fields: [produtoId], references: [id])
+
+  mesesAdicionais Int
+  valorPago       Decimal  @db.Decimal(10, 2)
+
+  inicioVigencia  DateTime
+  fimVigencia     DateTime
+
+  status          String   @default("ativa") // ativa | acionada | expirada | cancelada
+  acionamentos    Json?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([pedidoId])
+  @@index([produtoId])
+  @@index([status])
+  @@index([fimVigencia])
 }
 
 model Pagamento {
