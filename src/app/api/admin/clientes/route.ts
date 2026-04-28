@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { contarClientes } from '@/lib/clientes-count'
+import { STATUS_PAGO_TODOS, STATUS_PENDENTE_TODOS } from '@/lib/pedido-status'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,8 +83,43 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
+    // Recalcula "totalGasto" e contagem de pedidos com base em pedidos PAGOS.
+    // Os campos cacheados no Cliente podem estar desalinhados quando o pedido
+    // ainda está pendente — pra evitar mostrar "R$ X gasto" antes da confirmação
+    // do pagamento, agregamos por cliente do batch atual.
+    const clienteIds = clientes.map((c) => c.id)
+    const [agregadosPagos, agregadosPendentes] = await Promise.all([
+      clienteIds.length === 0
+        ? Promise.resolve([])
+        : prisma.pedido.groupBy({
+            by: ['clienteId'],
+            where: { clienteId: { in: clienteIds }, status: { in: STATUS_PAGO_TODOS } },
+            _sum: { total: true },
+            _count: { _all: true },
+          }),
+      clienteIds.length === 0
+        ? Promise.resolve([])
+        : prisma.pedido.groupBy({
+            by: ['clienteId'],
+            where: { clienteId: { in: clienteIds }, status: { in: STATUS_PENDENTE_TODOS } },
+            _count: { _all: true },
+          }),
+    ])
+    const pagoMap = new Map(agregadosPagos.map((a) => [a.clienteId, a]))
+    const pendenteMap = new Map(agregadosPendentes.map((a) => [a.clienteId, a]))
+    const clientesAjustados = clientes.map((c) => {
+      const pago = pagoMap.get(c.id)
+      const pendente = pendenteMap.get(c.id)
+      return {
+        ...c,
+        totalGasto:        Number(pago?._sum.total ?? 0),
+        totalPedidosPagos: pago?._count._all ?? 0,
+        totalPedidosPendentes: pendente?._count._all ?? 0,
+      }
+    })
+
     return NextResponse.json({
-      clientes,
+      clientes: clientesAjustados,
       total,
       totalGeral,
       page,

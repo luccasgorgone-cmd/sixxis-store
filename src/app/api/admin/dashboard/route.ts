@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { contarClientes } from '@/lib/clientes-count'
+import {
+  STATUS_PAGO_TODOS,
+  STATUS_PENDENTE_TODOS,
+  STATUS_CANCELADO_TODOS,
+} from '@/lib/pedido-status'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -54,8 +59,12 @@ export async function GET(request: NextRequest) {
 
   const pedidoWhere   = { createdAt: { gte: from, lte: to } }
   const prevWhere     = { createdAt: { gte: prevFrom, lte: prevTo } }
-  const paidWhere     = { ...pedidoWhere, status: { notIn: ['cancelado', 'CANCELADO'] } }
-  const prevPaidWhere = { ...prevWhere,   status: { notIn: ['cancelado', 'CANCELADO'] } }
+  // Receita confirmada = somente pedidos cujo pagamento foi aprovado.
+  // Pedidos pendentes/cancelados NÃO contam aqui — exibimos eles em métricas
+  // separadas (pedidosPendentes / Em processamento).
+  const paidWhere     = { ...pedidoWhere, status: { in: STATUS_PAGO_TODOS } }
+  const prevPaidWhere = { ...prevWhere,   status: { in: STATUS_PAGO_TODOS } }
+  const pendingWhere  = { ...pedidoWhere, status: { in: STATUS_PENDENTE_TODOS } }
 
   const [
     pedidos,
@@ -63,7 +72,8 @@ export async function GET(request: NextRequest) {
     prevClientes,
     produtosAtivos,
     totalClientes,
-    pedidosPendentes,
+    pedidosPendentesCount,
+    pedidosPendentesAgg,
     itensPedidos,
     pedidosPorStatus,
     estoqueCritico,
@@ -81,9 +91,13 @@ export async function GET(request: NextRequest) {
     prisma.produto.count({ where: { ativo: true } }),
     // Fonte única compartilhada com /api/admin/clientes — ver src/lib/clientes-count.ts
     contarClientes(),
-    prisma.pedido.count({ where: { status: { in: ['pendente', 'PENDENTE'] } } }),
+    prisma.pedido.count({ where: { status: { in: STATUS_PENDENTE_TODOS } } }),
+    // Receita potencial em processamento (limitada ao período pra coerência
+    // com o card "Receita confirmada"). Aparece como linha tracejada nos
+    // gráficos e como card secundário.
+    prisma.pedido.aggregate({ where: pendingWhere, _sum: { total: true }, _count: true }),
     prisma.itemPedido.findMany({
-      where: { pedido: { createdAt: { gte: from, lte: to }, status: { notIn: ['cancelado', 'CANCELADO'] } } },
+      where: { pedido: { createdAt: { gte: from, lte: to }, status: { in: STATUS_PAGO_TODOS } } },
       select: {
         quantidade: true,
         precoUnitario: true,
@@ -112,10 +126,11 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
-    // For vendasPorHora and vendasPorDiaSemana
+    // Vendas por hora/dia: traz pagos (linha sólida) + pendentes (linha tracejada
+    // pra Luccas saber quanto de receita pode entrar). Cancelados ficam fora.
     prisma.pedido.findMany({
-      where: { createdAt: { gte: from, lte: to }, status: { notIn: ['cancelado', 'CANCELADO'] } },
-      select: { createdAt: true, total: true },
+      where: { createdAt: { gte: from, lte: to }, status: { notIn: STATUS_CANCELADO_TODOS } },
+      select: { createdAt: true, total: true, status: true },
     }),
     // For clientesPerfil
     prisma.pedido.findMany({
@@ -131,6 +146,16 @@ export async function GET(request: NextRequest) {
   const prevReceita   = Number(prevPedidos._sum.total ?? 0)
   const prevTotalPedidos = prevPedidos._count
 
+  // Receita potencial em processamento — pedidos pendentes no período
+  const receitaPendente   = Number(pedidosPendentesAgg._sum.total ?? 0)
+  const totalPedidosPendentesPeriodo = pedidosPendentesAgg._count
+
+  // Taxa de conversão: pagos / (pagos + pendentes) no período
+  const totalDecisoes = totalPedidos + totalPedidosPendentesPeriodo
+  const taxaConversaoPedido = totalDecisoes > 0
+    ? (totalPedidos / totalDecisoes) * 100
+    : 0
+
   // Clientes no período atual (new clients)
   const clientesNoPeriodo = await prisma.cliente.count({ where: { createdAt: { gte: from, lte: to } } })
 
@@ -145,24 +170,36 @@ export async function GET(request: NextRequest) {
   }
 
   // ── Vendas por dia ──────────────────────────────────────────────────────────
-  const vendaDayMap: Record<string, { valor: number; pedidos: number }> = {}
+  // valor = receita confirmada (pagos)
+  // valorPendente = receita potencial (pendentes — linha tracejada na UI)
+  const vendaDayMap: Record<string, { valor: number; valorPendente: number; pedidos: number }> = {}
   pedidosBrutos.forEach((p) => {
     const d = formatDate(p.createdAt)
-    if (!vendaDayMap[d]) vendaDayMap[d] = { valor: 0, pedidos: 0 }
-    vendaDayMap[d].valor   += Number(p.total)
-    vendaDayMap[d].pedidos += 1
+    if (!vendaDayMap[d]) vendaDayMap[d] = { valor: 0, valorPendente: 0, pedidos: 0 }
+    if (STATUS_PAGO_TODOS.includes(p.status)) {
+      vendaDayMap[d].valor   += Number(p.total)
+      vendaDayMap[d].pedidos += 1
+    } else if (STATUS_PENDENTE_TODOS.includes(p.status)) {
+      vendaDayMap[d].valorPendente += Number(p.total)
+    }
   })
-  const vendasPorDia: { date: string; valor: number; pedidos: number }[] = []
+  const vendasPorDia: { date: string; valor: number; valorPendente: number; pedidos: number }[] = []
   const cur = new Date(from)
   while (cur <= to) {
     const d = formatDate(cur)
-    vendasPorDia.push({ date: d, valor: vendaDayMap[d]?.valor ?? 0, pedidos: vendaDayMap[d]?.pedidos ?? 0 })
+    vendasPorDia.push({
+      date: d,
+      valor:         vendaDayMap[d]?.valor ?? 0,
+      valorPendente: vendaDayMap[d]?.valorPendente ?? 0,
+      pedidos:       vendaDayMap[d]?.pedidos ?? 0,
+    })
     cur.setDate(cur.getDate() + 1)
   }
 
   // ── Vendas por hora ─────────────────────────────────────────────────────────
   const horasMap = Array.from({ length: 24 }, (_, hora) => ({ hora, pedidos: 0, valor: 0 }))
   pedidosBrutos.forEach((p) => {
+    if (!STATUS_PAGO_TODOS.includes(p.status)) return
     const h = new Date(p.createdAt).getHours()
     horasMap[h].pedidos++
     horasMap[h].valor += Number(p.total)
@@ -173,6 +210,7 @@ export async function GET(request: NextRequest) {
   const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
   const semanaMap = DIAS.map((dia) => ({ dia, valor: 0, pedidos: 0 }))
   pedidosBrutos.forEach((p) => {
+    if (!STATUS_PAGO_TODOS.includes(p.status)) return
     const d = new Date(p.createdAt).getDay()
     semanaMap[d].valor   += Number(p.total)
     semanaMap[d].pedidos += 1
@@ -303,11 +341,15 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     metrics: {
-      receita,
-      totalPedidos,
+      receita,                 // alias legado: receita confirmada
+      receitaConfirmada: receita,
+      receitaPendente,
+      totalPedidos,            // pagos no período
+      totalPedidosPendentesPeriodo,
+      taxaConversaoPedido,
       ticketMedio,
       produtosAtivos,
-      pedidosPendentes,
+      pedidosPendentes: pedidosPendentesCount, // count global de pendentes (todas as datas)
       totalClientes,
       pedidosEntregues,
       pedidosEnviados,

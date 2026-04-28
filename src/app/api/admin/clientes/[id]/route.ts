@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
+import { STATUS_PAGO_TODOS, STATUS_PENDENTE_TODOS } from '@/lib/pedido-status'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,30 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
     },
   })
   if (!cliente) return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 })
-  return NextResponse.json({ cliente })
+
+  // totalGasto deve refletir apenas pedidos com pagamento confirmado.
+  const [pagosAgg, pendentesAgg] = await Promise.all([
+    prisma.pedido.aggregate({
+      where: { clienteId: id, status: { in: STATUS_PAGO_TODOS } },
+      _sum: { total: true },
+      _count: { _all: true },
+    }),
+    prisma.pedido.aggregate({
+      where: { clienteId: id, status: { in: STATUS_PENDENTE_TODOS } },
+      _sum: { total: true },
+      _count: { _all: true },
+    }),
+  ])
+  const totalGastoConfirmado = Number(pagosAgg._sum.total ?? 0)
+  const totalEmProcessamento = Number(pendentesAgg._sum.total ?? 0)
+  const clienteAjustado = {
+    ...cliente,
+    totalGasto: totalGastoConfirmado,
+    totalEmProcessamento,
+    totalPedidos: pagosAgg._count._all,
+    totalPedidosPendentes: pendentesAgg._count._all,
+  }
+  return NextResponse.json({ cliente: clienteAjustado })
 }
 
 // PATCH /api/admin/clientes/[id] — update (block/unblock/cashback adj)

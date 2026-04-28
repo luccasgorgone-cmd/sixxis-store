@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
+import {
+  STATUS_PAGO_TODOS,
+  STATUS_PENDENTE_TODOS,
+} from '@/lib/pedido-status'
 
 export async function GET(request: NextRequest) {
   const unauthorized = await requireAdmin(request)
@@ -35,7 +39,14 @@ export async function GET(request: NextRequest) {
     }),
   }
 
-  const [pedidos, total, statsPendentes, statsEnviados, statsReceita] = await Promise.all([
+  const [
+    pedidos,
+    total,
+    statsPendentes,
+    statsEnviados,
+    statsReceitaConfirmada,
+    statsReceitaPendente,
+  ] = await Promise.all([
     prisma.pedido.findMany({
       where,
       skip: (page - 1) * limit,
@@ -53,18 +64,29 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.pedido.count({ where }),
-    prisma.pedido.count({ where: { ...where, status: 'pendente' } }),
+    prisma.pedido.count({ where: { ...where, status: { in: STATUS_PENDENTE_TODOS } } }),
     prisma.pedido.count({ where: { ...where, status: 'enviado' } }),
-    prisma.pedido.aggregate({ where, _sum: { total: true } }),
+    prisma.pedido.aggregate({
+      where: { ...where, status: { in: STATUS_PAGO_TODOS } },
+      _sum: { total: true },
+    }),
+    prisma.pedido.aggregate({
+      where: { ...where, status: { in: STATUS_PENDENTE_TODOS } },
+      _sum: { total: true },
+    }),
   ])
 
   return NextResponse.json({
     pedidos, total, page, limit,
     stats: {
       total,
-      pendentes: statsPendentes,
-      enviados:  statsEnviados,
-      receita:   Number(statsReceita._sum.total ?? 0),
+      pendentes:         statsPendentes,
+      enviados:          statsEnviados,
+      // Stats de receita refletem APENAS pedidos pagos. Receita pendente
+      // expõe o que pode entrar caso confirmem.
+      receita:           Number(statsReceitaConfirmada._sum.total ?? 0),
+      receitaConfirmada: Number(statsReceitaConfirmada._sum.total ?? 0),
+      receitaPendente:   Number(statsReceitaPendente._sum.total ?? 0),
     },
   })
 }

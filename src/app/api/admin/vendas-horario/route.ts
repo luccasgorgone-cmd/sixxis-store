@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
+import { STATUS_PAGO_TODOS } from '@/lib/pedido-status'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest) {
   const pedidos = await prisma.pedido.findMany({
     where: {
       createdAt: { gte: dataInicio },
-      status: { in: ['pago', 'enviado', 'entregue', 'PAGO', 'ENVIADO', 'ENTREGUE'] },
+      status: { in: STATUS_PAGO_TODOS },
     },
     select: {
       createdAt: true,

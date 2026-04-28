@@ -133,20 +133,28 @@ export default function AdminDashboard() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const var_ = dados?.variacao || {}
 
+  const totalDecisoes = (m.totalPedidos || 0) + (m.totalPedidosPendentesPeriodo || 0)
+  const taxaConv = totalDecisoes > 0
+    ? `${Math.round((m.totalPedidos || 0) / totalDecisoes * 100)}% conversão`
+    : 'Sem conversão no período'
+
   const CARDS = [
-    { label:'Receita Total',      valor:m.receita||0,          moeda:true,  variacao:var_.receita,    Icon:TrendingUp,  bg:'#dcfce7', fg:'#16a34a', href:'/adm-a7f9c2b4/pedidos', sub:`${m.totalPedidos||0} pedidos` },
+    { label:'Receita Confirmada', valor:m.receitaConfirmada ?? m.receita ?? 0, moeda:true, variacao:var_.receita,    Icon:TrendingUp,  bg:'#dcfce7', fg:'#16a34a', href:'/adm-a7f9c2b4/pedidos', sub:`${m.totalPedidos||0} pagos · ${taxaConv}` },
+    { label:'Em Processamento',   valor:m.receitaPendente ?? 0,             moeda:true,                            Icon:Clock,       bg:'#fef3c7', fg:'#d97706', href:'/adm-a7f9c2b4/pedidos?status=pendente', sub:`${m.totalPedidosPendentesPeriodo||0} pendentes — não somam` },
     { label:'Ticket Médio',       valor:m.ticketMedio||0,      moeda:true,  variacao:var_.ticketMedio,Icon:BarChart3,   bg:'#fef9c3', fg:'#ca8a04' },
-    { label:'Total de Pedidos',   valor:m.totalPedidos||0,     moeda:false, variacao:var_.pedidos,    Icon:ShoppingBag, bg:'#dbeafe', fg:'#2563eb', href:'/adm-a7f9c2b4/pedidos' },
+    { label:'Pedidos Pagos',      valor:m.totalPedidos||0,     moeda:false, variacao:var_.pedidos,    Icon:ShoppingBag, bg:'#dbeafe', fg:'#2563eb', href:'/adm-a7f9c2b4/pedidos' },
     { label:'Clientes',           valor:m.totalClientes||0,    moeda:false, variacao:var_.clientes,   Icon:Users,       bg:'#e8f8f7', fg:DARK, href:'/adm-a7f9c2b4/clientes', sub:`${dados?.clientesPerfil?.novos||0} novos` },
     { label:'Produtos Ativos',    valor:m.produtosAtivos||0,   moeda:false, Icon:Package,  bg:'#e0e7ff', fg:'#4f46e5', href:'/adm-a7f9c2b4/produtos' },
-    { label:'Pedidos Pendentes',  valor:m.pedidosPendentes||0, moeda:false, Icon:Clock,    bg:'#fef3c7', fg:'#d97706', href:'/adm-a7f9c2b4/pedidos?status=PENDENTE' },
     { label:'Pedidos Entregues',  valor:m.pedidosEntregues||0, moeda:false, Icon:CheckCircle, bg:'#d1fae5', fg:'#059669' },
     { label:'Pedidos Enviados',   valor:m.pedidosEnviados||0,  moeda:false, Icon:Truck,    bg:'#ede9fe', fg:'#7c3aed' },
   ] as const
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const grafData = (dados?.vendasPorDia||[]).map((d: any) => ({
-    data: fmtData(d.date), Receita: d.valor||0, Pedidos: d.pedidos||0,
+    data: fmtData(d.date),
+    Receita:       d.valor || 0,
+    EmProcessamento: d.valorPendente || 0,
+    Pedidos:       d.pedidos || 0,
   }))
 
   const semana = dados?.vendasPorDiaSemana || [
@@ -280,12 +288,17 @@ export default function AdminDashboard() {
             <YAxis tick={{ fontSize:11, fill:'#9ca3af' }} tickLine={false} axisLine={false}
               tickFormatter={(v: number) => abaGraf==='receita' ? fmtValor(v).replace('R$ ','') : String(v)} />
             <Tooltip content={<TTip moeda={abaGraf==='receita'} />} />
-            {abaGraf === 'receita'
-              ? <Area type="monotone" dataKey="Receita" stroke={TIFFANY} strokeWidth={2.5}
+            {abaGraf === 'receita' ? (
+              <>
+                <Area type="monotone" dataKey="Receita" name="Receita confirmada" stroke={TIFFANY} strokeWidth={2.5}
                   fill="url(#gR)" dot={false} activeDot={{ r:4, fill:TIFFANY }} />
-              : <Area type="monotone" dataKey="Pedidos" stroke="#2563eb" strokeWidth={2.5}
-                  fill="url(#gP)" dot={false} activeDot={{ r:4, fill:'#2563eb' }} />
-            }
+                <Area type="monotone" dataKey="EmProcessamento" name="Em processamento" stroke="#9ca3af" strokeWidth={1.8}
+                  strokeDasharray="5 4" fill="none" dot={false} />
+              </>
+            ) : (
+              <Area type="monotone" dataKey="Pedidos" stroke="#2563eb" strokeWidth={2.5}
+                fill="url(#gP)" dot={false} activeDot={{ r:4, fill:'#2563eb' }} />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       </div>
