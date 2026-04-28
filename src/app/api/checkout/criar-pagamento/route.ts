@@ -5,6 +5,7 @@ import type { Prisma } from '@prisma/client'
 import { mpPayment } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { isStatusPendente } from '@/lib/pedido-status'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
       { status: 404 },
     )
   }
-  if (pedido.status !== 'pendente') {
+  if (!isStatusPendente(pedido.status)) {
     return NextResponse.json(
       { error: 'Pedido em status inválido' },
       { status: 400 },

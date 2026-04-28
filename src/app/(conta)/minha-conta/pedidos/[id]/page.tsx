@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import LayoutConta from '@/components/conta/LayoutConta'
 import Link from 'next/link'
 import { ArrowLeft, MapPin, Package } from 'lucide-react'
+import { isStatusPendente, getStatusInfo } from '@/lib/pedido-status'
+import BotoesPedidoPendente from '@/components/pedido/BotoesPedidoPendente'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Detalhes do Pedido' }
@@ -15,8 +17,7 @@ function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
 
-const STATUS_LABEL: Record<string, string> = { pendente: 'Pendente', pago: 'Pago', enviado: 'Enviado', entregue: 'Entregue', cancelado: 'Cancelado' }
-const STATUS_COLOR: Record<string, string> = { pendente: 'bg-amber-50 text-amber-700', pago: 'bg-blue-50 text-blue-700', enviado: 'bg-purple-50 text-purple-700', entregue: 'bg-green-50 text-green-700', cancelado: 'bg-gray-100 text-gray-500' }
+const JANELA_CANCELAMENTO_HORAS = 48
 
 export default async function PedidoDetalhePage({ params }: { params: Promise<Params> }) {
   const { id } = await params
@@ -33,6 +34,11 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
 
   if (!pedido) notFound()
 
+  const pendente   = isStatusPendente(pedido.status)
+  const horasDesde = (Date.now() - pedido.createdAt.getTime()) / 36e5
+  const dentroJanela = horasDesde < JANELA_CANCELAMENTO_HORAS
+  const statusInfo = getStatusInfo(pedido.status)
+
   return (
     <LayoutConta>
       <div className="space-y-5">
@@ -46,8 +52,8 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
               <h1 className="font-extrabold text-gray-900 text-lg">Pedido #{pedido.id.slice(-8).toUpperCase()}</h1>
               <p className="text-xs text-gray-400 mt-0.5">{new Date(pedido.createdAt).toLocaleString('pt-BR')}</p>
             </div>
-            <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${STATUS_COLOR[pedido.status] ?? 'bg-gray-100 text-gray-500'}`}>
-              {STATUS_LABEL[pedido.status] ?? pedido.status}
+            <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${statusInfo.bg} ${statusInfo.color}`}>
+              {statusInfo.label}
             </span>
           </div>
           {pedido.codigoRastreio && (
@@ -56,6 +62,10 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
             </div>
           )}
         </div>
+
+        {pendente && (
+          <BotoesPedidoPendente pedidoId={pedido.id} podeCancelar={dentroJanela} />
+        )}
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-50">

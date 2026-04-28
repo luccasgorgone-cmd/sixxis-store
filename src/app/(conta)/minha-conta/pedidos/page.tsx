@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import LayoutConta from '@/components/conta/LayoutConta'
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
+import { getStatusInfo } from '@/lib/pedido-status'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Meus Pedidos' }
@@ -12,9 +13,6 @@ export const metadata: Metadata = { title: 'Meus Pedidos' }
 function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
-
-const STATUS_LABEL: Record<string, string> = { pendente: 'Pendente', pago: 'Pago', enviado: 'Enviado', entregue: 'Entregue', cancelado: 'Cancelado' }
-const STATUS_COLOR: Record<string, string> = { pendente: 'bg-amber-50 text-amber-700', pago: 'bg-blue-50 text-blue-700', enviado: 'bg-purple-50 text-purple-700', entregue: 'bg-green-50 text-green-700', cancelado: 'bg-gray-100 text-gray-500' }
 
 export default async function PedidosPage() {
   const session = await auth()
@@ -62,9 +60,14 @@ export default async function PedidosPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLOR[p.status] ?? 'bg-gray-100 text-gray-500'}`}>
-                    {STATUS_LABEL[p.status] ?? p.status}
-                  </span>
+                  {(() => {
+                    const info = getStatusInfo(p.status)
+                    return (
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${info.bg} ${info.color}`}>
+                        {info.label}
+                      </span>
+                    )
+                  })()}
                   <span className="text-sm font-extrabold text-gray-900">R$ {fmt(Number(p.total))}</span>
                 </div>
               </Link>
