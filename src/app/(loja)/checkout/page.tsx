@@ -4,6 +4,9 @@ import { Suspense, useState, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
+import {
+  type TipoCupom, descricaoCupom, calcularDescontoCupom,
+} from '@/lib/preco-cupom'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -186,74 +189,77 @@ interface ResumoProps {
 
 function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFinal, totalGarantias = 0 }: ResumoProps) {
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden border-l-4 border-l-[#3cbfb3]">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>
-          <p className="font-extrabold text-gray-900 text-sm">Resumo</p>
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Resumo do pedido</p>
           <p className="text-xs text-gray-400 mt-0.5">{itens.length} {itens.length === 1 ? 'item' : 'itens'}</p>
         </div>
-        <Package size={16} className="text-gray-300" />
+        <Package size={18} className="text-gray-300" />
       </div>
 
-      <div className="p-4 space-y-3 max-h-52 overflow-y-auto">
+      <div className="p-4 space-y-1 max-h-72 overflow-y-auto">
         {itens.map(item => (
-          <div key={item.produtoId + (item.variacaoId ?? '')} className="flex items-start gap-3">
+          <div key={item.produtoId + (item.variacaoId ?? '')} className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
             {item.imagem ? (
-              <div className="w-11 h-11 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden shrink-0">
-                <Image src={item.imagem} alt={item.nome} width={44} height={44} className="object-contain w-full h-full" />
+              <div className="w-[72px] h-[72px] rounded-lg border border-gray-100 bg-gray-50 overflow-hidden shrink-0">
+                <Image src={item.imagem} alt={item.nome} width={72} height={72} className="object-contain w-full h-full" />
               </div>
             ) : (
-              <div className="w-11 h-11 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
-                <ShoppingBag size={14} className="text-gray-300" />
+              <div className="w-[72px] h-[72px] rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
+                <ShoppingBag size={20} className="text-gray-300" />
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-900 leading-snug line-clamp-2">{item.nome}</p>
-              {item.variacaoNome && <p className="text-[10px] text-gray-400 mt-0.5">{item.variacaoNome}</p>}
-              <p className="text-[10px] text-gray-400">Qtd: {item.quantidade}</p>
+              <p className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{item.nome}</p>
+              {item.variacaoNome && <p className="text-[11px] text-gray-400 mt-0.5">{item.variacaoNome}</p>}
+              <p className="text-[11px] text-gray-400">Qtd: {item.quantidade}</p>
             </div>
-            <p className="text-xs font-bold text-gray-900 shrink-0 pt-0.5">
+            <p className="text-sm font-bold text-gray-900 shrink-0 pt-0.5">
               R$ {moeda(item.preco * item.quantidade)}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="px-5 pb-5 pt-3 space-y-2 border-t border-gray-100">
-        <div className="flex justify-between text-xs text-gray-500">
+      <div className="px-5 pb-3 pt-3 space-y-2 border-t border-gray-100">
+        <div className="flex justify-between text-sm text-gray-600">
           <span>Subtotal</span>
-          <span>R$ {moeda(total)}</span>
+          <span className="font-semibold">R$ {moeda(total)}</span>
         </div>
         {freteSel !== null && (
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-sm text-gray-600">
             <span>Frete</span>
-            <span className={frete === 0 ? 'text-green-600 font-semibold' : ''}>
+            <span className={frete === 0 ? 'text-green-600 font-bold' : 'font-semibold'}>
               {frete === 0 ? 'Grátis' : `R$ ${moeda(frete)}`}
             </span>
           </div>
         )}
         {totalGarantias > 0 && (
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-sm text-gray-600">
             <span>Garantia estendida</span>
-            <span>R$ {moeda(totalGarantias)}</span>
+            <span className="font-semibold">R$ {moeda(totalGarantias)}</span>
           </div>
         )}
         {cupom && (
-          <div className="flex justify-between text-xs text-green-600 font-semibold">
+          <div className="flex justify-between text-sm text-green-600 font-bold">
             <span>Cupom {cupom.codigo}</span>
             <span>-R$ {moeda(desconto)}</span>
           </div>
         )}
-        <div className="flex justify-between font-extrabold text-gray-900 text-sm pt-2.5 border-t border-gray-100">
-          <span>Total</span>
-          <span className="text-[#3cbfb3]">R$ {moeda(totalFinal)}</span>
+      </div>
+
+      <div className="px-5 pb-5">
+        <div className="rounded-xl bg-[#3cbfb3]/5 border border-[#3cbfb3]/20 px-4 py-3 flex justify-between items-baseline">
+          <span className="font-extrabold text-gray-900">Total</span>
+          <span className="text-xl font-black text-[#0f2e2b]">R$ {moeda(totalFinal)}</span>
         </div>
       </div>
 
       <div className="px-5 pb-4 flex items-center justify-between">
-        <span className="flex items-center gap-1 text-gray-300 text-[10px]"><Lock size={9} /> SSL 256-bit</span>
-        <span className="flex items-center gap-1 text-gray-300 text-[10px]"><Shield size={9} /> Compra segura</span>
-        <span className="flex items-center gap-1 text-gray-300 text-[10px]"><Award size={9} /> 100% original</span>
+        <span className="flex items-center gap-1 text-gray-400 text-[10px]"><Lock size={9} /> SSL 256-bit</span>
+        <span className="flex items-center gap-1 text-gray-400 text-[10px]"><Shield size={9} /> Compra segura</span>
+        <span className="flex items-center gap-1 text-gray-400 text-[10px]"><Award size={9} /> 100% original</span>
       </div>
     </div>
   )
@@ -325,6 +331,8 @@ function CheckoutContent() {
   const router = useRouter()
   const compraDireta = searchParams.get('compra_direta') === '1'
   const { itens, limparCarrinho } = useCarrinho()
+  const cupomGlobal = useCarrinho((s) => s.cupomAplicado)
+  const setCupomGlobal = useCarrinho((s) => s.setCupom)
   const total = useTotalCarrinho()
 
   const [etapa, setEtapa] = useState<Etapa>(1)
@@ -343,7 +351,23 @@ function CheckoutContent() {
   const viaCep = useViaCep()
 
   const [cupomInput, setCupomInput] = useState('')
-  const [cupom, setCupom]           = useState<{ codigo: string; desconto: number } | null>(null)
+  // O cupom é compartilhado com /carrinho via Zustand persist. Convertemos
+  // pra forma simples { codigo, desconto } pra preservar contrato local.
+  const cupom = cupomGlobal
+    ? { codigo: cupomGlobal.codigo, desconto: calcularDescontoCupom(cupomGlobal.tipo, cupomGlobal.valor, total) }
+    : null
+  const setCupom = (c: { codigo: string; tipo?: TipoCupom; valor?: number; desconto: number } | null) => {
+    if (!c) { setCupomGlobal(null); return }
+    const tipo = c.tipo ?? 'PERCENTUAL'
+    const valor = c.valor ?? 0
+    setCupomGlobal({
+      codigo: c.codigo,
+      tipo,
+      valor,
+      desconto: c.desconto,
+      descricao: descricaoCupom(tipo, valor),
+    })
+  }
   const [cupomErro, setCupomErro]   = useState('')
   const [cupomLoading, setCupomLoading] = useState(false)
 
@@ -459,7 +483,9 @@ function CheckoutContent() {
       })
       const d = await r.json()
       if (d.valido) {
-        setCupom({ codigo: d.codigo, desconto: d.desconto })
+        const tipo: TipoCupom = d.tipo ?? 'PERCENTUAL'
+        const valor = Number(d.valor) || 0
+        setCupom({ codigo: d.codigo, tipo, valor, desconto: d.desconto })
         setCupomInput('')
       } else {
         setCupomErro(d.erro ?? 'Cupom inválido')
@@ -593,7 +619,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-20">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-20">
       <div className="flex items-center gap-3 mb-8">
         <h1 className="text-xl font-extrabold text-gray-900">Finalizar Compra</h1>
         {compraDireta && (
@@ -603,7 +629,7 @@ function CheckoutContent() {
         )}
       </div>
 
-      <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px] gap-6 items-start">
+      <div className="flex flex-col lg:grid lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_460px] gap-6 items-start">
         <div>
           {fase === 'bricks' ? (
             <>
@@ -819,30 +845,38 @@ function CheckoutContent() {
 
               {etapa === 4 && (
                 <div className="space-y-4">
-                  <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <Tag size={11} /> Cupom de Desconto
-                    </p>
-                    <CupomField
-                      cupom={cupom} cupomInput={cupomInput} setCupomInput={v => { setCupomInput(v); setCupomErro('') }}
-                      cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom}
-                      remover={() => { setCupom(null); setCupomInput('') }}
-                    />
-                  </div>
+                  {/* Card único: Cupom + Forma de Pagamento. Antes eram 2 cards
+                      separados — cliente percebia como 2 ações sem conexão. */}
+                  <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-5">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <Tag size={11} /> Cupom de Desconto
+                      </p>
+                      <CupomField
+                        cupom={cupom} cupomInput={cupomInput} setCupomInput={v => { setCupomInput(v); setCupomErro('') }}
+                        cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom}
+                        remover={() => { setCupom(null); setCupomInput('') }}
+                      />
+                    </div>
 
-                  <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
-                      <CreditCard size={11} /> Forma de Pagamento
-                    </p>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      Você poderá escolher entre <strong className="text-[#0f2e2b]">PIX</strong>,{' '}
-                      <strong className="text-[#0f2e2b]">cartão de crédito</strong> ou{' '}
-                      <strong className="text-[#0f2e2b]">cartão de débito</strong> na próxima etapa, com checkout
-                      transparente e seguro do Mercado Pago.
-                    </p>
-                    <div className="flex items-center gap-3 text-[11px] text-gray-400">
-                      <span className="flex items-center gap-1"><Lock size={10} /> SSL 256-bit</span>
-                      <span className="flex items-center gap-1"><Shield size={10} /> Antifraude MP</span>
+                    <div className="border-t border-gray-100 pt-4 flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ou pague com</span>
+                    </div>
+
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <CreditCard size={11} /> Forma de Pagamento
+                      </p>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Você poderá escolher entre <strong className="text-[#0f2e2b]">PIX</strong>,{' '}
+                        <strong className="text-[#0f2e2b]">cartão de crédito</strong> ou{' '}
+                        <strong className="text-[#0f2e2b]">cartão de débito</strong> na próxima etapa, com checkout
+                        transparente e seguro do Mercado Pago.
+                      </p>
+                      <div className="flex items-center gap-3 text-[11px] text-gray-400">
+                        <span className="flex items-center gap-1"><Lock size={10} /> SSL 256-bit</span>
+                        <span className="flex items-center gap-1"><Shield size={10} /> Antifraude MP</span>
+                      </div>
                     </div>
                   </div>
 

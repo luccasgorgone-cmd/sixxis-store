@@ -4,13 +4,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ShoppingCart, Trash2, Plus, Minus, Tag, ChevronRight,
-  ShieldCheck, Truck, RefreshCw, CreditCard, Zap, Package,
+  ShieldCheck, Truck, Lock, CreditCard, Zap, Package,
   CheckCircle, AlertCircle, X, Star, Clock, BadgeCheck, Headphones
 } from 'lucide-react'
 import {
-  type TipoCupom, type CupomAplicado as CupomDef,
-  descricaoCupom, calcularDescontoCupom, legendaCupomAplicado,
+  type TipoCupom,
+  descricaoCupom, calcularDescontoCupom,
 } from '@/lib/preco-cupom'
+import { useCarrinho } from '@/hooks/useCarrinho'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -70,7 +71,8 @@ export default function CarrinhoPage() {
   const [itens, setItens] = useState<CarrinhoItem[]>([])
   const [carregando, setCarregando] = useState(true)
   const [cupomInput, setCupomInput] = useState('')
-  const [cupomAplicado, setCupomAplicado] = useState<CupomDef | null>(null)
+  const cupomAplicado = useCarrinho((s) => s.cupomAplicado)
+  const setCupomGlobal = useCarrinho((s) => s.setCupom)
   const [cupomErro, setCupomErro] = useState('')
   const [aplicandoCupom, setAplicandoCupom] = useState(false)
   const [cepInput, setCepInput] = useState('')
@@ -180,7 +182,7 @@ export default function CarrinhoPage() {
         const tipo: TipoCupom = data.tipo || 'PERCENTUAL'
         const valor = Number(data.valor) || 0
         const desconto = Number(data.desconto) || calcularDescontoCupom(tipo, valor, subtotal)
-        setCupomAplicado({
+        setCupomGlobal({
           codigo: data.codigo || cupomInput.trim().toUpperCase(),
           tipo,
           valor,
@@ -193,7 +195,7 @@ export default function CarrinhoPage() {
       const c = cupomInput.trim().toUpperCase()
       if (c === 'SIXXIS10') {
         const desconto = calcularDescontoCupom('PERCENTUAL', 10, subtotal)
-        setCupomAplicado({
+        setCupomGlobal({
           codigo: 'SIXXIS10',
           tipo: 'PERCENTUAL',
           valor: 10,
@@ -429,7 +431,7 @@ export default function CarrinhoPage() {
                       <p className="text-xs text-emerald-600">{cupomAplicado.descricao}</p>
                     </div>
                   </div>
-                  <button onClick={() => { setCupomAplicado(null); setCupomInput('') }}
+                  <button onClick={() => { setCupomGlobal(null); setCupomInput('') }}
                     className="text-emerald-400 hover:text-red-500 transition-colors p-1">
                     <X size={15} />
                   </button>
@@ -645,9 +647,9 @@ export default function CarrinhoPage() {
                 {[
                   { icon: ShieldCheck, titulo: '12 meses de garantia',       sub: 'Garantia real e documentada' },
                   { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Grátis acima de R$ 500' },
-                  { icon: RefreshCw,   titulo: 'Troca em 7 dias',            sub: 'Sem burocracia' },
+                  { icon: Lock,        titulo: 'Compra 100% segura',         sub: 'SSL 256-bit + Antifraude' },
                   { icon: CreditCard,  titulo: '6x sem juros',               sub: 'No cartão de crédito' },
-                  { icon: BadgeCheck,  titulo: 'Produto 100% original',      sub: 'Importadora oficial Sixxis' },
+                  { icon: BadgeCheck,  titulo: 'Produto 100% original',      sub: 'Direto da fábrica' },
                   { icon: Headphones,  titulo: 'Suporte especializado',      sub: 'Seg–Sex 8h às 18h' },
                 ].map(({ icon: Icon, titulo, sub }) => (
                   <div key={titulo} className="flex items-start gap-2.5 p-2.5 rounded-xl border border-gray-100 bg-white">

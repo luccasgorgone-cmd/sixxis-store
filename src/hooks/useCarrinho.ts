@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { TipoCupom } from '@/lib/preco-cupom'
 
 export interface ItemCarrinho {
   produtoId:    string
@@ -13,6 +14,17 @@ export interface ItemCarrinho {
   variacaoNome?: string
 }
 
+// Cupom aplicado fica no estado global pra sincronizar /carrinho ↔ /checkout.
+// Antes da Sprint 2C cada página tinha seu próprio state local — cliente
+// aplicava no carrinho e tinha que reaplicar no checkout.
+export interface CupomAplicadoStore {
+  codigo:    string
+  tipo:      TipoCupom
+  valor:     number  // parâmetro do cupom (10 = 10%, 50 = R$50)
+  desconto:  number  // já calculado em reais
+  descricao: string
+}
+
 function itemKey(produtoId: string, variacaoId?: string) {
   return produtoId + '::' + (variacaoId ?? '')
 }
@@ -20,11 +32,13 @@ function itemKey(produtoId: string, variacaoId?: string) {
 interface CarrinhoStore {
   itens: ItemCarrinho[]
   drawerAberto: boolean
+  cupomAplicado: CupomAplicadoStore | null
   setDrawerAberto: (v: boolean) => void
   adicionarItem: (item: ItemCarrinho) => void
   removerItem: (produtoId: string, variacaoId?: string) => void
   atualizarQuantidade: (produtoId: string, quantidade: number, variacaoId?: string) => void
   limparCarrinho: () => void
+  setCupom: (c: CupomAplicadoStore | null) => void
 }
 
 // NOTA: total/totalItens NÃO podem ser getters JS no objeto do store, porque o
@@ -37,7 +51,9 @@ export const useCarrinho = create<CarrinhoStore>()(
     (set, get) => ({
       itens: [],
       drawerAberto: false,
+      cupomAplicado: null,
       setDrawerAberto: (v) => set({ drawerAberto: v }),
+      setCupom: (c) => set({ cupomAplicado: c }),
       adicionarItem(item) {
         const key = itemKey(item.produtoId, item.variacaoId)
         set((state) => {
@@ -77,12 +93,12 @@ export const useCarrinho = create<CarrinhoStore>()(
         }))
       },
       limparCarrinho() {
-        set({ itens: [] })
+        set({ itens: [], cupomAplicado: null })
       },
     }),
     {
       name: 'sixxis-carrinho',
-      partialize: (state) => ({ itens: state.itens }),
+      partialize: (state) => ({ itens: state.itens, cupomAplicado: state.cupomAplicado }),
     },
   ),
 )
