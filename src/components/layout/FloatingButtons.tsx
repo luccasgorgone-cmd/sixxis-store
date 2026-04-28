@@ -138,11 +138,16 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
   const ocultarPorFooter = footerVisivel ? 'opacity-0 pointer-events-none' : 'opacity-100'
   const atenuadoFluxo = desativado ? 'opacity-30 pointer-events-none' : ''
 
+  // Em rotas com bottom-sheet sticky (carrinho/checkout), o avatar precisa
+  // subir para não sobrepor o CTA "Finalizar Compra".
+  const temBottomSheet = pathname.startsWith('/carrinho') || pathname.startsWith('/checkout')
+  const bottomBase = temBottomSheet ? 'calc(160px + env(safe-area-inset-bottom, 0px))' : '24px'
+
   return (
     <>
       <div
-        className={`fixed bottom-6 z-[999] flex flex-col-reverse items-end gap-3 transition-opacity duration-300 ${ocultarPorFooter} ${atenuadoFluxo}`}
-        style={containerStyle}
+        className={`fixed z-[999] flex flex-col-reverse items-end gap-3 transition-all duration-300 ${ocultarPorFooter} ${atenuadoFluxo}`}
+        style={{ ...containerStyle, bottom: bottomBase }}
       >
         {!oculto.wa && (
           <WhatsAppBotao onOcultar={() => ocultarBotao('wa')} />

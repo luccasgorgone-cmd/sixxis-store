@@ -7,6 +7,10 @@ import {
   ShieldCheck, Truck, RefreshCw, CreditCard, Zap, Package,
   CheckCircle, AlertCircle, X, Star, Clock, BadgeCheck, Headphones
 } from 'lucide-react'
+import {
+  type TipoCupom, type CupomAplicado as CupomDef,
+  descricaoCupom, calcularDescontoCupom, legendaCupomAplicado,
+} from '@/lib/preco-cupom'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -66,9 +70,7 @@ export default function CarrinhoPage() {
   const [itens, setItens] = useState<CarrinhoItem[]>([])
   const [carregando, setCarregando] = useState(true)
   const [cupomInput, setCupomInput] = useState('')
-  const [cupomAplicado, setCupomAplicado] = useState<{
-    codigo: string; tipo: 'percentual' | 'fixo'; valor: number; descricao: string
-  } | null>(null)
+  const [cupomAplicado, setCupomAplicado] = useState<CupomDef | null>(null)
   const [cupomErro, setCupomErro] = useState('')
   const [aplicandoCupom, setAplicandoCupom] = useState(false)
   const [cepInput, setCepInput] = useState('')
@@ -172,22 +174,32 @@ export default function CarrinhoPage() {
         })
       })
       const data = await res.json()
-      if (!res.ok || data.error) {
-        setCupomErro(data.error || 'Cupom inválido ou expirado.')
+      if (!res.ok || data.error || data.valido === false) {
+        setCupomErro(data.error || data.erro || 'Cupom inválido ou expirado.')
       } else {
+        const tipo: TipoCupom = data.tipo || 'PERCENTUAL'
+        const valor = Number(data.valor) || 0
+        const desconto = Number(data.desconto) || calcularDescontoCupom(tipo, valor, subtotal)
         setCupomAplicado({
           codigo: data.codigo || cupomInput.trim().toUpperCase(),
-          tipo: data.tipo || 'percentual',
-          valor: data.desconto || data.valor || 10,
-          descricao: data.descricao || `${data.desconto || data.valor}% de desconto`
+          tipo,
+          valor,
+          desconto,
+          descricao: descricaoCupom(tipo, valor),
         })
         setCupomErro('')
       }
     } catch {
-      // Fallback offline para SIXXIS10
       const c = cupomInput.trim().toUpperCase()
       if (c === 'SIXXIS10') {
-        setCupomAplicado({ codigo: 'SIXXIS10', tipo: 'percentual', valor: 10, descricao: '10% OFF na primeira compra' })
+        const desconto = calcularDescontoCupom('PERCENTUAL', 10, subtotal)
+        setCupomAplicado({
+          codigo: 'SIXXIS10',
+          tipo: 'PERCENTUAL',
+          valor: 10,
+          desconto,
+          descricao: '10% OFF na primeira compra',
+        })
         setCupomErro('')
       } else {
         setCupomErro('Cupom inválido ou expirado.')
@@ -226,9 +238,7 @@ export default function CarrinhoPage() {
     (s, i) => s + (i.precoPromocional ?? i.preco) * i.quantidade, 0
   )
   const descontoCupom = cupomAplicado
-    ? cupomAplicado.tipo === 'percentual'
-      ? subtotal * (cupomAplicado.valor / 100)
-      : Math.min(cupomAplicado.valor, subtotal)
+    ? calcularDescontoCupom(cupomAplicado.tipo, cupomAplicado.valor, subtotal)
     : 0
   const valorFrete = freteSelecionado?.preco ?? 0
   const totalFinal = subtotal - descontoCupom + valorFrete
