@@ -55,6 +55,11 @@ export default async function EditarProdutoPage({
               return JSON.parse(raw as string) as Record<string, string[]>
             } catch { return null }
           })(),
+          garantiaFabricaMeses: String(produto.garantiaFabricaMeses ?? 12),
+          garantiaEstendida12Preco: produto.garantiaEstendida12Preco != null
+            ? String(produto.garantiaEstendida12Preco) : '',
+          garantiaEstendida24Preco: produto.garantiaEstendida24Preco != null
+            ? String(produto.garantiaEstendida24Preco) : '',
         }}
       />
       <AvaliacoesAdminProduto produtoId={produto.id} />

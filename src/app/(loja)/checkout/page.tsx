@@ -12,13 +12,21 @@ import {
   User, MapPin, ChevronRight, Package, Star,
 } from 'lucide-react'
 import { type ItemCarrinho } from '@/hooks/useCarrinho'
+import GarantiaEstendidaStep, { type SelecaoGarantia } from '@/components/checkout/GarantiaEstendidaStep'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Etapa = 1 | 2 | 3
+type Etapa = 1 | 2 | 3 | 4
 type Fase = 'checkout' | 'bricks' | 'sucesso'
+
+interface ProdutoGarantiaInfo {
+  id: string
+  garantiaFabricaMeses: number
+  garantiaEstendida12Preco: number | string | null
+  garantiaEstendida24Preco: number | string | null
+}
 
 interface OpcaoFrete {
   name:          string
@@ -105,13 +113,22 @@ function Campo({
 
 // ─── StepIndicator ────────────────────────────────────────────────────────────
 
-const ETAPAS = [
+const ETAPAS_FULL = [
   { n: 1 as Etapa, label: 'Identificação', icon: User },
   { n: 2 as Etapa, label: 'Entrega',       icon: MapPin },
-  { n: 3 as Etapa, label: 'Pagamento',     icon: CreditCard },
+  { n: 3 as Etapa, label: 'Garantia',      icon: Shield },
+  { n: 4 as Etapa, label: 'Pagamento',     icon: CreditCard },
+]
+const ETAPAS_SEM_GARANTIA = [
+  { n: 1 as Etapa, label: 'Identificação', icon: User },
+  { n: 2 as Etapa, label: 'Entrega',       icon: MapPin },
+  { n: 4 as Etapa, label: 'Pagamento',     icon: CreditCard },
 ]
 
-function StepIndicator({ etapa, onBack }: { etapa: Etapa; onBack?: () => void }) {
+function StepIndicator({
+  etapa, onBack, mostrarGarantia,
+}: { etapa: Etapa; onBack?: () => void; mostrarGarantia: boolean }) {
+  const ETAPAS = mostrarGarantia ? ETAPAS_FULL : ETAPAS_SEM_GARANTIA
   return (
     <div className="flex items-center gap-0 mb-8">
       {ETAPAS.map((e, idx) => {
@@ -162,9 +179,10 @@ interface ResumoProps {
   desconto:    number
   cupom:       { codigo: string; desconto: number } | null
   totalFinal:  number
+  totalGarantias?: number
 }
 
-function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFinal }: ResumoProps) {
+function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFinal, totalGarantias = 0 }: ResumoProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -210,6 +228,12 @@ function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFi
             <span className={frete === 0 ? 'text-green-600 font-semibold' : ''}>
               {frete === 0 ? 'Grátis' : `R$ ${moeda(frete)}`}
             </span>
+          </div>
+        )}
+        {totalGarantias > 0 && (
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Garantia estendida</span>
+            <span>R$ {moeda(totalGarantias)}</span>
           </div>
         )}
         {cupom && (
@@ -323,9 +347,41 @@ function CheckoutContent() {
   const [erro, setErro]             = useState('')
   const [pedidoId, setPedidoId]     = useState<string | null>(null)
 
+  // Garantia estendida — opcional por item
+  const [garantiaSelecao, setGarantiaSelecao] = useState<SelecaoGarantia>({})
+  const [garantiaInfo, setGarantiaInfo]       = useState<Record<string, ProdutoGarantiaInfo>>({})
+
+  // Verifica quais produtos do carrinho oferecem garantia. Se nenhum oferecer,
+  // a etapa 3 é pulada automaticamente.
+  useEffect(() => {
+    if (itens.length === 0) { setGarantiaInfo({}); return }
+    const ids = [...new Set(itens.map((i) => i.produtoId))].join(',')
+    if (!ids) return
+    fetch(`/api/produtos/garantia-info?ids=${ids}`, { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        const map: Record<string, ProdutoGarantiaInfo> = {}
+        for (const p of (d.produtos ?? []) as ProdutoGarantiaInfo[]) map[p.id] = p
+        setGarantiaInfo(map)
+      })
+      .catch(() => {})
+  }, [itens])
+
+  const temGarantiaDisponivel = Object.values(garantiaInfo).some(
+    (p) => p.garantiaEstendida12Preco != null || p.garantiaEstendida24Preco != null,
+  )
+
+  const totalGarantias = Object.entries(garantiaSelecao).reduce((acc, [pid, meses]) => {
+    if (meses === 0) return acc
+    const p = garantiaInfo[pid]
+    if (!p) return acc
+    const preco = meses === 12 ? p.garantiaEstendida12Preco : p.garantiaEstendida24Preco
+    return acc + Number(preco ?? 0)
+  }, 0)
+
   const frete       = freteSel ?? 0
   const desconto    = cupom?.desconto ?? 0
-  const totalFinal  = Math.max(0, total + frete - desconto)
+  const totalFinal  = Math.max(0, total + frete + totalGarantias - desconto)
 
   const buscarCep = useCallback(async (cepRaw: string) => {
     const cepLimpo = cepRaw.replace(/\D/g, '')
@@ -394,7 +450,10 @@ function CheckoutContent() {
         setErro('Selecione uma opção de frete.')
         return
       }
-      setEtapa(3)
+      // Pula etapa 3 (Garantia) se nenhum produto oferece — vai direto pra Pagamento.
+      setEtapa(temGarantiaDisponivel ? 3 : 4)
+    } else if (etapa === 3) {
+      setEtapa(4)
     }
   }
 
@@ -409,6 +468,15 @@ function CheckoutContent() {
       })
       if (!er.ok) throw new Error('Erro ao salvar endereço')
       const { enderecoId } = await er.json()
+
+      const garantiasPayload = Object.entries(garantiaSelecao)
+        .filter(([, meses]) => meses === 12 || meses === 24)
+        .map(([produtoId, meses]) => ({
+          produtoId,
+          mesesAdicionais: meses as 12 | 24,
+          // valor é validado/sobrescrito no servidor — passa 0 só pra cumprir schema
+          valorPago: 0,
+        }))
 
       const pr = await fetch('/api/pedidos', {
         method:  'POST',
@@ -425,6 +493,7 @@ function CheckoutContent() {
           })),
           cupomCodigo: cupom?.codigo,
           desconto:    cupom?.desconto ?? 0,
+          garantias:   garantiasPayload.length > 0 ? garantiasPayload : undefined,
         }),
       })
       if (!pr.ok) {
@@ -476,6 +545,7 @@ function CheckoutContent() {
 
   const resumoProps: ResumoProps = {
     itens, total, frete, freteSel, desconto, cupom, totalFinal,
+    totalGarantias,
   }
 
   return (
@@ -521,7 +591,15 @@ function CheckoutContent() {
             </>
           ) : (
             <>
-              <StepIndicator etapa={etapa} onBack={etapa > 1 ? () => setEtapa((etapa - 1) as Etapa) : undefined} />
+              <StepIndicator
+                etapa={etapa}
+                mostrarGarantia={temGarantiaDisponivel}
+                onBack={etapa > 1 ? () => {
+                  // Voltar respeita o pulo da etapa 3 quando não há garantia
+                  if (etapa === 4 && !temGarantiaDisponivel) setEtapa(2)
+                  else setEtapa((etapa - 1) as Etapa)
+                } : undefined}
+              />
 
               {etapa === 1 && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-5">
@@ -651,12 +729,34 @@ function CheckoutContent() {
                     onClick={proximaEtapa}
                     className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
                   >
-                    Continuar para Pagamento <ChevronRight size={15} />
+                    Continuar para {temGarantiaDisponivel ? 'Garantia' : 'Pagamento'} <ChevronRight size={15} />
                   </button>
                 </div>
               )}
 
               {etapa === 3 && (
+                <div className="space-y-4">
+                  <GarantiaEstendidaStep
+                    itens={itens.map((i) => ({
+                      produtoId: i.produtoId,
+                      nome: i.nome + (i.variacaoNome ? ` — ${i.variacaoNome}` : ''),
+                      imagem: i.imagem,
+                      quantidade: i.quantidade,
+                    }))}
+                    selecao={garantiaSelecao}
+                    onChange={setGarantiaSelecao}
+                  />
+                  <button
+                    type="button"
+                    onClick={proximaEtapa}
+                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
+                  >
+                    Continuar para Pagamento <ChevronRight size={15} />
+                  </button>
+                </div>
+              )}
+
+              {etapa === 4 && (
                 <div className="space-y-4">
                   <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">

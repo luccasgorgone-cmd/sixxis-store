@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import {
-  LayoutDashboard, ShoppingBag, Gift, User, MapPin, Shield,
+  LayoutDashboard, ShoppingBag, Gift, User, MapPin, Shield, ShieldCheck,
 } from 'lucide-react'
 import { AvatarComArco } from '@/components/ui/AvatarComArco'
 import { IconeNivel } from '@/components/ui/NivelIcons'
@@ -15,6 +15,7 @@ const MENU_ITENS = [
   { href: '/minha-conta',           label: 'Dashboard', icone: LayoutDashboard, exact: true },
   { href: '/minha-conta/pedidos',   label: 'Pedidos',   icone: ShoppingBag },
   { href: '/minha-conta/cashback',  label: 'Cashback',  icone: Gift },
+  { href: '/minha-conta/garantias', label: 'Garantias', icone: ShieldCheck },
   { href: '/minha-conta/perfil',    label: 'Perfil',    icone: User },
   { href: '/minha-conta/enderecos', label: 'Endereços', icone: MapPin },
   { href: '/minha-conta/seguranca', label: 'Segurança', icone: Shield },

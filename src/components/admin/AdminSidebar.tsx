@@ -9,7 +9,7 @@ import {
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, ShieldOff,
   Target, MessageSquare, Clock, Bot, UserCog, History,
-  CreditCard,
+  CreditCard, ShieldCheck,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -33,6 +33,7 @@ const NAV_GROUPS = [
       { href: '/adm-a7f9c2b4/pedidos',    label: 'Pedidos',        icon: ShoppingBag, exact: false },
       { href: '/adm-a7f9c2b4/pagamentos', label: 'Pagamentos',     icon: CreditCard,  exact: false },
       { href: '/adm-a7f9c2b4/cupons',     label: 'Cupons',         icon: Tag,         exact: false },
+      { href: '/adm-a7f9c2b4/garantias',  label: 'Garantias',      icon: ShieldCheck, exact: false },
       { href: '/adm-a7f9c2b4/clientes',  label: 'Clientes',       icon: Users,       exact: false },
       { href: '/adm-a7f9c2b4/bloqueios', label: 'Bloqueios',      icon: ShieldOff,   exact: false },
     ],

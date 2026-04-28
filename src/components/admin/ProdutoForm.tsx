@@ -36,6 +36,9 @@ interface ProdutoFormData {
   estoque: string
   ativo: boolean
   videoUrl: string
+  garantiaFabricaMeses: string
+  garantiaEstendida12Preco: string
+  garantiaEstendida24Preco: string
 }
 
 export interface EspecificacaoRow { label: string; valor: string }
@@ -50,6 +53,9 @@ interface ProdutoFormProps {
     especificacoes?: EspecificacaoRow[] | null
     faqs?: FaqRow[] | null
     imagensPorVariacao?: Record<string, string[]> | null
+    garantiaFabricaMeses?: string
+    garantiaEstendida12Preco?: string
+    garantiaEstendida24Preco?: string
   }
   produtoId?: string
   mode: 'novo' | 'editar'
@@ -91,6 +97,9 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     estoque: initialData?.estoque ?? '0',
     ativo: initialData?.ativo !== false,
     videoUrl: initialData?.videoUrl ?? '',
+    garantiaFabricaMeses: initialData?.garantiaFabricaMeses ?? '12',
+    garantiaEstendida12Preco: initialData?.garantiaEstendida12Preco ?? '',
+    garantiaEstendida24Preco: initialData?.garantiaEstendida24Preco ?? '',
   })
 
   // Especificações e FAQs como JSON editável
@@ -310,6 +319,13 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
       especificacoes: especificacoesParsed,
       faqs: faqsParsed,
       imagensPorVariacao: temVariacoesCor ? imagensPorVariacao : null,
+      garantiaFabricaMeses: Number(form.garantiaFabricaMeses) || 12,
+      garantiaEstendida12Preco: form.garantiaEstendida12Preco
+        ? Number(form.garantiaEstendida12Preco)
+        : null,
+      garantiaEstendida24Preco: form.garantiaEstendida24Preco
+        ? Number(form.garantiaEstendida24Preco)
+        : null,
     }
 
     const url = mode === 'novo' ? '/api/admin/produtos' : `/api/admin/produtos/${produtoId}`
@@ -1020,6 +1036,102 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
               placeholder={'[\n  {\n    "pergunta": "Qual a voltagem?",\n    "resposta": "Bivolt 110V/220V."\n  }\n]'}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] resize-none"
             />
+          </div>
+
+          {/* Garantia */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wider">
+              Garantia
+            </h2>
+            <p className="text-xs text-gray-400 mb-4">
+              Garantia de fábrica + planos opcionais de garantia estendida vendidos no checkout.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Garantia de fábrica (meses)
+                </label>
+                <input
+                  name="garantiaFabricaMeses"
+                  type="number"
+                  min={1}
+                  max={120}
+                  value={form.garantiaFabricaMeses}
+                  onChange={handleChange}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+                <p className="text-xs text-gray-400 mt-1">Padrão 12 meses</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  +12 meses extra (R$)
+                </label>
+                <input
+                  name="garantiaEstendida12Preco"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.garantiaEstendida12Preco}
+                  onChange={handleChange}
+                  placeholder={form.preco ? (Number(form.preco) * 0.12).toFixed(2) : '0,00'}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Vazio = não oferece. Sugestão: 12% do preço
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  +24 meses extra (R$)
+                </label>
+                <input
+                  name="garantiaEstendida24Preco"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.garantiaEstendida24Preco}
+                  onChange={handleChange}
+                  placeholder={form.preco ? (Number(form.preco) * 0.20).toFixed(2) : '0,00'}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Vazio = não oferece. Sugestão: 20% do preço
+                </p>
+              </div>
+            </div>
+
+            {(form.garantiaEstendida12Preco || form.garantiaEstendida24Preco) && (
+              <div className="mt-4 bg-gray-50 rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Pré-visualização do checkout
+                </p>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Sem garantia adicional</span>
+                    <span className="font-bold text-gray-900">R$ 0</span>
+                  </div>
+                  {form.garantiaEstendida12Preco && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">+12 meses extra</span>
+                      <span className="font-bold text-[#3cbfb3]">
+                        R$ {Number(form.garantiaEstendida12Preco).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {form.garantiaEstendida24Preco && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">+24 meses extra</span>
+                      <span className="font-bold text-[#3cbfb3]">
+                        R$ {Number(form.garantiaEstendida24Preco).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
