@@ -1,11 +1,4 @@
-import path from 'path'
-import { config } from 'dotenv'
-config({ path: path.resolve(process.cwd(), '.env.local') })
-import { PrismaMariaDb } from '@prisma/adapter-mariadb'
-import { PrismaClient } from '@prisma/client'
-
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL!)
-const prisma  = new PrismaClient({ adapter })
+import { prisma } from './_db'
 
 async function main() {
   await prisma.cupom.upsert({

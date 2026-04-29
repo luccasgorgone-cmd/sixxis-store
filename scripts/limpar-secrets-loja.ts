@@ -8,16 +8,8 @@
 //
 // Sempre rode com backup do banco feito previamente.
 
-import path from 'path'
-import { config } from 'dotenv'
-config({ path: path.resolve(process.cwd(), '.env.local') })
-
-import { PrismaMariaDb } from '@prisma/adapter-mariadb'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from './_db'
 import { isSecretKey } from '../src/lib/config-secrets'
-
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL!)
-const prisma  = new PrismaClient({ adapter })
 
 const DRY = process.argv.includes('--dry')
 
