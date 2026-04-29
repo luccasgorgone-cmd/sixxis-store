@@ -813,3 +813,19 @@ main {
 .safe-bottom-fab {
   bottom: max(1.5rem, env(safe-area-inset-bottom));
 }
+
+/* ── FAB position: acima da bottom nav (56px) em mobile, sem ela em desktop */
+.fab-position-default {
+  /* Mobile: 56px (h-14 da BottomNavMobile) + 16px gap + safe-area */
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 768px) {
+  .fab-position-default {
+    /* Desktop: bottom-nav escondido, volta pro padrão */
+    bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+  }
+}
+/* Em rotas com sticky bottom-sheet (carrinho/checkout), o FAB sobe ainda mais */
+.fab-position-bottomsheet {
+  bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+}
