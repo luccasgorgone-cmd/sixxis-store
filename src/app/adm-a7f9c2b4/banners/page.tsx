@@ -65,6 +65,7 @@ export default function AdminBannersPage() {
 
   async function handleSalvar() {
     if (!form.imagem) { showToast('Adicione uma imagem', 'error'); return }
+    if (!form.titulo?.trim()) { showToast('Adicione um título descritivo', 'error'); return }
     setSaving(true)
     const r = await fetch('/api/admin/banners', {
       method:  'POST',
