@@ -18,6 +18,7 @@ interface Props {
   payerNome?: string
   payerCpf?: string
   onSucesso: () => void
+  onMetodoSelecionado?: (metodo: string) => void
 }
 
 interface PixState {
@@ -45,6 +46,7 @@ export default function CheckoutBricks({
   payerNome,
   payerCpf,
   onSucesso,
+  onMetodoSelecionado,
 }: Props) {
   const [publicKey, setPublicKey] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
@@ -161,6 +163,10 @@ export default function CheckoutBricks({
                 !isPix &&
                 Boolean(formData.token) &&
                 Boolean(formData.payment_method_id)
+
+              if (onMetodoSelecionado) {
+                onMetodoSelecionado(isPix ? 'pix' : isCard ? 'credit_card' : (formData.payment_method_id ?? 'unknown'))
+              }
 
               const body = isPix
                 ? {

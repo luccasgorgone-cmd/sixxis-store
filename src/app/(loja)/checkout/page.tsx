@@ -18,6 +18,7 @@ import { type ItemCarrinho } from '@/hooks/useCarrinho'
 import GarantiaEstendidaStep, { type SelecaoGarantia } from '@/components/checkout/GarantiaEstendidaStep'
 import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/EnderecosSalvos'
 import { useViaCep } from '@/hooks/useViaCep'
+import { trackAddPaymentInfo } from '@/lib/analytics/events'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 
@@ -652,6 +653,21 @@ function CheckoutContent() {
                   payerEmail={ident.email}
                   payerNome={ident.nome}
                   payerCpf={ident.cpf}
+                  onMetodoSelecionado={(metodo) => {
+                    trackAddPaymentInfo(
+                      itens.map(i => ({
+                        item_id: i.produtoId,
+                        item_name: i.nome,
+                        item_brand: 'Sixxis',
+                        price: i.preco,
+                        quantity: i.quantidade,
+                        variant: i.variacaoNome,
+                      })),
+                      totalFinal,
+                      metodo,
+                      cupom?.codigo,
+                    )
+                  }}
                   onSucesso={() => {
                     limparCarrinho()
                     router.push(`/pedido/${pedidoId}/sucesso`)
