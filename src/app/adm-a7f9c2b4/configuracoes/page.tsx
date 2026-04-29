@@ -330,6 +330,21 @@ function MaskedInput({
   )
 }
 
+// Substitui campos de senha/token sensíveis. Esses valores vivem em variáveis
+// de ambiente (Railway), nunca no banco da loja.
+function EnvVarHint({ envVar }: { envVar: string }) {
+  return (
+    <div className="border border-amber-200 bg-amber-50 rounded-xl px-4 py-3 text-xs text-amber-800 flex items-center gap-2">
+      <Shield className="w-4 h-4 shrink-0" />
+      <span>
+        Configurado via variável de ambiente{' '}
+        <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono">{envVar}</code> no
+        Railway (não editável pelo painel por segurança).
+      </span>
+    </div>
+  )
+}
+
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -1064,49 +1079,32 @@ export default function ConfiguracoesPage() {
 
   function renderIntegracoes() {
     const keys = [
-      'mp_access_token', 'mp_public_key', 'melhorenvio_token',
-      'focusnfe_token', 'focusnfe_env',
+      'focusnfe_env',
       'social_whatsapp', 'social_whatsapp_suporte', 'social_instagram', 'social_facebook',
     ]
     return (
       <div className="space-y-5">
         <Card title="Mercado Pago">
           <div className="space-y-4">
-            <Field label="Access Token" hint="Chave privada — nunca compartilhe">
-              <MaskedInput
-                value={configs.mp_access_token}
-                onChange={(v) => set('mp_access_token', v)}
-                placeholder="APP_USR-..."
-              />
+            <Field label="Access Token">
+              <EnvVarHint envVar="MP_ACCESS_TOKEN" />
             </Field>
-            <Field label="Public Key" hint="Chave pública — usada no checkout">
-              <MaskedInput
-                value={configs.mp_public_key}
-                onChange={(v) => set('mp_public_key', v)}
-                placeholder="APP_USR-..."
-              />
+            <Field label="Public Key">
+              <EnvVarHint envVar="MP_PUBLIC_KEY" />
             </Field>
           </div>
         </Card>
 
         <Card title="Melhor Envio">
-          <Field label="Token de acesso" hint="Gerado no painel Melhor Envio">
-            <MaskedInput
-              value={configs.melhorenvio_token}
-              onChange={(v) => set('melhorenvio_token', v)}
-              placeholder="eyJ..."
-            />
+          <Field label="Token de acesso">
+            <EnvVarHint envVar="MELHORENVIO_TOKEN" />
           </Field>
         </Card>
 
         <Card title="Focus NF-e">
           <div className="space-y-4">
-            <Field label="Token" hint="Token de autenticação Focus NF-e">
-              <MaskedInput
-                value={configs.focusnfe_token}
-                onChange={(v) => set('focusnfe_token', v)}
-                placeholder="seu_token_focus"
-              />
+            <Field label="Token">
+              <EnvVarHint envVar="FOCUSNFE_TOKEN" />
             </Field>
             <Field label="Ambiente">
               <select
@@ -1259,11 +1257,11 @@ export default function ConfiguracoesPage() {
 
   function renderTransportadoras() {
     const keys = [
-      'melhorenvio_sandbox_token','melhorenvio_prod_token','melhorenvio_ambiente',
+      'melhorenvio_ambiente',
       'melhorenvio_cep_origem','pacote_altura','pacote_largura','pacote_comprimento','pacote_peso',
       'correios_ativo','correios_contrato','correios_pac','correios_sedex','correios_sedex10',
-      'jadlog_ativo','jadlog_token','jadlog_contrato',
-      'totalexpress_ativo','totalexpress_token',
+      'jadlog_ativo','jadlog_contrato',
+      'totalexpress_ativo',
       'prazo_adicional','peso_divisor','frete_gratis_estados',
     ]
     const estadosSelecionados: string[] = (() => { try { return JSON.parse(configs.frete_gratis_estados || '[]') } catch { return [] } })()
@@ -1290,10 +1288,10 @@ export default function ConfiguracoesPage() {
               </Field>
             </div>
             <Field label="Token Sandbox">
-              <MaskedInput value={configs.melhorenvio_sandbox_token} onChange={(v) => set('melhorenvio_sandbox_token', v)} placeholder="eyJ..." />
+              <EnvVarHint envVar="MELHORENVIO_SANDBOX_TOKEN" />
             </Field>
             <Field label="Token Produção">
-              <MaskedInput value={configs.melhorenvio_prod_token} onChange={(v) => set('melhorenvio_prod_token', v)} placeholder="eyJ..." />
+              <EnvVarHint envVar="MELHORENVIO_PROD_TOKEN" />
             </Field>
           </div>
         </Card>
@@ -1332,14 +1330,14 @@ export default function ConfiguracoesPage() {
           <Card title="Jadlog">
             <Toggle checked={configs.jadlog_ativo === 'true'} onChange={(v) => set('jadlog_ativo', v ? 'true' : 'false')} label="Ativar Jadlog" />
             <div className="mt-4 space-y-3">
-              <Field label="Token API"><MaskedInput value={configs.jadlog_token} onChange={(v) => set('jadlog_token', v)} placeholder="Token..." /></Field>
+              <Field label="Token API"><EnvVarHint envVar="JADLOG_TOKEN" /></Field>
               <Field label="Conta / Contrato"><Input value={configs.jadlog_contrato} onChange={(v) => set('jadlog_contrato', v)} /></Field>
             </div>
           </Card>
           <Card title="Total Express">
             <Toggle checked={configs.totalexpress_ativo === 'true'} onChange={(v) => set('totalexpress_ativo', v ? 'true' : 'false')} label="Ativar Total Express" />
             <div className="mt-4">
-              <Field label="Token API"><MaskedInput value={configs.totalexpress_token} onChange={(v) => set('totalexpress_token', v)} placeholder="Token..." /></Field>
+              <Field label="Token API"><EnvVarHint envVar="TOTALEXPRESS_TOKEN" /></Field>
             </div>
           </Card>
         </div>
@@ -1999,7 +1997,7 @@ export default function ConfiguracoesPage() {
       'agente_cor_primaria', 'agente_cor_secundaria',
       'agente_modelo', 'agente_max_tokens', 'agente_temperatura',
       'agente_whatsapp_vendas', 'agente_whatsapp_suporte',
-      'agente_system_prompt', 'anthropic_api_key',
+      'agente_system_prompt',
       'agente_followup_ativo', 'agente_followup_delay_1', 'agente_followup_mensagem_1',
       'agente_followup_delay_2', 'agente_followup_mensagem_2',
       'agente_encerramento_auto', 'agente_mensagem_encerramento',
@@ -2111,15 +2109,8 @@ export default function ConfiguracoesPage() {
         {/* IA */}
         <Card title="Configurações de IA">
           <div className="space-y-4">
-            <Field
-              label="Anthropic API Key"
-              hint="Chave da API Anthropic (sk-ant-...). Pode ser configurada como variável de ambiente ANTHROPIC_API_KEY no Railway."
-            >
-              <MaskedInput
-                value={configs.anthropic_api_key}
-                onChange={(v) => set('anthropic_api_key', v)}
-                placeholder="sk-ant-api03-..."
-              />
+            <Field label="Anthropic API Key">
+              <EnvVarHint envVar="ANTHROPIC_API_KEY" />
             </Field>
 
             <Field label="Modelo de IA" hint="Claude Haiku é mais rápido e econômico; Sonnet é mais preciso">
