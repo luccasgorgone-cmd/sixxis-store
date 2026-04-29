@@ -19,6 +19,7 @@ export const fetchCache = 'force-no-store'
 export const metadata: Metadata = {
   title: { absolute: 'Sixxis Store — Climatizadores, Aspiradores e Spinning' },
   description: 'Loja oficial Sixxis em Araçatuba-SP. Climatizadores, aspiradores e bikes spinning com qualidade premium. Garantia Sixxis, frete para todo o Brasil.',
+  alternates: { canonical: 'https://sixxis-store-production.up.railway.app/' },
 }
 
 export default async function HomePage() {
