@@ -105,7 +105,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     },
     twitter: {
       card: 'summary_large_image',
-      title: produto.nome,
+      title: `${produto.nome}${preco > 0 ? ` — R$ ${preco.toLocaleString('pt-BR')}` : ''}`,
       description: descSEO,
       images: imagemPrincipal ? [imagemPrincipal] : [],
     },

@@ -64,8 +64,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sixxis Store — Climatizadores e Aspiradores',
-    description: 'Loja oficial Sixxis. 30 anos de qualidade.',
+    title: 'Sixxis Store — Climatizadores, Aspiradores e Spinning',
+    description: 'Loja oficial Sixxis em Araçatuba-SP. 30 anos de qualidade em climatização.',
     images: ['/og-image.jpg'],
   },
 }
