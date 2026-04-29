@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { trackAddToCart } from '@/lib/analytics/events'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -15,11 +16,20 @@ export default function BotaoAdicionarCarrinho({ produto }: Props) {
   const [adicionado, setAdicionado] = useState(false)
 
   function handleAdicionar() {
+    const preco = Number(produto.precoPromocional ?? produto.preco)
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
-      preco: Number(produto.precoPromocional ?? produto.preco),
+      preco,
       quantidade,
+    })
+    trackAddToCart({
+      item_id: produto.id,
+      item_name: produto.nome,
+      item_category: produto.categoria ?? undefined,
+      item_brand: 'Sixxis',
+      price: preco,
+      quantity: quantidade,
     })
     setAdicionado(true)
     setTimeout(() => setAdicionado(false), 2000)

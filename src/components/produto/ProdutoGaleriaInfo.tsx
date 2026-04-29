@@ -26,6 +26,7 @@ interface Props {
     estoque: number
     temVariacoes: boolean
     imagem?: string
+    categoria?: string | null
   }
   variacoes: Variacao[]
   taxaJuros: number

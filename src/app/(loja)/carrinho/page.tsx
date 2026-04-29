@@ -12,6 +12,7 @@ import {
   descricaoCupom, calcularDescontoCupom,
 } from '@/lib/preco-cupom'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { trackBeginCheckout } from '@/lib/analytics/events'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -247,6 +248,23 @@ export default function CarrinhoPage() {
   const totalPix = totalFinal * 0.97
 
   const totalItens = itens.reduce((s, i) => s + i.quantidade, 0)
+
+  // ── FINALIZAR COMPRA (track + push) ───────────────────────
+  const handleCheckout = () => {
+    trackBeginCheckout(
+      itens.map(i => ({
+        item_id: i.produtoId || i.id,
+        item_name: i.nome,
+        item_brand: 'Sixxis',
+        price: i.precoPromocional ?? i.preco,
+        quantity: i.quantidade,
+        variant: i.variacao,
+      })),
+      totalFinal,
+      cupomAplicado?.codigo,
+    )
+    router.push('/checkout')
+  }
 
   // ── LOADING ───────────────────────────────────────────────
   if (carregando) {
@@ -629,7 +647,7 @@ export default function CarrinhoPage() {
 
               {/* FINALIZAR COMPRA */}
               <button
-                onClick={() => router.push('/checkout')}
+                onClick={handleCheckout}
                 className="w-full py-4 rounded-xl font-black text-base flex items-center
                            justify-center gap-2 transition-all hover:shadow-lg
                            hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] mb-3"
@@ -733,7 +751,7 @@ export default function CarrinhoPage() {
           <span className="text-xl font-black text-gray-900">{fmtBRL(totalFinal)}</span>
         </div>
         <button
-          onClick={() => router.push('/checkout')}
+          onClick={handleCheckout}
           className="w-full py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
           style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}
         >

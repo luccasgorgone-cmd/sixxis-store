@@ -12,6 +12,7 @@ import { EconomiaBloco } from '@/components/produto/EconomiaBloco'
 import { PorQueComprarSixxis } from '@/components/produto/PorQueComprarSixxis'
 import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
+import ViewItemTracker from '@/components/analytics/ViewItemTracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -200,6 +201,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     estoque: produto.estoque,
     temVariacoes: produto.temVariacoes,
     imagem: imagens[0] ?? undefined,
+    categoria: produto.categoria,
   }
 
   const schemaProduct = {
@@ -244,6 +246,15 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   return (
     <div className="min-h-screen bg-white">
       <meta property="og:type" content="product" />
+      <ViewItemTracker
+        produto={{
+          item_id: produto.id,
+          item_name: produto.nome,
+          item_category: produto.categoria ?? undefined,
+          item_brand: 'Sixxis',
+          price: Number(promocional ?? preco),
+        }}
+      />
       <Script
         id={`schema-produto-${produto.slug}`}
         type="application/ld+json"
