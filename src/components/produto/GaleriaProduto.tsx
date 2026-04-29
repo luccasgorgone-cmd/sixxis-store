@@ -111,14 +111,14 @@ export default function GaleriaProduto({ itens, nomeProduto }: Props) {
             <>
               <button
                 onClick={anterior}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-100 rounded-xl p-2 shadow-md transition z-10"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-100 rounded-xl flex items-center justify-center shadow-md transition z-10"
                 aria-label="Imagem anterior"
               >
                 <ChevronLeft size={18} className="text-gray-700" />
               </button>
               <button
                 onClick={proximo}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-100 rounded-xl p-2 shadow-md transition z-10"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-100 rounded-xl flex items-center justify-center shadow-md transition z-10"
                 aria-label="Próxima imagem"
               >
                 <ChevronRight size={18} className="text-gray-700" />
@@ -150,9 +150,25 @@ export default function GaleriaProduto({ itens, nomeProduto }: Props) {
         )}
       </div>
 
-      {/* Thumbnails */}
+      {/* Dots indicator — só mobile (substitui thumbnails) */}
       {itens.length > 1 && (
-        <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex md:hidden justify-center gap-2 mt-2">
+          {itens.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setAtivo(i)}
+              className={`h-2 rounded-full transition-all ${
+                i === ativo ? 'w-6 bg-[#3cbfb3]' : 'w-2 bg-gray-300'
+              }`}
+              aria-label={`Ir para imagem ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Thumbnails — só desktop */}
+      {itens.length > 1 && (
+        <div className="hidden md:flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
           {itens.map((item, i) => (
             <button
               key={i}
