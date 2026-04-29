@@ -1,5 +1,12 @@
-// Templates padrão de email — executar via: npx tsx src/lib/email-templates-seed.ts
-import { prisma } from './prisma'
+// Templates padrão de email — apenas DADOS exportados.
+//
+// O seed efetivo vive em scripts/seed-email-templates.ts (que usa o helper
+// scripts/_db.ts pra normalizar mysql:// → mariadb:// quando rodando local).
+//
+// IMPORTANTE: este arquivo é importado por src/app/adm-a7f9c2b4/emails/page.tsx
+// para listar EMAIL_TEMPLATES no admin. Não pode ter side-effects (chamada
+// de Prisma, console.log, etc.) — senão o `next build` tenta conectar ao
+// DB durante "Collecting page data" e quebra.
 
 const BASE_HEADER = `
   <div style="background:#1a4f4a;padding:32px 40px;text-align:center;">
@@ -288,21 +295,3 @@ export const EMAIL_TEMPLATES = [
   },
 ]
 
-async function seed() {
-  console.log('Seeding email templates...')
-  for (const template of EMAIL_TEMPLATES) {
-    await prisma.emailTemplate.upsert({
-      where: { tipo: template.tipo },
-      update: template,
-      create: template,
-    })
-    console.log(`✓ ${template.tipo}`)
-  }
-  console.log('Done!')
-  await prisma.$disconnect()
-}
-
-seed().catch((e) => {
-  console.error(e)
-  process.exit(1)
-})
