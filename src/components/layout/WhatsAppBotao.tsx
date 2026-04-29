@@ -67,12 +67,12 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
 
       <button
         onClick={() => setAberto(!aberto)}
-        className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${
+        className={`w-11 h-11 md:w-14 md:h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${
           aberto ? 'bg-gray-700 hover:bg-gray-600' : 'bg-[#25D366] hover:bg-[#128C7E] wa-pulse'
         }`}
         aria-label={aberto ? 'Fechar atendimento' : 'Atendimento WhatsApp'}
       >
-        {aberto ? <X size={24} className="text-white" /> : <WaIcon />}
+        {aberto ? <X size={20} className="text-white md:w-6 md:h-6" /> : <WaIcon />}
       </button>
     </div>
   )

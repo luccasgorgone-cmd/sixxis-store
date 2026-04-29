@@ -47,11 +47,9 @@ export default function SpecsExpandiveis({ especificacoes, initialCount = 10 }: 
             }`}
           >
             <dt
-              className="text-[11px] sm:text-[11px] text-gray-500 font-medium uppercase tracking-wide leading-snug sm:shrink-0"
-              style={{ width: 'auto' }}
+              className="text-[11px] text-gray-500 font-medium uppercase tracking-wide leading-snug sm:shrink-0 sm:basis-[48%]"
             >
-              <span className="sm:hidden">{label}</span>
-              <span className="hidden sm:inline" style={{ width: '48%', display: 'inline-block' }}>{label}</span>
+              {label}
             </dt>
             <dd className="text-sm sm:text-[11px] text-gray-900 font-semibold leading-snug sm:flex-1">
               {valor}

@@ -724,14 +724,18 @@ export default function LunaWidget({ onOcultar, discreto = false }: LunaWidgetPr
           <span className={`absolute -top-1 -left-1 z-10 w-3 h-3 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`} />
           <button
             onClick={() => { setAberto(true); setMostrarBolha(false); setNaoLidas(0) }}
-            className="relative w-16 h-16 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none overflow-hidden"
+            className="relative w-12 h-12 md:w-16 md:h-16 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none overflow-hidden"
             style={{
               background: 'linear-gradient(145deg, #0f2e2b, #1a4f4a)',
               boxShadow: '0 8px 32px rgba(60,191,179,0.35), 0 4px 16px rgba(0,0,0,0.4)',
             }}
             aria-label={`Abrir chat com ${config.nome}`}
           >
-            <LunaAvatarSmart config={config} size={64} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="scale-75 md:scale-100">
+                <LunaAvatarSmart config={config} size={64} />
+              </div>
+            </div>
             {naoLidas > 0 && (
               <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
                 {naoLidas > 9 ? '9+' : naoLidas}
