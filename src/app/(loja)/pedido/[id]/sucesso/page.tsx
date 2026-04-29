@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { CheckCircle, Package, ArrowRight, Truck, FileText, Mail } from 'lucide-react'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import PurchaseTracker from '@/components/analytics/PurchaseTracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,7 +47,7 @@ export default async function PedidoSucessoPage({
     where: { id, clienteId: session.user.id },
     include: {
       itens: {
-        include: { produto: { select: { nome: true, imagens: true, slug: true } } },
+        include: { produto: { select: { nome: true, imagens: true, slug: true, categoria: true } } },
       },
       endereco: true,
       pagamentos: { orderBy: { createdAt: 'desc' }, take: 1 },
@@ -64,6 +65,21 @@ export default async function PedidoSucessoPage({
 
   return (
     <main className="min-h-[70vh] px-4 py-12 bg-[#f9fafb]">
+      <PurchaseTracker
+        transactionId={pedido.id}
+        items={pedido.itens.map(i => ({
+          item_id: i.produtoId,
+          item_name: i.produto.nome,
+          item_category: i.produto.categoria ?? undefined,
+          item_brand: 'Sixxis',
+          price: Number(i.precoUnitario),
+          quantity: i.quantidade,
+          variant: i.variacaoNome ?? undefined,
+        }))}
+        total={Number(pedido.total)}
+        frete={Number(pedido.frete)}
+        coupon={pedido.cupomCodigo ?? undefined}
+      />
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 text-center mb-4">
           <div className="w-20 h-20 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-5">
