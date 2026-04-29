@@ -228,6 +228,19 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     }),
   }
 
+  const schemaBreadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início',   item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Produtos', item: `${SITE_URL}/produtos` },
+      ...(produto.categoria
+        ? [{ '@type': 'ListItem', position: 3, name: categoriaLabel, item: `${SITE_URL}/produtos?categoria=${produto.categoria}` }]
+        : []),
+      { '@type': 'ListItem', position: produto.categoria ? 4 : 3, name: produto.nome },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <meta property="og:type" content="product" />
@@ -235,6 +248,11 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         id={`schema-produto-${produto.slug}`}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaProduct) }}
+      />
+      <Script
+        id={`schema-breadcrumb-${produto.slug}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaBreadcrumb) }}
       />
       <RevealInit />
       <Breadcrumb items={[
