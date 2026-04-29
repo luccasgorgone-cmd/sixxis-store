@@ -8,6 +8,7 @@ import EstrelasNota from '@/components/ui/EstrelasNota'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos, useComparador } from '@/hooks/useListas'
 import { useState } from 'react'
+import { trackAddToCart } from '@/lib/analytics/events'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -59,6 +60,14 @@ export default function CardProduto({ produto, priority = false }: Props) {
       quantidade: 1,
       imagem: imagemCapa || undefined,
     })
+    trackAddToCart({
+      item_id: produto.id,
+      item_name: produto.nome,
+      item_category: produto.categoria,
+      item_brand: 'Sixxis',
+      price: precoFinal,
+      quantity: 1,
+    })
     setAdicionado(true)
     setDrawerAberto(true)
     setTimeout(() => setAdicionado(false), 2000)
@@ -74,6 +83,14 @@ export default function CardProduto({ produto, priority = false }: Props) {
       preco: precoFinal,
       quantidade: 1,
       imagem: imagemCapa || undefined,
+    })
+    trackAddToCart({
+      item_id: produto.id,
+      item_name: produto.nome,
+      item_category: produto.categoria,
+      item_brand: 'Sixxis',
+      price: precoFinal,
+      quantity: 1,
     })
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
   }

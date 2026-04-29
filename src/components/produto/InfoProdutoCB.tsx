@@ -11,6 +11,7 @@ import CalcFrete from '@/components/produto/CalcFrete'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos } from '@/hooks/useListas'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
+import { trackAddToCart } from '@/lib/analytics/events'
 
 const SELOS_CONFIANCA = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
@@ -82,6 +83,7 @@ interface Props {
     estoque: number
     temVariacoes: boolean
     imagem?: string
+    categoria?: string | null
   }
   variacoes: Variacao[]
   taxaJuros: number
@@ -189,6 +191,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         variacaoNome: variacaoSelecionada.nome,
       }),
     })
+    trackAddToCart({
+      item_id: produto.id,
+      item_name: produto.nome,
+      item_category: produto.categoria ?? undefined,
+      item_brand: 'Sixxis',
+      price: precoAtual,
+      quantity: quantidade,
+      variant: variacaoSelecionada?.nome,
+    })
     setAdicionado(true)
     setDrawerAberto(true)
     setTimeout(() => setAdicionado(false), 2500)
@@ -210,6 +221,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         variacaoNome: variacaoSelecionada.nome,
       }),
     })
+    trackAddToCart({
+      item_id: produto.id,
+      item_name: produto.nome,
+      item_category: produto.categoria ?? undefined,
+      item_brand: 'Sixxis',
+      price: precoAtual,
+      quantity: quantidade,
+      variant: variacaoSelecionada?.nome,
+    })
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
   }
 
@@ -223,6 +243,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       imagem: produto.imagem,
       variacaoId: v.id,
       variacaoNome: v.nome,
+    })
+    trackAddToCart({
+      item_id: produto.id,
+      item_name: produto.nome,
+      item_category: produto.categoria ?? undefined,
+      item_brand: 'Sixxis',
+      price: preco,
+      quantity: qty,
+      variant: v.nome,
     })
     setModalVariacaoAberto(false)
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
@@ -238,6 +267,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       imagem: produto.imagem,
       variacaoId: v.id,
       variacaoNome: v.nome,
+    })
+    trackAddToCart({
+      item_id: produto.id,
+      item_name: produto.nome,
+      item_category: produto.categoria ?? undefined,
+      item_brand: 'Sixxis',
+      price: preco,
+      quantity: qty,
+      variant: v.nome,
     })
     setModalVariacaoAberto(false)
     setDrawerAberto(true)

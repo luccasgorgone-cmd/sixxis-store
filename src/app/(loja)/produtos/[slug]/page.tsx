@@ -201,6 +201,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     estoque: produto.estoque,
     temVariacoes: produto.temVariacoes,
     imagem: imagens[0] ?? undefined,
+    categoria: produto.categoria,
   }
 
   const schemaProduct = {
