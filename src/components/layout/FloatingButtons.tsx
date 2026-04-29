@@ -138,19 +138,20 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
   const ocultarPorFooter = footerVisivel ? 'opacity-0 pointer-events-none' : 'opacity-100'
   const atenuadoFluxo = desativado ? 'opacity-30 pointer-events-none' : ''
 
-  // Em rotas com bottom-sheet sticky (carrinho/checkout), o avatar precisa
-  // subir para não sobrepor o CTA "Finalizar Compra".
-  // Em todos os casos, respeita o home indicator do iPhone via safe-area-inset.
+  // Posicionamento do FAB:
+  // - default mobile: acima da bottom nav (56px) + safe-area
+  // - default desktop: 1.5rem do bottom (sem bottom nav)
+  // - rotas com sticky bottom-sheet (carrinho/checkout): sobe pra calc(160px + safe-area)
+  // O cálculo desktop/mobile vem de classes CSS em globals.css (media query),
+  // já que inline styles não suportam @media.
   const temBottomSheet = pathname.startsWith('/carrinho') || pathname.startsWith('/checkout')
-  const bottomBase = temBottomSheet
-    ? 'calc(160px + env(safe-area-inset-bottom, 0px))'
-    : 'max(1.5rem, env(safe-area-inset-bottom, 0px))'
+  const fabPositionClass = temBottomSheet ? 'fab-position-bottomsheet' : 'fab-position-default'
 
   return (
     <>
       <div
-        className={`fixed z-[999] flex flex-col-reverse items-end gap-3 transition-all duration-300 ${ocultarPorFooter} ${atenuadoFluxo}`}
-        style={{ ...containerStyle, bottom: bottomBase }}
+        className={`fixed z-[999] flex flex-col-reverse items-end gap-3 transition-all duration-300 ${fabPositionClass} ${ocultarPorFooter} ${atenuadoFluxo}`}
+        style={containerStyle}
       >
         {!oculto.wa && (
           <WhatsAppBotao onOcultar={() => ocultarBotao('wa')} />

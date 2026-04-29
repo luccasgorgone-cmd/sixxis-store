@@ -632,7 +632,7 @@ export default function CarrinhoPage() {
                 onClick={() => router.push('/checkout')}
                 className="w-full py-4 rounded-xl font-black text-base flex items-center
                            justify-center gap-2 transition-all hover:shadow-lg
-                           hover:-translate-y-0.5 active:translate-y-0 mb-3"
+                           hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] mb-3"
                 style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
                 <CreditCard size={18} /> Finalizar compra
               </button>

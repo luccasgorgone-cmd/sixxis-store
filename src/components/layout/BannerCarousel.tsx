@@ -101,7 +101,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
           {banners.length > 1 && (
             <button
               onClick={prev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
               aria-label="Banner anterior"
             >
               <ChevronLeft size={22} />
@@ -112,7 +112,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
           {banners.length > 1 && (
             <button
               onClick={next}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
               aria-label="Próximo banner"
             >
               <ChevronRight size={22} />

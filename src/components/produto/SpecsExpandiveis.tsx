@@ -37,26 +37,28 @@ export default function SpecsExpandiveis({ especificacoes, initialCount = 10 }: 
         </span>
       </div>
 
-      {/* Linhas zebradas */}
-      <div className="overflow-x-auto">
-        <div className="min-w-[280px]">
-          {visiveis.map(({ label, valor }, i) => (
-            <div
-              key={label}
-              className={`flex items-start px-4 py-2.5 border-b border-gray-50 last:border-0 hover:bg-blue-50/20 transition ${
-                i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
-              }`}
+      {/* Linhas zebradas — empilha label+valor em mobile, side-by-side em desktop */}
+      <dl>
+        {visiveis.map(({ label, valor }, i) => (
+          <div
+            key={label}
+            className={`flex flex-col sm:flex-row sm:items-start gap-0.5 sm:gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-blue-50/20 transition ${
+              i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
+            }`}
+          >
+            <dt
+              className="text-[11px] sm:text-[11px] text-gray-500 font-medium uppercase tracking-wide leading-snug sm:shrink-0"
+              style={{ width: 'auto' }}
             >
-              <span className="text-[11px] text-gray-500 font-medium shrink-0 leading-snug" style={{ width: '48%' }}>
-                {label}
-              </span>
-              <span className="text-[11px] text-gray-900 font-semibold leading-snug flex-1">
-                {valor}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+              <span className="sm:hidden">{label}</span>
+              <span className="hidden sm:inline" style={{ width: '48%', display: 'inline-block' }}>{label}</span>
+            </dt>
+            <dd className="text-sm sm:text-[11px] text-gray-900 font-semibold leading-snug sm:flex-1">
+              {valor}
+            </dd>
+          </div>
+        ))}
+      </dl>
 
       {/* Botão expand/collapse */}
       {especificacoes.length > initialCount && (

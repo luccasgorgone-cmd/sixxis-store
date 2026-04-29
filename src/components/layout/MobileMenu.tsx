@@ -181,7 +181,7 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
               href="https://www.facebook.com/profile.php?id=100090936724453"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center w-7 h-7 rounded-full border border-white/20 hover:border-[#3cbfb3] text-white/60 hover:text-[#3cbfb3] transition"
+              className="flex items-center justify-center w-11 h-11 rounded-full border border-white/20 hover:border-[#3cbfb3] text-white/60 hover:text-[#3cbfb3] transition"
               aria-label="Facebook Sixxis"
             >
               {/* Facebook icon */}

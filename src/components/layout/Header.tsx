@@ -407,12 +407,14 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               isCompact ? 'h-[52px]' : 'h-[68px]'
             }`}>
 
-              {/* Logo */}
+              {/* Logo — width/height explícitos previnem CLS */}
               <Link href="/" className="shrink-0 flex items-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={logoFinal}
                   alt="Sixxis"
+                  width={170}
+                  height={36}
                   style={{
                     height: isCompact ? '28px' : '36px',
                     width: 'auto',
@@ -420,6 +422,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                     transition: 'height 300ms ease-in-out',
                   }}
                   loading="eager"
+                  fetchPriority="high"
                   onError={() => setLogoErro(true)}
                 />
               </Link>

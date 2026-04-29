@@ -352,7 +352,7 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
               </div>
               <button
                 onClick={() => setDrawerAberto(false)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition"
+                className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-gray-100 transition"
                 aria-label="Fechar filtros"
               >
                 <X size={20} className="text-gray-500" />

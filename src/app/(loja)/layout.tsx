@@ -6,6 +6,7 @@ import CookieBanner from '@/components/cookies/CookieBanner'
 import ComparadorBar from '@/components/layout/ComparadorBar'
 import LojaWallpaper from '@/components/layout/LojaWallpaper'
 import PopupInicial from '@/components/popup/PopupInicial'
+import BottomNavMobile from '@/components/layout/BottomNavMobile'
 
 export default async function LojaLayout({ children }: { children: React.ReactNode }) {
   let logoUrl = '/logo-sixxis.png'
@@ -62,6 +63,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         <div className="flex-1 pb-24 md:pb-0">{children}</div>
         <Footer />
         <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />
+        <BottomNavMobile />
         <ComparadorBar />
         <CookieBanner />
         <PopupInicial />
