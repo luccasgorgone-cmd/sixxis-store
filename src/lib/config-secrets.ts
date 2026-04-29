@@ -30,6 +30,10 @@ export const SECRET_KEYS_DENYLIST = new Set<string>([
 
 export function isSecretKey(chave: string): boolean {
   if (!chave) return false
+  // Allowlist tem precedência: chaves explicitamente públicas (ex.: agente_max_tokens,
+  // que casa com o regex /token/ mas é só limite de tokens da Anthropic) nunca
+  // são tratadas como secret. A allowlist é declarada abaixo (PUBLIC_CONFIG_KEYS).
+  if (PUBLIC_CONFIG_KEYS.has(chave)) return false
   if (SECRET_KEYS_DENYLIST.has(chave)) return true
   return SECRET_KEY_REGEX.test(chave)
 }
