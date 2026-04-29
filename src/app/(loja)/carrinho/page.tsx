@@ -457,7 +457,7 @@ export default function CarrinhoPage() {
               ) : (
                 <>
                   <div className="flex gap-2">
-                    <div className="relative flex-1">
+                    <div className="relative flex-1 min-w-0">
                       <Tag size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
                         value={cupomInput}
@@ -472,7 +472,7 @@ export default function CarrinhoPage() {
                     </div>
                     <button onClick={aplicarCupom}
                       disabled={!cupomInput.trim() || aplicandoCupom}
-                      className="px-5 py-3 rounded-xl font-bold text-sm transition-all
+                      className="shrink-0 whitespace-nowrap px-4 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all
                                  hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
                       {aplicandoCupom ? '...' : 'Aplicar'}
@@ -505,13 +505,13 @@ export default function CarrinhoPage() {
                   onKeyDown={e => e.key === 'Enter' && calcularFrete()}
                   placeholder="00000-000"
                   maxLength={9}
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm
+                  className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm
                              font-mono focus:outline-none focus:border-[#3cbfb3]
                              focus:ring-2 focus:ring-[#3cbfb3]/20 transition-all"
                 />
                 <button onClick={calcularFrete}
                   disabled={cepInput.replace(/\D/g, '').length < 8 || calculandoFrete}
-                  className="px-5 py-3 rounded-xl font-bold text-sm transition-all
+                  className="shrink-0 whitespace-nowrap px-4 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all
                              hover:shadow-md disabled:opacity-50"
                   style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
                   {calculandoFrete ? '...' : 'Calcular'}
