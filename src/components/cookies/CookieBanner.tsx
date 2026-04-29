@@ -113,7 +113,7 @@ export default function CookieBanner() {
             </div>
             <button
               onClick={rejeitarOpcionais}
-              className="text-white/30 hover:text-white/60 transition mt-0.5 shrink-0"
+              className="w-11 h-11 flex items-center justify-center text-white/30 hover:text-white/60 transition shrink-0"
               aria-label="Fechar e recusar cookies opcionais"
             >
               <X size={16} />

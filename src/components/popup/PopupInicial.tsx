@@ -109,7 +109,7 @@ export default function PopupInicial() {
         <button
           onClick={fechar}
           aria-label="Fechar pop-up"
-          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+          className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
         >
           <X size={18} />
         </button>
