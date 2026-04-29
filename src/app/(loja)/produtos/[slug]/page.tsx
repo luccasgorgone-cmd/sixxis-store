@@ -95,7 +95,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       title: `${produto.nome}${preco > 0 ? ` — R$ ${preco.toLocaleString('pt-BR')}` : ''}`,
       description: descSEO,
       url: urlProduto,
-      type: 'website',
+      // og:type=product (nao suportado pelo schema oficial do Next; injetamos
+      // <meta property="og:type" content="product"> direto no JSX da page).
       siteName: 'Sixxis Store',
       locale: 'pt_BR',
       images: imagemPrincipal
@@ -229,6 +230,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
   return (
     <div className="min-h-screen bg-white">
+      <meta property="og:type" content="product" />
       <Script
         id={`schema-produto-${produto.slug}`}
         type="application/ld+json"
