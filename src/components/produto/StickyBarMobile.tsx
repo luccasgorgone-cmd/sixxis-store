@@ -44,14 +44,14 @@ export default function StickyBarMobile({ produtoId, nome, precoFinal, esgotado,
       {temVariacoes ? (
         <button
           onClick={scrollToSelector}
-          className="flex-1 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold py-4 rounded-xl transition-colors"
+          className="flex-1 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold py-4 rounded-xl transition-all active:scale-[0.97]"
         >
           Escolher Opção
         </button>
       ) : (
         <button
           onClick={handleAdicionar}
-          className={`flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-xl transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-xl transition-all active:scale-[0.97] ${
             adicionado
               ? 'bg-green-500 text-white'
               : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white'

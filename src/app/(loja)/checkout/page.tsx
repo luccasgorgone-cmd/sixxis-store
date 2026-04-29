@@ -702,7 +702,7 @@ function CheckoutContent() {
                   <button
                     type="button"
                     onClick={proximaEtapa}
-                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
+                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
                   >
                     Continuar para Entrega <ChevronRight size={15} />
                   </button>
@@ -814,7 +814,7 @@ function CheckoutContent() {
                   <button
                     type="button"
                     onClick={proximaEtapa}
-                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
+                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
                   >
                     Continuar para {temGarantiaDisponivel ? 'Garantia' : 'Pagamento'} <ChevronRight size={15} />
                   </button>
@@ -836,7 +836,7 @@ function CheckoutContent() {
                   <button
                     type="button"
                     onClick={proximaEtapa}
-                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
+                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
                   >
                     Continuar para Pagamento <ChevronRight size={15} />
                   </button>

@@ -284,7 +284,7 @@ export default function CarrinhoDrawer() {
             <Link
               href="/checkout"
               onClick={() => setDrawerAberto(false)}
-              className="w-full flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-4 rounded-2xl transition-all shadow-lg shadow-[#3cbfb3]/25 hover:-translate-y-0.5 text-base"
+              className="w-full flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-4 rounded-2xl transition-all shadow-lg shadow-[#3cbfb3]/25 hover:-translate-y-0.5 active:scale-[0.97] text-base"
             >
               <ShoppingBag size={18} />
               Finalizar Compra
