@@ -95,7 +95,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       title: `${produto.nome}${preco > 0 ? ` — R$ ${preco.toLocaleString('pt-BR')}` : ''}`,
       description: descSEO,
       url: urlProduto,
-      type: 'website',
+      // og:type=product (nao suportado pelo schema oficial do Next; injetamos
+      // <meta property="og:type" content="product"> direto no JSX da page).
       siteName: 'Sixxis Store',
       locale: 'pt_BR',
       images: imagemPrincipal
@@ -104,7 +105,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     },
     twitter: {
       card: 'summary_large_image',
-      title: produto.nome,
+      title: `${produto.nome}${preco > 0 ? ` — R$ ${preco.toLocaleString('pt-BR')}` : ''}`,
       description: descSEO,
       images: imagemPrincipal ? [imagemPrincipal] : [],
     },
@@ -227,12 +228,31 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     }),
   }
 
+  const schemaBreadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início',   item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Produtos', item: `${SITE_URL}/produtos` },
+      ...(produto.categoria
+        ? [{ '@type': 'ListItem', position: 3, name: categoriaLabel, item: `${SITE_URL}/produtos?categoria=${produto.categoria}` }]
+        : []),
+      { '@type': 'ListItem', position: produto.categoria ? 4 : 3, name: produto.nome },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-white">
+      <meta property="og:type" content="product" />
       <Script
         id={`schema-produto-${produto.slug}`}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaProduct) }}
+      />
+      <Script
+        id={`schema-breadcrumb-${produto.slug}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaBreadcrumb) }}
       />
       <RevealInit />
       <Breadcrumb items={[
