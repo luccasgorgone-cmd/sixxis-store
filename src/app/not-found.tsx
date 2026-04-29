@@ -3,7 +3,10 @@ import Link from 'next/link'
 import { Home, Search, Wind, Fan, Bike } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Página não encontrada | Sixxis Store',
+  // O title.template do RootLayout adiciona "| Sixxis Store" automaticamente,
+  // então usar string literal aqui causaria duplicação caso o template seja
+  // aplicado em algum render (ex.: prefetch). Mantemos só o nome da página.
+  title: 'Página não encontrada',
   description: 'A página que você buscou não existe. Explore nossos produtos e categorias.',
 }
 

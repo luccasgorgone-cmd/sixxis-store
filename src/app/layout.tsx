@@ -92,7 +92,7 @@ const schemaOrg = {
   name: 'Sixxis Store',
   description: 'Loja oficial Sixxis — Climatizadores, Aspiradores e Spinning',
   url: SITE_URL,
-  telephone: '+551899747-4701',
+  telephone: '+5518997474701',
   email: 'brasil.sixxis@gmail.com',
   address: {
     '@type': 'PostalAddress',
