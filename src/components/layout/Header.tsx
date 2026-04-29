@@ -336,7 +336,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         aria-hidden={!isTop}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-11">
+          <div className="flex items-center justify-between h-8 md:h-11">
 
             {/* Mobile: ticker rotativo */}
             <div className="flex md:hidden items-center justify-center flex-1 gap-2 overflow-hidden">
@@ -474,19 +474,19 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             </div>
 
             {/* ── Mobile ─────────────────────────────────────── */}
-            <div className={`flex md:hidden items-center gap-3 transition-all duration-300 ${
-              isCompact ? 'h-12' : 'h-16'
+            <div className={`flex md:hidden items-center gap-2 transition-all duration-300 ${
+              isCompact ? 'h-12' : 'h-14'
             }`}>
               <button
                 onClick={() => setDrawerOpen(true)}
                 className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/20 transition"
                 aria-label="Abrir menu"
               >
-                <Menu size={24} className="text-white" />
+                <Menu size={22} className="text-white" />
               </button>
 
               <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-                <Image src={logoFinal} alt="Sixxis" width={115} height={38} className="object-contain" priority onError={() => setLogoErro(true)} />
+                <Image src={logoFinal} alt="Sixxis" width={100} height={32} className="object-contain" priority onError={() => setLogoErro(true)} />
               </Link>
 
               <button
@@ -494,7 +494,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 className="relative ml-auto w-11 h-11 flex items-center justify-center text-white"
                 aria-label="Abrir carrinho"
               >
-                <ShoppingCart size={24} />
+                <ShoppingCart size={22} />
                 {totalItens > 0 && (
                   <span className="absolute top-0.5 right-0.5 bg-[#f59e0b] text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none px-0.5">
                     {totalItens > 9 ? '9+' : totalItens}
@@ -503,8 +503,13 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               </button>
             </div>
 
-            {/* Busca mobile */}
-            <div className="md:hidden pb-2">
+            {/* Busca mobile — só visível no topo, recolhe ao scrollar */}
+            <div
+              className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+                isCompact ? 'max-h-0 pb-0' : 'max-h-14 pb-2'
+              }`}
+              aria-hidden={isCompact}
+            >
               <SearchBar className="w-full" />
             </div>
 

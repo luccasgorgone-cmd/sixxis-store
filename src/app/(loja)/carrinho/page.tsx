@@ -357,10 +357,10 @@ export default function CarrinhoPage() {
                             )}
                           </div>
                           <button onClick={() => removerItem(item.id)}
-                            className="shrink-0 p-1.5 rounded-lg text-gray-300
+                            className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-gray-300
                                        hover:text-red-500 hover:bg-red-50 transition-all"
                             aria-label="Remover item">
-                            <X size={15} />
+                            <X size={18} />
                           </button>
                         </div>
 
@@ -389,21 +389,21 @@ export default function CarrinhoPage() {
                           </div>
 
                           {/* CONTROLE DE QUANTIDADE */}
-                          <div className="flex items-center gap-1.5 bg-gray-100 rounded-xl px-2 py-1.5">
+                          <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
                             <button onClick={() => alterarQtd(item.id, -1)}
                               disabled={item.quantidade <= 1}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-500
+                              className="w-11 h-11 rounded-lg flex items-center justify-center text-gray-500
                                          hover:text-gray-900 hover:bg-white disabled:opacity-30 transition-all">
-                              <Minus size={12} />
+                              <Minus size={16} />
                             </button>
-                            <span className="w-7 text-center text-sm font-black text-gray-900">
+                            <span className="w-9 text-center text-sm font-black text-gray-900">
                               {item.quantidade}
                             </span>
                             <button onClick={() => alterarQtd(item.id, 1)}
                               disabled={item.quantidade >= 99}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-500
+                              className="w-11 h-11 rounded-lg flex items-center justify-center text-gray-500
                                          hover:text-gray-900 hover:bg-white disabled:opacity-30 transition-all">
-                              <Plus size={12} />
+                              <Plus size={16} />
                             </button>
                           </div>
                         </div>

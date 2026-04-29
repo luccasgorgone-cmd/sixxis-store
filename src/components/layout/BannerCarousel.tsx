@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 interface Banner {
   id: string
   imagem: string
+  imagemMobile?: string | null
   titulo?: string | null
   subtitulo?: string | null
   link?: string | null
@@ -63,31 +64,37 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
-          {/* Imagem do banner */}
+          {/* Imagem do banner — usa <picture> para servir imagemMobile no mobile */}
           {banner.link ? (
             <Link href={banner.link} className="block w-full h-full">
-              <Image
-                key={banner.id}
-                src={banner.imagem}
-                alt={banner.titulo || 'Banner Sixxis'}
-                fill
-                className="object-cover w-full h-full"
-                style={{ objectPosition: 'center top' }}
-                priority
-                unoptimized
-              />
+              <picture key={banner.id}>
+                {banner.imagemMobile && (
+                  <source media="(max-width: 767px)" srcSet={banner.imagemMobile} />
+                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={banner.imagem}
+                  alt={banner.titulo || 'Banner Sixxis'}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ objectPosition: 'center top' }}
+                  loading="eager"
+                />
+              </picture>
             </Link>
           ) : (
-            <Image
-              key={banner.id}
-              src={banner.imagem}
-              alt={banner.titulo || 'Banner Sixxis'}
-              fill
-              className="object-cover w-full h-full"
-              style={{ objectPosition: 'center top' }}
-              priority
-              unoptimized
-            />
+            <picture key={banner.id}>
+              {banner.imagemMobile && (
+                <source media="(max-width: 767px)" srcSet={banner.imagemMobile} />
+              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={banner.imagem}
+                alt={banner.titulo || 'Banner Sixxis'}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ objectPosition: 'center top' }}
+                loading="eager"
+              />
+            </picture>
           )}
 
           {/* Seta esquerda */}

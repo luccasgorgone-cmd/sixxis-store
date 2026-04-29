@@ -98,7 +98,7 @@ export default function CarrinhoDrawer() {
           </div>
           <button
             onClick={() => setDrawerAberto(false)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
+            className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
             aria-label="Fechar carrinho"
           >
             <X size={20} />
@@ -175,26 +175,26 @@ export default function CarrinhoDrawer() {
                     <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white">
                       <button
                         onClick={() => atualizarQuantidade(item.produtoId, item.quantidade - 1, item.variacaoId)}
-                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+                        className="w-11 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
                         aria-label="Diminuir"
                       >
-                        <Minus size={12} />
+                        <Minus size={16} />
                       </button>
-                      <span className="w-8 text-center text-sm font-bold text-gray-900">{item.quantidade}</span>
+                      <span className="w-10 text-center text-sm font-bold text-gray-900">{item.quantidade}</span>
                       <button
                         onClick={() => atualizarQuantidade(item.produtoId, item.quantidade + 1, item.variacaoId)}
-                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+                        className="w-11 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
                         aria-label="Aumentar"
                       >
-                        <Plus size={12} />
+                        <Plus size={16} />
                       </button>
                     </div>
                     <button
                       onClick={() => removerItem(item.produtoId, item.variacaoId)}
-                      className="text-gray-300 hover:text-red-400 transition p-1"
+                      className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-red-400 transition"
                       aria-label="Remover item"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>

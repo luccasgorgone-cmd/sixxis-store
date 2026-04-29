@@ -19,12 +19,13 @@ export async function PUT(
 
   const { id } = await params
   const body = await request.json()
-  const { imagem, titulo, subtitulo, link, ordem, ativo, tempoCads } = body
+  const { imagem, imagemMobile, titulo, subtitulo, link, ordem, ativo, tempoCads } = body
 
   const banner = await prisma.banner.update({
     where: { id },
     data: {
       imagem,
+      imagemMobile: imagemMobile || null,
       titulo:    titulo    || null,
       subtitulo: subtitulo || null,
       link:      link      || null,

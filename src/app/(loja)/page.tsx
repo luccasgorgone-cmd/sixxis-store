@@ -10,6 +10,7 @@ import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
 import OfertasRelampago from '@/components/home/OfertasRelampago'
 import Depoimentos from '@/components/home/Depoimentos'
+import CategoriaImagemHero from '@/components/produto/CategoriaImagemHero'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -192,12 +193,11 @@ export default async function HomePage() {
                 </span>
               </div>
               <div className="absolute right-4 bottom-0 w-[42%] h-[115%] group-hover:scale-105 group-hover:-translate-y-1 transition-all duration-500 pointer-events-none">
-                <Image
+                <CategoriaImagemHero
                   src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775737122831-k4d1lc1.jpg"
                   alt="Climatizador Sixxis"
-                  fill
+                  categoria="climatizadores"
                   className="object-contain object-bottom drop-shadow-2xl"
-                  unoptimized
                 />
               </div>
             </Link>
@@ -221,12 +221,11 @@ export default async function HomePage() {
                 </span>
               </div>
               <div className="absolute right-4 bottom-0 w-[38%] h-[110%] group-hover:scale-105 group-hover:-translate-y-1 transition-all duration-500 pointer-events-none">
-                <Image
+                <CategoriaImagemHero
                   src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775754930452-4ixi773.png"
                   alt="Bike Spinning Sixxis"
-                  fill
+                  categoria="spinning"
                   className="object-contain object-bottom drop-shadow-2xl"
-                  unoptimized
                 />
               </div>
             </Link>
