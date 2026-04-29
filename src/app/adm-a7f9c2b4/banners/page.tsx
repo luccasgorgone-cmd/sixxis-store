@@ -199,17 +199,22 @@ export default function AdminBannersPage() {
               </div>
 
               <div className="space-y-3">
-                {[
-                  { key: 'titulo', label: 'Título', placeholder: 'Título do banner' },
-                  { key: 'subtitulo', label: 'Subtítulo', placeholder: 'Subtítulo opcional' },
-                  { key: 'link', label: 'Link', placeholder: '/produtos?categoria=climatizadores' },
-                ].map(({ key, label, placeholder }) => (
+                {([
+                  { key: 'titulo', label: 'Título', placeholder: 'Título do banner', required: true },
+                  { key: 'subtitulo', label: 'Subtítulo', placeholder: 'Subtítulo opcional', required: false },
+                  { key: 'link', label: 'Link', placeholder: '/produtos?categoria=climatizadores', required: false },
+                ] as const).map(({ key, label, placeholder, required }) => (
                   <div key={key}>
-                    <label className="text-xs font-medium text-gray-600">{label}</label>
+                    <label className="text-xs font-medium text-gray-600">
+                      {label}
+                      {required && <span className="text-red-500 ml-0.5">*</span>}
+                    </label>
                     <input
                       value={form[key as 'titulo' | 'subtitulo' | 'link'] ?? ''}
                       onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                       placeholder={placeholder}
+                      required={required}
+                      aria-required={required}
                       className="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
                     />
                   </div>
