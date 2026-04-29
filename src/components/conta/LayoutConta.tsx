@@ -118,7 +118,7 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
         {/* Abas horizontais scrolláveis — mobile only */}
-        <nav className="flex lg:hidden overflow-x-auto gap-1 pb-3 mb-4 border-b border-gray-200 hide-scrollbar">
+        <nav className="flex lg:hidden overflow-x-auto gap-0.5 pb-3 mb-4 border-b border-gray-200 hide-scrollbar">
           {MENU_ITENS.map(item => {
             const ativo = isActive(item.href, item.exact)
             const Icon = item.icone
@@ -126,13 +126,13 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
+                className={`flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
                   ativo
                     ? 'bg-[#3cbfb3] text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={13} />
                 {item.label}
               </Link>
             )
