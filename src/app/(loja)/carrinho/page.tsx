@@ -304,7 +304,7 @@ export default function CarrinhoPage() {
 
   // ── RENDER PRINCIPAL ──────────────────────────────────────
   return (
-    <div style={{ backgroundColor: '#f8fafc' }} className="min-h-screen pb-28 lg:pb-0">
+    <div style={{ backgroundColor: '#f8fafc' }} className="min-h-screen pb-20 lg:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* BREADCRUMB */}
@@ -723,41 +723,6 @@ export default function CarrinhoPage() {
         </div>
       </div>
 
-      {/* BOTTOM SHEET STICKY — MOBILE */}
-      <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-3"
-        style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-500">Subtotal</span>
-          <span className="text-sm font-semibold text-gray-900">{fmtBRL(subtotal)}</span>
-        </div>
-        {(cupomAplicado || (freteSelecionado && freteSelecionado.preco > 0)) && (
-          <div className="flex items-center justify-between mb-1">
-            {cupomAplicado && (
-              <span className="text-[11px] text-emerald-600 font-medium">
-                -{fmtBRL(descontoCupom)} ({cupomAplicado.codigo})
-              </span>
-            )}
-            {freteSelecionado && freteSelecionado.preco > 0 && (
-              <span className="text-[11px] text-gray-500 ml-auto">
-                + {fmtBRL(freteSelecionado.preco)} frete
-              </span>
-            )}
-          </div>
-        )}
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="text-sm font-black text-gray-900">Total</span>
-          <span className="text-xl font-black text-gray-900">{fmtBRL(totalFinal)}</span>
-        </div>
-        <button
-          onClick={handleCheckout}
-          className="w-full py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-          style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}
-        >
-          <CreditCard size={16} /> Finalizar compra
-        </button>
-      </div>
     </div>
   )
 }
