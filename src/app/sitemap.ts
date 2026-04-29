@@ -10,7 +10,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { ativo: true },
       select: { slug: true, createdAt: true },
     })
-  } catch {}
+  } catch (err) {
+    // Não estoura o build — sitemap volta sem produtos. Mas LOGA pra detectar
+    // problemas que antes ficavam invisíveis (ex.: connection string errada,
+    // schema mismatch, DB indisponível).
+    console.warn(
+      '[sitemap] Falha ao listar produtos:',
+      err instanceof Error ? err.message : err,
+    )
+  }
 
   const rotas = ['', '/produtos', '/ofertas', '/sobre', '/contato', '/garantia', '/seja-revendedor']
 
