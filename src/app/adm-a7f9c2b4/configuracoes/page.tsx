@@ -655,7 +655,7 @@ export default function ConfiguracoesPage() {
 
   function renderAparencia() {
     const coresKeys = Object.keys(CORES_DEFAULTS)
-    const FONTES = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Nunito', 'Raleway', 'Open Sans']
+    const FONTES = ['Inter', 'Poppins']
 
     return (
       <div className="space-y-5">
@@ -1573,7 +1573,7 @@ export default function ConfiguracoesPage() {
   }
 
   function renderTipografia() {
-    const FONTES = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Nunito', 'Raleway', 'Open Sans']
+    const FONTES = ['Inter', 'Poppins']
     const keys = ['fonte_principal', 'font_titulo_tamanho', 'font_titulo_peso', 'font_preco_tamanho', 'font_titulo_tracking']
 
     return (

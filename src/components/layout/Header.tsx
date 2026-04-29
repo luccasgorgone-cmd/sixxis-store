@@ -338,21 +338,23 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-8 md:h-11">
 
-            {/* Mobile: ticker rotativo */}
-            <div className="flex md:hidden items-center justify-center flex-1 gap-2 overflow-hidden">
+            {/* Mobile: ticker rotativo com fade */}
+            <div className="relative flex md:hidden items-center justify-center flex-1 h-full overflow-hidden">
               {TICKER_ITEMS.map((item, i) => {
                 const Icon = item.icon
+                const ativo = tickerIdx === i
                 return (
                   <div
                     key={i}
-                    className="flex items-center gap-2 transition-all duration-500"
+                    className="absolute inset-0 flex items-center justify-center gap-2 transition-opacity duration-500 ease-in-out"
                     style={{
-                      display: tickerIdx === i ? 'flex' : 'none',
-                      opacity: tickerIdx === i ? 1 : 0,
+                      opacity: ativo ? 1 : 0,
+                      pointerEvents: ativo ? 'auto' : 'none',
                     }}
+                    aria-hidden={!ativo}
                   >
-                    <Icon size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-                    <span className="text-[#0f2e2b] text-xs font-bold truncate">{item.text}</span>
+                    <Icon size={13} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
+                    <span className="text-[#0f2e2b] text-[11px] font-bold truncate">{item.text}</span>
                   </div>
                 )
               })}

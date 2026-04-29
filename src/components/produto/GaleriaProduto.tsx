@@ -47,16 +47,32 @@ export default function GaleriaProduto({ itens, nomeProduto }: Props) {
   const anterior = useCallback(() => setAtivo(i => i > 0 ? i - 1 : itens.length - 1), [itens.length])
   const proximo = useCallback(() => setAtivo(i => i < itens.length - 1 ? i + 1 : 0), [itens.length])
 
+  // Swipe nativo (mobile) — sem dependência externa.
+  const touchStartX = useRef<number | null>(null)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    touchStartX.current = null
+    if (Math.abs(dx) < 40) return // limiar p/ ignorar tap
+    if (dx > 0) anterior()
+    else proximo()
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {/* Imagem/Vídeo principal */}
       <div className="relative">
         <div
           ref={imgRef}
-          className={`relative bg-white rounded-2xl border-2 border-gray-100 overflow-hidden aspect-square${itemAtivo?.tipo === 'imagem' ? ' cursor-zoom-in' : ''}`}
+          className={`relative bg-white rounded-2xl border-2 border-gray-100 overflow-hidden aspect-square touch-pan-y${itemAtivo?.tipo === 'imagem' ? ' cursor-zoom-in' : ''}`}
           style={{ minHeight: '400px' }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {itemAtivo?.tipo === 'imagem' && (
             <>

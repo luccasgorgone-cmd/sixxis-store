@@ -75,13 +75,10 @@ export default function CarrinhoDrawer() {
         aria-hidden="true"
       />
 
-      {/* Drawer */}
+      {/* Drawer — mobile ocupa toda a largura, desktop limita a 420px */}
       <div
-        className="fixed top-0 right-0 z-[61] h-full flex flex-col shadow-2xl transition-transform duration-300"
+        className="fixed top-0 right-0 z-[61] h-full w-full sm:w-[420px] flex flex-col shadow-2xl transition-transform duration-300 bg-white"
         style={{
-          width: '100%',
-          maxWidth: '420px',
-          backgroundColor: '#fff',
           transform: drawerAberto ? 'translateX(0)' : 'translateX(100%)',
         }}
       >

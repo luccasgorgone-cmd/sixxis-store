@@ -1,13 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import {
-  Inter,
-  Poppins,
-  Roboto,
-  Montserrat,
-  Nunito,
-  Raleway,
-  Open_Sans,
-} from 'next/font/google'
+import { Inter, Poppins } from 'next/font/google'
 import './globals.css'
 import Script from 'next/script'
 import { prisma } from '@/lib/prisma'
@@ -18,23 +10,14 @@ const SITE_URL = 'https://sixxis-store-production.up.railway.app'
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
 
-// ── Pré-carregamento de todas as fontes disponíveis ───────────────────────────
-const inter      = Inter      ({ subsets: ['latin'], variable: '--font-inter',      display: 'swap' })
-const poppins    = Poppins    ({ subsets: ['latin'], variable: '--font-poppins',    display: 'swap', weight: ['400','500','600','700','800'] })
-const roboto     = Roboto     ({ subsets: ['latin'], variable: '--font-roboto',     display: 'swap', weight: ['400','500','700','900'] })
-const montserrat = Montserrat ({ subsets: ['latin'], variable: '--font-montserrat', display: 'swap' })
-const nunito     = Nunito     ({ subsets: ['latin'], variable: '--font-nunito',     display: 'swap' })
-const raleway    = Raleway    ({ subsets: ['latin'], variable: '--font-raleway',    display: 'swap' })
-const openSans   = Open_Sans  ({ subsets: ['latin'], variable: '--font-open-sans',  display: 'swap' })
+// ── Fontes carregadas (apenas Inter + Poppins; reduzimos de 7 para 2 fontes
+//    para aliviar o payload no mobile 3G/4G).
+const inter   = Inter   ({ subsets: ['latin'], variable: '--font-inter',   display: 'swap' })
+const poppins = Poppins ({ subsets: ['latin'], variable: '--font-poppins', display: 'swap', weight: ['400','500','600','700','800'] })
 
 const FONT_MAP: Record<string, { variable: string; className: string }> = {
-  Inter:       inter,
-  Poppins:     poppins,
-  Roboto:      roboto,
-  Montserrat:  montserrat,
-  Nunito:      nunito,
-  Raleway:     raleway,
-  'Open Sans': openSans,
+  Inter:   inter,
+  Poppins: poppins,
 }
 
 export const viewport: Viewport = {
@@ -156,10 +139,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   // Fonte selecionada (fallback: Inter)
   const fontObj    = FONT_MAP[fontePrincipal] ?? inter
-  const allFontVars = [
-    inter.variable, poppins.variable, roboto.variable,
-    montserrat.variable, nunito.variable, raleway.variable, openSans.variable,
-  ].join(' ')
+  const allFontVars = [inter.variable, poppins.variable].join(' ')
 
   const cssVars = {
     '--tiffany':             cfg.cor_principal      || '#3cbfb3',
