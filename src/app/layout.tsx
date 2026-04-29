@@ -4,6 +4,7 @@ import './globals.css'
 import Script from 'next/script'
 import { prisma } from '@/lib/prisma'
 import Providers from '@/components/Providers'
+import { GtmScriptHead, GtmNoScript } from '@/components/analytics/GtmScript'
 
 const SITE_URL = 'https://sixxis-store-production.up.railway.app'
 
@@ -204,6 +205,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${allFontVars} h-full antialiased`}
     >
       <head>
+        <GtmScriptHead />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Sixxis Store" />
@@ -220,6 +222,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className="min-h-full flex flex-col"
         style={bodyStyle}
       >
+        <GtmNoScript />
         <Providers>
           {children}
         </Providers>
