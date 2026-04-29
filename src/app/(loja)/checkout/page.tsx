@@ -3,6 +3,7 @@
 import { Suspense, useState, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 import {
   type TipoCupom, descricaoCupom, calcularDescontoCupom,
@@ -336,10 +337,49 @@ function CheckoutContent() {
   const setCupomGlobal = useCarrinho((s) => s.setCupom)
   const total = useTotalCarrinho()
 
+  const { data: session, status: sessionStatus } = useSession()
+
   const [etapa, setEtapa] = useState<Etapa>(1)
   const [fase, setFase] = useState<Fase>('checkout')
 
   const [ident, setIdent] = useState<IdentData>({ nome: '', cpf: '', email: '', telefone: '' })
+  const [perfilLoading, setPerfilLoading] = useState(false)
+  const [perfilFetched, setPerfilFetched] = useState(false)
+
+  // Prefill com dados do Cliente logado (nome/CPF/telefone/email).
+  // Roda 1x ao virar 'authenticated'. Aplica máscaras e preserva edicoes
+  // do user (so preenche se o campo ainda estiver vazio).
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated' || perfilFetched) return
+    if (!session?.user?.id) return
+
+    let cancelled = false
+    setPerfilLoading(true)
+
+    fetch('/api/conta/perfil', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then((data: { cliente?: { nome?: string | null; email?: string | null; cpf?: string | null; telefone?: string | null } }) => {
+        if (cancelled) return
+        const c = data.cliente
+        if (!c) return
+        setIdent(prev => ({
+          nome:     prev.nome     || (c.nome     ?? ''),
+          email:    prev.email    || (c.email    ?? ''),
+          cpf:      prev.cpf      || (c.cpf      ? maskCpf(c.cpf)      : ''),
+          telefone: prev.telefone || (c.telefone ? maskTel(c.telefone) : ''),
+        }))
+      })
+      .catch(err => {
+        console.error('[checkout] erro ao carregar perfil:', err)
+      })
+      .finally(() => {
+        if (cancelled) return
+        setPerfilLoading(false)
+        setPerfilFetched(true)
+      })
+
+    return () => { cancelled = true }
+  }, [sessionStatus, session?.user?.id, perfilFetched])
 
   const [end, setEnd] = useState<EnderecoData>({
     cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '',
@@ -694,22 +734,30 @@ function CheckoutContent() {
                     <p className="text-xs text-gray-400">Utilizados para identificação e envio do pedido.</p>
                   </div>
 
+                  {sessionStatus === 'authenticated' && session?.user?.name && (
+                    <div className="px-4 py-3 rounded-xl bg-[#e8f8f7] border border-[#3cbfb3]/30">
+                      <p className="text-sm text-[#0f2e2b]">
+                        Olá, <strong>{session.user.name.split(' ')[0]}</strong>! Confirme seus dados abaixo:
+                      </p>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
                       <Campo label="Nome completo" required value={ident.nome}
                         onChange={v => setIdent(d => ({ ...d, nome: v }))}
-                        placeholder="João da Silva" />
+                        placeholder={perfilLoading ? 'Carregando…' : 'João da Silva'} />
                     </div>
                     <Campo label="CPF" value={ident.cpf}
                       onChange={v => setIdent(d => ({ ...d, cpf: maskCpf(v) }))}
-                      placeholder="000.000.000-00" inputMode="numeric" />
+                      placeholder={perfilLoading ? 'Carregando…' : '000.000.000-00'} inputMode="numeric" />
                     <Campo label="Telefone / WhatsApp" value={ident.telefone}
                       onChange={v => setIdent(d => ({ ...d, telefone: maskTel(v) }))}
-                      placeholder="(11) 99999-9999" inputMode="tel" />
+                      placeholder={perfilLoading ? 'Carregando…' : '(11) 99999-9999'} inputMode="tel" />
                     <div className="sm:col-span-2">
                       <Campo label="E-mail" required type="email" value={ident.email}
                         onChange={v => setIdent(d => ({ ...d, email: v }))}
-                        placeholder="seu@email.com" />
+                        placeholder={perfilLoading ? 'Carregando…' : 'seu@email.com'} />
                     </div>
                   </div>
 
