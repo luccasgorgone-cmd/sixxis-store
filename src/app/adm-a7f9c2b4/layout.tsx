@@ -1,18 +1,14 @@
-'use client'
+import type { Metadata } from 'next'
+import AdminLayoutSwitch from '@/components/admin/AdminLayoutSwitch'
 
-import { usePathname } from 'next/navigation'
-import AdminLayoutClient from '@/components/admin/AdminLayoutClient'
+export const metadata: Metadata = {
+  title: {
+    default:  'Painel Admin',
+    template: '%s · Painel Admin · Sixxis',
+  },
+  robots: { index: false, follow: false },
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-
-  if (pathname === '/adm-a7f9c2b4/login') {
-    return (
-      <div className="min-h-screen bg-[#0f1f1d] flex items-center justify-center">
-        {children}
-      </div>
-    )
-  }
-
-  return <AdminLayoutClient>{children}</AdminLayoutClient>
+  return <AdminLayoutSwitch>{children}</AdminLayoutSwitch>
 }

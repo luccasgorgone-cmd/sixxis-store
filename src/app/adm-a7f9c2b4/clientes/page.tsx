@@ -9,6 +9,15 @@ import {
 import NivelLoyaltyIcon from '@/components/loyalty/NivelLoyaltyIcon'
 import { calcularNivel } from '@/lib/loyalty'
 
+// Mascara CPF para listagem: apenas os 4 últimos dígitos visíveis.
+// O CPF completo só aparece em /adm-a7f9c2b4/clientes/[id].
+function formatarCpfMascarado(cpf: string | null): string | null {
+  if (!cpf) return null
+  const digits = cpf.replace(/\D/g, '')
+  if (digits.length < 11) return '***.***.***-**'
+  return `***.***.${digits.slice(-5, -2)}-${digits.slice(-2)}`
+}
+
 interface Cliente {
   id: string
   nome: string | null
@@ -320,7 +329,7 @@ export default function AdminClientesPage() {
                       {c.nome || 'Sem nome'}
                     </p>
                     <p className="text-xs text-gray-400 truncate">{c.email}</p>
-                    {c.cpf && <p className="text-xs text-gray-300">{c.cpf}</p>}
+                    {c.cpf && <p className="text-xs text-gray-300 font-mono">{formatarCpfMascarado(c.cpf)}</p>}
                   </div>
                 </div>
 

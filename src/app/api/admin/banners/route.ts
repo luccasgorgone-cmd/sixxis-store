@@ -23,13 +23,14 @@ export async function POST(request: NextRequest) {
   if (unauthorized) return unauthorized
 
   const body = await request.json()
-  const { imagem, titulo, subtitulo, link, ordem, ativo, tempoCads } = body
+  const { imagem, imagemMobile, titulo, subtitulo, link, ordem, ativo, tempoCads } = body
 
   if (!imagem) return NextResponse.json({ error: 'Imagem obrigatória' }, { status: 400 })
 
   const banner = await prisma.banner.create({
     data: {
       imagem,
+      imagemMobile: imagemMobile || null,
       titulo:    titulo    || null,
       subtitulo: subtitulo || null,
       link:      link      || null,

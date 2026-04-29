@@ -782,3 +782,34 @@ main {
 .avatar-grid-item.active {
   transform: scale(1.08);
 }
+
+/* ── iOS Safari: evita zoom forçado ao focar inputs no mobile ────────────── */
+/* Inputs com font-size < 16px causam auto-zoom no Safari iOS. Esta regra
+   garante 16px+ apenas no breakpoint mobile, sem afetar o desktop onde os
+   inputs podem ser menores por design. */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="number"],
+  input[type="url"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input:not([type]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* ── Safe-area insets (iPhone com home indicator) ────────────────────────── */
+/* Classes utilitárias para componentes que ficam fixed-bottom (FAB, sticky
+   bars, drawer footers) respeitarem o home indicator. */
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+.safe-bottom-fab {
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
+}

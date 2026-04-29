@@ -140,8 +140,11 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
 
   // Em rotas com bottom-sheet sticky (carrinho/checkout), o avatar precisa
   // subir para não sobrepor o CTA "Finalizar Compra".
+  // Em todos os casos, respeita o home indicator do iPhone via safe-area-inset.
   const temBottomSheet = pathname.startsWith('/carrinho') || pathname.startsWith('/checkout')
-  const bottomBase = temBottomSheet ? 'calc(160px + env(safe-area-inset-bottom, 0px))' : '24px'
+  const bottomBase = temBottomSheet
+    ? 'calc(160px + env(safe-area-inset-bottom, 0px))'
+    : 'max(1.5rem, env(safe-area-inset-bottom, 0px))'
 
   return (
     <>

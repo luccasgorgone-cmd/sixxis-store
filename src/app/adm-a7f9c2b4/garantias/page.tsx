@@ -59,10 +59,19 @@ export default function AdminGarantiasPage() {
       if (filtroStatus) params.set('status', filtroStatus)
       const r = await fetch(`/api/admin/garantias?${params}`, { cache: 'no-store' })
       if (r.ok) setData(await r.json())
+      else setData({ garantias: [], total: 0, stats: { totalAtivas: 0, totalFaturado: 0, aVencer30Dias: 0 } })
+    } catch (e) {
+      console.error('[admin/garantias]', e)
+      setData({ garantias: [], total: 0, stats: { totalAtivas: 0, totalFaturado: 0, aVencer30Dias: 0 } })
     } finally { setLoading(false) }
   }, [filtroStatus])
 
-  useEffect(() => { buscar() }, [buscar])
+  useEffect(() => {
+    let alive = true
+    buscar()
+    const safety = setTimeout(() => { if (alive) setLoading(false) }, 8000)
+    return () => { alive = false; clearTimeout(safety) }
+  }, [buscar])
 
   const filtradas = (data?.garantias ?? []).filter((g) => {
     if (!busca) return true

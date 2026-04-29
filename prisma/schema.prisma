@@ -262,15 +262,16 @@ model AvaliacaoFoto {
 }
 
 model Banner {
-  id        String   @id @default(cuid())
-  imagem    String
-  titulo    String?
-  subtitulo String?
-  link      String?
-  ordem     Int      @default(0)
-  ativo     Boolean  @default(true)
-  tempoCads Int      @default(5)
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  imagem        String
+  imagemMobile  String?
+  titulo        String?
+  subtitulo     String?
+  link          String?
+  ordem         Int      @default(0)
+  ativo         Boolean  @default(true)
+  tempoCads     Int      @default(5)
+  createdAt     DateTime @default(now())
 }
 
 model Configuracao {

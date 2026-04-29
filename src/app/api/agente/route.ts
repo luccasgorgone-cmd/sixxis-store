@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now()
 
-    // Buscar configs do banco
+    // Buscar configs do banco — apenas configurações públicas/persona.
+    // A chave de API da Anthropic vive SOMENTE em process.env.ANTHROPIC_API_KEY
+    // por segurança (Railway env var, nunca no banco).
     const configs = await prisma.configuracao.findMany({
       where: {
         chave: {
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
             'agente_ativo', 'agente_nome', 'agente_modelo',
             'agente_max_tokens', 'agente_temperatura',
             'agente_system_prompt', 'agente_whatsapp_vendas',
-            'agente_whatsapp_suporte', 'anthropic_api_key',
+            'agente_whatsapp_suporte',
           ],
         },
       },
@@ -205,7 +207,7 @@ ${catalogoTexto}
     const systemPromptFinal = systemPromptBase + contextoLive + contextoFrete
 
     // ── Chamar Claude API ─────────────────────────────────────────────────────
-    const apiKey = cfg.anthropic_api_key || process.env.ANTHROPIC_API_KEY
+    const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
       return Response.json({
         resposta: `Olá! No momento estou com dificuldades técnicas. Por favor, fale conosco pelo WhatsApp: [Vendas](https://wa.me/${vendas}) ou [Suporte](https://wa.me/${suporte}) 😊`,

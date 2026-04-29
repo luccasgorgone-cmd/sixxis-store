@@ -923,7 +923,10 @@ function CheckoutContent() {
 function MobileResumo(props: ResumoProps) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-[0_-4px_24px_rgba(0,0,0,.06)]">
+    <div
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-[0_-4px_24px_rgba(0,0,0,.06)]"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
       <button
         type="button"
         onClick={() => setOpen(o => !o)}

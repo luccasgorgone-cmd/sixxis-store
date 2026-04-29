@@ -207,7 +207,7 @@ function MaisVendidosEditor() {
               )}
               <span className="flex-1 text-sm font-medium text-gray-800 truncate">{d.produto.nome}</span>
               <span className="text-xs text-gray-400">
-                R$ {Number(d.produto.preco).toFixed(2).replace('.', ',')}
+                {Number(d.produto.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </span>
               <button
                 onClick={() => remover(d.id)}

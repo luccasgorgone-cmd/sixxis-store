@@ -178,7 +178,9 @@ export default function ConfiguracoesLojaPage() {
   const carregar = useCallback(async () => {
     setCarregando(true)
     try {
-      const res = await fetch('/api/admin/configuracoes')
+      // ?publica=1 retorna apenas o allowlist de chaves seguras para edição.
+      // Secrets (api_key, tokens, hashes) são filtradas no servidor.
+      const res = await fetch('/api/admin/configuracoes?publica=1')
       const data: Record<string, string> = await res.json()
       const novos: ConfigItem[] = Object.entries(data).map(([chave, v]) => {
         const raw = String(v ?? '')

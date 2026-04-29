@@ -18,7 +18,7 @@ const CATEGORIAS: Record<string, string> = {
   spinning: 'Spinning & Fitness',
 }
 
-const LIMIT = 12
+const LIMIT = 24
 
 // All spec/filter param keys managed by FiltrosHorizontais
 const FILTER_KEYS = ['voltagem', 'capacidade', 'cobertura', 'vazao', 'velocidades', 'resistencia', 'peso_max', 'tipo', 'preco'] as const
