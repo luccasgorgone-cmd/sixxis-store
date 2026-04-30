@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Check, Package, Heart, GitCompare } from 'lucide-react'
+import { Package, Heart, GitCompare } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos, useComparador } from '@/hooks/useListas'
@@ -221,7 +221,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               <button
                 onClick={handleAddToCart}
                 disabled={esgotado}
-                className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1.5 md:gap-2 transition-all duration-200 active:scale-[0.98] ${
+                className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center transition-all duration-200 active:scale-[0.98] ${
                   esgotado
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : adicionado
@@ -229,9 +229,6 @@ export default function CardProduto({ produto, priority = false }: Props) {
                       : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
                 }`}
               >
-                {adicionado
-                  ? <Check className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
-                  : <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 shrink-0" />}
                 <span className="whitespace-nowrap">
                   {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
                 </span>
