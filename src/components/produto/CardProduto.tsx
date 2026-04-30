@@ -202,7 +202,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               em até 6x de <span className="font-semibold">R$ {fmt(precoFinal / 6)}</span> sem juros
             </p>
 
-            <p className="text-xs text-[#3cbfb3] font-semibold mb-3 whitespace-nowrap">
+            <p className="text-[11px] sm:text-xs text-[#3cbfb3] font-semibold mb-3 whitespace-nowrap">
               R$ {fmt(precoPix)} no Pix
               <span className="text-gray-400 font-normal whitespace-nowrap"> (3% OFF)</span>
             </p>
