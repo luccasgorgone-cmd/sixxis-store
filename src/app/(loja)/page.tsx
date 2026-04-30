@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Cpu, Headphones, BadgeCheck, ShoppingCart } from 'lucide-react'
-import CardProduto from '@/components/produto/CardProduto'
 import { prisma } from '@/lib/prisma'
 
 import NewsletterForm from '@/components/layout/NewsletterForm'
@@ -11,6 +10,7 @@ import TrustBar from '@/components/layout/TrustBar'
 import OfertasRelampago from '@/components/home/OfertasRelampago'
 import Depoimentos from '@/components/home/Depoimentos'
 import CategoriaImagemHero from '@/components/produto/CategoriaImagemHero'
+import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -51,7 +51,7 @@ export default async function HomePage() {
         include: { produto: true },
         orderBy: { ordem: 'asc' },
       }),
-      prisma.produto.findMany({ where: { ativo: true }, take: 8, orderBy: { createdAt: 'desc' } }),
+      prisma.produto.findMany({ where: { ativo: true }, take: 12, orderBy: { createdAt: 'desc' } }),
       prisma.configuracao.findMany(),
       prisma.configuracao.findMany({
         where: {
@@ -149,11 +149,7 @@ export default async function HomePage() {
           </div>
 
           {produtosMostrar.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {produtosMostrar.map((produto, i) => (
-                <CardProduto key={produto.id} produto={produto} priority={i < 3} />
-              ))}
-            </div>
+            <MaisVendidosCarrossel produtos={produtosMostrar} />
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
               <ShoppingCart size={48} className="text-gray-200 mx-auto mb-4" />
