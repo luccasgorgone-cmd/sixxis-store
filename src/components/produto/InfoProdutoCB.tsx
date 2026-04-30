@@ -545,7 +545,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       )}
 
       {/* Botões */}
-      <div className="flex flex-col gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6 px-4 md:px-0">
         {/* COMPRAR AGORA — principal, sempre sólido */}
         <button
           onClick={handleComprar}
