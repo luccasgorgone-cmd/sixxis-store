@@ -60,8 +60,14 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         <Header logoUrl={logoUrl} />
         {/* Spacer: reserva o espaço do header fixed; altura real via CSS var --sixxis-header-h */}
         <div aria-hidden="true" style={{ height: 'var(--sixxis-header-h, 140px)' }} />
-        <div className="flex-1 pb-24 md:pb-0">{children}</div>
+        <div className="flex-1">{children}</div>
         <Footer />
+        {/* Spacer mobile-only — reserva ~96px abaixo do Footer pro
+            BottomNavMobile (fixed bottom-0, h-14 + safe-area) nao
+            cobrir o final do footer ao scrollar ate o fim. Antes
+            esse pb estava no flex-1 do conteudo, criando gap escuro
+            entre fim do conteudo e o footer em paginas curtas. */}
+        <div aria-hidden="true" className="h-24 md:h-0" />
         <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />
         <BottomNavMobile />
         <ComparadorBar />
