@@ -230,7 +230,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               <button
                 onClick={handleAddToCart}
                 disabled={esgotado}
-                className={`w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] ${
+                className={`w-full font-bold py-2 md:py-2.5 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1.5 md:gap-2 whitespace-nowrap transition-all duration-200 active:scale-[0.98] ${
                   esgotado
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : adicionado
@@ -238,9 +238,9 @@ export default function CardProduto({ produto, priority = false }: Props) {
                       : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
                 }`}
               >
-                <ShoppingCart size={14} />
+                <ShoppingCart className="w-5 h-5 md:w-4 md:h-4" />
                 {esgotado ? 'Esgotado' : adicionado ? (
-                  <><Check size={14} /> Adicionado!</>
+                  <><Check className="w-5 h-5 md:w-4 md:h-4" /> Adicionado!</>
                 ) : 'Adicionar ao Carrinho'}
               </button>
 
