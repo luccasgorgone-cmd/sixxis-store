@@ -103,12 +103,12 @@ export function PorQueComprarSixxis() {
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent' }}
             >
               <div
-                className="flex items-center justify-center rounded-full mb-3 sm:mb-5 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16"
+                className="flex items-center justify-center rounded-full mb-3 sm:mb-5 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto"
                 style={{ backgroundColor: 'rgba(60, 191, 179, 0.10)' }}
               >
                 <Icone className="w-6 h-6 sm:w-9 sm:h-9 lg:w-12 lg:h-12" color="#3cbfb3" strokeWidth={1.75} />
               </div>
-              <h3 className="font-bold mb-1.5 sm:mb-2 text-sm sm:text-lg lg:text-xl" style={{ color: '#ffffff' }}>
+              <h3 className="font-bold mb-1.5 sm:mb-2 text-sm sm:text-lg lg:text-xl text-center" style={{ color: '#ffffff' }}>
                 {r.titulo}
               </h3>
               <p className="text-xs sm:text-sm leading-snug sm:leading-relaxed" style={{ color: '#d1d5db' }}>
