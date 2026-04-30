@@ -313,21 +313,21 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         {/* Stats + Por que Sixxis */}
         <section className="mt-16">
           {/* Stats row com ContadorAnimado */}
-          <div className="grid grid-cols-3 gap-4 mb-10 reveal">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-10 reveal">
             <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a]">
+              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 +<ContadorAnimado alvo={1000000} sufixo="" />
               </p>
               <p className="text-xs text-gray-500 font-medium mt-0.5">Produtos Vendidos</p>
             </div>
             <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a]">
+              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={12} sufixo=" meses" />
               </p>
               <p className="text-xs text-gray-500 font-medium mt-0.5">Garantia Sixxis</p>
             </div>
             <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a]">
+              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
               <p className="text-xs text-gray-500 font-medium mt-0.5">Originais</p>
