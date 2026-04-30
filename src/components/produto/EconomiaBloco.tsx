@@ -140,8 +140,10 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
             <div className="flex items-center gap-2 mb-2">
               <Wind size={18} strokeWidth={2} color="#0f2e2b" />
               <span className="font-bold text-sm" style={{ color: '#0f2e2b' }}>Climatizador Sixxis</span>
+            </div>
+            <div className="flex justify-center mb-2">
               <span
-                className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black"
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black"
                 style={{ backgroundColor: '#3cbfb3', color: '#ffffff' }}
               >
                 {percentual}% mais econômico
@@ -211,21 +213,22 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
           </div>
         </div>
 
-        {/* Métricas em 3 colunas */}
-        <div className="grid grid-cols-3" style={{ borderTop: '1px solid rgba(15,46,43,0.30)' }}>
-          <div className="p-3 text-center" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
-            <p className="text-[11px]" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/mês</p>
-            <p className="text-lg font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(economiaMes)}</p>
+        {/* Métricas em 3 colunas — items-stretch + min-h pra altura igual,
+            flex-col + justify-between alinha label no topo e valor no rodape */}
+        <div className="grid grid-cols-3 items-stretch" style={{ borderTop: '1px solid rgba(15,46,43,0.30)' }}>
+          <div className="p-3 text-center flex flex-col justify-between min-h-[80px]" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/mês</p>
+            <p className="text-base sm:text-lg font-bold mt-1" style={{ color: '#3cbfb3' }}>R$ {fmt(economiaMes)}</p>
           </div>
-          <div className="p-3 text-center" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
-            <p className="text-[11px]" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/ano</p>
-            <p className="text-lg font-bold" style={{ color: '#3cbfb3' }}>
+          <div className="p-3 text-center flex flex-col justify-between min-h-[80px]" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/ano</p>
+            <p className="text-base sm:text-lg font-bold mt-1" style={{ color: '#3cbfb3' }}>
               R$ {(economiaAno / 1000).toFixed(1)}k
             </p>
           </div>
-          <div className="p-3 text-center">
-            <p className="text-[11px]" style={{ color: '#0f2e2b', opacity: 0.75 }}>Produto se paga em</p>
-            <p className="text-lg font-bold" style={{ color: '#0f2e2b' }}>{retornoAnos} anos</p>
+          <div className="p-3 text-center flex flex-col justify-between min-h-[80px]">
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.75 }}>Produto se<br />paga em</p>
+            <p className="text-base sm:text-lg font-bold mt-1" style={{ color: '#0f2e2b' }}>{retornoAnos} anos</p>
           </div>
         </div>
 
