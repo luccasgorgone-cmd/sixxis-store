@@ -78,8 +78,12 @@ export default function ProdutoGaleriaInfo({
     <>
       <div className="relative">
         <GaleriaCB itens={itensGaleria} nome={produto.nome} />
+        {/* Specs no flow da galeria SOMENTE em desktop (mobile tem bloco
+            separado renderizado pela page apos o InfoProdutoCB). */}
         {specs.length > 0 && (
-          <SpecsExpandiveis especificacoes={specs} />
+          <div className="hidden lg:block">
+            <SpecsExpandiveis especificacoes={specs} />
+          </div>
         )}
       </div>
       <InfoProdutoCB
