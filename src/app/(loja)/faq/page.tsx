@@ -83,9 +83,9 @@ export default function FaqPage() {
         <FaqAccordion items={faqs} />
 
         {/* CTA */}
-        <div className="mt-12 bg-[#f8f9fa] rounded-2xl p-8 text-center border border-gray-200">
-          <h2 className="text-xl font-bold text-[#0a0a0a] mb-2">Não encontrou sua resposta?</h2>
-          <p className="text-gray-600 text-sm mb-6">
+        <div className="mt-12 bg-[#1a4f4a] rounded-2xl p-8 text-center border border-[#3cbfb3]/20 shadow-lg">
+          <h2 className="text-xl font-bold text-white mb-2">Não encontrou sua resposta?</h2>
+          <p className="text-gray-100 text-sm mb-6">
             Nossa equipe está pronta para te ajudar via WhatsApp ou pelo formulário de contato.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -97,7 +97,10 @@ export default function FaqPage() {
             >
               WhatsApp
             </a>
-            <a href="/contato" className="btn-outline">
+            <a
+              href="/contato"
+              className="bg-white text-[#1a4f4a] hover:bg-gray-100 px-6 py-3 rounded-xl font-bold transition border-2 border-white"
+            >
               Formulário de Contato
             </a>
           </div>
