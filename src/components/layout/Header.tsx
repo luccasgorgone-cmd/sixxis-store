@@ -145,7 +145,6 @@ const NAV_LINKS = [
   { href: '/ofertas',                           label: 'OFERTAS',        icon: Tag,   hot: true },
   { href: '/sobre',                             label: 'SOBRE',          icon: Info  },
   { href: '/contato',                           label: 'CONTATO',        icon: Phone },
-  { href: '/seja-revendedor',                   label: 'PARCEIRO',       icon: Store },
 ]
 
 // ── HEADER ────────────────────────────────────────────────────────────────────
