@@ -44,7 +44,6 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const precoPix = precoFinal * 0.97
   const esgotado = (produto.estoque ?? 1) <= 0
   const isNovo = !desconto
-  const isSX040 = /sx040|sx-040/i.test(produto.slug || '') || /sx040|sx-040/i.test(produto.nome || '')
 
   const mediaAvaliacoes = (produto as { mediaAvaliacoes?: number }).mediaAvaliacoes ?? 0
   const totalAvaliacoes = (produto as { totalAvaliacoes?: number }).totalAvaliacoes ?? 0
@@ -187,19 +186,11 @@ export default function CardProduto({ produto, priority = false }: Props) {
             </div>
           )}
 
-          {/* Urgência — últimas unidades */}
-          {isSX040 && !esgotado && (
-            <span className="inline-block text-xs text-orange-500 font-medium mb-2">
-              Últimas unidades
-            </span>
-          )}
-
           {/* Preços */}
           <div>
             {precoOriginal && (
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="text-xs text-gray-400 line-through">R$ {fmt(precoOriginal)}</span>
-                <span className="text-[10px] text-[#dc2626] font-bold">Baixou {desconto}%</span>
               </div>
             )}
 
