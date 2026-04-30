@@ -31,17 +31,6 @@ export default function PrivacidadePage() {
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-12 space-y-10">
 
-        {/* Intro */}
-        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <p className="text-gray-700 leading-relaxed">
-            A <strong>Sixxis</strong> ("nós", "nosso" ou "empresa"), inscrita no CNPJ 54.978.947/0001-09,
-            está comprometida em proteger a privacidade dos seus dados pessoais. Esta Política de Privacidade
-            descreve como coletamos, utilizamos, armazenamos e compartilhamos suas informações quando você utiliza
-            nosso site e realiza compras em nossa loja virtual, em conformidade com a{' '}
-            <strong>Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018)</strong>.
-          </p>
-        </div>
-
         {/* 1. Dados coletados */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
           <h2 className="text-xl font-bold text-[#0f2e2b] mb-4 flex items-center gap-2">
