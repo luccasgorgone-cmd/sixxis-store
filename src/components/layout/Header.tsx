@@ -406,6 +406,17 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               isCompact ? 'h-[52px]' : 'h-[68px]'
             }`}>
 
+              {/* Hamburger — visivel apenas em iPad portrait (md..lg-1) pois
+                  o NAV horizontal so aparece em lg+. Reusa o mesmo drawer
+                  lateral que e usado em mobile. */}
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="lg:hidden shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/20 transition"
+                aria-label="Abrir menu"
+              >
+                <Menu size={22} className="text-white" />
+              </button>
+
               {/* Logo — width/height explícitos previnem CLS */}
               <Link href="/" className="shrink-0 flex items-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
