@@ -722,6 +722,7 @@ model PopupInicial {
   ativado Boolean @default(false)
 
   bannerDesktop String?
+  bannerTablet  String?
   bannerMobile  String?
   altText       String?
 

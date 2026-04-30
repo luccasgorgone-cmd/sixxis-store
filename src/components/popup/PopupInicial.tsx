@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 interface PopupConfig {
   ativado:        boolean
   bannerDesktop?: string | null
+  bannerTablet?:  string | null
   bannerMobile?:  string | null
   altText?:       string | null
   linkDestino?:   string | null
@@ -93,7 +94,7 @@ export default function PopupInicial() {
 
   if (!aberto || !config) return null
 
-  const banner = config.bannerDesktop || config.bannerMobile
+  const banner = config.bannerDesktop || config.bannerTablet || config.bannerMobile
   const link = config.linkDestino || undefined
   const target = config.abrirNovaAba ? '_blank' : '_self'
 
@@ -118,16 +119,18 @@ export default function PopupInicial() {
           link ? (
             <a href={link} target={target} rel={target === '_blank' ? 'noopener' : undefined} onClick={fechar} className="block">
               <picture>
-                {config.bannerMobile && <source media="(max-width: 768px)" srcSet={config.bannerMobile} />}
+                {config.bannerMobile && <source media="(max-width: 767px)" srcSet={config.bannerMobile} />}
+                {config.bannerTablet && <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={config.bannerTablet} />}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={config.bannerDesktop || config.bannerMobile || ''} alt={config.altText || ''} className="w-full h-auto block" />
+                <img src={config.bannerDesktop || config.bannerTablet || config.bannerMobile || ''} alt={config.altText || ''} className="w-full h-auto block" />
               </picture>
             </a>
           ) : (
             <picture>
-              {config.bannerMobile && <source media="(max-width: 768px)" srcSet={config.bannerMobile} />}
+              {config.bannerMobile && <source media="(max-width: 767px)" srcSet={config.bannerMobile} />}
+              {config.bannerTablet && <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={config.bannerTablet} />}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={config.bannerDesktop || config.bannerMobile || ''} alt={config.altText || ''} className="w-full h-auto block" />
+              <img src={config.bannerDesktop || config.bannerTablet || config.bannerMobile || ''} alt={config.altText || ''} className="w-full h-auto block" />
             </picture>
           )
         )}

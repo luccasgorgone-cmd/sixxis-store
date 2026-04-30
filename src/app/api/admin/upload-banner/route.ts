@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-  const safeVariant = variant === 'mobile' ? 'mobile' : 'desktop'
+  const safeVariant = variant === 'mobile' ? 'mobile' : variant === 'tablet' ? 'tablet' : 'desktop'
   const key = `popups/${Date.now()}-${safeVariant}-${Math.random().toString(36).slice(2, 9)}.${ext}`
   const url = await uploadToR2(buffer, key, file.type)
 

@@ -17,6 +17,7 @@ export async function GET() {
     return NextResponse.json({
       ativado:        true,
       bannerDesktop:  config.bannerDesktop,
+      bannerTablet:   config.bannerTablet,
       bannerMobile:   config.bannerMobile,
       altText:        config.altText,
       linkDestino:    config.linkDestino,
