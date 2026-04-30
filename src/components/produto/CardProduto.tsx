@@ -202,9 +202,9 @@ export default function CardProduto({ produto, priority = false }: Props) {
               em até 6x de <span className="font-semibold">R$ {fmt(precoFinal / 6)}</span> sem juros
             </p>
 
-            <p className="text-xs text-[#3cbfb3] font-semibold mb-3">
+            <p className="text-xs text-[#3cbfb3] font-semibold mb-3 whitespace-nowrap">
               R$ {fmt(precoPix)} no Pix
-              <span className="text-gray-400 font-normal"> (3% OFF)</span>
+              <span className="text-gray-400 font-normal whitespace-nowrap"> (3% OFF)</span>
             </p>
 
             {/* Botões — Comprar Agora primeiro, Adicionar segundo */}
@@ -221,7 +221,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               <button
                 onClick={handleAddToCart}
                 disabled={esgotado}
-                className={`w-full font-bold py-2 md:py-2.5 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1.5 md:gap-2 whitespace-nowrap transition-all duration-200 active:scale-[0.98] ${
+                className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1.5 md:gap-2 transition-all duration-200 active:scale-[0.98] ${
                   esgotado
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : adicionado
@@ -229,10 +229,12 @@ export default function CardProduto({ produto, priority = false }: Props) {
                       : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
                 }`}
               >
-                <ShoppingCart className="w-5 h-5 md:w-4 md:h-4" />
-                {esgotado ? 'Esgotado' : adicionado ? (
-                  <><Check className="w-5 h-5 md:w-4 md:h-4" /> Adicionado!</>
-                ) : 'Adicionar ao Carrinho'}
+                {adicionado
+                  ? <Check className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
+                  : <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 shrink-0" />}
+                <span className="whitespace-nowrap">
+                  {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+                </span>
               </button>
 
               {/* Comparar — oculto em mobile */}

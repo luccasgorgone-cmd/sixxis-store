@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 interface Banner {
   id: string
   imagem: string
+  imagemTablet?: string | null
   imagemMobile?: string | null
   titulo?: string | null
   subtitulo?: string | null
@@ -70,6 +71,9 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
               <picture key={banner.id}>
                 {banner.imagemMobile && (
                   <source media="(max-width: 767px)" srcSet={banner.imagemMobile} />
+                )}
+                {banner.imagemTablet && (
+                  <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={banner.imagemTablet} />
                 )}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
