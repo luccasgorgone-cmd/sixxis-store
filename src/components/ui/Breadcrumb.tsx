@@ -11,7 +11,7 @@ interface Props {
 export default function Breadcrumb({ items }: Props) {
   return (
     <nav
-      className="w-full bg-transparent py-3 px-4"
+      className="w-full bg-white border-b border-gray-100 py-3 px-4"
       aria-label="Breadcrumb"
     >
       <ol
@@ -25,7 +25,7 @@ export default function Breadcrumb({ items }: Props) {
               {i > 0 && (
                 <span
                   aria-hidden="true"
-                  className="inline-flex items-center leading-none shrink-0 mx-1.5 text-current opacity-40 text-xs select-none"
+                  className="inline-flex items-center leading-none shrink-0 mx-1.5 text-gray-400 text-xs select-none"
                 >
                   /
                 </span>
@@ -33,13 +33,13 @@ export default function Breadcrumb({ items }: Props) {
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className="inline-flex items-center leading-none whitespace-nowrap shrink-0 text-current opacity-60 hover:opacity-100 hover:text-[#3cbfb3] transition-all"
+                  className="inline-flex items-center leading-none whitespace-nowrap shrink-0 text-gray-600 hover:text-[#3cbfb3] transition-all"
                 >
                   {item.label}
                 </Link>
               ) : (
                 <span
-                  className="inline-flex items-center leading-none whitespace-nowrap shrink-0 font-bold text-current opacity-90"
+                  className="inline-flex items-center leading-none whitespace-nowrap shrink-0 font-bold text-gray-900"
                   aria-current={isLast ? 'page' : undefined}
                 >
                   {item.label}
