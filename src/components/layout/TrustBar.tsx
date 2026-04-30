@@ -27,27 +27,24 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false }:
         : 'bg-white border-t border-b border-gray-100'
     }`}>
       <div className="max-w-7xl mx-auto px-4">
-        {/* Mobile: scroll horizontal / Desktop: grid */}
-        <div
-          className="flex md:grid md:grid-cols-4 gap-0 overflow-x-auto hide-scrollbar"
-          style={{ scrollbarWidth: 'none' }}
-        >
+        {/* Mobile: grid 2x2 / Desktop: grid 1x4 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-0">
           {items.map(({ titulo, sub }, i) => {
             const Icon = ICONS[i % ICONS.length]
             return (
               <div
                 key={titulo}
-                className={`flex items-center justify-center gap-3 py-1 px-4 sm:px-3 hover:bg-white/5 transition-colors shrink-0 md:shrink min-w-[180px] md:min-w-0 ${
-                  i > 0 ? (transparent ? 'border-l border-white/15' : 'border-l border-gray-200') : ''
+                className={`flex items-center justify-start md:justify-center gap-2 md:gap-3 py-1 px-2 md:px-3 hover:bg-white/5 transition-colors min-w-0 ${
+                  i > 0 ? (transparent ? 'md:border-l md:border-white/15' : 'md:border-l md:border-gray-200') : ''
                 }`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 ${
                   transparent ? 'bg-white/10' : 'bg-[#e8f8f7]'
                 }`}>
-                  <Icon size={16} className="text-[#3cbfb3]" strokeWidth={2} />
+                  <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#3cbfb3]" strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-xs sm:text-sm font-bold leading-tight truncate ${
+                  <p className={`text-[11px] md:text-sm font-bold leading-tight ${
                     transparent ? 'text-white' : 'text-gray-900'
                   }`}>
                     {titulo}

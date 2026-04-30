@@ -10,7 +10,7 @@ interface Props {
   initialCount?: number
 }
 
-export default function SpecsExpandiveis({ especificacoes, initialCount = 10 }: Props) {
+export default function SpecsExpandiveis({ especificacoes, initialCount = 5 }: Props) {
   const [expandido, setExpandido] = useState(false)
 
   const visiveis = expandido ? especificacoes : especificacoes.slice(0, initialCount)

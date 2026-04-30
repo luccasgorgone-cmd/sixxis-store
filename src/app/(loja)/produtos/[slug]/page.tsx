@@ -13,6 +13,7 @@ import { PorQueComprarSixxis } from '@/components/produto/PorQueComprarSixxis'
 import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
 import ViewItemTracker from '@/components/analytics/ViewItemTracker'
+import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 export const dynamic = 'force-dynamic'
 
@@ -287,17 +288,55 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           />
         </div>
 
+        {/* Specs — somente mobile/tablet, pois em lg+ ja aparece na coluna
+            esquerda dentro de ProdutoGaleriaInfo. Posicao apos
+            InfoProdutoCB (Compartilhar/Salvar) e antes de "Voce tambem pode
+            gostar", conforme reorganizacao mobile UX. */}
+        {especificacoes.length > 0 && (
+          <div className="lg:hidden mb-10">
+            <SpecsExpandiveis especificacoes={especificacoes} />
+          </div>
+        )}
+
         {/* ★ Você também pode gostar */}
         <ProdutosSimilares
           slugAtual={produto.slug}
           categoriaAtual={produto.categoria ?? ''}
         />
 
+        {/* Stats + Por que Sixxis */}
+        <section className="mt-16">{/* Stats + PorQue (movido pra antes
+            de EconomiaBloco/Descricao na ordem mobile UX) */}
+          {/* Stats row com ContadorAnimado */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-10 reveal">
+            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+                +<ContadorAnimado alvo={1000000} sufixo="" />
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Produtos Vendidos</p>
+            </div>
+            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+                <ContadorAnimado alvo={12} sufixo=" meses" />
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Garantia Sixxis</p>
+            </div>
+            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+                <ContadorAnimado alvo={100} sufixo="%" />
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Originais</p>
+            </div>
+          </div>
+
+          <PorQueComprarSixxis />
+        </section>
+
+        {/* Bloco de economia (Faça as contas) */}
+        <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} />
+
         {/* Descrição */}
         <DescricaoRica descricao={produto.descricao} />
-
-        {/* Bloco de economia — após Principais Benefícios, antes do FAQ */}
-        <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} />
 
         {/* Abas (Perguntas Frequentes + Avaliações) */}
         <div id="avaliacoes">
@@ -309,33 +348,6 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             hideDescricao
           />
         </div>
-
-        {/* Stats + Por que Sixxis */}
-        <section className="mt-16">
-          {/* Stats row com ContadorAnimado */}
-          <div className="grid grid-cols-3 gap-4 mb-10 reveal">
-            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a]">
-                +<ContadorAnimado alvo={1000000} sufixo="" />
-              </p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Produtos Vendidos</p>
-            </div>
-            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a]">
-                <ContadorAnimado alvo={12} sufixo=" meses" />
-              </p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Garantia Sixxis</p>
-            </div>
-            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a]">
-                <ContadorAnimado alvo={100} sufixo="%" />
-              </p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Originais</p>
-            </div>
-          </div>
-
-          <PorQueComprarSixxis />
-        </section>
 
       </div>
     </div>

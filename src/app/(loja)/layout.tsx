@@ -60,7 +60,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
         <Header logoUrl={logoUrl} />
         {/* Spacer: reserva o espaço do header fixed; altura real via CSS var --sixxis-header-h */}
         <div aria-hidden="true" style={{ height: 'var(--sixxis-header-h, 140px)' }} />
-        <div className="flex-1 pb-24 md:pb-0">{children}</div>
+        <div className="flex-1 pb-24 md:pb-0 bg-white md:bg-transparent">{children}</div>
         <Footer />
         <FloatingButtons agenteAtivo={cfg.agente_ativo === 'true'} />
         <BottomNavMobile />

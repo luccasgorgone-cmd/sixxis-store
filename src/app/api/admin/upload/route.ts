@@ -8,12 +8,13 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData()
   const file = formData.get('file') as File | null
+  const folder = (formData.get('folder') as string | null)?.replace(/[^a-z0-9-_/]/gi, '') || 'produtos'
 
   if (!file) {
     return NextResponse.json({ error: 'Nenhum arquivo enviado' }, { status: 400 })
   }
 
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']
   if (!allowedTypes.includes(file.type)) {
     return NextResponse.json({ error: 'Tipo de arquivo não permitido' }, { status: 400 })
   }
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
   const buffer = Buffer.from(bytes)
 
   const ext = file.name.split('.').pop() ?? 'jpg'
-  const key = `produtos/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`
+  const key = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`
 
   const url = await uploadToR2(buffer, key, file.type)
 

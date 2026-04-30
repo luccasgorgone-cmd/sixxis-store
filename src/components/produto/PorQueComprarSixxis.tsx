@@ -37,8 +37,8 @@ const RAZOES: Razao[] = [
   },
   {
     icone: Headphones,
-    titulo: 'Suporte humano, não robô',
-    desc: 'Fala com gente. WhatsApp, telefone, email. Equipe treinada no produto, atendimento de segunda a sábado.',
+    titulo: 'Atendimento 24/7',
+    desc: 'Suporte sempre disponível via WhatsApp e chat na loja. Tire dúvidas, resolva pendências e acompanhe seu pedido a qualquer hora.',
   },
 ]
 

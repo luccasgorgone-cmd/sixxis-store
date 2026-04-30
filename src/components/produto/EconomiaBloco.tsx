@@ -79,20 +79,20 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
         style={{ backgroundColor: '#ffffff', border: '2px solid #0f2e2b' }}
       >
         {/* Cabeçalho com título + badge */}
-        <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-3 flex-wrap">
+        <div className="px-4 sm:px-5 pt-5 pb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <TrendingDown size={24} strokeWidth={2} color="#0f2e2b" />
-              <h3 className="font-bold text-base" style={{ color: '#0f2e2b' }}>
+            <div className="flex items-start gap-2">
+              <TrendingDown size={20} strokeWidth={2} color="#0f2e2b" className="mt-0.5 shrink-0 sm:w-6 sm:h-6" />
+              <h3 className="font-bold text-sm sm:text-base leading-snug" style={{ color: '#0f2e2b' }}>
                 Faça as contas: quanto você deixa de pagar por mês
               </h3>
             </div>
-            <p className="text-xs mt-1" style={{ color: '#0f2e2b', opacity: 0.75 }}>
+            <p className="text-[11px] sm:text-xs mt-1 leading-snug" style={{ color: '#0f2e2b', opacity: 0.75 }}>
               Comparação real com ar-condicionado split 9.000 BTU, 8h/dia, 30 dias — tarifa R$ 0,85/kWh
             </p>
           </div>
           <span
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold shrink-0"
+            className="self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold shrink-0"
             style={{ backgroundColor: '#0f2e2b', color: '#3cbfb3' }}
           >
             <BadgeCheck size={14} strokeWidth={2.5} />
@@ -101,8 +101,8 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
         </div>
 
         {/* Valor em destaque */}
-        <div className="px-5 pb-5 text-center">
-          <p className="font-bold leading-none" style={{ color: '#0f2e2b', fontSize: 56 }}>
+        <div className="px-4 sm:px-5 pb-5 text-center">
+          <p className="font-bold leading-none text-4xl sm:text-[56px]" style={{ color: '#0f2e2b' }}>
             R$ {fmt(economiaMes)}
           </p>
           <p className="text-sm font-semibold mt-2" style={{ color: '#0f2e2b' }}>
@@ -111,9 +111,9 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
         </div>
 
         {/* Tabela Climatizador vs Ar-condicionado */}
-        <div className="px-5 pb-5">
-          <div className="overflow-hidden rounded-xl" style={{ border: '1px solid rgba(15,46,43,0.30)' }}>
-            <table className="w-full text-sm">
+        <div className="px-4 sm:px-5 pb-5">
+          <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid rgba(15,46,43,0.30)' }}>
+            <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
                   <th className="text-left px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}></th>

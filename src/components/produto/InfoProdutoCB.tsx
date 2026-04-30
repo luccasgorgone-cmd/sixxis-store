@@ -617,7 +617,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           onClick={() => toggleFav(produto.id)}
           className={`inline-flex items-center gap-2 text-xs border rounded-lg px-3 py-2 transition-colors ${
             isFav
-              ? 'text-red-500 border-red-300 bg-red-50'
+              ? 'text-red-500 border-red-300'
               : 'text-gray-500 hover:text-red-500 border-gray-200 hover:border-red-300'
           }`}
         >

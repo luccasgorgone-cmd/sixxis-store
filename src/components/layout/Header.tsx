@@ -145,7 +145,6 @@ const NAV_LINKS = [
   { href: '/ofertas',                           label: 'OFERTAS',        icon: Tag,   hot: true },
   { href: '/sobre',                             label: 'SOBRE',          icon: Info  },
   { href: '/contato',                           label: 'CONTATO',        icon: Phone },
-  { href: '/seja-revendedor',                   label: 'PARCEIRO',       icon: Store },
 ]
 
 // ── HEADER ────────────────────────────────────────────────────────────────────
@@ -745,7 +744,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             className="flex items-center gap-3 w-full bg-[#25D366] text-white text-sm font-semibold px-4 py-3 rounded-xl transition hover:bg-[#128C7E]"
           >
             <WaIcon />
-            (18) 99747-4701 — Vendas
+            Comercial
           </a>
           <div className="flex items-center gap-2 text-xs text-white/50">
             <Clock size={12} />

@@ -56,9 +56,9 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
         <div className="max-w-7xl mx-auto">
           <div className="h-7 w-52 bg-gray-200 rounded-xl animate-pulse mb-2" />
           <div className="h-4 w-72 bg-gray-100 rounded-lg animate-pulse mb-6" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <div className="flex md:grid md:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto md:overflow-visible">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl p-3 sm:p-4 animate-pulse">
+              <div key={i} className="bg-white rounded-2xl p-3 sm:p-4 animate-pulse min-w-[calc(50%-6px)] md:min-w-0 shrink-0 md:shrink">
                 <div className="aspect-square bg-gray-100 rounded-xl mb-3" />
                 <div className="h-4 bg-gray-100 rounded-lg mb-2 w-3/4" />
                 <div className="h-3 bg-gray-100 rounded-lg mb-3 w-1/2" />
@@ -96,8 +96,9 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
           </Link>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        {/* Mobile: carrossel horizontal (2 cards visiveis com snap) /
+            Desktop md+: grid 4 colunas */}
+        <div className="flex md:grid md:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0 pb-2 md:pb-0">
           {similares.map(p => {
             const precoBase  = Number(p.preco)
             const precoFinal = p.precoPromocional ? Number(p.precoPromocional) : precoBase
@@ -106,7 +107,7 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
             return (
               <div
                 key={p.id}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden"
+                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden min-w-[calc(50%-6px)] md:min-w-0 shrink-0 md:shrink snap-start"
               >
                 {/* Imagem — clicável para a página do produto */}
                 <Link href={`/produtos/${p.slug}`} className="relative aspect-square bg-gray-50 overflow-hidden block">
@@ -144,34 +145,6 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
                   <h3 className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-[#3cbfb3] transition-colors">
                     {p.nome}
                   </h3>
-
-                  {/* Specs destaque */}
-                  {p.especsDestaque.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2.5">
-                      {p.especsDestaque.slice(0, 3).map((spec, i) => (
-                        <span
-                          key={i}
-                          className="text-[10px] text-gray-500 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded-lg whitespace-nowrap"
-                        >
-                          {spec.valor}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Voltagens */}
-                  {p.voltagens.length > 0 && (
-                    <div className="flex gap-1 mb-2.5">
-                      {p.voltagens.map(v => (
-                        <span
-                          key={v}
-                          className="text-[10px] font-medium text-[#3cbfb3] border border-[#3cbfb3]/30 bg-[#3cbfb3]/5 px-1.5 py-0.5 rounded-md"
-                        >
-                          {v}
-                        </span>
-                      ))}
-                    </div>
-                  )}
 
                   {/* Preço */}
                   <div className="mt-auto pt-2 border-t border-gray-50">
