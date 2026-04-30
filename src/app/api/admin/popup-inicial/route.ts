@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 const updateSchema = z.object({
   ativado:        z.boolean().optional(),
   bannerDesktop:  z.string().nullable().optional(),
+  bannerTablet:   z.string().nullable().optional(),
   bannerMobile:   z.string().nullable().optional(),
   altText:        z.string().nullable().optional(),
   linkDestino:    z.string().nullable().optional(),

@@ -8,6 +8,7 @@ type Frequencia = 'sessao' | 'dia' | 'semana'
 interface PopupConfig {
   ativado:        boolean
   bannerDesktop:  string | null
+  bannerTablet:   string | null
   bannerMobile:   string | null
   altText:        string | null
   linkDestino:    string | null
@@ -24,6 +25,7 @@ interface PopupConfig {
 const VAZIO: PopupConfig = {
   ativado:        false,
   bannerDesktop:  null,
+  bannerTablet:   null,
   bannerMobile:   null,
   altText:        '',
   linkDestino:    '',
@@ -54,6 +56,7 @@ export default function PopupAdminPage() {
           setConfig({
             ativado:        Boolean(c.ativado),
             bannerDesktop:  c.bannerDesktop,
+            bannerTablet:   c.bannerTablet ?? null,
             bannerMobile:   c.bannerMobile,
             altText:        c.altText ?? '',
             linkDestino:    c.linkDestino ?? '',
@@ -93,7 +96,7 @@ export default function PopupAdminPage() {
     }
   }
 
-  async function uploadBanner(file: File, variant: 'desktop' | 'mobile') {
+  async function uploadBanner(file: File, variant: 'desktop' | 'tablet' | 'mobile') {
     setErro('')
     if (file.size > 2 * 1024 * 1024) {
       setErro('Imagem maior que 2MB.')
@@ -108,7 +111,11 @@ export default function PopupAdminPage() {
       if (!r.ok) throw new Error(d.error || 'Falha no upload')
       setConfig((c) => ({
         ...c,
-        ...(variant === 'desktop' ? { bannerDesktop: d.url } : { bannerMobile: d.url }),
+        ...(variant === 'desktop'
+          ? { bannerDesktop: d.url }
+          : variant === 'tablet'
+            ? { bannerTablet: d.url }
+            : { bannerMobile: d.url }),
       }))
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro no upload')
@@ -179,6 +186,15 @@ export default function PopupAdminPage() {
             url={config.bannerDesktop}
             onUpload={(f) => uploadBanner(f, 'desktop')}
             onRemove={() => setConfig((c) => ({ ...c, bannerDesktop: null }))}
+          />
+        </Card>
+
+        {/* Upload Tablet/iPad */}
+        <Card titulo="Banner tablet/iPad" sub="1024x768px ou 1024x600px · máx 2MB · opcional">
+          <BannerUpload
+            url={config.bannerTablet}
+            onUpload={(f) => uploadBanner(f, 'tablet')}
+            onRemove={() => setConfig((c) => ({ ...c, bannerTablet: null }))}
           />
         </Card>
 

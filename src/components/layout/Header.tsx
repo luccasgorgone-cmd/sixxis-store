@@ -505,9 +505,18 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 <Image src={logoFinal} alt="Sixxis" width={100} height={32} className="object-contain" priority onError={() => setLogoErro(true)} />
               </Link>
 
+              {/* Conta — empurra os 2 icones (Conta + Carrinho) pra direita */}
+              <Link
+                href={logado ? '/minha-conta' : '/login'}
+                className="ml-auto w-11 h-11 flex items-center justify-center text-white"
+                aria-label="Minha conta"
+              >
+                <User size={22} />
+              </Link>
+
               <button
                 onClick={() => setDrawerAberto(true)}
-                className="relative ml-auto w-11 h-11 flex items-center justify-center text-white"
+                className="relative w-11 h-11 flex items-center justify-center text-white"
                 aria-label="Abrir carrinho"
               >
                 <ShoppingCart size={22} />
