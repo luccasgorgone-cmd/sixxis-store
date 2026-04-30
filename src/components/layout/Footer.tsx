@@ -91,7 +91,7 @@ export default async function Footer() {
                   style={{ backgroundColor: '#25D366' }}
                 >
                   <WaSVG />
-                  Vendas
+                  Comercial
                 </a>
                 <a
                   href={`https://wa.me/${whatsappSuporte}`}
