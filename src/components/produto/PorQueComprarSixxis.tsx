@@ -81,7 +81,7 @@ export function PorQueComprarSixxis() {
         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {RAZOES.map((r, i) => {
           const Icone = r.icone
           const visivel = visiveis[i]
@@ -89,7 +89,7 @@ export function PorQueComprarSixxis() {
             <div
               key={i}
               ref={(el) => { refs.current[i] = el }}
-              className="p-8 rounded-[20px] border transition-all duration-200 hover:-translate-y-0.5"
+              className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[20px] border transition-all duration-200 hover:-translate-y-0.5"
               style={{
                 backgroundColor: '#0f2e2b',
                 borderColor: 'transparent',
@@ -103,19 +103,15 @@ export function PorQueComprarSixxis() {
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent' }}
             >
               <div
-                className="flex items-center justify-center rounded-full mb-5"
-                style={{
-                  width: 64,
-                  height: 64,
-                  backgroundColor: 'rgba(60, 191, 179, 0.10)',
-                }}
+                className="flex items-center justify-center rounded-full mb-3 sm:mb-5 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16"
+                style={{ backgroundColor: 'rgba(60, 191, 179, 0.10)' }}
               >
-                <Icone size={48} color="#3cbfb3" strokeWidth={1.75} />
+                <Icone className="w-6 h-6 sm:w-9 sm:h-9 lg:w-12 lg:h-12" color="#3cbfb3" strokeWidth={1.75} />
               </div>
-              <h3 className="font-bold mb-2" style={{ color: '#ffffff', fontSize: 20 }}>
+              <h3 className="font-bold mb-1.5 sm:mb-2 text-sm sm:text-lg lg:text-xl" style={{ color: '#ffffff' }}>
                 {r.titulo}
               </h3>
-              <p style={{ color: '#d1d5db', fontSize: 14, lineHeight: 1.6 }}>
+              <p className="text-xs sm:text-sm leading-snug sm:leading-relaxed" style={{ color: '#d1d5db' }}>
                 {r.desc}
               </p>
             </div>
