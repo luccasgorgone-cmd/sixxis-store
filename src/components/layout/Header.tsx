@@ -360,26 +360,27 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             </div>
 
             {/* Desktop: layout completo */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-1.5 lg:gap-2">
               <Tag size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-              <span className="text-[#0f2e2b] text-sm font-extrabold">CUPOM:</span>
-              <span className="bg-white text-[#0f2e2b] text-xs font-black px-2.5 py-1 rounded-lg border border-[#0f2e2b]/15 shadow-sm">
+              <span className="text-[#0f2e2b] text-xs lg:text-sm font-extrabold">CUPOM:</span>
+              <span className="bg-white text-[#0f2e2b] text-[10px] lg:text-xs font-black px-2 lg:px-2.5 py-0.5 lg:py-1 rounded-lg border border-[#0f2e2b]/15 shadow-sm whitespace-nowrap">
                 SIXXIS10
               </span>
-              <span className="text-[#0f2e2b]/85 text-sm font-semibold">
+              <span className="text-[#0f2e2b]/85 text-xs lg:text-sm font-semibold whitespace-nowrap">
                 — 10% OFF na 1ª compra
               </span>
             </div>
 
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-1.5 lg:gap-2">
               <div className="w-px h-5 bg-[#0f2e2b]/20" />
               <Truck size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-              <span className="text-[#0f2e2b] text-sm font-extrabold">
+              <span className="text-[#0f2e2b] text-xs lg:text-sm font-extrabold whitespace-nowrap">
                 FRETE GRÁTIS acima de R$ 500
               </span>
             </div>
 
-            <div className="hidden md:flex items-center gap-2">
+            {/* 3o item — escondido em iPad pra evitar overflow, aparece so em lg+ */}
+            <div className="hidden lg:flex items-center gap-2">
               <div className="w-px h-5 bg-[#0f2e2b]/20" />
               <MapPin size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
               <span className="text-[#0f2e2b]/85 text-sm font-semibold">
