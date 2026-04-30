@@ -312,21 +312,44 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
 
         {/* Stats — contadores +1M / 12 meses / 100% */}
         <section className="mt-12 mb-10">
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 reveal">
+          {/* Mobile: stack vertical com numero+label horizontais (cabe '+1.000.000') */}
+          <div className="md:hidden flex flex-col gap-2 reveal">
+            <div className="flex items-center justify-between bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15 px-5 py-3">
+              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+                +<ContadorAnimado alvo={1000000} sufixo="" />
+              </p>
+              <p className="text-sm text-gray-600 font-medium">Produtos Vendidos</p>
+            </div>
+            <div className="flex items-center justify-between bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15 px-5 py-3">
+              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+                <ContadorAnimado alvo={12} sufixo=" meses" />
+              </p>
+              <p className="text-sm text-gray-600 font-medium">Garantia Sixxis</p>
+            </div>
+            <div className="flex items-center justify-between bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15 px-5 py-3">
+              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+                <ContadorAnimado alvo={100} sufixo="%" />
+              </p>
+              <p className="text-sm text-gray-600 font-medium">Originais</p>
+            </div>
+          </div>
+
+          {/* Desktop md+: grid 3 colunas (layout original) */}
+          <div className="hidden md:grid grid-cols-3 gap-4 reveal">
             <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 +<ContadorAnimado alvo={1000000} sufixo="" />
               </p>
               <p className="text-xs text-gray-500 font-medium mt-0.5">Produtos Vendidos</p>
             </div>
             <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={12} sufixo=" meses" />
               </p>
               <p className="text-xs text-gray-500 font-medium mt-0.5">Garantia Sixxis</p>
             </div>
             <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-lg sm:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
               <p className="text-xs text-gray-500 font-medium mt-0.5">Originais</p>
