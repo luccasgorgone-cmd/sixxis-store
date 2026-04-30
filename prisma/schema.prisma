@@ -264,6 +264,7 @@ model AvaliacaoFoto {
 model Banner {
   id            String   @id @default(cuid())
   imagem        String
+  imagemTablet  String?
   imagemMobile  String?
   titulo        String?
   subtitulo     String?

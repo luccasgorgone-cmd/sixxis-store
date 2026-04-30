@@ -8,6 +8,7 @@ import { Toast } from '@/components/admin/Toast'
 interface Banner {
   id:           string
   imagem:       string
+  imagemTablet: string | null
   imagemMobile: string | null
   titulo:       string | null
   subtitulo:    string | null
@@ -18,7 +19,7 @@ interface Banner {
 }
 
 const EMPTY: Omit<Banner, 'id' | 'ordem'> = {
-  imagem: '', imagemMobile: '', titulo: '', subtitulo: '', link: '', ativo: true, tempoCads: 5,
+  imagem: '', imagemTablet: '', imagemMobile: '', titulo: '', subtitulo: '', link: '', ativo: true, tempoCads: 5,
 }
 
 export default function AdminBannersPage() {
@@ -30,7 +31,9 @@ export default function AdminBannersPage() {
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const fileRefTablet = useRef<HTMLInputElement>(null)
   const fileRefMobile = useRef<HTMLInputElement>(null)
+  const [uploadingTablet, setUploadingTablet] = useState(false)
   const [uploadingMobile, setUploadingMobile] = useState(false)
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') =>
@@ -63,6 +66,17 @@ export default function AdminBannersPage() {
     const url = await uploadImagem(file)
     if (url) setForm((f) => ({ ...f, imagem: url }))
     else showToast('Erro no upload', 'error')
+    e.target.value = ''
+  }
+
+  async function handleFileChangeTablet(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingTablet(true)
+    const url = await uploadImagem(file)
+    setUploadingTablet(false)
+    if (url) setForm((f) => ({ ...f, imagemTablet: url }))
+    else showToast('Erro no upload tablet', 'error')
     e.target.value = ''
   }
 
@@ -174,6 +188,27 @@ export default function AdminBannersPage() {
                     </div>
                   )}
                   <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                </div>
+
+                {/* Upload tablet (opcional) — iPad portrait 768-1023px */}
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-3">Imagem tablet/iPad (4:3 ou 16:10) — opcional</p>
+                <div
+                  onClick={() => fileRefTablet.current?.click()}
+                  className={`border-2 border-dashed rounded-xl h-36 cursor-pointer flex items-center justify-center overflow-hidden relative transition ${
+                    form.imagemTablet ? '' : 'border-gray-200 hover:border-[#3cbfb3]'
+                  }`}
+                >
+                  {form.imagemTablet ? (
+                    <Image src={form.imagemTablet} alt="preview tablet" fill className="object-cover" unoptimized />
+                  ) : uploadingTablet ? (
+                    <Loader2 className="w-7 h-7 text-[#3cbfb3] animate-spin" />
+                  ) : (
+                    <div className="text-center">
+                      <Upload className="w-7 h-7 text-gray-400 mx-auto mb-1" />
+                      <p className="text-xs text-gray-500">Substitui no iPad (768–1023px)</p>
+                    </div>
+                  )}
+                  <input ref={fileRefTablet} type="file" accept="image/*" className="hidden" onChange={handleFileChangeTablet} />
                 </div>
 
                 {/* Upload mobile (opcional) */}
