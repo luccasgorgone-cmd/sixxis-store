@@ -1,20 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-// ── Payment Badge ─────────────────────────────────────────────────────────────
-function PaymentBadge({ label, cor, circular = false }: { label: string; cor: string; circular?: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center justify-center text-white text-[10px] font-bold shrink-0 whitespace-nowrap ${
-        circular ? 'rounded-full w-7 h-7' : 'px-2.5 py-1 rounded-lg'
-      }`}
-      style={{ backgroundColor: cor }}
-    >
-      {label}
-    </span>
-  )
-}
-
 // ── Column Title ──────────────────────────────────────────────────────────────
 function ColTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -49,6 +35,17 @@ export default async function Footer() {
     else if (cfg.logo_url)           logoUrl          = cfg.logo_url
     if (cfg.social_whatsapp)         whatsappVendas   = cfg.social_whatsapp
     if (cfg.social_whatsapp_suporte) whatsappSuporte  = cfg.social_whatsapp_suporte
+  } catch {}
+
+  // Formas de pagamento dinamicas (configuradas em /adm-a7f9c2b4/formas-pagamento).
+  // Try/catch silencioso se a tabela ainda nao existir (db push pendente).
+  let formasPagamento: { id: string; nome: string; iconeUrl: string }[] = []
+  try {
+    formasPagamento = await prisma.formaPagamento.findMany({
+      where:   { ativo: true },
+      orderBy: [{ ordem: 'asc' }, { createdAt: 'asc' }],
+      select:  { id: true, nome: true, iconeUrl: true },
+    })
   } catch {}
 
   return (
@@ -254,13 +251,22 @@ export default async function Footer() {
                 Formas de Pagamento:
               </span>
               <div className="flex flex-wrap items-center justify-center gap-2">
-                <PaymentBadge label="PIX"        cor="#32bcad" />
-                <PaymentBadge label="VISA"       cor="#1a1f71" />
-                <PaymentBadge label="MC"         cor="#eb001b" circular />
-                <PaymentBadge label="Débito"     cor="#2563eb" />
-                <PaymentBadge label="Boleto"     cor="#374151" />
-                <PaymentBadge label="elo"        cor="#f59e0b" />
-                <PaymentBadge label="Diners"     cor="#4b5563" />
+                {formasPagamento.length > 0 ? (
+                  formasPagamento.map((forma) => (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      key={forma.id}
+                      src={forma.iconeUrl}
+                      alt={forma.nome}
+                      title={forma.nome}
+                      className="h-7 w-auto object-contain rounded bg-white/10 px-2 py-1 shrink-0"
+                    />
+                  ))
+                ) : (
+                  <span className="text-white/65 text-xs">
+                    PIX • Cartão de Crédito • Débito • Boleto
+                  </span>
+                )}
               </div>
             </div>
             <span className="text-white/70 text-xs font-semibold shrink-0">
