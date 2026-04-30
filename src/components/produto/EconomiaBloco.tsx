@@ -110,10 +110,64 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
           </p>
         </div>
 
-        {/* Tabela Climatizador vs Ar-condicionado */}
-        <div className="px-4 sm:px-5 pb-5">
-          <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid rgba(15,46,43,0.30)' }}>
-            <table className="w-full text-xs sm:text-sm">
+        {/* MOBILE: cards empilhados Ar-condicionado vs Climatizador */}
+        <div className="md:hidden px-4 pb-5 space-y-2">
+          {/* Card AC */}
+          <div className="rounded-xl p-3" style={{ border: '1px solid rgba(15,46,43,0.20)', backgroundColor: 'rgba(15,46,43,0.03)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <AirVent size={18} strokeWidth={2} color="#0f2e2b" />
+              <span className="font-bold text-sm" style={{ color: '#0f2e2b' }}>Ar-condicionado</span>
+              <span className="ml-auto text-[10px]" style={{ color: '#0f2e2b', opacity: 0.6 }}>{ac.descricaoAC}</span>
+            </div>
+            <dl className="text-xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Consumo</dt>
+                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>{ac.consumoW} W</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / mês</dt>
+                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC)}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / ano</dt>
+                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC * 12)}</dd>
+              </div>
+            </dl>
+          </div>
+
+          {/* Card Climatizador Sixxis (destaque tiffany) */}
+          <div className="rounded-xl p-3 relative" style={{ border: '2px solid #3cbfb3', backgroundColor: 'rgba(60,191,179,0.06)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Wind size={18} strokeWidth={2} color="#0f2e2b" />
+              <span className="font-bold text-sm" style={{ color: '#0f2e2b' }}>Climatizador Sixxis</span>
+              <span
+                className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black"
+                style={{ backgroundColor: '#3cbfb3', color: '#ffffff' }}
+              >
+                {percentual}% mais econômico
+              </span>
+            </div>
+            <dl className="text-xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Consumo</dt>
+                <dd className="font-bold" style={{ color: '#3cbfb3' }}>{consumoW} W</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / mês</dt>
+                <dd className="font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto)}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / ano</dt>
+                <dd className="font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto * 12)}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        {/* DESKTOP: tabela comparativa */}
+        <div className="hidden md:block px-5 pb-5">
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(15,46,43,0.30)' }}>
+            <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
                   <th className="text-left px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}></th>

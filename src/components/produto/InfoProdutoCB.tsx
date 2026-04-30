@@ -356,7 +356,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
 
         <div className="mb-2">
           <span className="text-gray-600 text-sm">por </span>
-          <span className="text-3xl font-black text-gray-900">R$ {fmt(precoAtual)}</span>
+          <span className="text-2xl md:text-3xl font-bold md:font-black text-gray-900">R$ {fmt(precoAtual)}</span>
           <span className="text-sm text-gray-600 ml-2">
             em até <strong>6x</strong> de{' '}
             <strong>R$ {fmt(precoAtual / 6)}</strong> sem juros no cartão
@@ -370,7 +370,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           </div>
           <div>
             <span className="text-gray-500 text-sm">por </span>
-            <span className="text-lg font-black text-gray-900">R$ {fmt(precoAtVista)}</span>
+            <span className="text-base md:text-lg font-bold md:font-black text-gray-900">R$ {fmt(precoAtVista)}</span>
             <span className="text-[#3cbfb3] text-sm font-semibold ml-1">com 3% de desconto</span>
           </div>
         </div>
