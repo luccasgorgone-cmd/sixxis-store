@@ -23,6 +23,7 @@ import {
   Bot,
 } from 'lucide-react'
 import CampoCor from '@/components/admin/CampoCor'
+import { DeprecatedBanner } from '@/components/admin/editor/DeprecatedBanner'
 import { Toast } from '@/components/admin/Toast'
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -2052,6 +2053,8 @@ export default function ConfiguracoesPage() {
           onClose={() => setToast(null)}
         />
       )}
+
+      <DeprecatedBanner />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Configurações</h1>
