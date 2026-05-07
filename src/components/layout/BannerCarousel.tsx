@@ -34,13 +34,10 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
       <section className="w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div
-            className="w-full rounded-2xl animate-pulse"
+            className="w-full rounded-2xl animate-pulse aspect-square md:aspect-[4/3] lg:aspect-[1920/560] lg:max-h-[560px]"
             style={{
               background:
                 'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 60%, rgba(15,46,43,0.7) 100%)',
-              aspectRatio: '1920/560',
-              maxHeight: '560px',
-              minHeight: '220px',
             }}
           />
         </div>
@@ -55,10 +52,8 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
     <section className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div
-          className="relative w-full overflow-hidden rounded-2xl select-none"
+          className="relative w-full overflow-hidden rounded-2xl select-none aspect-square md:aspect-[4/3] lg:aspect-[1920/560] lg:max-h-[560px]"
           style={{
-            aspectRatio: '1920/560',
-            maxHeight: '560px',
             background:
               'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 100%)',
           }}
@@ -89,6 +84,9 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
             <picture key={banner.id}>
               {banner.imagemMobile && (
                 <source media="(max-width: 767px)" srcSet={banner.imagemMobile} />
+              )}
+              {banner.imagemTablet && (
+                <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={banner.imagemTablet} />
               )}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

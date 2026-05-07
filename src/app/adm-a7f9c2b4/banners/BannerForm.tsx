@@ -132,7 +132,8 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="space-y-2">
           {/* Desktop */}
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imagem desktop (1920×640)</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imagem desktop — 1920×560px (3.43:1)</p>
+          <p className="text-[10px] text-gray-400 -mt-1">Layout largo. Texto à esquerda + produtos à direita.</p>
           <div
             onClick={() => fileRef.current?.click()}
             className={`border-2 border-dashed rounded-xl h-44 cursor-pointer flex items-center justify-center overflow-hidden relative transition ${
@@ -164,7 +165,7 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
 
           {/* Tablet */}
           <div className="flex items-center justify-between mt-3">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imagem tablet/iPad — opcional</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imagem tablet/iPad — 1024×768px (4:3) — opcional</p>
             {form.imagemTablet && (
               <button
                 type="button"
@@ -188,7 +189,7 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
             ) : (
               <div className="text-center">
                 <Upload className="w-7 h-7 text-gray-400 mx-auto mb-1" />
-                <p className="text-xs text-gray-500">Substitui no iPad (768–1023px)</p>
+                <p className="text-xs text-gray-500">Substitui no iPad (768–1023px). Layout 4:3 vertical ou horizontal.</p>
               </div>
             )}
             <input ref={fileRefTablet} type="file" accept="image/*" className="hidden"
@@ -197,7 +198,7 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
 
           {/* Mobile */}
           <div className="flex items-center justify-between mt-3">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imagem mobile — opcional</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imagem mobile — 800×800px (1:1 quadrado) — opcional</p>
             {form.imagemMobile && (
               <button
                 type="button"
@@ -221,7 +222,7 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
             ) : (
               <div className="text-center">
                 <Upload className="w-7 h-7 text-gray-400 mx-auto mb-1" />
-                <p className="text-xs text-gray-500">Substitui no mobile (≤ 767px)</p>
+                <p className="text-xs text-gray-500">Substitui no mobile (≤ 767px). Layout quadrado, texto e produtos empilhados.</p>
               </div>
             )}
             <input ref={fileRefMobile} type="file" accept="image/*" className="hidden"
