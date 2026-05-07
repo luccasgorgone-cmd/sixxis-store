@@ -18,6 +18,17 @@ function isAdminPublic(pathname: string): boolean {
   return ADMIN_PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
 }
 
+// Editores antigos consolidados em /editor-visual.
+//   - /editor-home e /mobile: removidos junto com filhos.
+//   - /configuracoes: removido SOMENTE a rota exata. /configuracoes/whatsapp
+//     (Marketing) e /configuracoes-loja (Negócio) permanecem ativos.
+function adminLegacyRedirect(pathname: string): boolean {
+  if (pathname === '/adm-a7f9c2b4/editor-home' || pathname.startsWith('/adm-a7f9c2b4/editor-home/')) return true
+  if (pathname === '/adm-a7f9c2b4/mobile'      || pathname.startsWith('/adm-a7f9c2b4/mobile/'))      return true
+  if (pathname === '/adm-a7f9c2b4/configuracoes')                                                    return true
+  return false
+}
+
 // ── CLIENTE ──────────────────────────────────────────────────────────────────
 // Sprint 2B: Sixxis exige login antes de checkout/minha-conta/pedidos.
 const CLIENTE_PROTEGIDAS = [
@@ -50,6 +61,10 @@ export function proxy(request: NextRequest) {
         return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
       }
       return NextResponse.redirect(new URL('/adm-a7f9c2b4/login', request.url))
+    }
+    // Editores legacy → consolidado em /editor-visual
+    if (adminLegacyRedirect(pathname)) {
+      return NextResponse.redirect(new URL('/adm-a7f9c2b4/editor-visual', request.url))
     }
     return NextResponse.next()
   }
