@@ -65,9 +65,10 @@ export const PUBLIC_CONFIG_KEYS = new Set<string>([
   // Hero/banner
   'hero_titulo', 'hero_subtitulo', 'hero_cta_texto', 'hero_cta_link', 'hero_imagem_url',
   // Por que Sixxis
-  'pq_sixxis_1_titulo', 'pq_sixxis_1_texto',
-  'pq_sixxis_2_titulo', 'pq_sixxis_2_texto',
-  'pq_sixxis_3_titulo', 'pq_sixxis_3_texto',
+  'pq_sixxis_1_titulo', 'pq_sixxis_1_texto', 'pq_sixxis_1_icone',
+  'pq_sixxis_2_titulo', 'pq_sixxis_2_texto', 'pq_sixxis_2_icone',
+  'pq_sixxis_3_titulo', 'pq_sixxis_3_texto', 'pq_sixxis_3_icone',
+  'pq_sixxis_4_titulo', 'pq_sixxis_4_texto', 'pq_sixxis_4_icone',
   // Trust bar / stats
   'trust_1_titulo', 'trust_1_sub',
   'trust_2_titulo', 'trust_2_sub',
