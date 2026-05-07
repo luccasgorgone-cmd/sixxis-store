@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
-import { pqSixxisDefaultEntries } from '@/lib/porque-sixxis-defaults'
 
 const NO_CACHE = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -11,15 +10,20 @@ const NO_CACHE = {
 
 export const dynamic = 'force-dynamic'
 
-// Sobrescreve as 12 chaves pq_sixxis_* com os defaults atuais.
-// Uso esperado: chamada manual 1x após deploy para substituir textos antigos
-// (ex.: "100% originais Sixxis", "instalação e manutenção") pelos novos
-// focados em qualidade premium, suporte de uso/operação e entrega nacional.
+// Substitui textos globais com menção a "produto original" e "instalação"
+// pelos novos focados em qualidade premium e suporte de uso/operação.
+// Uso: POST manual 1x após deploy.
+const FIXES: Record<string, string> = {
+  hero_subtitulo:    'Climatizadores, aspiradores e spinning de qualidade premium com entrega rápida para todo o Brasil.',
+  loja_descricao:    'Loja oficial Sixxis. Climatizadores, aspiradores, spinning e peças de reposição com qualidade comprovada.',
+  pq_sixxis_3_texto: 'Equipe pronta para tirar dúvidas sobre uso, operação e pós-venda dos produtos.',
+}
+
 export async function POST(request: NextRequest) {
   const unauthorized = await requireAdmin(request)
   if (unauthorized) return unauthorized
 
-  const entries = Object.entries(pqSixxisDefaultEntries())
+  const entries = Object.entries(FIXES)
 
   await Promise.all(
     entries.map(([chave, valor]) =>

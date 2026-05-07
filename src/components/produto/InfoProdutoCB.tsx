@@ -18,7 +18,7 @@ const SELOS_CONFIANCA = [
   { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Grátis acima de R$ 500' },
   { icon: Lock,        titulo: 'Compra 100% segura',       sub: 'SSL 256-bit + Antifraude' },
   { icon: CreditCard,  titulo: '6x sem juros',             sub: 'No cartão de crédito' },
-  { icon: BadgeCheck,  titulo: 'Produto 100% original',    sub: 'Direto da fábrica' },
+  { icon: BadgeCheck,  titulo: 'Qualidade Sixxis',         sub: 'Direto da fábrica' },
   { icon: Headphones,  titulo: 'Suporte especializado',    sub: 'Seg–Sex 8h às 18h' },
 ] as const
 

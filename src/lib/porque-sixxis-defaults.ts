@@ -27,7 +27,7 @@ export const PQ_SIXXIS_CARDS: PorQueSixxisCardDefault[] = [
   },
   {
     titulo: 'Suporte Especializado',
-    texto:  'Equipe técnica pronta para ajudar com instalação e manutenção.',
+    texto:  'Equipe pronta para tirar dúvidas sobre uso, operação e pós-venda dos produtos.',
     icone:  'Headphones',
   },
   {

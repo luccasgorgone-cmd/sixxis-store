@@ -266,10 +266,10 @@ export default async function HomePage() {
               return (
                 <div
                   key={n}
-                  className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-6 lg:p-8 hover:shadow-lg hover:bg-white/[0.12] transition-all duration-300"
+                  className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:bg-white/[0.12] transition-all duration-300"
                   style={{ borderTop: '4px solid #3cbfb3' }}
                 >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a4f4a] flex items-center justify-center mb-3 sm:mb-5">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a4f4a] flex items-center justify-center mb-3 sm:mb-5 mx-auto">
                     <Icon size={20} className="text-[#3cbfb3] sm:w-[22px] sm:h-[22px]" />
                   </div>
                   <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
