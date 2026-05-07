@@ -330,7 +330,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
               <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
-              <p className="text-sm text-gray-600 font-medium">Originais</p>
+              <p className="text-sm text-gray-600 font-medium">Qualidade</p>
             </div>
           </div>
 
@@ -352,7 +352,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
               <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Originais</p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Qualidade</p>
             </div>
           </div>
         </section>
