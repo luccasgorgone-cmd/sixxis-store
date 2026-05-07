@@ -7,6 +7,8 @@ import {
   Save, Loader2, ChevronUp, ChevronDown,
   Plus, Trash2, ImageIcon, Search, Check,
 } from 'lucide-react'
+import { PQ_SIXXIS_CARDS, PQ_SIXXIS_ICON_OPTIONS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
+import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -395,29 +397,59 @@ export default function EditorHomePage() {
       {/* ── 3. Por que Sixxis? ───────────────────────────────────────────────── */}
       <Card title='3. Por que Sixxis?'>
         <div className="space-y-4">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="border border-gray-100 rounded-xl p-4 space-y-3">
-              <p className="text-xs font-semibold text-gray-400 uppercase">Card {n}</p>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Título">
-                  <Input
-                    value={configs[`pq_sixxis_${n}_titulo`]}
-                    onChange={(v) => set(`pq_sixxis_${n}_titulo`, v)}
-                    placeholder={`Título ${n}`}
-                  />
-                </Field>
-                <Field label="Texto">
-                  <Input
-                    value={configs[`pq_sixxis_${n}_texto`]}
-                    onChange={(v) => set(`pq_sixxis_${n}_texto`, v)}
-                    placeholder="Descrição..."
-                  />
-                </Field>
+          {PQ_SIXXIS_NUMS.map((n, idx) => {
+            const def = PQ_SIXXIS_CARDS[idx]
+            const iconKey  = `pq_sixxis_${n}_icone`
+            const tituloKey = `pq_sixxis_${n}_titulo`
+            const textoKey  = `pq_sixxis_${n}_texto`
+            const iconValue = configs[iconKey] || def.icone
+            const PreviewIcon = getPqSixxisIcon(iconValue)
+            return (
+              <div key={n} className="border border-gray-100 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-gray-400 uppercase">Card {n}</p>
+                  <div className="w-9 h-9 rounded-lg bg-[#1a4f4a] flex items-center justify-center">
+                    <PreviewIcon size={18} className="text-[#3cbfb3]" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Field label="Título">
+                    <Input
+                      value={configs[tituloKey] ?? ''}
+                      onChange={(v) => set(tituloKey, v)}
+                      placeholder={def.titulo}
+                    />
+                  </Field>
+                  <Field label="Texto">
+                    <Input
+                      value={configs[textoKey] ?? ''}
+                      onChange={(v) => set(textoKey, v)}
+                      placeholder={def.texto}
+                    />
+                  </Field>
+                  <Field label="Ícone">
+                    <select
+                      value={iconValue}
+                      onChange={(e) => set(iconKey, e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                    >
+                      {PQ_SIXXIS_ICON_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
           <button
-            onClick={() => save(['pq_sixxis_1_titulo','pq_sixxis_1_texto','pq_sixxis_2_titulo','pq_sixxis_2_texto','pq_sixxis_3_titulo','pq_sixxis_3_texto'])}
+            onClick={() => save(
+              PQ_SIXXIS_NUMS.flatMap((n) => [
+                `pq_sixxis_${n}_titulo`,
+                `pq_sixxis_${n}_texto`,
+                `pq_sixxis_${n}_icone`,
+              ]),
+            )}
             disabled={saving}
             className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition disabled:opacity-50"
           >

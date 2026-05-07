@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Cpu, Headphones, BadgeCheck, ShoppingCart } from 'lucide-react'
+import { ArrowRight, ShoppingCart } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 
 import NewsletterForm from '@/components/layout/NewsletterForm'
@@ -11,6 +11,8 @@ import OfertasRelampago from '@/components/home/OfertasRelampago'
 import Depoimentos from '@/components/home/Depoimentos'
 import CategoriaImagemHero from '@/components/produto/CategoriaImagemHero'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
+import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
+import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -255,24 +257,26 @@ export default async function HomePage() {
             <h2 className="text-xl font-extrabold text-white">Por que Sixxis?</h2>
             <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { titulo: cfg.pq_sixxis_1_titulo || 'Tecnologia de Ponta',    texto: cfg.pq_sixxis_1_texto || 'Produtos desenvolvidos com engenharia avançada para máxima eficiência e durabilidade.', Icon: Cpu        },
-              { titulo: cfg.pq_sixxis_2_titulo || 'Suporte Especializado',  texto: cfg.pq_sixxis_2_texto || 'Equipe técnica treinada para te ajudar antes, durante e após a compra.',              Icon: Headphones },
-              { titulo: cfg.pq_sixxis_3_titulo || 'Melhor Custo-Benefício', texto: cfg.pq_sixxis_3_texto || 'Qualidade premium com preço justo. Garantia Sixxis em todos os produtos.',            Icon: BadgeCheck },
-            ].map(({ titulo, texto, Icon }) => (
-              <div
-                key={titulo}
-                className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-xl p-8 hover:shadow-lg hover:bg-white/[0.12] transition-all duration-300"
-                style={{ borderTop: '4px solid #3cbfb3' }}
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#1a4f4a] flex items-center justify-center mb-5">
-                  <Icon size={22} className="text-[#3cbfb3]" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            {PQ_SIXXIS_NUMS.map((n, idx) => {
+              const def = PQ_SIXXIS_CARDS[idx]
+              const titulo = cfg[`pq_sixxis_${n}_titulo`] || def.titulo
+              const texto  = cfg[`pq_sixxis_${n}_texto`]  || def.texto
+              const Icon   = getPqSixxisIcon(cfg[`pq_sixxis_${n}_icone`] || def.icone)
+              return (
+                <div
+                  key={n}
+                  className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-6 lg:p-8 hover:shadow-lg hover:bg-white/[0.12] transition-all duration-300"
+                  style={{ borderTop: '4px solid #3cbfb3' }}
+                >
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a4f4a] flex items-center justify-center mb-3 sm:mb-5">
+                    <Icon size={20} className="text-[#3cbfb3] sm:w-[22px] sm:h-[22px]" />
+                  </div>
+                  <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
+                  <p className="text-xs sm:text-sm text-white/70 leading-relaxed">{texto}</p>
                 </div>
-                <h3 className="font-bold text-white mb-3 text-base">{titulo}</h3>
-                <p className="text-sm text-white/70 leading-relaxed">{texto}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

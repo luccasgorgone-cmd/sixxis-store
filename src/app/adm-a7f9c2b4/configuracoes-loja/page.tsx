@@ -39,10 +39,16 @@ const CONFIG_LABELS: Record<string, ConfigMeta> = {
   // Por que Sixxis
   pq_sixxis_1_titulo: { label: 'Card 1 — Título',     tipo: 'texto',    grupo: 'Por que Sixxis?' },
   pq_sixxis_1_texto:  { label: 'Card 1 — Descrição',  tipo: 'textarea', grupo: 'Por que Sixxis?' },
+  pq_sixxis_1_icone:  { label: 'Card 1 — Ícone',      tipo: 'texto',    grupo: 'Por que Sixxis?' },
   pq_sixxis_2_titulo: { label: 'Card 2 — Título',     tipo: 'texto',    grupo: 'Por que Sixxis?' },
   pq_sixxis_2_texto:  { label: 'Card 2 — Descrição',  tipo: 'textarea', grupo: 'Por que Sixxis?' },
+  pq_sixxis_2_icone:  { label: 'Card 2 — Ícone',      tipo: 'texto',    grupo: 'Por que Sixxis?' },
   pq_sixxis_3_titulo: { label: 'Card 3 — Título',     tipo: 'texto',    grupo: 'Por que Sixxis?' },
   pq_sixxis_3_texto:  { label: 'Card 3 — Descrição',  tipo: 'textarea', grupo: 'Por que Sixxis?' },
+  pq_sixxis_3_icone:  { label: 'Card 3 — Ícone',      tipo: 'texto',    grupo: 'Por que Sixxis?' },
+  pq_sixxis_4_titulo: { label: 'Card 4 — Título',     tipo: 'texto',    grupo: 'Por que Sixxis?' },
+  pq_sixxis_4_texto:  { label: 'Card 4 — Descrição',  tipo: 'textarea', grupo: 'Por que Sixxis?' },
+  pq_sixxis_4_icone:  { label: 'Card 4 — Ícone',      tipo: 'texto',    grupo: 'Por que Sixxis?' },
 }
 
 function inferTipo(chave: string, valor: string): CampoTipo {

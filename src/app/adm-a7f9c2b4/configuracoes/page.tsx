@@ -94,12 +94,18 @@ const DEFAULTS: Record<string, string> = {
   hero_subtitulo: 'Produtos originais Sixxis com entrega rápida para todo o Brasil.',
   hero_cta_texto: 'Ver Produtos',
   hero_cta_link: '/produtos',
-  pq_sixxis_1_titulo: 'Qualidade Original',
-  pq_sixxis_1_texto: 'Todos os produtos são 100% originais Sixxis com garantia de fábrica.',
+  pq_sixxis_1_titulo: 'Qualidade Premium',
+  pq_sixxis_1_texto: 'Produtos testados e aprovados, com materiais resistentes para durar por anos.',
+  pq_sixxis_1_icone: 'Award',
   pq_sixxis_2_titulo: 'Entrega Rápida',
-  pq_sixxis_2_texto: 'Enviamos para todo o Brasil com Correios e transportadoras parceiras.',
+  pq_sixxis_2_texto: 'Despachamos em até 24h. Receba na sua porta com Correios e transportadoras parceiras.',
+  pq_sixxis_2_icone: 'Truck',
   pq_sixxis_3_titulo: 'Suporte Especializado',
   pq_sixxis_3_texto: 'Equipe técnica pronta para ajudar com instalação e manutenção.',
+  pq_sixxis_3_icone: 'Headphones',
+  pq_sixxis_4_titulo: 'Entrega para todo Brasil',
+  pq_sixxis_4_texto: 'Levamos conforto da capital ao interior — entregamos em todos os estados.',
+  pq_sixxis_4_icone: 'Package',
   newsletter_ativo: 'true',
   newsletter_titulo: 'Fique por dentro das novidades',
   newsletter_subtitulo: 'Receba ofertas exclusivas e lançamentos diretamente no seu email.',
@@ -1400,7 +1406,10 @@ export default function ConfiguracoesPage() {
   function renderEditor() {
     const keys = [
       'hero_titulo','hero_subtitulo','hero_cta_texto','hero_cta_link',
-      'pq_sixxis_1_titulo','pq_sixxis_1_texto','pq_sixxis_2_titulo','pq_sixxis_2_texto','pq_sixxis_3_titulo','pq_sixxis_3_texto',
+      'pq_sixxis_1_titulo','pq_sixxis_1_texto','pq_sixxis_1_icone',
+      'pq_sixxis_2_titulo','pq_sixxis_2_texto','pq_sixxis_2_icone',
+      'pq_sixxis_3_titulo','pq_sixxis_3_texto','pq_sixxis_3_icone',
+      'pq_sixxis_4_titulo','pq_sixxis_4_texto','pq_sixxis_4_icone',
       'newsletter_ativo','newsletter_titulo','newsletter_subtitulo',
       'whatsapp_banner_titulo','whatsapp_banner_subtitulo','rodape_tagline',
     ]
@@ -1431,15 +1440,37 @@ export default function ConfiguracoesPage() {
 
         <Card title='Seção "Por que Sixxis?"'>
           <div className="space-y-4">
-            {[1, 2, 3].map((n) => (
+            {[1, 2, 3, 4].map((n) => (
               <div key={n} className="border border-gray-100 rounded-xl p-4 space-y-3">
                 <p className="text-xs font-semibold text-gray-400 uppercase">Card {n}</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <Field label="Título">
                     <Input value={configs[`pq_sixxis_${n}_titulo`]} onChange={(v) => set(`pq_sixxis_${n}_titulo`, v)} placeholder={`Título ${n}`} />
                   </Field>
                   <Field label="Texto">
                     <Input value={configs[`pq_sixxis_${n}_texto`]} onChange={(v) => set(`pq_sixxis_${n}_texto`, v)} placeholder="Descrição..." />
+                  </Field>
+                  <Field label="Ícone">
+                    <select
+                      value={configs[`pq_sixxis_${n}_icone`] || 'Star'}
+                      onChange={(e) => set(`pq_sixxis_${n}_icone`, e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                    >
+                      <option value="Award">⭐ Award (qualidade)</option>
+                      <option value="Truck">🚚 Truck (entrega)</option>
+                      <option value="Headphones">🎧 Headphones (suporte)</option>
+                      <option value="Package">📦 Package (envio)</option>
+                      <option value="Shield">🛡️ Shield (proteção)</option>
+                      <option value="Star">⭐ Star (genérico)</option>
+                      <option value="Heart">❤️ Heart (amor)</option>
+                      <option value="Zap">⚡ Zap (rápido)</option>
+                      <option value="Clock">⏰ Clock (tempo)</option>
+                      <option value="ThumbsUp">👍 ThumbsUp (aprovação)</option>
+                      <option value="MapPin">📍 MapPin (localização)</option>
+                      <option value="BadgeCheck">✅ BadgeCheck (verificado)</option>
+                      <option value="Cpu">🖥️ Cpu (tecnologia)</option>
+                      <option value="Sparkles">✨ Sparkles (premium)</option>
+                    </select>
                   </Field>
                 </div>
               </div>
