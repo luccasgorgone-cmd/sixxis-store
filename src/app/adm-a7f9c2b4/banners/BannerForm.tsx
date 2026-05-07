@@ -5,44 +5,82 @@ import Image from 'next/image'
 import { Loader2, Upload, Save, X } from 'lucide-react'
 
 export interface Banner {
-  id:           string
-  imagem:       string
-  imagemTablet: string | null
-  imagemMobile: string | null
-  titulo:       string | null
-  subtitulo:    string | null
-  link:         string | null
-  ordem:        number
-  ativo:        boolean
-  tempoCads:    number
+  id:                string
+  imagem:            string
+  imagemTablet:      string | null
+  imagemMobile:      string | null
+  titulo:            string | null
+  subtitulo:         string | null
+  link:              string | null
+  ordem:             number
+  ativo:             boolean
+  tempoCads:         number
+  aspectMobile?:     string | null
+  aspectTablet?:     string | null
+  aspectDesktop?:    string | null
+  maxHeightDesktop?: string | null
 }
 
 type FormState = {
-  imagem:       string
-  imagemTablet: string
-  imagemMobile: string
-  titulo:       string
-  subtitulo:    string
-  link:         string
-  ativo:        boolean
-  tempoCads:    number
+  imagem:           string
+  imagemTablet:     string
+  imagemMobile:     string
+  titulo:           string
+  subtitulo:        string
+  link:             string
+  ativo:            boolean
+  tempoCads:        number
+  aspectMobile:     string
+  aspectTablet:     string
+  aspectDesktop:    string
+  maxHeightDesktop: string
 }
 
+const DEFAULT_ASPECT_MOBILE  = '1/1'
+const DEFAULT_ASPECT_TABLET  = '4/3'
+const DEFAULT_ASPECT_DESKTOP = '1920/560'
+const DEFAULT_MAX_H_DESKTOP  = '560px'
+
 const EMPTY: FormState = {
-  imagem: '', imagemTablet: '', imagemMobile: '', titulo: '', subtitulo: '', link: '', ativo: true, tempoCads: 5,
+  imagem: '', imagemTablet: '', imagemMobile: '', titulo: '', subtitulo: '', link: '',
+  ativo: true, tempoCads: 5,
+  aspectMobile:     DEFAULT_ASPECT_MOBILE,
+  aspectTablet:     DEFAULT_ASPECT_TABLET,
+  aspectDesktop:    DEFAULT_ASPECT_DESKTOP,
+  maxHeightDesktop: DEFAULT_MAX_H_DESKTOP,
 }
 
 function bannerToForm(b: Banner): FormState {
   return {
-    imagem:       b.imagem,
-    imagemTablet: b.imagemTablet ?? '',
-    imagemMobile: b.imagemMobile ?? '',
-    titulo:       b.titulo       ?? '',
-    subtitulo:    b.subtitulo    ?? '',
-    link:         b.link         ?? '',
-    ativo:        b.ativo,
-    tempoCads:    b.tempoCads,
+    imagem:           b.imagem,
+    imagemTablet:     b.imagemTablet ?? '',
+    imagemMobile:     b.imagemMobile ?? '',
+    titulo:           b.titulo       ?? '',
+    subtitulo:        b.subtitulo    ?? '',
+    link:             b.link         ?? '',
+    ativo:            b.ativo,
+    tempoCads:        b.tempoCads,
+    aspectMobile:     b.aspectMobile     ?? DEFAULT_ASPECT_MOBILE,
+    aspectTablet:     b.aspectTablet     ?? DEFAULT_ASPECT_TABLET,
+    aspectDesktop:    b.aspectDesktop    ?? DEFAULT_ASPECT_DESKTOP,
+    maxHeightDesktop: b.maxHeightDesktop ?? DEFAULT_MAX_H_DESKTOP,
   }
+}
+
+const PRESETS_MOBILE  = ['1/1', '4/5', '16/9', '4/3'] as const
+const PRESETS_TABLET  = ['4/3', '16/10', '21/9'] as const
+const PRESETS_DESKTOP = ['1920/560', '21/9', '16/9', '16/10'] as const
+
+function aspectToCss(value: string): string {
+  const trimmed = value.trim()
+  if (!trimmed) return '1 / 1'
+  if (trimmed.includes('/')) return trimmed.replace(/\//g, ' / ')
+  if (trimmed.includes(':')) return trimmed.replace(/:/g, ' / ')
+  return trimmed
+}
+
+function isValidAspect(value: string): boolean {
+  return /^\d+(\.\d+)?\s*[/:]\s*\d+(\.\d+)?$/.test(value.trim())
 }
 
 interface Props {
@@ -95,6 +133,9 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
   async function handleSalvar() {
     if (!form.imagem) { onError('Adicione uma imagem desktop'); return }
     if (!form.titulo.trim()) { onError('Adicione um título descritivo'); return }
+    if (!isValidAspect(form.aspectMobile))  { onError('Proporção mobile inválida (use formato W/H)');  return }
+    if (!isValidAspect(form.aspectTablet))  { onError('Proporção tablet inválida (use formato W/H)');  return }
+    if (!isValidAspect(form.aspectDesktop)) { onError('Proporção desktop inválida (use formato W/H)'); return }
     setSaving(true)
     const url = isEditing
       ? `/api/admin/banners/${banner!.id}`
@@ -265,6 +306,60 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
         </div>
       </div>
 
+      {/* Dimensões e proporções */}
+      <div className="border-t border-gray-100 pt-5 mt-2 mb-4">
+        <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+          Dimensões e proporções
+        </h3>
+        <p className="text-[11px] text-gray-400 mb-4">
+          Controla o aspect-ratio do container do banner em cada device. Formato <code className="text-gray-600">largura/altura</code> (ex: 16/9).
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <AspectField
+            label="Mobile (&lt; 768px)"
+            value={form.aspectMobile}
+            presets={PRESETS_MOBILE}
+            onChange={(v) => setForm((f) => ({ ...f, aspectMobile: v }))}
+          />
+          <AspectField
+            label="Tablet (768-1023px)"
+            value={form.aspectTablet}
+            presets={PRESETS_TABLET}
+            onChange={(v) => setForm((f) => ({ ...f, aspectTablet: v }))}
+          />
+          <AspectField
+            label="Desktop (≥ 1024px)"
+            value={form.aspectDesktop}
+            presets={PRESETS_DESKTOP}
+            onChange={(v) => setForm((f) => ({ ...f, aspectDesktop: v }))}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div>
+            <label className="text-xs font-medium text-gray-600">Altura máx desktop</label>
+            <input
+              value={form.maxHeightDesktop}
+              onChange={(e) => setForm((f) => ({ ...f, maxHeightDesktop: e.target.value }))}
+              placeholder="560px"
+              className="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+            />
+            <p className="text-[10px] text-gray-400 mt-1">Ex: 560px, 640px, auto</p>
+          </div>
+        </div>
+
+        {/* Preview ao vivo */}
+        <div>
+          <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Preview</p>
+          <div className="flex items-end gap-4 flex-wrap">
+            <PreviewBox label="Mobile"  aspect={form.aspectMobile}  width={80}  />
+            <PreviewBox label="Tablet"  aspect={form.aspectTablet}  width={140} />
+            <PreviewBox label="Desktop" aspect={form.aspectDesktop} width={220} />
+          </div>
+        </div>
+      </div>
+
       <div className="flex justify-end gap-2">
         <button
           onClick={handleCancel}
@@ -281,6 +376,70 @@ export function BannerForm({ banner, ordem, onSaved, onCancel, onError, onSucces
           {isEditing ? 'Salvar alterações' : 'Salvar'}
         </button>
       </div>
+    </div>
+  )
+}
+
+interface AspectFieldProps {
+  label: string
+  value: string
+  presets: readonly string[]
+  onChange: (v: string) => void
+}
+
+function AspectField({ label, value, presets, onChange }: AspectFieldProps) {
+  const isCustom = !presets.includes(value)
+  const valid = isValidAspect(value)
+  return (
+    <div>
+      <label className="text-xs font-medium text-gray-600">{label}</label>
+      <select
+        value={isCustom ? '__custom__' : value}
+        onChange={(e) => {
+          const v = e.target.value
+          if (v === '__custom__') onChange(value && !presets.includes(value) ? value : '')
+          else onChange(v)
+        }}
+        className="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+      >
+        {presets.map((p) => (
+          <option key={p} value={p}>{p}</option>
+        ))}
+        <option value="__custom__">Custom...</option>
+      </select>
+      {isCustom && (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="ex: 800/600"
+          className={`w-full mt-1.5 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+            valid
+              ? 'border-gray-200 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]'
+              : 'border-red-300 focus:ring-red-300'
+          }`}
+        />
+      )}
+      {isCustom && !valid && (
+        <p className="text-[10px] text-red-500 mt-1">Use formato W/H (ex: 16/9)</p>
+      )}
+    </div>
+  )
+}
+
+function PreviewBox({ label, aspect, width }: { label: string; aspect: string; width: number }) {
+  const valid = isValidAspect(aspect)
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div
+        className="bg-gradient-to-br from-[#1a4f4a]/30 to-[#0f2e2b]/50 rounded-lg border border-gray-200 flex items-center justify-center text-[10px] text-white/80 font-mono"
+        style={{
+          width: `${width}px`,
+          aspectRatio: valid ? aspectToCss(aspect) : '1 / 1',
+        }}
+      >
+        {valid ? aspect : '—'}
+      </div>
+      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
     </div>
   )
 }

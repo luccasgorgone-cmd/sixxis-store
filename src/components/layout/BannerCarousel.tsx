@@ -14,6 +14,20 @@ interface Banner {
   subtitulo?: string | null
   link?: string | null
   tempoCads?: number
+  aspectMobile?: string | null
+  aspectTablet?: string | null
+  aspectDesktop?: string | null
+  maxHeightDesktop?: string | null
+}
+
+function normalizeAspect(value?: string | null): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  // Aceita "16/9", "16:9", "1.78" — CSS aspect-ratio prefere "W / H"
+  if (trimmed.includes('/')) return trimmed.replace(/\//g, ' / ')
+  if (trimmed.includes(':')) return trimmed.replace(/:/g, ' / ')
+  return trimmed
 }
 
 export default function BannerCarousel({ banners }: { banners: Banner[] }) {
@@ -34,7 +48,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
       <section className="w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div
-            className="w-full rounded-2xl animate-pulse aspect-square md:aspect-[4/3] lg:aspect-[1920/560] lg:max-h-[560px]"
+            className="banner-container w-full rounded-2xl animate-pulse"
             style={{
               background:
                 'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 60%, rgba(15,46,43,0.7) 100%)',
@@ -47,16 +61,27 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
 
   const banner = banners[current]
 
+  const aspectVars: Record<string, string> = {}
+  const aMobile  = normalizeAspect(banner.aspectMobile)
+  const aTablet  = normalizeAspect(banner.aspectTablet)
+  const aDesktop = normalizeAspect(banner.aspectDesktop)
+  const mhDesk   = banner.maxHeightDesktop?.trim()
+  if (aMobile)  aspectVars['--aspect-mobile']  = aMobile
+  if (aTablet)  aspectVars['--aspect-tablet']  = aTablet
+  if (aDesktop) aspectVars['--aspect-desktop'] = aDesktop
+  if (mhDesk)   aspectVars['--max-h-desktop']  = mhDesk
+
   return (
     /* Outer: full width, sem background — sem espaço acima/abaixo */
     <section className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div
-          className="relative w-full overflow-hidden rounded-2xl select-none aspect-square md:aspect-[4/3] lg:aspect-[1920/560] lg:max-h-[560px]"
+          className="banner-container relative w-full overflow-hidden rounded-2xl select-none"
           style={{
             background:
               'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 100%)',
-          }}
+            ...aspectVars,
+          } as React.CSSProperties}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
