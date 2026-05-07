@@ -101,7 +101,7 @@ const DEFAULTS: Record<string, string> = {
   pq_sixxis_2_texto: 'Despachamos em até 24h. Receba na sua porta com Correios e transportadoras parceiras.',
   pq_sixxis_2_icone: 'Truck',
   pq_sixxis_3_titulo: 'Suporte Especializado',
-  pq_sixxis_3_texto: 'Equipe técnica pronta para ajudar com instalação e manutenção.',
+  pq_sixxis_3_texto: 'Equipe pronta para tirar dúvidas sobre uso, operação e pós-venda dos produtos.',
   pq_sixxis_3_icone: 'Headphones',
   pq_sixxis_4_titulo: 'Entrega para todo Brasil',
   pq_sixxis_4_texto: 'Levamos conforto da capital ao interior — entregamos em todos os estados.',
