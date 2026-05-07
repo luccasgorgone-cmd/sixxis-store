@@ -70,17 +70,17 @@ export default function GarantiaPage() {
             {[
               {
                 icon: Wind,     titulo: 'Climatizadores', prazo: '12 meses', cor: '#3cbfb3',
-                cobre: ['Motor e compressor', 'Painel eletrônico', 'Estrutura e corpo', 'Acessórios originais'],
+                cobre: ['Motor e compressor', 'Painel eletrônico', 'Estrutura e corpo', 'Acessórios oficiais'],
                 nao:   ['Filtros e consumíveis', 'Danos por mau uso'],
               },
               {
                 icon: Sparkles, titulo: 'Aspiradores',    prazo: '12 meses', cor: '#8b5cf6',
-                cobre: ['Motor principal', 'Corpo do aspirador', 'Mangueiras originais', 'Acessórios inclusos'],
+                cobre: ['Motor principal', 'Corpo do aspirador', 'Mangueiras oficiais', 'Acessórios inclusos'],
                 nao:   ['Sacos descartáveis', 'Filtros de uso'],
               },
               {
                 icon: Bike,     titulo: 'Bikes Spinning', prazo: '12 meses', cor: '#f59e0b',
-                cobre: ['Estrutura metálica', 'Sistema de freio', 'Guidão e selim', 'Pedais originais'],
+                cobre: ['Estrutura metálica', 'Sistema de freio', 'Guidão e selim', 'Pedais oficiais'],
                 nao:   ['Desgaste de correia', 'Partes móveis por uso'],
               },
             ].map((p, i) => {
