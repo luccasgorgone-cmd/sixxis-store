@@ -261,7 +261,7 @@ function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFi
       <div className="px-5 pb-4 flex items-center justify-between">
         <span className="flex items-center gap-1 text-gray-400 text-[10px]"><Lock size={9} /> SSL 256-bit</span>
         <span className="flex items-center gap-1 text-gray-400 text-[10px]"><Shield size={9} /> Compra segura</span>
-        <span className="flex items-center gap-1 text-gray-400 text-[10px]"><Award size={9} /> 100% original</span>
+        <span className="flex items-center gap-1 text-gray-400 text-[10px]"><Award size={9} /> Qualidade comprovada</span>
       </div>
     </div>
   )
@@ -966,7 +966,7 @@ function CheckoutContent() {
                   <div className="flex items-center justify-center gap-6 pt-1">
                     <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Lock size={9} /> SSL 256-bit</span>
                     <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Shield size={9} /> Compra segura</span>
-                    <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Star size={9} /> 100% original</span>
+                    <span className="flex items-center gap-1.5 text-gray-300 text-[10px]"><Star size={9} /> Qualidade comprovada</span>
                   </div>
                 </div>
               )}

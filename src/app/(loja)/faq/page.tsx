@@ -37,12 +37,12 @@ const faqs = [
     a: 'Após a confirmação do pagamento e envio, você receberá um e-mail com o código de rastreamento. Você também pode acompanhar o status diretamente na área "Meus Pedidos" dentro da sua conta no site.',
   },
   {
-    q: 'Os produtos são originais?',
-    a: 'Sim! Todos os produtos comercializados pela Sixxis são 100% originais, com nota fiscal e garantia. Trabalhamos direto da fábrica, sem intermediários e sem produtos falsificados ou paralelos.',
+    q: 'Como sei que os produtos têm qualidade?',
+    a: 'Trabalhamos diretamente com a fábrica Sixxis, garantindo padrão de qualidade premium em todos os produtos. Cada item passa por controle de qualidade antes do envio e conta com 12 meses de garantia oficial.',
   },
   {
-    q: 'Vocês têm assistência técnica?',
-    a: 'Sim. Contamos com uma equipe de suporte técnico especializado para auxiliar em dúvidas de instalação, uso e manutenção. Para atendimento técnico, entre em contato via WhatsApp (18) 99747-4701 ou pelo e-mail brasil.sixxis@gmail.com.',
+    q: 'Vocês oferecem suporte técnico?',
+    a: 'Sim! Nossa equipe técnica está pronta para tirar dúvidas sobre uso, operação e pós-venda via WhatsApp (18) 99747-4701 ou pelo e-mail brasil.sixxis@gmail.com. Como nossos produtos são plug-and-play, você só precisa ligar na tomada e pronto.',
   },
   {
     q: 'Como funciona o parcelamento no cartão?',

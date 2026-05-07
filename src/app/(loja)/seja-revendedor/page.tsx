@@ -98,7 +98,7 @@ export default function SejaRevendedorPage() {
     {
       icone: BadgeCheck,
       titulo: 'Produto Certificado',
-      texto: '100% originais Sixxis com certificação INMETRO, garantia de 12 meses e índice zero de recall na linha de climatizadores. Você vende com total confiança.',
+      texto: 'Produtos com qualidade premium e certificação INMETRO, garantia de 12 meses e índice zero de recall na linha de climatizadores. Você vende com total confiança.',
       destaque: 'Índice zero de recall',
     },
     {
