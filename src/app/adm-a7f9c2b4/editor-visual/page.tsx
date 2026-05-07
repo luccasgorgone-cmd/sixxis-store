@@ -8,9 +8,14 @@ import { LivePreview } from '@/components/admin/editor/LivePreview'
 import { SecaoGlobal } from '@/components/admin/editor/sections/SecaoGlobal'
 import { SecaoAnuncio } from '@/components/admin/editor/sections/SecaoAnuncio'
 import { SecaoHero } from '@/components/admin/editor/sections/SecaoHero'
+import { SecaoStats } from '@/components/admin/editor/sections/SecaoStats'
+import { SecaoMaisVendidos } from '@/components/admin/editor/sections/SecaoMaisVendidos'
 import { SecaoPorQueSixxis } from '@/components/admin/editor/sections/SecaoPorQueSixxis'
+import { SecaoBannersDuplos } from '@/components/admin/editor/sections/SecaoBannersDuplos'
 import { SecaoNewsletter } from '@/components/admin/editor/sections/SecaoNewsletter'
 import { SecaoBannerWhatsapp } from '@/components/admin/editor/sections/SecaoBannerWhatsapp'
+import { SecaoTrustBar } from '@/components/admin/editor/sections/SecaoTrustBar'
+import { SecaoOfertasRelampago } from '@/components/admin/editor/sections/SecaoOfertasRelampago'
 import { SecaoFooter } from '@/components/admin/editor/sections/SecaoFooter'
 import type { Configs, Device } from '@/components/admin/editor/types'
 
@@ -150,13 +155,17 @@ export default function EditorVisualPage() {
                 <SecaoGlobal {...sectionProps} />
                 <SecaoAnuncio {...sectionProps} />
                 <SecaoHero {...sectionProps} />
+                <SecaoTrustBar {...sectionProps} />
+                <SecaoOfertasRelampago {...sectionProps} />
+                <SecaoStats {...sectionProps} />
+                <SecaoMaisVendidos {...sectionProps} />
                 <SecaoPorQueSixxis {...sectionProps} />
+                <SecaoBannersDuplos {...sectionProps} />
                 <SecaoNewsletter {...sectionProps} />
                 <SecaoBannerWhatsapp {...sectionProps} />
                 <SecaoFooter {...sectionProps} />
                 <p className="text-center text-[11px] text-gray-400 pt-4 pb-2">
-                  Stats, Mais Vendidos, Banners Duplos, Trust Bar e Ofertas Relâmpago
-                  <br />— em breve nesta tela.
+                  12 seções · ordem segue o fluxo da home
                 </p>
               </>
             )}
