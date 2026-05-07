@@ -128,7 +128,7 @@ export default async function HomePage() {
           { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Frete grátis acima de R$ 500'    },
           { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos'            },
           { titulo: trust.trust_3_titulo || '6x sem juros no cartão',     sub: trust.trust_3_sub || 'Débito, crédito e PIX'            },
-          { titulo: trust.trust_4_titulo || 'Produtos Originais',         sub: trust.trust_4_sub || 'Garantia Sixxis'                  },
+          { titulo: trust.trust_4_titulo || 'Qualidade Sixxis',           sub: trust.trust_4_sub || 'Garantia Sixxis'                  },
         ]}
       />
 

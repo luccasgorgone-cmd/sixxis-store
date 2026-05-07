@@ -131,7 +131,7 @@ const DEFAULTS: Record<string, string> = {
   trust_2_sub: 'Seus dados protegidos',
   trust_3_titulo: '6x sem juros no cartão',
   trust_3_sub: 'Débito, crédito e PIX',
-  trust_4_titulo: 'Produtos Originais',
+  trust_4_titulo: 'Qualidade Sixxis',
   trust_4_sub: 'Garantia Sixxis',
   stat_1_num: '5.000+',
   stat_1_label: 'Clientes Satisfeitos',

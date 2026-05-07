@@ -23,7 +23,7 @@ const RAZOES: Razao[] = [
   {
     icone: ShieldCheck,
     titulo: 'Garantia real de 12 meses',
-    desc: 'Assistência técnica própria em Araçatuba-SP. Peças originais em estoque. Defeito? Trocamos ou consertamos sem burocracia.',
+    desc: 'Assistência técnica própria em Araçatuba-SP. Peças oficiais Sixxis em estoque. Defeito? Trocamos ou consertamos sem burocracia.',
   },
   {
     icone: TrendingDown,

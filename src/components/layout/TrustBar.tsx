@@ -11,7 +11,7 @@ const DEFAULT_ITEMS: TrustItem[] = [
   { titulo: 'Entrega para todo o Brasil', sub: 'Frete grátis acima de R$\u00a0500' },
   { titulo: 'Compra 100% Segura',         sub: 'Seus dados protegidos' },
   { titulo: '6x sem juros no cartão',     sub: 'Débito, crédito e PIX' },
-  { titulo: 'Produtos Originais',         sub: 'Garantia Sixxis' },
+  { titulo: 'Qualidade Sixxis',           sub: 'Garantia Sixxis' },
 ]
 
 interface Props {

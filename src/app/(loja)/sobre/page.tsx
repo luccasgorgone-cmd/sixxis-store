@@ -236,7 +236,7 @@ export default function SobrePage() {
               },
               {
                 icone: PackageCheck,
-                titulo: '100% Produtos Originais',
+                titulo: 'Qualidade Sixxis',
                 subtitulo: 'Certificação INMETRO em toda a linha',
                 texto: 'Todos os produtos saem diretamente da nossa importação oficial com nota fiscal, certificação INMETRO e rastreabilidade completa. Zero produtos paralelos ou adulterados — nunca.',
                 destaque: 'INMETRO',
