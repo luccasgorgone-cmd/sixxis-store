@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
   if (unauthorized) return unauthorized
 
   const body = await request.json()
-  const { imagem, imagemTablet, imagemMobile, titulo, subtitulo, link, ordem, ativo, tempoCads } = body
+  const {
+    imagem, imagemTablet, imagemMobile, titulo, subtitulo, link, ordem, ativo, tempoCads,
+    aspectMobile, aspectTablet, aspectDesktop, maxHeightDesktop,
+  } = body
 
   if (!imagem) return NextResponse.json({ error: 'Imagem obrigatória' }, { status: 400 })
 
@@ -38,6 +41,10 @@ export async function POST(request: NextRequest) {
       ordem:     Number(ordem) || 0,
       ativo:     ativo !== false,
       tempoCads: Number(tempoCads) || 5,
+      aspectMobile:     aspectMobile     || null,
+      aspectTablet:     aspectTablet     || null,
+      aspectDesktop:    aspectDesktop    || null,
+      maxHeightDesktop: maxHeightDesktop || null,
     },
   })
 
