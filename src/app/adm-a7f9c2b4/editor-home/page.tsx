@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_ICON_OPTIONS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
+import { DeprecatedBanner } from '@/components/admin/editor/DeprecatedBanner'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -340,6 +341,8 @@ export default function EditorHomePage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-20">
       {toast && <Toast message={toast.msg} type={toast.type} />}
+
+      <DeprecatedBanner />
 
       <div className="flex items-center justify-between">
         <div>

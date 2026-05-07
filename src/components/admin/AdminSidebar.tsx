@@ -9,7 +9,7 @@ import {
   LayoutTemplate, Mail, X, BarChart2, Users,
   Smartphone, Home, ExternalLink, ShieldOff,
   Target, MessageSquare, Clock, Bot, UserCog, History,
-  CreditCard, ShieldCheck, Bell,
+  CreditCard, ShieldCheck, Bell, Sparkles,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -56,11 +56,12 @@ const NAV_GROUPS = [
   {
     label: 'Conteúdo',
     items: [
-      { href: '/adm-a7f9c2b4/editor-home',        label: 'Editor da Home',     icon: Home,       exact: false },
-      { href: '/adm-a7f9c2b4/mobile',             label: 'Editor Mobile',      icon: Smartphone, exact: false },
+      { href: '/adm-a7f9c2b4/editor-visual',      label: 'Editor Visual',      icon: Sparkles,   exact: false, badge: 'NOVO' },
       { href: '/adm-a7f9c2b4/banners',            label: 'Banners',            icon: ImageIcon,  exact: false },
       { href: '/adm-a7f9c2b4/popup-inicial',      label: 'Pop-up Inicial',     icon: Bell,       exact: false },
       { href: '/adm-a7f9c2b4/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,    exact: false },
+      { href: '/adm-a7f9c2b4/editor-home',        label: 'Editor da Home',     icon: Home,       exact: false, deprecated: true },
+      { href: '/adm-a7f9c2b4/mobile',             label: 'Editor Mobile',      icon: Smartphone, exact: false, deprecated: true },
     ],
   },
   {
@@ -162,7 +163,10 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
               >
                 {group.label}
               </p>
-              {group.items.map(({ href, label, icon: Icon, exact }) => {
+              {group.items.map((item) => {
+                const { href, label, icon: Icon, exact } = item
+                const badge = (item as { badge?: string }).badge
+                const deprecated = (item as { deprecated?: boolean }).deprecated
                 const active = isActive(href, exact)
                 return (
                   <Link
@@ -173,6 +177,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
                       color:           active ? A.sidebarActiveText : A.sidebarText,
                       backgroundColor: active ? A.sidebarActiveBg : undefined,
                       fontWeight:      active ? 600 : 400,
+                      opacity:         deprecated && !active ? 0.5 : 1,
                     }}
                   >
                     {/* Squared icon container */}
@@ -184,9 +189,14 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
                     >
                       <Icon size={14} />
                     </span>
-                    <span className="flex-1 truncate">{label}</span>
+                    <span className={`flex-1 truncate ${deprecated ? 'line-through' : ''}`}>{label}</span>
+                    {badge && (
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#3cbfb3] text-[#0f2e2b] shrink-0">
+                        {badge}
+                      </span>
+                    )}
                     {/* Active dot */}
-                    {active && (
+                    {active && !badge && (
                       <span
                         className="w-1.5 h-1.5 rounded-full shrink-0"
                         style={{ backgroundColor: A.tiffany }}

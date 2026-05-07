@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { Save, Smartphone, Monitor } from 'lucide-react'
+import { DeprecatedBanner } from '@/components/admin/editor/DeprecatedBanner'
 
 interface MobileConfig {
   bannerMobileUrl:          string
@@ -62,6 +63,7 @@ export default function AdminMobilePage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      <DeprecatedBanner />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
