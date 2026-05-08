@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { X, ShoppingBag, Minus, Plus, Trash2, Truck, Package, Zap } from 'lucide-react'
+import { X, ShoppingBag, Minus, Plus, Trash2, Package, Zap } from 'lucide-react'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 
 interface UpsellItem {
@@ -15,8 +15,6 @@ interface UpsellItem {
   imagem: string | null
   pixPreco: string
 }
-
-const FRETE_GRATIS = 500
 
 function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -60,10 +58,6 @@ export default function CarrinhoDrawer() {
     }
   }, [drawerAberto])
 
-  const faltaFrete   = Math.max(0, FRETE_GRATIS - total)
-  const progressoPct = Math.min(100, (total / FRETE_GRATIS) * 100)
-  const freteGratis  = total >= FRETE_GRATIS
-
   return (
     <>
       {/* Overlay */}
@@ -100,29 +94,6 @@ export default function CarrinhoDrawer() {
           >
             <X size={20} />
           </button>
-        </div>
-
-        {/* Barra de progresso frete grátis */}
-        <div className="px-5 py-3 border-b border-gray-50 shrink-0">
-          {freteGratis ? (
-            <div className="flex items-center gap-2 text-green-700">
-              <Truck size={14} className="shrink-0" />
-              <span className="text-xs font-bold">Parabéns! Você ganhou frete grátis!</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <Truck size={13} className="text-gray-400 shrink-0" />
-              <span className="text-xs text-gray-600">
-                Faltam <strong className="text-amber-600">R$ {fmt(faltaFrete)}</strong> para frete grátis
-              </span>
-            </div>
-          )}
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-2">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${freteGratis ? 'bg-green-500' : 'bg-amber-400'}`}
-              style={{ width: `${progressoPct}%` }}
-            />
-          </div>
         </div>
 
         {/* Itens */}

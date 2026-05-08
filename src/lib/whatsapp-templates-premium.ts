@@ -63,7 +63,7 @@ Você deixou um carrinho de *${valorCarrinho}* esperando na Sixxis. 🛒
 
 ${cupom ? `🎁 Criamos um cupom *exclusivo* para você finalizar hoje:\n*Código:* ${cupom}\n\n` : ''}Finalize sua compra agora e aproveite:
 ✅ Parcele em até *6x sem juros*
-✅ Frete grátis acima de R$ 500
+✅ Envio em até 24h para todo Brasil
 ✅ *12 meses* de garantia Sixxis
 
 Posso te ajudar com alguma dúvida?

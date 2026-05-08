@@ -334,25 +334,26 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
             </div>
           </div>
 
-          {/* Desktop md+: grid 3 colunas (layout original) */}
-          <div className="hidden md:grid grid-cols-3 gap-4 reveal">
-            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+          {/* Tablet + Desktop: grid 3 colunas centralizada (max-w-3xl em tablet pra
+              não esticar; lg+ pode usar todo o container para acompanhar o resto). */}
+          <div className="hidden md:grid grid-cols-3 gap-3 lg:gap-4 max-w-3xl lg:max-w-none mx-auto reveal">
+            <div className="text-center py-4 lg:py-5 px-3 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-xl lg:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 +<ContadorAnimado alvo={1000000} sufixo="" />
               </p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Produtos Vendidos</p>
+              <p className="text-[11px] lg:text-xs text-gray-500 font-medium mt-1">Produtos Vendidos</p>
             </div>
-            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-xl lg:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={12} sufixo=" meses" />
               </p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Garantia Sixxis</p>
+              <p className="text-[11px] lg:text-xs text-gray-500 font-medium mt-1">Garantia Sixxis</p>
             </div>
-            <div className="text-center py-5 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
+              <p className="text-xl lg:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Qualidade</p>
+              <p className="text-[11px] lg:text-xs text-gray-500 font-medium mt-1">Qualidade</p>
             </div>
           </div>
         </section>

@@ -227,7 +227,7 @@ export default function CarrinhoPage() {
       }
       localStorage.setItem('sixxis_cep', cepLimpo)
     } catch {
-      const pac = { id: 'pac', nome: 'PAC — Correios', prazo: '3 a 5 dias úteis', preco: subtotal >= 500 ? 0 : 18.90 }
+      const pac = { id: 'pac', nome: 'PAC — Correios', prazo: '3 a 5 dias úteis', preco: 18.90 }
       const sedex = { id: 'sedex', nome: 'SEDEX — Correios', prazo: '1 a 2 dias úteis', preco: 32.90 }
       setFreteOpcoes([pac, sedex])
       setFreteSelecionado(pac)
@@ -518,13 +518,6 @@ export default function CarrinhoPage() {
                 </button>
               </div>
 
-              {subtotal >= 500 && (
-                <div className="flex items-center gap-2 text-xs text-emerald-600 mb-2">
-                  <CheckCircle size={12} />
-                  Frete grátis (PAC) para pedidos acima de R$ 500!
-                </div>
-              )}
-
               {freteOpcoes.length > 0 && (
                 <div className="space-y-2 mt-3">
                   {freteOpcoes.map(op => (
@@ -664,7 +657,7 @@ export default function CarrinhoPage() {
               <div className="mt-5 pt-4 border-t border-gray-50 grid grid-cols-2 gap-2">
                 {[
                   { icon: ShieldCheck, titulo: '12 meses de garantia',       sub: 'Garantia real e documentada' },
-                  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Grátis acima de R$ 500' },
+                  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
                   { icon: Lock,        titulo: 'Compra 100% segura',         sub: 'SSL 256-bit + Antifraude' },
                   { icon: CreditCard,  titulo: '6x sem juros',               sub: 'No cartão de crédito' },
                   { icon: BadgeCheck,  titulo: 'Qualidade comprovada',       sub: 'Direto da fábrica' },

@@ -21,8 +21,8 @@ const faqs = [
     a: 'Aceitamos PIX (com 3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x, cartão de débito e boleto bancário. Todos os pagamentos são processados com segurança via MercadoPago.',
   },
   {
-    q: 'O frete é gratuito?',
-    a: 'Sim! Oferecemos frete grátis para compras acima de R$ 500,00 para todo o Brasil. Para compras abaixo desse valor, o frete é calculado automaticamente no checkout com base no CEP de entrega.',
+    q: 'Como funciona o frete?',
+    a: 'Trabalhamos com despacho em até 24 h para todo o Brasil. O valor do frete é calculado automaticamente no checkout com base no CEP de entrega, conforme tabela da transportadora.',
   },
   {
     q: 'Como funciona a garantia dos produtos?',

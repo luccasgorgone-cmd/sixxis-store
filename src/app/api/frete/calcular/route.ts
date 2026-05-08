@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,13 +7,8 @@ export async function POST(req: NextRequest) {
     const { cep, peso = 15 } = await req.json()
     void peso // used in future Correios integration
 
-    const configs = await prisma.configuracao.findMany({
-      where: { chave: { in: ['frete_gratis_acima'] } },
-    })
-    const cfg = Object.fromEntries(configs.map(c => [c.chave, c.valor]))
-    const freteGratisAcima = Number(cfg.frete_gratis_acima || 500)
-    void freteGratisAcima
-
+    // Regra de frete grátis acima de R$ 500 foi removida pré-launch.
+    // Frete sempre cobrado conforme tabela regional abaixo.
     // Estimate by region based on CEP prefix
     const prefixo = Number(String(cep).slice(0, 5))
 
