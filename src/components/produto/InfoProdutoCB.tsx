@@ -15,7 +15,7 @@ import { trackAddToCart } from '@/lib/analytics/events'
 
 const SELOS_CONFIANCA = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
-  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Grátis acima de R$ 500' },
+  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
   { icon: Lock,        titulo: 'Compra 100% segura',       sub: 'SSL 256-bit + Antifraude' },
   { icon: CreditCard,  titulo: '6x sem juros',             sub: 'No cartão de crédito' },
   { icon: BadgeCheck,  titulo: 'Qualidade Sixxis',         sub: 'Direto da fábrica' },
@@ -577,8 +577,13 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
         </button>
       </div>
 
+      {/* Frete — antes dos selos pra reduzir fricção pós-CTA (mobile/tablet/desktop) */}
+      <div className="mt-4 border-t border-gray-100 pt-4">
+        <CalcFrete produtoId={produto.id} />
+      </div>
+
       {/* 6 Selos de confiança — grid 2x3 */}
-      <div className="grid grid-cols-2 gap-2 mt-4 mb-5 border-t border-gray-100 pt-4">
+      <div className="grid grid-cols-2 gap-2 mb-5">
         {SELOS_CONFIANCA.map(({ icon: Icon, titulo, sub }) => (
           <div
             key={titulo}
@@ -598,9 +603,6 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           </div>
         ))}
       </div>
-
-      {/* Frete */}
-      <CalcFrete produtoId={produto.id} />
 
       {/* Compartilhar + Favoritar */}
       <div className="flex items-center gap-2 flex-wrap">

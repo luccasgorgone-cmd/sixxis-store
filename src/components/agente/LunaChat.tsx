@@ -330,7 +330,7 @@ export default function LunaChat({
   if (fechado) return null
 
   return (
-    <div className="fixed bottom-6 left-6 z-[999] flex flex-col items-start gap-3">
+    <div className="fixed bottom-4 left-3 sm:bottom-6 sm:left-6 z-[999] flex flex-col items-start gap-2 sm:gap-3">
 
       {/* ── Janela do chat ─────────────────────────────────────────────────────── */}
       {aberto && (
@@ -577,8 +577,8 @@ export default function LunaChat({
       {/* ── Balão de boas-vindas ──────────────────────────────────────────────── */}
       {!aberto && mostrarBolha && (
         <div
-          className="relative bg-white rounded-2xl rounded-br-sm shadow-2xl px-4 py-3.5
-                     max-w-[230px] cursor-pointer border border-gray-100/80 hover:shadow-xl
+          className="relative bg-white rounded-2xl rounded-br-sm shadow-2xl px-3 py-2.5 sm:px-4 sm:py-3.5
+                     max-w-[180px] sm:max-w-[230px] cursor-pointer border border-gray-100/80 hover:shadow-xl
                      transition-shadow"
           style={{ boxShadow: '0 12px 40px rgba(15,46,43,0.15)' }}
           onClick={() => { setAberto(true); setMostrarBolha(false) }}
@@ -601,10 +601,10 @@ export default function LunaChat({
               <LunaFaceSmall />
             </div>
             <div>
-              <p className="text-xs text-gray-800 font-medium leading-snug">
+              <p className="text-[11px] sm:text-xs text-gray-800 font-medium leading-snug">
                 Olá! Estou disponível para te ajudar.
               </p>
-              <p className="text-[10px] text-[#3cbfb3] font-semibold mt-1">
+              <p className="text-[9px] sm:text-[10px] text-[#3cbfb3] font-semibold mt-1">
                 Luna · Sixxis
               </p>
             </div>
@@ -625,7 +625,7 @@ export default function LunaChat({
 
           <button
             onClick={() => { setAberto(true); setMostrarBolha(false) }}
-            className="relative w-14 h-14 rounded-full shadow-2xl overflow-hidden
+            className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-2xl overflow-hidden
                        transition-all duration-300 hover:scale-110 active:scale-95
                        ring-2 ring-white/30 hover:ring-[#3cbfb3]/60"
             style={{
@@ -635,7 +635,8 @@ export default function LunaChat({
             aria-label={`Abrir chat com ${nome}`}
           >
             <div className="absolute inset-0 flex items-center justify-center">
-              <LunaFace size={34} />
+              <span className="sm:hidden"><LunaFace size={28} /></span>
+              <span className="hidden sm:block"><LunaFace size={34} /></span>
             </div>
             {/* Brilho interno */}
             <div className="absolute top-0 left-0 w-full h-1/2 rounded-t-full bg-white/10" />

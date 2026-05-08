@@ -7,7 +7,7 @@ import type { SectionProps } from '../types'
 
 const TRUST_NUMS = [1, 2, 3, 4] as const
 const PLACEHOLDERS: Record<number, { titulo: string; sub: string }> = {
-  1: { titulo: 'Entrega para todo o Brasil', sub: 'Frete grátis acima de R$ 500' },
+  1: { titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
   2: { titulo: 'Compra 100% Segura',         sub: 'Seus dados protegidos' },
   3: { titulo: '6x sem juros no cartão',     sub: 'Débito, crédito e PIX' },
   4: { titulo: 'Qualidade comprovada',       sub: 'Garantia Sixxis' },

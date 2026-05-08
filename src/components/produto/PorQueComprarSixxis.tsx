@@ -33,7 +33,7 @@ const RAZOES: Razao[] = [
   {
     icone: Truck,
     titulo: 'Entrega para todo o Brasil',
-    desc: 'De Roraima ao Rio Grande do Sul. Frete grátis em compras acima de R$ 500. Rastreamento em tempo real.',
+    desc: 'De Roraima ao Rio Grande do Sul. Envio em até 24h para todo Brasil. Rastreamento em tempo real.',
   },
   {
     icone: Headphones,

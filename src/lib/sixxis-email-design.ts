@@ -122,7 +122,7 @@ export function emailBase({
                 <td width="33%" align="center" class="email-col-half" style="padding:8px;">
                   <div style="background:rgba(60,191,179,0.12);border-radius:12px;padding:12px 8px;">
                     ${svg('truck', '#3cbfb3', 22)}
-                    <p style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px;">Frete Grátis +R$500</p>
+                    <p style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px;">Envio em 24h</p>
                   </div>
                 </td>
                 <td width="33%" align="center" class="email-col-half" style="padding:8px;">

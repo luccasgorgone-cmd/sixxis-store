@@ -193,7 +193,7 @@ export default function CalcFrete({ produtoId, peso = 15 }: Props) {
           </div>
 
           <p className="text-[10px] text-gray-400 mt-2 text-center">
-            Frete grátis para pedidos acima de R$ 500,00
+            Frete calculado por região conforme transportadora
           </p>
         </div>
       )}

@@ -23,7 +23,7 @@ export function SecaoAnuncio({ config, setConfig, device }: SectionProps) {
       </div>
       <div className="space-y-3">
         <TextField label="Anúncio 1" value={config.anuncio_1 || ''} onChange={update('anuncio_1')} placeholder="🎉 CUPOM SIXXIS10 — 10% OFF na 1ª compra" />
-        <TextField label="Anúncio 2" value={config.anuncio_2 || ''} onChange={update('anuncio_2')} placeholder="🚚 Frete grátis acima de R$ 500" />
+        <TextField label="Anúncio 2" value={config.anuncio_2 || ''} onChange={update('anuncio_2')} placeholder="🚚 Envio em até 24h para todo Brasil" />
         <TextField label="Anúncio 3" value={config.anuncio_3 || ''} onChange={update('anuncio_3')} placeholder="💳 Parcele em até 6x sem juros" />
       </div>
     </EditorSection>

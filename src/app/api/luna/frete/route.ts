@@ -118,7 +118,10 @@ export async function POST(req: NextRequest) {
     }
 
     const regiao = getRegiao(cepLimpo)
-    const freteGratis = regiao.gratis || (valorPedido && Number(valorPedido) >= 500)
+    // Regra "frete grátis acima de R$ 500" removida (decisão pré-launch).
+    // Apenas regiões com regiao.gratis = true (ex: SP capital) seguem com frete grátis por proximidade.
+    void valorPedido
+    const freteGratis = regiao.gratis
     const freteValor = freteGratis ? 0 : regiao.frete
 
     return NextResponse.json({
@@ -129,10 +132,6 @@ export async function POST(req: NextRequest) {
       mensagem: freteGratis
         ? `✅ Frete GRÁTIS para seu CEP! Prazo estimado: ${regiao.prazo}`
         : `📦 Frete: R$ ${freteValor.toFixed(2).replace('.', ',')} | Prazo estimado: ${regiao.prazo}`,
-      observacao:
-        !freteGratis && valorPedido && Number(valorPedido) < 500
-          ? 'Frete grátis para compras acima de R$ 500,00'
-          : undefined,
     })
   } catch {
     return NextResponse.json({ error: 'Erro ao calcular frete' }, { status: 500 })

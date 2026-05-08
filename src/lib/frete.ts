@@ -33,8 +33,6 @@ const TABELA: Record<string, RegiaoFrete> = {
   '9': { pacPreco: 55,  sedexPreco: 98,  pacDias: '5 a 8 dias úteis', sedexDias: '2 a 4 dias úteis' },
 }
 
-const FRETE_GRATIS_MIN = 500 // R$ — PAC vira grátis acima deste subtotal
-
 export interface OpcaoFreteFallback {
   id: string
   nome: string
@@ -43,20 +41,23 @@ export interface OpcaoFreteFallback {
   servico: 'pac' | 'sedex' | 'retira'
 }
 
+// Regra de frete grátis acima de R$ 500 foi removida (decisão pré-launch).
+// Frete agora sempre cobrado conforme transportadora, independente do subtotal.
+// Cupom do tipo FRETE_GRATIS continua funcional (lógica em src/lib/preco-cupom).
 export function calcularFreteFallback(
   cepDestino: string,
   subtotal: number,
 ): OpcaoFreteFallback[] {
+  void subtotal
   const limpo = cepDestino.replace(/\D/g, '')
   const regiao = TABELA[limpo[0]] ?? TABELA['0']
-  const pacGratis = subtotal >= FRETE_GRATIS_MIN
 
   return [
     {
       id: 'pac',
-      nome: pacGratis ? 'PAC — Grátis' : 'PAC',
+      nome: 'PAC',
       prazo: regiao.pacDias,
-      preco: pacGratis ? 0 : regiao.pacPreco,
+      preco: regiao.pacPreco,
       servico: 'pac',
     },
     {
