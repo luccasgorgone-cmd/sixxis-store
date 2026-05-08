@@ -133,8 +133,31 @@ export default function SobrePage() {
             </p>
           </AnimSection>
 
-          <div className="relative max-w-4xl mx-auto">
-            <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 w-px"
+          {/* Mobile (<sm): grid 2 colunas compacto, sem zig-zag */}
+          <div className="grid grid-cols-2 gap-3 sm:hidden">
+            {TIMELINE.map((item, i) => {
+              const Icon = item.icon
+              return (
+                <AnimSection key={item.ano} delay={i * 50}>
+                  <div className="h-full bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: item.cor + '15' }}>
+                        <Icon size={13} style={{ color: item.cor }} />
+                      </div>
+                      <span className="text-sm font-black text-[#3cbfb3]">{item.ano}</span>
+                    </div>
+                    <h3 className="text-[12px] font-extrabold text-gray-900 mb-1 leading-snug">{item.titulo}</h3>
+                    <p className="text-[11px] text-gray-500 leading-snug line-clamp-4">{item.texto}</p>
+                  </div>
+                </AnimSection>
+              )
+            })}
+          </div>
+
+          {/* sm+: layout zig-zag original */}
+          <div className="relative max-w-4xl mx-auto hidden sm:block">
+            <div className="absolute left-1/2 top-0 bottom-0 w-px"
               style={{ backgroundImage: 'linear-gradient(to bottom, #3cbfb3, #0f2e2b)', transform: 'translateX(-50%)' }} />
 
             <div className="space-y-8">
@@ -157,11 +180,11 @@ export default function SobrePage() {
                           <p className="text-xs text-gray-500 leading-relaxed">{item.texto}</p>
                         </div>
                       </div>
-                      <div className="hidden sm:flex w-10 h-10 rounded-full border-4 border-white shadow-lg items-center justify-center shrink-0 z-10 self-start mt-4"
+                      <div className="flex w-10 h-10 rounded-full border-4 border-white shadow-lg items-center justify-center shrink-0 z-10 self-start mt-4"
                         style={{ backgroundColor: item.cor }}>
                         <Icon size={16} className="text-white" />
                       </div>
-                      <div className="flex-1 hidden sm:block" />
+                      <div className="flex-1" />
                     </div>
                   </AnimSection>
                 )
@@ -181,7 +204,7 @@ export default function SobrePage() {
               Nossa missão, visão e valores definem quem somos e como tomamos cada decisão dentro da empresa.
             </p>
           </AnimSection>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
             {[
               {
                 icon: Zap, titulo: 'Missão', cor: '#3cbfb3',
@@ -197,16 +220,22 @@ export default function SobrePage() {
               },
             ].map((item, i) => {
               const Icon = item.icon
+              const ehTerceiro = i === 2
               return (
-                <AnimSection key={item.titulo} delay={i * 100}
-                  className="rounded-2xl p-7 hover:-translate-y-1.5 transition-all duration-300"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
+                <AnimSection
+                  key={item.titulo}
+                  delay={i * 100}
+                  className={`rounded-2xl p-4 sm:p-5 lg:p-7 hover:-translate-y-1.5 transition-all duration-300 ${
+                    ehTerceiro ? 'col-span-2 md:col-span-1' : ''
+                  }`}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 lg:mb-5"
                     style={{ backgroundColor: 'rgba(60,191,179,0.15)' }}>
-                    <Icon size={24} style={{ color: item.cor }} />
+                    <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5 lg:w-6 lg:h-6" style={{ color: item.cor }} />
                   </div>
-                  <h3 className="text-xl font-extrabold text-white mb-3">{item.titulo}</h3>
-                  <p className="text-sm text-white/65 leading-relaxed">{item.texto}</p>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-extrabold text-white mb-2 lg:mb-3">{item.titulo}</h3>
+                  <p className="text-xs sm:text-sm text-white/65 leading-relaxed">{item.texto}</p>
                 </AnimSection>
               )
             })}
@@ -224,7 +253,7 @@ export default function SobrePage() {
               Mais de 30 anos construindo relacionamentos baseados em confiança, qualidade e resultados reais para os nossos clientes.
             </p>
           </AnimSection>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {[
               {
                 icone: BadgeCheck,
@@ -278,38 +307,38 @@ export default function SobrePage() {
               const Icon = item.icone
               return (
                 <AnimSection key={i} delay={i * 80}>
-                  <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-8 h-full flex flex-col relative overflow-hidden">
+                  <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-4 sm:p-5 lg:p-8 h-full flex flex-col relative overflow-hidden">
                     {/* Decoração de fundo */}
                     <div
-                      className="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-5 transition-opacity group-hover:opacity-10"
+                      className="absolute top-0 right-0 w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-bl-full opacity-5 transition-opacity group-hover:opacity-10"
                       style={{ backgroundColor: item.corIcone }}
                     />
                     {/* Ícone */}
                     <div
-                      className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 shrink-0 group-hover:scale-110 transition-transform duration-300"
+                      className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 lg:mb-5 shrink-0 group-hover:scale-110 transition-transform duration-300"
                       style={{ backgroundColor: `${item.corIcone}15` }}
                     >
-                      <Icon size={30} style={{ color: item.corIcone }} strokeWidth={1.8} />
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-[30px] lg:h-[30px]" style={{ color: item.corIcone }} strokeWidth={1.8} />
                     </div>
                     {/* Badge destaque */}
                     <span
-                      className="self-start text-[11px] font-black px-2.5 py-1 rounded-full mb-3 uppercase tracking-wide"
+                      className="self-start text-[9px] sm:text-[10px] lg:text-[11px] font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full mb-2 lg:mb-3 uppercase tracking-wide"
                       style={{ backgroundColor: `${item.corIcone}15`, color: item.corIcone }}
                     >
                       {item.destaque}
                     </span>
                     {/* Título */}
-                    <h3 className="text-lg font-extrabold text-gray-900 mb-1 leading-snug">
+                    <h3 className="text-sm sm:text-base lg:text-lg font-extrabold text-gray-900 mb-1 leading-snug">
                       {item.titulo}
                     </h3>
                     {/* Subtítulo */}
-                    <p className="text-sm font-semibold mb-3" style={{ color: item.corIcone }}>
+                    <p className="text-[11px] sm:text-xs lg:text-sm font-semibold mb-2 lg:mb-3" style={{ color: item.corIcone }}>
                       {item.subtitulo}
                     </p>
                     {/* Linha divisória */}
-                    <div className="w-8 h-0.5 rounded-full mb-4" style={{ backgroundColor: item.corIcone }} />
+                    <div className="w-6 sm:w-8 h-0.5 rounded-full mb-3 lg:mb-4" style={{ backgroundColor: item.corIcone }} />
                     {/* Descrição */}
-                    <p className="text-sm text-gray-500 leading-relaxed flex-1">
+                    <p className="text-[11px] sm:text-xs lg:text-sm text-gray-500 leading-relaxed flex-1">
                       {item.texto}
                     </p>
                   </div>

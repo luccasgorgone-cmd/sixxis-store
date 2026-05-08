@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import {
   Shield, CheckCircle, X, Phone, Mail,
-  Package, Wind, Bike, Sparkles, ArrowRight, FileText
+  Package, FileText, Clock,
 } from 'lucide-react'
 
 function useReveal() {
@@ -47,85 +47,11 @@ export default function GarantiaPage() {
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
             Termo de Garantia Sixxis
           </h1>
-          <p className="text-white/60 text-sm leading-relaxed max-w-xl mx-auto mb-5">
+          <p className="text-white/60 text-sm leading-relaxed max-w-xl mx-auto">
             Produtos de qualidade com suporte técnico especializado.
             Sua compra protegida por <strong className="text-white/90">12 meses de garantia total</strong>,
             em conformidade com o CDC — Lei nº 8.078/1990.
           </p>
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            <span className="text-white/70 text-xs">Válido para compras na loja oficial a partir de Jan/2025</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Prazos por produto ─── */}
-      <section className="py-14 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <Reveal className="text-center mb-10">
-            <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">Cobertura</span>
-            <h2 className="text-2xl font-extrabold text-gray-900 mt-2">Prazos de garantia por produto</h2>
-          </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                icon: Wind,     titulo: 'Climatizadores', prazo: '12 meses', cor: '#3cbfb3',
-                cobre: ['Motor e compressor', 'Painel eletrônico', 'Estrutura e corpo', 'Acessórios oficiais'],
-                nao:   ['Filtros e consumíveis', 'Danos por mau uso'],
-              },
-              {
-                icon: Sparkles, titulo: 'Aspiradores',    prazo: '12 meses', cor: '#8b5cf6',
-                cobre: ['Motor principal', 'Corpo do aspirador', 'Mangueiras oficiais', 'Acessórios inclusos'],
-                nao:   ['Sacos descartáveis', 'Filtros de uso'],
-              },
-              {
-                icon: Bike,     titulo: 'Bikes Spinning', prazo: '12 meses', cor: '#f59e0b',
-                cobre: ['Estrutura metálica', 'Sistema de freio', 'Guidão e selim', 'Pedais oficiais'],
-                nao:   ['Desgaste de correia', 'Partes móveis por uso'],
-              },
-            ].map((p, i) => {
-              const Icon = p.icon
-              return (
-                <Reveal key={p.titulo} delay={i * 80}
-                  className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="p-5 border-b border-gray-50"
-                    style={{ background: `linear-gradient(135deg, ${p.cor}08, transparent)` }}>
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
-                      style={{ backgroundColor: p.cor + '18' }}>
-                      <Icon size={20} style={{ color: p.cor }} />
-                    </div>
-                    <h3 className="text-base font-extrabold text-gray-900">{p.titulo}</h3>
-                    <div className="inline-flex items-center gap-1.5 mt-1.5">
-                      <Shield size={11} style={{ color: p.cor }} />
-                      <span className="text-xs font-extrabold" style={{ color: p.cor }}>{p.prazo}</span>
-                    </div>
-                  </div>
-                  <div className="p-5 space-y-1.5">
-                    <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider mb-2">Coberto:</p>
-                    {p.cobre.map(c => (
-                      <div key={c} className="flex items-center gap-2 text-xs text-gray-700">
-                        <CheckCircle size={11} className="text-green-500 shrink-0" /> {c}
-                      </div>
-                    ))}
-                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mt-3 mb-1">Não coberto:</p>
-                    {p.nao.map(n => (
-                      <div key={n} className="flex items-center gap-2 text-xs text-gray-400">
-                        <X size={11} className="text-red-400 shrink-0" /> {n}
-                      </div>
-                    ))}
-                  </div>
-                </Reveal>
-              )
-            })}
-          </div>
-          <Reveal className="mt-4">
-            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/25 rounded-2xl px-5 py-3.5 text-center">
-              <p className="text-xs text-[#0f2e2b] font-semibold">
-                A garantia legal do CDC (90 dias para produtos duráveis) é
-                <strong> adicional</strong> à garantia contratual Sixxis.
-              </p>
-            </div>
-          </Reveal>
         </div>
       </section>
 
@@ -162,6 +88,73 @@ export default function GarantiaPage() {
                 Ela é obrigatória para o acionamento da garantia.
                 O prazo deve ser solicitado dentro do período vigente.
               </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ─── O que está incluso ─── */}
+      <section className="py-14 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <Reveal className="text-center mb-10">
+            <span className="text-[#3cbfb3] text-xs font-extrabold uppercase tracking-widest">O que está incluso</span>
+            <h2 className="text-2xl font-extrabold text-gray-900 mt-2">Sua garantia Sixxis cobre</h2>
+            <p className="text-sm text-gray-500 mt-2 max-w-xl mx-auto">
+              Proteção integral por 12 meses, sem letras miúdas. Veja o que entra na cobertura padrão de toda a linha:
+            </p>
+          </Reveal>
+          <Reveal>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                'Defeitos de fabricação (motor, peças internas, eletrônica)',
+                'Desgaste prematuro de componentes oficiais',
+                'Falhas em até 12 meses do recebimento',
+                'Mão de obra de reparo gratuita',
+                'Logística reversa (envio + retorno) gratuita',
+              ].map(item => (
+                <div key={item}
+                  className="flex items-start gap-2.5 bg-white rounded-xl px-4 py-3 border border-[#3cbfb3]/20">
+                  <CheckCircle size={14} className="text-[#3cbfb3] shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700 font-medium leading-snug">{item}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+          <Reveal className="mt-5">
+            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/25 rounded-2xl px-5 py-3.5 text-center">
+              <p className="text-xs text-[#0f2e2b] font-semibold">
+                A garantia legal do CDC (90 dias para produtos duráveis) é
+                <strong> adicional</strong> à garantia contratual Sixxis.
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ─── Garantia estendida (em breve) ─── */}
+      <section className="py-12 bg-gray-50/40 border-y border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <Reveal>
+            <div className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <div className="w-12 h-12 shrink-0 rounded-2xl bg-[#3cbfb3]/15 border border-[#3cbfb3]/25 flex items-center justify-center">
+                <Clock size={20} className="text-[#3cbfb3]" />
+              </div>
+              <div className="flex-1">
+                <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-[#3cbfb3] mb-1">
+                  Em breve
+                </span>
+                <h3 className="text-base sm:text-lg font-extrabold text-gray-900 mb-1">
+                  Garantia Estendida
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Quer mais tranquilidade? Em breve, nossa garantia estendida estará disponível
+                  para até 24 meses adicionais.{' '}
+                  <Link href="/?ref=newsletter-garantia" className="text-[#3cbfb3] hover:underline font-medium">
+                    Cadastre-se na newsletter
+                  </Link>{' '}
+                  para ser avisado quando lançarmos.
+                </p>
+              </div>
             </div>
           </Reveal>
         </div>

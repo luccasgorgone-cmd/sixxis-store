@@ -70,7 +70,8 @@ function SearchBar({ className = '' }: { className?: string }) {
 
   return (
     <div ref={wrapperRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="flex h-11 bg-white rounded-xl overflow-hidden shadow-sm">
+      {/* h-9 no mobile, h-11 a partir de md+ — versão mobile fica mais compacta verticalmente */}
+      <form onSubmit={handleSubmit} className="flex h-9 md:h-11 bg-white rounded-xl overflow-hidden shadow-sm">
         <input
           type="search"
           value={query}
@@ -78,16 +79,16 @@ function SearchBar({ className = '' }: { className?: string }) {
           onFocus={() => sugestoes.length > 0 && setAberto(true)}
           placeholder="O que você está buscando?"
           autoComplete="off"
-          className="flex-1 px-4 text-gray-700 text-sm outline-none bg-transparent"
+          className="flex-1 px-3 md:px-4 text-gray-700 text-xs md:text-sm outline-none bg-transparent"
         />
         <button
           type="submit"
-          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] px-5 flex items-center justify-center transition shrink-0"
+          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] px-3 md:px-5 flex items-center justify-center transition shrink-0"
           aria-label="Buscar"
         >
           {carregando
-            ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            : <Search size={17} className="text-white" />
+            ? <span className="w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            : <Search size={16} className="text-white" />
           }
         </button>
       </form>
@@ -519,14 +520,14 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
             </div>
 
             {/* Busca mobile — só visível no topo, recolhe ao scrollar.
-                max-w-[85%] reduz ~15% pra dar respiro lateral em telas pequenas. */}
+                max-w-[70%] mantém compacta lateralmente; altura via h-9 dentro do SearchBar. */}
             <div
               className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-                isCompact ? 'max-h-0 pb-0' : 'max-h-14 pb-2'
+                isCompact ? 'max-h-0 pb-0' : 'max-h-12 pb-2'
               }`}
               aria-hidden={isCompact}
             >
-              <div className="max-w-[85%] mx-auto">
+              <div className="max-w-[70%] mx-auto">
                 <SearchBar className="w-full" />
               </div>
             </div>
