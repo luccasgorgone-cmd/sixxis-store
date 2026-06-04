@@ -36,9 +36,9 @@ interface ProdutoGarantiaInfo {
 }
 
 interface OpcaoFrete {
-  name:          string
-  price:         number
-  delivery_time: number
+  nome:  string
+  prazo: string
+  preco: number
 }
 
 interface EnderecoData {
@@ -471,14 +471,30 @@ function CheckoutContent() {
       })
       const fd = await fr.json()
       const opcoes: OpcaoFrete[] = (fd.opcoes ?? []).map(
-        (o: { name?: string; nome?: string; price?: number; preco?: number; delivery_time?: number; prazo?: string }) => ({
-          name: o.name ?? o.nome ?? 'Frete',
-          price: typeof o.price === 'number' ? o.price : Number(o.preco ?? 0),
-          delivery_time: o.delivery_time ?? 0,
-        }),
+        (o: { name?: string; nome?: string; price?: number; preco?: number; delivery_time?: number; prazo?: string }) => {
+          const preco =
+            typeof o.preco === 'number'
+              ? o.preco
+              : typeof o.price === 'number'
+                ? o.price
+                : Number(o.preco ?? o.price ?? 0)
+          // Prazo: usa string se vier; senão formata o delivery_time numérico.
+          const prazo = o.prazo
+            ? o.prazo
+            : typeof o.delivery_time === 'number' && o.delivery_time > 0
+              ? o.delivery_time === 1
+                ? '1 dia útil'
+                : `até ${o.delivery_time} dias úteis`
+              : 'a combinar'
+          return {
+            nome: o.nome ?? o.name ?? 'Frete',
+            preco,
+            prazo,
+          }
+        },
       )
       setOpcoesFrete(opcoes)
-      setFreteSel(opcoes[0]?.price ?? null)
+      setFreteSel(opcoes[0]?.preco ?? null)
     } catch { setOpcoesFrete([]) }
     finally { setCarregandoFrete(false) }
   }, [itens])
@@ -848,24 +864,24 @@ function CheckoutContent() {
                           <button
                             key={i}
                             type="button"
-                            onClick={() => setFreteSel(op.price)}
+                            onClick={() => setFreteSel(op.preco)}
                             className={`w-full flex items-center gap-3 border rounded-xl px-4 py-3 text-left transition ${
-                              freteSel === op.price
+                              freteSel === op.preco
                                 ? 'border-[#3cbfb3] bg-[#e8f8f7]'
                                 : 'border-gray-200 hover:border-[#3cbfb3]/40 hover:bg-gray-50'
                             }`}
                           >
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                              freteSel === op.price ? 'border-[#3cbfb3]' : 'border-gray-300'
+                              freteSel === op.preco ? 'border-[#3cbfb3]' : 'border-gray-300'
                             }`}>
-                              {freteSel === op.price && <div className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
+                              {freteSel === op.preco && <div className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm font-semibold text-gray-900">{op.name}</p>
-                              <p className="text-xs text-gray-400">{op.delivery_time} dias úteis</p>
+                              <p className="text-sm font-semibold text-gray-900">{op.nome}</p>
+                              <p className="text-xs text-gray-400">{op.prazo}</p>
                             </div>
-                            <p className={`text-sm font-bold ${op.price === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                              {op.price === 0 ? 'Grátis' : `R$ ${moeda(op.price)}`}
+                            <p className={`text-sm font-bold ${op.preco === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                              {op.preco === 0 ? 'Grátis' : `R$ ${moeda(op.preco)}`}
                             </p>
                           </button>
                         ))}

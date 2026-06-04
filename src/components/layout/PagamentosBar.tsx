@@ -38,18 +38,6 @@ export default function PagamentosBar() {
           Débito
         </span>
 
-        {/* Boleto */}
-        <span className="inline-flex items-center gap-1 bg-gray-600 text-white text-xs font-bold px-3 py-1.5 rounded-md">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="4" width="2" height="16" fill="white"/>
-            <rect x="7" y="4" width="1" height="16" fill="white"/>
-            <rect x="10" y="4" width="3" height="16" fill="white"/>
-            <rect x="15" y="4" width="1" height="16" fill="white"/>
-            <rect x="18" y="4" width="3" height="16" fill="white"/>
-          </svg>
-          Boleto
-        </span>
-
         {/* Elo */}
         <span className="inline-flex items-center justify-center bg-[#FFD100] text-black text-xs font-black px-3 py-1.5 rounded-md tracking-wide w-12">
           elo

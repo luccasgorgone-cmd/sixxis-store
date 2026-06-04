@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Truck, MapPin, Search, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 interface FreteOpcao {
-  tipo: string
+  nome: string
   prazo: string
   preco: number | null
 }
@@ -56,10 +56,15 @@ export default function CalcFrete({ produtoId, peso = 15 }: Props) {
         return
       }
 
-      const res = await fetch('/api/frete/calcular', {
+      const res = await fetch('/api/frete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cep: cepNumeros, produtoId, peso }),
+        body: JSON.stringify({
+          cepDestino: cepNumeros,
+          produtos: [
+            { id: produtoId ?? 'avulso', quantidade: 1, peso },
+          ],
+        }),
       })
       const data = await res.json()
 
@@ -175,7 +180,7 @@ export default function CalcFrete({ produtoId, peso = 15 }: Props) {
                     <Truck size={14} className="text-[#3cbfb3]" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-800">{op.tipo}</p>
+                    <p className="text-xs font-bold text-gray-800">{op.nome}</p>
                     <p className="text-[10px] text-gray-500">{op.prazo}</p>
                   </div>
                 </div>
