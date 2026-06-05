@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { criarGarantiasPedido } from '@/lib/garantia'
+import { resolverFrete } from '@/lib/frete-resolver'
 
 const itemSchema = z.object({
   produtoId:    z.string(),
@@ -21,6 +22,10 @@ const criarPedidoSchema = z.object({
   enderecoId:     z.string(),
   formaPagamento: z.string(),
   frete:          z.number().nonnegative(),
+  // Modalidade escolhida pelo cliente. O preço/prazo é sempre re-resolvido no
+  // servidor a partir da UF do endereço (fonte única) — o frete do client é só
+  // referência. 'a_combinar' nunca é aceito do client: é o servidor que decide.
+  freteTipo:      z.enum(['normal', 'expresso']).optional(),
   itens:          z.array(itemSchema).min(1),
   cupomCodigo:    z.string().optional(),
   desconto:       z.number().nonnegative().optional(),
@@ -58,8 +63,17 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { enderecoId, formaPagamento, frete, itens, cupomCodigo, desconto: descontoReq, garantias } = parsed.data
+  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, desconto: descontoReq, garantias } = parsed.data
   const desconto = descontoReq ?? 0
+
+  // Endereço deve pertencer ao cliente — e dele extraímos a UF de destino.
+  const endereco = await prisma.endereco.findUnique({
+    where: { id: enderecoId },
+    select: { clienteId: true, estado: true },
+  })
+  if (!endereco || endereco.clienteId !== session.user.id) {
+    return Response.json({ error: 'Endereço inválido' }, { status: 400 })
+  }
 
   // Buscar produtos e variações para calcular preços
   const produtoIds = [...new Set(itens.map((i) => i.produtoId))]
@@ -137,16 +151,51 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // ── Resolver frete no servidor (fonte única: tabela produto × UF) ──────────
+  // O cliente não controla preço nem status: tudo deriva da UF + tabela.
+  const resultadoFrete = await resolverFrete(
+    itens.map((i) => ({ produtoId: i.produtoId, quantidade: i.quantidade })),
+    endereco.estado,
+  )
+
+  if (resultadoFrete.status === 'bloqueado') {
+    return Response.json(
+      { error: resultadoFrete.mensagem || 'Não entregamos nesse estado.', freteStatus: 'bloqueado' },
+      { status: 400 },
+    )
+  }
+
+  let freteValor = 0
+  let freteTipoFinal: string
+  let fretePrazoFinal: number | null = null
+  let statusPedido: string
+
+  if (resultadoFrete.status === 'a_combinar') {
+    // Vira orçamento: sem pagamento, frete a cotar manualmente.
+    freteTipoFinal = 'a_combinar'
+    statusPedido = 'aguardando_frete'
+  } else {
+    // status 'ok' — escolhe a modalidade pedida pelo client (ou a 1ª disponível).
+    const escolhida =
+      resultadoFrete.opcoes.find((o) => o.id === freteTipo) ?? resultadoFrete.opcoes[0]
+    freteValor = escolhida.preco
+    freteTipoFinal = escolhida.id
+    fretePrazoFinal = escolhida.prazoDias
+    statusPedido = 'pendente'
+  }
+
   const pedido = await prisma.pedido.create({
     data: {
       clienteId:      session.user.id,
       enderecoId,
       formaPagamento,
-      frete,
+      frete:          freteValor,
+      freteTipo:      freteTipoFinal,
+      fretePrazo:     fretePrazoFinal,
       desconto,
       cupomCodigo:    cupomCodigo ?? null,
-      total:          Math.max(0, subtotal + frete + totalGarantias - desconto),
-      status:         'pendente',
+      total:          Math.max(0, subtotal + freteValor + totalGarantias - desconto),
+      status:         statusPedido,
       itens: {
         create: itensPedido.map((item) => ({
           produtoId:    item.produtoId,
@@ -197,5 +246,8 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  return Response.json({ pedido }, { status: 201 })
+  return Response.json(
+    { pedido, freteStatus: resultadoFrete.status },
+    { status: 201 },
+  )
 }

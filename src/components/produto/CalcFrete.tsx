@@ -1,23 +1,33 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Truck, MapPin, Search, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Truck, MapPin, Search, CheckCircle, AlertCircle, Ban, Loader2 } from 'lucide-react'
 
 interface FreteOpcao {
+  id: 'normal' | 'expresso'
   nome: string
   prazo: string
-  preco: number | null
+  preco: number
+}
+
+type FreteStatus = 'ok' | 'a_combinar' | 'bloqueado'
+
+interface Resultado {
+  localidade: string
+  bairro?: string
+  status: FreteStatus
+  opcoes: FreteOpcao[]
+  mensagem: string
 }
 
 interface Props {
   produtoId?: string
-  peso?: number
 }
 
-export default function CalcFrete({ produtoId, peso = 15 }: Props) {
+export default function CalcFrete({ produtoId }: Props) {
   const [cep, setCep] = useState('')
   const [loading, setLoading] = useState(false)
-  const [resultado, setResultado] = useState<{ localidade: string; bairro?: string; opcoes: FreteOpcao[] } | null>(null)
+  const [resultado, setResultado] = useState<Resultado | null>(null)
   const [erro, setErro] = useState('')
 
   useEffect(() => {
@@ -60,10 +70,8 @@ export default function CalcFrete({ produtoId, peso = 15 }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cepDestino: cepNumeros,
-          produtos: [
-            { id: produtoId ?? 'avulso', quantidade: 1, peso },
-          ],
+          uf: dadosCep.uf,
+          produtos: [{ id: produtoId ?? 'avulso', quantidade: 1 }],
         }),
       })
       const data = await res.json()
@@ -73,7 +81,9 @@ export default function CalcFrete({ produtoId, peso = 15 }: Props) {
       setResultado({
         localidade: `${dadosCep.localidade} - ${dadosCep.uf}`,
         bairro: dadosCep.bairro,
-        opcoes: data.opcoes || [],
+        status: (data.status as FreteStatus) ?? 'bloqueado',
+        opcoes: data.opcoes ?? [],
+        mensagem: data.mensagem ?? '',
       })
     } catch {
       setErro('Erro ao calcular o frete. Tente novamente.')
@@ -171,35 +181,54 @@ export default function CalcFrete({ produtoId, peso = 15 }: Props) {
             </p>
           </div>
 
-          <div className="space-y-2">
-            {resultado.opcoes.map((op, i) => (
-              <div key={i}
-                className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-3.5 py-3 hover:border-[#3cbfb3]/30 transition">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-[#f8f9fa] rounded-lg flex items-center justify-center">
-                    <Truck size={14} className="text-[#3cbfb3]" />
+          {resultado.status === 'ok' && (
+            <div className="space-y-2">
+              {resultado.opcoes.map((op) => (
+                <div key={op.id}
+                  className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-3.5 py-3 hover:border-[#3cbfb3]/30 transition">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-[#f8f9fa] rounded-lg flex items-center justify-center">
+                      <Truck size={14} className="text-[#3cbfb3]" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-800">{op.nome}</p>
+                      <p className="text-[10px] text-gray-500">{op.prazo}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-800">{op.nome}</p>
-                    <p className="text-[10px] text-gray-500">{op.prazo}</p>
+                  <div className="text-right">
+                    {op.preco === 0 ? (
+                      <p className="text-sm font-extrabold text-green-600">GRÁTIS</p>
+                    ) : (
+                      <p className="text-sm font-extrabold text-gray-900">
+                        R$ {op.preco.toFixed(2).replace('.', ',')}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="text-right">
-                  {op.preco === 0 || op.preco === null ? (
-                    <p className="text-sm font-extrabold text-green-600">GRÁTIS</p>
-                  ) : (
-                    <p className="text-sm font-extrabold text-gray-900">
-                      R$ {op.preco.toFixed(2).replace('.', ',')}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+              <p className="text-[10px] text-gray-400 mt-2 text-center">
+                Frete e prazo conforme a região de entrega
+              </p>
+            </div>
+          )}
 
-          <p className="text-[10px] text-gray-400 mt-2 text-center">
-            Frete calculado por região conforme transportadora
-          </p>
+          {resultado.status === 'a_combinar' && (
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3">
+              <Truck size={14} className="text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-800 font-medium">
+                Frete a combinar para a sua região. Finalize o pedido como orçamento e entramos em contato.
+              </p>
+            </div>
+          )}
+
+          {resultado.status === 'bloqueado' && (
+            <div className="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-3.5 py-3">
+              <Ban size={14} className="text-red-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-red-600 font-medium">
+                {resultado.mensagem || 'Ainda não entregamos na sua região.'}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
