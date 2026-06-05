@@ -46,18 +46,22 @@ interface Pedido {
   id: string; status: string; total: number; frete: number
   formaPagamento: string; mpPaymentId: string | null
   codigoRastreio: string | null; createdAt: string
+  transportadora: string | null; linkRastreio: string | null
+  custoFreteReal: number | null; enviadoEm: string | null; entregueEm: string | null
+  freteTipo: string | null; fretePrazo: number | null
   cliente: Cliente; endereco: Endereco; itens: ItemPedido[]
   pagamentos?: Pagamento[]
 }
 
-interface Stats { total: number; pendentes: number; enviados: number; receita: number }
+interface Stats { total: number; pendentes: number; enviados: number; receita: number; aguardandoEnvio: number }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STATUSES = ['pendente', 'pago', 'enviado', 'entregue', 'cancelado']
+const STATUSES = ['pendente', 'aguardando_frete', 'pago', 'enviado', 'entregue', 'cancelado']
 
 const STATUS_BADGE: Record<string, string> = {
   pendente: 'bg-amber-50 text-amber-700 border-amber-200',
+  aguardando_frete: 'bg-orange-50 text-orange-700 border-orange-200',
   pago: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   enviado: 'bg-purple-50 text-purple-700 border-purple-200',
   entregue: 'bg-green-50 text-green-700 border-green-200',
@@ -65,9 +69,21 @@ const STATUS_BADGE: Record<string, string> = {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  pendente: 'Pendente', pago: 'Pago', enviado: 'Enviado',
+  pendente: 'Pendente', aguardando_frete: 'Orçamento (frete a combinar)',
+  pago: 'Pago', enviado: 'Enviado',
   entregue: 'Entregue', cancelado: 'Cancelado',
 }
+
+// Abas de status (a aba "Pago" é a de atenção — pedidos aguardando despacho).
+const TABS: { key: string; label: string }[] = [
+  { key: '', label: 'Todos' },
+  { key: 'pago', label: 'Pago' },
+  { key: 'enviado', label: 'Enviado' },
+  { key: 'entregue', label: 'Entregue' },
+  { key: 'pendente', label: 'Pendente' },
+  { key: 'aguardando_frete', label: 'Orçamento' },
+  { key: 'cancelado', label: 'Cancelado' },
+]
 
 const TIMELINE_STEPS = ['pendente', 'pago', 'enviado', 'entregue']
 
@@ -133,26 +149,66 @@ function PedidoDetalhe({
   showToast: (msg: string, type?: 'success' | 'error') => void
 }) {
   const [status, setStatus] = useState(pedido.status)
+  const [transportadora, setTransportadora] = useState(pedido.transportadora ?? '')
   const [rastreio, setRastreio] = useState(pedido.codigoRastreio ?? '')
-  const [saving, setSaving] = useState(false)
+  const [linkRastreio, setLinkRastreio] = useState(pedido.linkRastreio ?? '')
+  const [custoReal, setCustoReal] = useState(pedido.custoFreteReal != null ? String(pedido.custoFreteReal) : '')
+  const [saving, setSaving] = useState<string | null>(null)
 
-  async function handleSave() {
-    setSaving(true)
-    const res = await fetch(`/api/admin/pedidos/${pedido.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, codigoRastreio: rastreio }),
-    })
-    setSaving(false)
-    if (res.ok) {
-      onUpdate(pedido.id, { status, codigoRastreio: rastreio })
-      showToast('Pedido atualizado!')
-    } else {
-      showToast('Erro ao atualizar pedido.', 'error')
+  const freteCobrado = Number(pedido.frete)
+  const custoNum = custoReal.trim() === '' ? null : Number(custoReal)
+  const margem = custoNum == null || Number.isNaN(custoNum) ? null : freteCobrado - custoNum
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function patch(payload: Record<string, any>, acao: string, successMsg: string) {
+    setSaving(acao)
+    try {
+      const res = await fetch(`/api/admin/pedidos/${pedido.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}))
+        throw new Error(e.error || 'falha')
+      }
+      const d = await res.json()
+      const p = d.pedido
+      onUpdate(pedido.id, {
+        status: p.status, codigoRastreio: p.codigoRastreio, transportadora: p.transportadora,
+        linkRastreio: p.linkRastreio, custoFreteReal: p.custoFreteReal,
+        enviadoEm: p.enviadoEm, entregueEm: p.entregueEm,
+      })
+      setStatus(p.status)
+      showToast(successMsg + (d.emailEnviado ? ' · email enviado ao cliente' : ''))
+    } catch (err) {
+      showToast((err as Error).message || 'Erro ao salvar', 'error')
     }
+    setSaving(null)
+  }
+
+  function confirmarEnvio() {
+    if (!rastreio.trim()) { showToast('Informe o código de rastreio.', 'error'); return }
+    patch(
+      { acao: 'despachar', transportadora, codigoRastreio: rastreio, linkRastreio, custoFreteReal: custoReal },
+      'despachar', 'Envio confirmado — pedido marcado como Enviado',
+    )
+  }
+  function marcarEntregue() {
+    patch({ acao: 'entregue' }, 'entregue', 'Pedido marcado como Entregue')
+  }
+  function salvarEdicao() {
+    patch(
+      { transportadora, codigoRastreio: rastreio, linkRastreio, custoFreteReal: custoReal },
+      'editar', 'Dados de envio atualizados (sem reenvio de email)',
+    )
+  }
+  function salvarStatus() {
+    patch({ status }, 'status', 'Status atualizado')
   }
 
   const end = pedido.endereco
+  const statusLower = (pedido.status || '').toLowerCase()
 
   return (
     <tr>
@@ -305,23 +361,30 @@ function PedidoDetalhe({
             </div>
           )}
 
-          {/* Ações */}
-          <div className="bg-white rounded-xl border border-gray-100 p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
-              <Truck className="w-3.5 h-3.5" /> Atualizar pedido
-            </p>
-            <div className="flex flex-wrap gap-3 items-end">
+          {/* Despacho e rastreio */}
+          <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Truck className="w-3.5 h-3.5" /> Despacho e rastreio
+              </p>
+              {statusLower === 'pago' && !pedido.codigoRastreio && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                  <AlertCircle className="w-3 h-3" /> Aguardando envio
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
-                >
-                  {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-                </select>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Transportadora</label>
+                <input
+                  value={transportadora}
+                  onChange={(e) => setTransportadora(e.target.value)}
+                  placeholder="Ex: Correios, Jadlog, transportadora própria…"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                />
               </div>
-              <div className="flex-1 min-w-48">
+              <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Código de rastreio</label>
                 <input
                   value={rastreio}
@@ -330,14 +393,110 @@ function PedidoDetalhe({
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
                 />
               </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Link de rastreio</label>
+                <input
+                  value={linkRastreio}
+                  onChange={(e) => setLinkRastreio(e.target.value)}
+                  placeholder="https://… (cole o link de acompanhamento)"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1.5">
+                  Custo real da transportadora
+                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">INTERNO — cliente não vê</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
+                  <input
+                    type="number" min="0" step="0.01"
+                    value={custoReal}
+                    onChange={(e) => setCustoReal(e.target.value)}
+                    placeholder="0,00"
+                    className="w-full border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Margem de frete (interno)</label>
+                <div className="h-[38px] flex items-center px-3 rounded-xl border border-gray-100 bg-gray-50 text-sm">
+                  <span className="text-gray-400 text-xs mr-2">Cobrado {fmt(freteCobrado)} −</span>
+                  {margem === null ? (
+                    <span className="text-gray-400">informe o custo</span>
+                  ) : (
+                    <span className={`font-bold ${margem >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {margem >= 0 ? '+' : ''}{fmt(margem)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Botões de ação */}
+            <div className="flex flex-wrap gap-2 items-center pt-1">
+              {statusLower === 'pago' ? (
+                <button
+                  onClick={confirmarEnvio}
+                  disabled={saving !== null}
+                  className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-xl px-4 py-2 text-sm transition"
+                >
+                  {saving === 'despachar' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Truck className="w-4 h-4" />}
+                  Confirmar envio
+                </button>
+              ) : (
+                <button
+                  onClick={salvarEdicao}
+                  disabled={saving !== null}
+                  className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-xl px-4 py-2 text-sm transition"
+                >
+                  {saving === 'editar' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Salvar alterações
+                </button>
+              )}
+
+              {statusLower === 'enviado' && (
+                <button
+                  onClick={marcarEntregue}
+                  disabled={saving !== null}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold rounded-xl px-4 py-2 text-sm transition"
+                >
+                  {saving === 'entregue' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Marcar como entregue
+                </button>
+              )}
+
+              {pedido.enviadoEm && (
+                <span className="text-[11px] text-gray-400">Despachado em {fmtDate(pedido.enviadoEm)}</span>
+              )}
+              {pedido.entregueEm && (
+                <span className="text-[11px] text-gray-400">Entregue em {fmtDate(pedido.entregueEm)}</span>
+              )}
+            </div>
+
+            {/* Override manual de status (cancelar, etc.) */}
+            <div className="flex flex-wrap gap-2 items-end border-t border-gray-100 pt-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Status (manual)</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white"
+                >
+                  {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+                </select>
+              </div>
               <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-xl px-4 py-2 text-sm transition"
+                onClick={salvarStatus}
+                disabled={saving !== null || status === pedido.status}
+                className="flex items-center gap-2 border border-gray-200 hover:bg-gray-50 disabled:opacity-40 text-gray-600 font-semibold rounded-xl px-3 py-2 text-sm transition"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Salvar
+                {saving === 'status' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Aplicar status
               </button>
+              <p className="text-[11px] text-gray-400 flex-1 min-w-[200px]">
+                Edição dos campos acima não reenvia email. O email de despacho é enviado só ao “Confirmar envio”.
+              </p>
             </div>
           </div>
         </div>
@@ -351,7 +510,7 @@ function PedidoDetalhe({
 export default function AdminPedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [total, setTotal] = useState(0)
-  const [stats, setStats] = useState<Stats>({ total: 0, pendentes: 0, enviados: 0, receita: 0 })
+  const [stats, setStats] = useState<Stats>({ total: 0, pendentes: 0, enviados: 0, receita: 0, aguardandoEnvio: 0 })
   const [page, setPage] = useState(1)
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('')
@@ -380,12 +539,13 @@ export default function AdminPedidosPage() {
         pendentes: Number(data.stats?.pendentes) || 0,
         enviados:  Number(data.stats?.enviados)  || 0,
         receita:   Number(data.stats?.receita)   || 0,
+        aguardandoEnvio: Number(data.stats?.aguardandoEnvio) || 0,
       })
     } catch (err) {
       console.error('[admin/pedidos] fetch falhou:', err)
       setPedidos([])
       setTotal(0)
-      setStats({ total: 0, pendentes: 0, enviados: 0, receita: 0 })
+      setStats({ total: 0, pendentes: 0, enviados: 0, receita: 0, aguardandoEnvio: 0 })
     } finally {
       setLoading(false)
     }
@@ -438,6 +598,50 @@ export default function AdminPedidosPage() {
           </div>
         </div>
 
+        {/* Alerta de pedidos aguardando envio */}
+        {stats.aguardandoEnvio > 0 && (
+          <button
+            onClick={() => setStatus('pago')}
+            className="w-full flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-left hover:bg-red-100 transition"
+          >
+            <span className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shrink-0">
+              <AlertCircle className="w-4 h-4" />
+            </span>
+            <span className="text-sm font-bold text-red-700">
+              {stats.aguardandoEnvio} pedido{stats.aguardandoEnvio !== 1 ? 's' : ''} pago{stats.aguardandoEnvio !== 1 ? 's' : ''} aguardando envio
+            </span>
+            <span className="ml-auto text-xs text-red-600 font-semibold">Ver →</span>
+          </button>
+        )}
+
+        {/* Abas por status */}
+        <div className="flex flex-wrap gap-2">
+          {TABS.map((tab) => {
+            const ativo = status === tab.key
+            const mostrarBadge = tab.key === 'pago' && stats.aguardandoEnvio > 0
+            return (
+              <button
+                key={tab.key || 'todos'}
+                onClick={() => setStatus(tab.key)}
+                className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-semibold border transition ${
+                  ativo
+                    ? 'bg-[#3cbfb3] text-white border-[#3cbfb3]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#3cbfb3]/40'
+                }`}
+              >
+                {tab.label}
+                {mostrarBadge && (
+                  <span className={`min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                    ativo ? 'bg-white text-red-600' : 'bg-red-500 text-white'
+                  }`}>
+                    {stats.aguardandoEnvio}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
@@ -475,11 +679,6 @@ export default function AdminPedidosPage() {
                 className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
               />
             </div>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}
-              className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white">
-              <option value="">Todos os status</option>
-              {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-            </select>
             <select value={pagamento} onChange={(e) => setPagamento(e.target.value)}
               className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] bg-white">
               <option value="">Todos os pagamentos</option>

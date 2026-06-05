@@ -259,10 +259,16 @@ export async function enviarEmailRastreio(para: string, opts: {
   nomeCliente:    string
   pedidoId:       string
   codigoRastreio: string
+  transportadora?: string
+  linkRastreio?:  string
+  prazoEstimado?: string
 }) {
   if (!process.env.RESEND_API_KEY) return
 
   const { nomeCliente, pedidoId, codigoRastreio } = opts
+  const transportadora = opts.transportadora?.trim() || 'Transportadora'
+  const linkRastreio = opts.linkRastreio?.trim() || `${SITE_URL}/minha-conta/pedidos`
+  const prazoEstimado = opts.prazoEstimado?.trim() || '5 a 10 dias úteis'
   const idCurto = pedidoId.slice(-8).toUpperCase()
   const template = await getTemplate('pedido_enviado')
 
@@ -274,8 +280,9 @@ export async function enviarEmailRastreio(para: string, opts: {
       nome:             nomeCliente,
       pedido_id:        idCurto,
       codigo_rastreio:  codigoRastreio,
-      link_rastreio:    'https://www.correios.com.br/rastreamento',
-      previsao_entrega: '5 a 10 dias úteis',
+      transportadora,
+      link_rastreio:    linkRastreio,
+      previsao_entrega: prazoEstimado,
       site_url:         SITE_URL,
     })
     assunto = renderTemplate(template.assunto, { nome: nomeCliente, pedido_id: idCurto })
@@ -284,9 +291,9 @@ export async function enviarEmailRastreio(para: string, opts: {
       nome: nomeCliente,
       pedidoId,
       codigoRastreio,
-      transportadora: 'Correios',
-      prazoEstimado: '5 a 10 dias úteis',
-      urlRastreio: 'https://www.correios.com.br/rastreamento',
+      transportadora,
+      prazoEstimado,
+      urlRastreio: linkRastreio,
       siteUrl: SITE_URL,
     })
     assunto = `Seu pedido #${idCurto} está a caminho!`

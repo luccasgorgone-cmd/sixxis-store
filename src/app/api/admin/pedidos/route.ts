@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status') ?? ''
   const q = searchParams.get('q') ?? ''
   const pagamento = searchParams.get('pagamento') ?? ''
+  const semRastreio = searchParams.get('semRastreio') === '1'
   const from = searchParams.get('from')
   const to = searchParams.get('to')
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'))
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
 
   const where = {
     ...(status && { status }),
+    ...(semRastreio && { codigoRastreio: null }),
     ...(pagamento && { formaPagamento: pagamento }),
     ...(from || to
       ? {
@@ -46,6 +48,7 @@ export async function GET(request: NextRequest) {
     statsEnviados,
     statsReceitaConfirmada,
     statsReceitaPendente,
+    statsAguardandoEnvio,
   ] = await Promise.all([
     prisma.pedido.findMany({
       where,
@@ -74,6 +77,9 @@ export async function GET(request: NextRequest) {
       where: { ...where, status: { in: STATUS_PENDENTE_TODOS } },
       _sum: { total: true },
     }),
+    // Contador de atenção: pagos sem rastreio — GLOBAL (ignora filtros da página)
+    // para o badge ser consistente em todas as abas e no menu lateral.
+    prisma.pedido.count({ where: { status: { in: ['pago', 'PAGO'] }, codigoRastreio: null } }),
   ])
 
   return NextResponse.json({
@@ -87,6 +93,7 @@ export async function GET(request: NextRequest) {
       receita:           Number(statsReceitaConfirmada._sum.total ?? 0),
       receitaConfirmada: Number(statsReceitaConfirmada._sum.total ?? 0),
       receitaPendente:   Number(statsReceitaPendente._sum.total ?? 0),
+      aguardandoEnvio:   statsAguardandoEnvio,
     },
   })
 }
