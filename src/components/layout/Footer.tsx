@@ -264,7 +264,7 @@ export default async function Footer() {
                   ))
                 ) : (
                   <span className="text-white/65 text-xs">
-                    PIX • Cartão de Crédito • Débito • Boleto
+                    PIX • Cartão de Crédito
                   </span>
                 )}
               </div>

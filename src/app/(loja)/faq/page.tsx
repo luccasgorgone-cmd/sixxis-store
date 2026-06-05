@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: 'Quais são as formas de pagamento aceitas?',
-    a: 'Aceitamos PIX (com 3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x, cartão de débito e boleto bancário. Todos os pagamentos são processados com segurança via MercadoPago.',
+    a: 'Aceitamos PIX (com 3% de desconto à vista) e cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x. Todos os pagamentos são processados com segurança via MercadoPago.',
   },
   {
     q: 'Como funciona o frete?',

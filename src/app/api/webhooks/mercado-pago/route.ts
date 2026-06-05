@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import type { Prisma } from '@prisma/client'
-import { mpPayment, MP_WEBHOOK_SECRET, MP_ENV } from '@/lib/mercadopago'
+import { mpPayment, MP_WEBHOOK_SECRET } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auditLog } from '@/lib/audit'
 import { calcularPontos, creditarPontos } from '@/lib/fidelidade'
@@ -42,11 +42,18 @@ function validarAssinatura(req: NextRequest): boolean {
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
 
-  if (MP_ENV === 'production') {
+  // Valida assinatura sempre que MERCADOPAGO_WEBHOOK_SECRET estiver definido.
+  // Sem secret → loga warning e segue (apenas pra dev local; em prod o secret
+  // DEVE estar setado no Railway).
+  if (MP_WEBHOOK_SECRET) {
     if (!validarAssinatura(req)) {
       console.warn('[mp:webhook] assinatura inválida')
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
     }
+  } else {
+    console.warn(
+      '[mp:webhook] MERCADOPAGO_WEBHOOK_SECRET ausente — validação de assinatura DESLIGADA. Configure o secret no Railway antes do go-live.',
+    )
   }
 
   let payload: { type?: string; data?: { id?: string | number } } | null = null
