@@ -117,6 +117,11 @@ model Pedido {
   desconto       Decimal             @default(0.00) @db.Decimal(10, 2)
   freteTipo      String?             // "normal" | "expresso" | "a_combinar"
   fretePrazo     Int?                // prazo estimado em dias úteis
+  transportadora String?             // nome da transportadora (texto livre)
+  linkRastreio   String?             // URL de rastreio colada manualmente
+  custoFreteReal Decimal?            @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
+  enviadoEm      DateTime?           // quando o pedido foi despachado
+  entregueEm     DateTime?           // quando foi marcado como entregue
   itens          ItemPedido[]
   cliente        Cliente             @relation(fields: [clienteId], references: [id])
   endereco       Endereco            @relation(fields: [enderecoId], references: [id])

@@ -38,9 +38,27 @@ export async function GET() {
     return Response.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
+  // ⚠️ SELECT explícito — NUNCA inclui custoFreteReal (custo interno da
+  // transportadora). Este payload vai para o cliente.
   const pedidos = await prisma.pedido.findMany({
     where: { clienteId: session.user.id },
-    include: {
+    select: {
+      id: true,
+      status: true,
+      total: true,
+      frete: true,
+      desconto: true,
+      freteTipo: true,
+      fretePrazo: true,
+      formaPagamento: true,
+      cupomCodigo: true,
+      codigoRastreio: true,
+      transportadora: true,
+      linkRastreio: true,
+      enviadoEm: true,
+      entregueEm: true,
+      createdAt: true,
+      pagoEm: true,
       itens: {
         include: { produto: { select: { nome: true, imagens: true } } },
       },

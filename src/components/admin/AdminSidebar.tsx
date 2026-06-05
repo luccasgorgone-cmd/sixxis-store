@@ -89,6 +89,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoUrl, setLogoUrl] = useState('/logo-sixxis.png')
+  const [aguardandoEnvio, setAguardandoEnvio] = useState(0)
 
   useEffect(() => {
     fetch('/api/admin/configuracoes')
@@ -103,6 +104,14 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
   useEffect(() => {
     onMobileClose?.()
   }, [pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Badge de atenção: pedidos pagos sem rastreio. Atualiza a cada navegação.
+  useEffect(() => {
+    fetch('/api/admin/pedidos/atencao', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d) setAguardandoEnvio(Number(d.aguardandoEnvio) || 0) })
+      .catch(() => {})
+  }, [pathname])
 
   function isActive(href: string, exact: boolean) {
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
@@ -189,6 +198,12 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
                       <Icon size={14} />
                     </span>
                     <span className="flex-1 truncate">{label}</span>
+                    {/* Badge de atenção no item Pedidos */}
+                    {href === '/adm-a7f9c2b4/pedidos' && aguardandoEnvio > 0 && (
+                      <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                        {aguardandoEnvio}
+                      </span>
+                    )}
                     {/* Active dot */}
                     {active && (
                       <span

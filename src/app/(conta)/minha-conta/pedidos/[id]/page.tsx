@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import LayoutConta from '@/components/conta/LayoutConta'
 import Link from 'next/link'
-import { ArrowLeft, MapPin, Package } from 'lucide-react'
+import { ArrowLeft, MapPin, Package, Truck, CheckCircle, Clock, ExternalLink } from 'lucide-react'
 import { isStatusPendente, getStatusInfo } from '@/lib/pedido-status'
 import BotoesPedidoPendente from '@/components/pedido/BotoesPedidoPendente'
 
@@ -56,15 +56,63 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
               {statusInfo.label}
             </span>
           </div>
-          {pedido.codigoRastreio && (
-            <div className="mt-3 px-3 py-2 bg-blue-50 rounded-xl text-xs text-blue-700">
-              <strong>Rastreio:</strong> {pedido.codigoRastreio}
-            </div>
-          )}
         </div>
 
         {pendente && (
           <BotoesPedidoPendente pedidoId={pedido.id} podeCancelar={dentroJanela} />
+        )}
+
+        {/* Acompanhamento da entrega (Pago → Enviado → Entregue) */}
+        {statusInfo.step >= 1 && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 space-y-4">
+            <h2 className="font-bold text-gray-900 text-sm flex items-center gap-2">
+              <Truck size={14} className="text-[#3cbfb3]" /> Acompanhe sua entrega
+            </h2>
+
+            {/* Timeline */}
+            <div className="flex items-center gap-0">
+              {[
+                { label: 'Pago', step: 1 },
+                { label: 'Enviado', step: 2 },
+                { label: 'Entregue', step: 3 },
+              ].map((s, i, arr) => {
+                const done = statusInfo.step >= s.step
+                return (
+                  <div key={s.label} className="flex items-center flex-1 last:flex-none">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${done ? 'bg-[#3cbfb3] border-[#3cbfb3]' : 'bg-white border-gray-200'}`}>
+                        {done ? <CheckCircle className="w-4 h-4 text-white" /> : <Clock className="w-3 h-3 text-gray-300" />}
+                      </div>
+                      <span className={`text-[10px] mt-1 ${done ? 'text-[#3cbfb3] font-semibold' : 'text-gray-300'}`}>{s.label}</span>
+                    </div>
+                    {i < arr.length - 1 && (
+                      <div className={`flex-1 h-0.5 mb-4 mx-1 ${statusInfo.step > s.step ? 'bg-[#3cbfb3]' : 'bg-gray-200'}`} />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Dados de rastreio (quando despachado) */}
+            {pedido.codigoRastreio && (
+              <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1.5">
+                {pedido.transportadora && (
+                  <p className="text-sm text-gray-700"><span className="text-gray-400">Transportadora:</span> <strong>{pedido.transportadora}</strong></p>
+                )}
+                <p className="text-sm text-gray-700"><span className="text-gray-400">Código:</span> <strong className="font-mono">{pedido.codigoRastreio}</strong></p>
+                {pedido.linkRastreio && (
+                  <a
+                    href={pedido.linkRastreio}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-1 text-sm font-semibold text-[#3cbfb3] hover:text-[#2a9d8f] transition"
+                  >
+                    <ExternalLink size={13} /> Acompanhar entrega
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
