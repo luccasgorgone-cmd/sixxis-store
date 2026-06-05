@@ -93,6 +93,7 @@ model Produto {
   destaques                ProdutoDestaque[]
   variacoes                VariacaoProduto[]
   garantias                GarantiaEstendida[]
+  freteRegras              FreteRegra[]
 
   @@index([categoria])
   @@index([slug])
@@ -114,6 +115,8 @@ model Pedido {
   codigoRastreio String?
   cupomCodigo    String?
   desconto       Decimal             @default(0.00) @db.Decimal(10, 2)
+  freteTipo      String?             // "normal" | "expresso" | "a_combinar"
+  fretePrazo     Int?                // prazo estimado em dias úteis
   itens          ItemPedido[]
   cliente        Cliente             @relation(fields: [clienteId], references: [id])
   endereco       Endereco            @relation(fields: [enderecoId], references: [id])
@@ -387,6 +390,30 @@ model VariacaoProduto {
   createdAt DateTime @default(now())
   produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
+  @@index([produtoId])
+}
+
+// Tabela de frete por produto × estado (UF) — fonte única de verdade do frete.
+// Gerenciada em /adm-a7f9c2b4/frete. Resolução em src/lib/frete-resolver.ts.
+model FreteRegra {
+  id            String   @id @default(cuid())
+  produtoId     String
+  uf            String   @db.Char(2)
+  // Frete normal
+  precoNormal   Decimal? @db.Decimal(10, 2)
+  prazoNormal   Int? // dias úteis
+  // Frete expresso
+  precoExpresso Decimal? @db.Decimal(10, 2)
+  prazoExpresso Int? // dias úteis
+  // Estados especiais
+  aCombinar     Boolean  @default(false) // vira orçamento, cliente não finaliza
+  bloqueado     Boolean  @default(false) // não entrega nesse estado
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+  produto       Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@unique([produtoId, uf])
+  @@index([uf])
   @@index([produtoId])
 }
 

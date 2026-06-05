@@ -9,7 +9,7 @@ import {
   LayoutTemplate, Mail, X, BarChart2, Users,
   ExternalLink, ShieldOff,
   Target, MessageSquare, Clock, Bot, UserCog, History,
-  CreditCard, ShieldCheck, Bell, Sparkles,
+  CreditCard, ShieldCheck, Bell, Sparkles, Truck,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -36,6 +36,12 @@ const NAV_GROUPS = [
       { href: '/adm-a7f9c2b4/garantias',  label: 'Garantias',      icon: ShieldCheck, exact: false },
       { href: '/adm-a7f9c2b4/clientes',  label: 'Clientes',       icon: Users,       exact: false },
       { href: '/adm-a7f9c2b4/bloqueios', label: 'Bloqueios',      icon: ShieldOff,   exact: false },
+    ],
+  },
+  {
+    label: 'Logística',
+    items: [
+      { href: '/adm-a7f9c2b4/frete', label: 'Frete', icon: Truck, exact: false },
     ],
   },
   {

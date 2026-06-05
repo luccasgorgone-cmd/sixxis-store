@@ -26,7 +26,8 @@ const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Etapa = 1 | 2 | 3 | 4
-type Fase = 'checkout' | 'bricks' | 'sucesso'
+type Fase = 'checkout' | 'bricks' | 'sucesso' | 'orcamento'
+type FreteStatus = 'ok' | 'a_combinar' | 'bloqueado'
 
 interface ProdutoGarantiaInfo {
   id: string
@@ -36,6 +37,7 @@ interface ProdutoGarantiaInfo {
 }
 
 interface OpcaoFrete {
+  id:    'normal' | 'expresso'
   nome:  string
   prazo: string
   preco: number
@@ -182,14 +184,14 @@ interface ResumoProps {
   itens:       ItemCarrinho[]
   total:       number
   frete:       number
-  freteSel:    number | null
+  freteStatus: FreteStatus | null
   desconto:    number
   cupom:       { codigo: string; desconto: number } | null
   totalFinal:  number
   totalGarantias?: number
 }
 
-function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFinal, totalGarantias = 0 }: ResumoProps) {
+function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, totalFinal, totalGarantias = 0 }: ResumoProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden border-l-4 border-l-[#3cbfb3]">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -229,12 +231,18 @@ function ResumoSidebar({ itens, total, freteSel, frete, desconto, cupom, totalFi
           <span>Subtotal</span>
           <span className="font-semibold">R$ {moeda(total)}</span>
         </div>
-        {freteSel !== null && (
+        {freteStatus === 'ok' && (
           <div className="flex justify-between text-sm text-gray-600">
             <span>Frete</span>
             <span className={frete === 0 ? 'text-green-600 font-bold' : 'font-semibold'}>
               {frete === 0 ? 'Grátis' : `R$ ${moeda(frete)}`}
             </span>
+          </div>
+        )}
+        {freteStatus === 'a_combinar' && (
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>Frete</span>
+            <span className="font-semibold text-amber-600">A combinar</span>
           </div>
         )}
         {totalGarantias > 0 && (
@@ -387,7 +395,9 @@ function CheckoutContent() {
   const [enderecoSalvoId, setEnderecoSalvoId] = useState<string | null>(null)
   const [mostrandoFormEnd, setMostrandoFormEnd] = useState(false)
   const [opcoesFrete, setOpcoesFrete]         = useState<OpcaoFrete[]>([])
-  const [freteSel, setFreteSel]               = useState<number | null>(null)
+  const [freteTipoSel, setFreteTipoSel]       = useState<'normal' | 'expresso' | null>(null)
+  const [freteStatus, setFreteStatus]         = useState<FreteStatus | null>(null)
+  const [freteMsg, setFreteMsg]               = useState('')
   const [carregandoFrete, setCarregandoFrete] = useState(false)
   const viaCep = useViaCep()
 
@@ -448,55 +458,50 @@ function CheckoutContent() {
     return acc + Number(preco ?? 0)
   }, 0)
 
-  const frete       = freteSel ?? 0
+  const freteSelObj = opcoesFrete.find((o) => o.id === freteTipoSel) ?? null
+  const frete       = freteStatus === 'ok' ? (freteSelObj?.preco ?? 0) : 0
   const desconto    = cupom?.desconto ?? 0
   const totalFinal  = Math.max(0, total + frete + totalGarantias - desconto)
 
-  // Calcular frete por CEP (chamado quando endereço fica completo).
-  const calcularFretePorCep = useCallback(async (cepLimpo: string) => {
-    if (cepLimpo.length !== 8 || itens.length === 0) return
+  // Calcular frete (fonte única: tabela produto × UF). Resolve por UF; o CEP só
+  // serve de fallback caso a UF ainda não esteja preenchida no formulário.
+  const calcularFrete = useCallback(async (uf: string, cepLimpo?: string) => {
+    if (itens.length === 0) return
+    if (!uf && (!cepLimpo || cepLimpo.length !== 8)) return
     setCarregandoFrete(true)
+    setFreteStatus(null)
+    setFreteMsg('')
+    setOpcoesFrete([])
+    setFreteTipoSel(null)
     try {
       const fr = await fetch('/api/frete', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          cepDestino: cepLimpo,
-          produtos: itens.map(i => ({
-            id: i.produtoId,
-            quantidade: i.quantidade,
-            preco: i.preco,
-          })),
+          uf: uf || undefined,
+          cepDestino: uf ? undefined : cepLimpo,
+          produtos: itens.map(i => ({ id: i.produtoId, quantidade: i.quantidade })),
         }),
       })
       const fd = await fr.json()
-      const opcoes: OpcaoFrete[] = (fd.opcoes ?? []).map(
-        (o: { name?: string; nome?: string; price?: number; preco?: number; delivery_time?: number; prazo?: string }) => {
-          const preco =
-            typeof o.preco === 'number'
-              ? o.preco
-              : typeof o.price === 'number'
-                ? o.price
-                : Number(o.preco ?? o.price ?? 0)
-          // Prazo: usa string se vier; senão formata o delivery_time numérico.
-          const prazo = o.prazo
-            ? o.prazo
-            : typeof o.delivery_time === 'number' && o.delivery_time > 0
-              ? o.delivery_time === 1
-                ? '1 dia útil'
-                : `até ${o.delivery_time} dias úteis`
-              : 'a combinar'
-          return {
-            nome: o.nome ?? o.name ?? 'Frete',
-            preco,
-            prazo,
-          }
-        },
-      )
-      setOpcoesFrete(opcoes)
-      setFreteSel(opcoes[0]?.preco ?? null)
-    } catch { setOpcoesFrete([]) }
-    finally { setCarregandoFrete(false) }
+      const status: FreteStatus = fd.status ?? 'bloqueado'
+      setFreteStatus(status)
+      setFreteMsg(fd.mensagem ?? '')
+      if (status === 'ok') {
+        const opcoes: OpcaoFrete[] = (fd.opcoes ?? []).map(
+          (o: { id: 'normal' | 'expresso'; nome: string; preco: number; prazo: string }) => ({
+            id: o.id, nome: o.nome, preco: Number(o.preco), prazo: o.prazo,
+          }),
+        )
+        setOpcoesFrete(opcoes)
+        setFreteTipoSel(opcoes[0]?.id ?? null)
+      }
+    } catch {
+      setFreteStatus('bloqueado')
+      setFreteMsg('Não foi possível calcular o frete. Tente novamente.')
+    } finally {
+      setCarregandoFrete(false)
+    }
   }, [itens])
 
   // Quando o hook ViaCEP encontra um endereço, popular o formulário.
@@ -510,8 +515,23 @@ function CheckoutContent() {
       cidade: e.cidade || r.cidade,
       estado: e.estado || r.estado,
     }))
-    calcularFretePorCep(r.cep)
-  }, [viaCep.result, calcularFretePorCep])
+    // O cálculo de frete dispara pelo efeito que observa end.estado (abaixo).
+  }, [viaCep.result])
+
+  // Recalcula o frete sempre que a UF de destino (ou o carrinho) muda.
+  useEffect(() => {
+    const uf = end.estado.trim().toUpperCase()
+    if (uf.length === 2 && itens.length > 0) {
+      calcularFrete(uf, end.cep.replace(/\D/g, ''))
+    } else {
+      setFreteStatus(null)
+      setOpcoesFrete([])
+      setFreteTipoSel(null)
+      setFreteMsg('')
+    }
+    // end.cep intencionalmente fora das deps: o gatilho é a UF, não o CEP.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [end.estado, itens.length, calcularFrete])
 
   function handleSelecionarEnderecoSalvo(e: EnderecoSalvo) {
     setEnderecoSalvoId(e.id)
@@ -525,7 +545,7 @@ function CheckoutContent() {
       cidade: e.cidade,
       estado: e.estado,
     })
-    calcularFretePorCep(e.cep.replace(/\D/g, ''))
+    // O cálculo de frete dispara pelo efeito que observa end.estado.
   }
 
   async function aplicarCupom() {
@@ -565,7 +585,19 @@ function CheckoutContent() {
         setErro('Preencha todos os campos de endereço obrigatórios.')
         return
       }
-      if (opcoesFrete.length > 0 && freteSel === null) {
+      if (carregandoFrete) {
+        setErro('Aguarde o cálculo do frete.')
+        return
+      }
+      if (freteStatus === null) {
+        setErro('Informe um CEP/estado válido para calcular o frete.')
+        return
+      }
+      if (freteStatus === 'bloqueado') {
+        setErro(freteMsg || 'Ainda não entregamos na sua região.')
+        return
+      }
+      if (freteStatus === 'ok' && !freteTipoSel) {
         setErro('Selecione uma opção de frete.')
         return
       }
@@ -612,6 +644,7 @@ function CheckoutContent() {
           enderecoId,
           formaPagamento: 'mercado_pago',
           frete,
+          freteTipo: freteStatus === 'ok' ? freteTipoSel ?? undefined : undefined,
           itens: itens.map(i => ({
             produtoId:    i.produtoId,
             quantidade:   i.quantidade,
@@ -629,7 +662,13 @@ function CheckoutContent() {
       }
       const pedidoData = await pr.json()
       setPedidoId(pedidoData.pedido.id)
-      setFase('bricks')
+      // Frete "a combinar" → pedido vira orçamento: não dispara pagamento.
+      if (pedidoData.freteStatus === 'a_combinar') {
+        limparCarrinho()
+        setFase('orcamento')
+      } else {
+        setFase('bricks')
+      }
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao processar pedido. Tente novamente.')
     } finally {
@@ -654,6 +693,31 @@ function CheckoutContent() {
     )
   }
 
+  // ── Orçamento (frete a combinar) — pedido registrado, sem pagamento ──
+  if (fase === 'orcamento') {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 py-20">
+        <div className="w-24 h-24 rounded-full bg-[#e8f8f7] flex items-center justify-center mb-6">
+          <CheckCircle size={40} className="text-[#3cbfb3]" />
+        </div>
+        <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Pedido registrado!</h2>
+        <p className="text-gray-500 text-sm mb-2 max-w-sm">
+          O frete da sua região é <strong>a combinar</strong>. Vamos cotar o frete e entrar em
+          contato para finalizar o pagamento.
+        </p>
+        {pedidoId && (
+          <p className="text-xs text-gray-400 mb-8">
+            Nº do orçamento: <span className="font-mono font-semibold">#{pedidoId.slice(-8).toUpperCase()}</span>
+          </p>
+        )}
+        <Link href="/produtos"
+          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-8 py-3.5 rounded-xl transition-colors text-sm">
+          Continuar comprando
+        </Link>
+      </div>
+    )
+  }
+
   // ── Sucesso fallback (caso o redirect falhe) ──
   if (fase === 'sucesso') {
     return (
@@ -671,7 +735,7 @@ function CheckoutContent() {
   }
 
   const resumoProps: ResumoProps = {
-    itens, total, frete, freteSel, desconto, cupom, totalFinal,
+    itens, total, frete, freteStatus, desconto, cupom, totalFinal,
     totalGarantias,
   }
 
@@ -854,27 +918,27 @@ function CheckoutContent() {
                       <Loader2 size={12} className="animate-spin" /> Calculando frete...
                     </div>
                   )}
-                  {opcoesFrete.length > 0 && (
+                  {!carregandoFrete && freteStatus === 'ok' && opcoesFrete.length > 0 && (
                     <div>
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                         <Truck size={11} /> Opção de Frete
                       </p>
                       <div className="space-y-2">
-                        {opcoesFrete.map((op, i) => (
+                        {opcoesFrete.map((op) => (
                           <button
-                            key={i}
+                            key={op.id}
                             type="button"
-                            onClick={() => setFreteSel(op.preco)}
+                            onClick={() => setFreteTipoSel(op.id)}
                             className={`w-full flex items-center gap-3 border rounded-xl px-4 py-3 text-left transition ${
-                              freteSel === op.preco
+                              freteTipoSel === op.id
                                 ? 'border-[#3cbfb3] bg-[#e8f8f7]'
                                 : 'border-gray-200 hover:border-[#3cbfb3]/40 hover:bg-gray-50'
                             }`}
                           >
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                              freteSel === op.preco ? 'border-[#3cbfb3]' : 'border-gray-300'
+                              freteTipoSel === op.id ? 'border-[#3cbfb3]' : 'border-gray-300'
                             }`}>
-                              {freteSel === op.preco && <div className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
+                              {freteTipoSel === op.id && <div className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
                             </div>
                             <div className="flex-1">
                               <p className="text-sm font-semibold text-gray-900">{op.nome}</p>
@@ -885,6 +949,30 @@ function CheckoutContent() {
                             </p>
                           </button>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!carregandoFrete && freteStatus === 'a_combinar' && (
+                    <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                      <Truck size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-amber-800">Frete a combinar</p>
+                        <p className="text-xs text-amber-700 mt-0.5">
+                          {freteMsg || 'Registramos seu pedido como orçamento e entramos em contato para finalizar o frete.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {!carregandoFrete && freteStatus === 'bloqueado' && (
+                    <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                      <Truck size={15} className="text-red-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-red-700">Indisponível para sua região</p>
+                        <p className="text-xs text-red-600 mt-0.5">
+                          {freteMsg || 'Ainda não entregamos na sua região.'}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -974,6 +1062,8 @@ function CheckoutContent() {
                   >
                     {carregando ? (
                       <><Loader2 size={16} className="animate-spin" /> Criando pedido...</>
+                    ) : freteStatus === 'a_combinar' ? (
+                      <><Truck size={14} /> Registrar orçamento</>
                     ) : (
                       <><Lock size={14} /> Ir para pagamento · R$ {moeda(totalFinal)}</>
                     )}

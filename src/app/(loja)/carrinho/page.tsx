@@ -84,6 +84,8 @@ export default function CarrinhoPage() {
     id: string; nome: string; prazo: string; preco: number
   } | null>(null)
   const [calculandoFrete, setCalculandoFrete] = useState(false)
+  const [freteStatus, setFreteStatus] = useState<'ok' | 'a_combinar' | 'bloqueado' | null>(null)
+  const [freteMsg, setFreteMsg] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [recomendados, setRecomendados] = useState<any[]>([])
 
@@ -214,24 +216,39 @@ export default function CarrinhoPage() {
   // ── CALCULAR FRETE ────────────────────────────────────────
   const calcularFrete = async () => {
     const cepLimpo = cepInput.replace(/\D/g, '')
-    if (cepLimpo.length < 8) return
+    if (cepLimpo.length < 8 || itens.length === 0) return
     setCalculandoFrete(true)
+    setFreteStatus(null)
+    setFreteMsg('')
+    setFreteOpcoes([])
+    setFreteSelecionado(null)
     try {
-      const res = await fetch(`/api/frete?cep=${cepLimpo}&total=${subtotal}`)
+      // Fonte única: tabela produto × UF. A UF é derivada do CEP no servidor.
+      const res = await fetch('/api/frete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cepDestino: cepLimpo,
+          produtos: itens.map(i => ({ id: i.produtoId || i.id, quantidade: i.quantidade })),
+        }),
+      })
       const data = await res.json()
-      if (data.opcoes?.length) {
-        setFreteOpcoes(data.opcoes)
-        if (data.opcoes[0]) setFreteSelecionado(data.opcoes[0])
-      } else {
-        throw new Error('sem opcoes')
+      const status: 'ok' | 'a_combinar' | 'bloqueado' = data.status ?? 'bloqueado'
+      setFreteStatus(status)
+      setFreteMsg(data.mensagem ?? '')
+      if (status === 'ok') {
+        const opcoes = (data.opcoes ?? []).map(
+          (o: { id: string; nome: string; prazo: string; preco: number }) => ({
+            id: o.id, nome: o.nome, prazo: o.prazo, preco: Number(o.preco),
+          }),
+        )
+        setFreteOpcoes(opcoes)
+        if (opcoes[0]) setFreteSelecionado(opcoes[0])
       }
       localStorage.setItem('sixxis_cep', cepLimpo)
     } catch {
-      const pac = { id: 'pac', nome: 'PAC — Correios', prazo: '3 a 5 dias úteis', preco: 18.90 }
-      const sedex = { id: 'sedex', nome: 'SEDEX — Correios', prazo: '1 a 2 dias úteis', preco: 32.90 }
-      setFreteOpcoes([pac, sedex])
-      setFreteSelecionado(pac)
-      localStorage.setItem('sixxis_cep', cepLimpo)
+      setFreteStatus('bloqueado')
+      setFreteMsg('Não foi possível calcular o frete. Tente novamente.')
     }
     setCalculandoFrete(false)
   }
@@ -546,6 +563,24 @@ export default function CarrinhoPage() {
                   ))}
                 </div>
               )}
+
+              {!calculandoFrete && freteStatus === 'a_combinar' && (
+                <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3 mt-3">
+                  <Truck size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-800 font-medium">
+                    Frete a combinar para a sua região. No checkout, o pedido é registrado como orçamento e entramos em contato.
+                  </p>
+                </div>
+              )}
+
+              {!calculandoFrete && freteStatus === 'bloqueado' && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-3.5 py-3 mt-3">
+                  <AlertCircle size={14} className="text-red-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-600 font-medium">
+                    {freteMsg || 'Ainda não entregamos na sua região.'}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* VOCÊ TAMBÉM PODE GOSTAR */}
@@ -616,6 +651,11 @@ export default function CarrinhoPage() {
                     <span className={`font-semibold ${freteSelecionado.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
                       {freteSelecionado.preco === 0 ? 'Grátis' : fmtBRL(freteSelecionado.preco)}
                     </span>
+                  </div>
+                ) : freteStatus === 'a_combinar' ? (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Frete</span>
+                    <span className="font-semibold text-amber-600">A combinar</span>
                   </div>
                 ) : (
                   <div className="flex justify-between text-sm">
