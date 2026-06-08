@@ -10,6 +10,21 @@ const loginSchema = z.object({
   password: z.string().min(6),
 })
 
+// Cookies compartilhados apex/www (domínio .sixxis.com.br) p/ o fluxo OAuth ser
+// consistente entre hosts. Em dev/preview (localhost, *.railway.app) fica
+// undefined — não force .sixxis.com.br lá ou o navegador rejeita o cookie.
+// Override via AUTH_COOKIE_DOMAIN se o domínio mudar.
+const IS_PROD = process.env.NODE_ENV === 'production'
+const COOKIE_DOMAIN = process.env.AUTH_COOKIE_DOMAIN ?? (IS_PROD ? '.sixxis.com.br' : undefined)
+const COOKIE_PREFIX = IS_PROD ? '__Secure-' : ''
+const cookieBase = {
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  path: '/',
+  secure: IS_PROD,
+  domain: COOKIE_DOMAIN,
+}
+
 export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
@@ -54,6 +69,16 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
   // Atrás do proxy do Railway (www.sixxis.com.br) — confia no x-forwarded-host.
   trustHost: true,
   session: { strategy: 'jwt' },
+  // Domínio compartilhado .sixxis.com.br nos cookies do fluxo (state/pkce/csrf/
+  // callback/sessão). csrf usa __Secure- (não __Host-, que proíbe domain).
+  cookies: {
+    sessionToken:     { name: `${COOKIE_PREFIX}authjs.session-token`,     options: cookieBase },
+    callbackUrl:      { name: `${COOKIE_PREFIX}authjs.callback-url`,       options: cookieBase },
+    csrfToken:        { name: `${COOKIE_PREFIX}authjs.csrf-token`,         options: cookieBase },
+    pkceCodeVerifier: { name: `${COOKIE_PREFIX}authjs.pkce.code_verifier`, options: { ...cookieBase, maxAge: 900 } },
+    state:            { name: `${COOKIE_PREFIX}authjs.state`,              options: { ...cookieBase, maxAge: 900 } },
+    nonce:            { name: `${COOKIE_PREFIX}authjs.nonce`,              options: cookieBase },
+  },
   pages: {
     signIn: '/login',
     error: '/login',

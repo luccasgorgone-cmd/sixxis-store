@@ -7,13 +7,12 @@ import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, User, Mail, Lock, Phone, CreditCard, ArrowRight, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, User, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
 
+// CPF e telefone NÃO são pedidos no cadastro — são coletados/validados no checkout.
 const cadastroSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  cpf: z.string().regex(/^\d{11}$/, 'CPF deve ter 11 dígitos'),
-  telefone: z.string().min(10, 'Telefone inválido'),
   senha: z.string().min(6, 'Senha deve ter ao menos 6 caracteres'),
   confirmarSenha: z.string(),
 }).refine((d) => d.senha === d.confirmarSenha, {
@@ -126,37 +125,6 @@ export default function CadastroPage() {
                 />
               </div>
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-            </div>
-
-            {/* CPF + Telefone */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1.5">CPF</label>
-                <div className="relative">
-                  <CreditCard size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    {...register('cpf')}
-                    placeholder="Somente números"
-                    maxLength={11}
-                    className="w-full pl-9 pr-3 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
-                  />
-                </div>
-                {errors.cpf && <p className="text-red-500 text-xs mt-1">{errors.cpf.message}</p>}
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1.5">Telefone</label>
-                <div className="relative">
-                  <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="tel"
-                    {...register('telefone')}
-                    placeholder="(18) 99999-9999"
-                    className="w-full pl-9 pr-3 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
-                  />
-                </div>
-                {errors.telefone && <p className="text-red-500 text-xs mt-1">{errors.telefone.message}</p>}
-              </div>
             </div>
 
             {/* Senha */}

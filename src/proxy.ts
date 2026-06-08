@@ -50,6 +50,19 @@ function clientePrecisaLogin(pathname: string): boolean {
 }
 
 export function proxy(request: NextRequest) {
+  // ─── Host canônico: apex → www ─────────────────────────────────────────────
+  // Garante que TODO o fluxo OAuth (inclui /api/auth/*) ocorra só em www, para os
+  // cookies de state/pkce/csrf serem setados e lidos no MESMO host. Sem isso, a
+  // 1ª tentativa de login Google falha (cookie de state ausente) e a 2ª funciona.
+  const host = (request.headers.get('host') ?? '').toLowerCase()
+  if (host === 'sixxis.com.br') {
+    const url = request.nextUrl.clone()
+    url.protocol = 'https:'
+    url.host = 'www.sixxis.com.br'
+    url.port = ''
+    return NextResponse.redirect(url, 308)
+  }
+
   const { pathname, searchParams } = request.nextUrl
 
   // ─── ADMIN guard (Sprint 1) ────────────────────────────────────────────────
@@ -84,15 +97,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/adm-a7f9c2b4/:path*',
-    '/api/admin/:path*',
-    '/checkout',
-    '/checkout/:path*',
-    '/minha-conta',
-    '/minha-conta/:path*',
-    '/pedidos',
-    '/pedidos/:path*',
-    '/pedido/:path*',
-  ],
+  // Catch-all (menos assets) para o canonical apex→www valer em todo o site,
+  // INCLUSIVE /api/auth/*. Os guards admin/cliente continuam restritos por
+  // predicado de path dentro de proxy(); demais rotas só passam por next().
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
