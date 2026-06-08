@@ -52,9 +52,12 @@ function clientePrecisaLogin(pathname: string): boolean {
 export function proxy(request: NextRequest) {
   // ─── Host canônico: apex → www ─────────────────────────────────────────────
   // Garante que TODO o fluxo OAuth (inclui /api/auth/*) ocorra só em www, para os
-  // cookies de state/pkce/csrf serem setados e lidos no MESMO host. Sem isso, a
-  // 1ª tentativa de login Google falha (cookie de state ausente) e a 2ª funciona.
-  const host = (request.headers.get('host') ?? '').toLowerCase()
+  // cookies de state/pkce/csrf serem setados e lidos no MESMO host — corrige o
+  // "InvalidCheck: pkceCodeVerifier could not be parsed" (cookie PKCE não lido no
+  // callback na 1ª tentativa). Atrás do proxy do Railway, o host público chega em
+  // x-forwarded-host; por isso checamos ele primeiro.
+  const rawHost = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? ''
+  const host = rawHost.split(',')[0].trim().split(':')[0].toLowerCase()
   if (host === 'sixxis.com.br') {
     const url = request.nextUrl.clone()
     url.protocol = 'https:'
