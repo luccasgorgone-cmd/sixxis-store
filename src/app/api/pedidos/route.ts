@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { criarGarantiasPedido } from '@/lib/garantia'
 import { resolverFrete } from '@/lib/frete-resolver'
 import { resgatarCashback } from '@/lib/cashback'
+import { avaliarCupom } from '@/lib/cupom'
 
 const itemSchema = z.object({
   produtoId:    z.string(),
@@ -85,8 +86,8 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, desconto: descontoReq, garantias, cashbackUsar } = parsed.data
-  const desconto = descontoReq ?? 0
+  // desconto do client é IGNORADO — recomputado no servidor a partir do cupom.
+  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, garantias, cashbackUsar } = parsed.data
 
   // Endereço deve pertencer ao cliente — e dele extraímos a UF de destino.
   const endereco = await prisma.endereco.findUnique({
@@ -141,6 +142,21 @@ export async function POST(request: NextRequest) {
       variacaoId:   item.variacaoId,
       variacaoNome: item.variacaoNome,
     })
+  }
+
+  // ── Barreira final do cupom (server-side, autoritativa) ────────────────────
+  // Revalida o cupom (inclui a regra de 1ª compra) e RECOMPUTA o desconto sobre
+  // o subtotal. Se a regra falhar, zera o desconto e NÃO grava o cupom — assim
+  // nem o desconto nem o registro de uso acontecem para um cupom indevido.
+  let descontoFinal = 0
+  let cupomCodigoFinal: string | null = null
+  if (cupomCodigo) {
+    const cupom = await prisma.cupom.findUnique({ where: { codigo: cupomCodigo.toUpperCase().trim() } })
+    const avaliacao = await avaliarCupom(cupom, subtotal, session.user.id)
+    if (avaliacao.valido && cupom) {
+      descontoFinal = avaliacao.desconto ?? 0
+      cupomCodigoFinal = cupom.codigo
+    }
   }
 
   // Validar e calcular custo das garantias contratadas (se houver)
@@ -214,9 +230,9 @@ export async function POST(request: NextRequest) {
       frete:          freteValor,
       freteTipo:      freteTipoFinal,
       fretePrazo:     fretePrazoFinal,
-      desconto,
-      cupomCodigo:    cupomCodigo ?? null,
-      total:          Math.max(0, subtotal + freteValor + totalGarantias - desconto),
+      desconto:       descontoFinal,
+      cupomCodigo:    cupomCodigoFinal,
+      total:          Math.max(0, subtotal + freteValor + totalGarantias - descontoFinal),
       status:         statusPedido,
       itens: {
         create: itensPedido.map((item) => ({

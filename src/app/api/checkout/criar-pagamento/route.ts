@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { isStatusPendente } from '@/lib/pedido-status'
 import { creditarCashback } from '@/lib/cashback'
+import { registrarUsoCupom } from '@/lib/cupom'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -182,6 +183,11 @@ export async function POST(req: NextRequest) {
       } catch (e) {
         console.error('[mp:create] cashback:', (e as Error).message)
       }
+      // Registra uso do cupom (idempotente). Mesma lacuna do cashback: cartão
+      // aprovado inline marca 'pago' antes do webhook, que então pularia.
+      await registrarUsoCupom(pedido.id).catch((e) =>
+        console.error('[mp:create] registrar uso cupom:', (e as Error).message),
+      )
     } else if (pagamento.mpPaymentId) {
       // mantém referência principal pra reconciliação via webhook
       await prisma.pedido.update({

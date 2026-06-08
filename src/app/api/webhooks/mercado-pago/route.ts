@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { auditLog } from '@/lib/audit'
 import { calcularPontos, creditarPontos } from '@/lib/fidelidade'
 import { creditarCashback, estornarCashbackPedido } from '@/lib/cashback'
+import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 
 function validarAssinatura(req: NextRequest): boolean {
@@ -147,15 +148,10 @@ export async function POST(req: NextRequest) {
         console.error('[mp:webhook] cashback:', e)
       }
 
-      // Cupom: incrementar uso
-      if (pedido.cupomCodigo) {
-        await prisma.cupom
-          .update({
-            where: { codigo: pedido.cupomCodigo },
-            data: { totalUsos: { increment: 1 } },
-          })
-          .catch(() => {})
-      }
+      // Cupom: registra uso (cria CupomUso + incrementa totalUsos). Idempotente.
+      await registrarUsoCupom(pedido.id).catch((e) =>
+        console.error('[mp:webhook] registrar uso cupom:', (e as Error).message),
+      )
 
       // Email de confirmação
       try {
