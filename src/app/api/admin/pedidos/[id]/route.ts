@@ -52,7 +52,8 @@ export async function PATCH(
     where: { id },
     select: {
       status: true, codigoRastreio: true, transportadora: true,
-      linkRastreio: true, custoFreteReal: true, enviadoEm: true, fretePrazo: true,
+      linkRastreio: true, custoFreteReal: true, enviadoEm: true, entregueEm: true,
+      fretePrazo: true,
       cliente: { select: { nome: true, email: true } },
     },
   })
@@ -61,9 +62,8 @@ export async function PATCH(
   }
 
   const data: Record<string, unknown> = {}
-  let dispararEmail = false
 
-  // ── Despacho: insere rastreio, migra pra "enviado", dispara email ──────────
+  // ── Campos de rastreio/custo conforme a ação ───────────────────────────────
   if (dados.acao === 'despachar') {
     const codigo = limpar(dados.codigoRastreio) ?? pedido.codigoRastreio
     if (!codigo) {
@@ -77,17 +77,12 @@ export async function PATCH(
     if (dados.linkRastreio !== undefined) data.linkRastreio = limpar(dados.linkRastreio)
     if (dados.custoFreteReal !== undefined) data.custoFreteReal = dados.custoFreteReal
     data.status = 'enviado'
-    // Só seta enviadoEm na 1ª vez; e só manda email se ainda não havia sido enviado.
-    const jaEnviado = pedido.status === 'enviado' || pedido.status === 'entregue' || !!pedido.enviadoEm
-    if (!pedido.enviadoEm) data.enviadoEm = new Date()
-    dispararEmail = !jaEnviado
   }
   // ── Marcar como entregue ──────────────────────────────────────────────────
   else if (dados.acao === 'entregue') {
     data.status = 'entregue'
-    data.entregueEm = new Date()
   }
-  // ── Edição genérica (correção) — sem troca de status, sem email ────────────
+  // ── Edição genérica (correção) — pode ou não trocar status ─────────────────
   else {
     if (dados.status !== undefined) data.status = dados.status
     if (dados.codigoRastreio !== undefined) data.codigoRastreio = limpar(dados.codigoRastreio)
@@ -96,22 +91,48 @@ export async function PATCH(
     if (dados.custoFreteReal !== undefined) data.custoFreteReal = dados.custoFreteReal
   }
 
+  // ── Transições de status: carimba datas + decide email ─────────────────────
+  // Centralizado p/ valer TANTO nas ações (despachar/entregue) QUANTO na troca
+  // de status manual via dropdown — antes só "despachar" carimbava/enviava, e
+  // mudar status pelo dropdown deixava enviadoEm/entregueEm null e sem email.
+  const statusAntes  = pedido.status
+  const statusDepois = (data.status as string | undefined) ?? statusAntes
+  let dispararEmail = false
+
+  // Entrou em "enviado" (anterior != enviado): carimba enviadoEm 1x e dispara
+  // o email de despacho 1x. Edição posterior sem trocar status NÃO reentra aqui
+  // (statusDepois == statusAntes), então não reenvia.
+  if (statusDepois === 'enviado' && statusAntes !== 'enviado' && !pedido.enviadoEm) {
+    data.enviadoEm = new Date()
+    const codigoEmail = (data.codigoRastreio as string | undefined) ?? pedido.codigoRastreio
+    dispararEmail = !!codigoEmail // só envia se houver rastreio
+  }
+
+  // Entrou em "entregue" (anterior != entregue): carimba entregueEm 1x.
+  if (statusDepois === 'entregue' && statusAntes !== 'entregue' && !pedido.entregueEm) {
+    data.entregueEm = new Date()
+  }
+
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 })
   }
 
   const atualizado = await prisma.pedido.update({ where: { id }, data })
 
-  // Email de despacho — try/catch, nunca bloqueia o salvamento.
+  // Email de despacho — try/catch, nunca bloqueia o salvamento. NÃO inclui
+  // custoFreteReal/margem (dados internos): só rastreio, transportadora e prazo.
   let emailEnviado = false
   if (dispararEmail && pedido.cliente?.email) {
+    const codigoEmail = (data.codigoRastreio as string | undefined) ?? pedido.codigoRastreio ?? ''
+    const transpEmail = (data.transportadora as string | null | undefined) ?? pedido.transportadora
+    const linkEmail   = (data.linkRastreio as string | null | undefined) ?? pedido.linkRastreio
     try {
       await enviarEmailRastreio(pedido.cliente.email, {
         nomeCliente:    pedido.cliente.nome,
         pedidoId:       id,
-        codigoRastreio: String(data.codigoRastreio),
-        transportadora: (data.transportadora as string | null) ?? undefined,
-        linkRastreio:   (data.linkRastreio as string | null) ?? undefined,
+        codigoRastreio: String(codigoEmail),
+        transportadora: transpEmail ?? undefined,
+        linkRastreio:   linkEmail ?? undefined,
         prazoEstimado:  pedido.fretePrazo ? `cerca de ${pedido.fretePrazo} dias úteis` : undefined,
       })
       emailEnviado = true

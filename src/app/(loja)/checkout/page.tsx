@@ -87,6 +87,33 @@ function maskCep(v: string) {
   return `${d.slice(0,5)}-${d.slice(5)}`
 }
 
+function soDigitos(v: string) {
+  return v.replace(/\D/g, '')
+}
+
+// CPF com validação dos 2 dígitos verificadores (rejeita 000... e repetidos).
+function isCpfValido(cpf: string): boolean {
+  const d = soDigitos(cpf)
+  if (d.length !== 11) return false
+  if (/^(\d)\1{10}$/.test(d)) return false
+  let soma = 0
+  for (let i = 0; i < 9; i++) soma += Number(d[i]) * (10 - i)
+  let resto = (soma * 10) % 11
+  if (resto === 10) resto = 0
+  if (resto !== Number(d[9])) return false
+  soma = 0
+  for (let i = 0; i < 10; i++) soma += Number(d[i]) * (11 - i)
+  resto = (soma * 10) % 11
+  if (resto === 10) resto = 0
+  return resto === Number(d[10])
+}
+
+// Telefone BR: 10 (fixo) ou 11 (celular) dígitos com DDD.
+function isTelefoneValido(tel: string): boolean {
+  const d = soDigitos(tel)
+  return d.length === 10 || d.length === 11
+}
+
 // ─── Campo de input ───────────────────────────────────────────────────────────
 
 function Campo({
@@ -354,7 +381,19 @@ function CheckoutContent() {
   const [perfilLoading, setPerfilLoading] = useState(false)
   const [perfilFetched, setPerfilFetched] = useState(false)
 
-  // Prefill com dados do Cliente logado (nome/CPF/telefone/email).
+  // Prefill imediato de nome/email da sessão NextAuth (session.user) — vale
+  // p/ credentials e OAuth (Google/Facebook). Não depende do fetch do perfil
+  // (que pode falhar/correr); só preenche se o campo ainda estiver vazio.
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated' || !session?.user) return
+    setIdent(prev => ({
+      ...prev,
+      nome:  prev.nome  || (session.user?.name  ?? ''),
+      email: prev.email || (session.user?.email ?? ''),
+    }))
+  }, [sessionStatus, session?.user])
+
+  // Prefill de CPF/telefone (e fallback de nome/email) do Cliente no banco.
   // Roda 1x ao virar 'authenticated'. Aplica máscaras e preserva edicoes
   // do user (so preenche se o campo ainda estiver vazio).
   useEffect(() => {
@@ -578,6 +617,14 @@ function CheckoutContent() {
         setErro('Preencha nome e e-mail.')
         return
       }
+      if (!isCpfValido(ident.cpf)) {
+        setErro('Informe um CPF válido.')
+        return
+      }
+      if (!isTelefoneValido(ident.telefone)) {
+        setErro('Informe um telefone válido com DDD.')
+        return
+      }
       setEtapa(2)
     } else if (etapa === 2) {
       const { cep, logradouro, numero, bairro, cidade, estado } = end
@@ -610,8 +657,27 @@ function CheckoutContent() {
 
   async function irParaPagamento() {
     setErro('')
+    // Guard final: nunca abre o pagamento (MP Bricks) sem CPF/telefone válidos.
+    if (!isCpfValido(ident.cpf) || !isTelefoneValido(ident.telefone)) {
+      setErro('Revise CPF e telefone na etapa de identificação.')
+      setEtapa(1)
+      return
+    }
     setCarregando(true)
     try {
+      // Persiste cpf/telefone no perfil p/ prefill futuro. Não bloqueia o
+      // checkout: falha/conflito é ignorado (ex.: guest sem sessão → 401).
+      try {
+        await fetch('/api/conta/perfil', {
+          method:  'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            cpf:      soDigitos(ident.cpf),
+            telefone: soDigitos(ident.telefone),
+          }),
+        })
+      } catch { /* não bloqueia o pagamento */ }
+
       let enderecoId = enderecoSalvoId
       // Endereço salvo: reaproveita. Caso contrário, cria um novo.
       if (!enderecoId) {
@@ -828,10 +894,10 @@ function CheckoutContent() {
                         onChange={v => setIdent(d => ({ ...d, nome: v }))}
                         placeholder={perfilLoading ? 'Carregando…' : 'João da Silva'} />
                     </div>
-                    <Campo label="CPF" value={ident.cpf}
+                    <Campo label="CPF" required value={ident.cpf}
                       onChange={v => setIdent(d => ({ ...d, cpf: maskCpf(v) }))}
                       placeholder={perfilLoading ? 'Carregando…' : '000.000.000-00'} inputMode="numeric" />
-                    <Campo label="Telefone / WhatsApp" value={ident.telefone}
+                    <Campo label="Telefone / WhatsApp" required value={ident.telefone}
                       onChange={v => setIdent(d => ({ ...d, telefone: maskTel(v) }))}
                       placeholder={perfilLoading ? 'Carregando…' : '(11) 99999-9999'} inputMode="tel" />
                     <div className="sm:col-span-2">
