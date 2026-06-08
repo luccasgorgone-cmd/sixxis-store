@@ -234,7 +234,7 @@ export default function MinhaContaPage() {
             <div className="flex items-center gap-3 mb-4">
               <IconeNivel nivel={nivel.atual} size={40} />
               <div>
-                <h2 className="text-sm font-black text-gray-900">Benefícios {nivel.atual}</h2>
+                <h2 className="text-sm font-black text-gray-900">Seus benefícios</h2>
                 <p className="text-xs" style={{ color: nivel.cor }}>
                   {((nivel.cashbackPct || 0.02) * 100).toFixed(0)}% cashback em todas as compras
                 </p>

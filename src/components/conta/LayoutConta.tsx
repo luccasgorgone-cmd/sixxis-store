@@ -54,7 +54,6 @@ function NivelCard() {
         <IconeNivel nivel={nivel.atual} size={36} />
         <div>
           <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Seu Nível</p>
-          <p className="text-sm font-black" style={{ color: nivel.cor }}>{nivel.atual}</p>
         </div>
       </div>
 
@@ -164,7 +163,6 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
                     <div className="relative flex items-center justify-between">
                       <div>
                         <p className="text-white/60 text-[9px] font-black uppercase tracking-widest">Seu nível</p>
-                        <p className="text-white font-black text-sm leading-tight mt-0.5">{cfgNivel.label}</p>
                       </div>
                       <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center"

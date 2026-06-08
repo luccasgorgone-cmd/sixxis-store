@@ -69,6 +69,7 @@ export async function GET(req: NextRequest) {
           bloqueado:      true,
           motivoBloqueio: true,
           cashbackSaldo:  true,
+          cashbackPendente: true,
           totalGasto:     true,
           totalPedidos:   true,
           ultimaCompra:   true,

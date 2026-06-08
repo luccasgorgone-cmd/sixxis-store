@@ -50,6 +50,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
     totalPedidos: pagosAgg._count._all,
     totalPedidosPendentes: pendentesAgg._count._all,
   }
+  // NUNCA expor o hash de senha. include traz todos os escalares → remove aqui.
+  delete (clienteAjustado as { senha?: string }).senha
   return NextResponse.json({ cliente: clienteAjustado })
 }
 
@@ -75,7 +77,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
   if (nome           !== undefined) data.nome           = nome
   if (telefone       !== undefined) data.telefone       = telefone
 
-  const cliente = await prisma.cliente.update({ where: { id }, data })
+  // select explícito — NUNCA retorna o hash de senha.
+  const cliente = await prisma.cliente.update({
+    where: { id },
+    data,
+    select: {
+      id: true, nome: true, email: true, cpf: true, telefone: true,
+      bloqueado: true, motivoBloqueio: true, bloqueadoEm: true,
+      cashbackSaldo: true, cashbackPendente: true, totalGasto: true,
+      totalPedidos: true, createdAt: true,
+    },
+  })
 
   const action = bloqueado === true ? 'cliente.block'
                : bloqueado === false ? 'cliente.unblock'
