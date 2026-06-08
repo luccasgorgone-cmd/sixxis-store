@@ -302,6 +302,33 @@ export async function enviarEmailRastreio(para: string, opts: {
   await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
 }
 
+export async function enviarEmailResetSenha(para: string, opts: {
+  nomeCliente: string
+  link:        string
+}) {
+  if (!process.env.RESEND_API_KEY) return
+
+  const { nomeCliente, link } = opts
+  const html = layout(`
+    <h1 style="margin:0 0 8px;font-size:22px;color:#0a0a0a;">Redefinir sua senha</h1>
+    <p style="margin:0 0 16px;font-size:15px;color:#374151;">
+      Olá, ${nomeCliente || 'Cliente'} — recebemos um pedido para redefinir a senha da sua
+      conta Sixxis. Clique no botão abaixo para criar uma nova senha. O link expira em 1 hora.
+    </p>
+    <p style="margin:0 0 24px;">${btn('Criar nova senha', link)}</p>
+    <p style="margin:0;font-size:13px;color:#9ca3af;">
+      Se você não solicitou isso, ignore este e-mail — sua senha continua a mesma.
+    </p>
+  `)
+
+  await getResend().emails.send({
+    from:    `${FROM_NAME} <${FROM}>`,
+    to:      para,
+    subject: 'Redefinição de senha — Sixxis Store',
+    html,
+  })
+}
+
 export async function enviarEmailBoasVindas(para: string, nomeCliente: string) {
   if (!process.env.RESEND_API_KEY) return
 

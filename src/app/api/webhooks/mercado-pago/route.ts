@@ -5,6 +5,7 @@ import { mpPayment, MP_WEBHOOK_SECRET } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auditLog } from '@/lib/audit'
 import { calcularPontos, creditarPontos } from '@/lib/fidelidade'
+import { creditarCashback } from '@/lib/cashback'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 
 function validarAssinatura(req: NextRequest): boolean {
@@ -132,6 +133,13 @@ export async function POST(req: NextRequest) {
         }
       } catch (e) {
         console.error('[mp:webhook] pontos:', e)
+      }
+
+      // Cashback (% do nível de fidelidade) — idempotente por pedido.
+      try {
+        await creditarCashback(pedido.clienteId, Number(pedido.total), pedido.id)
+      } catch (e) {
+        console.error('[mp:webhook] cashback:', e)
       }
 
       // Cupom: incrementar uso

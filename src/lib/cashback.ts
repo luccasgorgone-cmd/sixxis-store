@@ -1,10 +1,34 @@
 import { prisma } from '@/lib/prisma'
+import { calcularNivel, NIVEIS_CONFIG } from '@/lib/avatares'
 
-export const CASHBACK_PERCENT = 0.03 // 3% de cada compra
+const STATUS_GASTO = ['pago', 'entregue', 'PAGO', 'ENTREGUE'] as const
 
-/** Credita cashback ao cliente após uma compra */
+/**
+ * Credita cashback ao cliente após uma compra.
+ * - % é o do NÍVEL de fidelidade do cliente (Cristal 2% … Esmeralda 7%),
+ *   determinado pelo totalGasto (soma dos pedidos pagos/entregues) — mesma
+ *   fonte usada em /api/cashback.
+ * - Idempotente: nunca credita 2x o mesmo pedido (chave pedidoId + tipo credito).
+ */
 export async function creditarCashback(clienteId: string, valorPedido: number, pedidoId: string) {
-  const valor = parseFloat((valorPedido * CASHBACK_PERCENT).toFixed(2))
+  if (valorPedido <= 0) return
+
+  // Idempotência: se já há crédito pra este pedido, não faz nada.
+  const jaCreditado = await prisma.cashbackTransacao.findFirst({
+    where:  { pedidoId, clienteId, tipo: 'credito' },
+    select: { id: true },
+  })
+  if (jaCreditado) return
+
+  // Nível pelo total gasto (inclui este pedido, que já está 'pago' ao creditar).
+  const agg = await prisma.pedido.aggregate({
+    where: { clienteId, status: { in: [...STATUS_GASTO] } },
+    _sum:  { total: true },
+  })
+  const totalGasto = Number(agg._sum.total ?? 0)
+  const pct = NIVEIS_CONFIG[calcularNivel(totalGasto)]?.cashbackPct ?? NIVEIS_CONFIG.Cristal.cashbackPct
+
+  const valor = parseFloat((valorPedido * pct).toFixed(2))
   if (valor <= 0) return
 
   await prisma.$transaction([
@@ -13,7 +37,7 @@ export async function creditarCashback(clienteId: string, valorPedido: number, p
         clienteId,
         tipo:      'credito',
         valor,
-        descricao: `Cashback do pedido #${pedidoId}`,
+        descricao: `Cashback do pedido #${pedidoId.slice(-8).toUpperCase()}`,
         pedidoId,
       },
     }),
