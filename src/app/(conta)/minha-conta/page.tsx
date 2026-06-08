@@ -287,7 +287,7 @@ export default function MinhaContaPage() {
                   <p className="text-[11px] font-black mt-2 text-gray-900">{n.nome}</p>
                   <p className="text-[10px] font-bold" style={{ color: n.cor }}>{n.cashback} CB</p>
                   <p className="text-[9px] text-gray-400 text-center mt-0.5">
-                    {n.maxGasto && n.maxGasto !== Infinity ? `até R$${(n.maxGasto / 1000).toFixed(0)}k` : 'R$40k+'}
+                    {n.maxGasto && n.maxGasto !== Infinity ? `até R$${(n.maxGasto / 1000).toFixed(0)}k` : 'R$20k+'}
                   </p>
                   {isAtual && (
                     <span className="mt-1 text-[9px] font-black px-1.5 py-0.5 rounded-full"
