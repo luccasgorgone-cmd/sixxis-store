@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
       resultadoFrete.opcoes.find((o) => o.id === freteTipo) ?? resultadoFrete.opcoes[0]
     freteValor = escolhida.preco
     freteTipoFinal = escolhida.id
-    fretePrazoFinal = escolhida.prazoDias
+    fretePrazoFinal = escolhida.prazoDiasMax
     statusPedido = 'pendente'
   }
 

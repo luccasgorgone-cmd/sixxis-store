@@ -24,7 +24,8 @@ export interface OpcaoFreteResolvida {
   id: 'normal' | 'expresso'
   nome: string
   preco: number
-  prazoDias: number
+  prazoDiasMin: number
+  prazoDiasMax: number
   prazo: string // string formatada p/ exibição
 }
 
@@ -40,10 +41,12 @@ export interface ItemFrete {
   quantidade: number
 }
 
-export function formatarPrazo(dias: number | null | undefined): string {
-  if (!dias || dias <= 0) return 'a combinar'
-  if (dias === 1) return '1 dia útil'
-  return `até ${dias} dias úteis`
+export function formatarPrazo(min?: number | null, max?: number | null): string {
+  const lo = min && min > 0 ? min : 0
+  const hi = max && max > 0 ? max : 0
+  if (!hi) return 'a combinar'
+  if (!lo || lo === hi) return hi === 1 ? '1 dia útil' : `${hi} dias úteis`
+  return `${lo} a ${hi} dias úteis`   // ex.: "1 a 3 dias úteis"
 }
 
 const MSG_BLOQUEADO = 'Ainda não entregamos na sua região.'
@@ -92,8 +95,10 @@ export async function resolverFrete(
   let temExpresso = true // todos os itens têm preço expresso?
   let precoNormal = 0
   let precoExpresso = 0
-  let prazoNormal = 0
-  let prazoExpresso = 0
+  let prazoNormalMin = 0
+  let prazoNormalMax = 0
+  let prazoExpressoMin = 0
+  let prazoExpressoMax = 0
 
   for (const produtoId of produtoIds) {
     const regra = regraPorProduto.get(produtoId)
@@ -118,14 +123,16 @@ export async function resolverFrete(
 
     if (pn != null) {
       precoNormal += pn
-      prazoNormal = Math.max(prazoNormal, regra.prazoNormal ?? 0)
+      prazoNormalMin = Math.max(prazoNormalMin, regra.prazoNormalMin ?? 0)
+      prazoNormalMax = Math.max(prazoNormalMax, regra.prazoNormalMax ?? 0)
     } else {
       temNormal = false
     }
 
     if (pe != null) {
       precoExpresso += pe
-      prazoExpresso = Math.max(prazoExpresso, regra.prazoExpresso ?? 0)
+      prazoExpressoMin = Math.max(prazoExpressoMin, regra.prazoExpressoMin ?? 0)
+      prazoExpressoMax = Math.max(prazoExpressoMax, regra.prazoExpressoMax ?? 0)
     } else {
       temExpresso = false
     }
@@ -137,8 +144,9 @@ export async function resolverFrete(
       id: 'normal',
       nome: 'Frete Normal',
       preco: precoNormal,
-      prazoDias: prazoNormal,
-      prazo: formatarPrazo(prazoNormal),
+      prazoDiasMin: prazoNormalMin,
+      prazoDiasMax: prazoNormalMax,
+      prazo: formatarPrazo(prazoNormalMin, prazoNormalMax),
     })
   }
   if (temExpresso) {
@@ -146,8 +154,9 @@ export async function resolverFrete(
       id: 'expresso',
       nome: 'Frete Expresso',
       preco: precoExpresso,
-      prazoDias: prazoExpresso,
-      prazo: formatarPrazo(prazoExpresso),
+      prazoDiasMin: prazoExpressoMin,
+      prazoDiasMax: prazoExpressoMax,
+      prazo: formatarPrazo(prazoExpressoMin, prazoExpressoMax),
     })
   }
 

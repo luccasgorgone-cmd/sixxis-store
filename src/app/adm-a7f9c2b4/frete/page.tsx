@@ -21,9 +21,11 @@ interface ProdutoResumo {
 
 interface RegraEdit {
   precoNormal: string
-  prazoNormal: string
+  prazoNormalMin: string
+  prazoNormalMax: string
   precoExpresso: string
-  prazoExpresso: string
+  prazoExpressoMin: string
+  prazoExpressoMax: string
   aCombinar: boolean
   bloqueado: boolean
 }
@@ -31,15 +33,18 @@ interface RegraEdit {
 interface RegraApi {
   uf: string
   precoNormal: string | number | null
-  prazoNormal: number | null
+  prazoNormalMin: number | null
+  prazoNormalMax: number | null
   precoExpresso: string | number | null
-  prazoExpresso: number | null
+  prazoExpressoMin: number | null
+  prazoExpressoMax: number | null
   aCombinar: boolean
   bloqueado: boolean
 }
 
 const VAZIA: RegraEdit = {
-  precoNormal: '', prazoNormal: '', precoExpresso: '', prazoExpresso: '',
+  precoNormal: '', prazoNormalMin: '', prazoNormalMax: '',
+  precoExpresso: '', prazoExpressoMin: '', prazoExpressoMax: '',
   aCombinar: false, bloqueado: false,
 }
 
@@ -50,8 +55,8 @@ function regrasVazias(): Record<string, RegraEdit> {
 function temConteudo(r: RegraEdit): boolean {
   return (
     r.bloqueado || r.aCombinar ||
-    r.precoNormal !== '' || r.prazoNormal !== '' ||
-    r.precoExpresso !== '' || r.prazoExpresso !== ''
+    r.precoNormal !== '' || r.prazoNormalMin !== '' || r.prazoNormalMax !== '' ||
+    r.precoExpresso !== '' || r.prazoExpressoMin !== '' || r.prazoExpressoMax !== ''
   )
 }
 
@@ -82,11 +87,21 @@ function CamposRegra({
 }: { r: RegraEdit; onChange: (patch: Partial<RegraEdit>) => void; compact?: boolean }) {
   const disabled = r.bloqueado || r.aCombinar
   return (
-    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
-      <NumInput value={r.precoNormal}   onChange={(v) => onChange({ precoNormal: v })}   placeholder={compact ? 'R$ normal' : 'preço'} step="0.01" />
-      <NumInput value={r.prazoNormal}   onChange={(v) => onChange({ prazoNormal: v })}   placeholder={compact ? 'dias' : 'prazo'}     step="1" />
-      <NumInput value={r.precoExpresso} onChange={(v) => onChange({ precoExpresso: v })} placeholder={compact ? 'R$ expr.' : 'preço'}  step="0.01" />
-      <NumInput value={r.prazoExpresso} onChange={(v) => onChange({ prazoExpresso: v })} placeholder={compact ? 'dias' : 'prazo'}      step="1" />
+    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
+      {/* Normal: preço + prazo em faixa (min a max dias úteis) */}
+      <div className="flex items-center gap-1.5">
+        <NumInput value={r.precoNormal}    onChange={(v) => onChange({ precoNormal: v })}    placeholder={compact ? 'R$ normal' : 'preço'} step="0.01" />
+        <NumInput value={r.prazoNormalMin} onChange={(v) => onChange({ prazoNormalMin: v })} placeholder="min"                            step="1" />
+        <span className="text-xs text-gray-400 shrink-0">a</span>
+        <NumInput value={r.prazoNormalMax} onChange={(v) => onChange({ prazoNormalMax: v })} placeholder="max"                            step="1" />
+      </div>
+      {/* Expresso: preço + prazo em faixa (min a max dias úteis) */}
+      <div className="flex items-center gap-1.5">
+        <NumInput value={r.precoExpresso}    onChange={(v) => onChange({ precoExpresso: v })}    placeholder={compact ? 'R$ expr.' : 'preço'} step="0.01" />
+        <NumInput value={r.prazoExpressoMin} onChange={(v) => onChange({ prazoExpressoMin: v })} placeholder="min"                           step="1" />
+        <span className="text-xs text-gray-400 shrink-0">a</span>
+        <NumInput value={r.prazoExpressoMax} onChange={(v) => onChange({ prazoExpressoMax: v })} placeholder="max"                           step="1" />
+      </div>
     </div>
   )
 }
@@ -163,9 +178,11 @@ export default function FreteAdminPage() {
         if (!(r.uf in base)) continue
         base[r.uf] = {
           precoNormal: str(r.precoNormal),
-          prazoNormal: str(r.prazoNormal),
+          prazoNormalMin: str(r.prazoNormalMin),
+          prazoNormalMax: str(r.prazoNormalMax),
           precoExpresso: str(r.precoExpresso),
-          prazoExpresso: str(r.prazoExpresso),
+          prazoExpressoMin: str(r.prazoExpressoMin),
+          prazoExpressoMax: str(r.prazoExpressoMax),
           aCombinar: !!r.aCombinar,
           bloqueado: !!r.bloqueado,
         }
@@ -204,9 +221,11 @@ export default function FreteAdminPage() {
         if (!(r.uf in base)) continue
         base[r.uf] = {
           precoNormal: str(r.precoNormal),
-          prazoNormal: str(r.prazoNormal),
+          prazoNormalMin: str(r.prazoNormalMin),
+          prazoNormalMax: str(r.prazoNormalMax),
           precoExpresso: str(r.precoExpresso),
-          prazoExpresso: str(r.prazoExpresso),
+          prazoExpressoMin: str(r.prazoExpressoMin),
+          prazoExpressoMax: str(r.prazoExpressoMax),
           aCombinar: !!r.aCombinar,
           bloqueado: !!r.bloqueado,
         }
@@ -228,9 +247,11 @@ export default function FreteAdminPage() {
       const payload = UFS.filter((uf) => temConteudo(regras[uf])).map((uf) => ({
         uf,
         precoNormal: regras[uf].precoNormal,
-        prazoNormal: regras[uf].prazoNormal,
+        prazoNormalMin: regras[uf].prazoNormalMin,
+        prazoNormalMax: regras[uf].prazoNormalMax,
         precoExpresso: regras[uf].precoExpresso,
-        prazoExpresso: regras[uf].prazoExpresso,
+        prazoExpressoMin: regras[uf].prazoExpressoMin,
+        prazoExpressoMax: regras[uf].prazoExpressoMax,
         aCombinar: regras[uf].aCombinar,
         bloqueado: regras[uf].bloqueado,
       }))

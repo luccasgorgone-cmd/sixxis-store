@@ -406,10 +406,15 @@ model FreteRegra {
   uf            String   @db.Char(2)
   // Frete normal
   precoNormal   Decimal? @db.Decimal(10, 2)
-  prazoNormal   Int? // dias úteis
+  prazoNormal   Int? // @deprecated, usar prazoNormalMin/Max
   // Frete expresso
   precoExpresso Decimal? @db.Decimal(10, 2)
-  prazoExpresso Int? // dias úteis
+  prazoExpresso Int? // @deprecated, usar prazoExpressoMin/Max
+  // Prazo em faixa (dias úteis)
+  prazoNormalMin   Int?
+  prazoNormalMax   Int?
+  prazoExpressoMin Int?
+  prazoExpressoMax Int?
   // Estados especiais
   aCombinar     Boolean  @default(false) // vira orçamento, cliente não finaliza
   bloqueado     Boolean  @default(false) // não entrega nesse estado
