@@ -1,5 +1,7 @@
 'use client'
 
+import { analyticsConsentido } from '@/lib/consent'
+
 declare global {
   interface Window {
     dataLayer: Record<string, unknown>[]
@@ -18,6 +20,8 @@ export type ProdutoTracking = {
 
 function push(event: string, ecommerce: Record<string, unknown>) {
   if (typeof window === 'undefined') return
+  // (4) Só empurra evento de e-commerce ao dataLayer com consentimento de analytics.
+  if (!analyticsConsentido()) return
   window.dataLayer = window.dataLayer || []
   window.dataLayer.push({ ecommerce: null })
   window.dataLayer.push({ event, ecommerce })

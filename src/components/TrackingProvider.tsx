@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { COOKIE_SESSION, COOKIE_CONSENT, gerarSessaoId } from '@/lib/tracking'
+import { COOKIE_SESSION, gerarSessaoId } from '@/lib/tracking'
+import { analyticsConsentido, CONSENT_EVENT } from '@/lib/consent'
 
 type TrackData = Record<string, unknown>
 
@@ -36,16 +37,22 @@ function setCookieClient(name: string, value: string, days = 1) {
 export function TrackingProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const sessaoIdRef = useRef<string>('')
+  const inicializadoRef = useRef(false)
 
-  useEffect(() => {
+  // Só cria o cookie de sessão e persiste UTMs APÓS o consentimento de analytics.
+  // Sem consentimento → nada de sixxis_sid nem eventos.
+  const garantirSessao = useCallback((): boolean => {
+    if (inicializadoRef.current) return true
+    if (!analyticsConsentido()) return false
+
     let sid = getCookie(COOKIE_SESSION)
     if (!sid) {
       sid = gerarSessaoId()
       setCookieClient(COOKIE_SESSION, sid, 1)
     }
     sessaoIdRef.current = sid
+    inicializadoRef.current = true
 
-    // Persistir UTMs para uso em conversões posteriores
     try {
       const params = new URLSearchParams(window.location.search)
       const utms: Record<string, string> = {}
@@ -57,12 +64,12 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.setItem('sixxis_utms', JSON.stringify(utms))
       }
     } catch {}
+    return true
   }, [])
 
   const track = useCallback((tipo: string, dados?: TrackData) => {
     if (typeof window === 'undefined') return
-    const consent = getCookie(COOKIE_CONSENT)
-    if (consent === 'recusado') return
+    if (!garantirSessao()) return // sem consentimento → não rastreia
     const sid = sessaoIdRef.current
     if (!sid) return
 
@@ -77,11 +84,18 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
       }),
       keepalive: true,
     }).catch(() => {})
-  }, [])
+  }, [garantirSessao])
 
-  // Page views automáticos
+  // Inicializa (se já houver consentimento) e reage ao aceite no banner.
   useEffect(() => {
-    if (!sessaoIdRef.current) return
+    garantirSessao()
+    const onConsent = () => { if (garantirSessao()) track('page_view') }
+    window.addEventListener(CONSENT_EVENT, onConsent)
+    return () => window.removeEventListener(CONSENT_EVENT, onConsent)
+  }, [garantirSessao, track])
+
+  // Page views automáticos (track já valida consentimento).
+  useEffect(() => {
     track('page_view')
   }, [pathname, track])
 

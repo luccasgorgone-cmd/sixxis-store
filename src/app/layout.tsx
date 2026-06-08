@@ -205,6 +205,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${allFontVars} h-full antialiased`}
     >
       <head>
+        {/* Google Consent Mode v2 — default DENIED ANTES do GTM. Returning
+            visitor com consentimento salvo (cookie sixxis_consent) recebe o
+            update imediatamente, então GA4/GTM não seta _ga até o aceite. */}
+        <Script
+          id="consent-default"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});
+try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JSON.parse(decodeURIComponent(m[1]));gtag('consent','update',{analytics_storage:c.a?'granted':'denied',ad_storage:c.m?'granted':'denied',ad_user_data:c.m?'granted':'denied',ad_personalization:c.m?'granted':'denied'});}}catch(e){}
+            `,
+          }}
+        />
         <GtmScriptHead />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

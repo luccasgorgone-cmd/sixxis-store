@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Shield, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { gravarConsentClient, CONSENT_EVENT } from '@/lib/consent'
 
 interface ConsentState {
   necessarios: boolean
@@ -29,6 +30,24 @@ async function salvarConsentimento(consent: ConsentState) {
     CONSENT_KEY,
     JSON.stringify({ aceitou, categorias, sessionId, timestamp: Date.now() }),
   )
+
+  // (2) Cookie real de consentimento — lido pelos gates de servidor e client.
+  gravarConsentClient({ analytics: consent.analiticos, marketing: consent.marketing })
+
+  // (1) Google Consent Mode v2 — update conforme as categorias escolhidas.
+  const gtag = (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag
+  if (typeof gtag === 'function') {
+    gtag('consent', 'update', {
+      analytics_storage:   consent.analiticos ? 'granted' : 'denied',
+      ad_storage:          consent.marketing  ? 'granted' : 'denied',
+      ad_user_data:        consent.marketing  ? 'granted' : 'denied',
+      ad_personalization:  consent.marketing  ? 'granted' : 'denied',
+    })
+  }
+
+  // Avisa o TrackingProvider p/ (re)iniciar dentro da mesma navegação.
+  window.dispatchEvent(new Event(CONSENT_EVENT))
+
   try {
     await fetch('/api/cookies/consent', {
       method: 'POST',

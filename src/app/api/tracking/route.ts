@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { detectDispositivo, detectBrowser, detectOS, extrairUTMs, COOKIE_CONSENT } from '@/lib/tracking'
+import { detectDispositivo, detectBrowser, detectOS, extrairUTMs } from '@/lib/tracking'
+import { CONSENT_COOKIE, parseConsent } from '@/lib/consent'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,9 +14,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false }, { status: 400 })
     }
 
-    // Verificar consentimento de cookies (bloqueia apenas se explicitamente recusou)
-    const consent = req.cookies.get(COOKIE_CONSENT)?.value
-    if (consent === 'recusado') {
+    // Consentimento de analytics OBRIGATÓRIO (opt-in). Lê o cookie real de
+    // consentimento; sem analytics concedido, não registra nada.
+    const consent = parseConsent(req.cookies.get(CONSENT_COOKIE)?.value)
+    if (!consent.analytics) {
       return NextResponse.json({ ok: false, reason: 'no_consent' })
     }
 
