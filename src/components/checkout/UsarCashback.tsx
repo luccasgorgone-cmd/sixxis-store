@@ -4,15 +4,19 @@ import { useEffect, useState } from 'react'
 import { Coins, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 
 interface Props {
-  total: number
+  // Subtotal de PRODUTOS (sem frete) — base do teto de 10%.
+  subtotalProdutos: number
   onAplicar: (desconto: number) => void
 }
+
+// Teto: cashback aplicável é no máx. 10% do subtotal de produtos (espelha o servidor).
+const TETO_USO = 0.10
 
 function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
 
-export default function UsarCashback({ total, onAplicar }: Props) {
+export default function UsarCashback({ subtotalProdutos, onAplicar }: Props) {
   const [saldo, setSaldo]         = useState<number | null>(null)
   const [loading, setLoading]     = useState(true)
   const [aberto, setAberto]       = useState(false)
@@ -27,10 +31,11 @@ export default function UsarCashback({ total, onAplicar }: Props) {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading || saldo === null || saldo <= 0) return null
-
-  const maxUsar    = Math.min(saldo, total)
+  const teto       = parseFloat((Math.max(0, subtotalProdutos) * TETO_USO).toFixed(2))
+  const maxUsar    = Math.min(saldo ?? 0, teto)
   const valorNum   = Math.min(Math.max(0, Number(valorUsar) || 0), maxUsar)
+
+  if (loading || saldo === null || saldo <= 0 || maxUsar <= 0) return null
 
   function aplicar() {
     if (valorNum <= 0) return
@@ -80,7 +85,7 @@ export default function UsarCashback({ total, onAplicar }: Props) {
           ) : (
             <>
               <p className="text-xs text-gray-500 mb-3">
-                Use até <strong>R$ {fmt(maxUsar)}</strong> de cashback nesta compra.
+                Use até <strong>R$ {fmt(maxUsar)}</strong> de cashback (limite de 10% do valor dos produtos).
               </p>
               <div className="flex gap-2">
                 <input

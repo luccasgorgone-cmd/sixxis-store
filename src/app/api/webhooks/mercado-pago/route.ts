@@ -5,7 +5,7 @@ import { mpPayment, MP_WEBHOOK_SECRET } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auditLog } from '@/lib/audit'
 import { calcularPontos, creditarPontos } from '@/lib/fidelidade'
-import { creditarCashback } from '@/lib/cashback'
+import { creditarCashback, estornarCashbackPedido } from '@/lib/cashback'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 
 function validarAssinatura(req: NextRequest): boolean {
@@ -135,9 +135,14 @@ export async function POST(req: NextRequest) {
         console.error('[mp:webhook] pontos:', e)
       }
 
-      // Cashback (% do nível de fidelidade) — idempotente por pedido.
+      // Cashback (% do nível) sobre o SUBTOTAL DE PRODUTOS (sem frete).
+      // Entra como pendente; idempotente por pedido.
       try {
-        await creditarCashback(pedido.clienteId, Number(pedido.total), pedido.id)
+        const subtotalProdutos = pedido.itens.reduce(
+          (s, i) => s + Number(i.precoUnitario) * i.quantidade,
+          0,
+        )
+        await creditarCashback(pedido.clienteId, subtotalProdutos, pedido.id)
       } catch (e) {
         console.error('[mp:webhook] cashback:', e)
       }
@@ -183,13 +188,28 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    if (novoStatus === 'rejected' || novoStatus === 'cancelled') {
-      if (pedido.status !== 'pago') {
+    // Estorno/cancelamento. Se o pedido já estava pago e foi estornado
+    // (refunded/charged_back) ou cancelado, marca 'cancelado' e faz clawback do
+    // cashback. Se ainda não estava pago, volta a 'pendente' (comportamento antigo).
+    const ESTORNO = ['refunded', 'charged_back']
+    const negado = novoStatus === 'rejected' || novoStatus === 'cancelled'
+
+    if (ESTORNO.includes(novoStatus) || (negado && pedido.status === 'pago')) {
+      if (pedido.status !== 'cancelado') {
         await prisma.pedido.update({
           where: { id: pedido.id },
-          data: { status: 'pendente' },
+          data: { status: 'cancelado' },
         })
+        // clawback DEPOIS de cancelar, p/ o recálculo de nível já excluir o pedido.
+        await estornarCashbackPedido(pedido.id).catch((e) =>
+          console.error('[mp:webhook] clawback cashback:', (e as Error).message),
+        )
       }
+    } else if (negado && pedido.status !== 'pago') {
+      await prisma.pedido.update({
+        where: { id: pedido.id },
+        data: { status: 'pendente' },
+      })
     }
 
     await auditLog({

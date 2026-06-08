@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { criarGarantiasPedido } from '@/lib/garantia'
 import { resolverFrete } from '@/lib/frete-resolver'
+import { resgatarCashback } from '@/lib/cashback'
 
 const itemSchema = z.object({
   produtoId:    z.string(),
@@ -30,6 +31,9 @@ const criarPedidoSchema = z.object({
   cupomCodigo:    z.string().optional(),
   desconto:       z.number().nonnegative().optional(),
   garantias:      z.array(garantiaSchema).optional(),
+  // Cashback que o cliente quer resgatar. É só um PEDIDO: o servidor cap a
+  // min(saldo disponível, 10% do subtotal de produtos). Nunca confiar no client.
+  cashbackUsar:   z.number().nonnegative().optional(),
 })
 
 export async function GET() {
@@ -81,7 +85,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, desconto: descontoReq, garantias } = parsed.data
+  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, desconto: descontoReq, garantias, cashbackUsar } = parsed.data
   const desconto = descontoReq ?? 0
 
   // Endereço deve pertencer ao cliente — e dele extraímos a UF de destino.
@@ -264,8 +268,27 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // ── Resgate de cashback (server-side, com teto de 10% do subtotal) ─────────
+  // Só em pedido real (não em orçamento 'aguardando_frete'). O valor é capado
+  // em min(solicitado, saldo disponível, 10% do subtotal de produtos) e abatido
+  // do total. Idempotente por natureza (roda 1x na criação do pedido).
+  let cashbackAplicado = 0
+  if (statusPedido === 'pendente' && cashbackUsar && cashbackUsar > 0) {
+    cashbackAplicado = await resgatarCashback(session.user.id, cashbackUsar, subtotal, pedido.id)
+    if (cashbackAplicado > 0) {
+      await prisma.pedido.update({
+        where: { id: pedido.id },
+        data:  { cashbackUsado: cashbackAplicado, total: { decrement: cashbackAplicado } },
+      })
+    }
+  }
+
   return Response.json(
-    { pedido, freteStatus: resultadoFrete.status },
+    {
+      pedido: { ...pedido, cashbackUsado: cashbackAplicado, total: Number(pedido.total) - cashbackAplicado },
+      freteStatus: resultadoFrete.status,
+      cashbackAplicado,
+    },
     { status: 201 },
   )
 }

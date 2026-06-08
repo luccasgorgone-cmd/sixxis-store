@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
 import { enviarEmailRastreio } from '@/lib/email'
+import { liberarCashbackPedido, estornarCashbackPedido } from '@/lib/cashback'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -118,6 +119,21 @@ export async function PATCH(
   }
 
   const atualizado = await prisma.pedido.update({ where: { id }, data })
+
+  // ── Ciclo do cashback conforme a transição de status ───────────────────────
+  // Entrega → libera o cashback pendente (vira disponível). Idempotente.
+  if (statusDepois === 'entregue' && statusAntes !== 'entregue') {
+    await liberarCashbackPedido(id).catch((e) =>
+      console.error('[admin/pedidos] liberar cashback:', (e as Error).message),
+    )
+  }
+  // Cancelamento → clawback do cashback + recálculo de nível. Roda DEPOIS do
+  // update (status já 'cancelado'), p/ o recálculo de totalGasto excluir o pedido.
+  if (statusDepois === 'cancelado' && statusAntes !== 'cancelado') {
+    await estornarCashbackPedido(id).catch((e) =>
+      console.error('[admin/pedidos] clawback cashback:', (e as Error).message),
+    )
+  }
 
   // Email de despacho — try/catch, nunca bloqueia o salvamento. NÃO inclui
   // custoFreteReal/margem (dados internos): só rastreio, transportadora e prazo.

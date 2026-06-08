@@ -18,7 +18,8 @@ model Cliente {
   bloqueado             Boolean                @default(false)
   motivoBloqueio        String?
   bloqueadoEm           DateTime?
-  cashbackSaldo         Float                  @default(0)
+  cashbackSaldo         Float                  @default(0) // DISPONÍVEL (usável no checkout)
+  cashbackPendente      Float                  @default(0) // creditado mas ainda não entregue
   totalGasto            Float                  @default(0)
   totalPedidos          Int                    @default(0)
   ultimaCompra          DateTime?
@@ -115,6 +116,7 @@ model Pedido {
   codigoRastreio String?
   cupomCodigo    String?
   desconto       Decimal             @default(0.00) @db.Decimal(10, 2)
+  cashbackUsado  Decimal             @default(0.00) @db.Decimal(10, 2) // cashback resgatado neste pedido
   freteTipo      String?             // "normal" | "expresso" | "a_combinar"
   fretePrazo     Int?                // prazo estimado em dias úteis
   transportadora String?             // nome da transportadora (texto livre)
@@ -510,6 +512,10 @@ model CashbackTransacao {
   id        String   @id @default(cuid())
   clienteId String
   tipo      String // "credito" | "debito"
+  // Ciclo de vida do lançamento de crédito: "pendente" (creditado, não usável) →
+  // "disponivel" (liberado na entrega) → "cancelado" (estorno/clawback).
+  // Débitos (uso no checkout) nascem "disponivel" (final).
+  status    String   @default("disponivel")
   valor     Float
   descricao String?
   pedidoId  String?

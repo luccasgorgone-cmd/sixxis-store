@@ -23,7 +23,7 @@ export async function GET() {
     // Buscar cliente
     const cliente = await prisma.cliente.findUnique({
       where: { id: clienteId },
-      select: { cashbackSaldo: true, totalGasto: true },
+      select: { cashbackSaldo: true, cashbackPendente: true, totalGasto: true },
     }).catch(() => null)
 
     // Extrato
@@ -42,9 +42,10 @@ export async function GET() {
 
     const totalGasto = Number(pedidosStats._sum?.total ?? cliente?.totalGasto ?? 0)
     const saldo = Number(cliente?.cashbackSaldo ?? 0)
+    const pendente = Number(cliente?.cashbackPendente ?? 0)
 
     const cashbackAcumulado = extratoRaw
-      .filter((t) => t.tipo === 'credito')
+      .filter((t) => t.tipo === 'credito' && t.status !== 'cancelado')
       .reduce((s, t) => s + Number(t.valor), 0)
     const cashbackUsado = extratoRaw
       .filter((t) => t.tipo === 'debito')
@@ -53,6 +54,7 @@ export async function GET() {
     const extrato = extratoRaw.map((t) => ({
       id: t.id,
       tipo: t.tipo,
+      status: t.status,
       valor: Number(t.valor),
       descricao: t.descricao,
       pedidoId: t.pedidoId,
@@ -61,6 +63,7 @@ export async function GET() {
 
     return NextResponse.json({
       saldo,
+      pendente,
       percentual: calcularNivelCompleto(totalGasto).cashbackPct,
       extrato,
       totalGasto,

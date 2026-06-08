@@ -6,6 +6,7 @@ import { mpPayment } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { isStatusPendente } from '@/lib/pedido-status'
+import { creditarCashback } from '@/lib/cashback'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -169,6 +170,18 @@ export async function POST(req: NextRequest) {
           mpPaymentId: pagamento.mpPaymentId,
         },
       })
+      // Cartão aprovado SÍNCRONO: o webhook veria status já 'pago' e pularia o
+      // crédito. Credita aqui (pendente, % do nível, sobre o subtotal de
+      // produtos). Idempotente: se o webhook também rodar, não credita 2x.
+      try {
+        const subtotalProdutos = pedido.itens.reduce(
+          (s, i) => s + Number(i.precoUnitario) * i.quantidade,
+          0,
+        )
+        await creditarCashback(pedido.clienteId, subtotalProdutos, pedido.id)
+      } catch (e) {
+        console.error('[mp:create] cashback:', (e as Error).message)
+      }
     } else if (pagamento.mpPaymentId) {
       // mantém referência principal pra reconciliação via webhook
       await prisma.pedido.update({

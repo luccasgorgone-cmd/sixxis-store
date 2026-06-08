@@ -18,6 +18,7 @@ import {
 import { type ItemCarrinho } from '@/hooks/useCarrinho'
 import GarantiaEstendidaStep, { type SelecaoGarantia } from '@/components/checkout/GarantiaEstendidaStep'
 import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/EnderecosSalvos'
+import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
 import { trackAddPaymentInfo } from '@/lib/analytics/events'
 
@@ -216,9 +217,10 @@ interface ResumoProps {
   cupom:       { codigo: string; desconto: number } | null
   totalFinal:  number
   totalGarantias?: number
+  cashback?:   number
 }
 
-function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, totalFinal, totalGarantias = 0 }: ResumoProps) {
+function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, totalFinal, totalGarantias = 0, cashback = 0 }: ResumoProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden border-l-4 border-l-[#3cbfb3]">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -282,6 +284,12 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, tota
           <div className="flex justify-between text-sm text-green-600 font-bold">
             <span>Cupom {cupom.codigo}</span>
             <span>-R$ {moeda(desconto)}</span>
+          </div>
+        )}
+        {cashback > 0 && (
+          <div className="flex justify-between text-sm text-green-600 font-bold">
+            <span>Cashback</span>
+            <span>-R$ {moeda(cashback)}</span>
           </div>
         )}
       </div>
@@ -469,6 +477,9 @@ function CheckoutContent() {
   const [garantiaSelecao, setGarantiaSelecao] = useState<SelecaoGarantia>({})
   const [garantiaInfo, setGarantiaInfo]       = useState<Record<string, ProdutoGarantiaInfo>>({})
 
+  // Cashback resgatado nesta compra (R$). O servidor recapa em 10% do subtotal.
+  const [cashbackUsar, setCashbackUsar] = useState(0)
+
   // Verifica quais produtos do carrinho oferecem garantia. Se nenhum oferecer,
   // a etapa 3 é pulada automaticamente.
   useEffect(() => {
@@ -500,7 +511,10 @@ function CheckoutContent() {
   const freteSelObj = opcoesFrete.find((o) => o.id === freteTipoSel) ?? null
   const frete       = freteStatus === 'ok' ? (freteSelObj?.preco ?? 0) : 0
   const desconto    = cupom?.desconto ?? 0
-  const totalFinal  = Math.max(0, total + frete + totalGarantias - desconto)
+  // Cashback aplicado (capado a 10% do subtotal de produtos pelo componente; o
+  // servidor recapa por segurança). Só vale em pedido real (não em orçamento).
+  const cashbackAplicado = freteStatus === 'a_combinar' ? 0 : cashbackUsar
+  const totalFinal  = Math.max(0, total + frete + totalGarantias - desconto - cashbackAplicado)
 
   // Calcular frete (fonte única: tabela produto × UF). Resolve por UF; o CEP só
   // serve de fallback caso a UF ainda não esteja preenchida no formulário.
@@ -720,6 +734,7 @@ function CheckoutContent() {
           cupomCodigo: cupom?.codigo,
           desconto:    cupom?.desconto ?? 0,
           garantias:   garantiasPayload.length > 0 ? garantiasPayload : undefined,
+          cashbackUsar: cashbackAplicado > 0 ? cashbackAplicado : undefined,
         }),
       })
       if (!pr.ok) {
@@ -802,7 +817,7 @@ function CheckoutContent() {
 
   const resumoProps: ResumoProps = {
     itens, total, frete, freteStatus, desconto, cupom, totalFinal,
-    totalGarantias,
+    totalGarantias, cashback: cashbackAplicado,
   }
 
   return (
@@ -1092,6 +1107,10 @@ function CheckoutContent() {
                         remover={() => { setCupom(null); setCupomInput('') }}
                       />
                     </div>
+
+                    {freteStatus !== 'a_combinar' && (
+                      <UsarCashback subtotalProdutos={total} onAplicar={setCashbackUsar} />
+                    )}
 
                     <div className="border-t border-gray-100 pt-4 flex items-center gap-2">
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ou pague com</span>
