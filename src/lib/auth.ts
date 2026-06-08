@@ -49,6 +49,9 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  // Explícito p/ robustez: NextAuth v5 lê AUTH_SECRET e cai p/ NEXTAUTH_SECRET.
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  // Atrás do proxy do Railway (www.sixxis.com.br) — confia no x-forwarded-host.
   trustHost: true,
   session: { strategy: 'jwt' },
   pages: {
@@ -62,31 +65,43 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
       const email = user.email
       if (!email) return false
 
-      const existente = await prisma.cliente.findUnique({ where: { email } })
-
-      if (!existente) {
-        const novo = await prisma.cliente.create({
-          data: {
-            email,
-            nome: user.name ?? email.split('@')[0],
-            senha: '',
-            avatar: user.image ?? null,
-          },
+      try {
+        // select estreito — robusto contra drift de schema e evita payload extra.
+        const existente = await prisma.cliente.findUnique({
+          where: { email },
+          select: { id: true, bloqueado: true, avatar: true },
         })
-        user.id = novo.id
+
+        if (!existente) {
+          const novo = await prisma.cliente.create({
+            data: {
+              email,
+              nome: user.name ?? email.split('@')[0],
+              senha: '', // OAuth-first: sem senha local
+              avatar: user.image ?? null,
+            },
+            select: { id: true },
+          })
+          user.id = novo.id
+          return true
+        }
+
+        if (existente.bloqueado) return false
+
+        if (user.image && user.image !== existente.avatar) {
+          await prisma.cliente.update({
+            where: { id: existente.id },
+            data: { avatar: user.image },
+          })
+        }
+        user.id = existente.id
         return true
+      } catch (e) {
+        // Loga a exceção REAL (Prisma/DB) — antes ela era engolida num redirect
+        // de erro genérico do NextAuth, escondendo a causa nos logs do Railway.
+        console.error('[auth:google] falha ao criar/buscar cliente:', (e as Error).message)
+        return false
       }
-
-      if (existente.bloqueado) return false
-
-      if (user.image && user.image !== existente.avatar) {
-        await prisma.cliente.update({
-          where: { id: existente.id },
-          data: { avatar: user.image },
-        })
-      }
-      user.id = existente.id
-      return true
     },
     jwt({ token, user }) {
       if (user) token.id = user.id

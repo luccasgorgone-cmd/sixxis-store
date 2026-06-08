@@ -31,9 +31,22 @@ export async function POST(request: NextRequest) {
 
   const senhaHash = await bcrypt.hash(senha, 12)
 
-  await prisma.cliente.create({
-    data: { nome, email, cpf, telefone, senha: senhaHash },
-  })
+  try {
+    await prisma.cliente.create({
+      data: { nome, email, cpf, telefone, senha: senhaHash },
+    })
+  } catch (e) {
+    // Corrida no unique (email/cpf) → 409 limpo.
+    if ((e as { code?: string }).code === 'P2002') {
+      return Response.json({ error: 'Email ou CPF já cadastrado.' }, { status: 409 })
+    }
+    // Loga a causa REAL (ex.: falta de INSERT no usuário do banco) no Railway.
+    console.error('[auth:cadastro] falha ao criar cliente:', (e as Error).message)
+    return Response.json(
+      { error: 'Não foi possível concluir o cadastro. Tente novamente.' },
+      { status: 500 },
+    )
+  }
 
   return Response.json({ ok: true }, { status: 201 })
 }
