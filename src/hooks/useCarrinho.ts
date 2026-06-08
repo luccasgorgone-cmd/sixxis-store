@@ -33,12 +33,15 @@ interface CarrinhoStore {
   itens: ItemCarrinho[]
   drawerAberto: boolean
   cupomAplicado: CupomAplicadoStore | null
+  // Opt-in de uso do cashback — sincroniza /carrinho ↔ /checkout. Default false.
+  usarCashback: boolean
   setDrawerAberto: (v: boolean) => void
   adicionarItem: (item: ItemCarrinho) => void
   removerItem: (produtoId: string, variacaoId?: string) => void
   atualizarQuantidade: (produtoId: string, quantidade: number, variacaoId?: string) => void
   limparCarrinho: () => void
   setCupom: (c: CupomAplicadoStore | null) => void
+  setUsarCashback: (v: boolean) => void
 }
 
 // NOTA: total/totalItens NÃO podem ser getters JS no objeto do store, porque o
@@ -52,8 +55,10 @@ export const useCarrinho = create<CarrinhoStore>()(
       itens: [],
       drawerAberto: false,
       cupomAplicado: null,
+      usarCashback: false,
       setDrawerAberto: (v) => set({ drawerAberto: v }),
       setCupom: (c) => set({ cupomAplicado: c }),
+      setUsarCashback: (v) => set({ usarCashback: v }),
       adicionarItem(item) {
         const key = itemKey(item.produtoId, item.variacaoId)
         set((state) => {
@@ -93,12 +98,16 @@ export const useCarrinho = create<CarrinhoStore>()(
         }))
       },
       limparCarrinho() {
-        set({ itens: [], cupomAplicado: null })
+        set({ itens: [], cupomAplicado: null, usarCashback: false })
       },
     }),
     {
       name: 'sixxis-carrinho',
-      partialize: (state) => ({ itens: state.itens, cupomAplicado: state.cupomAplicado }),
+      partialize: (state) => ({
+        itens: state.itens,
+        cupomAplicado: state.cupomAplicado,
+        usarCashback: state.usarCashback,
+      }),
     },
   ),
 )

@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation'
 import {
   ShoppingCart, Trash2, Plus, Minus, Tag, ChevronRight,
   ShieldCheck, Truck, Lock, CreditCard, Zap, Package,
-  CheckCircle, AlertCircle, X, Star, Clock, BadgeCheck, Headphones
+  CheckCircle, AlertCircle, X, Star, Clock, BadgeCheck, Headphones, Coins
 } from 'lucide-react'
 import {
   type TipoCupom,
   descricaoCupom, calcularDescontoCupom,
 } from '@/lib/preco-cupom'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import UsarCashback from '@/components/checkout/UsarCashback'
 import { trackBeginCheckout } from '@/lib/analytics/events'
 
 // ─── TIPOS ───────────────────────────────────────────────────
@@ -88,6 +89,8 @@ export default function CarrinhoPage() {
   const [freteMsg, setFreteMsg] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [recomendados, setRecomendados] = useState<any[]>([])
+  // Cashback aplicável (R$) reportado pelo toggle — sincronizado com o checkout.
+  const [cashbackCart, setCashbackCart] = useState(0)
 
   // ── CARREGAR CARRINHO DO LOCALSTORAGE ──────────────────────
   useEffect(() => {
@@ -261,7 +264,9 @@ export default function CarrinhoPage() {
     ? calcularDescontoCupom(cupomAplicado.tipo, cupomAplicado.valor, subtotal)
     : 0
   const valorFrete = freteSelecionado?.preco ?? 0
-  const totalFinal = subtotal - descontoCupom + valorFrete
+  // Cashback aplicável só faz sentido sobre produtos; nunca deixa o total < 0.
+  const cashbackAplicado = Math.min(cashbackCart, subtotal - descontoCupom)
+  const totalFinal = Math.max(0, subtotal - descontoCupom + valorFrete - cashbackAplicado)
   const totalPix = totalFinal * 0.97
 
   const totalItens = itens.reduce((s, i) => s + i.quantidade, 0)
@@ -645,6 +650,16 @@ export default function CarrinhoPage() {
                     </span>
                   </div>
                 )}
+                {cashbackAplicado > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#0f9488] flex items-center gap-1">
+                      <Coins size={11} /> Cashback
+                    </span>
+                    <span className="font-bold text-[#0f9488]">
+                      -{fmtBRL(cashbackAplicado)}
+                    </span>
+                  </div>
+                )}
                 {freteSelecionado ? (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Frete</span>
@@ -716,23 +731,8 @@ export default function CarrinhoPage() {
               </div>
             </div>
 
-            {/* CARD CASHBACK */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: '#e8f8f7' }}>
-                  <Zap size={18} style={{ color: '#3cbfb3' }} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-gray-900">
-                    Ganhe cashback nesta compra
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Acumule 2% a 7% de volta no programa Sixxis Club
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* CASHBACK — usar ou não (opt-in, sincronizado com o checkout) */}
+            <UsarCashback subtotalProdutos={subtotal} onValor={setCashbackCart} compact />
 
             {/* PARCELAMENTO INFO */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">

@@ -124,6 +124,7 @@ model Pedido {
   custoFreteReal Decimal?            @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
   enviadoEm      DateTime?           // quando o pedido foi despachado
   entregueEm     DateTime?           // quando foi marcado como entregue
+  idempotencyKey String?  @unique    // dedup de criação: mesma key = mesmo pedido
   itens          ItemPedido[]
   cliente        Cliente             @relation(fields: [clienteId], references: [id])
   endereco       Endereco            @relation(fields: [enderecoId], references: [id])

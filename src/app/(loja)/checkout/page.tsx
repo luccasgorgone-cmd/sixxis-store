@@ -480,6 +480,14 @@ function CheckoutContent() {
   // Cashback resgatado nesta compra (R$). O servidor recapa em 10% do subtotal.
   const [cashbackUsar, setCashbackUsar] = useState(0)
 
+  // Idempotency key — 1 por tentativa de checkout (por carga da página). Cliques
+  // repetidos enviam a MESMA key; o servidor retorna o mesmo pedido, sem duplicar.
+  const [idempotencyKey] = useState(() =>
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `ck-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  )
+
   // Verifica quais produtos do carrinho oferecem garantia. Se nenhum oferecer,
   // a etapa 3 é pulada automaticamente.
   useEffect(() => {
@@ -735,6 +743,7 @@ function CheckoutContent() {
           desconto:    cupom?.desconto ?? 0,
           garantias:   garantiasPayload.length > 0 ? garantiasPayload : undefined,
           cashbackUsar: cashbackAplicado > 0 ? cashbackAplicado : undefined,
+          idempotencyKey,
         }),
       })
       if (!pr.ok) {
@@ -1109,7 +1118,7 @@ function CheckoutContent() {
                     </div>
 
                     {freteStatus !== 'a_combinar' && (
-                      <UsarCashback subtotalProdutos={total} onAplicar={setCashbackUsar} />
+                      <UsarCashback subtotalProdutos={total} onValor={setCashbackUsar} />
                     )}
 
                     <div className="border-t border-gray-100 pt-4 flex items-center gap-2">

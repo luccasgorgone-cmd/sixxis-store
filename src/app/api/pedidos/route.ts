@@ -35,6 +35,9 @@ const criarPedidoSchema = z.object({
   // Cashback que o cliente quer resgatar. É só um PEDIDO: o servidor cap a
   // min(saldo disponível, 10% do subtotal de produtos). Nunca confiar no client.
   cashbackUsar:   z.number().nonnegative().optional(),
+  // Idempotência: 1 key por tentativa de checkout. Repetir a key retorna o mesmo
+  // pedido (não cria duplicado).
+  idempotencyKey: z.string().min(8).max(100).optional(),
 })
 
 export async function GET() {
@@ -87,7 +90,28 @@ export async function POST(request: NextRequest) {
   }
 
   // desconto do client é IGNORADO — recomputado no servidor a partir do cupom.
-  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, garantias, cashbackUsar } = parsed.data
+  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, garantias, cashbackUsar, idempotencyKey } = parsed.data
+
+  // ── Idempotência: cliques repetidos com a MESMA key retornam o mesmo pedido ──
+  // (não cria pedido/cobrança duplicado). Checagem antecipada; a condição de
+  // corrida é coberta pelo índice @unique + catch P2002 na criação abaixo.
+  if (idempotencyKey) {
+    const jaCriado = await prisma.pedido.findFirst({
+      where:  { clienteId: session.user.id, idempotencyKey },
+      select: { id: true, status: true, total: true, cashbackUsado: true },
+    })
+    if (jaCriado) {
+      return Response.json(
+        {
+          pedido: jaCriado,
+          freteStatus: jaCriado.status === 'aguardando_frete' ? 'a_combinar' : 'ok',
+          cashbackAplicado: Number(jaCriado.cashbackUsado),
+          idempotente: true,
+        },
+        { status: 200 },
+      )
+    }
+  }
 
   // Endereço deve pertencer ao cliente — e dele extraímos a UF de destino.
   const endereco = await prisma.endereco.findUnique({
@@ -222,29 +246,54 @@ export async function POST(request: NextRequest) {
     statusPedido = 'pendente'
   }
 
-  const pedido = await prisma.pedido.create({
-    data: {
-      clienteId:      session.user.id,
-      enderecoId,
-      formaPagamento,
-      frete:          freteValor,
-      freteTipo:      freteTipoFinal,
-      fretePrazo:     fretePrazoFinal,
-      desconto:       descontoFinal,
-      cupomCodigo:    cupomCodigoFinal,
-      total:          Math.max(0, subtotal + freteValor + totalGarantias - descontoFinal),
-      status:         statusPedido,
-      itens: {
-        create: itensPedido.map((item) => ({
-          produtoId:    item.produtoId,
-          quantidade:   item.quantidade,
-          precoUnitario: item.precoUnitario,
-          variacaoId:   item.variacaoId ?? null,
-          variacaoNome: item.variacaoNome ?? null,
-        })),
+  let pedido
+  try {
+    pedido = await prisma.pedido.create({
+      data: {
+        clienteId:      session.user.id,
+        enderecoId,
+        formaPagamento,
+        frete:          freteValor,
+        freteTipo:      freteTipoFinal,
+        fretePrazo:     fretePrazoFinal,
+        desconto:       descontoFinal,
+        cupomCodigo:    cupomCodigoFinal,
+        total:          Math.max(0, subtotal + freteValor + totalGarantias - descontoFinal),
+        status:         statusPedido,
+        idempotencyKey: idempotencyKey ?? null,
+        itens: {
+          create: itensPedido.map((item) => ({
+            produtoId:    item.produtoId,
+            quantidade:   item.quantidade,
+            precoUnitario: item.precoUnitario,
+            variacaoId:   item.variacaoId ?? null,
+            variacaoNome: item.variacaoNome ?? null,
+          })),
+        },
       },
-    },
-  })
+    })
+  } catch (e) {
+    // Corrida: 2ª requisição com a mesma key chega após a 1ª criar → @unique
+    // dispara P2002. Retorna o pedido já criado, sem duplicar nem debitar de novo.
+    if ((e as { code?: string }).code === 'P2002' && idempotencyKey) {
+      const jaCriado = await prisma.pedido.findFirst({
+        where:  { clienteId: session.user.id, idempotencyKey },
+        select: { id: true, status: true, total: true, cashbackUsado: true },
+      })
+      if (jaCriado) {
+        return Response.json(
+          {
+            pedido: jaCriado,
+            freteStatus: jaCriado.status === 'aguardando_frete' ? 'a_combinar' : 'ok',
+            cashbackAplicado: Number(jaCriado.cashbackUsado),
+            idempotente: true,
+          },
+          { status: 200 },
+        )
+      }
+    }
+    throw e
+  }
 
   // Abater estoque das variações ou do produto pai
   for (const item of itensPedido) {
