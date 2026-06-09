@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ADMIN_BASE, ADMIN_INTERNAL, ADMIN_PATH_CHANGED } from '@/lib/admin-path'
 
 // Next 16 → proxy.ts substitui o antigo middleware.ts. Roda no Edge Runtime,
 // então NÃO pode importar crypto ou prisma. Aqui apenas verificamos a
@@ -6,13 +7,16 @@ import { NextRequest, NextResponse } from 'next/server'
 // token JWT acontece em route handlers de Node runtime.
 
 // ── ADMIN ────────────────────────────────────────────────────────────────────
+// ADMIN_BASE é o path PÚBLICO (configurável via NEXT_PUBLIC_ADMIN_PATH).
+// ADMIN_INTERNAL é a pasta estática do App Router. Quando o público difere do
+// interno, o proxy reescreve público → interno e bloqueia (404) o interno.
 const ADMIN_PUBLIC_PATHS = [
-  '/adm-a7f9c2b4/login',
+  `${ADMIN_BASE}/login`,
   '/api/admin/auth',
   '/api/admin/logout',
 ]
 function isAdminRoute(pathname: string): boolean {
-  return pathname.startsWith('/adm-a7f9c2b4') || pathname.startsWith('/api/admin')
+  return pathname.startsWith(ADMIN_BASE) || pathname.startsWith('/api/admin')
 }
 function isAdminPublic(pathname: string): boolean {
   return ADMIN_PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
@@ -23,9 +27,9 @@ function isAdminPublic(pathname: string): boolean {
 //   - /configuracoes: removido SOMENTE a rota exata. /configuracoes/whatsapp
 //     (Marketing) e /configuracoes-loja (Negócio) permanecem ativos.
 function adminLegacyRedirect(pathname: string): boolean {
-  if (pathname === '/adm-a7f9c2b4/editor-home' || pathname.startsWith('/adm-a7f9c2b4/editor-home/')) return true
-  if (pathname === '/adm-a7f9c2b4/mobile'      || pathname.startsWith('/adm-a7f9c2b4/mobile/'))      return true
-  if (pathname === '/adm-a7f9c2b4/configuracoes')                                                    return true
+  if (pathname === `${ADMIN_BASE}/editor-home` || pathname.startsWith(`${ADMIN_BASE}/editor-home/`)) return true
+  if (pathname === `${ADMIN_BASE}/mobile`      || pathname.startsWith(`${ADMIN_BASE}/mobile/`))      return true
+  if (pathname === `${ADMIN_BASE}/configuracoes`)                                                    return true
   return false
 }
 
@@ -68,19 +72,40 @@ export function proxy(request: NextRequest) {
 
   const { pathname, searchParams } = request.nextUrl
 
+  // ─── Path interno bloqueado (Sprint rotação) ───────────────────────────────
+  // Quando o ADMIN_PATH público foi rotacionado, o acesso direto à pasta interna
+  // (/adm-a7f9c2b4) responde 404 — força o uso exclusivo do path novo. As rotas
+  // /api/admin/* NÃO são afetadas (não ficam sob o segmento configurável).
+  if (
+    ADMIN_PATH_CHANGED &&
+    (pathname === ADMIN_INTERNAL || pathname.startsWith(ADMIN_INTERNAL + '/'))
+  ) {
+    return new NextResponse('Not Found', { status: 404 })
+  }
+
   // ─── ADMIN guard (Sprint 1) ────────────────────────────────────────────────
   if (isAdminRoute(pathname)) {
-    if (isAdminPublic(pathname)) return NextResponse.next()
-    const token = request.cookies.get('admin_token')?.value
-    if (!token) {
-      if (pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    // Auth/legacy avaliados no path PÚBLICO; rewrite público → interno acontece
+    // por último para a rota física renderizar mantendo a URL pública na barra.
+    if (!isAdminPublic(pathname)) {
+      const token = request.cookies.get('admin_token')?.value
+      if (!token) {
+        if (pathname.startsWith('/api/')) {
+          return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+        }
+        return NextResponse.redirect(new URL(`${ADMIN_BASE}/login`, request.url))
       }
-      return NextResponse.redirect(new URL('/adm-a7f9c2b4/login', request.url))
+      // Editores legacy → consolidado em /editor-visual
+      if (adminLegacyRedirect(pathname)) {
+        return NextResponse.redirect(new URL(`${ADMIN_BASE}/editor-visual`, request.url))
+      }
     }
-    // Editores legacy → consolidado em /editor-visual
-    if (adminLegacyRedirect(pathname)) {
-      return NextResponse.redirect(new URL('/adm-a7f9c2b4/editor-visual', request.url))
+    // Rewrite público → interno (no-op quando não há rotação). /api/admin fica
+    // de fora porque não começa com ADMIN_BASE.
+    if (ADMIN_PATH_CHANGED && pathname.startsWith(ADMIN_BASE)) {
+      const url = request.nextUrl.clone()
+      url.pathname = ADMIN_INTERNAL + pathname.slice(ADMIN_BASE.length)
+      return NextResponse.rewrite(url)
     }
     return NextResponse.next()
   }

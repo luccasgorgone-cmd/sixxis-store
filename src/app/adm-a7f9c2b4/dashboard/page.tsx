@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 export const dynamic = 'force-dynamic'
 
 export default function DashboardRedirect() {
-  redirect('/adm-a7f9c2b4')
+  redirect(ADMIN_BASE)
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Star, Search, Check, X, Trash2, Edit2, XCircle, Package as PackageIcon, Handshake } from 'lucide-react'
 import Link from 'next/link'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 type TipoAvaliacao = 'produto' | 'parceiro'
 
@@ -94,7 +95,7 @@ export default function AdminAvaliacoesPage() {
     if (tab === 'todas') sp.delete('tipo')
     else sp.set('tipo', tab)
     const qs = sp.toString()
-    const newUrl = qs ? `/adm-a7f9c2b4/avaliacoes?${qs}` : '/adm-a7f9c2b4/avaliacoes'
+    const newUrl = qs ? `${ADMIN_BASE}/avaliacoes?${qs}` : `${ADMIN_BASE}/avaliacoes`
     window.history.replaceState(null, '', newUrl)
   }, [tab])
 
@@ -127,7 +128,7 @@ export default function AdminAvaliacoesPage() {
           resposta: av.resposta,
           createdAt: av.createdAt,
           contextoLabel: av.produto?.nome ?? '—',
-          contextoHref: av.produto ? `/adm-a7f9c2b4/produtos/${av.produto.id}` : null,
+          contextoHref: av.produto ? `${ADMIN_BASE}/produtos/${av.produto.id}` : null,
           produtoImagem: av.produto?.imagens?.[0] ?? null,
           avatarIniciais: iniciaisDe(nome),
           avatarCor: corPorNome(nome),

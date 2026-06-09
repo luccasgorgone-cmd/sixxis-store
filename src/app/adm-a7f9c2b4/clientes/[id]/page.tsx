@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import NivelLoyaltyIcon from '@/components/loyalty/NivelLoyaltyIcon'
 import { calcularNivel, nivelPorId } from '@/lib/loyalty'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 const STATUS_PEDIDO: Record<string, { label: string; cor: string; bg: string; icone: React.ElementType }> = {
   PENDENTE:    { label: 'Aguardando',   cor: '#d97706', bg: '#fef3c7', icone: Clock         },
@@ -123,7 +124,7 @@ export default function ClienteDetalhe() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => router.push('/adm-a7f9c2b4/clientes')}
+            onClick={() => router.push(`${ADMIN_BASE}/clientes`)}
             className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition"
           >
             <ArrowLeft size={18} />

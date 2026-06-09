@@ -4,6 +4,7 @@ import Link from 'next/link'
 import {
   ShieldCheck, Search, RefreshCcw, AlertTriangle, Package, ChevronRight,
 } from 'lucide-react'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 interface Garantia {
   id: string
@@ -163,7 +164,7 @@ export default function AdminGarantiasPage() {
             {filtradas.map((g) => (
               <Link
                 key={g.id}
-                href={`/adm-a7f9c2b4/garantias/${g.id}`}
+                href={`${ADMIN_BASE}/garantias/${g.id}`}
                 className="flex items-center gap-4 p-4 hover:bg-gray-50/60 transition"
               >
                 <div className="flex-1 min-w-0">

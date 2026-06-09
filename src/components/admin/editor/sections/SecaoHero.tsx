@@ -4,6 +4,7 @@ import { Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import { EditorSection } from '../EditorSection'
 import { TextField, TextareaField } from '../FormFields'
+import { ADMIN_BASE } from '@/lib/admin-path'
 import type { SectionProps } from '../types'
 
 export function SecaoHero({ config, setConfig, device }: SectionProps) {
@@ -21,7 +22,7 @@ export function SecaoHero({ config, setConfig, device }: SectionProps) {
       <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-800">
         Os textos abaixo aparecem só quando não há banners ativos.
         {' '}
-        <Link href="/adm-a7f9c2b4/banners" className="font-semibold underline">
+        <Link href={`${ADMIN_BASE}/banners`} className="font-semibold underline">
           Gerenciar banners →
         </Link>
       </div>

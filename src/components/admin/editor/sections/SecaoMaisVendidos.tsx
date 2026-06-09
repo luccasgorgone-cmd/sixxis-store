@@ -4,6 +4,7 @@ import { TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { EditorSection } from '../EditorSection'
 import { ColorField, SelectField, TextField, ToggleField } from '../FormFields'
+import { ADMIN_BASE } from '@/lib/admin-path'
 import type { SectionProps } from '../types'
 
 const QTD_OPTIONS = [
@@ -28,7 +29,7 @@ export function SecaoMaisVendidos({ config, setConfig, device }: SectionProps) {
     >
       <div className="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 text-xs text-blue-800">
         Para selecionar quais produtos aparecem,{' '}
-        <Link href="/adm-a7f9c2b4/editor-home" className="font-semibold underline">
+        <Link href={`${ADMIN_BASE}/editor-home`} className="font-semibold underline">
           edite os destaques na tela legada →
         </Link>
       </div>

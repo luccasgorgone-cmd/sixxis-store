@@ -6,6 +6,7 @@ import {
   Search, CreditCard, CheckCircle2, XCircle, TrendingUp,
   Loader2, ExternalLink, RefreshCw,
 } from 'lucide-react'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 interface Pagamento {
   id: string
@@ -237,7 +238,7 @@ export default function AdminPagamentosPage() {
                   <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50/50">
                     <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">{fmtDate(p.createdAt)}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/adm-a7f9c2b4/pedidos`} className="text-[#3cbfb3] hover:underline font-mono text-xs">
+                      <Link href={`${ADMIN_BASE}/pedidos`} className="text-[#3cbfb3] hover:underline font-mono text-xs">
                         #{p.pedido.id.slice(-8).toUpperCase()}
                       </Link>
                     </td>

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { ChevronLeft, ShieldCheck, Package } from 'lucide-react'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 interface GarantiaDetalhe {
   id: string
@@ -173,7 +174,7 @@ export default function GarantiaDetalhePage() {
 
       {g.produto && (
         <Link
-          href={`/adm-a7f9c2b4/produtos/${g.produto.id}`}
+          href={`${ADMIN_BASE}/produtos/${g.produto.id}`}
           className="text-sm text-[#3cbfb3] hover:underline"
         >
           ← Editar produto vinculado

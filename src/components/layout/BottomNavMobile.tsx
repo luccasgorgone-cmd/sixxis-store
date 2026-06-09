@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Grid3x3, ShoppingCart, User } from 'lucide-react'
 import { useTotalItens, useCarrinho } from '@/hooks/useCarrinho'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 interface NavItem {
   href: string
@@ -29,7 +30,7 @@ export default function BottomNavMobile() {
   const setDrawerAberto = useCarrinho((s) => s.setDrawerAberto)
 
   if (pathname.startsWith('/checkout')) return null
-  if (pathname.startsWith('/adm-a7f9c2b4')) return null
+  if (pathname.startsWith(ADMIN_BASE)) return null
 
   return (
     <nav

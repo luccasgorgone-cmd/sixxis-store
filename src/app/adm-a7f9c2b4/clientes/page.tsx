@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import NivelLoyaltyIcon from '@/components/loyalty/NivelLoyaltyIcon'
 import { calcularNivel } from '@/lib/loyalty'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 // Mascara CPF para listagem: apenas os 4 últimos dígitos visíveis.
 // O CPF completo só aparece em /adm-a7f9c2b4/clientes/[id].
@@ -310,7 +311,7 @@ export default function AdminClientesPage() {
             {clientes.map(c => (
               <div
                 key={c.id}
-                onClick={() => window.location.href = `/adm-a7f9c2b4/clientes/${c.id}`}
+                onClick={() => window.location.href = `${ADMIN_BASE}/clientes/${c.id}`}
                 className={`grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-5 py-4 items-center hover:bg-gray-50/50 transition-colors cursor-pointer group ${c.bloqueado ? 'bg-red-50/30' : ''}`}
               >
                 {/* Cliente */}
@@ -377,7 +378,7 @@ export default function AdminClientesPage() {
                 {/* Ações */}
                 <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                   <a
-                    href={`/adm-a7f9c2b4/clientes/${c.id}`}
+                    href={`${ADMIN_BASE}/clientes/${c.id}`}
                     className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-[#3cbfb3]/10 text-[#3cbfb3] hover:bg-[#3cbfb3] hover:text-white transition-all"
                   >
                     <Eye size={13} /> Ver

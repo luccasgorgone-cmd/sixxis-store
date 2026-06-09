@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -25,7 +26,7 @@ export default function AdminLoginPage() {
       })
 
       if (res.ok) {
-        router.push('/adm-a7f9c2b4')
+        router.push(ADMIN_BASE)
         router.refresh()
       } else {
         let msg = 'Senha incorreta. Tente novamente.'

@@ -14,6 +14,7 @@ import {
   Plus,
   GripVertical,
 } from 'lucide-react'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 interface VariacaoInput {
   id?: string
@@ -340,7 +341,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     setSaving(false)
 
     if (res.ok) {
-      router.push('/adm-a7f9c2b4/produtos')
+      router.push(`${ADMIN_BASE}/produtos`)
       router.refresh()
     } else {
       const data = await res.json()
@@ -353,7 +354,7 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     if (!confirm('Deletar este produto permanentemente?')) return
     setDeleting(true)
     await fetch(`/api/admin/produtos/${produtoId}`, { method: 'DELETE' })
-    router.push('/adm-a7f9c2b4/produtos')
+    router.push(`${ADMIN_BASE}/produtos`)
     router.refresh()
   }
 

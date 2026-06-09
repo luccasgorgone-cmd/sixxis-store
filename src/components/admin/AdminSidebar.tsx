@@ -13,68 +13,69 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 const NAV_GROUPS = [
   {
     label: 'Visão Geral',
     items: [
-      { href: '/adm-a7f9c2b4', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+      { href: `${ADMIN_BASE}`, label: 'Dashboard', icon: LayoutDashboard, exact: true },
     ],
   },
   {
     label: 'Catálogo',
     items: [
-      { href: '/adm-a7f9c2b4/produtos', label: 'Produtos', icon: Package, exact: false },
+      { href: `${ADMIN_BASE}/produtos`, label: 'Produtos', icon: Package, exact: false },
     ],
   },
   {
     label: 'Vendas',
     items: [
-      { href: '/adm-a7f9c2b4/pedidos',    label: 'Pedidos',        icon: ShoppingBag, exact: false },
-      { href: '/adm-a7f9c2b4/pagamentos', label: 'Pagamentos',     icon: CreditCard,  exact: false },
-      { href: '/adm-a7f9c2b4/cupons',     label: 'Cupons',         icon: Tag,         exact: false },
-      { href: '/adm-a7f9c2b4/garantias',  label: 'Garantias',      icon: ShieldCheck, exact: false },
-      { href: '/adm-a7f9c2b4/clientes',  label: 'Clientes',       icon: Users,       exact: false },
-      { href: '/adm-a7f9c2b4/bloqueios', label: 'Bloqueios',      icon: ShieldOff,   exact: false },
+      { href: `${ADMIN_BASE}/pedidos`,    label: 'Pedidos',        icon: ShoppingBag, exact: false },
+      { href: `${ADMIN_BASE}/pagamentos`, label: 'Pagamentos',     icon: CreditCard,  exact: false },
+      { href: `${ADMIN_BASE}/cupons`,     label: 'Cupons',         icon: Tag,         exact: false },
+      { href: `${ADMIN_BASE}/garantias`,  label: 'Garantias',      icon: ShieldCheck, exact: false },
+      { href: `${ADMIN_BASE}/clientes`,  label: 'Clientes',       icon: Users,       exact: false },
+      { href: `${ADMIN_BASE}/bloqueios`, label: 'Bloqueios',      icon: ShieldOff,   exact: false },
     ],
   },
   {
     label: 'Logística',
     items: [
-      { href: '/adm-a7f9c2b4/frete', label: 'Frete', icon: Truck, exact: false },
+      { href: `${ADMIN_BASE}/frete`, label: 'Frete', icon: Truck, exact: false },
     ],
   },
   {
     label: 'Fidelidade',
     items: [
-      { href: '/adm-a7f9c2b4/avaliacoes', label: 'Avaliações', icon: Star, exact: false },
+      { href: `${ADMIN_BASE}/avaliacoes`, label: 'Avaliações', icon: Star, exact: false },
     ],
   },
   {
     label: 'Marketing',
     items: [
-      { href: '/adm-a7f9c2b4/campanhas',              label: 'Campanhas', icon: Target,        exact: false },
-      { href: '/adm-a7f9c2b4/emails',                 label: 'E-mails',   icon: Mail,          exact: false },
-      { href: '/adm-a7f9c2b4/configuracoes/whatsapp', label: 'WhatsApp',  icon: MessageSquare, exact: false },
-      { href: '/adm-a7f9c2b4/luna',                   label: 'Luna',      icon: Bot,           exact: false },
+      { href: `${ADMIN_BASE}/campanhas`,              label: 'Campanhas', icon: Target,        exact: false },
+      { href: `${ADMIN_BASE}/emails`,                 label: 'E-mails',   icon: Mail,          exact: false },
+      { href: `${ADMIN_BASE}/configuracoes/whatsapp`, label: 'WhatsApp',  icon: MessageSquare, exact: false },
+      { href: `${ADMIN_BASE}/luna`,                   label: 'Luna',      icon: Bot,           exact: false },
     ],
   },
   {
     label: 'Conteúdo',
     items: [
-      { href: '/adm-a7f9c2b4/editor-visual',      label: 'Editor Visual',      icon: Sparkles,   exact: false },
-      { href: '/adm-a7f9c2b4/banners',            label: 'Banners',            icon: ImageIcon,  exact: false },
-      { href: '/adm-a7f9c2b4/popup-inicial',      label: 'Pop-up Inicial',     icon: Bell,       exact: false },
-      { href: '/adm-a7f9c2b4/minha-conta-editor', label: 'Minha Conta Editor', icon: UserCog,    exact: false },
+      { href: `${ADMIN_BASE}/editor-visual`,      label: 'Editor Visual',      icon: Sparkles,   exact: false },
+      { href: `${ADMIN_BASE}/banners`,            label: 'Banners',            icon: ImageIcon,  exact: false },
+      { href: `${ADMIN_BASE}/popup-inicial`,      label: 'Pop-up Inicial',     icon: Bell,       exact: false },
+      { href: `${ADMIN_BASE}/minha-conta-editor`, label: 'Minha Conta Editor', icon: UserCog,    exact: false },
     ],
   },
   {
     label: 'Configurações',
     items: [
-      { href: '/adm-a7f9c2b4/analytics',          label: 'Analytics',             icon: BarChart2, exact: false },
-      { href: '/adm-a7f9c2b4/vendas-horario',     label: 'Horários de Venda',     icon: Clock,     exact: false },
-      { href: '/adm-a7f9c2b4/configuracoes-loja', label: 'Configurações da Loja', icon: Settings,  exact: false },
-      { href: '/adm-a7f9c2b4/auditoria',          label: 'Auditoria',             icon: History,   exact: false },
+      { href: `${ADMIN_BASE}/analytics`,          label: 'Analytics',             icon: BarChart2, exact: false },
+      { href: `${ADMIN_BASE}/vendas-horario`,     label: 'Horários de Venda',     icon: Clock,     exact: false },
+      { href: `${ADMIN_BASE}/configuracoes-loja`, label: 'Configurações da Loja', icon: Settings,  exact: false },
+      { href: `${ADMIN_BASE}/auditoria`,          label: 'Auditoria',             icon: History,   exact: false },
     ],
   },
 ]
@@ -120,7 +121,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
   async function handleLogout() {
     setLoggingOut(true)
     await fetch('/api/admin/logout', { method: 'POST' })
-    router.push('/adm-a7f9c2b4/login')
+    router.push(`${ADMIN_BASE}/login`)
   }
 
   return (
@@ -145,7 +146,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
       >
         {/* Logo */}
         <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: A.sidebarBorder }}>
-          <Link href="/adm-a7f9c2b4" className="block">
+          <Link href={ADMIN_BASE} className="block">
             <Image
               src={logoUrl}
               alt="Sixxis"
@@ -199,7 +200,7 @@ export default function AdminSidebar({ mobileOpen = false, onMobileClose }: Prop
                     </span>
                     <span className="flex-1 truncate">{label}</span>
                     {/* Badge de atenção no item Pedidos */}
-                    {href === '/adm-a7f9c2b4/pedidos' && aguardandoEnvio > 0 && (
+                    {href === `${ADMIN_BASE}/pedidos` && aguardandoEnvio > 0 && (
                       <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
                         {aguardandoEnvio}
                       </span>

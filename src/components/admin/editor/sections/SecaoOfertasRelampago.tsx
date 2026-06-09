@@ -4,6 +4,7 @@ import { Zap } from 'lucide-react'
 import Link from 'next/link'
 import { EditorSection } from '../EditorSection'
 import { ColorField, TextField, TextareaField, ToggleField } from '../FormFields'
+import { ADMIN_BASE } from '@/lib/admin-path'
 import type { SectionProps } from '../types'
 
 export function SecaoOfertasRelampago({ config, setConfig, device }: SectionProps) {
@@ -22,7 +23,7 @@ export function SecaoOfertasRelampago({ config, setConfig, device }: SectionProp
     >
       <div className="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 text-xs text-blue-800">
         Para configurar produtos em oferta e datas,{' '}
-        <Link href="/adm-a7f9c2b4/produtos" className="font-semibold underline">
+        <Link href={`${ADMIN_BASE}/produtos`} className="font-semibold underline">
           edite os produtos →
         </Link>
       </div>

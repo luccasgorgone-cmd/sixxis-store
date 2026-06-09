@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 export default function NotFoundAdmin() {
   return (
@@ -14,7 +15,7 @@ export default function NotFoundAdmin() {
           Esta rota do painel não existe ou foi removida.
         </p>
         <Link
-          href="/adm-a7f9c2b4"
+          href={ADMIN_BASE}
           className="inline-flex items-center gap-2 mt-6 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-semibold rounded-xl px-5 py-2.5 text-sm transition"
         >
           ← Voltar ao Dashboard
