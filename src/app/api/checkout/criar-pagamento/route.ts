@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth'
 import { isStatusPendente } from '@/lib/pedido-status'
 import { creditarCashback } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
+import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -62,7 +63,13 @@ export async function POST(req: NextRequest) {
 
   const pedido = await prisma.pedido.findFirst({
     where: { id: pedidoId, clienteId: session.user.id },
-    include: { itens: true, cliente: true },
+    include: {
+      // produto.nome + endereco são usados pelo e-mail de confirmação enviado no
+      // caminho do cartão aprovado inline (ver bloco 'approved' abaixo).
+      itens: { include: { produto: { select: { nome: true } } } },
+      cliente: true,
+      endereco: true,
+    },
   })
 
   if (!pedido) {
@@ -188,6 +195,30 @@ export async function POST(req: NextRequest) {
       await registrarUsoCupom(pedido.id).catch((e) =>
         console.error('[mp:create] registrar uso cupom:', (e as Error).message),
       )
+      // E-mail de confirmação. Mesma lacuna: o webhook do MP só envia quando
+      // status !== 'pago'; como já marcamos 'pago' aqui, o webhook pularia e o
+      // cliente de CARTÃO aprovado inline ficaria sem confirmação. Enviamos aqui
+      // (try/catch, nunca bloqueia). Não duplica com o webhook por causa do guard.
+      try {
+        const end = pedido.endereco
+        await enviarEmailConfirmacaoPedido(pedido.cliente.email, {
+          nomeCliente: pedido.cliente.nome,
+          pedidoId: pedido.id,
+          itens: pedido.itens.map((i) => ({
+            nome: i.produto.nome,
+            variacaoNome: i.variacaoNome,
+            quantidade: i.quantidade,
+            precoUnitario: Number(i.precoUnitario),
+          })),
+          frete: Number(pedido.frete),
+          desconto: Number(pedido.desconto),
+          total: Number(pedido.total),
+          formaPagamento: pedido.formaPagamento,
+          endereco: `${end.logradouro}, ${end.numero} — ${end.bairro}, ${end.cidade}/${end.estado}`,
+        })
+      } catch (e) {
+        console.error('[mp:create] email confirmacao:', (e as Error).message)
+      }
     } else if (pagamento.mpPaymentId) {
       // mantém referência principal pra reconciliação via webhook
       await prisma.pedido.update({
