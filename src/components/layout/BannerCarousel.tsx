@@ -33,6 +33,10 @@ function normalizeAspect(value?: string | null): string | undefined {
 export default function BannerCarousel({ banners }: { banners: Banner[] }) {
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
+  // Banners cuja imagem deu erro de load (ex.: arquivo 404 no R2). Guardamos por
+  // id para não tentar re-renderizar a <img> quebrada — o container mantém o
+  // gradiente da marca como fallback no lugar.
+  const [failed, setFailed] = useState<Set<string>>(() => new Set())
 
   const prev = useCallback(() => setCurrent(c => (c - 1 + banners.length) % banners.length), [banners.length])
   const next = useCallback(() => setCurrent(c => (c + 1) % banners.length), [banners.length])
@@ -60,6 +64,13 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
   }
 
   const banner = banners[current]
+  const imgFailed = failed.has(banner.id)
+  const markFailed = (id: string) => setFailed(f => {
+    if (f.has(id)) return f
+    const n = new Set(f)
+    n.add(id)
+    return n
+  })
 
   const aspectVars: Record<string, string> = {}
   const aMobile  = normalizeAspect(banner.aspectMobile)
@@ -85,8 +96,10 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
-          {/* Imagem do banner — usa <picture> para servir imagemMobile no mobile */}
-          {banner.link ? (
+          {/* Imagem do banner — usa <picture> para servir imagemMobile no mobile.
+              Se a imagem 404/falhar, escondemos a <img> (imgFailed) e o gradiente
+              da marca do container fica como fallback — sem <img> quebrada. */}
+          {!imgFailed && (banner.link ? (
             <Link href={banner.link} className="block w-full h-full">
               <picture key={banner.id}>
                 {banner.imagemMobile && (
@@ -102,6 +115,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                   className="absolute inset-0 w-full h-full object-cover"
                   style={{ objectPosition: 'center top' }}
                   loading="eager"
+                  onError={() => markFailed(banner.id)}
                 />
               </picture>
             </Link>
@@ -120,9 +134,10 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ objectPosition: 'center top' }}
                 loading="eager"
+                onError={() => markFailed(banner.id)}
               />
             </picture>
-          )}
+          ))}
 
           {/* Seta esquerda */}
           {banners.length > 1 && (

@@ -236,6 +236,9 @@ function BannersPanel({
   salvando: boolean
   salvoOk: boolean
 }) {
+  // URLs cujo preview deu erro de load (ex.: banner R2 404) — mostra placeholder
+  // em vez de <img> quebrada. Indexado por URL: troca de banner reavalia sozinho.
+  const [previewErro, setPreviewErro] = useState<Set<string>>(() => new Set())
   return (
     <div className="space-y-5">
       {(['desktop', 'mobile'] as const).map(tipo => {
@@ -263,10 +266,13 @@ function BannersPanel({
               className="w-full rounded-xl border-2 border-dashed border-gray-200 mb-4 overflow-hidden bg-gray-50 flex items-center justify-center"
               style={{ aspectRatio: tipo === 'desktop' ? '1920 / 400' : '720 / 400', maxHeight: 300 }}
             >
-              {url
+              {url && !previewErro.has(url)
                 /* eslint-disable-next-line @next/next/no-img-element */
-                ? <img src={url} alt="" className="w-full h-full object-cover" />
-                : <p className="text-sm text-gray-400">Sem banner — usando padrão</p>
+                ? <img src={url} alt="" className="w-full h-full object-cover"
+                    onError={() => setPreviewErro(s => new Set(s).add(url))} />
+                : <p className="text-sm text-gray-400">
+                    {url ? 'Imagem indisponível — usando padrão' : 'Sem banner — usando padrão'}
+                  </p>
               }
             </div>
 
