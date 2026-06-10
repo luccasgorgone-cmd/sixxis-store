@@ -7,6 +7,9 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Produtos — Sixxis Store',
   description: 'Explore a linha completa Sixxis: climatizadores, aspiradores e equipamentos fitness. Qualidade premium com garantia Sixxis.',
+  // Filtros (?categoria=, ?q=, ?ordem=) apontam para a versão limpa /produtos
+  // para evitar conteúdo duplicado indexado.
+  alternates: { canonical: '/produtos' },
 }
 
 function ProductsLoading() {

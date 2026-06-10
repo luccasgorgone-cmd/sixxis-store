@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 
-const BASE = 'https://sixxis-store-production.up.railway.app'
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let produtos: { slug: string; createdAt: Date }[] = []

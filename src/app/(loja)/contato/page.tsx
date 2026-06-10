@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Contato',
   description:
     'Entre em contato com a Sixxis. Tire dúvidas, solicite suporte técnico ou fale conosco via WhatsApp, e-mail ou formulário.',
+  alternates: { canonical: '/contato' },
 }
 
 const infos = [

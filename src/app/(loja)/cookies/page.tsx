@@ -7,6 +7,7 @@ export const revalidate = 86400
 export const metadata: Metadata = {
   title: 'Política de Cookies | Sixxis',
   description: 'Saiba como a Sixxis utiliza cookies para melhorar sua experiência de navegação.',
+  alternates: { canonical: '/cookies' },
 }
 
 export default function CookiesPage() {

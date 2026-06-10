@@ -17,7 +17,7 @@ import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 export const dynamic = 'force-dynamic'
 
-const SITE_URL = 'https://sixxis-store-production.up.railway.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br'
 
 // Limpa HTML e limita a N caracteres
 function limparHTML(html: string | null | undefined, max = 160): string {

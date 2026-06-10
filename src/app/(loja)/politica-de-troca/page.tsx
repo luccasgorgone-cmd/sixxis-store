@@ -8,6 +8,7 @@ export const revalidate = 86400
 export const metadata: Metadata = {
   title: 'Política de Troca e Devolução',
   description: 'Conheça nossa política de trocas e devoluções. Seu direito protegido pela Sixxis.',
+  alternates: { canonical: '/politica-de-troca' },
 }
 
 export default function PoliticaDeTrocaPage() {

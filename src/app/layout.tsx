@@ -6,7 +6,9 @@ import { prisma } from '@/lib/prisma'
 import Providers from '@/components/Providers'
 import { GtmScriptHead, GtmNoScript } from '@/components/analytics/GtmScript'
 
-const SITE_URL = 'https://sixxis-store-production.up.railway.app'
+// Domínio canônico de produção (apex → www via proxy.ts). É a fonte única para
+// metadataBase, canonical, OpenGraph/Twitter e schema.org. Override por env.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0

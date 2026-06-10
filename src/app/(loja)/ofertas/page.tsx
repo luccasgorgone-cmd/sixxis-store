@@ -5,7 +5,7 @@ import OfertasHero from '@/components/home/OfertasHero'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = { title: 'Ofertas — Sixxis Store' }
+export const metadata = { title: 'Ofertas — Sixxis Store', alternates: { canonical: '/ofertas' } }
 
 export default async function OfertasPage() {
   const ofertas = await prisma.produto.findMany({

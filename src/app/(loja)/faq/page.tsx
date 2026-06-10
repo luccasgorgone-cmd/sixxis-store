@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Perguntas Frequentes',
   description:
     'Tire suas dúvidas sobre entrega, pagamento, troca, garantia e produtos Sixxis. Central de ajuda completa.',
+  alternates: { canonical: '/faq' },
 }
 
 const faqs = [
