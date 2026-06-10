@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { COOKIE_SESSION, gerarSessaoId } from '@/lib/tracking'
+import { COOKIE_SESSION, gerarSessaoId, detectDispositivo } from '@/lib/tracking'
 import { analyticsConsentido, CONSENT_EVENT } from '@/lib/consent'
 
 type TrackData = Record<string, unknown>
@@ -86,13 +86,56 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
     }).catch(() => {})
   }, [garantirSessao])
 
+  // Heartbeat de presença (Fase 2). Ping leve (payload mínimo) por sendBeacon
+  // enquanto a aba está visível. Mesmo gate LGPD (garantirSessao só prossegue
+  // com consentimento analítico).
+  const enviarHeartbeat = useCallback(() => {
+    if (typeof document === 'undefined') return
+    if (document.visibilityState !== 'visible') return
+    if (!garantirSessao()) return
+    const sid = sessaoIdRef.current
+    if (!sid) return
+    const payload = JSON.stringify({
+      sessaoId: sid,
+      path: window.location.pathname,
+      dispositivo: detectDispositivo(navigator.userAgent),
+    })
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/analytics/heartbeat', new Blob([payload], { type: 'application/json' }))
+      } else {
+        fetch('/api/analytics/heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true,
+        }).catch(() => {})
+      }
+    } catch { /* noop */ }
+  }, [garantirSessao])
+
   // Inicializa (se já houver consentimento) e reage ao aceite no banner.
   useEffect(() => {
     garantirSessao()
-    const onConsent = () => { if (garantirSessao()) track('page_view') }
+    const onConsent = () => { if (garantirSessao()) { track('page_view'); enviarHeartbeat() } }
     window.addEventListener(CONSENT_EVENT, onConsent)
     return () => window.removeEventListener(CONSENT_EVENT, onConsent)
-  }, [garantirSessao, track])
+  }, [garantirSessao, track, enviarHeartbeat])
+
+  // Heartbeat imediato a cada troca de rota + a cada 15s enquanto visível.
+  // Pausa quando a aba some (visibilitychange) e retoma ao voltar.
+  useEffect(() => {
+    enviarHeartbeat()
+    let timer: ReturnType<typeof setInterval> | null = null
+    const start = () => { if (!timer) timer = setInterval(enviarHeartbeat, 15000) }
+    const stop = () => { if (timer) { clearInterval(timer); timer = null } }
+    const onVis = () => {
+      if (document.visibilityState === 'visible') { enviarHeartbeat(); start() } else { stop() }
+    }
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') start()
+    document.addEventListener('visibilitychange', onVis)
+    return () => { stop(); document.removeEventListener('visibilitychange', onVis) }
+  }, [pathname, enviarHeartbeat])
 
   // Page views automáticos (track já valida consentimento).
   useEffect(() => {

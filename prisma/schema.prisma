@@ -805,3 +805,17 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
 }
+
+// Presença em tempo real (Fase 2 analytics). 1 linha por sessão, atualizada pelo
+// heartbeat (/api/analytics/heartbeat) a cada ~15s enquanto a aba está visível.
+// Tabela dedicada p/ não martelar SessaoVisitante a cada ping. "Online agora" =
+// ultimoPing > (agora − 60s); o índice em ultimoPing torna a query barata.
+model Presenca {
+  id          String   @id @default(cuid())
+  sessaoId    String   @unique
+  path        String?  @db.Text
+  dispositivo String?
+  ultimoPing  DateTime @default(now())
+
+  @@index([ultimoPing])
+}

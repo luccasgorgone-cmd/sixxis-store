@@ -9,6 +9,7 @@ import {
   Users, Eye, ShoppingCart, TrendingUp, Monitor,
   Cookie, Search, RefreshCw, AlertCircle, Package,
   ShoppingBag, XCircle, DollarSign, Zap, Activity,
+  Smartphone, Tablet,
 } from 'lucide-react'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -21,6 +22,34 @@ function fmtValor(v: number) {
   if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`
   if (v >= 1_000)     return `R$ ${(v / 1_000).toFixed(1)}k`
   return `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+}
+
+// Pathname a partir da URL completa gravada no evento.
+function pathOf(u: string | null): string {
+  if (!u) return '—'
+  try { return new URL(u).pathname || '/' } catch { return u }
+}
+
+// "há Ns/min/h" — referência no relógio do servidor (presenca.agora) p/ não
+// depender do clock do navegador do admin.
+function haQuanto(iso: string, refIso?: string): string {
+  const ref = refIso ? new Date(refIso).getTime() : Date.now()
+  const diff = Math.max(0, Math.round((ref - new Date(iso).getTime()) / 1000))
+  if (diff < 60) return `há ${diff}s`
+  if (diff < 3600) return `há ${Math.floor(diff / 60)}min`
+  if (diff < 86400) return `há ${Math.floor(diff / 3600)}h`
+  return `há ${Math.floor(diff / 86400)}d`
+}
+
+const TIPO_LABEL: Record<string, { label: string; cor: string }> = {
+  page_view:        { label: 'Página vista',  cor: '#64748b' },
+  view_item:        { label: 'Produto visto', cor: '#2563eb' },
+  add_to_cart:      { label: 'Add carrinho',  cor: '#8b5cf6' },
+  begin_checkout:   { label: 'Checkout',      cor: '#f59e0b' },
+  add_payment_info: { label: 'Pagamento',     cor: '#f59e0b' },
+  purchase:         { label: 'Compra',        cor: '#16a34a' },
+  search:           { label: 'Busca',         cor: '#3cbfb3' },
+  scroll_depth:     { label: 'Scroll',        cor: '#cbd5e1' },
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,6 +107,17 @@ interface DadosAnalytics {
   }
 }
 
+interface FeedEvento {
+  tipo: string; pagina: string | null; produtoSlug: string | null
+  valor: number | null; createdAt: string
+}
+interface Presenca {
+  ok: boolean; agora: string; online: number
+  paginasAoVivo: { path: string; viewers: number }[]
+  dispositivosOnline: { mobile: number; desktop: number; tablet: number; outros: number }
+  feed: FeedEvento[]
+}
+
 type TabId = 'visao-geral' | 'carrinho' | 'visitantes' | 'eventos'
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -90,6 +130,7 @@ export default function AdminAnalyticsPage() {
   const [tab,          setTab]          = useState<TabId>('visao-geral')
   const [ultimaAtt,    setUltimaAtt]    = useState<Date | null>(null)
   const [autoRefresh,  setAutoRefresh]  = useState(false)
+  const [presenca,     setPresenca]     = useState<Presenca | null>(null)
 
   const buscar = useCallback(async (p: string) => {
     setLoading(true); setErro('')
@@ -111,6 +152,21 @@ export default function AdminAnalyticsPage() {
     const id = setInterval(() => buscar(periodo), 30000)
     return () => clearInterval(id)
   }, [autoRefresh, periodo, buscar])
+
+  // Presença ao vivo — polling leve a cada 12s (independente do período).
+  useEffect(() => {
+    let alive = true
+    const fetchPresenca = async () => {
+      try {
+        const res = await fetch('/api/admin/analytics/presenca', { cache: 'no-store' })
+        const data = await res.json()
+        if (alive && data?.ok) setPresenca(data as Presenca)
+      } catch { /* noop */ }
+    }
+    fetchPresenca()
+    const id = setInterval(fetchPresenca, 12000)
+    return () => { alive = false; clearInterval(id) }
+  }, [])
 
   if (erro) return (
     <div className="p-6">
@@ -201,6 +257,74 @@ export default function AdminAnalyticsPage() {
             <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
             Atualizar
           </button>
+        </div>
+      </div>
+
+      {/* ── AO VIVO (presença em tempo real, polling 12s) ── */}
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+          </span>
+          <h2 className="text-sm font-black text-gray-900">Ao Vivo</h2>
+          <span className="text-[10px] text-gray-400 ml-auto flex items-center gap-1">
+            <Activity size={11} /> atualiza a cada 12s
+          </span>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+          {/* Online agora + dispositivos */}
+          <div className="p-5">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Online agora</p>
+            <div className="flex items-end gap-2 mt-1">
+              <span className="text-4xl font-black text-gray-900 leading-none">{presenca?.online ?? 0}</span>
+              <span className="text-xs text-gray-400 mb-1">{(presenca?.online ?? 0) === 1 ? 'pessoa' : 'pessoas'}</span>
+            </div>
+            <div className="flex items-center gap-4 mt-4 text-xs text-gray-600">
+              <span className="flex items-center gap-1"><Smartphone size={13} className="text-gray-400" /> {presenca?.dispositivosOnline.mobile ?? 0}</span>
+              <span className="flex items-center gap-1"><Monitor size={13} className="text-gray-400" /> {presenca?.dispositivosOnline.desktop ?? 0}</span>
+              <span className="flex items-center gap-1"><Tablet size={13} className="text-gray-400" /> {presenca?.dispositivosOnline.tablet ?? 0}</span>
+            </div>
+          </div>
+          {/* Páginas sendo vistas agora */}
+          <div className="p-5">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Páginas sendo vistas</p>
+            {presenca?.paginasAoVivo?.length ? (
+              <div className="space-y-1.5 max-h-44 overflow-y-auto">
+                {presenca.paginasAoVivo.map((p, i) => (
+                  <div key={i} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="text-gray-700 truncate font-mono">{p.path}</span>
+                    <span className="shrink-0 font-black text-gray-900 bg-gray-100 rounded-full px-2 py-0.5">{p.viewers}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-300 py-6 text-center">Ninguém navegando agora</p>
+            )}
+          </div>
+          {/* Feed de eventos recentes */}
+          <div className="p-5">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Eventos recentes</p>
+            {presenca?.feed?.length ? (
+              <div className="space-y-1.5 max-h-44 overflow-y-auto">
+                {presenca.feed.map((e, i) => {
+                  const meta = TIPO_LABEL[e.tipo] || { label: e.tipo, cor: '#94a3b8' }
+                  const alvo = e.produtoSlug || pathOf(e.pagina)
+                  return (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: meta.cor }} />
+                      <span className="font-semibold text-gray-700 shrink-0">{meta.label}</span>
+                      <span className="text-gray-400 truncate flex-1 font-mono">{alvo}</span>
+                      {e.valor ? <span className="text-[10px] font-bold text-gray-500 shrink-0">{fmtValor(e.valor)}</span> : null}
+                      <span className="text-[10px] text-gray-300 shrink-0">{haQuanto(e.createdAt, presenca?.agora)}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-300 py-6 text-center">Sem eventos ainda</p>
+            )}
+          </div>
         </div>
       </div>
 
