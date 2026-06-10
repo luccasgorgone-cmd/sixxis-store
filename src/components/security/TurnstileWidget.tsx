@@ -9,10 +9,11 @@
 // Robustez (correção do bug de não-renderização):
 //   1. O api.js é carregado UMA vez via Promise compartilhada — resolve mesmo se
 //      o script já estava no DOM/carregado (evita a corrida do 'load' perdido).
-//   2. O render só roda dentro de window.turnstile.ready(...) — garante a API
-//      pronta antes de chamar render (evita render antes do turnstile existir).
-//   3. O container (ref) já está montado e com altura reservada (minHeight) —
-//      nunca 0x0 nem display:none no momento do render.
+//   2. NÃO usa turnstile.ready() — em produção o callback do ready() não dispara
+//      em alguns cenários. Assim que o load resolve (window.turnstile existe),
+//      chamamos turnstile.render() DIRETO. widgetId guarda contra render duplo.
+//   3. O container (ref) tem LARGURA + altura explícitas — o widget Managed
+//      (~300px) não monta o iframe se o container não tiver largura definida.
 //
 // Use TURNSTILE_ENABLED para gatear o submit; use a ref (TurnstileHandle.reset)
 // para forçar novo desafio quando o token foi consumido (ex.: senha errada).
@@ -102,17 +103,16 @@ const TurnstileWidget = forwardRef<TurnstileHandle, Props>(function TurnstileWid
 
     loadTurnstileScript()
       .then(() => {
-        if (cancelled || !window.turnstile) return
-        // ready() garante que a API está pronta para render (corrige a corrida).
-        window.turnstile.ready(() => {
-          if (cancelled || !containerRef.current || widgetIdRef.current != null) return
-          widgetIdRef.current = window.turnstile.render(containerRef.current, {
-            sitekey: SITE_KEY,
-            callback: (token: string) => cbRef.current(token),
-            'error-callback': () => cbRef.current(''),
-            'expired-callback': () => cbRef.current(''),
-            'timeout-callback': () => cbRef.current(''),
-          })
+        // Render DIRETO (sem turnstile.ready) assim que a API existe e o
+        // container está montado. widgetId evita render duplo.
+        if (cancelled || !window.turnstile || !containerRef.current) return
+        if (widgetIdRef.current != null) return
+        widgetIdRef.current = window.turnstile.render(containerRef.current, {
+          sitekey: SITE_KEY,
+          callback: (token: string) => cbRef.current(token),
+          'error-callback': () => cbRef.current(''),
+          'expired-callback': () => cbRef.current(''),
+          'timeout-callback': () => cbRef.current(''),
         })
       })
       .catch(() => {
@@ -136,8 +136,15 @@ const TurnstileWidget = forwardRef<TurnstileHandle, Props>(function TurnstileWid
   }, [])
 
   if (!SITE_KEY) return null
-  // minHeight reserva espaço visível antes do iframe montar (nunca 0x0).
-  return <div ref={containerRef} className={className} style={{ minHeight: 65 }} />
+  // LARGURA explícita (~300px) é obrigatória: sem ela o iframe Managed não monta.
+  // maxWidth:100% evita estouro em telas estreitas; margin auto centraliza.
+  return (
+    <div
+      ref={containerRef}
+      className={className}
+      style={{ width: 300, maxWidth: '100%', minHeight: 65, marginInline: 'auto' }}
+    />
+  )
 })
 
 export default TurnstileWidget
