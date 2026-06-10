@@ -32,5 +32,33 @@ if (!url.startsWith('mariadb://')) {
   )
 }
 
-const adapter = new PrismaMariaDb(url)
+// Conexão SÓ para scripts de ops/seed (este arquivo NÃO é importado pelo app em
+// runtime — o app usa src/lib/prisma.ts). Logo, nada aqui afeta produção.
+//
+// O proxy público do Railway (crossover.proxy.rlwy.net) usa MySQL com
+// caching_sha2_password. Sobre conexão NÃO criptografada, esse plugin exige a
+// RSA public key do servidor — daí o erro "RSA public key is not available
+// client side" e o pool timeout ao rodar localmente.
+//
+// Solução SEGURA: habilitar TLS/SSL. Com o canal criptografado, o caching_sha2
+// autentica sem precisar da troca de chave RSA em claro. Passamos um PoolConfig
+// (em vez da string) para conseguir setar `ssl`. Parseamos a própria
+// DATABASE_URL — nenhum segredo é hardcoded.
+//
+// rejectUnauthorized:false porque o MySQL do Railway usa certificado
+// self-signed (o proxy é TCP passthrough; o TLS é com o servidor real). O canal
+// continua CRIPTOGRAFADO — só não verificamos a cadeia da CA. NÃO usamos
+// allowPublicKeyRetrieval (esse seria o último recurso, sem criptografia).
+const u = new URL(url)
+const adapter = new PrismaMariaDb({
+  host: u.hostname,
+  port: u.port ? Number(u.port) : 3306,
+  user: decodeURIComponent(u.username),
+  password: decodeURIComponent(u.password),
+  database: u.pathname.replace(/^\//, ''),
+  ssl: { rejectUnauthorized: false },
+  // O handshake TLS via proxy remoto leva mais que o connectTimeout padrão
+  // (~1s) do driver — daí "failed to create socket". Folga generosa p/ local.
+  connectTimeout: 30_000,
+})
 export const prisma = new PrismaClient({ adapter })

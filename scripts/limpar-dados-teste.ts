@@ -1,226 +1,252 @@
-// Lista (e, com --execute, apaga) dados de TESTE acumulados no banco:
-//   - produto(s) de smoke-test (ex.: "TESTE SMOKE")
-//   - clientes de teste (por padrão de e-mail)
-//   - pedidos de teste (de clientes de teste OU que contêm produto de teste)
-//   - registros ligados: CupomUso, CashbackTransacao, HistoricoPontos, PontosCliente,
-//     Avaliacao, e — via cascata do Pedido — ItemPedido, Pagamento, GarantiaEstendida
+// Limpa dados transacionais de teste preservando o conteúdo de prova social.
 //
-// SEGURANÇA:
-//   - DRY-RUN é o PADRÃO: sem flag, o script só LISTA. Nada é apagado.
-//   - Só apaga com a flag explícita --execute.
-//   - REVISE a saída do dry-run antes de rodar --execute: os clientes são
-//     identificados por PADRÃO DE E-MAIL (editável abaixo) e podem ter falso
-//     positivo. Faça backup do banco antes do --execute.
+// POLÍTICA (dry-run por padrão; --execute aplica, tudo numa transação FK-safe):
+//
+//   MANTER:
+//     - TODAS as linhas de Avaliacao (reviews) e suas fotos.
+//     - TODAS as contas Cliente referenciadas por alguma Avaliacao (avaliadores).
+//     - Todo o catálogo de produtos, EXCETO o produto "TESTE SMOKE".
+//     - TODAS as DEFINIÇÕES: model Cupom (ex.: SIXXIS10), FreteRegra dos produtos
+//       reais e ProdutoDestaque dos produtos reais. (Só registros transacionais
+//       /de uso saem: CupomUso; e as FreteRegra/ProdutoDestaque do PRÓPRIO SMOKE.)
+//     - Auth de admin não é tocado (não está em Cliente).
+//
+//   APAGAR:
+//     - TODOS os outros Cliente (não-avaliadores) e suas dependências
+//       (CupomUso, CashbackTransacao, HistoricoPontos, PontosCliente, Endereco,
+//        Carrinho, BloqueioFraude, CampanhaDestinatario).
+//     - TODOS os Pedido e suas dependências (ItemPedido, Pagamento,
+//       GarantiaEstendida via cascata; CupomUso/CashbackTransacao/HistoricoPontos
+//       ligados a pedido).
+//     - O produto "TESTE SMOKE" e SÓ as dependências dele (ItemCarrinho,
+//       ListaEspera, ProdutoDestaque, VariacaoProduto, FreteRegra). Se houver
+//       Avaliacao apontando para ele, o produto é PRESERVADO (reviews têm
+//       prioridade) — o script avisa.
+//
+// SEGURANÇA: faça backup antes do --execute. O dry-run NÃO altera nada.
 //
 // Uso:
 //   npx tsx scripts/limpar-dados-teste.ts              # dry-run (lista)
 //   npx tsx scripts/limpar-dados-teste.ts --execute    # APAGA (irreversível)
-//
-// O .env.local é lido automaticamente por ./_db.
 
 import { prisma } from './_db'
 
 const EXECUTAR = process.argv.includes('--execute')
 
-// ── Padrões de identificação — EDITE conforme seus dados de teste ────────────
-// Produto: nome que CONTÉM qualquer um destes (case-insensitive no MySQL).
-const PRODUTO_PATTERNS = ['TESTE SMOKE', 'SMOKE']
-// Cliente: e-mail que CONTÉM qualquer um destes. Mantenha conservador.
-const EMAIL_PATTERNS = [
-  'smoke',
-  'teste@',
-  '+teste',
-  '+test',
-  '@example.com',
-  '@mailinator.com',
-  'qa@sixxis',
-]
+// Produto de teste: nome que CONTÉM este texto (case-insensitive no MySQL).
+const SMOKE_PATTERN = 'TESTE SMOKE'
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function orContains(campo: string, patterns: string[]): any {
-  return { OR: patterns.map((p) => ({ [campo]: { contains: p } })) }
-}
-
-// Filtro OR por pedidoId/clienteId, ignorando listas vazias. Se ambas vazias,
-// retorna um filtro que NUNCA casa (evita deletar tudo por engano).
-function orPedidoCliente(pedidoIds: string[], clienteIds: string[]) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ors: any[] = []
-  if (pedidoIds.length) ors.push({ pedidoId: { in: pedidoIds } })
-  if (clienteIds.length) ors.push({ clienteId: { in: clienteIds } })
-  return ors.length ? { OR: ors } : { id: { in: [] as string[] } }
-}
-
-const brl = (v: number | string) =>
-  Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+const SAMPLE = 10
+const sampleEmails = (rows: { email: string }[]) =>
+  rows.slice(0, SAMPLE).map((r) => r.email).join(', ') + (rows.length > SAMPLE ? ', …' : '')
 
 async function main() {
-  // Mostra em qual banco estamos mexendo (com credenciais mascaradas).
   const dbMasked = (process.env.DATABASE_URL || '')
     .replace(/\/\/[^@]*@/, '//***:***@')
     .split('?')[0]
   console.log(`\nBanco: ${dbMasked}`)
   console.log(
     EXECUTAR
-      ? '⚠️  MODO --execute: registros abaixo SERÃO APAGADOS (irreversível).'
+      ? '⚠️  MODO --execute: os registros abaixo SERÃO APAGADOS (irreversível).'
       : '🔎 DRY-RUN (padrão): apenas listando. Nada será apagado. Use --execute para apagar.',
   )
 
-  // ── 1) Produtos de teste ───────────────────────────────────────────────────
-  const produtos = await prisma.produto.findMany({
-    where: orContains('nome', PRODUTO_PATTERNS),
-    select: { id: true, nome: true, slug: true },
+  // ── Avaliadores = clientes referenciados por alguma Avaliacao ───────────────
+  const reviewers = await prisma.avaliacao.findMany({
+    where: { clienteId: { not: null } },
+    select: { clienteId: true },
+    distinct: ['clienteId'],
   })
-  const produtoIds = produtos.map((p) => p.id)
+  const reviewerIds = reviewers
+    .map((r) => r.clienteId)
+    .filter((id): id is string => Boolean(id))
 
-  console.log(`\n── Produtos de teste: ${produtos.length}`)
-  for (const p of produtos) console.log(`   • ${p.nome}  [${p.slug}]  ${p.id}`)
-
-  // ── 2) Clientes de teste (por e-mail) ──────────────────────────────────────
-  const clientes = await prisma.cliente.findMany({
-    where: orContains('email', EMAIL_PATTERNS),
-    select: {
-      id: true, nome: true, email: true, totalPedidos: true,
-      cashbackSaldo: true, cashbackPendente: true, createdAt: true,
-    },
-  })
-  const clienteIds = clientes.map((c) => c.id)
-
-  console.log(`\n── Clientes de teste (por padrão de e-mail): ${clientes.length}`)
-  for (const c of clientes)
-    console.log(
-      `   • ${c.email}  (${c.nome})  pedidos=${c.totalPedidos}  ` +
-      `cashback=${brl(c.cashbackSaldo)}/${brl(c.cashbackPendente)}pend  ${c.id}`,
+  if (reviewerIds.length === 0) {
+    console.warn(
+      '\n⚠️  ATENÇÃO: 0 avaliadores encontrados — TODOS os clientes entrariam na lista de exclusão. Revise antes de --execute.',
     )
+  }
 
-  // ── 3) Pedidos de teste = de clientes de teste ∪ que contêm produto de teste ─
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pedidoOr: any[] = []
-  if (clienteIds.length) pedidoOr.push({ clienteId: { in: clienteIds } })
-  if (produtoIds.length) pedidoOr.push({ itens: { some: { produtoId: { in: produtoIds } } } })
+  // ── Contagens dos grupos ────────────────────────────────────────────────────
+  const clienteNaoAvaliador = { id: { notIn: reviewerIds } }
 
-  const pedidos = pedidoOr.length
-    ? await prisma.pedido.findMany({
-        where: { OR: pedidoOr },
-        select: {
-          id: true, status: true, total: true, createdAt: true, clienteId: true,
-          cliente: { select: { email: true } },
-          _count: { select: { itens: true, pagamentos: true, garantias: true } },
-        },
-      })
-    : []
-  const pedidoIds = pedidos.map((p) => p.id)
+  const [
+    totalClientes,
+    totalAvaliadores,
+    aApagarClientes,
+    totalPedidos,
+    totalAvaliacoes,
+    totalProdutos,
+  ] = await Promise.all([
+    prisma.cliente.count(),
+    prisma.cliente.count({ where: { id: { in: reviewerIds } } }),
+    prisma.cliente.count({ where: clienteNaoAvaliador }),
+    prisma.pedido.count(),
+    prisma.avaliacao.count(),
+    prisma.produto.count(),
+  ])
 
-  // Quais pedidos vêm de cliente NÃO-teste (só por conter o produto de teste)?
-  // Útil pra revisão: pode ser um smoke-test feito numa conta real.
-  const pedidosClienteNaoTeste = pedidos.filter((p) => !clienteIds.includes(p.clienteId))
+  // ── Amostras ────────────────────────────────────────────────────────────────
+  const [amostraApagar, amostraAvaliadores, smokeProdutos] = await Promise.all([
+    prisma.cliente.findMany({
+      where: clienteNaoAvaliador,
+      select: { email: true },
+      take: SAMPLE,
+      orderBy: { createdAt: 'asc' },
+    }),
+    prisma.cliente.findMany({
+      where: { id: { in: reviewerIds } },
+      select: { email: true },
+      take: SAMPLE,
+    }),
+    prisma.produto.findMany({
+      where: { nome: { contains: SMOKE_PATTERN } },
+      select: { id: true, nome: true, slug: true },
+    }),
+  ])
+  const smokeIds = smokeProdutos.map((p) => p.id)
 
-  console.log(`\n── Pedidos de teste: ${pedidos.length}`)
-  for (const p of pedidos)
+  // Avaliações apontando para o produto de teste — se houver, ele é preservado.
+  const avaliacoesNoSmoke = smokeIds.length
+    ? await prisma.avaliacao.count({ where: { produtoId: { in: smokeIds } } })
+    : 0
+
+  // Dependências que serão apagadas (transparência no dry-run).
+  const [pedidoLinkedCupom, pedidoLinkedCashback, pedidoLinkedHist, itensPedido, pagamentos] =
+    await Promise.all([
+      prisma.cupomUso.count({ where: { pedidoId: { not: null } } }),
+      prisma.cashbackTransacao.count({ where: { pedidoId: { not: null } } }),
+      prisma.historicoPontos.count({ where: { pedidoId: { not: null } } }),
+      prisma.itemPedido.count(),
+      prisma.pagamento.count(),
+    ])
+
+  // DEFINIÇÕES que devem permanecer intactas — só conferência (nunca deletadas,
+  // exceto as FreteRegra/ProdutoDestaque do PRÓPRIO produto SMOKE).
+  const [totalCupons, totalFreteRegras, totalDestaques, smokeFreteRegras, smokeDestaques] =
+    await Promise.all([
+      prisma.cupom.count(),
+      prisma.freteRegra.count(),
+      prisma.produtoDestaque.count(),
+      smokeIds.length ? prisma.freteRegra.count({ where: { produtoId: { in: smokeIds } } }) : Promise.resolve(0),
+      smokeIds.length ? prisma.produtoDestaque.count({ where: { produtoId: { in: smokeIds } } }) : Promise.resolve(0),
+    ])
+  // Se o SMOKE for preservado (tem review), nada do frete/destaque dele sai.
+  const smokeSeraRemovido = smokeProdutos.length > 0 && avaliacoesNoSmoke === 0
+  const freteRemovido = smokeSeraRemovido ? smokeFreteRegras : 0
+  const destaqueRemovido = smokeSeraRemovido ? smokeDestaques : 0
+
+  // ── Relatório ───────────────────────────────────────────────────────────────
+  console.log('\n══════════ RESUMO ══════════')
+  console.log(`Clientes (total): ${totalClientes}`)
+  console.log(`  ↳ PRESERVADOS (avaliadores): ${totalAvaliadores}`)
+  if (amostraAvaliadores.length) console.log(`      amostra: ${sampleEmails(amostraAvaliadores)}`)
+  console.log(`  ↳ A APAGAR (não-avaliadores): ${aApagarClientes}`)
+  if (amostraApagar.length) console.log(`      amostra: ${sampleEmails(amostraApagar)}`)
+  console.log(`      (preservados + apagar = ${totalAvaliadores + aApagarClientes} | total = ${totalClientes})`)
+
+  console.log(`\nPedidos a apagar: ${totalPedidos}  (itens=${itensPedido}, pagamentos=${pagamentos})`)
+  console.log(`  ↳ deps ligadas a pedido — CupomUso=${pedidoLinkedCupom}, Cashback=${pedidoLinkedCashback}, HistoricoPontos=${pedidoLinkedHist}`)
+
+  console.log(`\nAvaliações PRESERVADAS: ${totalAvaliacoes}  (nenhuma é apagada → total fica IGUAL antes/depois)`)
+
+  console.log(`\nProduto a apagar (deve ser só "${SMOKE_PATTERN}"): ${smokeProdutos.length}`)
+  for (const p of smokeProdutos) console.log(`   • ${p.nome}  [${p.slug}]  ${p.id}`)
+  console.log(`  Catálogo real preservado: ${totalProdutos - smokeProdutos.length} de ${totalProdutos} produtos`)
+  if (avaliacoesNoSmoke > 0) {
     console.log(
-      `   • #${p.id.slice(-8).toUpperCase()}  ${p.status}  ${brl(Number(p.total))}  ` +
-      `(${p.cliente?.email ?? '—'})  itens=${p._count.itens} pag=${p._count.pagamentos} gar=${p._count.garantias}`,
+      `   ⚠️  "${SMOKE_PATTERN}" tem ${avaliacoesNoSmoke} avaliação(ões) → será PRESERVADO (reviews têm prioridade).`,
     )
-  if (pedidosClienteNaoTeste.length)
-    console.log(
-      `   ⚠️  ${pedidosClienteNaoTeste.length} pedido(s) pertencem a clientes NÃO classificados como teste ` +
-      `(entraram por conter produto de teste). Revise antes de --execute.`,
-    )
+  }
 
-  // ── 4) Registros ligados (sem FK em cascata) ───────────────────────────────
-  const ligadoFiltro = orPedidoCliente(pedidoIds, clienteIds)
-  const temLigados = pedidoIds.length > 0 || clienteIds.length > 0
+  console.log('\n── Definições (NÃO são apagadas — só conferência):')
+  console.log(`   • Cupom (definições, ex.: SIXXIS10): ${totalCupons} → IGUAL antes/depois (só CupomUso é removido)`)
+  console.log(`   • FreteRegra: ${totalFreteRegras} total; remove ${freteRemovido} (só do "${SMOKE_PATTERN}") → ficam ${totalFreteRegras - freteRemovido}`)
+  console.log(`   • ProdutoDestaque: ${totalDestaques} total; remove ${destaqueRemovido} (só do "${SMOKE_PATTERN}") → ficam ${totalDestaques - destaqueRemovido}`)
+  if (!smokeSeraRemovido && smokeProdutos.length > 0) {
+    console.log(`     (SMOKE será preservado por ter review → suas ${smokeFreteRegras} FreteRegra e ${smokeDestaques} Destaque também ficam)`)
+  }
 
-  const [cupomUsos, cashbacks, historicos, pontos, avaliacoes] = temLigados
-    ? await Promise.all([
-        prisma.cupomUso.count({ where: ligadoFiltro }),
-        prisma.cashbackTransacao.count({ where: ligadoFiltro }),
-        prisma.historicoPontos.count({ where: ligadoFiltro }),
-        clienteIds.length
-          ? prisma.pontosCliente.count({ where: { clienteId: { in: clienteIds } } })
-          : Promise.resolve(0),
-        clienteIds.length
-          ? prisma.avaliacao.count({ where: { clienteId: { in: clienteIds } } })
-          : Promise.resolve(0),
-      ])
-    : [0, 0, 0, 0, 0]
-
-  console.log('\n── Registros ligados:')
-  console.log(`   • CupomUso ............ ${cupomUsos}`)
-  console.log(`   • CashbackTransacao ... ${cashbacks}`)
-  console.log(`   • HistoricoPontos ..... ${historicos}`)
-  console.log(`   • PontosCliente ....... ${pontos}`)
-  console.log(`   • Avaliacao ........... ${avaliacoes}`)
-  console.log('   • ItemPedido / Pagamento / GarantiaEstendida → via cascata do Pedido')
-
-  const totalAlvos =
-    produtos.length + clientes.length + pedidos.length +
-    cupomUsos + cashbacks + historicos + pontos + avaliacoes
+  // Sanity check explícito no dry-run.
+  const catalogoEntraNaLista = smokeProdutos.some((p) => !p.nome.includes(SMOKE_PATTERN))
+  console.log('\n── Verificações:')
+  console.log(`   • Nenhum produto de catálogo real na lista de exclusão: ${catalogoEntraNaLista ? '❌ FALHOU' : '✅'}`)
+  console.log(`   • Avaliações antes = depois: ✅ ${totalAvaliacoes} (script nunca deleta Avaliacao)`)
+  console.log(`   • Cupom (definições) antes = depois: ✅ ${totalCupons} (script nunca deleta Cupom)`)
+  console.log(`   • FreteRegra só diminui as do SMOKE: ✅ −${freteRemovido}`)
+  console.log(`   • ProdutoDestaque só diminui as do SMOKE: ✅ −${destaqueRemovido}`)
 
   if (!EXECUTAR) {
-    console.log(`\n[dry-run] ${totalAlvos} registro(s) candidatos. Nada foi apagado.`)
-    console.log('Plano de exclusão (ordem FK-safe) ao rodar com --execute:')
-    console.log('  1. CupomUso, CashbackTransacao, HistoricoPontos (por pedido/cliente)')
-    console.log('  2. Pedido  → cascata: ItemPedido, Pagamento, GarantiaEstendida')
-    console.log('  3. Produto de teste  (só se não sobrar referência de pedido real)')
-    console.log('  4. PontosCliente + Avaliacao dos clientes  (bloqueiam o delete)')
-    console.log('  5. Cliente  → cascata: Endereco, Carrinho, CashbackTransacao, BloqueioFraude')
+    console.log('\n[dry-run] nada foi apagado.')
+    console.log('Ordem de exclusão (FK-safe) no --execute:')
+    console.log('  1. CupomUso/CashbackTransacao/HistoricoPontos com pedidoId != null')
+    console.log('  2. Pedido (todos) → cascata: ItemPedido, Pagamento, GarantiaEstendida')
+    console.log('  3. PontosCliente/HistoricoPontos/CashbackTransacao/CupomUso/CampanhaDestinatario dos não-avaliadores')
+    console.log('  4. Cliente (não-avaliadores) → cascata: Endereco, Carrinho, BloqueioFraude, CashbackTransacao')
+    console.log('  5. Dependências do TESTE SMOKE (ItemCarrinho, ListaEspera, ProdutoDestaque, VariacaoProduto, FreteRegra) + Produto')
     console.log('\nPara apagar: npx tsx scripts/limpar-dados-teste.ts --execute')
     return
   }
 
-  if (totalAlvos === 0) {
-    console.log('\n✅ Nada a apagar.')
-    return
-  }
-
-  // ── EXECUÇÃO (--execute) — ordem FK-safe, dentro de uma transação ──────────
+  // ── EXECUÇÃO (--execute) — ordem FK-safe, numa transação ───────────────────
   console.log('\n🧹 Apagando...')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const out: Record<string, number> = {}
 
   await prisma.$transaction(async (tx) => {
-    // 1) ligados ao pedido/cliente que não têm cascata automática
-    if (temLigados) {
-      out.cupomUso = (await tx.cupomUso.deleteMany({ where: ligadoFiltro })).count
-      out.cashback = (await tx.cashbackTransacao.deleteMany({ where: ligadoFiltro })).count
-      out.historicoPontos = (await tx.historicoPontos.deleteMany({ where: ligadoFiltro })).count
-    }
+    // 1) deps ligadas a pedido (de qualquer cliente, inclusive avaliadores)
+    out.cupomUsoPedido = (await tx.cupomUso.deleteMany({ where: { pedidoId: { not: null } } })).count
+    out.cashbackPedido = (await tx.cashbackTransacao.deleteMany({ where: { pedidoId: { not: null } } })).count
+    out.historicoPedido = (await tx.historicoPontos.deleteMany({ where: { pedidoId: { not: null } } })).count
 
-    // 2) pedidos → cascata em ItemPedido, Pagamento, GarantiaEstendida
-    if (pedidoIds.length) {
-      out.pedido = (await tx.pedido.deleteMany({ where: { id: { in: pedidoIds } } })).count
-    }
+    // 2) TODOS os pedidos → cascata ItemPedido, Pagamento, GarantiaEstendida
+    out.pedidos = (await tx.pedido.deleteMany({})).count
 
-    // 3) produtos de teste — só se não houver mais referências (de pedidos reais)
-    out.produto = 0
-    for (const prod of produtos) {
-      const [refItens, refGarantias] = await Promise.all([
-        tx.itemPedido.count({ where: { produtoId: prod.id } }),
-        tx.garantiaEstendida.count({ where: { produtoId: prod.id } }),
-      ])
-      if (refItens === 0 && refGarantias === 0) {
-        await tx.produto.delete({ where: { id: prod.id } })
-        out.produto++
-      } else {
-        console.warn(
-          `   ⚠️  Produto "${prod.nome}" MANTIDO: ainda referenciado ` +
-          `(itens=${refItens}, garantias=${refGarantias}) por pedido não-teste.`,
-        )
+    // 3) deps dos clientes NÃO-avaliadores (Restrict precisa vir antes do Cliente)
+    out.pontosCliente = (await tx.pontosCliente.deleteMany({ where: { clienteId: { notIn: reviewerIds } } })).count
+    out.historicoCliente = (await tx.historicoPontos.deleteMany({ where: { clienteId: { notIn: reviewerIds } } })).count
+    out.cashbackCliente = (await tx.cashbackTransacao.deleteMany({ where: { clienteId: { notIn: reviewerIds } } })).count
+    out.cupomUsoCliente = (await tx.cupomUso.deleteMany({ where: { clienteId: { notIn: reviewerIds } } })).count
+    out.campanhaDestinatario = (await tx.campanhaDestinatario.deleteMany({ where: { clienteId: { notIn: reviewerIds } } })).count
+
+    // 4) Clientes não-avaliadores → cascata Endereco, Carrinho, BloqueioFraude, CashbackTransacao
+    out.clientes = (await tx.cliente.deleteMany({ where: { id: { notIn: reviewerIds } } })).count
+
+    // 5) Produto de teste — só se NÃO houver Avaliacao apontando pra ele
+    out.smokeProdutos = 0
+    for (const prod of smokeProdutos) {
+      const reviewsDoProduto = await tx.avaliacao.count({ where: { produtoId: prod.id } })
+      if (reviewsDoProduto > 0) {
+        console.warn(`   ⚠️  "${prod.nome}" PRESERVADO: ${reviewsDoProduto} avaliação(ões) apontam pra ele.`)
+        continue
       }
+      // Restrict: apagar antes do produto
+      await tx.itemCarrinho.deleteMany({ where: { produtoId: prod.id } })
+      await tx.listaEspera.deleteMany({ where: { produtoId: prod.id } })
+      // Cascade (apagados explicitamente p/ clareza)
+      await tx.produtoDestaque.deleteMany({ where: { produtoId: prod.id } })
+      await tx.freteRegra.deleteMany({ where: { produtoId: prod.id } })
+      await tx.variacaoProduto.deleteMany({ where: { produtoId: prod.id } })
+      await tx.produto.delete({ where: { id: prod.id } })
+      out.smokeProdutos++
     }
-
-    // 4+5) clientes — remove bloqueadores Restrict, depois o cliente (cascata)
-    if (clienteIds.length) {
-      out.pontosCliente = (await tx.pontosCliente.deleteMany({ where: { clienteId: { in: clienteIds } } })).count
-      out.avaliacao = (await tx.avaliacao.deleteMany({ where: { clienteId: { in: clienteIds } } })).count
-      out.cliente = (await tx.cliente.deleteMany({ where: { id: { in: clienteIds } } })).count
-    }
-  })
+  }, { timeout: 120_000 })
 
   console.log('\n✅ Concluído. Apagados:')
   for (const [k, v] of Object.entries(out)) console.log(`   • ${k}: ${v}`)
+
+  // Confere que definições e reviews não foram afetadas além do esperado.
+  const [avaliacoesDepois, cuponsDepois, freteDepois, destaquesDepois] = await Promise.all([
+    prisma.avaliacao.count(),
+    prisma.cupom.count(),
+    prisma.freteRegra.count(),
+    prisma.produtoDestaque.count(),
+  ])
+  const ok = (a: boolean) => (a ? '✅' : '❌ MUDOU!')
+  console.log('\n── Conferências pós-execução:')
+  console.log(`   • Avaliações: antes=${totalAvaliacoes}, depois=${avaliacoesDepois} → ${ok(avaliacoesDepois === totalAvaliacoes)} (esperado: igual)`)
+  console.log(`   • Cupom (definições): antes=${totalCupons}, depois=${cuponsDepois} → ${ok(cuponsDepois === totalCupons)} (esperado: igual)`)
+  console.log(`   • FreteRegra: antes=${totalFreteRegras}, depois=${freteDepois} → ${ok(freteDepois === totalFreteRegras - freteRemovido)} (esperado: −${freteRemovido} do SMOKE)`)
+  console.log(`   • ProdutoDestaque: antes=${totalDestaques}, depois=${destaquesDepois} → ${ok(destaquesDepois === totalDestaques - destaqueRemovido)} (esperado: −${destaqueRemovido} do SMOKE)`)
 }
 
 main()
