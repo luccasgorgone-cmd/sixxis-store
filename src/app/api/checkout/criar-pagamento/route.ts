@@ -9,6 +9,7 @@ import { isStatusPendente } from '@/lib/pedido-status'
 import { creditarCashback } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
+import { rateLimit, getClientIp } from '@/lib/ratelimit'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -38,6 +39,15 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
+  // Rate-limit por cliente (degrada graciosamente sem Upstash configurado).
+  const rl = await rateLimit('criar-pagamento', session.user.id ?? getClientIp(req))
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de pagamento. Aguarde alguns minutos.' },
+      { status: 429 },
+    )
   }
 
   const body = await req.json().catch(() => null)

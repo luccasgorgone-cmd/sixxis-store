@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { rateLimit, getClientIp } from '@/lib/ratelimit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 // CPF e telefone são coletados/validados no checkout, não no cadastro.
 const cadastroSchema = z.object({
@@ -11,7 +13,26 @@ const cadastroSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request)
+  const rl = await rateLimit('cadastro', ip)
+  if (!rl.success) {
+    return Response.json(
+      { error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' },
+      { status: 429 },
+    )
+  }
+
   const body = await request.json()
+
+  // Verificação anti-robô (degrada graciosamente sem TURNSTILE_SECRET_KEY).
+  const okBot = await verifyTurnstile(body?.turnstileToken, ip)
+  if (!okBot) {
+    return Response.json(
+      { error: 'Verificação anti-robô falhou. Recarregue a página e tente novamente.' },
+      { status: 403 },
+    )
+  }
+
   const parsed = cadastroSchema.safeParse(body)
   if (!parsed.success) {
     return Response.json({ error: 'Dados inválidos' }, { status: 400 })

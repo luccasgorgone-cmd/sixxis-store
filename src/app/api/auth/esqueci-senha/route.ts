@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { gerarResetToken } from '@/lib/reset-token'
 import { enviarEmailResetSenha } from '@/lib/email'
+import { rateLimit, getClientIp } from '@/lib/ratelimit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,10 +18,28 @@ function respostaGenerica() {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => null) as { email?: string } | null
+  const ip = getClientIp(req)
+  const rl = await rateLimit('esqueci-senha', ip)
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' },
+      { status: 429 },
+    )
+  }
+
+  const body = await req.json().catch(() => null) as { email?: string; turnstileToken?: string } | null
   const email = body?.email?.trim().toLowerCase()
   if (!email) {
     return NextResponse.json({ error: 'Informe um e-mail.' }, { status: 400 })
+  }
+
+  // Verificação anti-robô (degrada graciosamente sem TURNSTILE_SECRET_KEY).
+  const okBot = await verifyTurnstile(body?.turnstileToken, ip)
+  if (!okBot) {
+    return NextResponse.json(
+      { error: 'Verificação anti-robô falhou. Recarregue a página e tente novamente.' },
+      { status: 403 },
+    )
   }
 
   try {

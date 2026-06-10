@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, User, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
+import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/security/TurnstileWidget'
 
 // CPF e telefone NÃO são pedidos no cadastro — são coletados/validados no checkout.
 const cadastroSchema = z.object({
@@ -27,6 +28,7 @@ export default function CadastroPage() {
   const [erro, setErro] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const [mostrarConfirmar, setMostrarConfirmar] = useState(false)
+  const [tsToken, setTsToken] = useState('')
 
   const {
     register,
@@ -39,7 +41,7 @@ export default function CadastroPage() {
     const res = await fetch('/api/auth/cadastro', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, turnstileToken: tsToken }),
     })
     if (!res.ok) {
       const body = await res.json()
@@ -171,9 +173,11 @@ export default function CadastroPage() {
               </div>
             )}
 
+            <TurnstileWidget onVerify={setTsToken} className="flex justify-center pt-1" />
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (TURNSTILE_ENABLED && !tsToken)}
               className="w-full flex items-center justify-center gap-2 font-extrabold text-white py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
               style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}
             >

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
+import TurnstileWidget, { TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/security/TurnstileWidget'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -21,6 +22,8 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const [erro, setErro] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
+  const [tsToken, setTsToken] = useState('')
+  const tsRef = useRef<TurnstileHandle>(null)
 
   useEffect(() => {
     if (searchParams.get('error')) {
@@ -39,10 +42,15 @@ export default function LoginPage() {
     const res = await signIn('credentials', {
       email: data.email,
       password: data.senha,
+      turnstileToken: tsToken,
       redirect: false,
     })
     if (res?.error) {
       setErro('Email ou senha inválidos.')
+      // O token Turnstile é single-use; após uma falha, reseta p/ um novo
+      // desafio na próxima tentativa (degradação graciosa: no-op se desligado).
+      setTsToken('')
+      tsRef.current?.reset()
     } else {
       router.push('/')
     }
@@ -142,9 +150,11 @@ export default function LoginPage() {
               </div>
             )}
 
+            <TurnstileWidget ref={tsRef} onVerify={setTsToken} className="flex justify-center pt-1" />
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (TURNSTILE_ENABLED && !tsToken)}
               className="w-full flex items-center justify-center gap-2 font-extrabold text-white py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
               style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}
             >

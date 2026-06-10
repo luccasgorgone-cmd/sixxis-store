@@ -4,6 +4,8 @@ import Google from 'next-auth/providers/google'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { rateLimit, getClientIp } from '@/lib/ratelimit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -31,8 +33,25 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Senha', type: 'password' },
+        turnstileToken: { label: 'Turnstile', type: 'text' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
+        // Rate-limit por IP + verificação anti-robô. Ambos degradam graciosamente
+        // (sem Upstash/Turnstile configurados, não bloqueiam). Lançar Error aqui
+        // faz o NextAuth devolver erro p/ a tela de login.
+        const ip = getClientIp(request)
+        const rl = await rateLimit('login', ip)
+        if (!rl.success) {
+          throw new Error('Muitas tentativas de login. Aguarde alguns minutos e tente novamente.')
+        }
+        const okBot = await verifyTurnstile(
+          typeof credentials?.turnstileToken === 'string' ? credentials.turnstileToken : null,
+          ip,
+        )
+        if (!okBot) {
+          throw new Error('Verificação anti-robô falhou. Recarregue a página e tente novamente.')
+        }
+
         const parsed = loginSchema.safeParse(credentials)
         if (!parsed.success) return null
 

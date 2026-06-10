@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { avaliarCupom } from '@/lib/cupom'
+import { rateLimit, getClientIp } from '@/lib/ratelimit'
 
 export async function POST(request: NextRequest) {
+  const rl = await rateLimit('validar-cupom', getClientIp(request))
+  if (!rl.success) {
+    return NextResponse.json(
+      { valido: false, erro: 'Muitas tentativas. Aguarde um momento.' },
+      { status: 429 },
+    )
+  }
+
   const { codigo, total } = await request.json()
 
   if (!codigo) return NextResponse.json({ valido: false, erro: 'Código obrigatório' })

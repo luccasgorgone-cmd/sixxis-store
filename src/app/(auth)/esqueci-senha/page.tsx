@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Mail, ArrowRight, ArrowLeft, CheckCircle, ShieldCheck } from 'lucide-react'
+import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/security/TurnstileWidget'
 
 export default function EsqueciSenhaPage() {
   const [email, setEmail] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
   const [erro, setErro] = useState('')
+  const [tsToken, setTsToken] = useState('')
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -19,7 +21,7 @@ export default function EsqueciSenhaPage() {
       const res = await fetch('/api/auth/esqueci-senha', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email: email.trim() }),
+        body:    JSON.stringify({ email: email.trim(), turnstileToken: tsToken }),
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({}))
@@ -94,9 +96,11 @@ export default function EsqueciSenhaPage() {
                   </div>
                 )}
 
+                <TurnstileWidget onVerify={setTsToken} className="flex justify-center pt-1" />
+
                 <button
                   type="submit"
-                  disabled={enviando}
+                  disabled={enviando || (TURNSTILE_ENABLED && !tsToken)}
                   className="w-full flex items-center justify-center gap-2 font-extrabold text-white py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
                   style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}
                 >
