@@ -12,6 +12,7 @@ import {
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
 import { useSession } from 'next-auth/react'
 import { logout } from '@/lib/logout'
+import { trackSearch } from '@/lib/analytics/events'
 import { useCarrinho, useTotalItens } from '@/hooks/useCarrinho'
 import { useScrollHeader } from '@/hooks/useScrollHeader'
 
@@ -66,7 +67,7 @@ function SearchBar({ className = '' }: { className?: string }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const q = query.trim()
-    if (q) { setAberto(false); router.push(`/produtos?q=${encodeURIComponent(q)}`); setQuery('') }
+    if (q) { trackSearch(q); setAberto(false); router.push(`/produtos?q=${encodeURIComponent(q)}`); setQuery('') }
   }
 
   return (

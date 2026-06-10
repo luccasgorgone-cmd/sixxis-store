@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    if (tipo === 'compra' && valor) {
+    if (tipo === 'purchase' && valor) {
       const agora = new Date()
       const hora = agora.getHours()
       const diaSemana = agora.getDay()

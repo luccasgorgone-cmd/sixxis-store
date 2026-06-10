@@ -35,6 +35,27 @@ export function gerarSessaoId(): string {
   return `sid_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
 }
 
+// ── Sessão no client (cookie único sixxis_sid) ────────────────────────────────
+// Fonte única do id de sessão usada por TrackingProvider, eventos de e-commerce
+// (events.ts) e pelo registro de consentimento. Sem localStorage.
+export function lerSidClient(): string {
+  if (typeof document === 'undefined') return ''
+  return document.cookie.split(';')
+    .find(c => c.trim().startsWith(COOKIE_SESSION + '='))
+    ?.split('=')[1]?.trim() || ''
+}
+
+export function obterSidClient(): string {
+  if (typeof document === 'undefined') return ''
+  let sid = lerSidClient()
+  if (!sid) {
+    sid = gerarSessaoId()
+    const expires = new Date(Date.now() + 864e5).toUTCString()
+    document.cookie = `${COOKIE_SESSION}=${sid};expires=${expires};path=/;SameSite=Lax`
+  }
+  return sid
+}
+
 export function extrairUTMs(url: string) {
   try {
     const u = new URL(url)

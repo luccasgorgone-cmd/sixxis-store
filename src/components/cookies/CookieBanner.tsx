@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Shield, ChevronDown, ChevronUp, X } from 'lucide-react'
 import { gravarConsentClient, CONSENT_EVENT } from '@/lib/consent'
+import { obterSidClient } from '@/lib/tracking'
 
 interface ConsentState {
   necessarios: boolean
@@ -10,26 +11,18 @@ interface ConsentState {
   marketing: boolean
 }
 
-const CONSENT_KEY = 'sixxis_cookie_consent'
-const SESSION_KEY = 'sixxis_session_id'
-
-function getSessionId(): string {
-  let id = localStorage.getItem(SESSION_KEY)
-  if (!id) {
-    id = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
-    localStorage.setItem(SESSION_KEY, id)
-  }
-  return id
+// Já decidiu? Presença do cookie real de consentimento (sixxis_consent) — fonte
+// única, sem localStorage.
+function jaDecidiu(): boolean {
+  if (typeof document === 'undefined') return false
+  return /(?:^|;\s*)sixxis_consent=/.test(document.cookie)
 }
 
 async function salvarConsentimento(consent: ConsentState) {
-  const sessionId = getSessionId()
+  // Sessão unificada no cookie sixxis_sid (mesma de TrackingProvider/eventos).
+  const sessionId = obterSidClient()
   const categorias = { analytics: consent.analiticos, marketing: consent.marketing }
   const aceitou = consent.analiticos || consent.marketing
-  localStorage.setItem(
-    CONSENT_KEY,
-    JSON.stringify({ aceitou, categorias, sessionId, timestamp: Date.now() }),
-  )
 
   // (2) Cookie real de consentimento — lido pelos gates de servidor e client.
   gravarConsentClient({ analytics: consent.analiticos, marketing: consent.marketing })
@@ -69,16 +62,11 @@ export default function CookieBanner() {
   })
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(CONSENT_KEY)
-      if (!saved) {
-        // Delay para não interferir com LCP
-        const t = setTimeout(() => setVisivel(true), 800)
-        return () => clearTimeout(t)
-      }
-    } catch {
-      setVisivel(true)
-    }
+    // Mostra o banner só se ainda não houver decisão (cookie sixxis_consent).
+    if (jaDecidiu()) return
+    // Delay para não interferir com LCP
+    const t = setTimeout(() => setVisivel(true), 800)
+    return () => clearTimeout(t)
   }, [])
 
   if (!visivel) return null

@@ -16,6 +16,9 @@ export async function POST(req: NextRequest) {
       'desconhecido'
     const userAgent = req.headers.get('user-agent') || ''
 
+    // Registro LGPD (alimenta o widget Cookies/LGPD do painel). O Sistema B
+    // (ClienteInsight) foi aposentado — visitantes/dispositivos agora vêm de
+    // SessaoVisitante (Sistema A), populado pelo /api/tracking.
     await prisma.cookieConsent.create({
       data: {
         sessionId,
@@ -23,26 +26,6 @@ export async function POST(req: NextRequest) {
         userAgent,
         aceitou: Boolean(aceitou),
         categorias: JSON.stringify(categorias || {}),
-      },
-    })
-
-    const dispositivo = /mobile/i.test(userAgent)
-      ? 'mobile'
-      : /tablet|ipad/i.test(userAgent)
-        ? 'tablet'
-        : 'desktop'
-
-    await prisma.clienteInsight.upsert({
-      where: { sessionId },
-      update: {
-        ultimaVisita: new Date(),
-        cookieCategs: JSON.stringify(categorias || {}),
-        dispositivo,
-      },
-      create: {
-        sessionId,
-        dispositivo,
-        cookieCategs: JSON.stringify(categorias || {}),
       },
     })
 

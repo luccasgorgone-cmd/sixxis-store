@@ -1,5 +1,5 @@
-// Visits are now tracked via /api/analytics/evento with tipo=page_view.
-// This stub exists for backwards compatibility.
+// DEPRECATED — Sistema B aposentado. Visitas/eventos agora via /api/tracking
+// (Sistema A). Stub mantido por compatibilidade; não grava nada.
 export async function POST() {
   return Response.json({ ok: true })
 }

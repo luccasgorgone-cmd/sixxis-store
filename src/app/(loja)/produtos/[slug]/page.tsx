@@ -250,6 +250,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
       <ViewItemTracker
         produto={{
           item_id: produto.id,
+          item_slug: produto.slug,
           item_name: produto.nome,
           item_category: produto.categoria ?? undefined,
           item_brand: 'Sixxis',
