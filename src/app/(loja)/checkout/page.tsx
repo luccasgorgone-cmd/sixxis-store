@@ -402,11 +402,17 @@ function CheckoutContent() {
   }, [sessionStatus, session?.user])
 
   // Prefill de CPF/telefone (e fallback de nome/email) do Cliente no banco.
-  // Roda 1x ao virar 'authenticated'. Aplica máscaras e preserva edicoes
-  // do user (so preenche se o campo ainda estiver vazio).
+  //
+  // IMPORTANTE: NÃO depende do session.user.id do cliente (useSession). No
+  // /checkout o useSession pode demorar/não popular, e antes isso travava todo
+  // o prefill (usuário logado caía com os 4 campos vazios). A rota
+  // /api/conta/perfil resolve a sessão via cookie httpOnly no servidor (auth())
+  // e busca o Cliente pelo id da sessão — fonte confiável mesmo sem session no
+  // cliente. Mesmo padrão server-authoritative do <EnderecosSalvos/>.
+  //
+  // Aplica máscaras e preserva edições do user (só preenche campo ainda vazio).
   useEffect(() => {
-    if (sessionStatus !== 'authenticated' || perfilFetched) return
-    if (!session?.user?.id) return
+    if (perfilFetched) return
 
     let cancelled = false
     setPerfilLoading(true)
@@ -416,25 +422,29 @@ function CheckoutContent() {
       .then((data: { cliente?: { nome?: string | null; email?: string | null; cpf?: string | null; telefone?: string | null } }) => {
         if (cancelled) return
         const c = data.cliente
-        if (!c) return
-        setIdent(prev => ({
-          nome:     prev.nome     || (c.nome     ?? ''),
-          email:    prev.email    || (c.email    ?? ''),
-          cpf:      prev.cpf      || (c.cpf      ? maskCpf(c.cpf)      : ''),
-          telefone: prev.telefone || (c.telefone ? maskTel(c.telefone) : ''),
-        }))
+        if (c) {
+          setIdent(prev => ({
+            nome:     prev.nome     || (c.nome     ?? ''),
+            email:    prev.email    || (c.email    ?? ''),
+            cpf:      prev.cpf      || (c.cpf      ? maskCpf(c.cpf)      : ''),
+            telefone: prev.telefone || (c.telefone ? maskTel(c.telefone) : ''),
+          }))
+        }
+        setPerfilFetched(true) // sucesso: não busca de novo
       })
       .catch(err => {
-        console.error('[checkout] erro ao carregar perfil:', err)
+        // 401 = visitante sem sessão (checkout convidado): silencioso e mantém
+        // perfilFetched=false p/ tentar de novo se o cliente logar no meio do
+        // checkout (sessionStatus muda → efeito re-roda).
+        if (err !== 401) console.error('[checkout] erro ao carregar perfil:', err)
       })
       .finally(() => {
         if (cancelled) return
         setPerfilLoading(false)
-        setPerfilFetched(true)
       })
 
     return () => { cancelled = true }
-  }, [sessionStatus, session?.user?.id, perfilFetched])
+  }, [sessionStatus, perfilFetched])
 
   const [end, setEnd] = useState<EnderecoData>({
     cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '',
