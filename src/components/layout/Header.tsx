@@ -7,10 +7,11 @@ import { useRouter } from 'next/navigation'
 import {
   Tag, Truck, MapPin, Search, User, ShoppingCart,
   Menu, X, Navigation, Clock, Mail, Store, HelpCircle,
-  Wind, Fan, Bike, Info, Phone, UserPlus,
+  Wind, Fan, Bike, Info, Phone, UserPlus, ShoppingBag, LogOut, ChevronDown,
 } from 'lucide-react'
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { logout } from '@/lib/logout'
 import { useCarrinho, useTotalItens } from '@/hooks/useCarrinho'
 import { useScrollHeader } from '@/hooks/useScrollHeader'
 
@@ -122,6 +123,105 @@ function SearchBar({ className = '' }: { className?: string }) {
           >
             <Search size={12} /> Ver todos para &ldquo;{query}&rdquo;
           </Link>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Menu da conta (desktop) ───────────────────────────────────────────────────
+// Logado: botão que abre dropdown com Minha conta / Meus pedidos / Sair.
+// Deslogado: link direto pro /login. Acessível por teclado (Escape fecha, foco
+// vai pro 1º item ao abrir) e fecha ao clicar fora.
+function AccountMenu({ logado, nome }: { logado: boolean; nome: string }) {
+  const [open, setOpen] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const firstItemRef = useRef<HTMLAnchorElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [open])
+
+  // Move o foco pro 1º item quando o menu abre (navegação por teclado).
+  useEffect(() => {
+    if (open) firstItemRef.current?.focus()
+  }, [open])
+
+  const triggerClasses =
+    'flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-xl transition min-w-[60px]'
+
+  if (!logado) {
+    return (
+      <Link href="/login" className={triggerClasses}>
+        <User size={21} strokeWidth={1.5} />
+        <span className="text-[11px] font-medium leading-none">Entrar</span>
+      </Link>
+    )
+  }
+
+  const itemClasses =
+    'flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0f2e2b] transition-colors outline-none focus:bg-gray-50'
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={triggerClasses}
+      >
+        <User size={21} strokeWidth={1.5} />
+        <span className="text-[11px] font-medium leading-none flex items-center gap-0.5">
+          {nome || 'Conta'}
+          <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        </span>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Menu da conta"
+          className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 py-1"
+        >
+          <Link
+            ref={firstItemRef}
+            role="menuitem"
+            href="/minha-conta"
+            onClick={() => setOpen(false)}
+            className={itemClasses}
+          >
+            <User size={16} className="text-gray-400" /> Minha conta
+          </Link>
+          <Link
+            role="menuitem"
+            href="/minha-conta/pedidos"
+            onClick={() => setOpen(false)}
+            className={itemClasses}
+          >
+            <ShoppingBag size={16} className="text-gray-400" /> Meus pedidos
+          </Link>
+          <div className="my-1 border-t border-gray-100" />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => { setOpen(false); logout() }}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors outline-none focus:bg-red-50 text-left"
+          >
+            <LogOut size={16} /> Sair
+          </button>
         </div>
       )}
     </div>
@@ -450,16 +550,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
                 <div className="w-px h-8 bg-white/20 hidden lg:block mx-1" />
 
-                {/* Entrar / Conta */}
-                <Link
-                  href={logado ? '/minha-conta' : '/login'}
-                  className="flex flex-col items-center gap-0.5 px-3 py-2 text-white hover:text-[#3cbfb3] hover:bg-white/10 rounded-xl transition min-w-[60px]"
-                >
-                  <User size={21} strokeWidth={1.5} />
-                  <span className="text-[11px] font-medium leading-none">
-                    {logado ? (session?.user?.name?.split(' ')[0] || 'Conta') : 'Entrar'}
-                  </span>
-                </Link>
+                {/* Entrar / Conta — logado vira dropdown com Sair (acessível) */}
+                <AccountMenu logado={logado} nome={session?.user?.name?.split(' ')[0] || ''} />
 
                 <div className="w-px h-8 bg-white/20 mx-1" />
 
@@ -731,7 +823,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                 Minha Conta
               </Link>
               <button
-                onClick={() => { signOut({ callbackUrl: '/' }); setDrawerOpen(false) }}
+                onClick={() => { logout(); setDrawerOpen(false) }}
                 className="flex items-center gap-4 px-6 py-4 text-base font-semibold text-red-300 hover:text-red-200 hover:bg-white/10 w-full text-left transition-colors border-b border-white/5"
               >
                 Sair

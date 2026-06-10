@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import {
-  LayoutDashboard, ShoppingBag, Gift, User, MapPin, Shield, ShieldCheck,
+  LayoutDashboard, ShoppingBag, Gift, User, MapPin, Shield, ShieldCheck, LogOut,
 } from 'lucide-react'
+import { logout } from '@/lib/logout'
 import { AvatarComArco } from '@/components/ui/AvatarComArco'
 import { IconeNivel } from '@/components/ui/NivelIcons'
 import { calcularNivel, NIVEIS_CONFIG, getNivelSVGString, normalizarNivel } from '@/lib/avatares'
@@ -229,6 +230,19 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
                   </Link>
                 )
               })}
+
+              {/* Saída clara na própria página de conta — reusa o logout único */}
+              <div className="my-1 border-t border-gray-100" />
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group text-red-600 hover:bg-red-50"
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-red-100 text-red-500 group-hover:bg-red-200 transition-all">
+                  <LogOut size={15} strokeWidth={2} />
+                </div>
+                <span className="text-sm flex-1 font-medium text-left">Sair</span>
+              </button>
             </div>
 
             {/* Card de nível */}
