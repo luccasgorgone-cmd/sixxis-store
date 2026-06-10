@@ -25,6 +25,7 @@ export default function BotaoAdicionarCarrinho({ produto }: Props) {
     })
     trackAddToCart({
       item_id: produto.id,
+      item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria ?? undefined,
       item_brand: 'Sixxis',

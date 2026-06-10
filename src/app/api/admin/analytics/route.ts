@@ -26,9 +26,18 @@ export async function GET(req: NextRequest) {
 
   try {
     const periodo = Math.min(90, Math.max(1, parseInt(req.nextUrl.searchParams.get('periodo') || '7')))
-    const dataInicio = new Date()
-    dataInicio.setDate(dataInicio.getDate() - periodo)
-    dataInicio.setHours(0, 0, 0, 0)
+    // Janela alinhada a America/Sao_Paulo (UTC-3, sem horário de verão no BR).
+    // 'Hoje' (periodo=1) = [início de hoje BRT, agora]; N dias = início de
+    // (hoje − (N−1)) BRT. Antes usávamos o fuso do servidor (UTC no Railway):
+    // o início do dia caía em 00:00 UTC, e eventos da noite BRT (ex.: 20:30Z =
+    // 17:30 BRT) ficavam fora do 'Hoje' por off-by-one de fuso. Calculamos o
+    // início do dia em BRT e convertemos de volta ao instante UTC (createdAt
+    // é gravado em UTC).
+    const BRT_OFFSET_MS = 3 * 60 * 60 * 1000
+    const inicioBrt = new Date(Date.now() - BRT_OFFSET_MS)
+    inicioBrt.setUTCHours(0, 0, 0, 0)
+    inicioBrt.setUTCDate(inicioBrt.getUTCDate() - (periodo - 1))
+    const dataInicio = new Date(inicioBrt.getTime() + BRT_OFFSET_MS)
 
     // ── Sistema A: SessaoVisitante (visitantes/dispositivos) + EventoTracking
     //    (eventos/carrinhos/compras/páginas/buscas/produtos). Cookies via

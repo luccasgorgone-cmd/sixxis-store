@@ -61,6 +61,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
     })
     trackAddToCart({
       item_id: produto.id,
+      item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria,
       item_brand: 'Sixxis',
@@ -85,6 +86,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
     })
     trackAddToCart({
       item_id: produto.id,
+      item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria,
       item_brand: 'Sixxis',
