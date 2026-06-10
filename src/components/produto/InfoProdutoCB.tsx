@@ -134,7 +134,6 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
   const [adicionado, setAdicionado] = useState(false)
   const [parcelasAberto, setParcelasAberto] = useState(false)
   const [quantidade, setQuantidade] = useState(1)
-  const [visitantes, setVisitantes] = useState(0)
   const [modalVariacaoAberto, setModalVariacaoAberto] = useState(false)
 
   // On mount, sync the default color selection with the gallery
@@ -144,20 +143,6 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    // Fake visitor counter — seed from productId for consistency per page
-    const seed = produto.id.charCodeAt(0) + produto.id.charCodeAt(1)
-    const base = 3 + (seed % 11)
-    setVisitantes(base)
-    const t = setInterval(() => {
-      setVisitantes(v => {
-        const delta = Math.random() < 0.4 ? (Math.random() < 0.5 ? 1 : -1) : 0
-        return Math.max(2, Math.min(18, v + delta))
-      })
-    }, 7000)
-    return () => clearInterval(t)
-  }, [produto.id])
 
   const precoBase = produto.precoPromocional ?? produto.preco
   const precoAtual = variacaoSelecionada?.preco ?? precoBase
@@ -326,16 +311,6 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           Tire sua dúvida
         </a>
       </div>
-
-      {/* Visitantes ao vivo */}
-      {visitantes > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, minHeight: 0 }}>
-          <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 0 2px rgba(34,197,94,0.25)', flexShrink: 0 }} />
-          <span style={{ fontSize: 12, color: '#6b7280', lineHeight: 1, minHeight: 0 }}>
-            <strong style={{ color: '#111827' }}>{visitantes}</strong> pessoas estão vendo este produto agora
-          </span>
-        </div>
-      )}
 
       {/* Badge desconto */}
       {desconto > 0 && (
