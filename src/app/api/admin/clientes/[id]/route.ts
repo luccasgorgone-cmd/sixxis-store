@@ -89,6 +89,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
     },
   })
 
+  // Histórico append-only de bloqueio/desbloqueio (tela "Bloqueios & Fraudes").
+  // Só quando a ação MEXE no bloqueio — não a cada update de perfil/cashback.
+  // Best-effort: nunca quebra a operação principal.
+  if (bloqueado !== undefined) {
+    try {
+      await prisma.bloqueioFraude.create({
+        data: {
+          clienteId: id,
+          acao:      bloqueado ? 'bloqueio' : 'desbloqueio',
+          motivo:    bloqueado ? (motivoBloqueio || 'Bloqueado pelo admin') : 'Desbloqueado pelo admin',
+          criadoPor: 'admin',
+        },
+      })
+    } catch (e) {
+      console.error('[clientes:block] falha ao registrar histórico:', e)
+    }
+  }
+
   const action = bloqueado === true ? 'cliente.block'
                : bloqueado === false ? 'cliente.unblock'
                : 'cliente.update'

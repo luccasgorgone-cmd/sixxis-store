@@ -528,11 +528,16 @@ model CashbackTransacao {
   @@index([createdAt])
 }
 
+// Log append-only de bloqueios/desbloqueios de cliente (auditoria da tela
+// "Bloqueios & Fraudes"). 1 registro por ação, gravado no MESMO endpoint que
+// seta Cliente.bloqueado (PATCH /api/admin/clientes/[id]). O estado vigente vive
+// em Cliente.bloqueado; esta tabela é só o histórico.
 model BloqueioFraude {
   id        String   @id @default(cuid())
   clienteId String
+  acao      String   @default("bloqueio") // "bloqueio" | "desbloqueio"
   motivo    String
-  criadoPor String? // admin email
+  criadoPor String? // identidade do admin (genérico "admin" — token não traz e-mail)
   createdAt DateTime @default(now())
   cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
