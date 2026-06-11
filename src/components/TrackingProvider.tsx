@@ -4,8 +4,23 @@ import { createContext, useContext, useEffect, useCallback, useRef } from 'react
 import { usePathname } from 'next/navigation'
 import { COOKIE_SESSION, gerarSessaoId, detectDispositivo } from '@/lib/tracking'
 import { analyticsConsentido, CONSENT_EVENT } from '@/lib/consent'
+import { ADMIN_BASE, ADMIN_INTERNAL } from '@/lib/admin-path'
 
 type TrackData = Record<string, unknown>
+
+// Não rastreia navegação do admin (path configurável via NEXT_PUBLIC_ADMIN_PATH —
+// nada hardcoded), nem rotas internas/assets. Evita inflar visitantes/eventos e
+// vazar páginas do painel em "top páginas"/feed. Tracking de cliente intacto.
+function pathExcluido(path: string): boolean {
+  if (!path) return false
+  return (
+    path === ADMIN_BASE || path.startsWith(ADMIN_BASE + '/') ||
+    path === ADMIN_INTERNAL || path.startsWith(ADMIN_INTERNAL + '/') ||
+    path.startsWith('/api') ||
+    path.startsWith('/_next') ||
+    /\.[a-z0-9]+$/i.test(path) // assets com extensão (.ico, .png, .css, .js, .txt, .xml…)
+  )
+}
 
 interface TrackingCtx {
   track: (tipo: string, dados?: TrackData) => void
@@ -69,6 +84,7 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
 
   const track = useCallback((tipo: string, dados?: TrackData) => {
     if (typeof window === 'undefined') return
+    if (pathExcluido(window.location.pathname)) return // não rastreia admin/api/assets
     if (!garantirSessao()) return // sem consentimento → não rastreia
     const sid = sessaoIdRef.current
     if (!sid) return
@@ -92,6 +108,7 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
   const enviarHeartbeat = useCallback(() => {
     if (typeof document === 'undefined') return
     if (document.visibilityState !== 'visible') return
+    if (pathExcluido(window.location.pathname)) return // não conta presença no admin
     if (!garantirSessao()) return
     const sid = sessaoIdRef.current
     if (!sid) return
