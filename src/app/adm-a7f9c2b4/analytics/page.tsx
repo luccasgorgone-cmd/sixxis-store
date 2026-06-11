@@ -9,7 +9,7 @@ import {
   Users, Eye, ShoppingCart, TrendingUp, Monitor,
   Cookie, Search, RefreshCw, AlertCircle, Package,
   ShoppingBag, XCircle, DollarSign, Zap, Activity,
-  Smartphone, Tablet,
+  Smartphone, Tablet, Globe, Server, Info, Compass, MapPin,
 } from 'lucide-react'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -118,7 +118,24 @@ interface Presenca {
   feed: FeedEvento[]
 }
 
-type TabId = 'visao-geral' | 'carrinho' | 'visitantes' | 'eventos'
+type TabId = 'visao-geral' | 'carrinho' | 'visitantes' | 'eventos' | 'trafego'
+
+// Tráfego Bruto (Fase 4C) — todos os visitantes, anônimo/cookieless.
+interface TrafegoData {
+  ok: boolean
+  periodo: number
+  pageviews: number
+  unicos: number
+  geoAtivo: boolean
+  topPaginas: { path: string; count: number }[]
+  dispositivos: { nome: string; count: number }[]
+  browsers: { nome: string; count: number }[]
+  sistemas: { nome: string; count: number }[]
+  referrers: { nome: string; count: number }[]
+  paises: { nome: string; count: number }[]
+  horarios: { hora: number; count: number }[]
+  porDia: { dia: string; count: number }[]
+}
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
@@ -131,6 +148,8 @@ export default function AdminAnalyticsPage() {
   const [ultimaAtt,    setUltimaAtt]    = useState<Date | null>(null)
   const [autoRefresh,  setAutoRefresh]  = useState(false)
   const [presenca,     setPresenca]     = useState<Presenca | null>(null)
+  const [trafego,      setTrafego]      = useState<TrafegoData | null>(null)
+  const [trafegoLoad,  setTrafegoLoad]  = useState(false)
 
   const buscar = useCallback(async (p: string) => {
     setLoading(true); setErro('')
@@ -146,6 +165,21 @@ export default function AdminAnalyticsPage() {
   }, [])
 
   useEffect(() => { buscar(periodo) }, [periodo, buscar])
+
+  // Tráfego Bruto — busca sob demanda (só quando a aba está ativa) e quando o
+  // período muda. Endpoint separado pra não pesar o /api/admin/analytics.
+  const buscarTrafego = useCallback(async (p: string) => {
+    setTrafegoLoad(true)
+    try {
+      const res = await fetch(`/api/admin/analytics/trafego?periodo=${p}`, { cache: 'no-store' })
+      const data = await res.json()
+      if (res.ok && data.ok) setTrafego(data as TrafegoData)
+    } catch { /* noop */ } finally { setTrafegoLoad(false) }
+  }, [])
+
+  useEffect(() => {
+    if (tab === 'trafego') buscarTrafego(periodo)
+  }, [tab, periodo, buscarTrafego])
 
   useEffect(() => {
     if (!autoRefresh) return
@@ -206,6 +240,7 @@ export default function AdminAnalyticsPage() {
     { id: 'carrinho',    label: 'Carrinhos' },
     { id: 'visitantes',  label: 'Visitantes' },
     { id: 'eventos',     label: 'Páginas & Buscas' },
+    { id: 'trafego',     label: 'Tráfego Bruto' },
   ]
 
   // Visitas por dia para ComposedChart
@@ -920,6 +955,231 @@ export default function AdminAnalyticsPage() {
                   </div>
                 </div>
               ) : null}
+            </div>
+          )}
+
+          {/* ── Tab: Tráfego Bruto (Fase 4C) ──────────────────────────────────── */}
+          {tab === 'trafego' && (
+            <div className="space-y-4">
+              {/* Nota explicativa bruto x comportamental */}
+              <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                <Info size={16} className="text-blue-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-blue-900 leading-relaxed">
+                  <strong>Tráfego bruto = TODOS os visitantes</strong> (inclusive quem recusou cookies).
+                  Medição <strong>server-side, sem cookie e sem dados pessoais</strong> (interesse legítimo, LGPD).
+                  Visitantes únicos são <strong>aproximados</strong> (hash anônimo IP+navegador, rotacionado por dia — não rastreia entre dias).
+                  As demais abas mostram o comportamental detalhado de quem <strong>consentiu</strong>.
+                </p>
+              </div>
+
+              {trafegoLoad && !trafego ? (
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse" />)}
+                </div>
+              ) : !trafego ? (
+                <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-sm text-gray-400">
+                  Sem dados de tráfego ainda. Os hits aparecem assim que houver visitas.
+                </div>
+              ) : (
+                <>
+                  {/* KPIs */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {[
+                      { icon: Eye,   label: 'Pageviews (exato)',        val: trafego.pageviews.toLocaleString('pt-BR'), cor: TIFFANY },
+                      { icon: Users, label: 'Visitantes únicos (≈)',    val: `≈ ${trafego.unicos.toLocaleString('pt-BR')}`, cor: '#2563eb' },
+                      { icon: Server, label: 'Período',                  val: `${trafego.periodo}d`, cor: DARK },
+                    ].map(k => {
+                      const Icon = k.icon
+                      return (
+                        <div key={k.label} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                          <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2.5" style={{ backgroundColor: k.cor + '15' }}>
+                            <Icon size={15} style={{ color: k.cor }} />
+                          </div>
+                          <p className="text-xl font-extrabold text-gray-900 leading-none">{k.val}</p>
+                          <p className="text-[10px] text-gray-500 mt-1 leading-tight">{k.label}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Pageviews por dia */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <h2 className="text-sm font-black text-gray-900 mb-1">Pageviews por Dia</h2>
+                    <p className="text-xs text-gray-400 mb-4">Tráfego bruto diário (todos os visitantes)</p>
+                    {trafego.porDia.length === 0 ? (
+                      <div className="flex items-center justify-center h-32 text-gray-300 text-sm">Sem dados</div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={trafego.porDia.map(d => ({
+                          dia: new Date(d.dia + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }),
+                          Pageviews: d.count,
+                        }))} margin={{ top:5, right:10, left:-10, bottom:5 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                          <XAxis dataKey="dia" tick={{ fontSize:11, fill:'#9ca3af' }} tickLine={false} axisLine={false}
+                            interval={trafego.porDia.length > 15 ? Math.floor(trafego.porDia.length / 8) : 0} />
+                          <YAxis tick={{ fontSize:11, fill:'#9ca3af' }} tickLine={false} axisLine={false} />
+                          <Tooltip content={<TTip moeda={false} />} />
+                          <Bar dataKey="Pageviews" fill={TIFFANY} radius={[4,4,0,0]} maxBarSize={26} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
+
+                  {/* Top páginas */}
+                  <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                    <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+                      <Eye size={14} className="text-[#3cbfb3]" /> Páginas Mais Acessadas (bruto)
+                    </h3>
+                    {trafego.topPaginas.length === 0 ? (
+                      <p className="text-xs text-gray-400 text-center py-6">Sem dados.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {trafego.topPaginas.slice(0, 15).map((p, i) => {
+                          const maxV = trafego.topPaginas[0]?.count || 1
+                          const pct = Math.round((p.count / maxV) * 100)
+                          return (
+                            <div key={p.path} className="flex items-center gap-3">
+                              <span className="text-[10px] font-bold text-gray-400 w-4 shrink-0">{i + 1}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-600 truncate font-mono">{p.path}</p>
+                                <div className="h-1.5 bg-gray-100 rounded-full mt-0.5 overflow-hidden">
+                                  <div className="h-full rounded-full" style={{ width:`${pct}%`, backgroundColor:TIFFANY }} />
+                                </div>
+                              </div>
+                              <span className="text-xs font-extrabold text-gray-900 shrink-0">{p.count}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Splits: Dispositivos / Navegadores / Sistemas */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {[
+                      { titulo: 'Dispositivos', icon: Monitor, dados: trafego.dispositivos, cor: '#3cbfb3' },
+                      { titulo: 'Navegadores',  icon: Compass, dados: trafego.browsers,     cor: '#2563eb' },
+                      { titulo: 'Sistemas',     icon: Server,  dados: trafego.sistemas,     cor: '#8b5cf6' },
+                    ].map(grp => {
+                      const Icon = grp.icon
+                      const total = grp.dados.reduce((s, d) => s + d.count, 0)
+                      return (
+                        <div key={grp.titulo} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                          <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+                            <Icon size={14} className="text-[#3cbfb3]" /> {grp.titulo}
+                          </h3>
+                          {grp.dados.length === 0 ? (
+                            <p className="text-xs text-gray-400 py-4">Sem dados.</p>
+                          ) : (
+                            <div className="space-y-2.5">
+                              {grp.dados.slice(0, 6).map(d => {
+                                const pct = total > 0 ? Math.round((d.count / total) * 100) : 0
+                                return (
+                                  <div key={d.nome}>
+                                    <div className="flex justify-between text-xs mb-1">
+                                      <span className="text-gray-600 font-medium truncate">{d.nome}</span>
+                                      <span className="font-bold text-gray-900 shrink-0 ml-2">{pct}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                                      <div className="h-1.5 rounded-full" style={{ width:`${pct}%`, backgroundColor: grp.cor }} />
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Origens + Geografia */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Top origens / referrers */}
+                    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                      <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+                        <Globe size={14} className="text-[#3cbfb3]" /> Origens (referrers externos)
+                      </h3>
+                      {trafego.referrers.length === 0 ? (
+                        <p className="text-xs text-gray-400 text-center py-6">
+                          Nenhuma origem externa registrada — tráfego direto ou interno.
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {trafego.referrers.slice(0, 12).map((rf, i) => {
+                            const maxV = trafego.referrers[0]?.count || 1
+                            const pct = Math.round((rf.count / maxV) * 100)
+                            return (
+                              <div key={rf.nome} className="flex items-center gap-3">
+                                <span className="text-[10px] font-bold text-gray-400 w-4 shrink-0">{i + 1}</span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs text-gray-700 truncate">{rf.nome}</p>
+                                  <div className="h-1.5 bg-gray-100 rounded-full mt-0.5 overflow-hidden">
+                                    <div className="h-full rounded-full" style={{ width:`${pct}%`, backgroundColor:'#8b5cf6' }} />
+                                  </div>
+                                </div>
+                                <span className="text-xs font-extrabold text-gray-900 shrink-0">{rf.count}</span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Geografia */}
+                    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                      <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+                        <MapPin size={14} className="text-[#3cbfb3]" /> Geografia (país)
+                      </h3>
+                      {!trafego.geoAtivo ? (
+                        <div className="flex flex-col items-center justify-center text-center py-8 px-2">
+                          <Globe size={28} className="text-gray-200 mb-3" />
+                          <p className="text-xs font-semibold text-gray-500">Geolocalização não configurada</p>
+                          <p className="text-[11px] text-gray-400 mt-1 leading-snug">
+                            Cloudflare está em DNS-only (sem header de país). Pendente integrar
+                            <strong> MaxMind GeoLite2</strong> (base local) para derivar país do IP. <em>TODO</em>.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {trafego.paises.slice(0, 12).map((pais, i) => {
+                            const maxV = trafego.paises[0]?.count || 1
+                            const pct = Math.round((pais.count / maxV) * 100)
+                            return (
+                              <div key={pais.nome} className="flex items-center gap-3">
+                                <span className="text-[10px] font-bold text-gray-400 w-4 shrink-0">{i + 1}</span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs text-gray-700 truncate font-mono uppercase">{pais.nome}</p>
+                                  <div className="h-1.5 bg-gray-100 rounded-full mt-0.5 overflow-hidden">
+                                    <div className="h-full rounded-full" style={{ width:`${pct}%`, backgroundColor:TIFFANY }} />
+                                  </div>
+                                </div>
+                                <span className="text-xs font-extrabold text-gray-900 shrink-0">{pais.count}</span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Horários de pico */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <h2 className="text-sm font-black text-gray-900 mb-1">Horários de Pico (bruto)</h2>
+                    <p className="text-xs text-gray-400 mb-4">Distribuição de pageviews por hora (BRT)</p>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <BarChart data={trafego.horarios.map(h => ({ hora: `${String(h.hora).padStart(2,'0')}h`, Pageviews: h.count }))}
+                        margin={{ top:0, right:0, left:-20, bottom:0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                        <XAxis dataKey="hora" tick={{ fontSize:9, fill:'#9ca3af' }} tickLine={false} axisLine={false} interval={2} />
+                        <YAxis tick={{ fontSize:10, fill:'#9ca3af' }} tickLine={false} axisLine={false} />
+                        <Tooltip content={<TTip moeda={false} />} />
+                        <Bar dataKey="Pageviews" fill={DARK} radius={[4,4,0,0]} maxBarSize={20} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </>

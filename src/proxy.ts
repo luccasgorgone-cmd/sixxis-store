@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { NextFetchEvent } from 'next/server'
 import { ADMIN_BASE, ADMIN_INTERNAL, ADMIN_PATH_CHANGED } from '@/lib/admin-path'
 
 // Next 16 → proxy.ts substitui o antigo middleware.ts. Roda no Edge Runtime,
@@ -53,7 +54,60 @@ function clientePrecisaLogin(pathname: string): boolean {
   return CLIENTE_PROTEGIDAS.some((re) => re.test(pathname))
 }
 
-export function proxy(request: NextRequest) {
+// ── TRÁFEGO BRUTO (Fase 4C) ──────────────────────────────────────────────────
+// Mede pageviews de TODOS os visitantes server-side, sem cookie e sem PII. O
+// proxy só detecta o pageview e delega a escrita (hash/DB) ao route Node
+// /api/trafego/coletar via waitUntil — o proxy fica leve e runtime-agnóstico.
+const TRAFEGO_SECRET = process.env.TRAFEGO_INTERNAL_SECRET || 'sixxis-trafego-internal-v1'
+
+// Conta cada NAVEGAÇÃO de página: carga de documento (hard load) OU navegação
+// soft do App Router (RSC, com `_rsc` na query) — nunca prefetch, asset, api ou
+// admin. Sem isso, num SPA quase só a 1ª carga contaria (subcontagem grosseira).
+function ehPageview(request: NextRequest, pathname: string): boolean {
+  if (request.method !== 'GET') return false
+  // Prefetch nunca conta (link hover/viewport prefetch do Next).
+  if (request.headers.get('next-router-prefetch')) return false
+  if (request.headers.get('purpose') === 'prefetch') return false
+  if (request.headers.get('sec-purpose')?.includes('prefetch')) return false
+  // Excluir api, _next, admin/painel e arquivos com extensão (assets soltos).
+  if (pathname.startsWith('/api') || pathname.startsWith('/_next')) return false
+  if (isAdminRoute(pathname)) return false
+  if (/\.[a-z0-9]+$/i.test(pathname)) return false
+  // Documento (hard load / sem header em browsers antigos) ou navegação RSC real.
+  const dest = request.headers.get('sec-fetch-dest')
+  const ehDocumento = !dest || dest === 'document'
+  const ehRscNavegacao = request.nextUrl.searchParams.has('_rsc')
+  return ehDocumento || ehRscNavegacao
+}
+
+function registrarTrafego(request: NextRequest, pathname: string, event?: NextFetchEvent) {
+  try {
+    const url = new URL('/api/trafego/coletar', request.url)
+    const host = (request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '')
+      .split(',')[0].trim()
+    const payload = JSON.stringify({
+      path: pathname,
+      ua:   request.headers.get('user-agent') ?? '',
+      ref:  request.headers.get('referer') ?? '',
+      ip:   request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? '',
+      // Geo = TODO: aproveita país só se algum proxy de borda já mandar o header.
+      pais: request.headers.get('cf-ipcountry') ?? request.headers.get('x-vercel-ip-country') ?? '',
+      host,
+    })
+    const p = fetch(url, {
+      method:  'POST',
+      headers: { 'content-type': 'application/json', 'x-tb-secret': TRAFEGO_SECRET },
+      body:    payload,
+      keepalive: true,
+    }).catch(() => {})
+    // waitUntil mantém a função viva até o POST completar (sem atrasar a resposta).
+    if (event?.waitUntil) event.waitUntil(p)
+  } catch {
+    /* telemetria best-effort: nunca quebra a navegação */
+  }
+}
+
+export function proxy(request: NextRequest, event?: NextFetchEvent) {
   // ─── Host canônico: apex → www ─────────────────────────────────────────────
   // Garante que TODO o fluxo OAuth (inclui /api/auth/*) ocorra só em www, para os
   // cookies de state/pkce/csrf serem setados e lidos no MESMO host — corrige o
@@ -71,6 +125,13 @@ export function proxy(request: NextRequest) {
   }
 
   const { pathname, searchParams } = request.nextUrl
+
+  // ─── Tráfego Bruto (Fase 4C) ───────────────────────────────────────────────
+  // Registra o pageview anônimo de TODA navegação de página (independe de
+  // consentimento; admin/api/assets ficam de fora). Fire-and-forget.
+  if (ehPageview(request, pathname)) {
+    registrarTrafego(request, pathname, event)
+  }
 
   // ─── Path interno bloqueado (Sprint rotação) ───────────────────────────────
   // Quando o ADMIN_PATH público foi rotacionado, o acesso direto à pasta interna

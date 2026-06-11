@@ -847,3 +847,34 @@ model CarrinhoCliente {
 
   @@index([status, atualizadoEm])
 }
+
+// Tráfego Bruto (Fase 4C) — medição SERVER-SIDE, COOKIELESS e SEM PII de TODOS os
+// visitantes (inclusive quem NÃO aceita cookies). Roda por interesse legítimo
+// (LGPD): nenhum cookie, nenhum identificador no dispositivo, NUNCA grava IP cru.
+//
+// 1 linha por pageview de documento (GET). Coletado no proxy.ts (fire-and-forget
+// via waitUntil → /api/trafego/coletar). Bots óbvios são descartados por User-Agent.
+//
+// visitorHash = sha256(IP + UserAgent + dia + SALT) → irreversível e ROTACIONADO
+// por dia (o `dia` entra no hash). Permite contar "únicos do dia" de forma
+// APROXIMADA sem nunca persistir o IP nem correlacionar entre dias.
+//
+// dia/hora em fuso BRT (America/Sao_Paulo), iguais à régua do resto do analytics.
+model TrafegoBruto {
+  id          String   @id @default(cuid())
+  dia         String   @db.Char(10)        // YYYY-MM-DD (BRT)
+  hora        Int                          // 0-23 (BRT)
+  path        String   @db.VarChar(512)
+  dispositivo String?  @db.VarChar(20)     // mobile | desktop | tablet | outros
+  browser     String?  @db.VarChar(40)
+  os          String?  @db.VarChar(40)
+  pais        String?  @db.VarChar(2)       // ISO-3166 (geo = TODO; null por ora)
+  referrer    String?  @db.VarChar(255)     // host da origem externa (sem query)
+  visitorHash String   @db.Char(64)
+  createdAt   DateTime @default(now())
+
+  @@index([dia])
+  @@index([dia, hora])
+  @@index([path])
+  @@index([visitorHash])
+}

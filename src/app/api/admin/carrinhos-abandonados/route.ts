@@ -19,7 +19,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const sp = req.nextUrl.searchParams
-    const horas = Math.max(0, Number(sp.get('horas') ?? HORAS_PADRAO) || HORAS_PADRAO)
+    // Honra ?horas=0 (todos os ativos com itens). Só cai no default se ausente/NaN.
+    const horasRaw = Number(sp.get('horas'))
+    const horas = sp.get('horas') !== null && !Number.isNaN(horasRaw) ? Math.max(0, horasRaw) : HORAS_PADRAO
     const ordenar = sp.get('ordenar') === 'valor' ? 'valor' : 'recencia'
     const limite = new Date(Date.now() - horas * 60 * 60 * 1000)
 
