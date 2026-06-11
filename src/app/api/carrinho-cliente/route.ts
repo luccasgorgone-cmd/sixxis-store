@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
+import { isClienteBloqueado } from '@/lib/cliente-bloqueio'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +33,11 @@ export async function POST(request: NextRequest) {
   const clienteId = session?.user?.id ?? null
   // Sem cliente logado: não persistimos (carrinho anônimo intocado).
   if (!clienteId) return Response.json({ skipped: true })
+
+  // Cliente bloqueado: não espelha carrinho (ação sensível de conta).
+  if (await isClienteBloqueado(clienteId)) {
+    return Response.json({ skipped: true, bloqueado: true })
+  }
 
   const body = await request.json().catch(() => null)
   const parsed = bodySchema.safeParse(body)

@@ -10,6 +10,7 @@ import { creditarCashback } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
+import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -39,6 +40,11 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
+  // Gate autoritativo: cliente bloqueado não gera pagamento.
+  if (await isClienteBloqueado(session.user.id)) {
+    return NextResponse.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
   }
 
   // Rate-limit por cliente (degrada graciosamente sem Upstash configurado).

@@ -6,6 +6,7 @@ import { criarGarantiasPedido } from '@/lib/garantia'
 import { resolverFrete } from '@/lib/frete-resolver'
 import { resgatarCashback } from '@/lib/cashback'
 import { avaliarCupom } from '@/lib/cupom'
+import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 
 const itemSchema = z.object({
   produtoId:    z.string(),
@@ -81,6 +82,11 @@ export async function POST(request: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) {
     return Response.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
+  // Gate autoritativo: cliente bloqueado NÃO cria pedido, mesmo que a UI deixe.
+  if (await isClienteBloqueado(session.user.id)) {
+    return Response.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
   }
 
   const body = await request.json()

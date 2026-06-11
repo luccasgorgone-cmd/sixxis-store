@@ -26,6 +26,11 @@ export default function LoginPage() {
   const tsRef = useRef<TurnstileHandle>(null)
 
   useEffect(() => {
+    // Conta bloqueada (OAuth recusado ou sessão derrubada) → mensagem clara.
+    if (searchParams.get('bloqueado') === '1') {
+      setErro('Conta bloqueada. Entre em contato com o suporte.')
+      return
+    }
     if (searchParams.get('error')) {
       setErro('Não foi possível entrar com Google. Tente novamente ou use seu email e senha.')
     }
@@ -46,7 +51,11 @@ export default function LoginPage() {
       redirect: false,
     })
     if (res?.error) {
-      setErro('Email ou senha inválidos.')
+      // `code` distingue conta bloqueada de credencial inválida (ver auth.ts).
+      const bloqueada = res.code === 'conta_bloqueada'
+      setErro(bloqueada
+        ? 'Conta bloqueada. Entre em contato com o suporte.'
+        : 'Email ou senha inválidos.')
       // O token Turnstile é single-use; após uma falha, reseta p/ um novo
       // desafio na próxima tentativa (degradação graciosa: no-op se desligado).
       setTsToken('')

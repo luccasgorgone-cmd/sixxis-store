@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth'
+import NextAuth, { CredentialsSignin } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import { prisma } from '@/lib/prisma'
@@ -6,6 +6,16 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
 import { verifyTurnstile } from '@/lib/turnstile'
+
+// Erro de credenciais com `code` próprio — permite o front diferenciar conta
+// bloqueada de senha errada (signIn devolve o code) sem vazar a existência da conta.
+class ContaBloqueadaError extends CredentialsSignin {
+  code = 'conta_bloqueada'
+}
+
+// Re-checa o bloqueio no JWT no máximo a cada N ms — derruba sessão JÁ emitida
+// (cliente bloqueado depois de logar) sem martelar o banco a cada request.
+const REVALIDA_BLOQUEIO_MS = 60_000
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -66,7 +76,7 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
         const senhaValida = await bcrypt.compare(parsed.data.password, cliente.senha)
         if (!senhaValida) return null
 
-        if (cliente.bloqueado) throw new Error('Conta bloqueada. Entre em contato com o suporte.')
+        if (cliente.bloqueado) throw new ContaBloqueadaError()
 
         return { id: cliente.id, name: cliente.nome, email: cliente.email }
       },
@@ -130,7 +140,8 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
           return true
         }
 
-        if (existente.bloqueado) return false
+        // OAuth de conta bloqueada: redireciona pro login com mensagem clara.
+        if (existente.bloqueado) return '/login?bloqueado=1'
 
         if (user.image && user.image !== existente.avatar) {
           await prisma.cliente.update({
@@ -147,12 +158,34 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
         return false
       }
     },
-    jwt({ token, user }) {
-      if (user) token.id = user.id
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.bloqueado = false
+        token.checadoEm = Date.now()
+      }
+      // Revalida o bloqueio periodicamente para invalidar sessões já emitidas
+      // (cliente bloqueado DEPOIS de logar). Throttle por timestamp no token.
+      const agora = Date.now()
+      const ultimo = typeof token.checadoEm === 'number' ? token.checadoEm : 0
+      if (token.id && agora - ultimo > REVALIDA_BLOQUEIO_MS) {
+        try {
+          const c = await prisma.cliente.findUnique({
+            where: { id: token.id as string },
+            select: { bloqueado: true },
+          })
+          token.bloqueado = !!c?.bloqueado
+          token.checadoEm = agora
+        } catch {
+          // Falha de DB: mantém o último valor conhecido (não derruba por engano).
+        }
+      }
       return token
     },
     session({ session, token }) {
       if (token.id) session.user.id = token.id as string
+      // Exposto p/ o guard client derrubar a sessão e p/ a UI reagir.
+      session.user.bloqueado = !!token.bloqueado
       return session
     },
   },
