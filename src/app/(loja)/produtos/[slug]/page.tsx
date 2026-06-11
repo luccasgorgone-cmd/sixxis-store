@@ -192,6 +192,12 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   )?.valor
   const consumoW = specPotencia ? parseInt(specPotencia.replace(/[^0-9]/g, '')) : 0
 
+  // Área de cobertura (m²) das specs — fallback do AC escalado p/ modelos fora da tabela.
+  const specCobertura = especificacoes.find(s =>
+    s.label?.toLowerCase().includes('cobertura') || s.label?.toLowerCase().includes('área') || s.label?.toLowerCase().includes('area')
+  )?.valor
+  const coberturaM2 = specCobertura ? parseInt(specCobertura.replace(/[^0-9]/g, '')) : 0
+
   const produtoParaInfo = {
     id: produto.id,
     nome: produto.nome,
@@ -309,7 +315,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         <DescricaoRica descricao={produto.descricao} />
 
         {/* Bloco de economia (Faça as contas) */}
-        <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} />
+        <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} coberturaM2={coberturaM2} />
 
         {/* Stats — contadores +1M / 12 meses / 100% */}
         <section className="mt-12 mb-10">

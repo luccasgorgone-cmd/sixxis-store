@@ -2,16 +2,23 @@
 import { useState, useRef, useEffect } from 'react'
 import { TrendingDown, AirVent, Wind, Zap, BadgeCheck } from 'lucide-react'
 
-// ── Dados de AC por modelo (consumo real em watts)
-const AC_POR_MODELO: Record<string, { btu: number; consumoW: number; descricaoAC: string }> = {
-  'm45':         { btu: 9000,  consumoW: 870,  descricaoAC: '9.000 BTU Inverter' },
-  'sx040':       { btu: 9000,  consumoW: 870,  descricaoAC: '9.000 BTU Inverter' },
-  'sx060':       { btu: 12000, consumoW: 1100, descricaoAC: '12.000 BTU Inverter' },
-  'sx070':       { btu: 12000, consumoW: 1100, descricaoAC: '12.000 BTU Inverter' },
-  'sx100':       { btu: 15000, consumoW: 1400, descricaoAC: '15.000 BTU Inverter' },
-  'sx120':       { btu: 18000, consumoW: 1700, descricaoAC: '18.000 BTU Inverter' },
-  'sx200-trend': { btu: 22000, consumoW: 2000, descricaoAC: '22.000 BTU Inverter' },
-  'sx200-prime': { btu: 30000, consumoW: 2800, descricaoAC: '30.000 BTU Inverter' },
+// ── AC por modelo, ESCALADO pela área que o climatizador cobre ────────────────
+// O AC fixo de 9.000 BTU subestimava os modelos grandes (fazia o climatizador
+// parecer caro). Aqui cada modelo é comparado com o setup de ar-condicionado que
+// climatizaria a MESMA área. `wattsAC` é a soma do consumo desse setup; o custo é
+// SEMPRE derivado dos watts (não hardcoded). Chave = slug canônico.
+//   area: m² cobertos · wattsAC: consumo do setup AC · setup: texto do subtítulo
+//   descricaoAC: rótulo curto do AC nos cards/tabela
+const AC_POR_MODELO: Record<string, { area: number; wattsAC: number; setup: string; descricaoAC: string }> = {
+  'm45-trend':   { area: 45,  wattsAC: 2900,  setup: '1× ar-condicionado 30.000 BTU',                 descricaoAC: '1× 30.000 BTU' },
+  'sx040':       { area: 45,  wattsAC: 2900,  setup: '1× ar-condicionado 30.000 BTU',                 descricaoAC: '1× 30.000 BTU' },
+  'sx060-prime': { area: 60,  wattsAC: 3770,  setup: '1× ar-condicionado 30.000 BTU + 1× 9.000 BTU',  descricaoAC: '30.000 + 9.000 BTU' },
+  'sx070-trend': { area: 80,  wattsAC: 4600,  setup: '2× ar-condicionado 24.000 BTU',                 descricaoAC: '2× 24.000 BTU' },
+  'sx100-trend': { area: 120, wattsAC: 6950,  setup: '2× ar-condicionado 30.000 BTU + 1× 12.000 BTU', descricaoAC: '2× 30.000 + 12.000 BTU' },
+  'sx120-prime': { area: 140, wattsAC: 8700,  setup: '3× ar-condicionado 30.000 BTU',                 descricaoAC: '3× 30.000 BTU' },
+  'sx180-trend': { area: 180, wattsAC: 11600, setup: '4× ar-condicionado 30.000 BTU',                 descricaoAC: '4× 30.000 BTU' },
+  'sx200-trend': { area: 200, wattsAC: 11600, setup: '4× ar-condicionado 30.000 BTU',                 descricaoAC: '4× 30.000 BTU' },
+  'sx200-prime': { area: 250, wattsAC: 14500, setup: '5× ar-condicionado 30.000 BTU',                 descricaoAC: '5× 30.000 BTU' },
 }
 
 // ── REGRAS DE ECONOMIA — NUNCA ALTERAR
@@ -19,16 +26,23 @@ const TARIFA = 0.85     // R$/kWh
 const HORAS_DIA = 8
 const DIAS_MES = 30
 
+// Fallback (modelo fora da tabela): dimensiona o AC pela área de cobertura.
+// 600 BTU/m², arredondado pra cima em unidades de 30.000 BTU (2.900 W cada).
+const BTU_POR_M2 = 600
+const BTU_UNIDADE = 30000
+const W_UNIDADE   = 2900
+
 function resolverChave(slug: string): string {
   const s = slug.toLowerCase()
   if (s.includes('sx200') && s.includes('prime')) return 'sx200-prime'
   if (s.includes('sx200')) return 'sx200-trend'
-  if (s.includes('sx120')) return 'sx120'
-  if (s.includes('sx100')) return 'sx100'
-  if (s.includes('sx070')) return 'sx070'
-  if (s.includes('sx060')) return 'sx060'
+  if (s.includes('sx180')) return 'sx180-trend'
+  if (s.includes('sx120')) return 'sx120-prime'
+  if (s.includes('sx100')) return 'sx100-trend'
+  if (s.includes('sx070')) return 'sx070-trend'
+  if (s.includes('sx060')) return 'sx060-prime'
   if (s.includes('sx040')) return 'sx040'
-  if (s.includes('m45'))   return 'm45'
+  if (s.includes('m45'))   return 'm45-trend'
   return ''
 }
 
@@ -37,11 +51,12 @@ const fmt = (v: number) =>
 
 interface Props {
   slug: string
-  consumoW: number   // Potência em Watts (do campo Potência, NUNCA da Vazão de Ar)
+  consumoW: number       // Potência do climatizador, em W (NUNCA a Vazão de Ar)
   preco: number
+  coberturaM2?: number   // Área de cobertura (spec) — usada no fallback
 }
 
-export function EconomiaBloco({ slug, consumoW, preco }: Props) {
+export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
   const [visivel, setVisivel] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -53,12 +68,23 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
     return () => obs.disconnect()
   }, [])
 
+  // AC da tabela (por modelo) ou, fora dela, escalado pela área de cobertura.
   const chave = resolverChave(slug)
-  const ac = AC_POR_MODELO[chave]
+  let ac = AC_POR_MODELO[chave] as { area: number; wattsAC: number; setup: string; descricaoAC: string } | undefined
+  if (!ac && coberturaM2 && coberturaM2 > 0) {
+    const unidades = Math.max(1, Math.ceil((coberturaM2 * BTU_POR_M2) / BTU_UNIDADE))
+    ac = {
+      area: coberturaM2,
+      wattsAC: unidades * W_UNIDADE,
+      setup: `${unidades}× ar-condicionado 30.000 BTU`,
+      descricaoAC: `${unidades}× 30.000 BTU`,
+    }
+  }
   if (!ac || !consumoW) return null
 
-  const custoAC      = (ac.consumoW / 1000) * HORAS_DIA * DIAS_MES * TARIFA
-  const custoProduto = (consumoW    / 1000) * HORAS_DIA * DIAS_MES * TARIFA
+  // Custos SEMPRE derivados dos watts (consistência). 240 = 8h × 30 dias.
+  const custoAC      = (ac.wattsAC / 1000) * HORAS_DIA * DIAS_MES * TARIFA
+  const custoProduto = (consumoW   / 1000) * HORAS_DIA * DIAS_MES * TARIFA
   const economiaMes  = custoAC - custoProduto
   const economiaAno  = economiaMes * 12
   const percentual   = Math.round((economiaMes / custoAC) * 100)
@@ -88,7 +114,7 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
               </h3>
             </div>
             <p className="text-[11px] sm:text-xs mt-1 leading-snug" style={{ color: '#0f2e2b', opacity: 0.75 }}>
-              Comparação real com ar-condicionado split 9.000 BTU, 8h/dia, 30 dias — tarifa R$ 0,85/kWh
+              Equivalente a {ac.setup} para climatizar {ac.area} m² · 8h/dia, 30 dias — tarifa R$ 0,85/kWh
             </p>
           </div>
           <span
@@ -122,7 +148,7 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
             <dl className="text-xs space-y-1.5">
               <div className="flex items-center justify-between">
                 <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Consumo</dt>
-                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>{ac.consumoW} W</dd>
+                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>{ac.wattsAC} W</dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / mês</dt>
@@ -190,7 +216,7 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
               <tbody>
                 <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
                   <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Consumo</td>
-                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>{ac.consumoW}W</td>
+                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>{ac.wattsAC}W</td>
                   <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>{consumoW}W</td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
@@ -236,7 +262,7 @@ export function EconomiaBloco({ slug, consumoW, preco }: Props) {
         <div className="px-4 py-2.5" style={{ borderTop: '1px solid rgba(15,46,43,0.30)', backgroundColor: 'rgba(15,46,43,0.04)' }}>
           <p className="text-[10px] leading-relaxed flex items-center gap-1.5" style={{ color: '#0f2e2b', opacity: 0.70 }}>
             <Zap size={24} strokeWidth={2} color="#0f2e2b" style={{ width: 12, height: 12, flexShrink: 0 }} />
-            Consumo AC calculado para Split Inverter {ac.descricaoAC} ({ac.consumoW}W).
+            Consumo AC calculado para {ac.setup} ({ac.wattsAC}W).
             Baseado em {HORAS_DIA}h/dia × {DIAS_MES} dias × R$ {TARIFA.toFixed(2)}/kWh (tarifa ANEEL 2024).
             Consumo real pode variar conforme uso.
           </p>
