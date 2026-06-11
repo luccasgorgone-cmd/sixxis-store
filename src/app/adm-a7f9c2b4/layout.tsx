@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import AdminLayoutSwitch from '@/components/admin/AdminLayoutSwitch'
+import NoTrack from '@/components/admin/NoTrack'
 
 export const metadata: Metadata = {
   title: {
@@ -10,5 +11,10 @@ export const metadata: Metadata = {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <AdminLayoutSwitch>{children}</AdminLayoutSwitch>
+  return (
+    <>
+      <NoTrack />
+      <AdminLayoutSwitch>{children}</AdminLayoutSwitch>
+    </>
+  )
 }

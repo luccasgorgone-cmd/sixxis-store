@@ -8,10 +8,28 @@ import { ADMIN_BASE, ADMIN_INTERNAL } from '@/lib/admin-path'
 
 type TrackData = Record<string, unknown>
 
+// Flag setada pela árvore do admin (<NoTrack/>): exclusão robusta independente do
+// NEXT_PUBLIC_ADMIN_PATH estar inlined no bundle do client.
+function noTrackAtivo(): boolean {
+  return typeof window !== 'undefined' && !!(window as unknown as { __sixxisNoTrack?: boolean }).__sixxisNoTrack
+}
+
+// Normaliza pra pathname: se vier URL completa (https://host/painel.../x), extrai
+// só o path. Sem isso, startsWith(ADMIN_BASE) falha contra a URL completa e a
+// exclusão vaza. Aceita pathname puro (no-op) ou href.
+function normalizarPath(input: string): string {
+  if (!input) return ''
+  if (input.includes('://')) {
+    try { return new URL(input).pathname } catch { return input }
+  }
+  return input
+}
+
 // Não rastreia navegação do admin (path configurável via NEXT_PUBLIC_ADMIN_PATH —
 // nada hardcoded), nem rotas internas/assets. Evita inflar visitantes/eventos e
 // vazar páginas do painel em "top páginas"/feed. Tracking de cliente intacto.
-function pathExcluido(path: string): boolean {
+function pathExcluido(input: string): boolean {
+  const path = normalizarPath(input)
   if (!path) return false
   return (
     path === ADMIN_BASE || path.startsWith(ADMIN_BASE + '/') ||
@@ -84,7 +102,9 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
 
   const track = useCallback((tipo: string, dados?: TrackData) => {
     if (typeof window === 'undefined') return
-    if (pathExcluido(window.location.pathname)) return // não rastreia admin/api/assets
+    // Decide a exclusão SEMPRE pelo pathname (mesma fonte do heartbeat).
+    const path = window.location.pathname
+    if (noTrackAtivo() || pathExcluido(path)) return // não rastreia admin/api/assets
     if (!garantirSessao()) return // sem consentimento → não rastreia
     const sid = sessaoIdRef.current
     if (!sid) return
@@ -95,7 +115,9 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({
         tipo,
         sessaoId: sid,
-        pagina: window.location.href,
+        // Grava o pathname (não a URL completa) → "Top Páginas" agrupa limpo e
+        // o feed mostra o path. UTMs ficam na SessaoVisitante.
+        pagina: path,
         ...dados,
       }),
       keepalive: true,
@@ -108,7 +130,7 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
   const enviarHeartbeat = useCallback(() => {
     if (typeof document === 'undefined') return
     if (document.visibilityState !== 'visible') return
-    if (pathExcluido(window.location.pathname)) return // não conta presença no admin
+    if (noTrackAtivo() || pathExcluido(window.location.pathname)) return // não conta presença no admin
     if (!garantirSessao()) return
     const sid = sessaoIdRef.current
     if (!sid) return
