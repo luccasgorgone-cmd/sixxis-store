@@ -71,8 +71,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
   }
 
   const data: Record<string, unknown> = {}
-  if (bloqueado  !== undefined) { data.bloqueado = bloqueado; data.bloqueadoEm = bloqueado ? new Date() : null }
-  if (motivoBloqueio !== undefined) data.motivoBloqueio = motivoBloqueio
+  if (bloqueado !== undefined) {
+    data.bloqueado   = bloqueado
+    data.bloqueadoEm = bloqueado ? new Date() : null
+    // Ao desbloquear, limpa motivo/data antigos (não deixa motivo com bloqueado=false).
+    if (!bloqueado) data.motivoBloqueio = null
+  }
+  // motivoBloqueio explícito só vale quando NÃO é um desbloqueio.
+  if (motivoBloqueio !== undefined && bloqueado !== false) data.motivoBloqueio = motivoBloqueio
   if (cashbackSaldo  !== undefined) data.cashbackSaldo  = cashbackSaldo
   if (nome           !== undefined) data.nome           = nome
   if (telefone       !== undefined) data.telefone       = telefone
