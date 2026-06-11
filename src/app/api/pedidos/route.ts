@@ -348,6 +348,19 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // ── Carrinho do cliente vira "convertido" (Fase 4A) ────────────────────────
+  // Concluiu a compra → o carrinho persistido não conta mais como abandonado.
+  // updateMany não lança se o cliente não tiver um CarrinhoCliente. Best-effort:
+  // nunca quebra a criação do pedido.
+  try {
+    await prisma.carrinhoCliente.updateMany({
+      where: { clienteId: session.user.id },
+      data:  { status: 'convertido' },
+    })
+  } catch (e) {
+    console.error('[pedidos] falha ao marcar carrinho convertido:', e)
+  }
+
   return Response.json(
     {
       pedido: { ...pedido, cashbackUsado: cashbackAplicado, total: Number(pedido.total) - cashbackAplicado },

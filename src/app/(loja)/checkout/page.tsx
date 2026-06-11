@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState, useCallback, useEffect } from 'react'
+import { Suspense, useState, useCallback, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -21,6 +21,7 @@ import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/Ender
 import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
 import { trackAddPaymentInfo } from '@/lib/analytics/events'
+import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 
@@ -384,6 +385,9 @@ function CheckoutContent() {
 
   const [etapa, setEtapa] = useState<Etapa>(1)
   const [fase, setFase] = useState<Fase>('checkout')
+  // Etapa mais avançada do funil já espelhada no servidor (CarrinhoCliente).
+  // Só envia quando AUMENTA — evita request a cada re-render.
+  const etapaMaxRef = useRef(0)
 
   const [ident, setIdent] = useState<IdentData>({ nome: '', cpf: '', email: '', telefone: '' })
   const [perfilLoading, setPerfilLoading] = useState(false)
@@ -603,6 +607,25 @@ function CheckoutContent() {
     // end.cep intencionalmente fora das deps: o gatilho é a UF, não o CEP.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [end.estado, itens.length, calcularFrete])
+
+  // ── Marca a etapa do funil no carrinho persistido do cliente LOGADO ─────────
+  // Reaproveita o estado do checkout (etapa/frete/fase) e grava a etapa MAIS
+  // avançada em CarrinhoCliente.etapaAtual. Só dispara quando a etapa aumenta.
+  // Anônimo não envia (servidor também faz no-op).
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated' || itens.length === 0) return
+    // Mapeia o estado da UI para a escala única (carrinho→pagamento).
+    let step: number = ETAPA.IDENTIFICACAO // checkout aberto = identificação à vista
+    if (fase === 'bricks' || etapa === 4) step = ETAPA.PAGAMENTO
+    else if (etapa === 3) step = ETAPA.FRETE      // garantia: frete já resolvido
+    else if (etapa === 2) {
+      step = (freteStatus === 'ok' && freteTipoSel) ? ETAPA.FRETE : ETAPA.ENDERECO
+    }
+    if (step > etapaMaxRef.current) {
+      etapaMaxRef.current = step
+      syncCarrinhoCliente(itens, step)
+    }
+  }, [sessionStatus, etapa, fase, freteStatus, freteTipoSel, itens])
 
   function handleSelecionarEnderecoSalvo(e: EnderecoSalvo) {
     setEnderecoSalvoId(e.id)

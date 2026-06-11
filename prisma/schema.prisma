@@ -41,6 +41,7 @@ model Cliente {
   pedidos               Pedido[]
   pontos                PontosCliente?
   campanhasDestinatario CampanhaDestinatario[]
+  carrinhoCliente       CarrinhoCliente?
 }
 
 model Endereco {
@@ -818,4 +819,31 @@ model Presenca {
   ultimoPing  DateTime @default(now())
 
   @@index([ultimoPing])
+}
+
+// Carrinho persistido do cliente LOGADO (Fase 4A — recuperação de abandonados).
+// Espelha o carrinho Zustand (client) no servidor sempre que o cliente
+// autenticado adiciona/remove/muda qtd ou avança etapas do checkout. NÃO toca no
+// carrinho anônimo (que segue só em localStorage / Carrinho+ItemCarrinho por
+// sessionId). 1 linha por cliente (clienteId @unique).
+//
+// status: "ativo" (carrinho em aberto) | "convertido" (virou pedido) |
+// "abandonado" NÃO é gravado — é DERIVADO no read (status=ativo + itens>0 +
+// atualizadoEm há mais de X). Sem cron.
+//
+// etapaAtual: etapa MAIS AVANÇADA já alcançada no funil (nunca regride):
+//   1 = carrinho · 2 = identificação · 3 = endereço · 4 = frete · 5 = pagamento
+model CarrinhoCliente {
+  id           String   @id @default(cuid())
+  clienteId    String   @unique
+  // [{ produtoId, slug, nome, variacao, qtd, preco }]
+  itens        Json
+  valorTotal   Float    @default(0)
+  etapaAtual   Int      @default(1)
+  status       String   @default("ativo")
+  atualizadoEm DateTime @updatedAt
+  criadoEm     DateTime @default(now())
+  cliente      Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([status, atualizadoEm])
 }
