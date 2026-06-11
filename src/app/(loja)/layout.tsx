@@ -25,13 +25,17 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
           'logo_url',
           'bg_body_url', 'bg_body_ativo', 'bg_body_size',
           'bg_body_attachment', 'bg_body_position', 'bg_body_overlay',
-          'agente_ativo',
+          'agente_ativo', 'loja_aberta', 'loja_horario',
         ],
       },
     },
   }).catch(() => [])
 
   const cfg = Object.fromEntries(cfgList.map((c) => [c.chave, c.valor]))
+
+  // Loja temporariamente fechada (config loja_aberta=false). Default: aberta.
+  const lojaFechada = cfg.loja_aberta === 'false'
+  const horarioLoja = cfg.loja_horario?.trim() || ''
 
   if (cfg.logo_url) logoUrl = cfg.logo_url
 
@@ -57,6 +61,12 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
   return (
     <LojaWallpaper wallpaperStyle={wallpaperStyle} bgAtivo={bgAtivo} bgOverlay={bgOverlay}>
       <div className="relative flex flex-col min-h-screen" style={{ zIndex: 1 }}>
+        {lojaFechada && (
+          <div className="bg-amber-500 text-[#0f2e2b] text-center text-xs sm:text-sm font-bold px-4 py-2 relative" style={{ zIndex: 50 }}>
+            Loja temporariamente fechada para novos pedidos.
+            {horarioLoja ? ` Atendimento: ${horarioLoja}.` : ''} Você pode navegar normalmente.
+          </div>
+        )}
         <Header logoUrl={logoUrl} />
         {/* Spacer: reserva o espaço do header fixed; altura real via CSS var --sixxis-header-h */}
         <div aria-hidden="true" style={{ height: 'var(--sixxis-header-h, 140px)' }} />

@@ -25,16 +25,26 @@ export default async function Footer() {
   let logoUrl        = '/logo-sixxis.png'
   let whatsappVendas = '5518997474701'
   let whatsappSuporte = '5511934102621'
+  // Defaults = valores atuais (hardcoded antes) — produção não muda até editar.
+  let instagramUrl  = 'https://instagram.com/sixxisoficial'
+  let facebookUrl   = 'https://www.facebook.com/profile.php?id=100090936724453'
+  let tagline       = 'Qualidade e inovação para seu conforto e bem estar!'
 
   try {
     const configs = await prisma.configuracao.findMany({
-      where: { chave: { in: ['logo_url', 'logo_rodape_url', 'social_whatsapp', 'social_whatsapp_suporte'] } },
+      where: { chave: { in: [
+        'logo_url', 'logo_rodape_url', 'social_whatsapp', 'social_whatsapp_suporte',
+        'social_instagram', 'social_facebook', 'rodape_tagline',
+      ] } },
     })
     const cfg = Object.fromEntries(configs.map((c) => [c.chave, c.valor]))
     if (cfg.logo_rodape_url)         logoUrl          = cfg.logo_rodape_url
     else if (cfg.logo_url)           logoUrl          = cfg.logo_url
     if (cfg.social_whatsapp)         whatsappVendas   = cfg.social_whatsapp
     if (cfg.social_whatsapp_suporte) whatsappSuporte  = cfg.social_whatsapp_suporte
+    if (cfg.social_instagram)        instagramUrl     = cfg.social_instagram
+    if (cfg.social_facebook)         facebookUrl      = cfg.social_facebook
+    if (cfg.rodape_tagline?.trim())  tagline          = cfg.rodape_tagline
   } catch {}
 
   // Formas de pagamento dinamicas (configuradas em /adm-a7f9c2b4/formas-pagamento).
@@ -71,10 +81,9 @@ export default async function Footer() {
                 style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
               />
 
-              {/* Slogan */}
+              {/* Slogan (config: rodape_tagline) */}
               <p className="text-white/65 text-xs text-center leading-relaxed mt-2 mb-5">
-                Qualidade e inovação para seu<br />
-                conforto e bem estar!
+                {tagline}
               </p>
 
               {/* BOTÕES */}
@@ -175,9 +184,9 @@ export default async function Footer() {
             <div>
               <ColTitle>Redes Sociais</ColTitle>
               <div className="flex gap-3 mb-2">
-                {/* Instagram */}
+                {/* Instagram (config: social_instagram) */}
                 <a
-                  href="https://instagram.com/sixxisoficial"
+                  href={instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
@@ -191,9 +200,9 @@ export default async function Footer() {
                   </svg>
                 </a>
 
-                {/* Facebook */}
+                {/* Facebook (config: social_facebook) */}
                 <a
-                  href="https://www.facebook.com/profile.php?id=100090936724453"
+                  href={facebookUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"

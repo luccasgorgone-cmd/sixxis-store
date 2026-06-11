@@ -31,46 +31,64 @@ export const viewport: Viewport = {
   viewportFit:   'cover',
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default:  'Sixxis Store — Climatizadores, Aspiradores e Spinning | Araçatuba SP',
-    template: '%s | Sixxis Store',
-  },
-  description:
-    'Loja oficial Sixxis em Araçatuba-SP. Climatizadores evaporativos, aspiradores sem fio e bicicletas spinning com 30 anos de qualidade. Garantia real de 12 meses. Frete para todo o Brasil.',
-  keywords: [
-    'climatizador sixxis', 'climatizador evaporativo', 'aspirador sem fio sixxis',
-    'spinning sixxis', 'sixxis araçatuba', 'loja sixxis',
-    'climatizador residencial', 'climatizador industrial',
-  ],
-  authors: [{ name: 'Sixxis Store', url: SITE_URL }],
-  creator: 'Sixxis Store',
-  publisher: 'Sixxis Store',
-  robots: {
-    index: true, follow: true,
-    googleBot: {
+// Defaults usados quando seo_title/seo_description não estão configurados.
+const SEO_TITLE_DEFAULT = 'Sixxis Store — Climatizadores, Aspiradores e Spinning | Araçatuba SP'
+const SEO_DESC_DEFAULT =
+  'Loja oficial Sixxis em Araçatuba-SP. Climatizadores evaporativos, aspiradores sem fio e bicicletas spinning com 30 anos de qualidade. Garantia real de 12 meses. Frete para todo o Brasil.'
+
+// SEO editável em Configurações da Loja (seo_title / seo_description). A imagem
+// Open Graph vem do arquivo-convenção src/app/opengraph-image.tsx (resolve o
+// 404 do antigo /og-image.jpg estático). Fallback para os padrões da loja.
+export async function generateMetadata(): Promise<Metadata> {
+  let seoTitle = SEO_TITLE_DEFAULT
+  let seoDesc  = SEO_DESC_DEFAULT
+  try {
+    const rows = await prisma.configuracao.findMany({
+      where: { chave: { in: ['seo_title', 'seo_description'] } },
+    })
+    const c = Object.fromEntries(rows.map((r) => [r.chave, r.valor]))
+    if (c.seo_title?.trim())       seoTitle = c.seo_title
+    if (c.seo_description?.trim())  seoDesc  = c.seo_description
+  } catch (err) {
+    console.error('[root-layout] seo config fetch failed:', err)
+  }
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: seoTitle, template: '%s | Sixxis Store' },
+    description: seoDesc,
+    keywords: [
+      'climatizador sixxis', 'climatizador evaporativo', 'aspirador sem fio sixxis',
+      'spinning sixxis', 'sixxis araçatuba', 'loja sixxis',
+      'climatizador residencial', 'climatizador industrial',
+    ],
+    authors: [{ name: 'Sixxis Store', url: SITE_URL }],
+    creator: 'Sixxis Store',
+    publisher: 'Sixxis Store',
+    robots: {
       index: true, follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      googleBot: {
+        index: true, follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
-  },
-  openGraph: {
-    type:        'website',
-    locale:      'pt_BR',
-    url:         SITE_URL,
-    siteName:    'Sixxis Store',
-    title:       'Sixxis Store — Climatizadores, Aspiradores e Spinning',
-    description: 'Loja oficial Sixxis em Araçatuba-SP. 30 anos de qualidade em climatização.',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Sixxis Store' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Sixxis Store — Climatizadores, Aspiradores e Spinning',
-    description: 'Loja oficial Sixxis em Araçatuba-SP. 30 anos de qualidade em climatização.',
-    images: ['/og-image.jpg'],
-  },
+    openGraph: {
+      type:        'website',
+      locale:      'pt_BR',
+      url:         SITE_URL,
+      siteName:    'Sixxis Store',
+      title:       seoTitle,
+      description: seoDesc,
+      // imagem provida por src/app/opengraph-image.tsx (file convention)
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: seoTitle,
+      description: seoDesc,
+    },
+  }
 }
 
 const schemaOrg = {

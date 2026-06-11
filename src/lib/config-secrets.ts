@@ -45,7 +45,7 @@ export function isSecretKey(chave: string): boolean {
 export const PUBLIC_CONFIG_KEYS = new Set<string>([
   // Identidade da loja
   'loja_nome', 'loja_descricao', 'loja_email', 'loja_telefone',
-  'loja_endereco', 'loja_cnpj', 'loja_horario',
+  'loja_endereco', 'loja_cnpj', 'loja_horario', 'loja_aberta',
   'logo_url', 'logo_rodape_url', 'favicon_url',
   // Cores e aparência
   'cor_principal', 'cor_principal_dark', 'cor_destaque',
@@ -58,7 +58,9 @@ export const PUBLIC_CONFIG_KEYS = new Set<string>([
   'cor_badge_oferta', 'cor_badge_novo', 'cor_badge_esgotado',
   'cor_anuncio_fundo', 'cor_anuncio_texto',
   'cor_stats_fundo', 'cor_wa_fundo', 'cor_footer_fundo',
-  'aparencia_cor_primaria', 'aparencia_cor_secundaria',
+  // aparencia_cor_primaria/secundaria REMOVIDAS: eram duplicatas mortas de
+  // cor_principal/cor_principal_dark (nunca lidas pelo render). Fonte única de
+  // cores = Editor Visual (cor_*). Linhas antigas no banco ficam órfãs (inertes).
   'bg_header_cor', 'bg_header_nav_cor',
   'bg_anuncio_cor', 'bg_anuncio_texto',
   'bg_footer_cor', 'bg_footer_texto', 'bg_footer_titulo', 'bg_footer_hover',
