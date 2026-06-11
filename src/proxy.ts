@@ -55,10 +55,11 @@ function clientePrecisaLogin(pathname: string): boolean {
 }
 
 // ── TRÁFEGO BRUTO (Fase 4C) ──────────────────────────────────────────────────
-// Mede pageviews de TODOS os visitantes server-side, sem cookie e sem PII. O
-// proxy só detecta o pageview e delega a escrita (hash/DB) ao route Node
-// /api/trafego/coletar via waitUntil — o proxy fica leve e runtime-agnóstico.
-const TRAFEGO_SECRET = process.env.TRAFEGO_INTERNAL_SECRET || 'sixxis-trafego-internal-v1'
+// Mede pageviews de TODOS os visitantes server-side, sem cookie e sem PII.
+// O proxy roda no Node runtime (functions-config: runtime=nodejs), então grava
+// DIRETO no banco via import dinâmico do writer dentro de waitUntil. NÃO usa
+// self-fetch HTTP: dentro do container do Railway uma chamada à própria URL
+// pública não roteia de volta (erro engolido) — era a causa de pageviews=0.
 
 // Conta cada NAVEGAÇÃO de página: carga de documento (hard load) OU navegação
 // soft do App Router (RSC, com `_rsc` na query) — nunca prefetch, asset, api ou
@@ -82,10 +83,9 @@ function ehPageview(request: NextRequest, pathname: string): boolean {
 
 function registrarTrafego(request: NextRequest, pathname: string, event?: NextFetchEvent) {
   try {
-    const url = new URL('/api/trafego/coletar', request.url)
     const host = (request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '')
       .split(',')[0].trim()
-    const payload = JSON.stringify({
+    const hit = {
       path: pathname,
       ua:   request.headers.get('user-agent') ?? '',
       ref:  request.headers.get('referer') ?? '',
@@ -93,17 +93,17 @@ function registrarTrafego(request: NextRequest, pathname: string, event?: NextFe
       // Geo = TODO: aproveita país só se algum proxy de borda já mandar o header.
       pais: request.headers.get('cf-ipcountry') ?? request.headers.get('x-vercel-ip-country') ?? '',
       host,
-    })
-    const p = fetch(url, {
-      method:  'POST',
-      headers: { 'content-type': 'application/json', 'x-tb-secret': TRAFEGO_SECRET },
-      body:    payload,
-      keepalive: true,
-    }).catch(() => {})
-    // waitUntil mantém a função viva até o POST completar (sem atrasar a resposta).
+    }
+    // Import dinâmico: o writer (prisma + crypto) só carrega quando há pageview,
+    // mantendo leve o caminho quente do proxy (redirects/guards).
+    const p = import('@/lib/trafego-writer')
+      .then((m) => m.registrarHit(hit))
+      .catch((err) => { console.error('[trafego] writer indisponível:', err) })
+    // waitUntil mantém a função viva até a escrita concluir (sem atrasar a resposta).
     if (event?.waitUntil) event.waitUntil(p)
-  } catch {
-    /* telemetria best-effort: nunca quebra a navegação */
+  } catch (err) {
+    // telemetria best-effort: nunca quebra a navegação
+    console.error('[trafego] erro ao registrar pageview:', err)
   }
 }
 
