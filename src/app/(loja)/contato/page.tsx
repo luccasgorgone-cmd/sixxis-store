@@ -22,8 +22,8 @@ const infos = [
   {
     icon:  Mail,
     title: 'E-mail',
-    lines: ['brasil.sixxis@gmail.com', 'Respondemos em até 1 dia útil'],
-    href:  'mailto:brasil.sixxis@gmail.com',
+    lines: ['sac@sixxis.com.br', 'Respondemos em até 1 dia útil'],
+    href:  'mailto:sac@sixxis.com.br',
   },
   {
     icon:  MapPin,

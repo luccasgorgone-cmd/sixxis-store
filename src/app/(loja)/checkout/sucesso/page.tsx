@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CheckCircle, Package, ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Pedido Confirmado | Sixxis Store',
+  title: 'Pedido Confirmado',
   description: 'Seu pedido foi confirmado com sucesso. Acompanhe o status na área de pedidos.',
 }
 

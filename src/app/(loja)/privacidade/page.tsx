@@ -5,7 +5,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb'
 export const revalidate = 86400
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidade | Sixxis',
+  title: 'Política de Privacidade',
   description: 'Saiba como a Sixxis coleta, usa e protege seus dados pessoais, em conformidade com a LGPD.',
   alternates: { canonical: '/privacidade' },
 }
@@ -104,7 +104,7 @@ export default function PrivacidadePage() {
             <strong>Não vendemos seus dados.</strong> Compartilhamos apenas com:
           </p>
           <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Transportadoras</strong> (Correios, Melhor Envio etc.) — para entregar seu pedido.</span></li>
+            <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Correios e transportadoras parceiras</strong> (Braspress, Jamef, entre outras) — para entregar seu pedido.</span></li>
             <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Processadoras de pagamento</strong> (Mercado Pago) — com proteção PCI-DSS.</span></li>
             <li className="flex gap-2"><span className="text-[#3cbfb3] font-bold">•</span><span><strong>Autoridades públicas</strong> — quando exigido por lei.</span></li>
           </ul>
@@ -151,8 +151,8 @@ export default function PrivacidadePage() {
           </div>
           <p className="mt-4 text-sm text-gray-600">
             Para exercer seus direitos, escreva para{' '}
-            <a href="mailto:brasil.sixxis@gmail.com" className="text-[#3cbfb3] font-medium hover:underline">
-              brasil.sixxis@gmail.com
+            <a href="mailto:sac@sixxis.com.br" className="text-[#3cbfb3] font-medium hover:underline">
+              sac@sixxis.com.br
             </a>
             . Respondemos em até <strong>15 dias úteis</strong>.
           </p>
@@ -183,10 +183,10 @@ export default function PrivacidadePage() {
               Encarregado de Dados (DPO)
             </p>
             <a
-              href="mailto:brasil.sixxis@gmail.com"
+              href="mailto:sac@sixxis.com.br"
               className="inline-block bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm"
             >
-              brasil.sixxis@gmail.com
+              sac@sixxis.com.br
             </a>
             <p className="text-white/50 text-xs mt-4 leading-relaxed">
               Sixxis · CNPJ 54.978.947/0001-09<br />

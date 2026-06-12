@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import {
   Shield, CheckCircle, X, Phone, Mail,
-  Package, FileText, Clock,
+  Package, FileText,
 } from 'lucide-react'
 
 function useReveal() {
@@ -131,28 +131,22 @@ export default function GarantiaPage() {
         </div>
       </section>
 
-      {/* ─── Garantia estendida (em breve) ─── */}
+      {/* ─── Garantia estendida (disponível no checkout) ─── */}
       <section className="py-12 bg-gray-50/40 border-y border-gray-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <Reveal>
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="bg-white border border-[#3cbfb3]/25 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5">
               <div className="w-12 h-12 shrink-0 rounded-2xl bg-[#3cbfb3]/15 border border-[#3cbfb3]/25 flex items-center justify-center">
-                <Clock size={20} className="text-[#3cbfb3]" />
+                <Shield size={20} className="text-[#3cbfb3]" />
               </div>
               <div className="flex-1">
-                <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-[#3cbfb3] mb-1">
-                  Em breve
-                </span>
                 <h3 className="text-base sm:text-lg font-extrabold text-gray-900 mb-1">
                   Garantia Estendida
                 </h3>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  Quer mais tranquilidade? Em breve, nossa garantia estendida estará disponível
-                  para até 24 meses adicionais.{' '}
-                  <Link href="/?ref=newsletter-garantia" className="text-[#3cbfb3] hover:underline font-medium">
-                    Cadastre-se na newsletter
-                  </Link>{' '}
-                  para ser avisado quando lançarmos.
+                  Quer mais tranquilidade? A garantia estendida opcional está disponível no
+                  <strong className="text-gray-700"> checkout</strong> — adicione até
+                  <strong className="text-gray-700"> +24 meses</strong> de cobertura ao finalizar a compra.
                 </p>
               </div>
             </div>
@@ -202,9 +196,9 @@ export default function GarantiaPage() {
               Resposta em até 2 dias úteis.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <a href="mailto:brasil.sixxis@gmail.com"
+              <a href="mailto:sac@sixxis.com.br"
                 className="inline-flex items-center gap-2 bg-[#3cbfb3] text-white font-bold px-5 py-3 rounded-xl transition hover:bg-[#2a9d8f] text-sm">
-                <Mail size={14} /> brasil.sixxis@gmail.com
+                <Mail size={14} /> sac@sixxis.com.br
               </a>
               <Link href="/pedidos"
                 className="inline-flex items-center gap-2 border border-white/20 text-white font-semibold px-5 py-3 rounded-xl hover:bg-white/10 transition text-sm">

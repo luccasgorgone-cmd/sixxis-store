@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: 'Quais são as formas de pagamento aceitas?',
-    a: 'Aceitamos PIX (com 3% de desconto à vista) e cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x. Todos os pagamentos são processados com segurança via MercadoPago.',
+    a: 'Aceitamos PIX (3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x e cartão de débito. Todos os pagamentos são processados com segurança via Mercado Pago.',
   },
   {
     q: 'Como funciona o frete?',
@@ -43,7 +43,7 @@ const faqs = [
   },
   {
     q: 'Vocês oferecem suporte técnico?',
-    a: 'Sim! Nossa equipe técnica está pronta para tirar dúvidas sobre uso, operação e pós-venda via WhatsApp (18) 99747-4701 ou pelo e-mail brasil.sixxis@gmail.com. Como nossos produtos são plug-and-play, você só precisa ligar na tomada e pronto.',
+    a: 'Sim! Nossa equipe técnica está pronta para tirar dúvidas sobre uso, operação e pós-venda via WhatsApp (18) 99747-4701 ou pelo e-mail sac@sixxis.com.br. Como nossos produtos são plug-and-play, você só precisa ligar na tomada e pronto.',
   },
   {
     q: 'Como funciona o parcelamento no cartão?',

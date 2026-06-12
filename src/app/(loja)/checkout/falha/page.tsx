@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { XCircle, ArrowLeft, MessageCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Pagamento não aprovado | Sixxis Store',
+  title: 'Pagamento não aprovado',
   description: 'Houve um problema ao processar seu pagamento. Tente novamente ou entre em contato com nossa equipe.',
 }
 

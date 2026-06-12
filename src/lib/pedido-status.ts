@@ -100,10 +100,28 @@ export function formatarPagamento(forma: string): string {
   const map: Record<string, string> = {
     pix:           'PIX',
     cartao:        'Cartão de Crédito',
-    boleto:        'Boleto',
     credito:       'Cartão de Crédito',
+    credit_card:   'Cartão de Crédito',
     debito:        'Cartão de Débito',
+    debit_card:    'Cartão de Débito',
     mercado_pago:  'Mercado Pago',
   }
-  return map[forma.toLowerCase()] ?? forma
+  return map[forma?.toLowerCase()] ?? forma
+}
+
+// Status crus do Mercado Pago → rótulo PT-BR amigável (admin Pedidos/Pagamentos).
+export function formatarMpStatus(status: string): string {
+  const map: Record<string, string> = {
+    pending:                  'Aguardando',
+    pending_waiting_transfer: 'Aguardando PIX',
+    in_process:               'Em análise',
+    in_mediation:             'Em mediação',
+    authorized:               'Autorizado',
+    approved:                 'Aprovado',
+    rejected:                 'Rejeitado',
+    cancelled:                'Cancelado',
+    refunded:                 'Reembolsado',
+    charged_back:             'Estornado',
+  }
+  return map[status?.toLowerCase()] ?? status
 }

@@ -14,7 +14,7 @@ import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/security/Turnst
 const cadastroSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  senha: z.string().min(6, 'Senha deve ter ao menos 6 caracteres'),
+  senha: z.string().min(8, 'Senha deve ter ao menos 8 caracteres'),
   confirmarSenha: z.string(),
 }).refine((d) => d.senha === d.confirmarSenha, {
   message: 'Senhas não coincidem',
@@ -137,7 +137,7 @@ export default function CadastroPage() {
                 <input
                   type={mostrarSenha ? 'text' : 'password'}
                   {...register('senha')}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   className="w-full pl-10 pr-11 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
                 />
                 <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)}

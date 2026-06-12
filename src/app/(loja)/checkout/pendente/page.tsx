@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Clock, Package, ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Pagamento em processamento | Sixxis Store',
+  title: 'Pagamento em processamento',
   description: 'Seu pagamento está sendo processado. Aguarde a confirmação por e-mail.',
 }
 
@@ -31,7 +31,7 @@ export default function CheckoutPendentePage() {
               <Clock size={16} className="text-amber-500" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#0a0a0a]">Boleto / PIX aguardando pagamento</p>
+              <p className="text-sm font-semibold text-[#0a0a0a]">PIX aguardando pagamento</p>
               <p className="text-xs text-gray-500">Efetue o pagamento dentro do prazo indicado no e-mail enviado.</p>
             </div>
           </div>

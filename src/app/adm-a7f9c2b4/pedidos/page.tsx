@@ -9,6 +9,7 @@ import {
   Clock, AlertCircle, Save, DollarSign,
 } from 'lucide-react'
 import { Toast } from '@/components/admin/Toast'
+import { formatarPagamento, formatarMpStatus } from '@/lib/pedido-status'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -86,8 +87,6 @@ const TABS: { key: string; label: string }[] = [
 ]
 
 const TIMELINE_STEPS = ['pendente', 'pago', 'enviado', 'entregue']
-
-const PAGAMENTOS = ['', 'pix', 'cartao', 'boleto']
 
 function fmt(v: number) {
   return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -283,7 +282,7 @@ function PedidoDetalhe({
                   <CreditCard className="w-3.5 h-3.5" /> Forma de pagamento
                 </p>
                 <div className="bg-white rounded-xl border border-gray-100 px-4 py-3 text-sm space-y-1">
-                  <p className="capitalize font-medium text-gray-700">{pedido.formaPagamento}</p>
+                  <p className="font-medium text-gray-700">{formatarPagamento(pedido.formaPagamento)}</p>
                   {pedido.mpPaymentId && (
                     <p className="text-xs font-mono text-gray-400">MP: {pedido.mpPaymentId}</p>
                   )}
@@ -330,7 +329,7 @@ function PedidoDetalhe({
                             pg.mpStatus === 'refunded' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                             'bg-amber-50 text-amber-700 border-amber-200'
                           }`}>
-                            {pg.mpStatus}
+                            {formatarMpStatus(pg.mpStatus)}
                           </span>
                         </td>
                         <td className="px-3 py-2 text-gray-500">
@@ -684,7 +683,6 @@ export default function AdminPedidosPage() {
               <option value="">Todos os pagamentos</option>
               <option value="pix">PIX</option>
               <option value="cartao">Cartão</option>
-              <option value="boleto">Boleto</option>
             </select>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -758,7 +756,7 @@ export default function AdminPedidosPage() {
                           <td className="px-3 py-4 text-sm text-gray-500 hidden 2xl:table-cell">{fmt(Number(p.frete))}</td>
                           <td className="px-3 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">{fmt(Number(p.total))}</td>
                           <td className="px-3 py-4 hidden xl:table-cell">
-                            <span className="text-xs capitalize text-gray-500">{p.formaPagamento}</span>
+                            <span className="text-xs text-gray-500">{formatarPagamento(p.formaPagamento)}</span>
                           </td>
                           <td className="px-3 py-4">
                             <span className={`text-xs font-semibold rounded-full px-2.5 py-1 border capitalize whitespace-nowrap ${STATUS_BADGE[p.status] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>

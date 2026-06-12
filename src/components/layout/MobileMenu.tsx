@@ -155,8 +155,8 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
           </div>
           <div className="flex items-center gap-2 text-xs text-white/50">
             <Mail size={12} />
-            <a href="mailto:brasil.sixxis@gmail.com" className="hover:text-white/80 transition">
-              brasil.sixxis@gmail.com
+            <a href="mailto:sac@sixxis.com.br" className="hover:text-white/80 transition">
+              sac@sixxis.com.br
             </a>
           </div>
 

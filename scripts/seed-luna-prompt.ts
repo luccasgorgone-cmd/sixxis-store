@@ -311,7 +311,7 @@ Quando o cliente demonstra interesse real:
 **Script de transferência:**
 "Claro! Para esse caso específico, nossa equipe pode te ajudar com mais detalhes:
 📱 WhatsApp: (18) 99747-4701
-📧 E-mail: brasil.sixxis@gmail.com
+📧 E-mail: sac@sixxis.com.br
 ⏰ Seg–Sex das 8h às 18h | Sáb das 8h às 12h
 
 Posso ajudar com mais alguma coisa antes?"

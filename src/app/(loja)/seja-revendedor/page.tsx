@@ -613,10 +613,10 @@ export default function SejaRevendedorPage() {
                     <Phone size={15} style={{ color: '#3cbfb3' }} /> (18) 99747-4701
                   </a>
                   <a
-                    href="mailto:brasil.sixxis@gmail.com"
+                    href="mailto:sac@sixxis.com.br"
                     className="flex items-center gap-2.5 text-sm font-medium text-gray-700 hover:text-[#3cbfb3] transition-colors mb-2"
                   >
-                    <Mail size={15} style={{ color: '#3cbfb3' }} /> brasil.sixxis@gmail.com
+                    <Mail size={15} style={{ color: '#3cbfb3' }} /> sac@sixxis.com.br
                   </a>
                   <div className="flex items-center gap-2.5 text-sm text-gray-500">
                     <MapPin size={15} style={{ color: '#3cbfb3' }} /> Araçatuba, SP

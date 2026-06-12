@@ -14,6 +14,8 @@ import {
 
 const FROM = process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br'
 const FROM_NAME = process.env.EMAIL_FROM_NAME ?? 'Sixxis Store'
+// Respostas dos e-mails transacionais vão para o SAC (não para o noreply).
+const REPLY_TO = process.env.EMAIL_REPLY_TO ?? 'sac@sixxis.com.br'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://sixxis-store-production.up.railway.app'
 const LOGO_URL = `${SITE_URL}/logo-sixxis.png`
 
@@ -252,7 +254,7 @@ export async function enviarEmailConfirmacaoPedido(para: string, opts: {
     assunto = `Pedido #${idCurto} confirmado — Obrigado, ${nomeCliente}!`
   }
 
-  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
+  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, replyTo: REPLY_TO, to: para, subject: assunto, html })
 }
 
 export async function enviarEmailRastreio(para: string, opts: {
@@ -299,7 +301,7 @@ export async function enviarEmailRastreio(para: string, opts: {
     assunto = `Seu pedido #${idCurto} está a caminho!`
   }
 
-  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
+  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, replyTo: REPLY_TO, to: para, subject: assunto, html })
 }
 
 export async function enviarEmailResetSenha(para: string, opts: {
@@ -323,6 +325,7 @@ export async function enviarEmailResetSenha(para: string, opts: {
 
   await getResend().emails.send({
     from:    `${FROM_NAME} <${FROM}>`,
+    replyTo: REPLY_TO,
     to:      para,
     subject: 'Redefinição de senha — Sixxis Store',
     html,
@@ -345,7 +348,7 @@ export async function enviarEmailBoasVindas(para: string, nomeCliente: string) {
     assunto = `Bem-vindo(a) à Sixxis, ${nomeCliente}! Seu cupom de boas-vindas está aqui`
   }
 
-  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
+  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, replyTo: REPLY_TO, to: para, subject: assunto, html })
 }
 
 export async function enviarEmailAbandonoCarrinho(para: string, opts: {
@@ -391,7 +394,7 @@ export async function enviarEmailAbandonoCarrinho(para: string, opts: {
     assunto = `${nomeCliente}, seu carrinho ainda está esperando`
   }
 
-  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
+  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, replyTo: REPLY_TO, to: para, subject: assunto, html })
 }
 
 export async function enviarEmailVoltaEstoque(para: string, opts: {
@@ -430,7 +433,7 @@ export async function enviarEmailVoltaEstoque(para: string, opts: {
     assunto = `${nomeProduto} está disponível novamente!`
   }
 
-  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
+  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, replyTo: REPLY_TO, to: para, subject: assunto, html })
 }
 
 export async function enviarEmailFollowUp(para: string, opts: {
@@ -465,7 +468,7 @@ export async function enviarEmailFollowUp(para: string, opts: {
     assunto = `Como foi a entrega do seu pedido, ${nomeCliente}?`
   }
 
-  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, to: para, subject: assunto, html })
+  await getResend().emails.send({ from: `${FROM_NAME} <${FROM}>`, replyTo: REPLY_TO, to: para, subject: assunto, html })
 }
 
 // ─── Envio de teste via template premium ─────────────────────────────────────
@@ -507,6 +510,7 @@ export async function enviarEmailTeste(tipo: string, emailDestino: string): Prom
     if (!template) throw new Error(`Template "${tipo}" não encontrado`)
     await getResend().emails.send({
       from:    `${FROM_NAME} <${FROM}>`,
+    replyTo: REPLY_TO,
       to:      emailDestino,
       subject: `[TESTE] ${renderTemplate(template.assunto, { nome: 'João Silva', pedido_id: 'TEST12345678' })}`,
       html:    renderTemplate(template.corpo, dadosFalsos as unknown as Record<string, string>),
@@ -527,6 +531,7 @@ export async function enviarEmailTeste(tipo: string, emailDestino: string): Prom
 
   await getResend().emails.send({
     from:    `${FROM_NAME} <${FROM}>`,
+    replyTo: REPLY_TO,
     to:      emailDestino,
     subject: `[TESTE] ${assuntosFalsos[tipo] ?? tipo}`,
     html:    htmlFinal,

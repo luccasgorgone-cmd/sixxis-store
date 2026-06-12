@@ -7,6 +7,7 @@ import {
   Loader2, ExternalLink, RefreshCw,
 } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import { formatarMpStatus } from '@/lib/pedido-status'
 
 interface Pagamento {
   id: string
@@ -254,7 +255,7 @@ export default function AdminPagamentosPage() {
                     <td className="px-4 py-3 font-bold text-gray-900 whitespace-nowrap">{fmt(p.valor / 100)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUS_BADGE[p.mpStatus] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                        {p.mpStatus}
+                        {formatarMpStatus(p.mpStatus)}
                       </span>
                       {p.mpStatusDetail && <p className="text-[10px] text-gray-400 mt-0.5">{p.mpStatusDetail}</p>}
                     </td>

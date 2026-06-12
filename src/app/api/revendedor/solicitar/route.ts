@@ -41,7 +41,8 @@ export async function POST(req: Request) {
 
     await resend.emails.send({
       from: process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br',
-      to: process.env.EMAIL_CONTATO ?? 'brasil.sixxis@gmail.com',
+      to: process.env.EMAIL_CONTATO ?? 'sac@sixxis.com.br',
+      replyTo: 'sac@sixxis.com.br',
       subject: `Nova Solicitação de Revendedor — ${nome}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">

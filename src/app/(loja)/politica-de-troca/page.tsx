@@ -119,7 +119,7 @@ export default function PoliticaDeTrocaPage() {
                 {
                   step: '01',
                   title: 'Entre em contato',
-                  text:  'Envie uma mensagem via WhatsApp (18) 99747-4701 ou e-mail brasil.sixxis@gmail.com informando o número do pedido e o motivo da solicitação.',
+                  text:  'Envie uma mensagem via WhatsApp (18) 99747-4701 ou e-mail sac@sixxis.com.br informando o número do pedido e o motivo da solicitação.',
                 },
                 {
                   step: '02',
@@ -157,7 +157,7 @@ export default function PoliticaDeTrocaPage() {
                 {[
                   'PIX: estorno em até 2 dias úteis',
                   'Cartão de crédito: estorno em até 2 faturas, conforme operadora',
-                  'Boleto: reembolso via PIX ou TED em até 5 dias úteis',
+                  'Cartão de débito: estorno em até 7 dias úteis, conforme operadora',
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="text-[#3cbfb3] font-bold mt-0.5">•</span>
@@ -178,8 +178,8 @@ export default function PoliticaDeTrocaPage() {
               <a href="https://wa.me/5518997474701" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm">
                 WhatsApp (18) 99747-4701
               </a>
-              <a href="mailto:brasil.sixxis@gmail.com" className="btn-outline text-sm">
-                brasil.sixxis@gmail.com
+              <a href="mailto:sac@sixxis.com.br" className="btn-outline text-sm">
+                sac@sixxis.com.br
               </a>
             </div>
           </div>

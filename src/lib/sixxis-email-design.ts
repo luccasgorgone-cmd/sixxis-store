@@ -16,7 +16,7 @@ export const BRAND = {
   logoUrl: 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/177575493045 2-4ixi773.png',
   site: 'https://sixxis-store-production.up.railway.app',
   whatsapp: '5518997474701',
-  email: 'brasil.sixxis@gmail.com',
+  email: 'sac@sixxis.com.br',
   instagram: '@sixxis',
   enderecoRodape: 'Araçatuba, SP — Brasil',
   cnpj: '54.978.947/0001-09',

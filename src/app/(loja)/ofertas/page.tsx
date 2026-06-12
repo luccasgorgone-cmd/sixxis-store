@@ -5,7 +5,11 @@ import OfertasHero from '@/components/home/OfertasHero'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = { title: 'Ofertas — Sixxis Store', alternates: { canonical: '/ofertas' } }
+export const metadata = {
+  title: 'Ofertas Relâmpago',
+  description: 'Ofertas relâmpago Sixxis: climatizadores, aspiradores e spinning com descontos por tempo limitado. Aproveite enquanto durarem os estoques.',
+  alternates: { canonical: '/ofertas' },
+}
 
 export default async function OfertasPage() {
   const ofertas = await prisma.produto.findMany({

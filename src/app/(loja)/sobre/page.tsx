@@ -101,7 +101,7 @@ export default function SobrePage() {
                 { val: '30+',  label: 'Anos de mercado',        icon: Building2 },
                 { val: '1M+',  label: 'Clientes atendidos',     icon: Users     },
                 { val: '200+', label: 'Revendedores parceiros', icon: Heart     },
-                { val: '12M',  label: 'Meses de garantia',      icon: Shield    },
+                { val: '12',   label: 'Meses de garantia',      icon: Shield    },
               ].map(s => {
                 const Icon = s.icon
                 return (
@@ -388,7 +388,7 @@ export default function SobrePage() {
                   {[
                     { icon: Phone, label: 'Vendas',              val: '(18) 99747-4701',         href: 'https://wa.me/5518997474701',    cor: '#25D366' },
                     { icon: Phone, label: 'Assistência Técnica', val: '(11) 93410-2621',          href: 'https://wa.me/5511934102621',    cor: '#3cbfb3' },
-                    { icon: Mail,  label: 'E-mail',              val: 'brasil.sixxis@gmail.com',  href: 'mailto:brasil.sixxis@gmail.com', cor: '#8b5cf6' },
+                    { icon: Mail,  label: 'E-mail',              val: 'sac@sixxis.com.br',  href: 'mailto:sac@sixxis.com.br', cor: '#8b5cf6' },
                   ].map(c => {
                     const Icon = c.icon
                     return (

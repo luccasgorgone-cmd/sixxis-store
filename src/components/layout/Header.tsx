@@ -354,7 +354,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           try {
             const r1 = await fetch(
               `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
-              { headers: { 'User-Agent': 'SixxisStore/1.0 (brasil.sixxis@gmail.com)' } }
+              { headers: { 'User-Agent': 'SixxisStore/1.0 (sac@sixxis.com.br)' } }
             )
             const d1 = await r1.json()
             if (d1.address?.postcode) {
@@ -852,7 +852,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
           </div>
           <div className="flex items-center gap-2 text-xs text-white/50">
             <Mail size={12} />
-            <a href="mailto:brasil.sixxis@gmail.com" className="hover:text-white/80 transition">brasil.sixxis@gmail.com</a>
+            <a href="mailto:sac@sixxis.com.br" className="hover:text-white/80 transition">sac@sixxis.com.br</a>
           </div>
         </div>
       </div>

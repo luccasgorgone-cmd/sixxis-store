@@ -128,9 +128,9 @@ export default async function Footer() {
               <ColTitle>Institucional</ColTitle>
               <ul className="space-y-1.5">
                 {[
-                  { label: 'Sobre Nós',               href: '/sobre'       },
-                  { label: 'Termo de Garantia',        href: '/garantia'    },
-                  { label: 'Política de Privacidade',  href: '/privacidade' },
+                  { label: 'Sobre Nós',        href: '/sobre'           },
+                  { label: 'Seja um Parceiro', href: '/seja-revendedor' },
+                  { label: 'Fale Conosco',     href: '/contato'         },
                 ].map(item => (
                   <li key={item.label}>
                     <Link href={item.href} className="text-white/70 hover:text-white text-sm transition block py-0.5">

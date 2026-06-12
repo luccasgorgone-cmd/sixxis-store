@@ -98,7 +98,7 @@ const schemaOrg = {
   description: 'Loja oficial Sixxis — Climatizadores, Aspiradores e Spinning',
   url: SITE_URL,
   telephone: '+5518997474701',
-  email: 'brasil.sixxis@gmail.com',
+  email: 'sac@sixxis.com.br',
   address: {
     '@type': 'PostalAddress',
     streetAddress: 'R. Anhanguera, 1711',

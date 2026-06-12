@@ -5,8 +5,8 @@ import { Cookie } from 'lucide-react'
 export const revalidate = 86400
 
 export const metadata: Metadata = {
-  title: 'Política de Cookies | Sixxis',
-  description: 'Saiba como a Sixxis utiliza cookies para melhorar sua experiência de navegação.',
+  title: 'Política de Cookies',
+  description: 'Saiba como a Sixxis utiliza cookies para melhorar sua experiência de navegação, em conformidade com a LGPD.',
   alternates: { canonical: '/cookies' },
 }
 
@@ -100,9 +100,9 @@ export default function CookiesPage() {
 
           <div className="bg-[#e8f8f7] border border-[#3cbfb3]/20 rounded-xl p-4">
             <p className="text-xs text-[#0f2e2b] leading-relaxed">
-              <strong>Atualização:</strong> Esta política foi atualizada em janeiro de 2025.
-              Para dúvidas, entre em contato: <a href="mailto:brasil.sixxis@gmail.com"
-                className="text-[#3cbfb3] hover:underline">brasil.sixxis@gmail.com</a>
+              <strong>Atualização:</strong> Esta política foi atualizada em maio de 2026.
+              Para dúvidas, entre em contato: <a href="mailto:sac@sixxis.com.br"
+                className="text-[#3cbfb3] hover:underline">sac@sixxis.com.br</a>
             </p>
           </div>
         </div>

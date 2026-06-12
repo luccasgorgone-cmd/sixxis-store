@@ -147,7 +147,9 @@ export default function CheckoutBricks({
           customization={{
             paymentMethods: {
               creditCard: 'all',
+              debitCard: 'all',
               bankTransfer: ['pix'],
+              // boleto (ticket) intencionalmente NÃO habilitado.
               maxInstallments: 12,
             },
             visual: {
@@ -158,14 +160,15 @@ export default function CheckoutBricks({
             setErro(null)
             setCarregando(true)
             try {
-              const isPix = formData.payment_method_id === 'pix'
-              const isCard =
-                !isPix &&
-                Boolean(formData.token) &&
-                Boolean(formData.payment_method_id)
+              const pmId = formData.payment_method_id ?? ''
+              const isPix = pmId === 'pix'
+              const isCard = !isPix && Boolean(formData.token) && Boolean(pmId)
+              // Débito: payment_method_id do MP começa com "deb" (debvisa, debmaster, debelo…).
+              const isDebit = isCard && /^deb|debit/i.test(pmId)
+              const metodoCartao = isDebit ? ('debit_card' as const) : ('credit_card' as const)
 
               if (onMetodoSelecionado) {
-                onMetodoSelecionado(isPix ? 'pix' : isCard ? 'credit_card' : (formData.payment_method_id ?? 'unknown'))
+                onMetodoSelecionado(isPix ? 'pix' : isCard ? metodoCartao : (pmId || 'unknown'))
               }
 
               const body = isPix
@@ -180,7 +183,7 @@ export default function CheckoutBricks({
                 : isCard
                   ? {
                       pedidoId,
-                      metodo: 'credit_card' as const,
+                      metodo: metodoCartao,
                       cardToken: formData.token,
                       parcelas: formData.installments ?? 1,
                       issuerId: formData.issuer_id,
