@@ -81,8 +81,13 @@ export async function POST(req: NextRequest) {
     where: { id: pedidoId, clienteId: session.user.id },
     include: {
       // produto.nome + endereco são usados pelo e-mail de confirmação enviado no
-      // caminho do cartão aprovado inline (ver bloco 'approved' abaixo).
-      itens: { include: { produto: { select: { nome: true } } } },
+      // caminho do cartão aprovado inline (ver bloco 'approved' abaixo). sku/
+      // descricao/categoria enriquecem o additional_info.items do Mercado Pago.
+      itens: {
+        include: {
+          produto: { select: { nome: true, sku: true, descricao: true, categoria: true } },
+        },
+      },
       cliente: true,
       endereco: true,
     },
@@ -116,6 +121,28 @@ export async function POST(req: NextRequest) {
   const lastName = rest.join(' ') || firstName
   const cpfDigits = payerCpf?.replace(/\D/g, '')
 
+  // Telefone -> { area_code (DDD), number }. Tolera "(11) 98765-4321", "+55 11…", etc.
+  const telDigits = (pedido.cliente.telefone ?? '').replace(/\D/g, '')
+  const telLocal = telDigits.length > 11 && telDigits.startsWith('55')
+    ? telDigits.slice(2)
+    : telDigits
+  const phone =
+    telLocal.length >= 10
+      ? { area_code: telLocal.slice(0, 2), number: telLocal.slice(2) }
+      : undefined
+
+  // Endereço do pedido -> payer.address (e additional_info abaixo).
+  const end = pedido.endereco
+  const zipCode = (end?.cep ?? '').replace(/\D/g, '')
+  const address =
+    end && (end.logradouro || zipCode)
+      ? {
+          zip_code: zipCode || undefined,
+          street_name: end.logradouro || undefined,
+          street_number: end.numero || undefined,
+        }
+      : undefined
+
   const basePayer: Record<string, unknown> = {
     email: emailPayer,
     first_name: firstName || 'Cliente',
@@ -124,11 +151,49 @@ export async function POST(req: NextRequest) {
   if (cpfDigits && cpfDigits.length === 11) {
     basePayer.identification = { type: 'CPF', number: cpfDigits }
   }
+  if (phone) basePayer.phone = phone
+  if (address) basePayer.address = address
+
+  // Itens do carrinho -> additional_info.items (lido pelo antifraude do MP).
+  // category_id deve ser uma categoria do MP; a loja vende climatização/eletro.
+  const MP_CATEGORY = 'home_appliances'
+  const itemsMP = pedido.itens.map((i) => ({
+    id: i.produto.sku || i.produtoId,
+    title: i.variacaoNome ? `${i.produto.nome} — ${i.variacaoNome}` : i.produto.nome,
+    description: (i.produto.descricao || i.produto.nome).replace(/\s+/g, ' ').trim().slice(0, 256),
+    category_id: MP_CATEGORY,
+    quantity: i.quantidade,
+    unit_price: Number(i.precoUnitario),
+    currency_id: 'BRL',
+  }))
+
+  // additional_info: items + espelho do payer + endereço de entrega. Tudo isso
+  // alimenta a Qualidade da Integração e o score de aprovação.
+  const additionalInfo: Record<string, unknown> = { items: itemsMP }
+  const aiPayer: Record<string, unknown> = {
+    first_name: firstName || 'Cliente',
+    last_name: lastName,
+  }
+  if (phone) aiPayer.phone = phone
+  if (address) aiPayer.address = address
+  additionalInfo.payer = aiPayer
+  if (end) {
+    additionalInfo.shipments = {
+      receiver_address: {
+        zip_code: zipCode || undefined,
+        street_name: end.logradouro || undefined,
+        street_number: end.numero || undefined,
+        city_name: end.cidade || undefined,
+        state_name: end.estado || undefined,
+      },
+    }
+  }
 
   const basePayload = {
     transaction_amount: valorBRL,
     description: `Pedido #${pedido.id.slice(0, 8).toUpperCase()}`,
     payer: basePayer,
+    additional_info: additionalInfo,
     external_reference: pedido.id,
     notification_url: `${APP_URL}/api/webhooks/mercado-pago`,
     metadata: {
