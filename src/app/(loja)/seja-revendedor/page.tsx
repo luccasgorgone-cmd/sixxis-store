@@ -367,22 +367,22 @@ export default function SejaRevendedorPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {[
               {
-                numero: '34%',
-                descricao: 'crescimento do mercado de climatizadores no Brasil nos últimos 3 anos',
-                icone: TrendingUp,
-                fonte: 'IBGE / Abrava 2024'
-              },
-              {
-                numero: '82%',
-                descricao: 'dos brasileiros priorizam conforto térmico ao escolher onde morar ou trabalhar',
-                icone: Users,
-                fonte: 'Pesquisa CNI 2024'
-              },
-              {
-                numero: 'R$8bi',
-                descricao: 'é o tamanho atual do mercado de equipamentos de climatização e bem-estar no Brasil',
+                numero: 'R$ 50,15 bi',
+                descricao: 'faturamento do setor de climatização e refrigeração no Brasil em 2025',
                 icone: BarChart3,
-                fonte: 'ABEE 2024'
+                fonte: 'Fonte: ABRAVA'
+              },
+              {
+                numero: '+10,4%',
+                descricao: 'crescimento do setor em 2025, acima do PIB',
+                icone: TrendingUp,
+                fonte: 'Fonte: ABRAVA'
+              },
+              {
+                numero: 'R$ 55,62 bi',
+                descricao: 'projeção do setor para 2026',
+                icone: TrendingUp,
+                fonte: 'Fonte: ABRAVA'
               },
             ].map((item, i) => (
               <AnimSection
