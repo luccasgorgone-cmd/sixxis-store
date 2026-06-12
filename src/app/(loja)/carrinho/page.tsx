@@ -664,7 +664,7 @@ export default function CarrinhoPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Frete</span>
                     <span className={`font-semibold ${freteSelecionado.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
-                      {freteSelecionado.preco === 0 ? 'Grátis' : fmtBRL(freteSelecionado.preco)}
+                      {freteSelecionado.preco === 0 ? 'Frete Grátis' : fmtBRL(freteSelecionado.preco)}
                     </span>
                   </div>
                 ) : freteStatus === 'a_combinar' ? (

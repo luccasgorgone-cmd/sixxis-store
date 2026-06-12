@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Truck, Loader2, Save, Copy, Check, AlertTriangle, Ban, HandCoins, ChevronDown,
+  Truck, Loader2, Save, Copy, Check, AlertTriangle, Ban, HandCoins, ChevronDown, Gift,
 } from 'lucide-react'
 import { Toast } from '@/components/admin/Toast'
 import { UFS, UF_NOMES, REGIOES, type UF } from '@/lib/ufs'
@@ -28,6 +28,7 @@ interface RegraEdit {
   prazoExpressoMax: string
   aCombinar: boolean
   bloqueado: boolean
+  freteGratis: boolean
 }
 
 interface RegraApi {
@@ -40,12 +41,13 @@ interface RegraApi {
   prazoExpressoMax: number | null
   aCombinar: boolean
   bloqueado: boolean
+  freteGratis: boolean
 }
 
 const VAZIA: RegraEdit = {
   precoNormal: '', prazoNormalMin: '', prazoNormalMax: '',
   precoExpresso: '', prazoExpressoMin: '', prazoExpressoMax: '',
-  aCombinar: false, bloqueado: false,
+  aCombinar: false, bloqueado: false, freteGratis: false,
 }
 
 function regrasVazias(): Record<string, RegraEdit> {
@@ -54,7 +56,7 @@ function regrasVazias(): Record<string, RegraEdit> {
 
 function temConteudo(r: RegraEdit): boolean {
   return (
-    r.bloqueado || r.aCombinar ||
+    r.bloqueado || r.aCombinar || r.freteGratis ||
     r.precoNormal !== '' || r.prazoNormalMin !== '' || r.prazoNormalMax !== '' ||
     r.precoExpresso !== '' || r.prazoExpressoMin !== '' || r.prazoExpressoMax !== ''
   )
@@ -67,8 +69,8 @@ function str(v: string | number | null): string {
 // ─── Inputs reutilizáveis ─────────────────────────────────────────────────────
 
 function NumInput({
-  value, onChange, placeholder, step,
-}: { value: string; onChange: (v: string) => void; placeholder: string; step: string }) {
+  value, onChange, placeholder, step, disabled,
+}: { value: string; onChange: (v: string) => void; placeholder: string; step: string; disabled?: boolean }) {
   return (
     <input
       type="number"
@@ -77,7 +79,8 @@ function NumInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[#3cbfb3] text-center"
+      disabled={disabled}
+      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[#3cbfb3] text-center disabled:bg-gray-50 disabled:text-gray-300 disabled:placeholder:text-gray-300"
     />
   )
 }
@@ -86,22 +89,30 @@ function CamposRegra({
   r, onChange, compact,
 }: { r: RegraEdit; onChange: (patch: Partial<RegraEdit>) => void; compact?: boolean }) {
   const disabled = r.bloqueado || r.aCombinar
+  const gratis = r.freteGratis
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
-      {/* Normal: preço + prazo em faixa (min a max dias úteis) */}
+      {/* Normal: preço (zerado/apagado quando grátis) + prazo em faixa (min a max dias úteis).
+          No frete grátis, só o prazo normal continua editável: é o prazo da entrega grátis. */}
       <div className="flex items-center gap-1.5">
-        <NumInput value={r.precoNormal}    onChange={(v) => onChange({ precoNormal: v })}    placeholder={compact ? 'R$ normal' : 'preço'} step="0.01" />
+        <NumInput value={gratis ? '' : r.precoNormal} onChange={(v) => onChange({ precoNormal: v })} placeholder={gratis ? 'grátis' : (compact ? 'R$ normal' : 'preço')} step="0.01" disabled={gratis} />
         <NumInput value={r.prazoNormalMin} onChange={(v) => onChange({ prazoNormalMin: v })} placeholder="min"                            step="1" />
         <span className="text-xs text-gray-400 shrink-0">a</span>
         <NumInput value={r.prazoNormalMax} onChange={(v) => onChange({ prazoNormalMax: v })} placeholder="max"                            step="1" />
       </div>
-      {/* Expresso: preço + prazo em faixa (min a max dias úteis) */}
-      <div className="flex items-center gap-1.5">
-        <NumInput value={r.precoExpresso}    onChange={(v) => onChange({ precoExpresso: v })}    placeholder={compact ? 'R$ expr.' : 'preço'} step="0.01" />
-        <NumInput value={r.prazoExpressoMin} onChange={(v) => onChange({ prazoExpressoMin: v })} placeholder="min"                           step="1" />
-        <span className="text-xs text-gray-400 shrink-0">a</span>
-        <NumInput value={r.prazoExpressoMax} onChange={(v) => onChange({ prazoExpressoMax: v })} placeholder="max"                           step="1" />
-      </div>
+      {/* Expresso: escondido no frete grátis (grátis é a opção única). */}
+      {gratis ? (
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+          <Gift size={13} /> Frete grátis — entrega no prazo normal
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5">
+          <NumInput value={r.precoExpresso}    onChange={(v) => onChange({ precoExpresso: v })}    placeholder={compact ? 'R$ expr.' : 'preço'} step="0.01" />
+          <NumInput value={r.prazoExpressoMin} onChange={(v) => onChange({ prazoExpressoMin: v })} placeholder="min"                           step="1" />
+          <span className="text-xs text-gray-400 shrink-0">a</span>
+          <NumInput value={r.prazoExpressoMax} onChange={(v) => onChange({ prazoExpressoMax: v })} placeholder="max"                           step="1" />
+        </div>
+      )}
     </div>
   )
 }
@@ -111,9 +122,29 @@ function Toggles({
 }: { r: RegraEdit; onChange: (patch: Partial<RegraEdit>) => void }) {
   return (
     <div className="flex items-center gap-1.5">
+      {/* Frete grátis: ao ligar, zera preços/expresso e desliga combinar/bloquear. */}
       <button
         type="button"
-        onClick={() => onChange({ aCombinar: !r.aCombinar, bloqueado: false })}
+        onClick={() =>
+          onChange(
+            r.freteGratis
+              ? { freteGratis: false }
+              : {
+                  freteGratis: true, aCombinar: false, bloqueado: false,
+                  precoNormal: '', precoExpresso: '', prazoExpressoMin: '', prazoExpressoMax: '',
+                },
+          )
+        }
+        title="Frete grátis (mantém só o prazo normal)"
+        className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold border transition ${
+          r.freteGratis ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-white text-gray-400 border-gray-200 hover:border-emerald-300'
+        }`}
+      >
+        <Gift size={12} /> Grátis
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange({ aCombinar: !r.aCombinar, bloqueado: false, freteGratis: false })}
         title="A combinar (vira orçamento)"
         className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold border transition ${
           r.aCombinar ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-white text-gray-400 border-gray-200 hover:border-amber-300'
@@ -123,7 +154,7 @@ function Toggles({
       </button>
       <button
         type="button"
-        onClick={() => onChange({ bloqueado: !r.bloqueado, aCombinar: false })}
+        onClick={() => onChange({ bloqueado: !r.bloqueado, aCombinar: false, freteGratis: false })}
         title="Bloquear venda neste estado"
         className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold border transition ${
           r.bloqueado ? 'bg-red-50 text-red-700 border-red-300' : 'bg-white text-gray-400 border-gray-200 hover:border-red-300'
@@ -185,6 +216,7 @@ export default function FreteAdminPage() {
           prazoExpressoMax: str(r.prazoExpressoMax),
           aCombinar: !!r.aCombinar,
           bloqueado: !!r.bloqueado,
+          freteGratis: !!r.freteGratis,
         }
       }
       setRegras(base)
@@ -228,6 +260,7 @@ export default function FreteAdminPage() {
           prazoExpressoMax: str(r.prazoExpressoMax),
           aCombinar: !!r.aCombinar,
           bloqueado: !!r.bloqueado,
+          freteGratis: !!r.freteGratis,
         }
       }
       setRegras(base)
@@ -254,6 +287,7 @@ export default function FreteAdminPage() {
         prazoExpressoMax: regras[uf].prazoExpressoMax,
         aCombinar: regras[uf].aCombinar,
         bloqueado: regras[uf].bloqueado,
+        freteGratis: regras[uf].freteGratis,
       }))
       const res = await fetch(`/api/admin/frete/${produtoSel}`, {
         method: 'PUT',
@@ -423,9 +457,14 @@ export default function FreteAdminPage() {
                     const r = regras[uf]
                     return (
                       <div key={uf} className="px-4 py-3 flex flex-col lg:flex-row lg:items-center gap-2">
-                        <div className="w-full lg:w-44 shrink-0">
+                        <div className="w-full lg:w-44 shrink-0 flex items-center gap-2">
                           <span className="text-sm font-bold text-gray-800">{uf}</span>
-                          <span className="text-xs text-gray-400 ml-2">{UF_NOMES[uf]}</span>
+                          <span className="text-xs text-gray-400">{UF_NOMES[uf]}</span>
+                          {r.freteGratis && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black">
+                              <Gift size={10} /> GRÁTIS
+                            </span>
+                          )}
                         </div>
                         <div className="flex-1 min-w-[260px]">
                           <CamposRegra r={r} onChange={(patch) => atualizarUF(uf, patch)} />

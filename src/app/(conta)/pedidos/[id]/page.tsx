@@ -180,7 +180,13 @@ export default async function PedidoDetalheContaPage({
         <div className="border-t border-gray-100 mt-4 pt-4 space-y-1.5 text-sm">
           <div className="flex justify-between text-gray-500">
             <span>Frete</span>
-            <span>{Number(pedido.frete) === 0 ? 'Grátis' : fmt(Number(pedido.frete))}</span>
+            {pedido.freteTipo === 'a_combinar' ? (
+              <span className="text-amber-600 font-semibold">A combinar</span>
+            ) : Number(pedido.frete) === 0 ? (
+              <span className="text-green-600 font-bold">Frete Grátis</span>
+            ) : (
+              <span>{fmt(Number(pedido.frete))}</span>
+            )}
           </div>
           {Number(pedido.desconto) > 0 && (
             <div className="flex justify-between text-green-600">

@@ -265,7 +265,7 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, tota
           <div className="flex justify-between text-sm text-gray-600">
             <span>Frete</span>
             <span className={frete === 0 ? 'text-green-600 font-bold' : 'font-semibold'}>
-              {frete === 0 ? 'Grátis' : `R$ ${moeda(frete)}`}
+              {frete === 0 ? 'Frete Grátis' : `R$ ${moeda(frete)}`}
             </span>
           </div>
         )}

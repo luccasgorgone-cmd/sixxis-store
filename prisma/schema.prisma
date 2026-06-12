@@ -422,6 +422,7 @@ model FreteRegra {
   // Estados especiais
   aCombinar     Boolean  @default(false) // vira orçamento, cliente não finaliza
   bloqueado     Boolean  @default(false) // não entrega nesse estado
+  freteGratis   Boolean  @default(false) // entrega grátis; só o prazo normal vale
   criadoEm      DateTime @default(now())
   atualizadoEm  DateTime @updatedAt
   produto       Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)

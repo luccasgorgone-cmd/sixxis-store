@@ -27,6 +27,7 @@ export interface OpcaoFreteResolvida {
   prazoDiasMin: number
   prazoDiasMax: number
   prazo: string // string formatada p/ exibição
+  freteGratis: boolean // true → preço 0 por "frete grátis" (não por falta de preço)
 }
 
 export interface ResultadoFrete {
@@ -34,6 +35,7 @@ export interface ResultadoFrete {
   uf: UF | null
   opcoes: OpcaoFreteResolvida[]
   mensagem: string
+  freteGratis: boolean // a opção resolvida é frete grátis (valor 0)
 }
 
 export interface ItemFrete {
@@ -77,12 +79,12 @@ export async function resolverFrete(
 ): Promise<ResultadoFrete> {
   const uf = normalizarUF(ufInput)
   if (!uf) {
-    return { status: 'bloqueado', uf: null, opcoes: [], mensagem: 'UF inválida.' }
+    return { status: 'bloqueado', uf: null, opcoes: [], mensagem: 'UF inválida.', freteGratis: false }
   }
 
   const itensValidos = itens.filter((i) => i.produtoId && i.quantidade > 0)
   if (itensValidos.length === 0) {
-    return { status: 'bloqueado', uf, opcoes: [], mensagem: 'Carrinho vazio.' }
+    return { status: 'bloqueado', uf, opcoes: [], mensagem: 'Carrinho vazio.', freteGratis: false }
   }
 
   const produtoIds = [...new Set(itensValidos.map((i) => i.produtoId))]
@@ -132,6 +134,17 @@ export async function resolverFrete(
     const pn = regra.precoNormal != null ? Number(regra.precoNormal) : null
     const pe = regra.precoExpresso != null ? Number(regra.precoExpresso) : null
 
+    // 3. Frete grátis (flag explícita OU preço normal = 0). É a opção ÚNICA:
+    //    preço 0, prazo da faixa normal, expresso suprimido. Vem ANTES do teste
+    //    "sem preço" porque uma regra grátis costuma ter os preços em branco.
+    if (regra.freteGratis || pn === 0) {
+      precoNormal += 0
+      prazoNormalMin = Math.max(prazoNormalMin, regra.prazoNormalMin ?? 0)
+      prazoNormalMax = Math.max(prazoNormalMax, regra.prazoNormalMax ?? 0)
+      temExpresso = false // frete grátis é a única modalidade
+      continue
+    }
+
     // Regra existe mas sem nenhum preço → trata como orçamento (precisa cotação).
     if (pn == null && pe == null) {
       algumACombinar = true
@@ -158,21 +171,26 @@ export async function resolverFrete(
 
   // Aplica a precedência: bloqueado tem prioridade máxima, depois a_combinar.
   if (algumBloqueado) {
-    return { status: 'bloqueado', uf, opcoes: [], mensagem: MSG_BLOQUEADO }
+    return { status: 'bloqueado', uf, opcoes: [], mensagem: MSG_BLOQUEADO, freteGratis: false }
   }
   if (algumACombinar) {
-    return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR }
+    return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR, freteGratis: false }
   }
+
+  // Frete grátis: preço normal soma 0 entre todos os itens (todos grátis, ou todos
+  // a R$ 0). "frete grátis OU 0 reais = frete grátis ao cliente".
+  const normalGratis = temNormal && precoNormal === 0
 
   const opcoes: OpcaoFreteResolvida[] = []
   if (temNormal) {
     opcoes.push({
       id: 'normal',
-      nome: 'Frete Normal',
+      nome: normalGratis ? 'Frete Grátis' : 'Frete Normal',
       preco: precoNormal,
       prazoDiasMin: prazoNormalMin,
       prazoDiasMax: prazoNormalMax,
       prazo: formatarPrazo(prazoNormalMin, prazoNormalMax),
+      freteGratis: normalGratis,
     })
   }
   if (temExpresso) {
@@ -183,13 +201,17 @@ export async function resolverFrete(
       prazoDiasMin: prazoExpressoMin,
       prazoDiasMax: prazoExpressoMax,
       prazo: formatarPrazo(prazoExpressoMin, prazoExpressoMax),
+      freteGratis: precoExpresso === 0,
     })
   }
 
   // Nenhuma modalidade é comum a todos os itens → orçamento.
   if (opcoes.length === 0) {
-    return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR }
+    return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR, freteGratis: false }
   }
 
-  return { status: 'ok', uf, opcoes, mensagem: '' }
+  // Opção grátis primeiro (é a única quando há frete grátis).
+  opcoes.sort((a, b) => Number(b.freteGratis) - Number(a.freteGratis))
+
+  return { status: 'ok', uf, opcoes, mensagem: '', freteGratis: normalGratis }
 }

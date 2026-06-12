@@ -34,18 +34,25 @@ const regraSchema = z
     prazoExpressoMax: prazoField.optional(),
     aCombinar: z.boolean().optional(),
     bloqueado: z.boolean().optional(),
+    freteGratis: z.boolean().optional(),
   })
-  .transform((r) => ({
-    uf: r.uf.toUpperCase(),
-    precoNormal: r.precoNormal ?? null,
-    prazoNormalMin: r.prazoNormalMin ?? null,
-    prazoNormalMax: r.prazoNormalMax ?? null,
-    precoExpresso: r.precoExpresso ?? null,
-    prazoExpressoMin: r.prazoExpressoMin ?? null,
-    prazoExpressoMax: r.prazoExpressoMax ?? null,
-    aCombinar: r.aCombinar ?? false,
-    bloqueado: r.bloqueado ?? false,
-  }))
+  .transform((r) => {
+    const freteGratis = r.freteGratis ?? false
+    return {
+      uf: r.uf.toUpperCase(),
+      // Frete grátis zera os preços (a única opção é grátis); mantém só os prazos normais.
+      precoNormal: freteGratis ? null : r.precoNormal ?? null,
+      prazoNormalMin: r.prazoNormalMin ?? null,
+      prazoNormalMax: r.prazoNormalMax ?? null,
+      precoExpresso: freteGratis ? null : r.precoExpresso ?? null,
+      prazoExpressoMin: freteGratis ? null : r.prazoExpressoMin ?? null,
+      prazoExpressoMax: freteGratis ? null : r.prazoExpressoMax ?? null,
+      // Exclusividade mútua: grátis desliga a_combinar/bloqueado.
+      aCombinar: freteGratis ? false : r.aCombinar ?? false,
+      bloqueado: freteGratis ? false : r.bloqueado ?? false,
+      freteGratis,
+    }
+  })
 
 const putSchema = z.object({ regras: z.array(regraSchema) })
 
@@ -119,6 +126,7 @@ export async function PUT(
           prazoExpressoMax: r.prazoExpressoMax,
           aCombinar: r.aCombinar,
           bloqueado: r.bloqueado,
+          freteGratis: r.freteGratis,
         },
         create: {
           produtoId,
@@ -131,6 +139,7 @@ export async function PUT(
           prazoExpressoMax: r.prazoExpressoMax,
           aCombinar: r.aCombinar,
           bloqueado: r.bloqueado,
+          freteGratis: r.freteGratis,
         },
       }),
     ),

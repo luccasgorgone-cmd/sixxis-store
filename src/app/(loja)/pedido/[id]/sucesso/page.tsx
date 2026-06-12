@@ -152,7 +152,13 @@ export default async function PedidoSucessoPage({
             </div>
             <div className="flex justify-between text-xs text-gray-500">
               <span>Frete</span>
-              <span>{Number(pedido.frete) === 0 ? 'Grátis' : moeda(Number(pedido.frete))}</span>
+              {pedido.freteTipo === 'a_combinar' ? (
+                <span className="text-amber-600 font-semibold">A combinar</span>
+              ) : Number(pedido.frete) === 0 ? (
+                <span className="text-green-600 font-bold">Frete Grátis</span>
+              ) : (
+                <span>{moeda(Number(pedido.frete))}</span>
+              )}
             </div>
             {Number(pedido.desconto) > 0 && (
               <div className="flex justify-between text-xs text-green-600">
