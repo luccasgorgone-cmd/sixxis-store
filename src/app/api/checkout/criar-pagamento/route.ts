@@ -164,7 +164,6 @@ export async function POST(req: NextRequest) {
     category_id: MP_CATEGORY,
     quantity: i.quantidade,
     unit_price: Number(i.precoUnitario),
-    currency_id: 'BRL',
   }))
 
   // additional_info: items + espelho do payer + endereço de entrega. Tudo isso
