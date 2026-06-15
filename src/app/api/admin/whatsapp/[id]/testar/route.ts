@@ -18,7 +18,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const res = await fetch(`${num.apiUrl}/message/sendText/${num.instanceId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': num.apiKey },
-      body: JSON.stringify({ number: tel.startsWith('55') ? tel : `55${tel}`, text: '✅ Teste de conexão Sixxis Store. Se recebeu isso, está tudo funcionando!' }),
+      body: JSON.stringify({ number: tel.startsWith('55') ? tel : `55${tel}`, text: '✅ Teste de conexão Sixxis. Se recebeu isso, está tudo funcionando!' }),
     })
     if (!res.ok) throw new Error(`Status ${res.status}`)
     await prisma.whatsappNumero.update({ where: { id }, data: { status: 'CONECTADO' } })

@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og'
 // antigo /og-image.jpg estático que dava 404. Aplicada a todas as rotas que não
 // definem a própria opengraph-image.
 export const runtime = 'nodejs'
-export const alt = 'Sixxis Store — Climatizadores, Aspiradores e Spinning'
+export const alt = 'Sixxis — Climatizadores, Aspiradores e Spinning'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 

@@ -5,7 +5,7 @@ import ProdutosClient from '@/components/produto/ProdutosClient'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Produtos — Sixxis Store',
+  title: 'Produtos — Sixxis',
   description: 'Explore a linha completa Sixxis: climatizadores, aspiradores e equipamentos fitness. Qualidade premium com garantia Sixxis.',
   // Filtros (?categoria=, ?q=, ?ordem=) apontam para a versão limpa /produtos
   // para evitar conteúdo duplicado indexado.

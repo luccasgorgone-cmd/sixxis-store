@@ -586,7 +586,7 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       {/* Compartilhar + Favoritar */}
       <div className="flex items-center gap-2 flex-wrap">
         <a
-          href={`https://wa.me/?text=${encodeURIComponent(`Olha esse produto na Sixxis Store: ${produto.nome} — ${typeof window !== 'undefined' ? window.location.origin : 'https://sixxis-store-production.up.railway.app'}/produtos/${produto.slug}`)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(`Olha esse produto na Sixxis: ${produto.nome} — ${typeof window !== 'undefined' ? window.location.origin : 'https://sixxis-store-production.up.railway.app'}/produtos/${produto.slug}`)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#25D366] border border-gray-200 hover:border-[#25D366] rounded-lg px-3 py-2 transition-colors"

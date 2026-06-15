@@ -13,7 +13,7 @@ import {
 } from './email-templates-premium'
 
 const FROM = process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br'
-const FROM_NAME = process.env.EMAIL_FROM_NAME ?? 'Sixxis Store'
+const FROM_NAME = process.env.EMAIL_FROM_NAME ?? 'Sixxis'
 // Respostas dos e-mails transacionais vão para o SAC (não para o noreply).
 const REPLY_TO = process.env.EMAIL_REPLY_TO ?? 'sac@sixxis.com.br'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://sixxis-store-production.up.railway.app'
@@ -141,7 +141,7 @@ function layout(content: string) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sixxis Store</title>
+  <title>Sixxis</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:32px 16px;">
@@ -159,7 +159,7 @@ function layout(content: string) {
         </tr>
         <tr>
           <td style="background:#f8f9fa;border-radius:0 0 12px 12px;padding:24px 32px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="margin:0 0 8px;font-size:12px;color:#9ca3af;">© ${new Date().getFullYear()} Sixxis Store — Araçatuba, SP</p>
+            <p style="margin:0 0 8px;font-size:12px;color:#9ca3af;">© ${new Date().getFullYear()} Sixxis</p>
             <p style="margin:0;font-size:12px;color:#9ca3af;">
               <a href="${SITE_URL}" style="color:#3cbfb3;text-decoration:none;">Visitar loja</a>
               &nbsp;·&nbsp;
@@ -327,7 +327,7 @@ export async function enviarEmailResetSenha(para: string, opts: {
     from:    `${FROM_NAME} <${FROM}>`,
     replyTo: REPLY_TO,
     to:      para,
-    subject: 'Redefinição de senha — Sixxis Store',
+    subject: 'Redefinição de senha — Sixxis',
     html,
   })
 }

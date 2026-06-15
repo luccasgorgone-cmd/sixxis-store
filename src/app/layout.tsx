@@ -32,9 +32,9 @@ export const viewport: Viewport = {
 }
 
 // Defaults usados quando seo_title/seo_description não estão configurados.
-const SEO_TITLE_DEFAULT = 'Sixxis Store — Climatizadores, Aspiradores e Spinning | Araçatuba SP'
+const SEO_TITLE_DEFAULT = 'Sixxis — Climatizadores, Aspiradores e Spinning'
 const SEO_DESC_DEFAULT =
-  'Loja oficial Sixxis em Araçatuba-SP. Climatizadores evaporativos, aspiradores sem fio e bicicletas spinning com 30 anos de qualidade. Garantia real de 12 meses. Frete para todo o Brasil.'
+  'Climatizadores evaporativos, aspiradores sem fio e bicicletas spinning com qualidade premium. Garantia Sixxis de 12 meses. Frete para todo o Brasil.'
 
 // SEO editável em Configurações da Loja (seo_title / seo_description). A imagem
 // Open Graph vem do arquivo-convenção src/app/opengraph-image.tsx (resolve o
@@ -55,16 +55,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(SITE_URL),
-    title: { default: seoTitle, template: '%s | Sixxis Store' },
+    title: { default: seoTitle, template: '%s | Sixxis' },
     description: seoDesc,
     keywords: [
       'climatizador sixxis', 'climatizador evaporativo', 'aspirador sem fio sixxis',
-      'spinning sixxis', 'sixxis araçatuba', 'loja sixxis',
+      'spinning sixxis', 'loja sixxis',
       'climatizador residencial', 'climatizador industrial',
     ],
-    authors: [{ name: 'Sixxis Store', url: SITE_URL }],
-    creator: 'Sixxis Store',
-    publisher: 'Sixxis Store',
+    authors: [{ name: 'Sixxis', url: SITE_URL }],
+    creator: 'Sixxis',
+    publisher: 'Sixxis',
     robots: {
       index: true, follow: true,
       googleBot: {
@@ -78,7 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type:        'website',
       locale:      'pt_BR',
       url:         SITE_URL,
-      siteName:    'Sixxis Store',
+      siteName:    'Sixxis',
       title:       seoTitle,
       description: seoDesc,
       // imagem provida por src/app/opengraph-image.tsx (file convention)
@@ -93,24 +93,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const schemaOrg = {
   '@context': 'https://schema.org',
-  '@type': 'Store',
-  name: 'Sixxis Store',
-  description: 'Loja oficial Sixxis — Climatizadores, Aspiradores e Spinning',
+  '@type': 'OnlineStore',
+  name: 'Sixxis',
+  description: 'Climatizadores, Aspiradores e Spinning Sixxis — Frete para todo o Brasil',
   url: SITE_URL,
   telephone: '+5518997474701',
   email: 'sac@sixxis.com.br',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'R. Anhanguera, 1711',
-    addressLocality: 'Araçatuba',
-    addressRegion: 'SP',
-    postalCode: '16015-480',
-    addressCountry: 'BR',
-  },
-  openingHoursSpecification: [
-    { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday'], opens: '08:00', closes: '18:00' },
-    { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Saturday'], opens: '08:00', closes: '12:00' },
-  ],
   priceRange: 'R$500 - R$9.250',
   currenciesAccepted: 'BRL',
   paymentAccepted: 'Cash, Credit Card, Debit Card, PIX',
@@ -242,7 +230,7 @@ try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JS
         <GtmScriptHead />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Sixxis Store" />
+        <meta name="apple-mobile-web-app-title" content="Sixxis" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev" crossOrigin="anonymous" />

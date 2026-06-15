@@ -1,4 +1,4 @@
-# Escalando a Sixxis Store para 10.000 usuários
+# Escalando a Sixxis para 10.000 usuários
 
 ## Estado atual após otimizações
 

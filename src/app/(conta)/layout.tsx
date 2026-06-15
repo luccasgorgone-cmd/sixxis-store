@@ -6,7 +6,7 @@ import CookieBanner from '@/components/cookies/CookieBanner'
 import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = {
-  title: { template: '%s — Minha Conta | Sixxis Store', default: 'Minha Conta — Sixxis Store' },
+  title: { template: '%s — Minha Conta | Sixxis', default: 'Minha Conta — Sixxis' },
   robots: { index: false },
 }
 

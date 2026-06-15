@@ -45,7 +45,7 @@ export default function CategoriaBanner({ categoria, total, loading }: Props) {
   const meta = META[categoria] ?? {
     emoji: '🛒',
     label: categoria.charAt(0).toUpperCase() + categoria.slice(1),
-    desc: 'Explore os melhores produtos da Sixxis Store.',
+    desc: 'Explore os melhores produtos da Sixxis.',
     from: '#0f2e2b',
     to: '#1a4f4a',
   }

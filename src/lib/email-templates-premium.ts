@@ -54,7 +54,7 @@ export function templateBoasVindas({
       subtitulo: 'Seu desconto de 10% já está ativo',
     })}
     <div class="email-content-pad" style="padding:40px 32px;">
-      ${paragrafo(`Sua conta na <strong>Sixxis Store</strong> foi criada. Já liberamos um cupom exclusivo de boas-vindas para você usar na sua primeira compra.`)}
+      ${paragrafo(`Sua conta na <strong>Sixxis</strong> foi criada. Já liberamos um cupom exclusivo de boas-vindas para você usar na sua primeira compra.`)}
 
       <div style="background:linear-gradient(135deg, ${BRAND.corEscura}, ${BRAND.corMedia});border-radius:16px;padding:28px;text-align:center;margin-bottom:28px;">
         ${svg('gift', BRAND.corPrincipal, 32)}

@@ -11,7 +11,7 @@ export const WA_TEMPLATES = {
   boasVindas: ({ nome }: { nome: string }) => `
 Olá, *${nome}*! 👋
 
-Bem-vindo(a) à *Sixxis Store* — somos especialistas em climatização há mais de 30 anos.
+Bem-vindo(a) à *Sixxis* — somos especialistas em climatização há mais de 30 anos.
 
 ✅ Sua conta foi criada com sucesso.
 
@@ -99,14 +99,14 @@ Olá, *${nome}*! 👋
 ${mensagem}
 
 ${ctaTexto && ctaLink ? `👉 ${ctaTexto}\n${ctaLink}\n` : ''}
-_Sixxis Store · ${new Date().getFullYear()}_
+_Sixxis · ${new Date().getFullYear()}_
 `.trim(),
 
   // ── 7. REATIVAÇÃO (cliente inativo) ──────────────
   reativacao: ({ nome, diasSemCompra }: { nome: string; diasSemCompra: number }) => `
 Sentimos sua falta, *${nome}*! 😊
 
-Faz ${diasSemCompra} dias que você não visita a *Sixxis Store*.
+Faz ${diasSemCompra} dias que você não visita a *Sixxis*.
 
 Temos *novidades* e *ofertas exclusivas* esperando por você:
 🌟 Novos modelos de climatizadores

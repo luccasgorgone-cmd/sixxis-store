@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 // Uso: POST manual 1x após deploy.
 const FIXES: Record<string, string> = {
   hero_subtitulo:    'Climatizadores, aspiradores e spinning de qualidade premium com entrega rápida para todo o Brasil.',
-  loja_descricao:    'Loja oficial Sixxis. Climatizadores, aspiradores, spinning e peças de reposição com qualidade comprovada.',
+  loja_descricao:    'Climatizadores, aspiradores, spinning e peças de reposição Sixxis com qualidade comprovada. Frete para todo o Brasil.',
   pq_sixxis_3_texto: 'Equipe pronta para tirar dúvidas sobre uso, operação e pós-venda dos produtos.',
 }
 

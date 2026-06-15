@@ -48,7 +48,7 @@ export async function POST(req: Request) {
         <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
           <div style="background:#1a4f4a;padding:28px 32px;text-align:center;">
             <h1 style="color:#3cbfb3;margin:0;font-size:22px;">Nova Solicitação de Parceria</h1>
-            <p style="color:rgba(255,255,255,.7);margin:6px 0 0;font-size:13px;">Sixxis Store — Painel Administrativo</p>
+            <p style="color:rgba(255,255,255,.7);margin:6px 0 0;font-size:13px;">Sixxis — Painel Administrativo</p>
           </div>
           <div style="padding:24px 32px;background:#fff;">
             <h2 style="color:#1f2937;font-size:16px;margin:0 0 16px;">Dados do Solicitante</h2>

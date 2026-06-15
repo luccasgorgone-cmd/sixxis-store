@@ -7,7 +7,7 @@ import { personalizarTemplate } from '@/lib/whatsapp-templates-premium'
 export const dynamic = 'force-dynamic'
 
 const FROM = process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br'
-const FROM_NAME = process.env.EMAIL_FROM_NAME ?? 'Sixxis Store'
+const FROM_NAME = process.env.EMAIL_FROM_NAME ?? 'Sixxis'
 
 function personalizarMensagem(template: string, vars: Record<string, string>) {
   return personalizarTemplate(template, vars)

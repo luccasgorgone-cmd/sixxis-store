@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
   // Meta description SEM HTML
   const descBase = limparHTML(produto.descricao, 80)
-  const descSEO = `Compre ${produto.nome} na Sixxis Store. ${
+  const descSEO = `Compre ${produto.nome} na Sixxis. ${
     specsText ? specsText + '. ' : descBase ? descBase + '. ' : ''
   }${preco > 0 ? `A partir de R$ ${preco.toLocaleString('pt-BR')}. ` : ''}Garantia 12 meses, frete para todo o Brasil.`.substring(0, 160)
 
@@ -91,7 +91,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       produto.nome,
       `${produto.nome} preço`,
       `${produto.nome} comprar`,
-      'Sixxis', 'Sixxis Store', categoria, 'Araçatuba',
+      'Sixxis', categoria,
     ].join(', '),
     openGraph: {
       title: `${produto.nome}${preco > 0 ? ` — R$ ${preco.toLocaleString('pt-BR')}` : ''}`,
@@ -99,11 +99,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       url: urlProduto,
       // og:type=product (nao suportado pelo schema oficial do Next; injetamos
       // <meta property="og:type" content="product"> direto no JSX da page).
-      siteName: 'Sixxis Store',
+      siteName: 'Sixxis',
       locale: 'pt_BR',
-      images: imagemPrincipal
-        ? [{ url: imagemPrincipal, width: 1200, height: 630, alt: produto.nome }]
-        : [],
+      // og:image — usa a imagem do produto; sem ela, cai no opengraph-image.tsx
+      // padrão da loja (não passamos array vazio, que suprimiria o fallback).
+      ...(imagemPrincipal && {
+        images: [{ url: imagemPrincipal, width: 1200, height: 630, alt: produto.nome }],
+      }),
     },
     twitter: {
       card: 'summary_large_image',
@@ -226,7 +228,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
       price: (promocional ?? preco).toFixed(2),
       priceValidUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
       availability: produto.estoque > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      seller: { '@type': 'Organization', name: 'Sixxis Store' },
+      seller: { '@type': 'Organization', name: 'Sixxis' },
     },
     ...(totalAv > 0 && {
       aggregateRating: {

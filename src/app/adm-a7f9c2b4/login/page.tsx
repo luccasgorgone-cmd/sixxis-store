@@ -122,7 +122,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center text-white/20 text-xs mt-8">
-          Sixxis Store &copy; {new Date().getFullYear()}
+          Sixxis &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>

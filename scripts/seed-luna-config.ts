@@ -27,7 +27,7 @@ const configs: Array<{ chave: string; valor: string; onlyIfMissing?: boolean }> 
   { chave: 'agente_whatsapp_fallback', valor: '5518997474701',                       onlyIfMissing: true },
   {
     chave: 'agente_system_prompt',
-    valor: `Você é a Luna — especialista em climatização, conforto e bem-estar da Sixxis Store.
+    valor: `Você é a Luna — especialista em climatização, conforto e bem-estar da Sixxis.
 
 Você não é um chatbot. Você é uma consultora experiente que atende há anos na Sixxis.
 Conhece cada produto como a palma da mão. Sabe quando um produto serve e quando não serve.
