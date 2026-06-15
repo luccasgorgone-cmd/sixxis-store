@@ -5,6 +5,8 @@ import Script from 'next/script'
 import { prisma } from '@/lib/prisma'
 import Providers from '@/components/Providers'
 import { GtmScriptHead, GtmNoScript } from '@/components/analytics/GtmScript'
+import { MetaPixelScript, MetaPixelNoScript } from '@/components/analytics/MetaPixel'
+import MetaPixelRouter from '@/components/analytics/MetaPixelRouter'
 
 // Domínio canônico de produção (apex → www via proxy.ts). É a fonte única para
 // metadataBase, canonical, OpenGraph/Twitter e schema.org. Override por env.
@@ -228,6 +230,7 @@ try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JS
           }}
         />
         <GtmScriptHead />
+        <MetaPixelScript />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Sixxis" />
@@ -245,7 +248,9 @@ try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JS
         style={bodyStyle}
       >
         <GtmNoScript />
+        <MetaPixelNoScript />
         <Providers>
+          <MetaPixelRouter />
           {children}
         </Providers>
         <Script

@@ -48,5 +48,12 @@ export function analyticsConsentido(): boolean {
   return lerConsentClient().analytics
 }
 
+// Gate de marketing/publicidade (Meta Pixel, remarketing). Espelha
+// analyticsConsentido(), mas lê a categoria 'marketing' do mesmo cookie
+// sixxis_consent — é a categoria correta p/ ferramentas de anúncio (LGPD).
+export function marketingConsentido(): boolean {
+  return lerConsentClient().marketing
+}
+
 // Evento p/ avisar componentes (ex.: TrackingProvider) que o consentimento mudou.
 export const CONSENT_EVENT = 'sixxis-consent-changed'

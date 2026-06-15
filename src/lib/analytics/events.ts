@@ -2,6 +2,7 @@
 
 import { analyticsConsentido } from '@/lib/consent'
 import { obterSidClient } from '@/lib/tracking'
+import { trackMeta } from '@/lib/analytics/meta-pixel'
 
 declare global {
   interface Window {
@@ -62,6 +63,14 @@ export function trackViewItem(produto: ProdutoTracking) {
     value: produto.price,
     items: [produto],
   })
+  // Meta: ViewContent (gate de marketing dentro do trackMeta).
+  trackMeta('ViewContent', {
+    content_type: 'product',
+    content_ids: [produto.item_id],
+    content_name: produto.item_name,
+    value: produto.price,
+    currency: 'BRL',
+  })
   enviarInterno('view_item', {
     produtoId: produto.item_id,
     produtoSlug: produto.item_slug,
@@ -76,6 +85,14 @@ export function trackAddToCart(produto: ProdutoTracking) {
     currency: 'BRL',
     value: item.price * item.quantity,
     items: [item],
+  })
+  // Meta: AddToCart.
+  trackMeta('AddToCart', {
+    content_type: 'product',
+    content_ids: [item.item_id],
+    content_name: item.item_name,
+    value: item.price * item.quantity,
+    currency: 'BRL',
   })
   enviarInterno('add_to_cart', {
     produtoId: item.item_id,
@@ -97,6 +114,14 @@ export function trackBeginCheckout(items: ProdutoTracking[], total: number, coup
     value: total,
     coupon,
     items,
+  })
+  // Meta: InitiateCheckout (num_items = soma das quantidades).
+  trackMeta('InitiateCheckout', {
+    content_type: 'product',
+    content_ids: items.map((i) => i.item_id),
+    value: total,
+    currency: 'BRL',
+    num_items: items.reduce((s, i) => s + (i.quantity ?? 1), 0),
   })
   enviarInterno('begin_checkout', {
     valor: total,
@@ -138,6 +163,19 @@ export function trackPurchase(
     coupon,
     items,
   })
+  // Meta: Purchase. eventID = id do pedido → DEDUPLICA com o CAPI (fase 2):
+  // o mesmo id sai no browser (aqui) e no servidor.
+  trackMeta(
+    'Purchase',
+    {
+      content_type: 'product',
+      content_ids: items.map((i) => i.item_id),
+      value: total,
+      currency: 'BRL',
+      num_items: items.reduce((s, i) => s + (i.quantity ?? 1), 0),
+    },
+    { eventID: transactionId },
+  )
   enviarInterno('purchase', {
     valor: total,
     dados: {
