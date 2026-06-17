@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,35 @@ export async function POST(req: Request) {
   const { nome, email, telefone } = dados
   if (!nome?.trim() || !email?.trim() || !telefone?.trim()) {
     return Response.json({ erro: 'Campos obrigatórios faltando' }, { status: 400 })
+  }
+
+  // Persiste a solicitação (lead). Best-effort: se o banco falhar, ainda
+  // enviamos o e-mail de notificação abaixo para não perder o lead.
+  const s = (v: unknown) => {
+    const str = v == null ? '' : String(v).trim()
+    return str === '' ? null : str
+  }
+  try {
+    await prisma.solicitacaoParceiro.create({
+      data: {
+        tipo:         s(dados.tipo) ?? 'pj',
+        nome:         nome.trim(),
+        email:        email.trim(),
+        telefone:     telefone.trim(),
+        cpf:          s(dados.cpf),
+        cnpj:         s(dados.cnpj),
+        razaoSocial:  s(dados.razaoSocial),
+        nomeFantasia: s(dados.nomeFantasia),
+        cidade:       s(dados.cidade),
+        estado:       s(dados.estado)?.slice(0, 2).toUpperCase() ?? null,
+        cep:          s(dados.cep),
+        endereco:     s(dados.endereco),
+        segmento:     s(dados.segmento),
+        mensagem:     s(dados.mensagem),
+      },
+    })
+  } catch (e) {
+    console.error('[REVENDEDOR API] falha ao persistir solicitação:', e)
   }
 
   const linhasTabela = Object.entries(dados)

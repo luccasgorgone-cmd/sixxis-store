@@ -884,3 +884,49 @@ model TrafegoBruto {
   @@index([path])
   @@index([visitorHash])
 }
+
+// Solicitações do formulário "Seja um Parceiro" (/seja-revendedor). Antes o lead
+// só era enviado por e-mail; agora também persiste aqui. Gerenciada em
+// /adm-a7f9c2b4/parceiros. O e-mail de notificação NÃO foi removido.
+// status: "novo" | "em_analise" | "aprovado" | "recusado".
+// Campos mapeados do form: <segmento> = o SELECT "Segmento de Atuação";
+// empresa = razaoSocial/nomeFantasia/cnpj; cidadeUf = cidade + estado.
+model SolicitacaoParceiro {
+  id           String   @id @default(cuid())
+  tipo         String   @default("pj") // "pj" | "pf"
+  nome         String
+  email        String
+  telefone     String
+  cpf          String?
+  cnpj         String?
+  razaoSocial  String?
+  nomeFantasia String?
+  cidade       String?
+  estado       String?  @db.Char(2)
+  cep          String?
+  endereco     String?  @db.Text
+  segmento     String? // SELECT do form: Varejo | Atacado | E-commerce | Distribuidor | Outro
+  mensagem     String?  @db.Text
+  status       String   @default("novo")
+  createdAt    DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Mensagens do formulário /contato. Antes só ia por e-mail para sac@sixxis.com.br;
+// agora também persiste aqui. Gerenciada em /adm-a7f9c2b4/contatos. O e-mail de
+// notificação NÃO foi removido. status: "novo" | "lido" | "respondido" | "arquivado".
+model MensagemContato {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String
+  telefone  String?
+  assunto   String
+  mensagem  String   @db.Text
+  status    String   @default("novo")
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}

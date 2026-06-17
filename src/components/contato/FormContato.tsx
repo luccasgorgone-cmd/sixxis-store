@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Send, CheckCircle, AlertCircle } from 'lucide-react'
+import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/security/TurnstileWidget'
 
 type FormState = {
   nome: string
@@ -40,6 +41,7 @@ export default function FormContato() {
   const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({})
   const [enviando, setEnviando] = useState(false)
   const [erroGlobal, setErroGlobal] = useState('')
+  const [tsToken, setTsToken] = useState('')
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -75,7 +77,7 @@ export default function FormContato() {
       const r = await fetch('/api/contato', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(form),
+        body:    JSON.stringify({ ...form, turnstileToken: tsToken }),
       })
       if (!r.ok) throw new Error()
       setEnviado(true)
@@ -219,9 +221,11 @@ export default function FormContato() {
         </div>
       )}
 
+      <TurnstileWidget onVerify={setTsToken} className="flex justify-start" />
+
       <button
         type="submit"
-        disabled={enviando}
+        disabled={enviando || (TURNSTILE_ENABLED && !tsToken)}
         className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm px-8 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg w-full sm:w-auto"
       >
         <Send size={16} />

@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Tag, Truck, MapPin, Search, User, ShoppingCart,
-  Menu, X, Navigation, Clock, Mail, Store, HelpCircle,
-  Wind, Fan, Bike, Info, Phone, UserPlus, ShoppingBag, LogOut, ChevronDown,
+  Menu, X, Navigation, Clock, Mail, HelpCircle,
+  Wind, Fan, Bike, Info, Phone, UserPlus, ShoppingBag, LogOut, ChevronDown, Handshake,
 } from 'lucide-react'
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
 import { useSession } from 'next-auth/react'
@@ -235,6 +235,7 @@ const NAV_LINKS = [
   { href: '/produtos?categoria=aspiradores',    label: 'ASPIRADORES',    icon: Fan   },
   { href: '/produtos?categoria=spinning',       label: 'SPINNING',       icon: Bike  },
   { href: '/ofertas',                           label: 'OFERTAS',        icon: Tag,   hot: true },
+  { href: '/seja-revendedor',                   label: 'PARCEIROS',      icon: Handshake },
   { href: '/sobre',                             label: 'SOBRE',          icon: Info  },
   { href: '/contato',                           label: 'CONTATO',        icon: Phone },
 ]
@@ -802,10 +803,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
 
           <div className="mx-6 my-3 border-t border-white/10" />
 
-          <Link href="/seja-revendedor" onClick={() => setDrawerOpen(false)} className="flex items-center gap-4 px-6 py-4 text-base font-semibold text-[#3cbfb3] hover:bg-white/10 transition-colors border-b border-white/5">
-            <Store size={20} className="text-[#3cbfb3]" />
-            Seja um Revendedor
-          </Link>
+          {/* "Parceiros" agora vive na NAV principal (NAV_LINKS) — link secundário
+              removido daqui para não duplicar dentro do mesmo drawer. */}
           <Link href="/faq" onClick={() => setDrawerOpen(false)} className="flex items-center gap-4 px-6 py-4 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors border-b border-white/5">
             <HelpCircle size={20} className="text-white/50" />
             FAQ

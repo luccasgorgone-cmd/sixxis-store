@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
+import { verifyTurnstile } from '@/lib/turnstile'
+import { getClientIp } from '@/lib/ratelimit'
 
 const schema = z.object({
   nome:     z.string().min(2),
@@ -10,13 +13,40 @@ const schema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request)
   const body = await request.json().catch(() => null)
+
+  // Anti-spam: verificação anti-robô (degrada graciosamente sem TURNSTILE_SECRET_KEY).
+  const okBot = await verifyTurnstile(body?.turnstileToken, ip)
+  if (!okBot) {
+    return NextResponse.json(
+      { error: 'Verificação anti-robô falhou. Recarregue a página e tente novamente.' },
+      { status: 403 },
+    )
+  }
+
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 })
   }
 
   const { nome, email, telefone, assunto, mensagem } = parsed.data
+
+  // Persiste a mensagem (best-effort: se o banco falhar, ainda enviamos o e-mail
+  // de notificação abaixo para não perder o contato).
+  try {
+    await prisma.mensagemContato.create({
+      data: {
+        nome,
+        email,
+        telefone: telefone?.trim() || null,
+        assunto,
+        mensagem,
+      },
+    })
+  } catch (e) {
+    console.error('[contato] falha ao persistir mensagem:', e)
+  }
 
   if (process.env.RESEND_API_KEY) {
     const { Resend } = await import('resend')

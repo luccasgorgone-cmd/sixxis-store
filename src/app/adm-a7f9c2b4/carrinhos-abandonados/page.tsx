@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   ShoppingCart, RefreshCcw, Mail, Phone, ChevronDown,
   Package, Clock, TrendingUp, Users, MessageCircle, Send,
+  Calendar, BarChart3, List,
 } from 'lucide-react'
 
 // Escala única de etapas (espelha CarrinhoCliente.etapaAtual / carrinho-cliente-sync).
@@ -42,9 +43,24 @@ interface CarrinhoAbandonado {
   atualizadoEm: string
   criadoEm: string
 }
+interface DiaBreakdown {
+  dia: string
+  count: number
+  valor: number
+}
 
 function fmtBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+// 'YYYY-MM-DD' (BRT, já calculado no servidor) → 'DD/MM/AAAA' sem reparsear como
+// Date (evita deslocamento de fuso). Também devolve o dia da semana.
+function fmtDia(iso: string): { data: string; semana: string } {
+  const [a, m, d] = iso.split('-').map(Number)
+  if (!a || !m || !d) return { data: iso, semana: '' }
+  const dt = new Date(a, m - 1, d)
+  const semana = dt.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')
+  return { data: `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${a}`, semana }
 }
 
 function haQuantoTempo(d: string): string {
@@ -65,15 +81,30 @@ function soDigitos(v: string | null): string {
 export default function CarrinhosAbandonadosPage() {
   const [carrinhos, setCarrinhos] = useState<CarrinhoAbandonado[]>([])
   const [valorTotalGeral, setValorTotalGeral] = useState(0)
+  const [porDia, setPorDia] = useState<DiaBreakdown[]>([])
   const [loading, setLoading] = useState(true)
   const [ordenar, setOrdenar] = useState<'recencia' | 'valor'>('valor')
   const [horas, setHoras] = useState(1)
   const [expandidoId, setExpandidoId] = useState<string | null>(null)
+  // Filtro de PERÍODO por data do carrinho ("de quando pra cá") — distinto do
+  // filtro de inatividade (horas). '' = todos.
+  const [periodo, setPeriodo] = useState<'' | '7' | '15' | '30' | 'custom'>('')
+  const [dataInicio, setDataInicio] = useState('')
+  const [dataFim, setDataFim] = useState('')
+  // Modo de visualização: lista de carrinhos ou breakdown diário.
+  const [visao, setVisao] = useState<'lista' | 'diario'>('lista')
 
   const buscar = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({ ordenar, horas: String(horas) })
+      if (periodo) {
+        params.set('periodo', periodo)
+        if (periodo === 'custom') {
+          if (dataInicio) params.set('dataInicio', dataInicio)
+          if (dataFim) params.set('dataFim', dataFim)
+        }
+      }
       const res = await fetch(`/api/admin/carrinhos-abandonados?${params}`, {
         cache: 'no-store', credentials: 'include',
       })
@@ -81,14 +112,16 @@ export default function CarrinhosAbandonadosPage() {
       const data = await res.json()
       setCarrinhos(Array.isArray(data.carrinhos) ? data.carrinhos : [])
       setValorTotalGeral(Number(data.valorTotalGeral) || 0)
+      setPorDia(Array.isArray(data.porDia) ? data.porDia : [])
     } catch (err) {
       console.error('[admin/carrinhos-abandonados] fetch falhou:', err)
       setCarrinhos([])
       setValorTotalGeral(0)
+      setPorDia([])
     } finally {
       setLoading(false)
     }
-  }, [ordenar, horas])
+  }, [ordenar, horas, periodo, dataInicio, dataFim])
 
   useEffect(() => {
     let alive = true
@@ -140,35 +173,156 @@ export default function CarrinhosAbandonadosPage() {
       </div>
 
       {/* CONTROLES */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row gap-3 sm:items-center">
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Ordenar</label>
-          <select
-            value={ordenar}
-            onChange={e => setOrdenar(e.target.value as 'recencia' | 'valor')}
-            className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
-          >
-            <option value="valor">Maior valor</option>
-            <option value="recencia">Mais recentes</option>
-          </select>
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Inativo há</label>
-          <select
-            value={horas}
-            onChange={e => setHoras(Number(e.target.value))}
-            className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
-          >
-            <option value={1}>+1 hora</option>
-            <option value={3}>+3 horas</option>
-            <option value={6}>+6 horas</option>
-            <option value={24}>+24 horas</option>
-            <option value={72}>+3 dias</option>
-          </select>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:flex-wrap">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Ordenar</label>
+            <select
+              value={ordenar}
+              onChange={e => setOrdenar(e.target.value as 'recencia' | 'valor')}
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
+            >
+              <option value="valor">Maior valor</option>
+              <option value="recencia">Mais recentes</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Inativo há</label>
+            <select
+              value={horas}
+              onChange={e => setHoras(Number(e.target.value))}
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
+            >
+              <option value={1}>+1 hora</option>
+              <option value={3}>+3 horas</option>
+              <option value={6}>+6 horas</option>
+              <option value={24}>+24 horas</option>
+              <option value={72}>+3 dias</option>
+            </select>
+          </div>
+          {/* PERÍODO — por data do carrinho ("de quando pra cá"). Diferente de "Inativo há". */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1">
+              <Calendar size={13} /> Período
+            </label>
+            <select
+              value={periodo}
+              onChange={e => setPeriodo(e.target.value as '' | '7' | '15' | '30' | 'custom')}
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
+            >
+              <option value="">Todo o período</option>
+              <option value="7">Últimos 7 dias</option>
+              <option value="15">Últimos 15 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="custom">Personalizado…</option>
+            </select>
+          </div>
+          {periodo === 'custom' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dataInicio}
+                max={dataFim || undefined}
+                onChange={e => setDataInicio(e.target.value)}
+                className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
+              />
+              <span className="text-gray-400 text-sm">até</span>
+              <input
+                type="date"
+                value={dataFim}
+                min={dataInicio || undefined}
+                onChange={e => setDataFim(e.target.value)}
+                className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#3cbfb3] bg-white"
+              />
+            </div>
+          )}
+          {/* Toggle de visão: lista x diário */}
+          <div className="sm:ml-auto inline-flex rounded-xl border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setVisao('lista')}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold transition-colors ${
+                visao === 'lista' ? 'bg-[#3cbfb3] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <List size={15} /> Lista
+            </button>
+            <button
+              onClick={() => setVisao('diario')}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold transition-colors ${
+                visao === 'diario' ? 'bg-[#3cbfb3] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <BarChart3 size={15} /> Diário
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* VISÃO DIÁRIA — breakdown por dia (data de criação do carrinho) */}
+      {visao === 'diario' && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="hidden md:grid grid-cols-[1.4fr_1fr_1.2fr_2fr] gap-4 px-5 py-3 bg-gray-50/80 border-b border-gray-100">
+            {['Dia', 'Carrinhos', 'Valor', 'Distribuição'].map((h, i) => (
+              <span key={i} className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{h}</span>
+            ))}
+          </div>
+
+          {loading && (
+            <div className="divide-y divide-gray-50">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="px-5 py-4"><div className="h-4 bg-gray-100 animate-pulse rounded-lg" /></div>
+              ))}
+            </div>
+          )}
+
+          {!loading && porDia.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <BarChart3 size={44} className="text-gray-200 mb-3" />
+              <p className="text-base font-semibold text-gray-400">Nenhum carrinho no período</p>
+              <p className="text-sm text-gray-300 mt-1">Ajuste os filtros de período e inatividade.</p>
+            </div>
+          )}
+
+          {!loading && porDia.length > 0 && (() => {
+            const maxCount = Math.max(...porDia.map(d => d.count))
+            // Mais recente primeiro para leitura rápida.
+            const ordenado = [...porDia].sort((a, b) => b.dia.localeCompare(a.dia))
+            return (
+              <div className="divide-y divide-gray-50">
+                {ordenado.map(d => {
+                  const { data, semana } = fmtDia(d.dia)
+                  const pct = maxCount > 0 ? Math.round((d.count / maxCount) * 100) : 0
+                  return (
+                    <div key={d.dia} className="grid grid-cols-[1.4fr_1fr_1.2fr_2fr] gap-4 px-5 py-3.5 items-center">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">{data}</p>
+                        <p className="text-[11px] text-gray-400 capitalize">{semana}</p>
+                      </div>
+                      <span className="text-sm font-black text-gray-900">{d.count}</span>
+                      <span className="text-sm font-bold text-gray-700">{fmtBRL(d.valor)}</span>
+                      <div className="hidden md:flex items-center gap-2">
+                        <div className="flex-1 h-2.5 rounded-full bg-gray-100 overflow-hidden">
+                          <div className="h-full rounded-full bg-[#3cbfb3]" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+                {/* Rodapé com totais — confere com a contagem da lista */}
+                <div className="grid grid-cols-[1.4fr_1fr_1.2fr_2fr] gap-4 px-5 py-3.5 items-center bg-gray-50/60">
+                  <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Total</span>
+                  <span className="text-sm font-black text-gray-900">{carrinhos.length}</span>
+                  <span className="text-sm font-bold text-gray-700">{fmtBRL(valorTotalGeral)}</span>
+                  <span />
+                </div>
+              </div>
+            )
+          })()}
+        </div>
+      )}
+
       {/* LISTA */}
+      {visao === 'lista' && (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="hidden md:grid grid-cols-[2.2fr_1.6fr_0.8fr_1fr_1.1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50/80 border-b border-gray-100">
           {['Cliente', 'Contato', 'Itens', 'Valor total', 'Etapa atual', 'Última atividade', ''].map((h, i) => (
@@ -341,6 +495,7 @@ export default function CarrinhosAbandonadosPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }
