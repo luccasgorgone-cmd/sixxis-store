@@ -79,10 +79,18 @@ export default function FormContato() {
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ ...form, turnstileToken: tsToken }),
       })
-      if (!r.ok) throw new Error()
+      // Só sucesso em 2xx; em erro, surface o motivo real retornado pela API.
+      if (!r.ok) {
+        const d = await r.json().catch(() => null)
+        throw new Error(d?.error || 'Erro ao enviar mensagem. Tente novamente ou entre em contato pelo WhatsApp.')
+      }
       setEnviado(true)
-    } catch {
-      setErroGlobal('Erro ao enviar mensagem. Tente novamente ou entre em contato pelo WhatsApp.')
+    } catch (err) {
+      setErroGlobal(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Erro ao enviar mensagem. Tente novamente ou entre em contato pelo WhatsApp.',
+      )
     } finally {
       setEnviando(false)
     }

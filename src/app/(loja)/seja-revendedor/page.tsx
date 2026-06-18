@@ -6,7 +6,7 @@ import {
   TrendingUp, Shield, Users, Package, Star, CheckCircle,
   ArrowRight, Phone, Mail, MapPin, Award,
   BarChart3, Zap, Clock, HeartHandshake, Globe,
-  Building2, Quote, BadgeCheck, Flame
+  Building2, Quote, BadgeCheck, Flame, AlertCircle
 } from 'lucide-react'
 import SectionKicker from '@/components/ui/SectionKicker'
 
@@ -54,19 +54,43 @@ export default function SejaRevendedorPage() {
   })
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
+  const [erro, setErro] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setErro('')
     setEnviando(true)
     try {
-      await fetch('/api/revendedor/solicitar', {
+      // Mapeia os campos do form EXATAMENTE para o schema da API
+      // /api/revendedor/solicitar (model Prisma SolicitacaoParceiro):
+      // whatsapp → telefone (obrigatório na API) e empresa → nomeFantasia
+      // (exibido como "Empresa" no admin Parceiros).
+      const r = await fetch('/api/revendedor/solicitar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, tipo: 'parceiro' }),
+        body: JSON.stringify({
+          tipo:         'pj',
+          nome:         formData.nome,
+          email:        formData.email,
+          telefone:     formData.whatsapp,
+          nomeFantasia: formData.empresa,
+          cidade:       formData.cidade,
+          segmento:     formData.segmento,
+          mensagem:     formData.mensagem,
+        }),
       })
-    } catch { /* silent */ }
-    setEnviado(true)
-    setEnviando(false)
+      // Resposta honesta: só consideramos sucesso em 2xx. Em erro, mostramos
+      // o motivo real retornado pela API (nunca fingimos sucesso).
+      if (!r.ok) {
+        const d = await r.json().catch(() => null)
+        throw new Error(d?.erro || 'Não foi possível enviar sua solicitação. Tente novamente.')
+      }
+      setEnviado(true)
+    } catch (err) {
+      setErro(err instanceof Error ? err.message : 'Erro ao enviar. Tente novamente ou fale pelo WhatsApp.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   const stats = [
@@ -632,10 +656,10 @@ export default function SejaRevendedorPage() {
                     style={{ backgroundColor: '#f0fffe', borderColor: '#3cbfb3' }}
                   >
                     <CheckCircle size={56} className="mx-auto mb-4" style={{ color: '#3cbfb3' }} />
-                    <h3 className="text-2xl font-black text-gray-900 mb-2">Cadastro recebido!</h3>
+                    <h3 className="text-2xl font-black text-gray-900 mb-2">Solicitação recebida!</h3>
                     <p className="text-gray-500 text-base">
-                      Nossa equipe comercial entrará em contato via WhatsApp em até 24 horas.
-                      Bem-vindo à família Sixxis! 🎉
+                      Recebemos sua solicitação de parceria! Nossa equipe vai analisar e entrar
+                      em contato em breve pelo e-mail ou WhatsApp informado.
                     </p>
                   </div>
                 ) : (
@@ -740,6 +764,13 @@ export default function SejaRevendedorPage() {
                         placeholder="Conte um pouco sobre seu negócio ou dúvida..."
                       />
                     </div>
+
+                    {erro && (
+                      <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
+                        <AlertCircle size={16} className="shrink-0" />
+                        {erro}
+                      </div>
+                    )}
 
                     <button
                       type="submit"

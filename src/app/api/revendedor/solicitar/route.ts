@@ -23,8 +23,15 @@ export async function POST(req: Request) {
   }
 
   const { nome, email, telefone } = dados
-  if (!nome?.trim() || !email?.trim() || !telefone?.trim()) {
-    return Response.json({ erro: 'Campos obrigatórios faltando' }, { status: 400 })
+  const faltando = (['nome', 'email', 'telefone'] as const).filter((k) => !dados[k]?.trim())
+  if (faltando.length) {
+    // Loga o motivo exato do 400 (qual campo faltou + payload recebido) para
+    // diagnosticar desalinhamentos entre o form e o schema desta rota.
+    console.error('[REVENDEDOR API] 400 — campos obrigatórios faltando:', faltando, '| payload:', dados)
+    return Response.json(
+      { erro: `Campos obrigatórios faltando: ${faltando.join(', ')}` },
+      { status: 400 },
+    )
   }
 
   // Persiste a solicitação (lead). Best-effort: se o banco falhar, ainda
@@ -33,6 +40,7 @@ export async function POST(req: Request) {
     const str = v == null ? '' : String(v).trim()
     return str === '' ? null : str
   }
+  let persistido = false
   try {
     await prisma.solicitacaoParceiro.create({
       data: {
@@ -52,6 +60,7 @@ export async function POST(req: Request) {
         mensagem:     s(dados.mensagem),
       },
     })
+    persistido = true
   } catch (e) {
     console.error('[REVENDEDOR API] falha ao persistir solicitação:', e)
   }
@@ -66,7 +75,12 @@ export async function POST(req: Request) {
     `)
     .join('')
 
+  // Notificação por e-mail (best-effort). NÃO derruba a requisição: o lead já
+  // pode ter sido persistido acima, então a falha de e-mail não pode virar erro
+  // para o usuário (senão ele reenviaria e duplicaria o registro).
+  let emailEnviado = false
   try {
+    if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY ausente')
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     await resend.emails.send({
@@ -130,9 +144,19 @@ export async function POST(req: Request) {
       `,
     })
 
-    return Response.json({ ok: true })
+    emailEnviado = true
   } catch (error) {
-    console.error('[REVENDEDOR API]', error)
-    return Response.json({ erro: 'Erro ao enviar solicitação' }, { status: 500 })
+    console.error('[REVENDEDOR API] falha ao enviar e-mail de notificação:', error)
   }
+
+  // Sucesso desde que o lead tenha sido capturado por ALGUM canal (banco ou
+  // e-mail). Só é erro real se ambos falharem — aí o lead se perderia.
+  if (!persistido && !emailEnviado) {
+    return Response.json(
+      { erro: 'Não foi possível registrar sua solicitação no momento. Tente novamente ou fale pelo WhatsApp.' },
+      { status: 500 },
+    )
+  }
+
+  return Response.json({ ok: true })
 }
