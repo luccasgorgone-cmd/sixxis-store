@@ -142,7 +142,7 @@ export const EMAIL_TEMPLATES = [
   {
     tipo: 'followup_entrega',
     ativo: true,
-    assunto: 'Seu pedido chegou, {{nome}}? Como foi a experiência',
+    assunto: 'Seu pedido chegou, {{nome}}? Como foi sua experiência?',
     prazo: 15,
     unidadePrazo: 'dias',
     corpo: wrapTemplate(`
