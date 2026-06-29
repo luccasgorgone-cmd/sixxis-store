@@ -30,6 +30,15 @@ function limparHTML(html: string | null | undefined, max = 160): string {
     .substring(0, max)
 }
 
+// Trunca meta description no último espaço antes de `max`, sem cortar palavra no
+// meio, e fecha com reticências. (Só corta quando o texto excede o limite.)
+function truncarSEO(texto: string, max = 160): string {
+  if (texto.length <= max) return texto
+  const corte = texto.slice(0, max)
+  const ultimoEspaco = corte.lastIndexOf(' ')
+  return (ultimoEspaco > 0 ? corte.slice(0, ultimoEspaco) : corte).trimEnd() + '…'
+}
+
 function getNomeCategoria(cat: string | null): string {
   if (!cat) return 'Produtos'
   const map: Record<string, string> = {
@@ -80,9 +89,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
   // Meta description SEM HTML
   const descBase = limparHTML(produto.descricao, 80)
-  const descSEO = `Compre ${produto.nome} na Sixxis. ${
+  const descSEO = truncarSEO(`Compre ${produto.nome} na Sixxis. ${
     specsText ? specsText + '. ' : descBase ? descBase + '. ' : ''
-  }${preco > 0 ? `A partir de R$ ${preco.toLocaleString('pt-BR')}. ` : ''}Garantia 12 meses, frete para todo o Brasil.`.substring(0, 160)
+  }${preco > 0 ? `A partir de R$ ${preco.toLocaleString('pt-BR')}. ` : ''}Garantia 12 meses, frete para todo o Brasil.`)
 
   return {
     title: `${produto.nome} — ${categoria}`,

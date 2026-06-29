@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { HelpCircle } from 'lucide-react'
 import FaqAccordion from '@/components/faq/FaqAccordion'
 import Breadcrumb from '@/components/ui/Breadcrumb'
@@ -55,9 +56,26 @@ const faqs = [
   },
 ]
 
+// JSON-LD FAQPage — montado a partir das MESMAS perguntas/respostas renderizadas
+// acima (array `faqs`). Mantém o structured data sincronizado com o conteúdo real.
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
 export default function FaqPage() {
   return (
     <main className="bg-white">
+      <Script
+        id="schema-faq"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'FAQ' }]} />
 
       {/* Hero */}

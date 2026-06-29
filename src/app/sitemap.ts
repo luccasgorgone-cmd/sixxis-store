@@ -22,12 +22,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const rotas = ['', '/produtos', '/ofertas', '/sobre', '/contato', '/garantia', '/seja-revendedor']
 
+  // Páginas de listagem por categoria (?categoria=) — conteúdo distinto e indexável,
+  // cada uma com canonical próprio. Espelha META_CATEGORIAS da page de produtos.
+  const categorias = ['climatizadores', 'aspiradores', 'spinning']
+
   return [
     ...rotas.map(r => ({
       url: `${BASE}${r}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: r === '' ? 1 : 0.8,
+    })),
+    {
+      url: `${BASE}/faq`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    },
+    ...categorias.map(c => ({
+      url: `${BASE}/produtos?categoria=${c}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
     })),
     ...produtos.map(p => ({
       url: `${BASE}/produtos/${p.slug}`,
