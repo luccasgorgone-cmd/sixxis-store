@@ -24,13 +24,13 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window,document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-// LGPD: nega por padrão (mirror do Google Consent Mode 'default deny' no layout).
-// <MetaPixelRouter/> concede ao vivo quando o marketing é aceito no banner; aqui
-// restauramos o consentimento do visitante recorrente lendo o cookie sixxis_consent.
-fbq('consent','revoke');
+// LGPD — init UMA vez; PageView só em estado 'grant'. Ler o consentimento ANTES
+// de qualquer track: 'consent','revoke' antes do init trava a fila do fbq (queue
+// nunca drena, configCount=0) e o PageView acabava contado em 'revoke' sem beacon.
+// Visitante recorrente que já consentiu → grant ANTES do track. Sem consentimento
+// → revoke e NENHUM track; <MetaPixelRouter/> dispara o PageView ao aceitar o banner.
 fbq('init','${PIXEL_ID}');
-fbq('track','PageView');
-try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JSON.parse(decodeURIComponent(m[1]));if(c.m===1||c.marketing===true){fbq('consent','grant');}}}catch(e){}
+(function(){var ok=false;try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JSON.parse(decodeURIComponent(m[1]));ok=(c.m===1||c.marketing===true);}}catch(e){}if(ok){fbq('consent','grant');fbq('track','PageView');}else{fbq('consent','revoke');}})();
         `,
       }}
     />
