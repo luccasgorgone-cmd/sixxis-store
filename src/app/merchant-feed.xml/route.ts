@@ -74,6 +74,9 @@ interface ItemFeed {
   googleCategoria: string
   productType: string
   mpn: string
+  // Frete por UF (g:shipping). price = custo Normal naquele estado p/ 1 unidade
+  // (0 quando frete grátis). Desbloqueia o Shopping (frete configurado no feed).
+  shipping: { region: string; price: number }[]
 }
 
 function renderItem(it: ItemFeed): string {
@@ -97,6 +100,12 @@ function renderItem(it: ItemFeed): string {
     `<g:mpn>${esc(it.mpn)}</g:mpn>`,
     ...(it.itemGroupId ? [`<g:item_group_id>${esc(it.itemGroupId)}</g:item_group_id>`] : []),
     ...(it.cor ? [`<g:color>${esc(it.cor)}</g:color>`] : []),
+    // Frete por estado — um bloco g:shipping por UF atendida (serviço "Padrão").
+    ...it.shipping.map(
+      (s) =>
+        `<g:shipping><g:country>BR</g:country><g:region>${esc(s.region)}</g:region>` +
+        `<g:service>Padrão</g:service><g:price>${esc(precoBRL(s.price))}</g:price></g:shipping>`,
+    ),
   ]
   return `    <item>\n      ${linhas.join('\n      ')}\n    </item>`
 }
@@ -104,7 +113,14 @@ function renderItem(it: ItemFeed): string {
 export async function GET() {
   const produtos = await prisma.produto.findMany({
     where: { ativo: true },
-    include: { variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } } },
+    include: {
+      variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
+      // Frete por UF (fonte única: FreteRegra produto × estado). Só os campos
+      // necessários p/ montar o g:shipping de cada estado atendido.
+      freteRegras: {
+        select: { uf: true, precoNormal: true, freteGratis: true, bloqueado: true, aCombinar: true },
+      },
+    },
     orderBy: { nome: 'asc' },
   })
 
@@ -127,6 +143,17 @@ export async function GET() {
     const precoBase = Number(p.preco)
     const promoBase = p.precoPromocional != null ? Number(p.precoPromocional) : null
 
+    // Frete por UF: um bloco por estado ATENDIDO. Pula bloqueado/a_combinar
+    // (sem preço fixo). Frete grátis (flag ou precoNormal 0) → 0.00. Mesma
+    // regra do site (frete-resolver), aqui sempre por 1 unidade.
+    const shipping = p.freteRegras
+      .filter((r) => !r.bloqueado && !r.aCombinar && (r.freteGratis || r.precoNormal != null))
+      .map((r) => ({
+        region: r.uf,
+        price: r.freteGratis || Number(r.precoNormal) === 0 ? 0 : Number(r.precoNormal),
+      }))
+      .sort((a, b) => a.region.localeCompare(b.region))
+
     const base = {
       title: p.nome,
       description: descricao,
@@ -135,6 +162,7 @@ export async function GET() {
       imagensAdicionais,
       googleCategoria: cat.google,
       productType: cat.tipo,
+      shipping,
     }
 
     // Variações com PREÇO PRÓPRIO (ex.: sx200-prime cor Branco/Preto) → 1 item
