@@ -106,6 +106,17 @@ const schemaOrg = {
   currenciesAccepted: 'BRL',
   paymentAccepted: 'Cash, Credit Card, Debit Card, PIX',
   logo: `${SITE_URL}/logo-sixxis.png`,
+  // image + address: completam o cartão de Organização no Rich Results (eram os
+  // 2 avisos não-críticos). image = logo absoluto da loja; address = endereço da
+  // empresa (Araçatuba/SP). postalCode omitido por não estar nas configs.
+  image: `${SITE_URL}/logo-sixxis.png`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'R. Anhanguera, 1711 - Icaray',
+    addressLocality: 'Araçatuba',
+    addressRegion: 'SP',
+    addressCountry: 'BR',
+  },
 }
 
 const COR_KEYS = [
