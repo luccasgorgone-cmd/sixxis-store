@@ -108,7 +108,10 @@ export function trackAddToCart(produto: ProdutoTracking) {
   })
 }
 
-export function trackBeginCheckout(items: ProdutoTracking[], total: number, coupon?: string) {
+// eventID (opcional): mesmo id no browser e no servidor → DEDUPLICA o
+// InitiateCheckout com o CAPI (fase 2). Quando ausente, o Pixel dispara sem id
+// (comportamento antigo). Gerado por quem chama (1x por entrada no checkout).
+export function trackBeginCheckout(items: ProdutoTracking[], total: number, coupon?: string, eventID?: string) {
   push('begin_checkout', {
     currency: 'BRL',
     value: total,
@@ -116,16 +119,20 @@ export function trackBeginCheckout(items: ProdutoTracking[], total: number, coup
     items,
   })
   // Meta: InitiateCheckout (num_items = soma das quantidades).
-  trackMeta('InitiateCheckout', {
-    content_type: 'product',
-    content_ids: items.map((i) => i.item_id),
-    value: total,
-    currency: 'BRL',
-    num_items: items.reduce((s, i) => s + (i.quantity ?? 1), 0),
-  })
+  trackMeta(
+    'InitiateCheckout',
+    {
+      content_type: 'product',
+      content_ids: items.map((i) => i.item_id),
+      value: total,
+      currency: 'BRL',
+      num_items: items.reduce((s, i) => s + (i.quantity ?? 1), 0),
+    },
+    eventID ? { eventID } : undefined,
+  )
   enviarInterno('begin_checkout', {
     valor: total,
-    dados: { coupon, itens: items.map(i => ({ id: i.item_id, nome: i.item_name, qtd: i.quantity ?? 1, preco: i.price })) },
+    dados: { coupon, eventID, itens: items.map(i => ({ id: i.item_id, nome: i.item_name, qtd: i.quantity ?? 1, preco: i.price })) },
   })
 }
 

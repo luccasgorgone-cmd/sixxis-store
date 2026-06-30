@@ -20,7 +20,7 @@ import GarantiaEstendidaStep, { type SelecaoGarantia } from '@/components/checko
 import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/EnderecosSalvos'
 import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
-import { trackAddPaymentInfo } from '@/lib/analytics/events'
+import { trackAddPaymentInfo, trackBeginCheckout } from '@/lib/analytics/events'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
@@ -501,6 +501,41 @@ function CheckoutContent() {
       ? crypto.randomUUID()
       : `ck-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   )
+
+  // ── InitiateCheckout / begin_checkout (topo do funil de checkout) ───────────
+  // Dispara UMA vez ao entrar no /checkout com carrinho não-vazio — cobre TODOS
+  // os caminhos de entrada (drawer, compra direta, refresh, link direto), não só
+  // o botão "Finalizar compra" do /carrinho. O guard (ref) garante 1 disparo por
+  // entrada; sair e voltar remonta o componente e reseta o ref. Lê o carrinho
+  // REAL (Zustand) e usa o MESMO formato de content_ids/items do AddToCart.
+  //
+  // eventID gerado aqui e guardado no ref → reuso futuro na dedupe com o CAPI.
+  const initiateCheckoutEventIdRef = useRef<string | null>(null)
+  const beginCheckoutDisparadoRef  = useRef(false)
+  useEffect(() => {
+    if (beginCheckoutDisparadoRef.current) return
+    // Espera o carrinho hidratar (Zustand persist) antes de disparar.
+    if (itens.length === 0) return
+    beginCheckoutDisparadoRef.current = true
+    const eventID =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `ic-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    initiateCheckoutEventIdRef.current = eventID
+    trackBeginCheckout(
+      itens.map(i => ({
+        item_id:    i.produtoId,
+        item_name:  i.nome,
+        item_brand: 'Sixxis',
+        price:      i.preco,
+        quantity:   i.quantidade,
+        variant:    i.variacaoNome,
+      })),
+      total,
+      cupom?.codigo,
+      eventID,
+    )
+  }, [itens, total, cupom?.codigo])
 
   // Verifica quais produtos do carrinho oferecem garantia. Se nenhum oferecer,
   // a etapa 3 é pulada automaticamente.

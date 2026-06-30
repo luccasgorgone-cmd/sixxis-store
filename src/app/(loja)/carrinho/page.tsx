@@ -13,7 +13,6 @@ import {
 } from '@/lib/preco-cupom'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import UsarCashback from '@/components/checkout/UsarCashback'
-import { trackBeginCheckout } from '@/lib/analytics/events'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -271,20 +270,11 @@ export default function CarrinhoPage() {
 
   const totalItens = itens.reduce((s, i) => s + i.quantidade, 0)
 
-  // ── FINALIZAR COMPRA (track + push) ───────────────────────
+  // ── FINALIZAR COMPRA ──────────────────────────────────────
+  // begin_checkout / InitiateCheckout NÃO dispara mais aqui: passou a disparar
+  // 1x no mount de /checkout (cobre todos os caminhos de entrada, não só este
+  // botão, e evita disparo duplicado no caminho carrinho→checkout).
   const handleCheckout = () => {
-    trackBeginCheckout(
-      itens.map(i => ({
-        item_id: i.produtoId || i.id,
-        item_name: i.nome,
-        item_brand: 'Sixxis',
-        price: i.precoPromocional ?? i.preco,
-        quantity: i.quantidade,
-        variant: i.variacao,
-      })),
-      totalFinal,
-      cupomAplicado?.codigo,
-    )
     router.push('/checkout')
   }
 
