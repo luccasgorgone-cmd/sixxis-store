@@ -21,6 +21,7 @@ import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/Ender
 import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
 import { trackAddPaymentInfo, trackBeginCheckout } from '@/lib/analytics/events'
+import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
@@ -536,6 +537,25 @@ function CheckoutContent() {
       eventID,
     )
   }, [itens, total, cupom?.codigo])
+
+  // ── Advanced Matching (Pixel) conforme o cliente preenche o checkout ────────
+  // Reenriquece o Pixel à medida que identificação/endereço são preenchidos —
+  // beneficia AddPaymentInfo e o Purchase (cliente conhecido). InitiateCheckout
+  // dispara no mount; para o logado o <MetaAdvancedMatching/> global já cobriu.
+  // Re-init NÃO re-dispara PageView; gate de marketing tratado na própria lib.
+  useEffect(() => {
+    if (!ident.email && !ident.telefone) return
+    initMetaAdvancedMatching({
+      email:      ident.email,
+      telefone:   ident.telefone,
+      nome:       ident.nome,
+      cidade:     end.cidade,
+      estado:     end.estado,
+      cep:        end.cep,
+      country:    'br',
+      externalId: session?.user?.id ?? undefined,
+    })
+  }, [ident.email, ident.telefone, ident.nome, end.cidade, end.estado, end.cep, session?.user?.id])
 
   // Verifica quais produtos do carrinho oferecem garantia. Se nenhum oferecer,
   // a etapa 3 é pulada automaticamente.

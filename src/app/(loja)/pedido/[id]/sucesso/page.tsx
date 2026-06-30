@@ -50,6 +50,7 @@ export default async function PedidoSucessoPage({
         include: { produto: { select: { nome: true, imagens: true, slug: true, categoria: true } } },
       },
       endereco: true,
+      cliente: { select: { nome: true, email: true, telefone: true } },
       pagamentos: { orderBy: { createdAt: 'desc' }, take: 1 },
     },
   })
@@ -79,6 +80,16 @@ export default async function PedidoSucessoPage({
         total={Number(pedido.total)}
         frete={Number(pedido.frete)}
         coupon={pedido.cupomCodigo ?? undefined}
+        advancedMatching={{
+          email:      pedido.cliente.email,
+          telefone:   pedido.cliente.telefone,
+          nome:       pedido.cliente.nome,
+          cidade:     pedido.endereco.cidade,
+          estado:     pedido.endereco.estado,
+          cep:        pedido.endereco.cep,
+          country:    'br',
+          externalId: pedido.clienteId,
+        }}
       />
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 text-center mb-4">

@@ -7,6 +7,7 @@ import Providers from '@/components/Providers'
 import { GtmScriptHead, GtmNoScript } from '@/components/analytics/GtmScript'
 import { MetaPixelScript, MetaPixelNoScript } from '@/components/analytics/MetaPixel'
 import MetaPixelRouter from '@/components/analytics/MetaPixelRouter'
+import MetaAdvancedMatching from '@/components/analytics/MetaAdvancedMatching'
 
 // Domínio canônico de produção (apex → www via proxy.ts). É a fonte única para
 // metadataBase, canonical, OpenGraph/Twitter e schema.org. Override por env.
@@ -251,6 +252,7 @@ try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JS
         <MetaPixelNoScript />
         <Providers>
           <MetaPixelRouter />
+          <MetaAdvancedMatching />
           {children}
         </Providers>
         <Script
