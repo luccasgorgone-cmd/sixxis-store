@@ -8,6 +8,7 @@ import { calcularPontos, creditarPontos } from '@/lib/fidelidade'
 import { creditarCashback, estornarCashbackPedido } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
+import { enviarPurchaseCapi } from '@/lib/analytics/meta-capi'
 
 function validarAssinatura(req: NextRequest): boolean {
   if (!MP_WEBHOOK_SECRET) return false
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
       include: {
         pedido: {
           include: {
-            cliente: { select: { id: true, nome: true, email: true } },
+            cliente: { select: { id: true, nome: true, email: true, telefone: true } },
             endereco: true,
             itens: {
               include: { produto: { select: { nome: true, slug: true } } },
@@ -182,6 +183,62 @@ export async function POST(req: NextRequest) {
         target: pedido.id,
         metadata: { mpPaymentId, valor: pagamento.valor },
       })
+    }
+
+    // ── CAPI Purchase (server-side, Fase 2) ────────────────────────────────────
+    // Espelha o Purchase do browser (event_id = pedido.id → a Meta deduplica).
+    // Fica FORA do bloco "primeira aprovação" e tem guard próprio
+    // (capiPurchaseEnviadoEm) para poder reenviar num webhook repetido se o 1º
+    // envio falhou. NUNCA quebra o fluxo do pedido (try/catch + log).
+    if (novoStatus === 'approved') {
+      try {
+        // Claim atômico: só 1 webhook ganha o lock (UPDATE ... WHERE col IS NULL).
+        const claim = await prisma.pedido.updateMany({
+          where: { id: pedido.id, capiPurchaseEnviadoEm: null },
+          data: { capiPurchaseEnviadoEm: new Date() },
+        })
+        if (claim.count === 1) {
+          const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br'
+          const resultado = await enviarPurchaseCapi({
+            eventId: pedido.id,
+            eventTime: Math.floor(Date.now() / 1000),
+            eventSourceUrl: `${SITE_URL}/pedido/${pedido.id}/sucesso`,
+            userData: {
+              email:      pedido.cliente.email,
+              telefone:   pedido.cliente.telefone,
+              nome:       pedido.cliente.nome,
+              cidade:     pedido.endereco.cidade,
+              estado:     pedido.endereco.estado,
+              cep:        pedido.endereco.cep,
+              country:    'br',
+              externalId: pedido.clienteId,
+            },
+            fbp: pedido.fbp,
+            fbc: pedido.fbc,
+            clientIp: pedido.clientIp,
+            clientUserAgent: pedido.clientUserAgent,
+            value: Number(pedido.total),
+            currency: 'BRL',
+            contentIds: pedido.itens.map((i) => i.produtoId),
+            contents: pedido.itens.map((i) => ({
+              id: i.produtoId,
+              quantity: i.quantidade,
+              item_price: Number(i.precoUnitario),
+            })),
+            numItems: pedido.itens.reduce((s, i) => s + i.quantidade, 0),
+          })
+          if (!resultado.ok) {
+            // Libera o guard p/ retry num próximo webhook (a Meta dedupe por
+            // event_id cobre eventual envio duplo).
+            await prisma.pedido
+              .update({ where: { id: pedido.id }, data: { capiPurchaseEnviadoEm: null } })
+              .catch(() => {})
+            console.error('[mp:webhook] CAPI Purchase falhou:', resultado.error)
+          }
+        }
+      } catch (e) {
+        console.error('[mp:webhook] CAPI Purchase:', (e as Error).message)
+      }
     }
 
     // Estorno/cancelamento. Se o pedido já estava pago e foi estornado

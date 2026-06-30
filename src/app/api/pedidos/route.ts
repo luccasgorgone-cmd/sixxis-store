@@ -39,6 +39,9 @@ const criarPedidoSchema = z.object({
   // Idempotência: 1 key por tentativa de checkout. Repetir a key retorna o mesmo
   // pedido (não cria duplicado).
   idempotencyKey: z.string().min(8).max(100).optional(),
+  // Atribuição Meta — cookies capturados no browser (CAPI Purchase os reutiliza).
+  fbp: z.string().max(255).optional(),
+  fbc: z.string().max(255).optional(),
 })
 
 export async function GET() {
@@ -96,7 +99,16 @@ export async function POST(request: NextRequest) {
   }
 
   // desconto do client é IGNORADO — recomputado no servidor a partir do cupom.
-  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, garantias, cashbackUsar, idempotencyKey } = parsed.data
+  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, garantias, cashbackUsar, idempotencyKey, fbp, fbc } = parsed.data
+
+  // Atribuição Meta: IP/UA do request ORIGINAL do cliente (este POST), p/ o CAPI
+  // Purchase — o webhook do MP vem do servidor do MP, não serviria. Persistidos
+  // junto com fbp/fbc na criação do pedido.
+  const clientIp =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    null
+  const clientUserAgent = request.headers.get('user-agent') || null
 
   // ── Idempotência: cliques repetidos com a MESMA key retornam o mesmo pedido ──
   // (não cria pedido/cobrança duplicado). Checagem antecipada; a condição de
@@ -267,6 +279,10 @@ export async function POST(request: NextRequest) {
         total:          Math.max(0, subtotal + freteValor + totalGarantias - descontoFinal),
         status:         statusPedido,
         idempotencyKey: idempotencyKey ?? null,
+        fbp:             fbp ?? null,
+        fbc:             fbc ?? null,
+        clientIp,
+        clientUserAgent,
         itens: {
           create: itensPedido.map((item) => ({
             produtoId:    item.produtoId,

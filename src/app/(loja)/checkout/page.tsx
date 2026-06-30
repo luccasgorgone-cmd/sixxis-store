@@ -22,6 +22,7 @@ import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
 import { trackAddPaymentInfo, trackBeginCheckout } from '@/lib/analytics/events'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
+import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
@@ -813,12 +814,18 @@ function CheckoutContent() {
           valorPago: 0,
         }))
 
+      // Atribuição Meta: cookies _fbp/_fbc (ou _fbc montado do ?fbclid=) p/ o
+      // CAPI Purchase ligar a compra ao clique no anúncio. Best-effort.
+      const { fbp, fbc } = capturarFbpFbc()
+
       const pr = await fetch('/api/pedidos', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           enderecoId,
           formaPagamento: 'mercado_pago',
+          fbp,
+          fbc,
           frete,
           freteTipo: freteStatus === 'ok' ? freteTipoSel ?? undefined : undefined,
           itens: itens.map(i => ({

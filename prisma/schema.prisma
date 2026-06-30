@@ -126,6 +126,15 @@ model Pedido {
   enviadoEm      DateTime?           // quando o pedido foi despachado
   entregueEm     DateTime?           // quando foi marcado como entregue
   idempotencyKey String?  @unique    // dedup de criação: mesma key = mesmo pedido
+  // ── Atribuição/CAPI Meta (Conversions API) ──────────────────────────────────
+  // Capturados no checkout (browser) e persistidos p/ o CAPI Purchase do webhook
+  // ligar a compra ao clique no anúncio. IP/UA são os do request ORIGINAL do
+  // cliente (criação do pedido), não os do webhook (que vem do Mercado Pago).
+  fbp                   String?           // cookie _fbp
+  fbc                   String?           // cookie _fbc (ou montado do fbclid)
+  clientIp              String?           // IP do cliente na criação do pedido
+  clientUserAgent       String?  @db.Text // user-agent do cliente na criação
+  capiPurchaseEnviadoEm DateTime?         // guard de idempotência do CAPI Purchase
   itens          ItemPedido[]
   cliente        Cliente             @relation(fields: [clienteId], references: [id])
   endereco       Endereco            @relation(fields: [enderecoId], references: [id])
