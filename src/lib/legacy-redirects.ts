@@ -31,8 +31,8 @@ const EXATOS: Record<string, string> = {
   '/product-category/aspiradores':    '/produtos?categoria=aspiradores',
   '/product-category/spinning':       '/produtos?categoria=spinning',
   // ── Estáticas ──
+  // /loja (e seus subpaths paginados /loja/page/N) tratado no fallback abaixo.
   '/quem-somos':               '/sobre',
-  '/loja':                     '/produtos',
   '/termo-de-garantia-sixxis': '/garantia',
   '/blog':                     '/produtos',
   '/showroom.php':             '/produtos',
@@ -59,6 +59,10 @@ export function resolverRedirectLegado(pathname: string): string | null {
 
   // 3) Fallback: qualquer /product-category/:cat* não mapeada → catálogo.
   if (p === '/product-category' || p.startsWith('/product-category/')) return '/produtos'
+
+  // 4) Fallback: a loja antiga e TODA a sua paginação (/loja/page/N, /loja/:path*)
+  //    → catálogo. Cobre o tráfego que o Search Console/GTM ainda batem.
+  if (p === '/loja' || p.startsWith('/loja/')) return '/produtos'
 
   return null
 }
