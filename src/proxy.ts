@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { NextFetchEvent } from 'next/server'
 import { ADMIN_BASE, ADMIN_INTERNAL, ADMIN_PATH_CHANGED } from '@/lib/admin-path'
+import { resolverRedirectLegado } from '@/lib/legacy-redirects'
 
 // Next 16 → proxy.ts substitui o antigo middleware.ts. Roda no Edge Runtime,
 // então NÃO pode importar crypto ou prisma. Aqui apenas verificamos a
@@ -125,6 +126,22 @@ export function proxy(request: NextRequest, event?: NextFetchEvent) {
   }
 
   const { pathname, searchParams } = request.nextUrl
+
+  // ─── 301 das URLs do site ANTIGO (WooCommerce) → estrutura nova ────────────
+  // Roda ANTES do pageview/guards: a URL legada não é página real do site novo,
+  // então redireciona já e não conta como pageview. O destino vai LIMPO — a
+  // query antiga do Woo (?add-to-cart=...) é descartada; só a query do próprio
+  // destino (ex.: ?categoria=) é mantida. Casa com e sem barra final. 301
+  // permanente (cacheável por buscadores). A tabela e a ordem específico→
+  // fallback ficam em @/lib/legacy-redirects.
+  const destinoLegado = resolverRedirectLegado(pathname)
+  if (destinoLegado) {
+    const [destPath, destQuery] = destinoLegado.split('?')
+    const url = request.nextUrl.clone()
+    url.pathname = destPath
+    url.search = destQuery ? `?${destQuery}` : '' // sobrescreve = descarta a query antiga
+    return NextResponse.redirect(url, 301)
+  }
 
   // ─── Tráfego Bruto (Fase 4C) ───────────────────────────────────────────────
   // Registra o pageview anônimo de TODA navegação de página (independe de
