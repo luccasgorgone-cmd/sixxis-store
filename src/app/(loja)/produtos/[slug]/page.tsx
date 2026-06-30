@@ -229,6 +229,9 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     description: limparHTML(produto.descricao, 300),
     image: imagens?.length ? imagens : undefined,
     sku: produto.sku || produto.slug,
+    // Sem GTIN/EAN: brand + mpn identificam o produto (Sixxis é a marca). Conserta
+    // o aviso de "identificador ausente" e ajuda o rastreio automático do Google.
+    mpn: produto.sku || produto.slug,
     brand: { '@type': 'Brand', name: 'Sixxis' },
     offers: {
       '@type': 'Offer',
