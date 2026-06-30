@@ -255,10 +255,11 @@ try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JS
           <MetaAdvancedMatching />
           {children}
         </Providers>
-        <Script
+        {/* JSON-LD da loja (OnlineStore) como <script> simples — sai no HTML do
+            servidor. next/script (afterInteractive) só injetava após hidratar. */}
+        <script
           id="schema-org"
           type="application/ld+json"
-          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
         />
       </body>

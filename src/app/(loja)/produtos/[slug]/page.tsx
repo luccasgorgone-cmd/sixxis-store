@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import Script from 'next/script'
 import { prisma } from '@/lib/prisma'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import type { GaleriaItemCB } from '@/components/produto/GaleriaCB'
@@ -277,13 +276,13 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           price: Number(promocional ?? preco),
         }}
       />
-      <Script
-        id={`schema-produto-${produto.slug}`}
+      {/* JSON-LD renderizado DIRETO no Server Component (tag <script> simples,
+          não next/script): sai no HTML do servidor, antes de qualquer JS. */}
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaProduct) }}
       />
-      <Script
-        id={`schema-breadcrumb-${produto.slug}`}
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaBreadcrumb) }}
       />
