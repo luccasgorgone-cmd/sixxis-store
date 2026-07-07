@@ -70,6 +70,8 @@ export interface ItemCarrinho {
   quantidade:   number
   variacaoId?:  string
   variacaoNome?: string
+  // g:id do feed (Meta content_ids / GA4 item_id). Ver hooks/useCarrinho.ts.
+  feedId?:      string
 }
 
 // ─── Endereço ────────────────────────────────────────────────────────────────

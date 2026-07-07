@@ -12,6 +12,10 @@ export interface ItemCarrinho {
   imagem?:      string
   variacaoId?:  string
   variacaoNome?: string
+  // g:id do feed (Meta content_ids / GA4 item_id). Calculado com feedId() no
+  // momento do add (onde temos sku/slug/variação). Persiste no carrinho p/ os
+  // eventos de checkout/purchase mandarem o id do catálogo, não o CUID.
+  feedId?:      string
 }
 
 // Cupom aplicado fica no estado global pra sincronizar /carrinho ↔ /checkout.

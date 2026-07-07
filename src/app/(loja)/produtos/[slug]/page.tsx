@@ -12,6 +12,7 @@ import { PorQueComprarSixxis } from '@/components/produto/PorQueComprarSixxis'
 import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
 import ViewItemTracker from '@/components/analytics/ViewItemTracker'
+import { feedIdProduto } from '@/lib/feed-id'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 export const dynamic = 'force-dynamic'
@@ -268,7 +269,10 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
       <meta property="og:type" content="product" />
       <ViewItemTracker
         produto={{
-          item_id: produto.id,
+          // item_id = g:id do feed (sku ?? slug) → content_ids do Meta batem com
+          // o catálogo. produto_id = CUID (só pipeline interno).
+          item_id: feedIdProduto({ sku: produto.sku, slug: produto.slug }),
+          produto_id: produto.id,
           item_slug: produto.slug,
           item_name: produto.nome,
           item_category: produto.categoria ?? undefined,

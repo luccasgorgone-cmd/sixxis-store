@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { feedIdProduto } from '@/lib/feed-id'
 
 // ─── Google Merchant Center — feed de produtos (RSS 2.0 + namespace g:) ───────
 // URL pública estável: https://www.sixxis.com.br/merchant-feed.xml
@@ -135,7 +136,9 @@ export async function GET() {
 
     const cat = CATEGORIA_MAP[p.categoria] ?? CATEGORIA_FALLBACK
     const link = `${SITE_URL}/produtos/${p.slug}`
-    const sku = p.sku ?? p.slug
+    // g:id do item único (sku ?? slug). MESMA função usada no tracking
+    // (Meta content_ids / GA4 item_id) — mantém o catálogo correspondendo.
+    const sku = feedIdProduto({ sku: p.sku, slug: p.slug })
     const descricao =
       semHTML(p.descricao) ||
       `${p.nome} — ${cat.tipo} Sixxis. Garantia de 12 meses, frete para todo o Brasil.`

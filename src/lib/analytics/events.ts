@@ -11,7 +11,13 @@ declare global {
 }
 
 export type ProdutoTracking = {
+  // item_id = g:id do feed (ASPIRA-BRAVO, CLIM-SX070-TREND…). É o que vai ao GA4
+  // (item_id) e ao Meta (content_ids) — bate 1:1 com o catálogo/feed. Gerado
+  // pela função feedId()/feedIdProduto() de '@/lib/feed-id'. NUNCA o CUID.
   item_id: string
+  // produto_id = CUID do banco. Só existe para o pipeline interno (EventoTracking,
+  // que tem FK pro Produto). NUNCA é enviado ao GA4 nem ao Meta.
+  produto_id: string
   item_slug?: string
   item_name: string
   item_category?: string
@@ -19,6 +25,14 @@ export type ProdutoTracking = {
   price: number
   quantity?: number
   variant?: string
+}
+
+// Item no formato do GA4 (dataLayer): remove produto_id (CUID interno) — o GA4
+// só enxerga o item_id = g:id do feed.
+function paraGA4(produto: ProdutoTracking): Omit<ProdutoTracking, 'produto_id'> {
+  const item = { ...produto }
+  delete (item as Partial<ProdutoTracking>).produto_id
+  return item
 }
 
 function push(event: string, ecommerce: Record<string, unknown>) {
@@ -61,9 +75,10 @@ export function trackViewItem(produto: ProdutoTracking) {
   push('view_item', {
     currency: 'BRL',
     value: produto.price,
-    items: [produto],
+    items: [paraGA4(produto)],
   })
-  // Meta: ViewContent (gate de marketing dentro do trackMeta).
+  // Meta: ViewContent (gate de marketing dentro do trackMeta). content_ids =
+  // g:id do feed → catálogo corresponde (dedupe/matching).
   trackMeta('ViewContent', {
     content_type: 'product',
     content_ids: [produto.item_id],
@@ -72,7 +87,7 @@ export function trackViewItem(produto: ProdutoTracking) {
     currency: 'BRL',
   })
   enviarInterno('view_item', {
-    produtoId: produto.item_id,
+    produtoId: produto.produto_id,
     produtoSlug: produto.item_slug,
     valor: produto.price,
     dados: { item_name: produto.item_name, item_category: produto.item_category, variant: produto.variant },
@@ -84,9 +99,9 @@ export function trackAddToCart(produto: ProdutoTracking) {
   push('add_to_cart', {
     currency: 'BRL',
     value: item.price * item.quantity,
-    items: [item],
+    items: [paraGA4(item)],
   })
-  // Meta: AddToCart.
+  // Meta: AddToCart. content_ids = g:id do feed.
   trackMeta('AddToCart', {
     content_type: 'product',
     content_ids: [item.item_id],
@@ -95,7 +110,7 @@ export function trackAddToCart(produto: ProdutoTracking) {
     currency: 'BRL',
   })
   enviarInterno('add_to_cart', {
-    produtoId: item.item_id,
+    produtoId: item.produto_id,
     produtoSlug: item.item_slug,
     valor: item.price * item.quantity,
     dados: {
@@ -116,9 +131,9 @@ export function trackBeginCheckout(items: ProdutoTracking[], total: number, coup
     currency: 'BRL',
     value: total,
     coupon,
-    items,
+    items: items.map(paraGA4),
   })
-  // Meta: InitiateCheckout (num_items = soma das quantidades).
+  // Meta: InitiateCheckout (num_items = soma das quantidades). content_ids = g:id.
   trackMeta(
     'InitiateCheckout',
     {
@@ -132,7 +147,7 @@ export function trackBeginCheckout(items: ProdutoTracking[], total: number, coup
   )
   enviarInterno('begin_checkout', {
     valor: total,
-    dados: { coupon, eventID, itens: items.map(i => ({ id: i.item_id, nome: i.item_name, qtd: i.quantity ?? 1, preco: i.price })) },
+    dados: { coupon, eventID, itens: items.map(i => ({ id: i.produto_id, nome: i.item_name, qtd: i.quantity ?? 1, preco: i.price })) },
   })
 }
 
@@ -147,7 +162,7 @@ export function trackAddPaymentInfo(
     value: total,
     payment_type,
     coupon,
-    items,
+    items: items.map(paraGA4),
   })
   enviarInterno('add_payment_info', {
     valor: total,
@@ -168,10 +183,10 @@ export function trackPurchase(
     value: total,
     shipping: frete,
     coupon,
-    items,
+    items: items.map(paraGA4),
   })
-  // Meta: Purchase. eventID = id do pedido → DEDUPLICA com o CAPI (fase 2):
-  // o mesmo id sai no browser (aqui) e no servidor.
+  // Meta: Purchase. content_ids = g:id do feed. eventID = id do pedido →
+  // DEDUPLICA com o CAPI (fase 2): o mesmo id sai no browser (aqui) e no servidor.
   trackMeta(
     'Purchase',
     {
@@ -189,7 +204,7 @@ export function trackPurchase(
       transaction_id: transactionId,
       shipping: frete,
       coupon,
-      itens: items.map(i => ({ id: i.item_id, nome: i.item_name, qtd: i.quantity ?? 1, preco: i.price })),
+      itens: items.map(i => ({ id: i.produto_id, nome: i.item_name, qtd: i.quantity ?? 1, preco: i.price })),
     },
   })
 }

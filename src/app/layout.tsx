@@ -108,13 +108,14 @@ const schemaOrg = {
   logo: `${SITE_URL}/logo-sixxis.png`,
   // image + address: completam o cartão de Organização no Rich Results (eram os
   // 2 avisos não-críticos). image = logo absoluto da loja; address = endereço da
-  // empresa (Araçatuba/SP). postalCode omitido por não estar nas configs.
+  // empresa (Araçatuba/SP) com postalCode (CEP).
   image: `${SITE_URL}/logo-sixxis.png`,
   address: {
     '@type': 'PostalAddress',
     streetAddress: 'R. Anhanguera, 1711 - Icaray',
     addressLocality: 'Araçatuba',
     addressRegion: 'SP',
+    postalCode: '16020-355',
     addressCountry: 'BR',
   },
 }

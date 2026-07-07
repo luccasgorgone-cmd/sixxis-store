@@ -9,6 +9,7 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos, useComparador } from '@/hooks/useListas'
 import { useState } from 'react'
 import { trackAddToCart } from '@/lib/analytics/events'
+import { feedIdProduto } from '@/lib/feed-id'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -45,6 +46,9 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const esgotado = (produto.estoque ?? 1) <= 0
   const isNovo = !desconto
 
+  // g:id do feed p/ este card (sem variação → item único: sku ?? slug).
+  const gId = feedIdProduto({ sku: produto.sku, slug: produto.slug })
+
   const mediaAvaliacoes = (produto as { mediaAvaliacoes?: number }).mediaAvaliacoes ?? 0
   const totalAvaliacoes = (produto as { totalAvaliacoes?: number }).totalAvaliacoes ?? 0
 
@@ -58,9 +62,11 @@ export default function CardProduto({ produto, priority = false }: Props) {
       preco: precoFinal,
       quantidade: 1,
       imagem: imagemCapa || undefined,
+      feedId: gId,
     })
     trackAddToCart({
-      item_id: produto.id,
+      item_id: gId,
+      produto_id: produto.id,
       item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria,
@@ -83,9 +89,11 @@ export default function CardProduto({ produto, priority = false }: Props) {
       preco: precoFinal,
       quantidade: 1,
       imagem: imagemCapa || undefined,
+      feedId: gId,
     })
     trackAddToCart({
-      item_id: produto.id,
+      item_id: gId,
+      produto_id: produto.id,
       item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria,

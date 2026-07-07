@@ -12,6 +12,7 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos } from '@/hooks/useListas'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import { trackAddToCart } from '@/lib/analytics/events'
+import { feedId } from '@/lib/feed-id'
 
 const SELOS_CONFIANCA = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
@@ -160,6 +161,12 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
     if (onVariacaoChange) onVariacaoChange(v?.nome ?? null)
   }
 
+  // g:id do feed p/ este produto/variação (Meta content_ids / GA4 item_id).
+  // `variacoes` (todas) decide se o produto é vendido por variação precificada.
+  function gIdCarrinho(v?: { sku?: string | null; preco?: number | null } | null): string {
+    return feedId({ sku: produto.sku, slug: produto.slug }, v, variacoes)
+  }
+
   function handleAddToCart() {
     if (produto.temVariacoes && !variacaoSelecionada) {
       setModalVariacaoAberto(true)
@@ -171,13 +178,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       preco: precoAtual,
       quantidade,
       imagem: produto.imagem,
+      feedId: gIdCarrinho(variacaoSelecionada),
       ...(variacaoSelecionada && {
         variacaoId: variacaoSelecionada.id,
         variacaoNome: variacaoSelecionada.nome,
       }),
     })
     trackAddToCart({
-      item_id: produto.id,
+      item_id: gIdCarrinho(variacaoSelecionada),
+      produto_id: produto.id,
       item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria ?? undefined,
@@ -202,13 +211,15 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
       preco: precoAtual,
       quantidade,
       imagem: produto.imagem,
+      feedId: gIdCarrinho(variacaoSelecionada),
       ...(variacaoSelecionada && {
         variacaoId: variacaoSelecionada.id,
         variacaoNome: variacaoSelecionada.nome,
       }),
     })
     trackAddToCart({
-      item_id: produto.id,
+      item_id: gIdCarrinho(variacaoSelecionada),
+      produto_id: produto.id,
       item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria ?? undefined,
@@ -222,17 +233,20 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
 
   function handleModalConfirmarCheckout(v: VariacaoSelecionavel, qty: number) {
     const preco = v.preco ?? precoBase
+    const gid = gIdCarrinho(variacoes.find((x) => x.id === v.id))
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
       preco,
       quantidade: qty,
       imagem: produto.imagem,
+      feedId: gid,
       variacaoId: v.id,
       variacaoNome: v.nome,
     })
     trackAddToCart({
-      item_id: produto.id,
+      item_id: gid,
+      produto_id: produto.id,
       item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria ?? undefined,
@@ -247,17 +261,20 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
 
   function handleModalConfirmarCarrinho(v: VariacaoSelecionavel, qty: number) {
     const preco = v.preco ?? precoBase
+    const gid = gIdCarrinho(variacoes.find((x) => x.id === v.id))
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
       preco,
       quantidade: qty,
       imagem: produto.imagem,
+      feedId: gid,
       variacaoId: v.id,
       variacaoNome: v.nome,
     })
     trackAddToCart({
-      item_id: produto.id,
+      item_id: gid,
+      produto_id: produto.id,
       item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria ?? undefined,

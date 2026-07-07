@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { trackAddToCart } from '@/lib/analytics/events'
+import { feedIdProduto } from '@/lib/feed-id'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -17,14 +18,17 @@ export default function BotaoAdicionarCarrinho({ produto }: Props) {
 
   function handleAdicionar() {
     const preco = Number(produto.precoPromocional ?? produto.preco)
+    const gId = feedIdProduto({ sku: produto.sku, slug: produto.slug })
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
       preco,
       quantidade,
+      feedId: gId,
     })
     trackAddToCart({
-      item_id: produto.id,
+      item_id: gId,
+      produto_id: produto.id,
       item_slug: produto.slug,
       item_name: produto.nome,
       item_category: produto.categoria ?? undefined,

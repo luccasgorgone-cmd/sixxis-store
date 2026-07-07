@@ -5,6 +5,7 @@ import { CheckCircle, Package, ArrowRight, Truck, FileText, Mail } from 'lucide-
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import PurchaseTracker from '@/components/analytics/PurchaseTracker'
+import { feedId } from '@/lib/feed-id'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +48,15 @@ export default async function PedidoSucessoPage({
     where: { id, clienteId: session.user.id },
     include: {
       itens: {
-        include: { produto: { select: { nome: true, imagens: true, slug: true, categoria: true } } },
+        include: {
+          produto: {
+            select: {
+              nome: true, imagens: true, slug: true, categoria: true, sku: true,
+              // p/ resolver o g:id (content_ids) de itens vendidos por variação.
+              variacoes: { select: { id: true, sku: true, preco: true } },
+            },
+          },
+        },
       },
       endereco: true,
       cliente: { select: { nome: true, email: true, telefone: true } },
@@ -69,7 +78,13 @@ export default async function PedidoSucessoPage({
       <PurchaseTracker
         transactionId={pedido.id}
         items={pedido.itens.map(i => ({
-          item_id: i.produtoId,
+          // content_ids = g:id do feed (mesma função do merchant-feed).
+          item_id: feedId(
+            { sku: i.produto.sku, slug: i.produto.slug },
+            i.variacaoId ? i.produto.variacoes.find(v => v.id === i.variacaoId) : null,
+            i.produto.variacoes,
+          ),
+          produto_id: i.produtoId,
           item_name: i.produto.nome,
           item_category: i.produto.categoria ?? undefined,
           item_brand: 'Sixxis',

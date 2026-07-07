@@ -526,7 +526,10 @@ function CheckoutContent() {
     initiateCheckoutEventIdRef.current = eventID
     trackBeginCheckout(
       itens.map(i => ({
-        item_id:    i.produtoId,
+        // content_ids = g:id do feed (gravado no add). Fallback ao CUID só se
+        // o item veio de um caminho antigo sem feedId.
+        item_id:    i.feedId ?? i.produtoId,
+        produto_id: i.produtoId,
         item_name:  i.nome,
         item_brand: 'Sixxis',
         price:      i.preco,
@@ -961,7 +964,8 @@ function CheckoutContent() {
                   onMetodoSelecionado={(metodo) => {
                     trackAddPaymentInfo(
                       itens.map(i => ({
-                        item_id: i.produtoId,
+                        item_id: i.feedId ?? i.produtoId,
+                        produto_id: i.produtoId,
                         item_name: i.nome,
                         item_brand: 'Sixxis',
                         price: i.preco,

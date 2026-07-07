@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { X, ShoppingBag, Minus, Plus, Trash2, Package, Zap } from 'lucide-react'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
+import { feedIdProduto } from '@/lib/feed-id'
 
 interface UpsellItem {
   id: string
   nome: string
   slug: string
+  sku: string | null
   preco: number
   precoFinal: number
   desconto: number | null
@@ -202,7 +204,7 @@ export default function CarrinhoDrawer() {
                       <p className="text-[10px] text-[#3cbfb3]">R$ {fmt(Number(p.pixPreco))} no PIX</p>
                     </div>
                     <button
-                      onClick={() => adicionarItem({ produtoId: p.id, nome: p.nome, preco: p.precoFinal, quantidade: 1, imagem: p.imagem ?? undefined })}
+                      onClick={() => adicionarItem({ produtoId: p.id, nome: p.nome, preco: p.precoFinal, quantidade: 1, imagem: p.imagem ?? undefined, feedId: feedIdProduto({ sku: p.sku, slug: p.slug }) })}
                       className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
                     >
                       + Add

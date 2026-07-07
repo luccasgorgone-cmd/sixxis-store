@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { feedIdProduto } from '@/lib/feed-id'
 import type { Produto } from '@/types'
 
 // ── Tipo local para compatibilidade ──────────────────────────────────────────
@@ -47,7 +48,14 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
   const imagem = Array.isArray(produto.imagens) ? produto.imagens[0] : null
 
   function comprarAgora() {
-    adicionarItem({ produtoId: produto.id, nome: produto.nome, preco: precoFinal, quantidade: 1, imagem: imagem || undefined })
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco: precoFinal,
+      quantidade: 1,
+      imagem: imagem || undefined,
+      feedId: feedIdProduto({ sku: produto.sku, slug: produto.slug }),
+    })
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
   }
 
