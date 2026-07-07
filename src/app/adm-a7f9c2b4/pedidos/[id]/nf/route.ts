@@ -3,9 +3,10 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
-import { formatarPagamento, formatarMpStatus } from '@/lib/pedido-status'
+import { formatarPagamento, formatarMpStatus, getStatusInfo } from '@/lib/pedido-status'
 import { feedId } from '@/lib/feed-id'
-import { gerarNfPdf, type NfItem } from '@/lib/nf-pdf'
+import { obterConfig } from '@/lib/fidelidade'
+import { gerarNfPdf, type NfItem, type NfPagamento, type NfTentativa } from '@/lib/nf-pdf'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -22,17 +23,36 @@ function parseNum(v: string | null): number | null {
   return Number.isNaN(n) ? null : n
 }
 
-let logoCache: Uint8Array | null | undefined
+let logoLocalCache: Uint8Array | null | undefined
 
-async function carregarLogo(): Promise<Uint8Array | null> {
-  if (logoCache !== undefined) return logoCache
+// Logo padrão bundlada (texto branco) — fallback quando não há logo dedicada.
+async function carregarLogoLocal(): Promise<Uint8Array | null> {
+  if (logoLocalCache !== undefined) return logoLocalCache
   try {
     const buf = await readFile(path.join(process.cwd(), 'public', 'logo-sixxis.png'))
-    logoCache = new Uint8Array(buf)
+    logoLocalCache = new Uint8Array(buf)
   } catch {
-    logoCache = null
+    logoLocalCache = null
   }
-  return logoCache
+  return logoLocalCache
+}
+
+// Logo da NF: prioriza a dedicada (config nf_logo_url, texto escuro p/ fundo
+// claro), buscada do R2. Fallback SEMPRE para a logo local — nunca quebra.
+async function carregarLogoNf(): Promise<Uint8Array | null> {
+  try {
+    const url = await obterConfig('nf_logo_url', '')
+    if (url) {
+      const res = await fetch(url, { cache: 'no-store' })
+      if (res.ok) {
+        const buf = await res.arrayBuffer()
+        if (buf.byteLength > 0) return new Uint8Array(buf)
+      }
+    }
+  } catch (e) {
+    console.error('[nf] logo dedicada falhou, usando fallback:', (e as Error).message)
+  }
+  return carregarLogoLocal()
 }
 
 export async function GET(
@@ -116,13 +136,32 @@ export async function GET(
   const freteTotais = freteCliente ? valorFrete ?? 0 : null
   const total = Math.max(0, subtotal - desconto + (freteTotais ?? 0))
 
-  // ── Pagamento: prioriza o aprovado; senão o mais recente. ───────────────────
+  // ── Pagamento: prioriza o aprovado; senão o mais recente. Valor é Int (cents).
   const pgAprovado =
     pedido.pagamentos.find((p) => p.mpStatus === 'approved') ?? pedido.pagamentos[0] ?? null
-  const statusPg = pgAprovado
-    ? `${formatarMpStatus(pgAprovado.mpStatus)}${pgAprovado.mpStatusDetail ? ` (${pgAprovado.mpStatusDetail})` : ''}`
-    : pedido.status
-  const aprovadoEm = pgAprovado?.aprovadoEm ?? pedido.pagoEm ?? null
+  const pagamento: NfPagamento = {
+    metodo: formatarPagamento(pgAprovado?.metodo ?? pedido.formaPagamento),
+    bandeira: pgAprovado?.bandeira ?? null,
+    ultimosDigitos: pgAprovado?.ultimosDigitos ?? null,
+    parcelas: pgAprovado?.parcelas ?? null,
+    valor: pgAprovado ? pgAprovado.valor / 100 : null,
+    status: pgAprovado ? formatarMpStatus(pgAprovado.mpStatus) : getStatusInfo(pedido.status).label,
+    statusDetalhe: pgAprovado?.mpStatusDetail ?? null,
+    aprovadoEm: pgAprovado?.aprovadoEm ?? pedido.pagoEm ?? null,
+    mpPaymentId: pgAprovado?.mpPaymentId ?? pedido.mpPaymentId ?? null,
+    mpPreferenceId: pgAprovado?.mpPreferenceId ?? null,
+    payerNome: pgAprovado?.payerNome ?? null,
+    payerEmail: pgAprovado?.payerEmail ?? null,
+    payerCpf: pgAprovado?.payerCpf ?? pedido.cliente.cpf ?? null,
+  }
+
+  // ── Tentativas de pagamento (todas) — vira mini-tabela no PDF se houver >1. ──
+  const tentativas: NfTentativa[] = pedido.pagamentos.map((pg) => ({
+    data: pg.createdAt,
+    metodo: formatarPagamento(pg.metodo),
+    valor: pg.valor / 100,
+    status: formatarMpStatus(pg.mpStatus),
+  }))
 
   // ── Logística: valores do modal, fallback pro que está salvo. ───────────────
   const transportadora = sp.get('transportadora')?.trim() || pedido.transportadora || null
@@ -132,12 +171,14 @@ export async function GET(
     prazoModal ||
     (pedido.fretePrazo ? `cerca de ${pedido.fretePrazo} dias úteis` : null)
 
-  const logoBytes = await carregarLogo()
+  const logoBytes = await carregarLogoNf()
 
   const pdf = await gerarNfPdf({
     pedidoCodigo: codigo,
+    pedidoStatus: getStatusInfo(pedido.status).label,
     emitidoEm: new Date(),
     pedidoCriadoEm: pedido.createdAt,
+    pagoEm: pedido.pagoEm,
     cliente: {
       nome: pedido.cliente.nome,
       email: pedido.cliente.email,
@@ -159,12 +200,8 @@ export async function GET(
     frete: freteTotais,
     total,
     cupomCodigo: pedido.cupomCodigo,
-    pagamento: {
-      metodo: formatarPagamento(pedido.formaPagamento),
-      mpPaymentId: pgAprovado?.mpPaymentId ?? pedido.mpPaymentId ?? null,
-      status: statusPg,
-      aprovadoEm,
-    },
+    pagamento,
+    tentativas,
     logistica: { transportadora, codigoRastreio, prazo, valorFrete, freteFaturado: freteCliente },
     logoBytes,
   })
