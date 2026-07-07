@@ -11,6 +11,7 @@ import {
 import { Toast } from '@/components/admin/Toast'
 import { formatarPagamento, formatarMpStatus } from '@/lib/pedido-status'
 import { formatarTelefone, formatarCpf } from '@/lib/format'
+import { ADMIN_BASE } from '@/lib/admin-path'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -161,6 +162,8 @@ function NfModal({
   const [prazo, setPrazo] = useState(
     pedido.fretePrazo ? `cerca de ${pedido.fretePrazo} dias úteis` : '',
   )
+  // Frete por conta do cliente? Default: Sim quando o pedido cobrou frete.
+  const [freteCliente, setFreteCliente] = useState(Number(pedido.frete) > 0)
 
   function gerar() {
     const params = new URLSearchParams()
@@ -168,7 +171,10 @@ function NfModal({
     if (frete.trim()) params.set('frete', frete.trim())
     if (rastreio.trim()) params.set('rastreio', rastreio.trim())
     if (prazo.trim()) params.set('prazo', prazo.trim())
-    window.open(`/adm-a7f9c2b4/pedidos/${pedido.id}/nf?${params.toString()}`, '_blank', 'noopener')
+    params.set('freteCliente', freteCliente ? '1' : '0')
+    // ADMIN_BASE = alias público (ex.: /painel…) que o proxy reescreve p/ a rota
+    // interna. Usar o path interno hardcoded cai em 404.
+    window.open(`${ADMIN_BASE}/pedidos/${pedido.id}/nf?${params.toString()}`, '_blank', 'noopener')
   }
 
   return (
@@ -244,6 +250,34 @@ function NfModal({
               placeholder="Ex: cerca de 7 dias úteis"
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Frete por conta do cliente?</label>
+            <div className="flex gap-2">
+              {[
+                { val: true, label: 'Sim' },
+                { val: false, label: 'Não' },
+              ].map(({ val, label }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setFreteCliente(val)}
+                  className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold border transition ${
+                    freteCliente === val
+                      ? 'bg-[#3cbfb3] text-white border-[#3cbfb3]'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#3cbfb3]/40'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1">
+              {freteCliente
+                ? 'Frete entra nos totais e soma ao Total do documento.'
+                : 'Frete NÃO entra nos totais — fica só como custo interno (não faturado).'}
+            </p>
           </div>
         </div>
 

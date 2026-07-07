@@ -94,21 +94,27 @@ export async function GET(
   const subtotal = itens.reduce((s, i) => s + i.precoUnitario * i.quantidade, 0)
   const desconto = Number(pedido.desconto)
 
-  // ── Totais ESPELHAM o pedido (batem com a transação no Mercado Pago). NÃO
-  //    recalculamos: frete = pedido.frete (o que o cliente pagou, já embutido no
-  //    total) e total = pedido.total. ──────────────────────────────────────────
-  const frete = Number(pedido.frete)
-  const total = Number(pedido.total)
-
-  // ── "Valor do frete" do modal é dado LOGÍSTICO (custo/transportadora): entra
-  //    só na seção Logística, NUNCA no cálculo do Total. Fallback: custoFreteReal.
-  const freteLogistico = parseNum(sp.get('frete'))
-  const valorFreteLogistico =
-    freteLogistico != null
-      ? freteLogistico
+  // ── "Valor do frete" vem do modal (fallback: custoFreteReal). ───────────────
+  const freteModal = parseNum(sp.get('frete'))
+  const valorFrete =
+    freteModal != null
+      ? freteModal
       : pedido.custoFreteReal != null
         ? Number(pedido.custoFreteReal)
         : null
+
+  // ── "Frete por conta do cliente?" (toggle do modal). Default: Sim se o pedido
+  //    cobrou frete. ───────────────────────────────────────────────────────────
+  //  • Sim → frete entra nos TOTAIS e soma ao Total (subtotal − desconto + frete)
+  //          e também aparece na Logística.
+  //  • Não → NÃO entra nos totais (Total = subtotal − desconto); o valor aparece
+  //          só na Logística, como custo interno não faturado.
+  const freteClienteParam = sp.get('freteCliente')
+  const freteCliente =
+    freteClienteParam != null ? freteClienteParam === '1' : Number(pedido.frete) > 0
+
+  const freteTotais = freteCliente ? valorFrete ?? 0 : null
+  const total = Math.max(0, subtotal - desconto + (freteTotais ?? 0))
 
   // ── Pagamento: prioriza o aprovado; senão o mais recente. ───────────────────
   const pgAprovado =
@@ -150,7 +156,7 @@ export async function GET(
     itens,
     subtotal,
     desconto,
-    frete,
+    frete: freteTotais,
     total,
     cupomCodigo: pedido.cupomCodigo,
     pagamento: {
@@ -159,7 +165,7 @@ export async function GET(
       status: statusPg,
       aprovadoEm,
     },
-    logistica: { transportadora, codigoRastreio, prazo, valorFrete: valorFreteLogistico },
+    logistica: { transportadora, codigoRastreio, prazo, valorFrete, freteFaturado: freteCliente },
     logoBytes,
   })
 

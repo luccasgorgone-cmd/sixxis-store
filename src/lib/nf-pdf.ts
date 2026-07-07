@@ -94,7 +94,9 @@ export interface NfData {
   itens: NfItem[]
   subtotal: number
   desconto: number
-  frete: number
+  // Frete nos TOTAIS: null = não faturado (não renderiza a linha nem soma ao
+  // Total). Número (inclui 0 = "Grátis") = frete por conta do cliente.
+  frete: number | null
   total: number
   cupomCodigo: string | null
   pagamento: {
@@ -107,9 +109,11 @@ export interface NfData {
     transportadora: string | null
     codigoRastreio: string | null
     prazo: string | null
-    // Custo/valor logístico do frete (dado do modal) — NÃO entra no Total, que
-    // espelha pedido.total. Puramente informativo p/ o financeiro.
+    // Valor do frete (dado do modal). Sempre aparece na seção Logística.
     valorFrete: number | null
+    // true = frete por conta do cliente (faturado, entra nos totais);
+    // false = custo interno não faturado (só logística).
+    freteFaturado: boolean
   }
   logoBytes: Uint8Array | null
 }
@@ -293,7 +297,9 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
   if (data.desconto > 0) {
     totLinha(`Desconto${data.cupomCodigo ? ` (${data.cupomCodigo})` : ''}`, `- ${moeda(data.desconto)}`, { color: rgb(0.1, 0.6, 0.3) })
   }
-  totLinha('Frete', data.frete === 0 ? 'Grátis' : moeda(data.frete))
+  if (data.frete != null) {
+    totLinha('Frete', data.frete === 0 ? 'Grátis' : moeda(data.frete))
+  }
   page.drawLine({ start: { x: totLabelX, y: y + 6 }, end: { x: totX, y: y + 6 }, thickness: 0.6, color: LINHA })
   y -= 2
   text('Total', totLabelX, y, { size: 11, font: bold, color: ESCURO })
@@ -328,7 +334,16 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
     yg -= 14
   }
   lgLinha('Transportadora', data.logistica.transportadora || '-')
-  lgLinha('Valor do frete', data.logistica.valorFrete != null ? moeda(data.logistica.valorFrete) : '-')
+  const valorFreteFmt =
+    data.logistica.valorFrete != null ? moeda(data.logistica.valorFrete) : null
+  lgLinha(
+    data.logistica.freteFaturado ? 'Valor do frete' : 'Custo interno',
+    valorFreteFmt
+      ? data.logistica.freteFaturado
+        ? valorFreteFmt
+        : `${valorFreteFmt} — não faturado`
+      : '-',
+  )
   lgLinha('Rastreio', data.logistica.codigoRastreio || '-')
   lgLinha('Prazo', data.logistica.prazo || '-')
   y = boxTop - boxH - 20
