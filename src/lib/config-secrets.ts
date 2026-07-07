@@ -46,7 +46,7 @@ export const PUBLIC_CONFIG_KEYS = new Set<string>([
   // Identidade da loja
   'loja_nome', 'loja_descricao', 'loja_email', 'loja_telefone',
   'loja_endereco', 'loja_cnpj', 'loja_horario', 'loja_aberta',
-  'logo_url', 'logo_rodape_url', 'favicon_url',
+  'logo_url', 'logo_rodape_url', 'favicon_url', 'nf_logo_url',
   // Cores e aparência
   'cor_principal', 'cor_principal_dark', 'cor_destaque',
   'cor_header', 'cor_header_texto', 'cor_textos', 'cor_textos_sec',

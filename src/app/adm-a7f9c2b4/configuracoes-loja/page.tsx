@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Save, RefreshCw, Settings, Check, ChevronDown, Search,
   Store, Palette, LayoutTemplate, Bot, Globe, ExternalLink, Lock, Info,
+  FileText, UploadCloud, Trash2,
 } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
 
@@ -35,6 +36,7 @@ type Secao =
   | { id: string; titulo: string; icon: typeof Store; tipo: 'form'; intro?: string; campos: Campo[] }
   | { id: string; titulo: string; icon: typeof Store; tipo: 'cores'; intro?: string }
   | { id: string; titulo: string; icon: typeof Store; tipo: 'atalho'; intro: string; linkLabel: string; href: string; itens: string[] }
+  | { id: string; titulo: string; icon: typeof Store; tipo: 'nf'; intro?: string }
 
 const SECOES: Secao[] = [
   {
@@ -56,6 +58,13 @@ const SECOES: Secao[] = [
       { chave: 'favicon_url',     label: 'Favicon (URL)',           tipo: 'url', descricao: 'Cabeado: ícone da aba.' },
       { chave: 'fonte_principal', label: 'Fonte principal',         tipo: 'texto', placeholder: 'Inter', descricao: 'Cabeado. Opções: Inter, Poppins.' },
     ],
+  },
+  {
+    id: 'documentos-nf',
+    titulo: 'Documentos / NF',
+    icon: FileText,
+    tipo: 'nf',
+    intro: 'Logo dedicada do PDF "Espelho do Pedido / NF" (fundo claro).',
   },
   {
     id: 'aparencia',
@@ -158,6 +167,8 @@ export default function ConfiguracoesLojaPage() {
   const [carregando, setCarregando] = useState(true)
   const [busca, setBusca]       = useState('')
   const [abertas, setAbertas]   = useState<Record<string, boolean>>({ identidade: true })
+  const [nfUploading, setNfUploading] = useState(false)
+  const [nfErro, setNfErro]     = useState('')
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -193,6 +204,46 @@ export default function ConfiguracoesLojaPage() {
   }
 
   const set = (chave: string, v: string) => setValores((p) => ({ ...p, [chave]: v }))
+
+  // ── Logo dedicada da NF: upload reusa o pipeline R2 (/api/admin/upload-nf-logo,
+  //    que já persiste em nf_logo_url). Preview lê valores.nf_logo_url. ──────────
+  const onNfLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setNfErro('')
+    setNfUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/upload-nf-logo', { method: 'POST', body: fd })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        throw new Error(d.error || 'Falha no upload')
+      }
+      const { url } = await res.json()
+      set('nf_logo_url', url)
+    } catch (err) {
+      setNfErro((err as Error).message || 'Erro ao enviar a logo')
+    }
+    setNfUploading(false)
+    e.target.value = ''
+  }
+
+  const removerNfLogo = async () => {
+    setNfErro('')
+    setNfUploading(true)
+    try {
+      await fetch('/api/admin/configuracoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ configs: { nf_logo_url: '' } }),
+      })
+      set('nf_logo_url', '')
+    } catch (err) {
+      setNfErro((err as Error).message || 'Erro ao remover')
+    }
+    setNfUploading(false)
+  }
 
   const q = busca.trim().toLowerCase()
   // Filtra campos por busca; seções com match abrem automaticamente.
@@ -354,6 +405,65 @@ export default function ConfiguracoesLojaPage() {
                         >
                           {secao.linkLabel} <ExternalLink size={13} />
                         </a>
+                      </div>
+                    )}
+
+                    {/* ── Documentos / NF (upload da logo dedicada) ── */}
+                    {secao.tipo === 'nf' && (
+                      <div className="mt-4 space-y-4">
+                        <div className="flex items-start gap-2 text-xs text-gray-500 bg-blue-50/50 border border-blue-100 rounded-xl px-3 py-2.5">
+                          <Info size={13} className="text-blue-400 shrink-0 mt-0.5" />
+                          <span>
+                            Logo usada <strong>apenas</strong> no PDF &ldquo;Espelho do Pedido / NF&rdquo;.
+                            O documento tem fundo claro, então use uma versão de <strong>texto escuro</strong>.
+                            Se vazio, cai na logo padrão do sistema. PNG ou JPG, até 5MB.
+                          </span>
+                        </div>
+
+                        {valores.nf_logo_url ? (
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <div className="border border-gray-200 rounded-xl px-4 py-3 bg-white flex items-center justify-center min-w-[160px]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={valores.nf_logo_url}
+                                alt="Logo da NF"
+                                className="h-12 max-w-[220px] object-contain"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={removerNfLogo}
+                              disabled={nfUploading}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-50"
+                            >
+                              <Trash2 size={13} /> Remover
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-400">
+                            Nenhuma logo de NF configurada — o PDF usa a logo padrão do sistema.
+                          </p>
+                        )}
+
+                        <label
+                          className={`inline-flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition cursor-pointer ${
+                            nfUploading
+                              ? 'bg-gray-100 text-gray-400 cursor-wait'
+                              : 'bg-[#3cbfb3] text-[#0f2e2b] hover:bg-[#2a9d8f]'
+                          }`}
+                        >
+                          {nfUploading ? <RefreshCw size={15} className="animate-spin" /> : <UploadCloud size={15} />}
+                          {nfUploading ? 'Enviando...' : valores.nf_logo_url ? 'Trocar logo (PNG/JPG)' : 'Enviar logo (PNG/JPG)'}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            className="hidden"
+                            disabled={nfUploading}
+                            onChange={onNfLogoFile}
+                          />
+                        </label>
+
+                        {nfErro && <p className="text-xs text-red-500">{nfErro}</p>}
                       </div>
                     )}
                   </div>
