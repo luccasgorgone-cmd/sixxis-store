@@ -9,6 +9,26 @@ import { creditarCashback, estornarCashbackPedido } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 import { enviarPurchaseCapi } from '@/lib/analytics/meta-capi'
+import { feedId } from '@/lib/feed-id'
+import { isStatusPago, isStatusCancelado } from '@/lib/pedido-status'
+
+// g:id do feed p/ um item de pedido (content_ids do CAPI). Resolve variação
+// precificada → SKU da variação; senão item único (sku ?? slug do produto).
+function gIdItem(i: {
+  variacaoId: string | null
+  produto: {
+    sku: string | null
+    slug: string
+    variacoes: { id: string; sku: string; preco: unknown }[]
+  }
+}): string {
+  const v = i.variacaoId ? i.produto.variacoes.find((x) => x.id === i.variacaoId) : null
+  return feedId(
+    { sku: i.produto.sku, slug: i.produto.slug },
+    v ? { sku: v.sku, preco: v.preco as number | null } : null,
+    i.produto.variacoes.map((x) => ({ sku: x.sku, preco: x.preco as number | null })),
+  )
+}
 
 function validarAssinatura(req: NextRequest): boolean {
   if (!MP_WEBHOOK_SECRET) return false
@@ -87,7 +107,15 @@ export async function POST(req: NextRequest) {
             cliente: { select: { id: true, nome: true, email: true, telefone: true } },
             endereco: true,
             itens: {
-              include: { produto: { select: { nome: true, slug: true } } },
+              include: {
+                produto: {
+                  select: {
+                    nome: true, slug: true, sku: true,
+                    // p/ o g:id (content_ids do CAPI) de itens por variação.
+                    variacoes: { select: { id: true, sku: true, preco: true } },
+                  },
+                },
+              },
             },
           },
         },
@@ -219,9 +247,11 @@ export async function POST(req: NextRequest) {
             clientUserAgent: pedido.clientUserAgent,
             value: Number(pedido.total),
             currency: 'BRL',
-            contentIds: pedido.itens.map((i) => i.produtoId),
+            // content_ids/contents = g:id do feed (dedupe com o Purchase do
+            // browser, que também manda o g:id). MESMA função do merchant-feed.
+            contentIds: pedido.itens.map((i) => gIdItem(i)),
             contents: pedido.itens.map((i) => ({
-              id: i.produtoId,
+              id: gIdItem(i),
               quantity: i.quantidade,
               item_price: Number(i.precoUnitario),
             })),
@@ -241,28 +271,56 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Estorno/cancelamento. Se o pedido já estava pago e foi estornado
-    // (refunded/charged_back) ou cancelado, marca 'cancelado' e faz clawback do
-    // cashback. Se ainda não estava pago, volta a 'pendente' (comportamento antigo).
+    // ── Estorno / cancelamento ─────────────────────────────────────────────────
+    // GUARD anti-cancelamento de pedido pago: um pedido com QUALQUER pagamento
+    // aprovado (ou pagoEm preenchido) NUNCA pode ser cancelado por um evento de
+    // negação/expiração (rejected/cancelled) — o caso clássico é um PIX que
+    // expira DEPOIS do cartão já ter sido aprovado. Só um ESTORNO real
+    // (refunded/charged_back) reverte um pedido pago.
     const ESTORNO = ['refunded', 'charged_back']
     const negado = novoStatus === 'rejected' || novoStatus === 'cancelled'
 
-    if (ESTORNO.includes(novoStatus) || (negado && pedido.status === 'pago')) {
-      if (pedido.status !== 'cancelado') {
+    const pedidoTemPagamentoAprovado =
+      pedido.pagoEm != null ||
+      isStatusPago(pedido.status) ||
+      (await prisma.pagamento.count({
+        where: { pedidoId: pedido.id, mpStatus: 'approved' },
+      })) > 0
+
+    if (ESTORNO.includes(novoStatus)) {
+      // Estorno/chargeback real → cancela o pedido e faz clawback do cashback.
+      // NÃO chamamos refund na API do MP: o dinheiro já voltou lá (foi o próprio
+      // MP quem emitiu este evento); aqui só refletimos o estado internamente.
+      if (!isStatusCancelado(pedido.status)) {
         await prisma.pedido.update({
           where: { id: pedido.id },
-          data: { status: 'cancelado' },
+          data: {
+            status: 'cancelado',
+            canceladoEm: new Date(),
+            canceladoMotivo: `Estorno Mercado Pago (${novoStatus}) — pagamento ${mpPaymentId}`,
+          },
         })
         // clawback DEPOIS de cancelar, p/ o recálculo de nível já excluir o pedido.
         await estornarCashbackPedido(pedido.id).catch((e) =>
           console.error('[mp:webhook] clawback cashback:', (e as Error).message),
         )
       }
-    } else if (negado && pedido.status !== 'pago') {
-      await prisma.pedido.update({
-        where: { id: pedido.id },
-        data: { status: 'pendente' },
-      })
+    } else if (negado) {
+      if (pedidoTemPagamentoAprovado) {
+        // Pedido já pago: o evento negado/expirado atualiza APENAS o pagamento
+        // (feito acima). NUNCA derruba o pedido. Corrige o bug do PIX expirado
+        // cancelando um pedido pago por cartão.
+        console.warn(
+          `[mp:webhook] ${novoStatus} ignorado p/ o status do pedido ${pedido.id}: ` +
+            `já existe pagamento aprovado (evento do pagamento ${mpPaymentId})`,
+        )
+      } else if (!isStatusCancelado(pedido.status)) {
+        // Pedido ainda não pago → volta a 'pendente' (comportamento antigo).
+        await prisma.pedido.update({
+          where: { id: pedido.id },
+          data: { status: 'pendente' },
+        })
+      }
     }
 
     await auditLog({

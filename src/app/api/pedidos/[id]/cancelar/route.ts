@@ -45,7 +45,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<Param
   await prisma.$transaction(async (tx) => {
     await tx.pedido.update({
       where: { id },
-      data: { status: 'cancelado_cliente' },
+      data: {
+        status: 'cancelado_cliente',
+        canceladoEm: new Date(),
+        canceladoMotivo: body.motivo?.trim()
+          ? `Cancelado pelo cliente: ${body.motivo.trim()}`
+          : 'Cancelado pelo cliente',
+      },
     })
     // Devolver estoque (variações + produto pai).
     for (const item of pedido.itens) {

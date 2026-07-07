@@ -125,6 +125,8 @@ model Pedido {
   custoFreteReal Decimal?            @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
   enviadoEm      DateTime?           // quando o pedido foi despachado
   entregueEm     DateTime?           // quando foi marcado como entregue
+  canceladoEm    DateTime?           // quando o pedido foi cancelado (auditoria)
+  canceladoMotivo String?  @db.Text  // motivo do cancelamento (estorno, admin, cliente…)
   idempotencyKey String?  @unique    // dedup de criação: mesma key = mesmo pedido
   // ── Atribuição/CAPI Meta (Conversions API) ──────────────────────────────────
   // Capturados no checkout (browser) e persistidos p/ o CAPI Purchase do webhook

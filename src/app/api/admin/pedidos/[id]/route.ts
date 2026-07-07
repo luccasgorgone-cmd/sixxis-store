@@ -114,6 +114,12 @@ export async function PATCH(
     data.entregueEm = new Date()
   }
 
+  // Entrou em "cancelado" (anterior != cancelado): carimba a auditoria 1x.
+  if (statusDepois === 'cancelado' && statusAntes !== 'cancelado') {
+    data.canceladoEm = new Date()
+    data.canceladoMotivo = 'Cancelado manualmente pelo admin'
+  }
+
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 })
   }
