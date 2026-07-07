@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight, Eye, Building2,
 } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import { formatarTelefone, formatarCnpj } from '@/lib/format'
 
 const STATUS_META: Record<string, { label: string; cor: string }> = {
   novo:       { label: 'Novo',        cor: '#3b82f6' },
@@ -187,7 +188,7 @@ export default function AdminParceirosPage() {
                     <p className="text-xs text-gray-700 truncate flex items-center gap-1">
                       <Building2 size={11} className="text-gray-300 shrink-0" /> {empresa || '—'}
                     </p>
-                    {s.cnpj && <p className="text-[11px] text-gray-400 truncate mt-0.5">{s.cnpj}</p>}
+                    {s.cnpj && <p className="text-[11px] text-gray-400 truncate mt-0.5">{formatarCnpj(s.cnpj)}</p>}
                   </div>
 
                   {/* Contato */}
@@ -196,7 +197,7 @@ export default function AdminParceirosPage() {
                       <Mail size={11} className="text-gray-300 shrink-0" /> {s.email}
                     </p>
                     <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                      <Phone size={11} className="text-gray-300 shrink-0" /> {s.telefone}
+                      <Phone size={11} className="text-gray-300 shrink-0" /> {formatarTelefone(s.telefone)}
                     </p>
                   </div>
 

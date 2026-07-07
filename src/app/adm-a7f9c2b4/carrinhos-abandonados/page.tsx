@@ -5,6 +5,7 @@ import {
   Package, Clock, TrendingUp, Users, MessageCircle, Send,
   Calendar, BarChart3, List,
 } from 'lucide-react'
+import { formatarTelefone } from '@/lib/format'
 
 // Escala única de etapas (espelha CarrinhoCliente.etapaAtual / carrinho-cliente-sync).
 const ETAPA_LABEL: Record<number, string> = {
@@ -383,7 +384,7 @@ export default function CarrinhosAbandonadosPage() {
                       </p>
                       {c.telefone && (
                         <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                          <Phone size={11} className="text-gray-300 shrink-0" /> {c.telefone}
+                          <Phone size={11} className="text-gray-300 shrink-0" /> {formatarTelefone(c.telefone)}
                         </p>
                       )}
                     </div>

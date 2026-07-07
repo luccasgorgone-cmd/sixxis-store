@@ -7,6 +7,7 @@ import {
   Calendar, Tag, MessageSquare, User, Handshake,
 } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import { formatarTelefone, formatarCpf, formatarCnpj } from '@/lib/format'
 
 const STATUS_OPCOES = [
   { valor: 'novo',       label: 'Novo',       cor: '#3b82f6' },
@@ -159,11 +160,11 @@ export default function ParceiroDetalhe() {
           <Campo icon={User}      label="Nome / Responsável" valor={s.nome} />
           <Campo icon={Tag}       label="Tipo" valor={s.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'} />
           <Campo icon={Mail}      label="E-mail" valor={s.email} />
-          <Campo icon={Phone}     label="Telefone / WhatsApp" valor={s.telefone} />
+          <Campo icon={Phone}     label="Telefone / WhatsApp" valor={s.telefone ? formatarTelefone(s.telefone) : s.telefone} />
           <Campo icon={Building2} label="Razão Social" valor={s.razaoSocial} />
           <Campo icon={Building2} label="Nome Fantasia" valor={s.nomeFantasia} />
-          <Campo icon={FileText}  label="CNPJ" valor={s.cnpj} />
-          <Campo icon={FileText}  label="CPF" valor={s.cpf} />
+          <Campo icon={FileText}  label="CNPJ" valor={s.cnpj ? formatarCnpj(s.cnpj) : s.cnpj} />
+          <Campo icon={FileText}  label="CPF" valor={s.cpf ? formatarCpf(s.cpf) : s.cpf} />
           <Campo icon={Tag}       label="Segmento de atuação" valor={s.segmento} />
           <Campo icon={MapPin}    label="Cidade / UF" valor={cidadeUf} />
           <Campo icon={MapPin}    label="CEP" valor={s.cep} />

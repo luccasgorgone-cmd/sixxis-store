@@ -6,6 +6,7 @@ import {
   ArrowLeft, Mail, Phone, Calendar, Tag, MessageSquare, User, Inbox,
 } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import { formatarTelefone } from '@/lib/format'
 
 const STATUS_OPCOES = [
   { valor: 'novo',       label: 'Novo',       cor: '#3b82f6' },
@@ -156,7 +157,7 @@ export default function ContatoDetalhe() {
           <Campo icon={User}  label="Nome" valor={m.nome} />
           <Campo icon={Tag}   label="Assunto" valor={assuntoLabel} />
           <Campo icon={Mail}  label="E-mail" valor={m.email} />
-          <Campo icon={Phone} label="Telefone / WhatsApp" valor={m.telefone} />
+          <Campo icon={Phone} label="Telefone / WhatsApp" valor={m.telefone ? formatarTelefone(m.telefone) : m.telefone} />
         </div>
       </div>
 

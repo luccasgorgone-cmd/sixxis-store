@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight, Eye,
 } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import { formatarTelefone } from '@/lib/format'
 
 const STATUS_META: Record<string, { label: string; cor: string }> = {
   novo:       { label: 'Novo',       cor: '#3b82f6' },
@@ -190,7 +191,7 @@ export default function AdminContatosPage() {
                   </p>
                   {m.telefone && (
                     <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                      <Phone size={11} className="text-gray-300 shrink-0" /> {m.telefone}
+                      <Phone size={11} className="text-gray-300 shrink-0" /> {formatarTelefone(m.telefone)}
                     </p>
                   )}
                 </div>

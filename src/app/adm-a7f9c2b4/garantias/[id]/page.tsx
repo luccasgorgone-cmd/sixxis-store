@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { ChevronLeft, ShieldCheck, Package } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import { formatarTelefone, formatarCpf } from '@/lib/format'
 
 interface GarantiaDetalhe {
   id: string
@@ -110,8 +111,8 @@ export default function GarantiaDetalhePage() {
           <p className="font-bold text-gray-900">Cliente</p>
           <p className="text-gray-600">{g.pedido?.cliente?.nome}</p>
           <p className="text-gray-500">{g.pedido?.cliente?.email}</p>
-          {g.pedido?.cliente?.cpf && <p className="text-gray-500">CPF: {g.pedido.cliente.cpf}</p>}
-          {g.pedido?.cliente?.telefone && <p className="text-gray-500">Tel: {g.pedido.cliente.telefone}</p>}
+          {g.pedido?.cliente?.cpf && <p className="text-gray-500">CPF: {formatarCpf(g.pedido.cliente.cpf)}</p>}
+          {g.pedido?.cliente?.telefone && <p className="text-gray-500">Tel: {formatarTelefone(g.pedido.cliente.telefone)}</p>}
         </div>
       </div>
 

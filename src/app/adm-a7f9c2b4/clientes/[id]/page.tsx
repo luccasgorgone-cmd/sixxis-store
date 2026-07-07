@@ -10,6 +10,7 @@ import {
 import NivelLoyaltyIcon from '@/components/loyalty/NivelLoyaltyIcon'
 import { calcularNivel, nivelPorId } from '@/lib/loyalty'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import { formatarTelefone, formatarCpf } from '@/lib/format'
 
 const STATUS_PEDIDO: Record<string, { label: string; cor: string; bg: string; icone: React.ElementType }> = {
   PENDENTE:    { label: 'Aguardando',   cor: '#d97706', bg: '#fef3c7', icone: Clock         },
@@ -174,12 +175,12 @@ export default function ClienteDetalhe() {
             <div className="space-y-2 text-left">
               {cliente.telefone && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone size={14} className="text-gray-400 shrink-0" /> {cliente.telefone}
+                  <Phone size={14} className="text-gray-400 shrink-0" /> {formatarTelefone(cliente.telefone)}
                 </div>
               )}
               {cliente.cpf && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <CreditCard size={14} className="text-gray-400 shrink-0" /> {cliente.cpf}
+                  <CreditCard size={14} className="text-gray-400 shrink-0" /> {formatarCpf(cliente.cpf)}
                 </div>
               )}
               {enderecos[0] && (
@@ -240,8 +241,8 @@ export default function ClienteDetalhe() {
                       {[
                         { label: 'Nome completo',  valor: cliente.nome || '—' },
                         { label: 'E-mail',         valor: cliente.email },
-                        { label: 'CPF',            valor: cliente.cpf || '—' },
-                        { label: 'Telefone',       valor: cliente.telefone || '—' },
+                        { label: 'CPF',            valor: cliente.cpf ? formatarCpf(cliente.cpf) : '—' },
+                        { label: 'Telefone',       valor: cliente.telefone ? formatarTelefone(cliente.telefone) : '—' },
                         { label: 'Cadastrado em',  valor: fmtData(cliente.createdAt) },
                         { label: 'Última compra',  valor: fmtData(cliente.ultimaCompra) },
                       ].map((item, i) => (
