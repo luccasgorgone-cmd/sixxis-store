@@ -6,10 +6,11 @@ import React from 'react'
 import {
   ChevronDown, ChevronRight, Loader2, ShoppingCart,
   Search, Package, MapPin, CreditCard, Truck, CheckCircle,
-  Clock, AlertCircle, Save, DollarSign,
+  Clock, AlertCircle, Save, DollarSign, FileText, X,
 } from 'lucide-react'
 import { Toast } from '@/components/admin/Toast'
 import { formatarPagamento, formatarMpStatus } from '@/lib/pedido-status'
+import { formatarTelefone, formatarCpf } from '@/lib/format'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,6 +42,7 @@ interface Pagamento {
   createdAt: string
   aprovadoEm: string | null
   rejeitadoEm: string | null
+  payerCpf?: string | null
 }
 
 interface Pedido {
@@ -138,6 +140,132 @@ function Timeline({ status }: { status: string }) {
   )
 }
 
+// Modal "Gerar NF" — Espelho do Pedido / Solicitação de Faturamento.
+// Campos editáveis pré-preenchidos; "Gerar PDF" abre a rota /nf em nova aba.
+function NfModal({
+  pedido,
+  onClose,
+}: {
+  pedido: Pedido
+  onClose: () => void
+}) {
+  const [transportadora, setTransportadora] = useState(pedido.transportadora ?? '')
+  const [frete, setFrete] = useState(
+    pedido.custoFreteReal != null
+      ? String(pedido.custoFreteReal)
+      : pedido.frete != null
+        ? String(pedido.frete)
+        : '',
+  )
+  const [rastreio, setRastreio] = useState(pedido.codigoRastreio ?? '')
+  const [prazo, setPrazo] = useState(
+    pedido.fretePrazo ? `cerca de ${pedido.fretePrazo} dias úteis` : '',
+  )
+
+  function gerar() {
+    const params = new URLSearchParams()
+    if (transportadora.trim()) params.set('transportadora', transportadora.trim())
+    if (frete.trim()) params.set('frete', frete.trim())
+    if (rastreio.trim()) params.set('rastreio', rastreio.trim())
+    if (prazo.trim()) params.set('prazo', prazo.trim())
+    window.open(`/adm-a7f9c2b4/pedidos/${pedido.id}/nf?${params.toString()}`, '_blank', 'noopener')
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 bg-[#0f2e2b]">
+          <div className="flex items-center gap-2 text-white">
+            <FileText className="w-4 h-4 text-[#3cbfb3]" />
+            <div>
+              <p className="text-sm font-bold leading-tight">Gerar NF</p>
+              <p className="text-[11px] text-[#9fd8d1] leading-tight">
+                Espelho do Pedido · #{pedido.id.slice(-8).toUpperCase()}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-white/70 hover:text-white transition">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+            Documento interno para o financeiro faturar. <b>Não é documento fiscal</b> —
+            a NF-e é emitida depois.
+          </p>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Transportadora</label>
+            <input
+              value={transportadora}
+              onChange={(e) => setTransportadora(e.target.value)}
+              placeholder="Ex: Correios, Jadlog…"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Valor do frete</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
+                <input
+                  type="number" min="0" step="0.01"
+                  value={frete}
+                  onChange={(e) => setFrete(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Código de rastreio</label>
+              <input
+                value={rastreio}
+                onChange={(e) => setRastreio(e.target.value)}
+                placeholder="BR000000000BR"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Prazo</label>
+            <input
+              value={prazo}
+              onChange={(e) => setPrazo(e.target.value)}
+              placeholder="Ex: cerca de 7 dias úteis"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100 bg-gray-50">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={gerar}
+            className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-semibold rounded-xl px-4 py-2 text-sm transition"
+          >
+            <FileText className="w-4 h-4" /> Gerar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PedidoDetalhe({
   pedido,
   onUpdate,
@@ -153,6 +281,7 @@ function PedidoDetalhe({
   const [linkRastreio, setLinkRastreio] = useState(pedido.linkRastreio ?? '')
   const [custoReal, setCustoReal] = useState(pedido.custoFreteReal != null ? String(pedido.custoFreteReal) : '')
   const [saving, setSaving] = useState<string | null>(null)
+  const [nfOpen, setNfOpen] = useState(false)
 
   const freteCobrado = Number(pedido.frete)
   const custoNum = custoReal.trim() === '' ? null : Number(custoReal)
@@ -207,6 +336,7 @@ function PedidoDetalhe({
   }
 
   const end = pedido.endereco
+  const payerCpf = pedido.pagamentos?.find(p => p.payerCpf)?.payerCpf
   const statusLower = (pedido.status || '').toLowerCase()
 
   return (
@@ -272,7 +402,8 @@ function PedidoDetalhe({
                   <p>{end.logradouro}, {end.numero}{end.complemento ? `, ${end.complemento}` : ''}</p>
                   <p>{end.bairro} — {end.cidade}/{end.estado}</p>
                   <p>CEP {end.cep}</p>
-                  {pedido.cliente.telefone && <p className="text-gray-400">{pedido.cliente.telefone}</p>}
+                  {pedido.cliente?.telefone && <p className="text-gray-400">Telefone: {formatarTelefone(pedido.cliente.telefone)}</p>}
+                  {payerCpf && <p className="text-gray-400">CPF: {formatarCpf(payerCpf)}</p>}
                 </div>
               </div>
 
@@ -366,11 +497,19 @@ function PedidoDetalhe({
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Truck className="w-3.5 h-3.5" /> Despacho e rastreio
               </p>
-              {statusLower === 'pago' && !pedido.codigoRastreio && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
-                  <AlertCircle className="w-3 h-3" /> Aguardando envio
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {statusLower === 'pago' && !pedido.codigoRastreio && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                    <AlertCircle className="w-3 h-3" /> Aguardando envio
+                  </span>
+                )}
+                <button
+                  onClick={() => setNfOpen(true)}
+                  className="inline-flex items-center gap-1.5 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-semibold rounded-lg px-3 py-1.5 text-xs transition"
+                >
+                  <FileText className="w-3.5 h-3.5" /> Gerar NF
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -499,6 +638,7 @@ function PedidoDetalhe({
             </div>
           </div>
         </div>
+        {nfOpen && <NfModal pedido={pedido} onClose={() => setNfOpen(false)} />}
       </td>
     </tr>
   )
