@@ -40,6 +40,11 @@ interface ProdutoFormData {
   garantiaFabricaMeses: string
   garantiaEstendida12Preco: string
   garantiaEstendida24Preco: string
+  pesoKg: string
+  alturaCm: string
+  larguraCm: string
+  comprimentoCm: string
+  volumes: string
 }
 
 export interface EspecificacaoRow { label: string; valor: string }
@@ -101,6 +106,11 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
     garantiaFabricaMeses: initialData?.garantiaFabricaMeses ?? '12',
     garantiaEstendida12Preco: initialData?.garantiaEstendida12Preco ?? '',
     garantiaEstendida24Preco: initialData?.garantiaEstendida24Preco ?? '',
+    pesoKg: initialData?.pesoKg ?? '',
+    alturaCm: initialData?.alturaCm ?? '',
+    larguraCm: initialData?.larguraCm ?? '',
+    comprimentoCm: initialData?.comprimentoCm ?? '',
+    volumes: initialData?.volumes ?? '1',
   })
 
   // Especificações e FAQs como JSON editável
@@ -327,6 +337,12 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
       garantiaEstendida24Preco: form.garantiaEstendida24Preco
         ? Number(form.garantiaEstendida24Preco)
         : null,
+      // Dimensões e peso (frete) — string vazia vira null; volumes default 1.
+      pesoKg: form.pesoKg ? Number(form.pesoKg) : null,
+      alturaCm: form.alturaCm ? Number(form.alturaCm) : null,
+      larguraCm: form.larguraCm ? Number(form.larguraCm) : null,
+      comprimentoCm: form.comprimentoCm ? Number(form.comprimentoCm) : null,
+      volumes: form.volumes ? Number(form.volumes) : null,
     }
 
     const url = mode === 'novo' ? '/api/admin/produtos' : `/api/admin/produtos/${produtoId}`
@@ -1133,6 +1149,86 @@ export default function ProdutoForm({ initialData, produtoId, mode }: ProdutoFor
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Dimensões e peso (para frete) */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wider">
+              Dimensões e peso (para frete)
+            </h2>
+            <p className="text-xs text-gray-400 mb-4">
+              Usado para cotar o frete com as transportadoras. Vale para o produto inteiro —
+              as variações (110/220, cor) herdam estes valores.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Peso (kg)</label>
+                <input
+                  name="pesoKg"
+                  type="number"
+                  min={0}
+                  step="0.001"
+                  value={form.pesoKg}
+                  onChange={handleChange}
+                  placeholder="Ex: 15,00"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Altura (cm)</label>
+                <input
+                  name="alturaCm"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.alturaCm}
+                  onChange={handleChange}
+                  placeholder="Ex: 105"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Largura (cm)</label>
+                <input
+                  name="larguraCm"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.larguraCm}
+                  onChange={handleChange}
+                  placeholder="Ex: 42"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Comprimento (cm)</label>
+                <input
+                  name="comprimentoCm"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.comprimentoCm}
+                  onChange={handleChange}
+                  placeholder="Ex: 52"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Volumes</label>
+                <input
+                  name="volumes"
+                  type="number"
+                  min={1}
+                  step="1"
+                  value={form.volumes}
+                  onChange={handleChange}
+                  placeholder="1"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                />
+                <p className="text-xs text-gray-400 mt-1">Nº de caixas/pacotes</p>
+              </div>
+            </div>
           </div>
         </div>
 

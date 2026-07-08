@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
   const resultado = await resolverFrete(
     produtos.map((p) => ({ produtoId: p.id, quantidade: p.quantidade })),
     uf,
+    { cepDestino },
   )
 
   return Response.json(resultado)

@@ -546,9 +546,11 @@ export default function CarrinhoPage() {
                           onChange={() => setFreteSelecionado(op)} />
                         <div>
                           <p className="text-sm font-semibold text-gray-900">{op.nome}</p>
-                          <p className="text-xs text-gray-400 flex items-center gap-1">
-                            <Clock size={10} /> {op.prazo}
-                          </p>
+                          {op.prazo && (
+                            <p className="text-xs text-gray-400 flex items-center gap-1">
+                              <Clock size={10} /> {op.prazo}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <p className={`text-sm font-black ${op.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>

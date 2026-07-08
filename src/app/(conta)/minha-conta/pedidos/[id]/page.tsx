@@ -96,10 +96,9 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
             {/* Dados de rastreio (quando despachado) */}
             {pedido.codigoRastreio && (
               <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1.5">
-                {pedido.transportadora && (
-                  <p className="text-sm text-gray-700"><span className="text-gray-400">Transportadora:</span> <strong>{pedido.transportadora}</strong></p>
-                )}
-                <p className="text-sm text-gray-700"><span className="text-gray-400">Código:</span> <strong className="font-mono">{pedido.codigoRastreio}</strong></p>
+                {/* A transportadora NÃO é exposta ao cliente (só serviço/prazo/código).
+                    O nome da transportadora permanece visível apenas no admin. */}
+                <p className="text-sm text-gray-700"><span className="text-gray-400">Código de rastreio:</span> <strong className="font-mono">{pedido.codigoRastreio}</strong></p>
                 {pedido.linkRastreio && (
                   <a
                     href={pedido.linkRastreio}

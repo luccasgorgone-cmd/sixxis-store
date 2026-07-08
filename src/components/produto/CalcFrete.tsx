@@ -192,7 +192,7 @@ export default function CalcFrete({ produtoId }: Props) {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-gray-800">{op.nome}</p>
-                      <p className="text-[10px] text-gray-500">{op.prazo}</p>
+                      {op.prazo && <p className="text-[10px] text-gray-500">{op.prazo}</p>}
                     </div>
                   </div>
                   <div className="text-right">

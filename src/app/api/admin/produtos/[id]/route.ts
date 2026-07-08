@@ -66,6 +66,11 @@ export async function PUT(
     garantiaFabricaMeses,
     garantiaEstendida12Preco,
     garantiaEstendida24Preco,
+    pesoKg,
+    alturaCm,
+    larguraCm,
+    comprimentoCm,
+    volumes,
   } = body
 
   const slug = slugRaw
@@ -157,6 +162,12 @@ export async function PUT(
               ? null
               : Number(garantiaEstendida24Preco),
         }),
+        // Dimensões e peso (frete): '' / null → null; volumes vazio → null.
+        ...(pesoKg !== undefined && { pesoKg: pesoKg === null || pesoKg === '' ? null : Number(pesoKg) }),
+        ...(alturaCm !== undefined && { alturaCm: alturaCm === null || alturaCm === '' ? null : Number(alturaCm) }),
+        ...(larguraCm !== undefined && { larguraCm: larguraCm === null || larguraCm === '' ? null : Number(larguraCm) }),
+        ...(comprimentoCm !== undefined && { comprimentoCm: comprimentoCm === null || comprimentoCm === '' ? null : Number(comprimentoCm) }),
+        ...(volumes !== undefined && { volumes: volumes === null || volumes === '' ? null : Number(volumes) }),
       },
     })
   })

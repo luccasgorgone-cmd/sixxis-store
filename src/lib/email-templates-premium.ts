@@ -148,12 +148,13 @@ export function templateConfirmacaoPedido({
 // 3. PEDIDO ENVIADO
 // ══════════════════════════════════════════════
 export function templatePedidoEnviado({
-  nome, pedidoId, codigoRastreio, transportadora, urlRastreio, prazoEstimado, siteUrl,
+  nome, pedidoId, codigoRastreio, urlRastreio, prazoEstimado, siteUrl,
 }: {
   nome: string
   pedidoId: string
   codigoRastreio: string
-  transportadora: string
+  // Recebido dos callers, mas NÃO exposto ao cliente (o e-mail é genérico).
+  transportadora?: string
   urlRastreio?: string
   prazoEstimado?: string
   siteUrl: string
@@ -166,7 +167,7 @@ export function templatePedidoEnviado({
       subtitulo: `Pedido #${idCurto}`,
     })}
     <div class="email-content-pad" style="padding:40px 32px;">
-      ${paragrafo(`Despachamos seu pedido pela <strong>${transportadora}</strong>. Use o código abaixo para acompanhar em tempo real.`)}
+      ${paragrafo(`Despachamos seu pedido. Use o código abaixo para acompanhar a entrega em tempo real.`)}
 
       <div style="background:#0f2e2b;border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
         ${svg('truck', BRAND.corPrincipal, 28)}
@@ -183,7 +184,7 @@ export function templatePedidoEnviado({
     </div>`
   return emailBase({
     assunto: `Seu pedido #${idCurto} saiu para entrega`,
-    preview: `Rastreio: ${codigoRastreio} · ${transportadora}`,
+    preview: `Rastreio: ${codigoRastreio}`,
     conteudo,
   })
 }

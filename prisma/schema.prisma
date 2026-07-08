@@ -88,6 +88,13 @@ model Produto {
   garantiaFabricaMeses     Int                 @default(12)
   garantiaEstendida12Preco Decimal?            @db.Decimal(10, 2)
   garantiaEstendida24Preco Decimal?            @db.Decimal(10, 2)
+  // Dimensões e peso (para cotação de frete). POR PRODUTO — variações (110/220,
+  // cor) herdam estes valores; não há dimensão por variação.
+  pesoKg                   Decimal?            @db.Decimal(10, 3)
+  alturaCm                 Decimal?            @db.Decimal(10, 2)
+  larguraCm                Decimal?            @db.Decimal(10, 2)
+  comprimentoCm            Decimal?            @db.Decimal(10, 2)
+  volumes                  Int?                @default(1)
   avaliacoes               Avaliacao[]
   itensCarrinho            ItemCarrinho[]
   itensPedido              ItemPedido[]

@@ -613,7 +613,9 @@ function CheckoutContent() {
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           uf: uf || undefined,
-          cepDestino: uf ? undefined : cepLimpo,
+          // Envia o CEP sempre que válido: além de derivar a UF, habilita a
+          // cotação em tempo real (carriers) mesmo quando a UF já é conhecida.
+          cepDestino: cepLimpo && cepLimpo.length === 8 ? cepLimpo : undefined,
           produtos: itens.map(i => ({ id: i.produtoId, quantidade: i.quantidade })),
         }),
       })
@@ -1131,7 +1133,7 @@ function CheckoutContent() {
                             </div>
                             <div className="flex-1">
                               <p className="text-sm font-semibold text-gray-900">{op.nome}</p>
-                              <p className="text-xs text-gray-400">{op.prazo}</p>
+                              {op.prazo && <p className="text-xs text-gray-400">{op.prazo}</p>}
                             </div>
                             <p className={`text-sm font-bold ${op.preco === 0 ? 'text-green-600' : 'text-gray-900'}`}>
                               {op.preco === 0 ? 'Grátis' : `R$ ${moeda(op.preco)}`}

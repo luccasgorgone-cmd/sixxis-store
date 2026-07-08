@@ -60,6 +60,11 @@ export default async function EditarProdutoPage({
             ? String(produto.garantiaEstendida12Preco) : '',
           garantiaEstendida24Preco: produto.garantiaEstendida24Preco != null
             ? String(produto.garantiaEstendida24Preco) : '',
+          pesoKg: produto.pesoKg != null ? String(produto.pesoKg) : '',
+          alturaCm: produto.alturaCm != null ? String(produto.alturaCm) : '',
+          larguraCm: produto.larguraCm != null ? String(produto.larguraCm) : '',
+          comprimentoCm: produto.comprimentoCm != null ? String(produto.comprimentoCm) : '',
+          volumes: produto.volumes != null ? String(produto.volumes) : '1',
         }}
       />
       <AvaliacoesAdminProduto produtoId={produto.id} />

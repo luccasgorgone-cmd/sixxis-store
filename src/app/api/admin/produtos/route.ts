@@ -86,6 +86,11 @@ export async function POST(request: NextRequest) {
     variacoes,
     especificacoes,
     faqs,
+    pesoKg,
+    alturaCm,
+    larguraCm,
+    comprimentoCm,
+    volumes,
   } = body
 
   if (!nome || !slugRaw || !categoria || preco == null) {
@@ -129,6 +134,11 @@ export async function POST(request: NextRequest) {
       temVariacoes: Boolean(temVariacoes),
       especificacoes: especificacoes ?? undefined,
       faqs: faqs ?? undefined,
+      pesoKg: pesoKg === null || pesoKg === '' || pesoKg === undefined ? null : Number(pesoKg),
+      alturaCm: alturaCm === null || alturaCm === '' || alturaCm === undefined ? null : Number(alturaCm),
+      larguraCm: larguraCm === null || larguraCm === '' || larguraCm === undefined ? null : Number(larguraCm),
+      comprimentoCm: comprimentoCm === null || comprimentoCm === '' || comprimentoCm === undefined ? null : Number(comprimentoCm),
+      volumes: volumes === null || volumes === '' || volumes === undefined ? 1 : Number(volumes),
       variacoes: temVariacoes && variacoesInput.length > 0
         ? {
             create: variacoesInput.map((v) => ({
