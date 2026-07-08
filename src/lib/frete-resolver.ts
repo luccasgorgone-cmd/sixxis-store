@@ -249,7 +249,18 @@ export async function resolverFrete(
     const bg = carrierNaCadeia
       ? await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
       : null
-    const prazoNormalStr = !prazoNormalMax ? '' : formatarPrazo(prazoNormalMin, prazoNormalMax)
+
+    // Prazo exibido no frete grátis:
+    //  • manual preenchido (ex.: SX200 "2 a 5 dias úteis") → mantém como está.
+    //  • manual vazio (prazoNormalMax = 0, ex.: aspirador em RS/MG) → usa o prazo
+    //    da MESMA cotação Braspress já feita acima (sem chamada extra).
+    //  • Braspress sem prazo (falhou/off/0) → segue vazio (não quebra o grátis).
+    const manualTemPrazo = prazoNormalMax > 0
+    const carrierPrazo = bg?.opcao.prazoDiasMax ?? 0
+    const prazoMin = manualTemPrazo ? prazoNormalMin : carrierPrazo
+    const prazoMax = manualTemPrazo ? prazoNormalMax : carrierPrazo
+    const prazoNormalStr = prazoMax > 0 ? formatarPrazo(prazoMin, prazoMax) : ''
+
     return {
       status: 'ok',
       uf,
@@ -258,8 +269,8 @@ export async function resolverFrete(
           id: 'normal',
           nome: 'Frete Grátis',
           preco: 0,
-          prazoDiasMin: prazoNormalMin,
-          prazoDiasMax: prazoNormalMax,
+          prazoDiasMin: prazoMin,
+          prazoDiasMax: prazoMax,
           prazo: prazoNormalStr,
           freteGratis: true,
         },
