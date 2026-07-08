@@ -17,7 +17,8 @@ const NO_CACHE = {
 //
 // Retorno JSON sempre:
 //   { ok, produto:{id,nome,sku,pesoKg,alturaCm,larguraCm,comprimentoCm,volumes},
-//     payloadEnviado:{cepOrigem,cepDestino,peso,volumes,cubagem,vlrMercadoria},
+//     payloadEnviado:{cnpjRemetente,cnpjDestinatario,modal,tipoFrete,cepOrigem,
+//                     cepDestino,vlrMercadoria,peso,volumes,cubagem},
 //     resultado:{preco,prazoDias}|null, erro:{status,mensagem}|null }
 export async function GET(request: NextRequest) {
   const unauthorized = await requireAdmin(request)

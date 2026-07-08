@@ -32,20 +32,36 @@ function authHeader(): string | null {
   return `Basic ${token}`
 }
 
-// Payload "de exibição" (o que a Braspress recebe, sem credenciais). Reusado
-// tanto pela cotação real quanto pelo diagnóstico do admin.
+// Payload COMPLETO enviado à Braspress (é exatamente o body do POST, sem
+// credenciais de auth). Fonte única: cotar() e o diagnóstico usam este mesmo
+// objeto — o que o admin vê é o que foi enviado.
+//
+// Tipos numéricos: a Braspress trata string como campo nulo ("CAMPOS DE ENTRADA
+// NULOS"), então CNPJs e CEPs vão como INTEIRO. modal/tipoFrete são strings
+// fixas por contrato da API.
 export interface PayloadBraspress {
-  cepOrigem: string
-  cepDestino: string
+  cnpjRemetente: number
+  cnpjDestinatario: number
+  modal: 'R'
+  tipoFrete: '1'
+  cepOrigem: number
+  cepDestino: number
+  vlrMercadoria: number
   peso: number
   volumes: number
   cubagem: { altura: number; largura: number; comprimento: number; volumes: number }[]
-  vlrMercadoria: number
 }
 
 export function montarPayloadBraspress(input: CotacaoInput): PayloadBraspress {
-  const cepOrigem = digits(process.env.BRASPRESS_CEP_ORIGEM) || digits(input.cepOrigem)
-  const cepDestino = digits(input.cepDestino)
+  const cnpjRemetente = Number(digits(process.env.BRASPRESS_CNPJ_REMETENTE) || '0')
+  // Sem CPF/CNPJ do cliente (ex.: cotação de teste/anônima) → usa o próprio
+  // remetente como fallback. NUNCA 0/null (a Braspress rejeita).
+  const docCliente = digits(input.cnpjDestinatario)
+  const cnpjDestinatario = docCliente ? Number(docCliente) : cnpjRemetente
+
+  const cepOrigem = Number(digits(process.env.BRASPRESS_CEP_ORIGEM) || digits(input.cepOrigem) || '0')
+  const cepDestino = Number(digits(input.cepDestino) || '0')
+
   const peso = input.itens.reduce((s, i) => s + i.pesoKg * i.quantidade, 0)
   const volumes = input.itens.reduce((s, i) => s + Math.max(1, i.quantidade), 0)
   const cubagem = input.itens.map((i) => ({
@@ -54,13 +70,18 @@ export function montarPayloadBraspress(input: CotacaoInput): PayloadBraspress {
     comprimento: Number(cmParaM(i.comprimentoCm).toFixed(3)),
     volumes: Math.max(1, i.quantidade),
   }))
+
   return {
+    cnpjRemetente,
+    cnpjDestinatario,
+    modal: 'R',
+    tipoFrete: '1',
     cepOrigem,
     cepDestino,
+    vlrMercadoria: Number(input.valorMercadoria.toFixed(2)),
     peso: Number(peso.toFixed(3)),
     volumes,
     cubagem,
-    vlrMercadoria: Number(input.valorMercadoria.toFixed(2)),
   }
 }
 
@@ -77,28 +98,19 @@ async function requestBraspress(input: CotacaoInput): Promise<BraspressResultado
   const payload = montarPayloadBraspress(input)
 
   const auth = authHeader()
-  const cnpjRemetente = digits(process.env.BRASPRESS_CNPJ_REMETENTE)
+  // Validação nos dígitos crus (o Number perde zero à esquerda / vazio vira 0).
+  const cnpjRemetenteDigits = digits(process.env.BRASPRESS_CNPJ_REMETENTE)
+  const cepOrigemDigits = digits(process.env.BRASPRESS_CEP_ORIGEM) || digits(input.cepOrigem)
+  const cepDestinoDigits = digits(input.cepDestino)
 
-  if (!auth || !cnpjRemetente || payload.cepOrigem.length !== 8 || payload.cepDestino.length !== 8) {
-    const mensagem = 'credenciais (BRASPRESS_API_USER/PASSWORD/CNPJ_REMETENTE) ou CEP origem/destino ausentes ou inválidos'
+  if (!auth || !cnpjRemetenteDigits || cepOrigemDigits.length !== 8 || cepDestinoDigits.length !== 8) {
+    const mensagem =
+      'credenciais (BRASPRESS_API_USER/PASSWORD/CNPJ_REMETENTE) ou CEP origem/destino ausentes ou inválidos'
     console.warn(`[braspress] cotação ignorada: ${mensagem}`)
     return { payload, cotacoes: [], erro: { status: null, mensagem } }
   }
   if (!input.itens.length) {
     return { payload, cotacoes: [], erro: { status: null, mensagem: 'sem itens para cotar' } }
-  }
-
-  const body = {
-    cnpjRemetente: Number(cnpjRemetente),
-    cnpjDestinatario: Number(digits(input.cnpjDestinatario) || '0'),
-    modal: 'R',
-    tipoFrete: '1',
-    cepOrigem: Number(payload.cepOrigem),
-    cepDestino: Number(payload.cepDestino),
-    vlrMercadoria: payload.vlrMercadoria,
-    peso: payload.peso,
-    volumes: payload.volumes,
-    cubagem: payload.cubagem,
   }
 
   const controller = new AbortController()
@@ -111,7 +123,8 @@ async function requestBraspress(input: CotacaoInput): Promise<BraspressResultado
         Accept: 'application/json',
         Authorization: auth,
       },
-      body: JSON.stringify(body),
+      // Envia o payload COMPLETO verbatim (mesmo objeto do diagnóstico).
+      body: JSON.stringify(payload),
       signal: controller.signal,
       cache: 'no-store',
     })
@@ -173,7 +186,7 @@ export const braspressCarrier: Carrier = {
 }
 
 // Diagnóstico do admin: roda a cotação SEM checar a feature flag e devolve o
-// payload enviado + resultado + erro. Uso exclusivo de rotas admin protegidas.
+// payload COMPLETO enviado + resultado + erro. Uso exclusivo de rotas admin.
 export async function diagnosticarBraspress(input: CotacaoInput): Promise<{
   payload: PayloadBraspress
   resultado: { preco: number; prazoDias: number } | null
