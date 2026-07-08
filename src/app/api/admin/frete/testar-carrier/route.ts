@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { diagnosticarBraspress } from '@/lib/carriers/braspress'
+import { diagnosticarMelhorEnvio } from '@/lib/carriers/melhorenvio'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ const NO_CACHE = {
 
 // Diagnóstico de cotação (SÓ leitura, requireAdmin). Não grava nada.
 //
-// GET /api/admin/frete/testar-carrier?produtoId=<id>&cepDestino=<cep>&carrier=braspress
+// GET /api/admin/frete/testar-carrier?produtoId=<id>&cepDestino=<cep>&carrier=braspress|melhorenvio
 //
 // Retorno JSON sempre:
 //   { ok, produto:{id,nome,sku,pesoKg,alturaCm,larguraCm,comprimentoCm,volumes},
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
     volumes: produto.volumes != null ? Number(produto.volumes) : null,
   }
 
-  if (carrier !== 'braspress') {
+  if (carrier !== 'braspress' && carrier !== 'melhorenvio') {
     return NextResponse.json(
       { ok: false, produto: produtoOut, payloadEnviado: null, resultado: null, erro: { status: 400, mensagem: `Carrier não suportado: ${carrier}` } },
       { status: 400, headers: NO_CACHE },
@@ -98,8 +99,8 @@ export async function GET(request: NextRequest) {
 
   const valorMercadoria = Number(produto.precoPromocional ?? produto.preco)
 
-  const diag = await diagnosticarBraspress({
-    cepOrigem: '', // adapter usa BRASPRESS_CEP_ORIGEM da env
+  const input = {
+    cepOrigem: '', // cada adapter usa o CEP de origem da própria env
     cepDestino,
     valorMercadoria,
     itens: [
@@ -111,7 +112,13 @@ export async function GET(request: NextRequest) {
         quantidade: 1,
       },
     ],
-  })
+  }
+
+  // Mesmo shape de retorno { payload, resultado, erro } para os dois adapters.
+  const diag =
+    carrier === 'melhorenvio'
+      ? await diagnosticarMelhorEnvio(input)
+      : await diagnosticarBraspress(input)
 
   return NextResponse.json(
     {
