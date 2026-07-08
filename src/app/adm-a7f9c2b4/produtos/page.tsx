@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { getCategoriaBadge } from '@/lib/admin-tokens'
 import { ADMIN_BASE } from '@/lib/admin-path'
+import ImportarDimensoes from '@/components/admin/ImportarDimensoes'
 
 interface Produto {
   id: string
@@ -174,6 +175,9 @@ export default function AdminProdutosPage() {
           </div>
         ))}
       </div>
+
+      {/* Importar dimensões (frete) */}
+      <ImportarDimensoes />
 
       {/* Filters */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row gap-3">
