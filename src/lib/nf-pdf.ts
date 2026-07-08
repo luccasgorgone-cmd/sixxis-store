@@ -44,7 +44,7 @@ const LARG = A4_W - MARGEM * 2 // 511.28 — largura útil
 const FOOTER_Y = 54
 const GAP = 16 // gap entre seções
 const LH = 14 // altura de linha
-const OBS_BOTTOM = FOOTER_Y + 20 // 74 — base da moldura de observações
+const OBS_BOTTOM = FOOTER_Y + 12 // 66 — base da moldura (junto ao rodapé)
 
 function moeda(v: number): string {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -418,8 +418,12 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
     y -= LH
   }
 
-  // ── Observações — estica até o rodapé (folha sempre cheia) ───────────────────
-  if (y < OBS_BOTTOM + 60 + GAP + 18) novaPagina()
+  // ── Observações — preenche o resto da PÁGINA ATUAL (cursor → margem inferior).
+  //    "Espaço restante" = y - OBS_BOTTOM. Só quebra pra nova página se sobrar
+  //    menos que o mínimo (evita página 2 quase vazia); caso contrário estica a
+  //    moldura até o rodapé aqui mesmo.
+  const MIN_OBS = 40
+  if (y - OBS_BOTTOM < MIN_OBS) novaPagina()
   secTitle('Observações')
   const obsTop = y
   const obsH = obsTop - OBS_BOTTOM
@@ -427,7 +431,10 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
     x: MARGEM, y: OBS_BOTTOM, width: LARG, height: obsH,
     color: BOX_BG, borderColor: LINHA, borderWidth: 0.7,
   })
-  text('Uso interno do financeiro — anotações de faturamento / conferência.', MARGEM + 10, obsTop - 14, { size: 8, color: CINZA_CLARO })
+  // Legenda só quando a moldura tem altura suficiente (evita texto fora da caixa).
+  if (obsH >= 20) {
+    text('Uso interno do financeiro — anotações de faturamento / conferência.', MARGEM + 10, obsTop - 14, { size: 8, color: CINZA_CLARO })
+  }
   y = OBS_BOTTOM
 
   // ── Rodapé (em todas as páginas) ────────────────────────────────────────────
