@@ -15,16 +15,16 @@ import {
 } from 'pdf-lib'
 import { formatarTelefone, formatarDocumento } from '@/lib/format'
 
-// ─── Marca ───────────────────────────────────────────────────────────────────
+// ─── Marca / paleta (contraste calibrado p/ impressão) ──────────────────────
 const TIFFANY = rgb(0x3c / 255, 0xbf / 255, 0xb3 / 255) // #3cbfb3
 const ESCURO = rgb(0x0f / 255, 0x2e / 255, 0x2b / 255) // #0f2e2b
-const TIFFANY_TINT = rgb(0xe8 / 255, 0xf8 / 255, 0xf7 / 255) // #e8f8f7
-const ZEBRA = rgb(0.968, 0.976, 0.978)
+const TIFFANY_TINT = rgb(0xee / 255, 0xf7 / 255, 0xf6 / 255) // #eef7f6 — header da tabela
+const HAIR_TAB = rgb(0xee / 255, 0xf2 / 255, 0xf4 / 255) // #eef2f4 — linhas da tabela
 const BOX_BG = rgb(0.992, 0.995, 0.997)
-const CINZA = rgb(0.42, 0.45, 0.5)
-const CINZA_CLARO = rgb(0.58, 0.61, 0.66)
-const LINHA = rgb(0.88, 0.9, 0.92)
-const PRETO = rgb(0.1, 0.1, 0.11)
+const CINZA = rgb(0x5b / 255, 0x64 / 255, 0x72 / 255) // #5b6472 — cabeçalho/SKU
+const CINZA_CLARO = rgb(0x4b / 255, 0x55 / 255, 0x63 / 255) // #4b5563 — TODOS os rótulos (~7:1)
+const LINHA = rgb(0xdf / 255, 0xe3 / 255, 0xe8 / 255) // #dfe3e8 — réguas/hairlines
+const PRETO = rgb(0x1a / 255, 0x1a / 255, 0x1c / 255) // #1a1a1c — valores
 const VERDE = rgb(0.1, 0.6, 0.3)
 const BRANCO = rgb(1, 1, 1)
 
@@ -42,7 +42,7 @@ const MARGEM = 42
 const X_DIR = A4_W - MARGEM // 553.28 — borda direita da área útil
 const LARG = A4_W - MARGEM * 2 // 511.28 — largura útil
 const FOOTER_Y = 54
-const GAP = 16 // gap entre seções
+const GAP = 18 // gap entre seções
 const LH = 14 // altura de linha
 const OBS_BOTTOM = FOOTER_Y + 12 // 66 — base da moldura (junto ao rodapé)
 
@@ -278,38 +278,41 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
   text(`CEP ${e.cep}`, colRx, yr, { size: 9 }); yr -= 13
   y = Math.min(yl, yr) + 2
 
-  // ── Itens (tabela zebra) ────────────────────────────────────────────────────
+  // ── Itens (tabela: header tiffany-claro + hairlines) ────────────────────────
   secTitle('Itens do pedido')
   const cSku = X_DIR - 220
   const cQtd = X_DIR - 150
   const cUnit = X_DIR - 78
   const cSub = X_DIR
-  const hH = 16
-  page.drawRectangle({ x: MARGEM, y: y - hH + 4, width: LARG, height: hH, color: TIFFANY_TINT })
+  const hH = 17
+  page.drawRectangle({ x: MARGEM, y: y - hH + 5, width: LARG, height: hH, color: TIFFANY_TINT })
   text('Produto', MARGEM + 6, y - 7, { size: 7.5, font: bold, color: ESCURO })
   text('SKU', cSku, y - 7, { size: 7.5, font: bold, color: ESCURO })
   textRight('Qtd', cQtd, y - 7, { size: 7.5, font: bold, color: ESCURO })
   textRight('Vl. Unit.', cUnit, y - 7, { size: 7.5, font: bold, color: ESCURO })
   textRight('Subtotal', cSub, y - 7, { size: 7.5, font: bold, color: ESCURO })
-  y -= hH + 5
-  data.itens.forEach((it, i) => {
+  y -= hH + 6
+  data.itens.forEach((it) => {
     garantir(18)
-    if (i % 2 === 1) page.drawRectangle({ x: MARGEM, y: y - 4, width: LARG, height: 14, color: ZEBRA })
     text(trunc(it.nome, 8.5, cSku - MARGEM - 12), MARGEM + 6, y, { size: 8.5, color: PRETO })
     text(trunc(it.sku, 8, cQtd - cSku - 26), cSku, y, { size: 8, color: CINZA })
     textRight(String(it.quantidade), cQtd, y, { size: 8.5, color: PRETO })
     textRight(moeda(it.precoUnitario), cUnit, y, { size: 8.5, color: PRETO })
     textRight(moeda(it.precoUnitario * it.quantidade), cSub, y, { size: 8.5, font: bold, color: PRETO })
-    y -= LH
+    y -= 6
+    hline(y, MARGEM, X_DIR, HAIR_TAB, 0.6)
+    y -= 8
   })
 
-  // ── Totais (bloco à direita) ────────────────────────────────────────────────
-  garantir(70)
-  y -= 4
-  const totLabelX = X_DIR - 190
-  const totLinha = (label: string, valor: string, o: { bold?: boolean; color?: ReturnType<typeof rgb> } = {}) => {
-    text(label, totLabelX, y, { size: 9, color: o.bold ? PRETO : CINZA, font: o.bold ? bold : font })
-    textRight(valor, X_DIR, y, { size: 9, font: o.bold ? bold : font, color: o.color ?? PRETO })
+  // ── Totais (bloco à direita, com réguas de destaque) ────────────────────────
+  garantir(80)
+  const totLabelX = X_DIR - 200
+  y -= 8
+  hline(y, totLabelX, X_DIR, LINHA, 0.6) // régua fina acima do bloco de totais
+  y -= 14
+  const totLinha = (label: string, valor: string, o: { color?: ReturnType<typeof rgb> } = {}) => {
+    text(label, totLabelX, y, { size: 9, color: CINZA_CLARO })
+    textRight(valor, X_DIR, y, { size: 9, color: o.color ?? PRETO })
     y -= 15
   }
   totLinha('Subtotal dos produtos', moeda(data.subtotal))
@@ -317,11 +320,11 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
     totLinha(`Desconto${data.cupomCodigo ? ` (${data.cupomCodigo})` : ''}`, `- ${moeda(data.desconto)}`, { color: VERDE })
   }
   if (data.frete != null) totLinha('Frete', data.frete === 0 ? 'Grátis' : moeda(data.frete))
-  hline(y + 6, totLabelX, X_DIR, LINHA, 0.7)
-  y -= 2
-  text('Total', totLabelX, y, { size: 11, font: bold, color: ESCURO })
-  textRight(moeda(data.total), X_DIR, y, { size: 12, font: bold, color: TIFFANY })
-  y -= 8
+  y -= 3 // respiro antes do Total
+  hline(y + 11, totLabelX, X_DIR, LINHA, 0.7)
+  text('Total', totLabelX, y, { size: 11.5, font: bold, color: ESCURO })
+  textRight(moeda(data.total), X_DIR, y, { size: 13.5, font: bold, color: TIFFANY })
+  y -= 10
 
   // ── Pagamento (2 sub-colunas rótulo→valor, largas) ──────────────────────────
   garantir(120)
@@ -360,31 +363,6 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
       text(trunc(pair[1], 9, R_MAXW), R_VAL, y, { size: 9, color: PRETO })
     }
     y -= LH
-  }
-
-  // ── Tentativas de pagamento (só se houver mais de uma) ──────────────────────
-  if (data.tentativas.length > 1) {
-    garantir(40 + data.tentativas.length * LH)
-    secTitle('Tentativas de pagamento')
-    const tData = MARGEM + 6
-    const tMet = MARGEM + 160
-    const tVal = MARGEM + 320 // right-align
-    const tStat = MARGEM + 340
-    page.drawRectangle({ x: MARGEM, y: y - 12, width: LARG, height: 15, color: TIFFANY_TINT })
-    text('Data', tData, y - 8, { size: 7.5, font: bold, color: ESCURO })
-    text('Método', tMet, y - 8, { size: 7.5, font: bold, color: ESCURO })
-    textRight('Valor', tVal, y - 8, { size: 7.5, font: bold, color: ESCURO })
-    text('Status', tStat, y - 8, { size: 7.5, font: bold, color: ESCURO })
-    y -= 16
-    data.tentativas.forEach((t, i) => {
-      garantir(16)
-      if (i % 2 === 1) page.drawRectangle({ x: MARGEM, y: y - 4, width: LARG, height: 13, color: ZEBRA })
-      text(dataHora(t.data), tData, y, { size: 8, color: PRETO })
-      text(trunc(t.metodo, 8, tVal - 40 - tMet), tMet, y, { size: 8, color: PRETO })
-      textRight(moeda(t.valor), tVal, y, { size: 8, color: PRETO })
-      text(trunc(t.status, 8, X_DIR - tStat), tStat, y, { size: 8, color: PRETO })
-      y -= LH
-    })
   }
 
   // ── Resumo do pedido + Logística (2 sub-colunas) ────────────────────────────
