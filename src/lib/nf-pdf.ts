@@ -221,13 +221,12 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
   const headTop = y
   const img = data.logoBytes ? await embedImageSmart(doc, data.logoBytes) : null
   if (img) {
-    const h = 30
+    const h = 33
     const w = (img.width / img.height) * h
     page.drawImage(img, { x: MARGEM, y: headTop - h + 2, width: w, height: h })
   } else {
     text(EMPRESA.nome, MARGEM, headTop - 18, { size: 20, font: bold, color: ESCURO })
   }
-  textRight(EMPRESA.nome, X_DIR, headTop - 4, { size: 11, font: bold, color: ESCURO })
   textRight(`CNPJ ${EMPRESA.cnpj}`, X_DIR, headTop - 17, { size: 8, color: CINZA })
   textRight(EMPRESA.endereco, X_DIR, headTop - 28, { size: 8, color: CINZA })
   textRight(EMPRESA.contato, X_DIR, headTop - 39, { size: 8, color: CINZA })
