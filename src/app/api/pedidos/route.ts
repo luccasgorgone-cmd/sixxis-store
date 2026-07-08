@@ -65,7 +65,7 @@ export async function GET() {
       formaPagamento: true,
       cupomCodigo: true,
       codigoRastreio: true,
-      transportadora: true,
+      // transportadora NÃO vai ao cliente (nome da transportadora é interno).
       linkRastreio: true,
       enviadoEm: true,
       entregueEm: true,
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
   // Endereço deve pertencer ao cliente — e dele extraímos a UF de destino.
   const endereco = await prisma.endereco.findUnique({
     where: { id: enderecoId },
-    select: { clienteId: true, estado: true },
+    select: { clienteId: true, estado: true, cep: true },
   })
   if (!endereco || endereco.clienteId !== session.user.id) {
     return Response.json({ error: 'Endereço inválido' }, { status: 400 })
@@ -231,11 +231,14 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // ── Resolver frete no servidor (fonte única: tabela produto × UF) ──────────
-  // O cliente não controla preço nem status: tudo deriva da UF + tabela.
+  // ── Resolver frete no servidor (fonte única) ───────────────────────────────
+  // O cliente não controla preço nem status: tudo deriva da UF/CEP + cadeia
+  // (FreteRegra/Braspress). Passa o CEP para que a Braspress cote o MESMO preço
+  // que o cliente viu no checkout e para registrar o custoFreteReal.
   const resultadoFrete = await resolverFrete(
     itens.map((i) => ({ produtoId: i.produtoId, quantidade: i.quantidade })),
     endereco.estado,
+    { cepDestino: endereco.cep },
   )
 
   if (resultadoFrete.status === 'bloqueado') {
@@ -249,6 +252,11 @@ export async function POST(request: NextRequest) {
   let freteTipoFinal: string
   let fretePrazoFinal: number | null = null
   let statusPedido: string
+  // Custo REAL da transportadora (interno) — gravado inclusive em frete grátis.
+  // Vem do resolver (cotação de carrier); null quando não houve cotação.
+  const custoFreteRealFinal =
+    resultadoFrete.custoFreteReal != null ? resultadoFrete.custoFreteReal : null
+  const transportadoraFinal = resultadoFrete.transportadora ?? null
 
   if (resultadoFrete.status === 'a_combinar') {
     // Vira orçamento: sem pagamento, frete a cotar manualmente.
@@ -274,6 +282,8 @@ export async function POST(request: NextRequest) {
         frete:          freteValor,
         freteTipo:      freteTipoFinal,
         fretePrazo:     fretePrazoFinal,
+        custoFreteReal: custoFreteRealFinal, // INTERNO — cliente nunca vê
+        transportadora: transportadoraFinal, // nome interno do carrier (admin)
         desconto:       descontoFinal,
         cupomCodigo:    cupomCodigoFinal,
         total:          Math.max(0, subtotal + freteValor + totalGarantias - descontoFinal),
@@ -383,9 +393,14 @@ export async function POST(request: NextRequest) {
     console.error('[pedidos] falha ao marcar carrinho convertido:', e)
   }
 
+  // ⚠️ Resposta ao cliente: remove custo interno de frete e nome da transportadora.
+  const { custoFreteReal: _cfr, transportadora: _tp, ...pedidoPublico } = pedido
+  void _cfr
+  void _tp
+
   return Response.json(
     {
-      pedido: { ...pedido, cashbackUsado: cashbackAplicado, total: Number(pedido.total) - cashbackAplicado },
+      pedido: { ...pedidoPublico, cashbackUsado: cashbackAplicado, total: Number(pedido.total) - cashbackAplicado },
       freteStatus: resultadoFrete.status,
       cashbackAplicado,
     },

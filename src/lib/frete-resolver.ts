@@ -2,18 +2,23 @@
 // Substitui as 4 tabelas divergentes que existiam (lib/frete TABELA, api/frete/cep
 // PRAZOS, api/luna/frete REGIOES e o fallback inline do carrinho).
 //
-// Cadeia de resolução (produto × UF):
-//   1. FreteRegra (override manual do admin) — precedência máxima:
-//        - regra.bloqueado                      → 'bloqueado' (não vende)
-//        - regra com preço/frete grátis         → 'ok' (Normal/Expresso/Grátis)
-//   2. Braspress (cotação em tempo real)        — quando o manual NÃO precifica
-//        (sem regra*, regra "a combinar", ou regra sem preço) E os produtos têm
-//        peso/dimensões. Feature flag CARRIERS_BRASPRESS_ENABLED.
-//   3. "a combinar" (orçamento)                 — quando não há cotação possível.
+// Cadeia de resolução (produto × UF) — Braspress é o MOTOR DE PREÇO principal:
+//   1. Flags de negócio da FreteRegra (avaliadas PRIMEIRO):
+//        a. bloqueado = true  → 'bloqueado' (não vende). NÃO cota carrier. FIM.
+//        b. freteGratis = true → cliente vê "Frete Grátis" (preço 0). Em paralelo,
+//           tenta cotar a Braspress só para gravar o custoFreteReal do pedido; se
+//           falhar, custoFreteReal fica null (frete grátis NUNCA quebra a venda).
+//   2. Caso normal (sem bloqueio, sem grátis):
+//        a. Cota TODAS as transportadoras ATIVAS (registry de carriers, hoje só
+//           Braspress). Havendo várias no futuro: a MAIS BARATA (empate → menor prazo).
+//        b. Veio cotação → usa ela. Preço = CUSTO PURO (sem markup). custoFreteReal =
+//           mesmo valor. Cliente vê "Entrega" + prazo + preço, nunca a transportadora.
+//        c. Nenhum carrier retornou → FALLBACK para a tabela manual FreteRegra.
+//        d. Sem carrier E sem regra manual → 'a_combinar'.
 //
-//   * "sem regra" só cai para cotação/​a combinar quando há carrier habilitado;
-//     com os carriers desligados o comportamento histórico é preservado byte a
-//     byte ("sem regra" = bloqueado).
+// TRAVAS: qualquer exceção de carrier é capturada e cai no fallback — o checkout
+// nunca fica sem resposta. Feature flag CARRIERS_BRASPRESS_ENABLED OFF → cadeia
+// 100% tabela manual, byte-idêntica ao histórico ("sem regra" = bloqueado).
 //
 // Carrinho com múltiplos produtos (frete é por produto):
 //   - QUALQUER item bloqueado    → pedido bloqueado
@@ -44,6 +49,12 @@ export interface ResultadoFrete {
   opcoes: OpcaoFreteResolvida[]
   mensagem: string
   freteGratis: boolean // a opção resolvida é frete grátis (valor 0)
+  // Custo REAL da transportadora (carrier), para registro interno no pedido —
+  // gravado inclusive em frete grátis (o cliente pagou 0, mas a empresa gastou).
+  // null quando não houve cotação de carrier (fallback manual / a combinar).
+  custoFreteReal?: number | null
+  // Nome interno da transportadora que cotou (SÓ admin, nunca vai ao cliente).
+  transportadora?: string | null
 }
 
 export interface ItemFrete {
@@ -201,33 +212,82 @@ export async function resolverFrete(
     }
   }
 
-  // Aplica a precedência: bloqueado tem prioridade máxima.
+  // 1a. Bloqueado tem prioridade máxima: NÃO cota carrier. FIM.
   if (algumBloqueado) {
     return { status: 'bloqueado', uf, opcoes: [], mensagem: MSG_BLOQUEADO, freteGratis: false }
   }
 
-  // Cotação em tempo real (Braspress): o carrinho inteiro vira UMA cotação.
+  // Produto SEM preço manual (sem regra*/a combinar/sem preço), com carrier na
+  // cadeia → Braspress é a fonte de preço. Precedência mantida do histórico:
+  // esta checagem vem ANTES de grátis/normal. (*sem regra com a flag OFF já virou
+  // bloqueado no laço, então aqui precisaCotar só existe com carrier ligado.)
   if (precisaCotar) {
-    const opcoesCarrier = await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
-    if (opcoesCarrier.length > 0) {
-      return { status: 'ok', uf, opcoes: opcoesCarrier, mensagem: '', freteGratis: false }
+    const cr = await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
+    if (cr) {
+      return {
+        status: 'ok', uf, opcoes: [cr.opcao], mensagem: '', freteGratis: false,
+        custoFreteReal: cr.custoFreteReal, transportadora: cr.transportadora,
+      }
     }
-    // Carrier não devolveu preço (desligado, sem dimensão, falha) → orçamento.
+    // 2d. Sem cotação e sem preço manual → orçamento.
     return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR, freteGratis: false }
   }
 
+  // Caminho da flag OFF: "a combinar" declarado no laço tem precedência sobre
+  // grátis/normal (mesma ordem do histórico).
   if (algumACombinar) {
     return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR, freteGratis: false }
   }
 
-  // Frete grátis: preço normal soma 0 entre todos os itens (todos grátis, ou todos
-  // a R$ 0). "frete grátis OU 0 reais = frete grátis ao cliente".
+  // Frete grátis ao cliente = todos os itens somam 0 no normal (grátis ou R$ 0).
   const normalGratis = temNormal && precoNormal === 0
 
+  // 1b. FRETE GRÁTIS: cliente vê "Frete Grátis" (preço 0). Em paralelo tenta cotar
+  // a Braspress só para registrar o custoFreteReal — se falhar, segue null (frete
+  // grátis NUNCA quebra a venda).
+  if (normalGratis) {
+    const bg = carrierNaCadeia
+      ? await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
+      : null
+    const prazoNormalStr = !prazoNormalMax ? '' : formatarPrazo(prazoNormalMin, prazoNormalMax)
+    return {
+      status: 'ok',
+      uf,
+      opcoes: [
+        {
+          id: 'normal',
+          nome: 'Frete Grátis',
+          preco: 0,
+          prazoDiasMin: prazoNormalMin,
+          prazoDiasMax: prazoNormalMax,
+          prazo: prazoNormalStr,
+          freteGratis: true,
+        },
+      ],
+      mensagem: '',
+      freteGratis: true,
+      custoFreteReal: bg?.custoFreteReal ?? null,
+      transportadora: bg?.transportadora ?? null,
+    }
+  }
+
+  // 2a/2b. CASO NORMAL (precificado) — Braspress é o MOTOR DE PREÇO principal.
+  // Cota o carrinho inteiro; se veio cotação, ela VENCE a tabela manual (preço =
+  // custo puro, sem markup). Se não veio, cai no fallback manual abaixo.
+  if (carrierNaCadeia) {
+    const cr = await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
+    if (cr) {
+      return {
+        status: 'ok', uf, opcoes: [cr.opcao], mensagem: '', freteGratis: false,
+        custoFreteReal: cr.custoFreteReal, transportadora: cr.transportadora,
+      }
+    }
+  }
+
+  // 2c. FALLBACK: tabela manual FreteRegra (comportamento histórico).
   const opcoes: OpcaoFreteResolvida[] = []
   if (temNormal) {
-    // Frete grátis sem prazo configurado NÃO exibe "a combinar" (bug do duplo
-    // texto): mostra só "Frete Grátis". Prazo real, quando existe, é mantido.
+    // Frete grátis sem prazo NÃO exibe "a combinar": só "Frete Grátis".
     const prazoNormalStr =
       normalGratis && !prazoNormalMax ? '' : formatarPrazo(prazoNormalMin, prazoNormalMax)
     opcoes.push({
@@ -260,18 +320,26 @@ export async function resolverFrete(
   // Opção grátis primeiro (é a única quando há frete grátis).
   opcoes.sort((a, b) => Number(b.freteGratis) - Number(a.freteGratis))
 
-  return { status: 'ok', uf, opcoes, mensagem: '', freteGratis: normalGratis }
+  return { status: 'ok', uf, opcoes, mensagem: '', freteGratis: normalGratis, custoFreteReal: null, transportadora: null }
 }
 
-// Cota o carrinho inteiro via carriers (Braspress). Retorna 1 opção genérica
-// ("Entrega") com a MENOR cotação — o NOME da transportadora NUNCA vai ao
-// cliente. [] quando faltam dimensões, o carrier falha ou está desligado.
+// Resultado da cotação de carrier para o carrinho inteiro.
+interface CarrierResolucao {
+  opcao: OpcaoFreteResolvida // opção genérica "Entrega" mostrada ao cliente
+  custoFreteReal: number // custo real da transportadora (= preço, sem markup)
+  transportadora: string // nome interno do serviço (só admin)
+}
+
+// Cota o carrinho inteiro via carriers (Braspress). Retorna a MENOR cotação como
+// opção genérica ("Entrega") — o NOME da transportadora NUNCA vai ao cliente
+// (fica só em transportadora, p/ admin). null quando faltam dimensões, o carrier
+// falha/timeout ou está desligado. Nunca lança (cotarComCarriers já captura).
 async function cotarCarrinho(
   produtoIds: string[],
   qtdPorProduto: Map<string, number>,
   cepDestino: string,
   documentoDestinatario?: string,
-): Promise<OpcaoFreteResolvida[]> {
+): Promise<CarrierResolucao | null> {
   const produtos = await prisma.produto.findMany({
     where: { id: { in: produtoIds } },
     select: {
@@ -297,7 +365,7 @@ async function cotarCarrinho(
     const comprimento = p.comprimentoCm != null ? Number(p.comprimentoCm) : 0
 
     // Sem peso/dimensões completas não dá para cotar com segurança → aborta.
-    if (peso <= 0 || altura <= 0 || largura <= 0 || comprimento <= 0) return []
+    if (peso <= 0 || altura <= 0 || largura <= 0 || comprimento <= 0) return null
 
     const preco = Number(p.precoPromocional ?? p.preco)
     valorMercadoria += preco * qtd
@@ -311,7 +379,7 @@ async function cotarCarrinho(
     })
   }
 
-  if (itens.length === 0) return []
+  if (itens.length === 0) return null
 
   const cotacoes = await cotarComCarriers({
     cepOrigem: '', // adapters usam a env de origem própria
@@ -321,14 +389,18 @@ async function cotarCarrinho(
     itens,
   })
 
-  if (cotacoes.length === 0) return []
+  if (cotacoes.length === 0) return null
 
-  // Menor preço vence; nome genérico, sem transportadora.
-  const melhor = cotacoes.reduce((a, b) => (b.preco < a.preco ? b : a))
+  // Menor preço vence; empate → menor prazo. Nome genérico, sem transportadora.
+  const melhor = cotacoes.reduce((a, b) =>
+    b.preco < a.preco || (b.preco === a.preco && b.prazoDias < a.prazoDias) ? b : a,
+  )
+  // PART C: prazoDias vem do campo `prazo` da resposta Braspress, em DIAS ÚTEIS.
+  // Não somamos/dobramos — usamos o valor real; formatarPrazo escreve "dias úteis".
   const prazo = melhor.prazoDias
 
-  return [
-    {
+  return {
+    opcao: {
       id: 'normal',
       nome: 'Entrega',
       preco: melhor.preco,
@@ -337,5 +409,7 @@ async function cotarCarrinho(
       prazo: formatarPrazo(prazo, prazo),
       freteGratis: melhor.preco === 0,
     },
-  ]
+    custoFreteReal: melhor.preco,
+    transportadora: melhor.servico,
+  }
 }

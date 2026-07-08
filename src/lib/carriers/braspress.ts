@@ -142,6 +142,8 @@ async function requestBraspress(input: CotacaoInput): Promise<BraspressResultado
     }
 
     const preco = Number(data?.totalFrete)
+    // PART C: `prazo` da resposta Braspress = prazo de entrega em DIAS ÚTEIS.
+    // Usamos o valor cru (não somamos/dobramos); o resolver formata "dias úteis".
     const prazoDias = Number(data?.prazo)
     if (!Number.isFinite(preco) || preco <= 0) {
       const mensagem = `resposta sem totalFrete válido: ${JSON.stringify(data).slice(0, 200)}`

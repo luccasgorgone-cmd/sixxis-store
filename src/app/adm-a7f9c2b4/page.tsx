@@ -148,6 +148,7 @@ export default function AdminDashboard() {
     { label:'Produtos Ativos',    valor:m.produtosAtivos||0,   moeda:false, Icon:Package,  bg:'#e0e7ff', fg:'#4f46e5', href:`${ADMIN_BASE}/produtos` },
     { label:'Pedidos Entregues',  valor:m.pedidosEntregues||0, moeda:false, Icon:CheckCircle, bg:'#d1fae5', fg:'#059669' },
     { label:'Pedidos Enviados',   valor:m.pedidosEnviados||0,  moeda:false, Icon:Truck,    bg:'#ede9fe', fg:'#7c3aed' },
+    { label:'Custo de Frete (empresa)', valor:m.custoFreteReal||0, moeda:true, Icon:Truck, bg:'#f3e8ff', fg:'#9333ea', sub:'custo real · inclui fretes grátis' },
   ] as const
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

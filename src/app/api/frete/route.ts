@@ -52,5 +52,10 @@ export async function POST(request: NextRequest) {
     { cepDestino },
   )
 
-  return Response.json(resultado)
+  // ⚠️ Resposta PÚBLICA: remove os campos internos (custo real da transportadora
+  // e nome da transportadora). O cliente só vê status/opções/preço/prazo.
+  const { custoFreteReal: _c, transportadora: _t, ...publico } = resultado
+  void _c
+  void _t
+  return Response.json(publico)
 }

@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
     catalogo,
     pedidosBrutos,
     pedidosClientesPeriodo,
+    custoFreteAgg,
   ] = await Promise.all([
     prisma.pedido.findMany({
       where: paidWhere,
@@ -137,6 +138,9 @@ export async function GET(request: NextRequest) {
       where: paidWhere,
       select: { clienteId: true },
     }),
+    // Custo de frete REAL da empresa no período (pedidos pagos) — inclui os
+    // fretes que foram grátis pro cliente (custoFreteReal gravado mesmo assim).
+    prisma.pedido.aggregate({ where: paidWhere, _sum: { custoFreteReal: true } }),
   ])
 
   // ── Aggregate metrics ───────────────────────────────────────────────────────
@@ -145,6 +149,9 @@ export async function GET(request: NextRequest) {
   const ticketMedio   = totalPedidos > 0 ? receita / totalPedidos : 0
   const prevReceita   = Number(prevPedidos._sum.total ?? 0)
   const prevTotalPedidos = prevPedidos._count
+
+  // Custo de frete real da empresa no período (soma de custoFreteReal dos pagos)
+  const custoFreteReal = Number(custoFreteAgg._sum.custoFreteReal ?? 0)
 
   // Receita potencial em processamento — pedidos pendentes no período
   const receitaPendente   = Number(pedidosPendentesAgg._sum.total ?? 0)
@@ -344,6 +351,7 @@ export async function GET(request: NextRequest) {
       receita,                 // alias legado: receita confirmada
       receitaConfirmada: receita,
       receitaPendente,
+      custoFreteReal,          // custo real de frete da empresa no período (pagos)
       totalPedidos,            // pagos no período
       totalPedidosPendentesPeriodo,
       taxaConversaoPedido,
