@@ -381,6 +381,9 @@ function CheckoutContent() {
   const { itens, limparCarrinho } = useCarrinho()
   const cupomGlobal = useCarrinho((s) => s.cupomAplicado)
   const setCupomGlobal = useCarrinho((s) => s.setCupom)
+  // Hidratação do store (persist é assíncrono) — evita o flash de "carrinho
+  // vazio" no primeiro paint, antes de reidratar do localStorage.
+  const hasHydrated = useCarrinho((s) => s._hasHydrated)
   const total = useTotalCarrinho()
 
   const { data: session, status: sessionStatus } = useSession()
@@ -864,6 +867,18 @@ function CheckoutContent() {
     } finally {
       setCarregando(false)
     }
+  }
+
+  // ── Aguarda a reidratação do store antes de decidir "carrinho vazio" ──
+  // No primeiro paint (SSR e cliente) itens=[] antes de reidratar do
+  // localStorage; sem esta guarda, "Seu carrinho está vazio" pisca. Mesmo
+  // tratamento de carregando do /carrinho. Não afeta o fluxo compra_direta.
+  if (!hasHydrated && !compraDireta) {
+    return (
+      <div style={{ backgroundColor: '#f8fafc' }} className="min-h-[70vh] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full animate-spin" style={{ border: '3px solid #e5e7eb', borderTopColor: '#3cbfb3' }} />
+      </div>
+    )
   }
 
   // ── Carrinho vazio ──

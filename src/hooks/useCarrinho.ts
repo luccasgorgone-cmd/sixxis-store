@@ -46,6 +46,10 @@ interface CarrinhoStore {
   limparCarrinho: () => void
   setCupom: (c: CupomAplicadoStore | null) => void
   setUsarCashback: (v: boolean) => void
+  // Hidratação do persist (localStorage) — false até a reidratação assíncrona
+  // terminar. Consumidores usam para evitar decidir "carrinho vazio" cedo demais.
+  _hasHydrated: boolean
+  setHasHydrated: (v: boolean) => void
 }
 
 // NOTA: total/totalItens NÃO podem ser getters JS no objeto do store, porque o
@@ -60,9 +64,11 @@ export const useCarrinho = create<CarrinhoStore>()(
       drawerAberto: false,
       cupomAplicado: null,
       usarCashback: false,
+      _hasHydrated: false,
       setDrawerAberto: (v) => set({ drawerAberto: v }),
       setCupom: (c) => set({ cupomAplicado: c }),
       setUsarCashback: (v) => set({ usarCashback: v }),
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
       adicionarItem(item) {
         const key = itemKey(item.produtoId, item.variacaoId)
         set((state) => {
@@ -112,6 +118,12 @@ export const useCarrinho = create<CarrinhoStore>()(
         cupomAplicado: state.cupomAplicado,
         usarCashback: state.usarCashback,
       }),
+      // Dispara quando a reidratação do localStorage termina (automático). O
+      // _hasHydrated NÃO é persistido (fora do partialize) — começa false no
+      // servidor e no primeiro paint, e vira true só após reidratar no cliente.
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     },
   ),
 )
