@@ -13,6 +13,7 @@ import {
 } from '@/lib/preco-cupom'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import UsarCashback from '@/components/checkout/UsarCashback'
+import { FRETE_COPY } from '@/lib/copy/frete'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -507,7 +508,7 @@ export default function CarrinhoPage() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
               <h3 className="text-sm font-black text-gray-900 flex items-center gap-2 mb-4">
                 <Truck size={14} style={{ color: '#3cbfb3' }} />
-                Calcular frete
+                {FRETE_COPY.calcular}
               </h3>
 
               <div className="flex gap-2 mb-3">
@@ -526,7 +527,7 @@ export default function CarrinhoPage() {
                   className="shrink-0 whitespace-nowrap px-4 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all
                              hover:shadow-md disabled:opacity-50"
                   style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
-                  {calculandoFrete ? '...' : 'Calcular'}
+                  {calculandoFrete ? FRETE_COPY.calculando : FRETE_COPY.calcular}
                 </button>
               </div>
 
@@ -554,7 +555,7 @@ export default function CarrinhoPage() {
                         </div>
                       </div>
                       <p className={`text-sm font-black ${op.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
-                        {op.preco === 0 ? 'Grátis' : fmtBRL(op.preco)}
+                        {op.preco === 0 ? FRETE_COPY.gratisPreco : fmtBRL(op.preco)}
                       </p>
                     </label>
                   ))}
@@ -565,7 +566,7 @@ export default function CarrinhoPage() {
                 <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3 mt-3">
                   <Truck size={14} className="text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-xs text-amber-800 font-medium">
-                    Frete a combinar para a sua região. No checkout, o pedido é registrado como orçamento e entramos em contato.
+                    {FRETE_COPY.aCombinarDescricao}
                   </p>
                 </div>
               )}
@@ -656,18 +657,18 @@ export default function CarrinhoPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Frete</span>
                     <span className={`font-semibold ${freteSelecionado.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
-                      {freteSelecionado.preco === 0 ? 'Frete Grátis' : fmtBRL(freteSelecionado.preco)}
+                      {freteSelecionado.preco === 0 ? FRETE_COPY.gratis : fmtBRL(freteSelecionado.preco)}
                     </span>
                   </div>
                 ) : freteStatus === 'a_combinar' ? (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Frete</span>
-                    <span className="font-semibold text-amber-600">A combinar</span>
+                    <span className="font-semibold text-amber-600">{FRETE_COPY.aCombinar}</span>
                   </div>
                 ) : (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Frete</span>
-                    <span className="text-xs text-gray-400">Calcule acima</span>
+                    <span className="text-xs text-gray-400">{FRETE_COPY.calculeAcima}</span>
                   </div>
                 )}
               </div>

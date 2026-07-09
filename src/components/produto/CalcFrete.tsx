@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Truck, MapPin, Search, CheckCircle, AlertCircle, Ban, Loader2 } from 'lucide-react'
+import { FRETE_COPY } from '@/lib/copy/frete'
 
 interface FreteOpcao {
   id: 'normal' | 'expresso'
@@ -140,7 +141,7 @@ export default function CalcFrete({ produtoId }: Props) {
           ) : (
             <Search size={14} />
           )}
-          {loading ? 'Consultando...' : 'Consultar'}
+          {loading ? FRETE_COPY.calculando : FRETE_COPY.calcular}
         </button>
       </div>
 
@@ -150,7 +151,7 @@ export default function CalcFrete({ produtoId }: Props) {
         rel="noopener noreferrer"
         className="text-[11px] text-[#3cbfb3] hover:text-[#2a9d8f] transition underline"
       >
-        Não sei meu CEP
+        {FRETE_COPY.naoSeiCep}
       </a>
 
       {/* Erro */}
@@ -197,7 +198,7 @@ export default function CalcFrete({ produtoId }: Props) {
                   </div>
                   <div className="text-right">
                     {op.preco === 0 ? (
-                      <p className="text-sm font-extrabold text-green-600">GRÁTIS</p>
+                      <p className="text-sm font-extrabold text-green-600">{FRETE_COPY.gratisPreco}</p>
                     ) : (
                       <p className="text-sm font-extrabold text-gray-900">
                         R$ {op.preco.toFixed(2).replace('.', ',')}
@@ -216,7 +217,7 @@ export default function CalcFrete({ produtoId }: Props) {
             <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3">
               <Truck size={14} className="text-amber-600 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800 font-medium">
-                Frete a combinar para a sua região. Finalize o pedido como orçamento e entramos em contato.
+                {FRETE_COPY.aCombinarDescricao}
               </p>
             </div>
           )}

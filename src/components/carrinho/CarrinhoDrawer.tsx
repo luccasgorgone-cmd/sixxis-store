@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { X, ShoppingBag, Minus, Plus, Trash2, Package, Zap } from 'lucide-react'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 import { feedIdProduto } from '@/lib/feed-id'
+import { FRETE_COPY } from '@/lib/copy/frete'
 
 interface UpsellItem {
   id: string
@@ -224,7 +225,7 @@ export default function CarrinhoDrawer() {
               <span className="text-sm text-gray-600">Subtotal</span>
               <span className="text-lg font-black text-gray-900">R$ {fmt(total)}</span>
             </div>
-            <p className="text-xs text-gray-400 -mt-1">Frete calculado no checkout</p>
+            <p className="text-xs text-gray-400 -mt-1">{FRETE_COPY.calculadoNoCheckout}</p>
 
             {/* Selos */}
             <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-xl py-2 px-3 flex-wrap">
@@ -260,7 +261,7 @@ export default function CarrinhoDrawer() {
               className="w-full flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-4 rounded-2xl transition-all shadow-lg shadow-[#3cbfb3]/25 hover:-translate-y-0.5 active:scale-[0.97] text-base"
             >
               <ShoppingBag size={18} />
-              Finalizar Compra
+              Finalizar compra
             </Link>
             <Link
               href="/carrinho"

@@ -24,6 +24,7 @@ import { trackAddPaymentInfo, trackBeginCheckout } from '@/lib/analytics/events'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
+import { FRETE_COPY } from '@/lib/copy/frete'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 
@@ -267,14 +268,14 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, tota
           <div className="flex justify-between text-sm text-gray-600">
             <span>Frete</span>
             <span className={frete === 0 ? 'text-green-600 font-bold' : 'font-semibold'}>
-              {frete === 0 ? 'Frete Grátis' : `R$ ${moeda(frete)}`}
+              {frete === 0 ? FRETE_COPY.gratis : `R$ ${moeda(frete)}`}
             </span>
           </div>
         )}
         {freteStatus === 'a_combinar' && (
           <div className="flex justify-between text-sm text-gray-600">
             <span>Frete</span>
-            <span className="font-semibold text-amber-600">A combinar</span>
+            <span className="font-semibold text-amber-600">{FRETE_COPY.aCombinar}</span>
           </div>
         )}
         {totalGarantias > 0 && (
@@ -1121,7 +1122,7 @@ function CheckoutContent() {
 
                   {carregandoFrete && (
                     <div className="flex items-center gap-2 text-xs text-[#3cbfb3]">
-                      <Loader2 size={12} className="animate-spin" /> Calculando frete...
+                      <Loader2 size={12} className="animate-spin" /> {FRETE_COPY.calculando}
                     </div>
                   )}
                   {!carregandoFrete && freteStatus === 'ok' && opcoesFrete.length > 0 && (
@@ -1151,7 +1152,7 @@ function CheckoutContent() {
                               {op.prazo && <p className="text-xs text-gray-400">{op.prazo}</p>}
                             </div>
                             <p className={`text-sm font-bold ${op.preco === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                              {op.preco === 0 ? 'Grátis' : `R$ ${moeda(op.preco)}`}
+                              {op.preco === 0 ? FRETE_COPY.gratisPreco : `R$ ${moeda(op.preco)}`}
                             </p>
                           </button>
                         ))}
@@ -1163,9 +1164,9 @@ function CheckoutContent() {
                     <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
                       <Truck size={15} className="text-amber-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm font-semibold text-amber-800">Frete a combinar</p>
+                        <p className="text-sm font-semibold text-amber-800">{FRETE_COPY.aCombinarTitulo}</p>
                         <p className="text-xs text-amber-700 mt-0.5">
-                          {freteMsg || 'Registramos seu pedido como orçamento e entramos em contato para finalizar o frete.'}
+                          {freteMsg || FRETE_COPY.aCombinarDescricao}
                         </p>
                       </div>
                     </div>
