@@ -5,6 +5,8 @@
 // Emojis usados estrategicamente (não excessivamente)
 // Tom: profissional, caloroso, direto
 
+import { MAX_PARCELAS_SEM_JUROS } from './parcelamento'
+
 export const WA_TEMPLATES = {
 
   // ── 1. BOAS-VINDAS ──────────────────────────────
@@ -62,7 +64,7 @@ Oi, *${nome}*! 👋
 Você deixou um carrinho de *${valorCarrinho}* esperando na Sixxis. 🛒
 
 ${cupom ? `🎁 Criamos um cupom *exclusivo* para você finalizar hoje:\n*Código:* ${cupom}\n\n` : ''}Finalize sua compra agora e aproveite:
-✅ Parcele em até *6x sem juros*
+✅ Parcele em até *${MAX_PARCELAS_SEM_JUROS}x sem juros*
 ✅ Envio em até 24h para todo Brasil
 ✅ *12 meses* de garantia Sixxis
 

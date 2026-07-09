@@ -15,6 +15,7 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import UsarCashback from '@/components/checkout/UsarCashback'
 import SelosConfianca from '@/components/checkout/SelosConfianca'
 import { FRETE_COPY } from '@/lib/copy/frete'
+import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -682,7 +683,7 @@ export default function CarrinhoPage() {
                   {fmtBRL(totalPix)} no PIX (3% OFF)
                 </p>
                 <p className="text-xs text-gray-400 text-center mt-2">
-                  ou 6× de {fmtBRL(totalFinal / 6)} sem juros
+                  ou {MAX_PARCELAS_SEM_JUROS}× de {fmtBRL(valorParcela(totalFinal))} sem juros
                 </p>
               </div>
 
@@ -720,7 +721,7 @@ export default function CarrinhoPage() {
                     Parcele sem juros
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Em até 6× no cartão de crédito · Débito e PIX aceitos
+                    Em até {MAX_PARCELAS_SEM_JUROS}× no cartão de crédito · Débito e PIX aceitos
                   </p>
                 </div>
               </div>

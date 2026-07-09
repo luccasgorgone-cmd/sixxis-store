@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { HelpCircle } from 'lucide-react'
 import FaqAccordion from '@/components/faq/FaqAccordion'
 import Breadcrumb from '@/components/ui/Breadcrumb'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 export const revalidate = 3600
 
@@ -20,7 +21,7 @@ const faqs = [
   },
   {
     q: 'Quais são as formas de pagamento aceitas?',
-    a: 'Aceitamos PIX (3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até 12x e cartão de débito. Todos os pagamentos são processados com segurança via Mercado Pago.',
+    a: `Aceitamos PIX (3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até ${MAX_PARCELAS_SEM_JUROS}x sem juros e cartão de débito. Todos os pagamentos são processados com segurança via Mercado Pago.`,
   },
   {
     q: 'Como funciona o frete?',
@@ -48,7 +49,7 @@ const faqs = [
   },
   {
     q: 'Como funciona o parcelamento no cartão?',
-    a: 'Parcelamos em até 12x no cartão de crédito. Para compras acima de R$ 200,00, o parcelamento é sem juros em até 6x. Acima de 6x, aplicamos os juros da operadora de cartão. A opção de parcelamento é exibida automaticamente no checkout conforme o valor do pedido.',
+    a: `Parcelamos em até ${MAX_PARCELAS_SEM_JUROS}x sem juros no cartão de crédito. A opção de parcelamento é exibida automaticamente no checkout conforme o valor do pedido.`,
   },
   {
     q: 'Posso comprar peças de reposição avulsas?',

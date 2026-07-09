@@ -1300,12 +1300,15 @@ function CheckoutContent() {
             </>
           )}
 
-          {/* Selos de confiança — componente compartilhado com o /carrinho */}
-          <SelosConfianca className="mt-6" />
+          {/* Selos de confiança (mobile): abaixo das etapas, antes do resumo
+              flutuante. No desktop ficam na coluna da direita (aside). */}
+          <SelosConfianca className="mt-6 lg:hidden" />
         </div>
 
         <aside className="hidden lg:block lg:sticky lg:top-6 self-start">
           <ResumoSidebar {...resumoProps} />
+          {/* Selos de confiança (desktop): logo abaixo do Resumo do pedido. */}
+          <SelosConfianca className="mt-4" />
         </aside>
       </div>
 

@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { initMercadoPago } from '@mercadopago/sdk-react'
 import { Loader2, AlertCircle } from 'lucide-react'
 import PixPainel from './PixPainel'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 const Payment = dynamic(
   () => import('@mercadopago/sdk-react').then((m) => m.Payment),
@@ -150,7 +151,10 @@ export default function CheckoutBricks({
               debitCard: 'all',
               bankTransfer: ['pix'],
               // boleto (ticket) intencionalmente NÃO habilitado.
-              maxInstallments: 12,
+              // Limita as parcelas ao "sem juros" (fonte única). "Sem juros até N"
+              // depende da configuração da CONTA Mercado Pago (a loja absorve os
+              // juros) — este código só LIMITA/EXIBE, não altera quem paga.
+              maxInstallments: MAX_PARCELAS_SEM_JUROS,
             },
             visual: {
               // 'flat' + customVariables na identidade Sixxis (tiffany #3cbfb3,

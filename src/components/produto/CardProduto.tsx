@@ -10,6 +10,7 @@ import { useFavoritos, useComparador } from '@/hooks/useListas'
 import { useState } from 'react'
 import { trackAddToCart } from '@/lib/analytics/events'
 import { feedIdProduto } from '@/lib/feed-id'
+import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -209,7 +210,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
             </p>
 
             <p className="hidden sm:block text-xs text-gray-500 mb-1">
-              em até 6x de <span className="font-semibold">R$ {fmt(precoFinal / 6)}</span> sem juros
+              em até {MAX_PARCELAS_SEM_JUROS}x de <span className="font-semibold">R$ {fmt(valorParcela(precoFinal))}</span> sem juros
             </p>
 
             <p className="text-[11px] sm:text-xs text-[#3cbfb3] font-semibold mb-3 whitespace-nowrap">

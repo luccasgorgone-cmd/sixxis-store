@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { valorParcela } from '@/lib/parcelamento'
 
 export const dynamic = 'force-dynamic'
 
@@ -149,7 +150,7 @@ export async function GET(
         preco:            String(p.preco),
         precoPromocional: p.precoPromocional ? String(p.precoPromocional) : null,
         pixPreco:         (precoFinal * 0.97).toFixed(2),
-        parcelaValor:     (precoFinal / 6).toFixed(2),
+        parcelaValor:     valorParcela(precoFinal).toFixed(2),
         desconto:         desconto > 0 ? desconto : null,
         linha:            p.slug?.toLowerCase().includes('prime') ? 'Prime' : null,
         imagem:           (p.imagens as string[])?.[0] ?? null,

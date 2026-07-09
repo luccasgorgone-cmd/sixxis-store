@@ -1,3 +1,5 @@
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
+
 export default function PagamentosBar() {
   return (
     <div className="bg-white border-t border-gray-100 py-5 px-4">
@@ -45,7 +47,7 @@ export default function PagamentosBar() {
 
         {/* Parcelas */}
         <span className="text-xs text-gray-400 font-medium ml-1 hidden sm:inline">
-          Parcele em até <strong className="text-gray-600">6x sem juros</strong>
+          Parcele em até <strong className="text-gray-600">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
         </span>
       </div>
     </div>

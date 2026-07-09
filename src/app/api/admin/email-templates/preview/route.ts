@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { gerarHtmlTemplate } from '@/lib/email'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +11,7 @@ const DADOS_DEMO = {
   total:            599.90,
   subtotal:         599.90,
   frete:            0,
-  forma_pagamento:  'Cartão de Crédito (6x)',
+  forma_pagamento:  `Cartão de Crédito (${MAX_PARCELAS_SEM_JUROS}x)`,
   status:           'Confirmado',
   codigo_rastreio:  'BR123456789BR',
   link_rastreio:    'https://www.correios.com.br',

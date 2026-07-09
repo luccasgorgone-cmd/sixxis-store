@@ -35,7 +35,21 @@
       "PowerShell(cd \"C:\\\\Users\\\\User\\\\sixxis-store\"; npx tsc --noEmit -p \"C:\\\\Users\\\\User\\\\sixxis-store\\\\tsconfig.json\" 2>&1 | Select-Object -First 20; \"exit: $LASTEXITCODE\")",
       "PowerShell(node \"C:/Users/User/AppData/Local/Temp/claude/C--Users-User-sixxis-store/c2850248-03c0-49c3-b9be-fd46ed81555a/scratchpad/test-pdf.cjs\")",
       "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 30; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")",
-      "PowerShell(npx prisma generate 2>&1 | Select-Object -Last 3; Write-Output \"=== tsc ===\"; npx tsc --noEmit 2>&1 | Select-Object -Last 20; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")"
+      "PowerShell(npx prisma generate 2>&1 | Select-Object -Last 3; Write-Output \"=== tsc ===\"; npx tsc --noEmit 2>&1 | Select-Object -Last 20; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 20; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 25; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")",
+      "PowerShell(npx tsx scripts/_smoke-nf.ts 2>&1 | Select-Object -Last 15)",
+      "PowerShell(npx tsx scripts/_smoke-nf.ts 2>&1 | Select-Object -Last 12)",
+      "PowerShell(npx tsx scripts/_smoke-nf.ts 2>&1 | Select-Object -Last 6)",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 15; Write-Output \"=== tsc: $LASTEXITCODE ===\"; npx tsx scripts/_smoke-nf.ts 2>&1 | Select-Object -Last 6)",
+      "PowerShell(railway run *)",
+      "PowerShell(railway login *)",
+      "PowerShell(railway whoami *)",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 30; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 20; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 20; Write-Output \"=== tsc exit: $LASTEXITCODE ===\"; if \\($LASTEXITCODE -eq 0\\) { npm run build 2>&1 | Select-String -Pattern \"error|Failed|Compiled successfully|Finished TypeScript|\\\\\\(34/34\\\\\\)\" -CaseSensitive:$false | Select-Object -First 15 })",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 25; Write-Output \"=== tsc exit: $LASTEXITCODE ===\"; if \\($LASTEXITCODE -eq 0\\) { npm run build 2>&1 | Select-String -Pattern \"error|Failed|Compiled successfully|Finished TypeScript|\\\\\\(34/34\\\\\\)\" -CaseSensitive:$false | Select-Object -First 15 })",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 40; Write-Output \"=== tsc exit: $LASTEXITCODE ===\")"
     ]
   }
 }

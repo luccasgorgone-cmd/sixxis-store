@@ -1,4 +1,5 @@
 import { emailBase, emailBotao, emailDivisor, svg, BRAND } from './sixxis-email-design'
+import { MAX_PARCELAS_SEM_JUROS } from './parcelamento'
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif"
 const fmtValor = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -34,7 +35,7 @@ function selosGrid() {
         ${selo('star', 'Garantia 12m')}
       </tr>
       <tr>
-        ${selo('credit', '6x sem juros')}
+        ${selo('credit', `${MAX_PARCELAS_SEM_JUROS}x sem juros`)}
         ${selo('heart', 'Cashback')}
         ${selo('package', '30 anos')}
       </tr>

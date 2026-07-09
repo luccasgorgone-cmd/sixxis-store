@@ -3,6 +3,8 @@
 // Versão 2.0 — SVG Lucide-style, sem emojis, {{ano}} dinâmico
 // ═══════════════════════════════════════════════════════
 
+import { MAX_PARCELAS_SEM_JUROS } from './parcelamento'
+
 export const BRAND = {
   nome: 'Sixxis',
   slogan: 'Qualidade e Conforto para o Seu Ambiente',
@@ -136,7 +138,7 @@ export function emailBase({
                 <td width="33%" align="center" class="email-col-half" style="padding:8px;">
                   <div style="background:rgba(60,191,179,0.12);border-radius:12px;padding:12px 8px;">
                     ${svg('credit', '#3cbfb3', 22)}
-                    <p style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px;">6x sem juros</p>
+                    <p style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px;">${MAX_PARCELAS_SEM_JUROS}x sem juros</p>
                   </div>
                 </td>
                 <td width="33%" align="center" class="email-col-half" style="padding:8px;">

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Zap, ChevronRight } from 'lucide-react'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 interface Similar {
   id: string
@@ -157,7 +158,7 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
                       R$ {fmt(precoFinal)}
                     </p>
                     <p className="text-[10px] text-gray-400 mt-0.5">
-                      6x de R$ {fmt(p.parcelaValor)} sem juros
+                      {MAX_PARCELAS_SEM_JUROS}x de R$ {fmt(p.parcelaValor)} sem juros
                     </p>
                     <p className="text-[10px] text-[#3cbfb3] font-medium mt-0.5">
                       R$ {fmt(p.pixPreco)} no PIX

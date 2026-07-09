@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 // ── Column Title ──────────────────────────────────────────────────────────────
 function ColTitle({ children }: { children: React.ReactNode }) {
@@ -279,7 +280,7 @@ export default async function Footer() {
               </div>
             </div>
             <span className="text-white/70 text-xs font-semibold shrink-0">
-              Parcele em até <strong className="text-white">6x sem juros</strong>
+              Parcele em até <strong className="text-white">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
             </span>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { Truck, ShieldCheck, CreditCard, Star } from 'lucide-react'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 const ICONS = [Truck, ShieldCheck, CreditCard, Star] as const
 
@@ -10,7 +11,7 @@ interface TrustItem {
 const DEFAULT_ITEMS: TrustItem[] = [
   { titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
   { titulo: 'Compra 100% Segura',         sub: 'Seus dados protegidos' },
-  { titulo: '6x sem juros no cartão',     sub: 'Débito, crédito e PIX' },
+  { titulo: `${MAX_PARCELAS_SEM_JUROS}x sem juros no cartão`, sub: 'Débito, crédito e PIX' },
   { titulo: 'Qualidade Sixxis',           sub: 'Garantia Sixxis' },
 ]
 

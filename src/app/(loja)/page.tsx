@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, ShoppingCart } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
@@ -128,7 +129,7 @@ export default async function HomePage() {
         items={[
           { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Despacho em 24h'    },
           { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos'            },
-          { titulo: trust.trust_3_titulo || '6x sem juros no cartão',     sub: trust.trust_3_sub || 'Débito, crédito e PIX'            },
+          { titulo: trust.trust_3_titulo || `${MAX_PARCELAS_SEM_JUROS}x sem juros no cartão`, sub: trust.trust_3_sub || 'Débito, crédito e PIX'            },
           { titulo: trust.trust_4_titulo || 'Qualidade Sixxis',           sub: trust.trust_4_sub || 'Garantia Sixxis'                  },
         ]}
       />

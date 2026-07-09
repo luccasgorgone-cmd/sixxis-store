@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 
 interface Variacao {
   id:      string
@@ -39,7 +40,7 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
   const precoBase    = produto.precoPromocional ?? produto.preco
   const precoAtual   = selecionada?.preco ?? precoBase
   const precoAtVista = precoAtual * 0.97
-  const parcelamento = precoAtual / 12
+  const parcelamento = valorParcela(precoAtual)
   const estoqueAtual = selecionada?.estoque ?? 0
 
   const variacoesAtivas = variacoes.filter((v) => v.ativo)
@@ -100,7 +101,7 @@ export default function SeletorVariacao({ produto, variacoes }: Props) {
             R$ {fmt(precoAtVista)} à vista no PIX (-3%)
           </p>
           <p className="text-sm text-gray-500">
-            ou 12x de R$ {fmt(parcelamento)} no cartão
+            ou {MAX_PARCELAS_SEM_JUROS}x de R$ {fmt(parcelamento)} sem juros no cartão
           </p>
         </div>
       )}

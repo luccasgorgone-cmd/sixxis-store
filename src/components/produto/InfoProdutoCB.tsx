@@ -13,12 +13,13 @@ import { useFavoritos } from '@/hooks/useListas'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import { trackAddToCart } from '@/lib/analytics/events'
 import { feedId } from '@/lib/feed-id'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 const SELOS_CONFIANCA = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
   { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
   { icon: Lock,        titulo: 'Compra 100% segura',       sub: 'SSL 256-bit + Antifraude' },
-  { icon: CreditCard,  titulo: '6x sem juros',             sub: 'No cartão de crédito' },
+  { icon: CreditCard,  titulo: `${MAX_PARCELAS_SEM_JUROS}x sem juros`, sub: 'No cartão de crédito' },
   { icon: BadgeCheck,  titulo: 'Qualidade Sixxis',         sub: 'Direto da fábrica' },
   { icon: Headphones,  titulo: 'Suporte especializado',    sub: 'Seg–Sex 8h às 18h' },
 ] as const
@@ -87,7 +88,9 @@ interface Props {
     categoria?: string | null
   }
   variacoes: Variacao[]
-  taxaJuros: number
+  // Legado: não é mais usado desde que o parcelamento virou "até Nx sem juros"
+  // (fonte única em @/lib/parcelamento). Mantido só para não quebrar os callers.
+  taxaJuros?: number
   mediaAvaliacoes: number
   totalAvaliacoes: number
   imagensPorVariacao?: Record<string, string[]>
@@ -96,11 +99,6 @@ interface Props {
 
 function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-function calcPMT(pv: number, taxa: number, n: number) {
-  if (taxa === 0) return pv / n
-  return pv * (taxa * Math.pow(1 + taxa, n)) / (Math.pow(1 + taxa, n) - 1)
 }
 
 function inferirTipoVariacao(nomes: string[]): string {
@@ -114,7 +112,7 @@ function inferirTipoVariacao(nomes: string[]): string {
   return 'Variação'
 }
 
-export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, onVariacaoChange }: Props) {
+export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, onVariacaoChange }: Props) {
   const router = useRouter()
   const { adicionarItem, setDrawerAberto } = useCarrinho()
   const favIds = useFavoritos((s) => s.ids)
@@ -152,7 +150,8 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
     ? Math.round(((precoOriginal - precoAtual) / precoOriginal) * 100)
     : 0
   const precoAtVista = precoAtual * 0.97
-  const taxa = taxaJuros / 100
+  // Lista de parcelas sem juros derivada da fonte única (1..MAX).
+  const parcelasSemJuros = Array.from({ length: MAX_PARCELAS_SEM_JUROS }, (_, i) => i + 1)
   const estoqueAtual = variacaoSelecionada ? variacaoSelecionada.estoque : produto.estoque
   const esgotado = estoqueAtual === 0
 
@@ -354,8 +353,8 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
           <span className="text-gray-600 text-sm">por </span>
           <span className="text-2xl md:text-3xl font-bold md:font-black text-gray-900">R$ {fmt(precoAtual)}</span>
           <span className="text-sm text-gray-600 ml-2">
-            em até <strong>6x</strong> de{' '}
-            <strong>R$ {fmt(precoAtual / 6)}</strong> sem juros no cartão
+            em até <strong>{MAX_PARCELAS_SEM_JUROS}x</strong> de{' '}
+            <strong>R$ {fmt(precoAtual / MAX_PARCELAS_SEM_JUROS)}</strong> sem juros no cartão
           </span>
         </div>
 
@@ -382,48 +381,23 @@ export default function InfoProdutoCB({ produto, variacoes, taxaJuros, mediaAval
 
         {parcelasAberto && (
           <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 mb-4">
-            <div className="grid grid-cols-2 gap-3">
-
-              {/* Coluna 1: 1x–6x sem juros */}
-              <div>
-                <p className="text-[10px] font-extrabold text-green-700 uppercase tracking-wide mb-2 text-center">
-                  Sem juros
-                </p>
-                <div className="space-y-1">
-                  {[1,2,3,4,5,6].map(n => (
-                    <div key={n} className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs ${
-                      n === 6 ? 'bg-[#e8f8f7] border border-[#3cbfb3]/30' : 'bg-white border border-gray-100'
-                    }`}>
-                      <span className="font-bold text-gray-700 w-6">{n}x</span>
-                      <span className={`font-bold ${n === 6 ? 'text-[#3cbfb3]' : 'text-gray-700'}`}>
-                        R$ {fmt(precoAtual / n)}
-                      </span>
-                    </div>
-                  ))}
+            <p className="text-[10px] font-extrabold text-green-700 uppercase tracking-wide mb-2 text-center">
+              Sem juros
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {parcelasSemJuros.map(n => (
+                <div key={n} className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs ${
+                  n === MAX_PARCELAS_SEM_JUROS ? 'bg-[#e8f8f7] border border-[#3cbfb3]/30' : 'bg-white border border-gray-100'
+                }`}>
+                  <span className="font-bold text-gray-700 w-6">{n}x</span>
+                  <span className={`font-bold ${n === MAX_PARCELAS_SEM_JUROS ? 'text-[#3cbfb3]' : 'text-gray-700'}`}>
+                    R$ {fmt(precoAtual / n)}
+                  </span>
                 </div>
-              </div>
-
-              {/* Coluna 2: 7x–12x com juros */}
-              <div>
-                <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-2 text-center">
-                  Com juros
-                </p>
-                <div className="space-y-1">
-                  {[7,8,9,10,11,12].map(n => {
-                    const valor = calcPMT(precoAtual, taxa, n)
-                    return (
-                      <div key={n} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs bg-white border border-gray-100">
-                        <span className="font-bold text-gray-700 w-6">{n}x</span>
-                        <span className="font-bold text-gray-600">R$ {fmt(valor)}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
+              ))}
             </div>
             <p className="text-[10px] text-gray-400 text-center mt-3">
-              * Parcelas com juros calculadas sobre o valor total. Confira no checkout.
+              Parcelas sem juros no cartão de crédito. Confira as condições no checkout.
             </p>
           </div>
         )}

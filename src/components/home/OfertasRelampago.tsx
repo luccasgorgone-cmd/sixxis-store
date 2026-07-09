@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { feedIdProduto } from '@/lib/feed-id'
+import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import type { Produto } from '@/types'
 
 // ── Tipo local para compatibilidade ──────────────────────────────────────────
@@ -115,7 +116,7 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
             </p>
           )}
           <p className="text-[11px] text-gray-400 mt-0.5">
-            6x de R$ {(precoFinal / 6).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} s/ juros
+            {MAX_PARCELAS_SEM_JUROS}x de R$ {valorParcela(precoFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} s/ juros
           </p>
         </div>
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import ProdutosClient from '@/components/produto/ProdutosClient'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,7 @@ const META_CATEGORIAS: Record<string, { title: string; description: string; cano
   aspiradores: {
     title: 'Aspiradores de Pó Potentes',
     description:
-      'Aspiradores de pó Sixxis com alta potência de sucção para a limpeza do dia a dia. Frete para todo o Brasil, parcelamento em até 12x e garantia de 12 meses.',
+      `Aspiradores de pó Sixxis com alta potência de sucção para a limpeza do dia a dia. Frete para todo o Brasil, parcelamento em até ${MAX_PARCELAS_SEM_JUROS}x sem juros e garantia de 12 meses.`,
     canonical: `${SITE_URL}/produtos?categoria=aspiradores`,
   },
   spinning: {

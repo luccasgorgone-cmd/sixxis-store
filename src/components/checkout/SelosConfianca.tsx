@@ -1,4 +1,5 @@
 import { ShieldCheck, Truck, Lock, CreditCard, BadgeCheck, Headphones } from 'lucide-react'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
 // 6 selos de confiança — usados no /carrinho e no /checkout (fonte única, sem
 // duplicar o markup). Ícones Lucide monocromáticos, sem emoji.
@@ -6,7 +7,7 @@ const SELOS = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',       sub: 'Garantia real e documentada' },
   { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
   { icon: Lock,        titulo: 'Compra 100% segura',         sub: 'SSL 256-bit + Antifraude' },
-  { icon: CreditCard,  titulo: '6x sem juros',               sub: 'No cartão de crédito' },
+  { icon: CreditCard,  titulo: `${MAX_PARCELAS_SEM_JUROS}x sem juros`, sub: 'No cartão de crédito' },
   { icon: BadgeCheck,  titulo: 'Qualidade comprovada',       sub: 'Direto da fábrica' },
   { icon: Headphones,  titulo: 'Suporte especializado',      sub: 'Seg–Sex 8h às 18h' },
 ] as const
