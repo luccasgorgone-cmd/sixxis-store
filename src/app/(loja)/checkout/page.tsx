@@ -25,6 +25,8 @@ import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 import { FRETE_COPY } from '@/lib/copy/frete'
+import Breadcrumb from '@/components/ui/Breadcrumb'
+import SelosConfianca from '@/components/checkout/SelosConfianca'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 
@@ -946,9 +948,17 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-20">
+    <>
+      <Breadcrumb
+        items={[
+          { label: 'Início', href: '/' },
+          { label: 'Carrinho', href: '/carrinho' },
+          { label: 'Finalizar compra' },
+        ]}
+      />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-20">
       <div className="flex items-center gap-3 mb-8">
-        <h1 className="text-xl font-extrabold text-gray-900">Finalizar Compra</h1>
+        <h1 className="text-2xl font-black text-gray-900">Finalizar compra</h1>
         {compraDireta && (
           <span className="inline-flex items-center gap-1.5 bg-[#e8f8f7] text-[#3cbfb3] text-[10px] font-bold px-3 py-1 rounded-full border border-[#3cbfb3]/30">
             <Zap size={10} /> Compra Rápida
@@ -1289,6 +1299,9 @@ function CheckoutContent() {
               )}
             </>
           )}
+
+          {/* Selos de confiança — componente compartilhado com o /carrinho */}
+          <SelosConfianca className="mt-6" />
         </div>
 
         <aside className="hidden lg:block lg:sticky lg:top-6 self-start">
@@ -1297,7 +1310,8 @@ function CheckoutContent() {
       </div>
 
       <MobileResumo {...resumoProps} />
-    </div>
+      </div>
+    </>
   )
 }
 

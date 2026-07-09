@@ -153,7 +153,29 @@ export default function CheckoutBricks({
               maxInstallments: 12,
             },
             visual: {
-              style: { theme: 'default' },
+              // 'flat' + customVariables na identidade Sixxis (tiffany #3cbfb3,
+              // cantos arredondados como o rounded-xl/2xl da loja, fundos claros).
+              // Só estética — métodos/parcelas seguem inalterados.
+              style: {
+                theme: 'flat',
+                customVariables: {
+                  baseColor: '#3cbfb3',
+                  baseColorFirstVariant: '#2a9d8f',
+                  baseColorSecondVariant: '#e8f8f7',
+                  textPrimaryColor: '#0f2e2b',
+                  textSecondaryColor: '#6b7280',
+                  inputBackgroundColor: '#ffffff',
+                  formBackgroundColor: '#ffffff',
+                  outlinePrimaryColor: '#3cbfb3',
+                  outlineSecondaryColor: '#e5e7eb',
+                  buttonTextColor: '#ffffff',
+                  borderRadiusSmall: '8px',
+                  borderRadiusMedium: '12px',
+                  borderRadiusLarge: '16px',
+                  borderRadiusFull: '9999px',
+                  fontSizeMedium: '14px',
+                },
+              },
             },
           }}
           onSubmit={async ({ formData }: { formData: BricksFormData }) => {

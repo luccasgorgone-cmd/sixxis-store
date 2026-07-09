@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ShoppingCart, Trash2, Plus, Minus, Tag, ChevronRight,
-  ShieldCheck, Truck, Lock, CreditCard, Zap, Package,
-  CheckCircle, AlertCircle, X, Star, Clock, BadgeCheck, Headphones, Coins
+  Truck, CreditCard, Zap, Package,
+  CheckCircle, AlertCircle, X, Star, Clock, Coins
 } from 'lucide-react'
 import {
   type TipoCupom,
@@ -13,6 +13,7 @@ import {
 } from '@/lib/preco-cupom'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import UsarCashback from '@/components/checkout/UsarCashback'
+import SelosConfianca from '@/components/checkout/SelosConfianca'
 import { FRETE_COPY } from '@/lib/copy/frete'
 
 // ─── TIPOS ───────────────────────────────────────────────────
@@ -303,8 +304,7 @@ export default function CarrinhoPage() {
             Adicione produtos para continuar com a compra
           </p>
           <Link href="/produtos"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-black text-base transition-all hover:shadow-lg hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-black text-base transition-all hover:shadow-lg hover:-translate-y-0.5 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
             <Zap size={18} /> Explorar produtos
           </Link>
           <p className="text-xs text-gray-400 mt-6">
@@ -486,8 +486,8 @@ export default function CarrinhoPage() {
                     <button onClick={aplicarCupom}
                       disabled={!cupomInput.trim() || aplicandoCupom}
                       className="shrink-0 whitespace-nowrap px-4 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all
-                                 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
+                                 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed
+                                 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
                       {aplicandoCupom ? '...' : 'Aplicar'}
                     </button>
                   </div>
@@ -525,8 +525,8 @@ export default function CarrinhoPage() {
                 <button onClick={calcularFrete}
                   disabled={cepInput.replace(/\D/g, '').length < 8 || calculandoFrete}
                   className="shrink-0 whitespace-nowrap px-4 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all
-                             hover:shadow-md disabled:opacity-50"
-                  style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
+                             hover:shadow-md disabled:opacity-50
+                             bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
                   {calculandoFrete ? FRETE_COPY.calculando : FRETE_COPY.calcular}
                 </button>
               </div>
@@ -691,8 +691,8 @@ export default function CarrinhoPage() {
                 onClick={handleCheckout}
                 className="w-full py-4 rounded-xl font-black text-base flex items-center
                            justify-center gap-2 transition-all hover:shadow-lg
-                           hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] mb-3"
-                style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
+                           hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] mb-3
+                           bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
                 <CreditCard size={18} /> Finalizar compra
               </button>
 
@@ -701,27 +701,8 @@ export default function CarrinhoPage() {
                 ← Continuar comprando
               </Link>
 
-              {/* TRUST BADGES — 6 selos definitivos */}
-              <div className="mt-5 pt-4 border-t border-gray-50 grid grid-cols-2 gap-2">
-                {[
-                  { icon: ShieldCheck, titulo: '12 meses de garantia',       sub: 'Garantia real e documentada' },
-                  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
-                  { icon: Lock,        titulo: 'Compra 100% segura',         sub: 'SSL 256-bit + Antifraude' },
-                  { icon: CreditCard,  titulo: '6x sem juros',               sub: 'No cartão de crédito' },
-                  { icon: BadgeCheck,  titulo: 'Qualidade comprovada',       sub: 'Direto da fábrica' },
-                  { icon: Headphones,  titulo: 'Suporte especializado',      sub: 'Seg–Sex 8h às 18h' },
-                ].map(({ icon: Icon, titulo, sub }) => (
-                  <div key={titulo} className="flex items-start gap-2.5 p-2.5 rounded-xl border border-gray-100 bg-white">
-                    <div className="shrink-0 w-8 h-8 rounded-lg bg-[#3cbfb3]/10 flex items-center justify-center">
-                      <Icon size={15} className="text-[#3cbfb3]" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[12px] font-semibold text-gray-800 leading-tight">{titulo}</p>
-                      <p className="text-[11px] text-gray-500 leading-tight mt-0.5">{sub}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* TRUST BADGES — 6 selos definitivos (componente compartilhado) */}
+              <SelosConfianca className="mt-5 pt-4 border-t border-gray-50" />
             </div>
 
             {/* CASHBACK — usar ou não (opt-in, sincronizado com o checkout) */}
