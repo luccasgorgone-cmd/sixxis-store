@@ -6,7 +6,7 @@
 //     - TODAS as linhas de Avaliacao (reviews) e suas fotos.
 //     - TODAS as contas Cliente referenciadas por alguma Avaliacao (avaliadores).
 //     - Todo o catálogo de produtos, EXCETO o produto "TESTE SMOKE".
-//     - TODAS as DEFINIÇÕES: model Cupom (ex.: SIXXIS10), FreteRegra dos produtos
+//     - TODAS as DEFINIÇÕES: model Cupom (ex.: SIXXIS05), FreteRegra dos produtos
 //       reais e ProdutoDestaque dos produtos reais. (Só registros transacionais
 //       /de uso saem: CupomUso; e as FreteRegra/ProdutoDestaque do PRÓPRIO SMOKE.)
 //     - Auth de admin não é tocado (não está em Cliente).
@@ -160,7 +160,7 @@ async function main() {
   }
 
   console.log('\n── Definições (NÃO são apagadas — só conferência):')
-  console.log(`   • Cupom (definições, ex.: SIXXIS10): ${totalCupons} → IGUAL antes/depois (só CupomUso é removido)`)
+  console.log(`   • Cupom (definições, ex.: SIXXIS05): ${totalCupons} → IGUAL antes/depois (só CupomUso é removido)`)
   console.log(`   • FreteRegra: ${totalFreteRegras} total; remove ${freteRemovido} (só do "${SMOKE_PATTERN}") → ficam ${totalFreteRegras - freteRemovido}`)
   console.log(`   • ProdutoDestaque: ${totalDestaques} total; remove ${destaqueRemovido} (só do "${SMOKE_PATTERN}") → ficam ${totalDestaques - destaqueRemovido}`)
   if (!smokeSeraRemovido && smokeProdutos.length > 0) {

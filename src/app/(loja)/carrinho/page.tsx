@@ -16,6 +16,7 @@ import UsarCashback from '@/components/checkout/UsarCashback'
 import SelosConfianca from '@/components/checkout/SelosConfianca'
 import { FRETE_COPY } from '@/lib/copy/frete'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
+import { CUPOM_PC_CODIGO, CUPOM_PC_OFF, CUPOM_PC_DESCRICAO } from '@/lib/cupom-primeira-compra'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -200,20 +201,9 @@ export default function CarrinhoPage() {
         setCupomErro('')
       }
     } catch {
-      const c = cupomInput.trim().toUpperCase()
-      if (c === 'SIXXIS10') {
-        const desconto = calcularDescontoCupom('PERCENTUAL', 10, subtotal)
-        setCupomGlobal({
-          codigo: 'SIXXIS10',
-          tipo: 'PERCENTUAL',
-          valor: 10,
-          desconto,
-          descricao: '10% OFF na primeira compra',
-        })
-        setCupomErro('')
-      } else {
-        setCupomErro('Cupom inválido ou expirado.')
-      }
+      // Falha de rede NÃO concede desconto: só o servidor (avaliarCupom) decide
+      // se um cupom é válido, qual o percentual e se a 1ª compra se aplica.
+      setCupomErro('Não foi possível validar o cupom. Tente novamente.')
     }
     setAplicandoCupom(false)
   }
@@ -309,7 +299,7 @@ export default function CarrinhoPage() {
             <Zap size={18} /> Explorar produtos
           </Link>
           <p className="text-xs text-gray-400 mt-6">
-            Use o cupom <span className="font-bold text-[#3cbfb3]">SIXXIS10</span> para 10% OFF na primeira compra
+            Use o cupom <span className="font-bold text-[#3cbfb3]">{CUPOM_PC_CODIGO}</span> para {CUPOM_PC_DESCRICAO}
           </p>
         </div>
       </div>
@@ -497,9 +487,9 @@ export default function CarrinhoPage() {
                       <AlertCircle size={12} />{cupomErro}
                     </p>
                   )}
-                  <button onClick={() => setCupomInput('SIXXIS10')}
+                  <button onClick={() => setCupomInput(CUPOM_PC_CODIGO)}
                     className="mt-2 text-xs text-[#3cbfb3] hover:underline">
-                    Primeira compra? Use <strong>SIXXIS10</strong> para 10% OFF →
+                    Primeira compra? Use <strong>{CUPOM_PC_CODIGO}</strong> para {CUPOM_PC_OFF} →
                   </button>
                 </>
               )}

@@ -6,6 +6,7 @@
 // Tom: profissional, caloroso, direto
 
 import { MAX_PARCELAS_SEM_JUROS } from './parcelamento'
+import { CUPOM_PC_CODIGO, CUPOM_PC_OFF } from './cupom-primeira-compra'
 
 export const WA_TEMPLATES = {
 
@@ -17,7 +18,7 @@ Bem-vindo(a) à *Sixxis* — somos especialistas em climatização há mais de 3
 
 ✅ Sua conta foi criada com sucesso.
 
-🎁 *Presente de boas-vindas:* use o cupom *SIXXIS10* e ganhe *10% OFF* na sua primeira compra.
+🎁 *Presente de boas-vindas:* use o cupom *${CUPOM_PC_CODIGO}* e ganhe *${CUPOM_PC_OFF}* na sua primeira compra.
 
 Precisa de ajuda para escolher o produto certo? É só responder aqui! Nossa equipe está pronta para te atender.
 

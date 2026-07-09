@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getResend } from './email-resend'
+import { CUPOM_PC_CODIGO } from './cupom-primeira-compra'
 import {
   templateBoasVindas,
   templateConfirmacaoPedido,
@@ -60,7 +61,7 @@ export function gerarHtmlTemplate(tipo: string, variaveis: Record<string, any>):
         imagemProduto: primeiroItem.img || variaveis.produto_img,
         preco: totalCarrinho,
         carrinhoUrl: `${siteUrl}/carrinho`,
-        cupom: variaveis.cupom || 'SIXXIS10',
+        cupom: variaveis.cupom || CUPOM_PC_CODIGO,
       })
     }
 
@@ -389,7 +390,7 @@ export async function enviarEmailAbandonoCarrinho(para: string, opts: {
       produto: primeiro?.nome ?? 'seu produto',
       preco: totalCarrinho,
       carrinhoUrl: `${SITE_URL}/carrinho`,
-      cupom: 'SIXXIS10',
+      cupom: CUPOM_PC_CODIGO,
     })
     assunto = `${nomeCliente}, seu carrinho ainda está esperando`
   }

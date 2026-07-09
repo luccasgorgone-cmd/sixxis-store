@@ -14,7 +14,7 @@ com backup). Devem ser feitos na próxima sessão.
 - [ ] `npx tsx scripts/limpar-reviews-duplicadas.ts` — remove duplicatas.
 - [ ] `npx tsx scripts/seed-reviews-realistas.ts` — gera reviews únicas por
       produto (preserva SX040).
-- [ ] `npx tsx scripts/seed-sixxis10.ts` — garante cupom SIXXIS10 no DB.
+- [ ] `npx tsx scripts/seed-cupom-primeira-compra.ts` — garante cupom SIXXIS05 no DB (migra SIXXIS10).
 - [ ] `npx tsx src/scripts/seed-garantia-estendida.ts` — recalcula garantia
       estendida (12% / 20%) com base nos preços atuais.
 - [ ] **MOB-4**: `npx prisma db push` para criar a coluna nova
@@ -75,7 +75,7 @@ Confirmar visualmente clicando em cada item da sidebar.
       card no topo redireciona para `/adm-a7f9c2b4/luna`
 - [ ] `/adm-a7f9c2b4/clientes` mostra CPF mascarado
 - [ ] `/produtos/sx040` ainda exibe garantia 12m/24m com valores
-- [ ] Adicionar produto ao carrinho, aplicar SIXXIS10, ir para checkout
+- [ ] Adicionar produto ao carrinho, aplicar SIXXIS05, ir para checkout
 
 ## Footer paths (validar como public)
 

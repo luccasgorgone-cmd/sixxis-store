@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
+import { CUPOM_PC_CODIGO } from '@/lib/cupom-primeira-compra'
 import {
   Tag, Plus, Search, X, Edit2, Trash2, Eye,
   Copy, CheckCircle, Clock, AlertTriangle, Percent,
@@ -171,7 +172,7 @@ function ModalCupom({
                 value={form.codigo}
                 onChange={(e) => setForm((p) => ({ ...p, codigo: e.target.value.toUpperCase().replace(/\s/g, '') }))}
                 className={`${input} flex-1 font-mono font-bold tracking-wider`}
-                placeholder="SIXXIS10"
+                placeholder={CUPOM_PC_CODIGO}
                 maxLength={20}
               />
               <button type="button" onClick={gerarCodigo}

@@ -10,6 +10,7 @@ import {
   Wind, Fan, Bike, Info, Phone, UserPlus, ShoppingBag, LogOut, ChevronDown, Handshake,
 } from 'lucide-react'
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
+import { CUPOM_PC_CODIGO, CUPOM_PC_LABEL, CUPOM_PC_BANNER } from '@/lib/cupom-primeira-compra'
 import { useSession } from 'next-auth/react'
 import { logout } from '@/lib/logout'
 import { trackSearch } from '@/lib/analytics/events'
@@ -242,7 +243,7 @@ const NAV_LINKS = [
 
 // ── HEADER ────────────────────────────────────────────────────────────────────
 const TICKER_ITEMS = [
-  { icon: Tag,   text: 'CUPOM SIXXIS10 — 10% OFF na 1ª compra' },
+  { icon: Tag,   text: CUPOM_PC_BANNER },
   { icon: Truck, text: 'Envio em até 24h para todo Brasil' },
   { icon: MapPin,text: 'Entrega para todo o Brasil' },
 ]
@@ -457,10 +458,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
               <Tag size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
               <span className="text-[#0f2e2b] text-xs lg:text-sm font-extrabold">CUPOM:</span>
               <span className="bg-white text-[#0f2e2b] text-[10px] lg:text-xs font-black px-2 lg:px-2.5 py-0.5 lg:py-1 rounded-lg border border-[#0f2e2b]/15 shadow-sm whitespace-nowrap">
-                SIXXIS10
+                {CUPOM_PC_CODIGO}
               </span>
               <span className="text-[#0f2e2b]/85 text-xs lg:text-sm font-semibold whitespace-nowrap">
-                — 10% OFF na 1ª compra
+                — {CUPOM_PC_LABEL}
               </span>
             </div>
 

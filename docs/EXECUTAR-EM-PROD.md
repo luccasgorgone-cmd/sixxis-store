@@ -81,8 +81,8 @@ railway run npx prisma db push
 # 3.1 Limpar secrets do banco
 railway run npx tsx scripts/limpar-secrets-loja.ts
 
-# 3.2 Seed do cupom SIXXIS10
-railway run npx tsx scripts/seed-sixxis10.ts
+# 3.2 Seed do cupom SIXXIS05 (migra o legado SIXXIS10)
+railway run npx tsx scripts/seed-cupom-primeira-compra.ts
 
 # 3.3 Limpar reviews duplicadas
 railway run npx tsx scripts/limpar-reviews-duplicadas.ts
@@ -93,7 +93,7 @@ railway run npx tsx scripts/seed-reviews-realistas.ts
 
 **Outputs esperados:**
 - 3.1: log das chaves removidas (anthropic_api_key, mercadopago_*, r2_*, evolution_*, etc)
-- 3.2: `✅ Cupom SIXXIS10 criado` ou `atualizado`
+- 3.2: `✅ SIXXIS10 → SIXXIS05` ou `✅ SIXXIS05 garantido`
 - 3.3: log de N reviews removidos
 - 3.4: log de ~36-40 reviews criados (4 por produto × 9 produtos não-SX040)
 
@@ -112,7 +112,7 @@ railway run npx tsx scripts/seed-reviews-realistas.ts
 - [ ] Inputs sensíveis substituídos por `<EnvVarHint>`
 
 ### `/adm-a7f9c2b4/cupons`
-- [ ] `SIXXIS10` ativo, percentual 10%, primeira compra apenas
+- [ ] `SIXXIS05` ativo, percentual 5%, primeira compra apenas (e `SIXXIS10` inválido)
 
 ### `/adm-a7f9c2b4/avaliacoes`
 - [ ] 5 reviews aleatórias com texto distinto (sem clones do Ricardo P. / Fernanda C.)
@@ -228,7 +228,7 @@ git push origin main
 - [ ] Polimento mobile em prod (bottom nav, audit tap targets, MOB-14..17)
 - [ ] Schema atualizado (Banner.imagemMobile)
 - [ ] Banco sem secrets em ConfiguracaoLoja
-- [ ] SIXXIS10 ativo no banco
+- [ ] SIXXIS05 ativo no banco (SIXXIS10 não existe mais)
 - [ ] Reviews realistas (sem clones)
 - [ ] Mobile experience nivelada com Mercado Livre / Magalu / Casas Bahia
 - [x] Branches polimento-* deletadas no remote (já feito nesta sessão)

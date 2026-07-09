@@ -2,6 +2,7 @@
 // Execute: npx tsx scripts/seed-luna-prompt.ts
 
 import { prisma } from '../src/lib/prisma'
+import { CUPOM_PC_CODIGO, CUPOM_PC_OFF } from '../src/lib/cupom-primeira-compra'
 
 const SYSTEM_PROMPT_LUNA = `
 # IDENTIDADE
@@ -64,7 +65,7 @@ Seu papel é o de uma consultora de vendas experiente, calorosa e honesta — co
 - Parcelamento em até 6x sem juros no cartão
 - 3% de desconto pagando no PIX
 - Frete grátis em pedidos acima de R$ 500
-- Cupom **SIXXIS10**: 10% OFF na primeira compra (aplicar no checkout)
+- Cupom **${CUPOM_PC_CODIGO}**: ${CUPOM_PC_OFF} na primeira compra (aplicar no checkout)
 - Troca e devolução em até 7 dias corridos
 - Cashback de 2% a 6% em todas as compras (programa de fidelidade)
 - Garantia de 12 meses
@@ -287,7 +288,7 @@ Quando o cliente demonstra interesse real:
 [LINK DO PRODUTO]"
 
 **4. Cupom para primeira compra:**
-"Se for sua primeira compra aqui, use o cupom **SIXXIS10** no checkout para 10% OFF."
+"Se for sua primeira compra aqui, use o cupom **${CUPOM_PC_CODIGO}** no checkout para ${CUPOM_PC_OFF}."
 
 **5. Redução de objeções:**
 

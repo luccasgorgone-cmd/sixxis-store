@@ -5,6 +5,7 @@ import { EditorSection } from '../EditorSection'
 import { ColorField, TextField } from '../FormFields'
 import type { SectionProps } from '../types'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
+import { CUPOM_PC_BANNER } from '@/lib/cupom-primeira-compra'
 
 export function SecaoAnuncio({ config, setConfig, device }: SectionProps) {
   const update = (key: string) => (v: string) =>
@@ -23,7 +24,7 @@ export function SecaoAnuncio({ config, setConfig, device }: SectionProps) {
         <ColorField label="Cor do texto"  value={config.cor_anuncio_texto || ''} onChange={update('cor_anuncio_texto')} />
       </div>
       <div className="space-y-3">
-        <TextField label="Anúncio 1" value={config.anuncio_1 || ''} onChange={update('anuncio_1')} placeholder="🎉 CUPOM SIXXIS10 — 10% OFF na 1ª compra" />
+        <TextField label="Anúncio 1" value={config.anuncio_1 || ''} onChange={update('anuncio_1')} placeholder={`🎉 ${CUPOM_PC_BANNER}`} />
         <TextField label="Anúncio 2" value={config.anuncio_2 || ''} onChange={update('anuncio_2')} placeholder="🚚 Envio em até 24h para todo Brasil" />
         <TextField label="Anúncio 3" value={config.anuncio_3 || ''} onChange={update('anuncio_3')} placeholder={`💳 Parcele em até ${MAX_PARCELAS_SEM_JUROS}x sem juros`} />
       </div>
