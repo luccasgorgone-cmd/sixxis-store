@@ -12,6 +12,8 @@ import {
   descricaoCupom, calcularDescontoCupom,
 } from '@/lib/preco-cupom'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { validarCupomRemoto } from '@/lib/cupom-client'
+import { useRevalidarCupomPersistido } from '@/hooks/useRevalidarCupom'
 import UsarCashback from '@/components/checkout/UsarCashback'
 import SelosConfianca from '@/components/checkout/SelosConfianca'
 import { FRETE_COPY } from '@/lib/copy/frete'
@@ -175,35 +177,21 @@ export default function CarrinhoPage() {
     if (!cupomInput.trim()) return
     setAplicandoCupom(true)
     setCupomErro('')
-    try {
-      const res = await fetch('/api/cupons/validar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          codigo: cupomInput.trim().toUpperCase(),
-          total: subtotal
-        })
+    // Falha de rede/429 NÃO concede desconto: só o servidor (avaliarCupom) decide
+    // se um cupom é válido, qual o percentual e se a 1ª compra se aplica.
+    const r = await validarCupomRemoto(cupomInput, subtotal)
+    if (r.estado === 'valido') {
+      limparAvisoCupom()
+      setCupomGlobal({
+        codigo:    r.cupom.codigo,
+        tipo:      r.cupom.tipo,
+        valor:     r.cupom.valor,
+        desconto:  r.cupom.desconto,
+        descricao: descricaoCupom(r.cupom.tipo, r.cupom.valor),
       })
-      const data = await res.json()
-      if (!res.ok || data.error || data.valido === false) {
-        setCupomErro(data.error || data.erro || 'Cupom inválido ou expirado.')
-      } else {
-        const tipo: TipoCupom = data.tipo || 'PERCENTUAL'
-        const valor = Number(data.valor) || 0
-        const desconto = Number(data.desconto) || calcularDescontoCupom(tipo, valor, subtotal)
-        setCupomGlobal({
-          codigo: data.codigo || cupomInput.trim().toUpperCase(),
-          tipo,
-          valor,
-          desconto,
-          descricao: descricaoCupom(tipo, valor),
-        })
-        setCupomErro('')
-      }
-    } catch {
-      // Falha de rede NÃO concede desconto: só o servidor (avaliarCupom) decide
-      // se um cupom é válido, qual o percentual e se a 1ª compra se aplica.
-      setCupomErro('Não foi possível validar o cupom. Tente novamente.')
+      setCupomErro('')
+    } else {
+      setCupomErro(r.erro)
     }
     setAplicandoCupom(false)
   }
@@ -252,6 +240,10 @@ export default function CarrinhoPage() {
   const subtotal = itens.reduce(
     (s, i) => s + (i.precoPromocional ?? i.preco) * i.quantidade, 0
   )
+  // Cupom persistido pode ter sido desativado/alterado depois de aplicado:
+  // reconfirma com o servidor e remove sozinho se não valer mais.
+  const { aviso: avisoCupom, limparAviso: limparAvisoCupom } = useRevalidarCupomPersistido(subtotal)
+
   const descontoCupom = cupomAplicado
     ? calcularDescontoCupom(cupomAplicado.tipo, cupomAplicado.valor, subtotal)
     : 0
@@ -442,6 +434,12 @@ export default function CarrinhoPage() {
                 <Tag size={14} style={{ color: '#3cbfb3' }} />
                 Cupom de desconto
               </h3>
+
+              {avisoCupom && !cupomAplicado && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-3">
+                  {avisoCupom}
+                </p>
+              )}
 
               {cupomAplicado ? (
                 <div className="flex items-center justify-between bg-emerald-50

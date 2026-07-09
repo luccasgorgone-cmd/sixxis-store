@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Tag, X, Check, Loader2 } from 'lucide-react'
+import { validarCupomRemoto } from '@/lib/cupom-client'
 
 interface Props {
   total:     number
@@ -20,20 +21,14 @@ export default function CampoCupom({ total, onAplicar, onRemover }: Props) {
     setErro('')
     setValidando(true)
 
-    const r = await fetch('/api/cupons/validar', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ codigo: codigo.trim(), total }),
-    })
-
-    const d = await r.json()
+    const r = await validarCupomRemoto(codigo, total)
     setValidando(false)
 
-    if (d.valido) {
-      setAplicado({ codigo: d.codigo, desconto: d.desconto })
-      onAplicar(d.codigo, d.desconto)
+    if (r.estado === 'valido') {
+      setAplicado({ codigo: r.cupom.codigo, desconto: r.cupom.desconto })
+      onAplicar(r.cupom.codigo, r.cupom.desconto)
     } else {
-      setErro(d.erro ?? 'Cupom inválido')
+      setErro(r.erro)
     }
   }
 

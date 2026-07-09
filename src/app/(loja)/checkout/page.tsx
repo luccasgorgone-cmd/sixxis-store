@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
+import { validarCupomRemoto } from '@/lib/cupom-client'
+import { useRevalidarCupomPersistido } from '@/hooks/useRevalidarCupom'
 import {
   type TipoCupom, descricaoCupom, calcularDescontoCupom,
 } from '@/lib/preco-cupom'
@@ -319,7 +321,7 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, tota
 // ─── CupomField ──────────────────────────────────────────────────────────────
 
 function CupomField({
-  cupom, cupomInput, setCupomInput, cupomErro, cupomLoading, aplicarCupom, remover,
+  cupom, cupomInput, setCupomInput, cupomErro, cupomLoading, aplicarCupom, remover, aviso,
 }: {
   cupom: { codigo: string; desconto: number } | null
   cupomInput: string
@@ -328,6 +330,8 @@ function CupomField({
   cupomLoading: boolean
   aplicarCupom: () => void
   remover: () => void
+  /** Cupom persistido foi recusado pelo servidor e removido automaticamente. */
+  aviso?: string
 }) {
   if (cupom) {
     return (
@@ -350,6 +354,11 @@ function CupomField({
   }
   return (
     <div>
+      {aviso && (
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-2">
+          {aviso}
+        </p>
+      )}
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Tag size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
@@ -490,6 +499,10 @@ function CheckoutContent() {
   }
   const [cupomErro, setCupomErro]   = useState('')
   const [cupomLoading, setCupomLoading] = useState(false)
+
+  // Cupom persistido pode ter sido desativado/alterado desde que foi aplicado no
+  // carrinho: reconfirma com o servidor e remove sozinho se não valer mais.
+  const { aviso: avisoCupom, limparAviso: limparAvisoCupom } = useRevalidarCupomPersistido(total)
 
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro]             = useState('')
@@ -713,23 +726,15 @@ function CheckoutContent() {
     if (!cupomInput.trim()) { setCupomErro('Digite um código'); return }
     setCupomErro('')
     setCupomLoading(true)
-    try {
-      const r = await fetch('/api/cupons/validar', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ codigo: cupomInput.trim(), total }),
-      })
-      const d = await r.json()
-      if (d.valido) {
-        const tipo: TipoCupom = d.tipo ?? 'PERCENTUAL'
-        const valor = Number(d.valor) || 0
-        setCupom({ codigo: d.codigo, tipo, valor, desconto: d.desconto })
-        setCupomInput('')
-      } else {
-        setCupomErro(d.erro ?? 'Cupom inválido')
-      }
-    } catch { setCupomErro('Erro ao validar cupom') }
-    finally { setCupomLoading(false) }
+    const r = await validarCupomRemoto(cupomInput, total)
+    if (r.estado === 'valido') {
+      limparAvisoCupom()
+      setCupom({ codigo: r.cupom.codigo, tipo: r.cupom.tipo, valor: r.cupom.valor, desconto: r.cupom.desconto })
+      setCupomInput('')
+    } else {
+      setCupomErro(r.erro)
+    }
+    setCupomLoading(false)
   }
 
   function proximaEtapa() {
@@ -1239,7 +1244,7 @@ function CheckoutContent() {
                       </p>
                       <CupomField
                         cupom={cupom} cupomInput={cupomInput} setCupomInput={v => { setCupomInput(v); setCupomErro('') }}
-                        cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom}
+                        cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom} aviso={avisoCupom}
                         remover={() => { setCupom(null); setCupomInput('') }}
                       />
                     </div>
