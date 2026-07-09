@@ -384,7 +384,14 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
             <p className="text-[10px] font-extrabold text-green-700 uppercase tracking-wide mb-2 text-center">
               Sem juros
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            {/* Contagem VERTICAL (column-major): 1..5 na coluna esquerda, 6..10 na
+                direita. grid-flow-col preenche coluna a coluna; as linhas vêm de
+                MAX_PARCELAS_SEM_JUROS/2 para acompanhar a fonte única (se virar 12x,
+                viram 6 linhas em vez de estourar uma 3ª coluna). */}
+            <div
+              className="grid grid-cols-2 grid-flow-col gap-2"
+              style={{ gridTemplateRows: `repeat(${Math.ceil(MAX_PARCELAS_SEM_JUROS / 2)}, auto)` }}
+            >
               {parcelasSemJuros.map(n => (
                 <div key={n} className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs ${
                   n === MAX_PARCELAS_SEM_JUROS ? 'bg-[#e8f8f7] border border-[#3cbfb3]/30' : 'bg-white border border-gray-100'
