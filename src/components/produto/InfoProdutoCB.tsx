@@ -12,6 +12,7 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos } from '@/hooks/useListas'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import { trackAddToCart } from '@/lib/analytics/events'
+import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { feedId } from '@/lib/feed-id'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
@@ -149,7 +150,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
   const desconto = precoOriginal > precoAtual
     ? Math.round(((precoOriginal - precoAtual) / precoOriginal) * 100)
     : 0
-  const precoAtVista = precoAtual * 0.97
+  const precoAtVista = precoPix(precoAtual)
   // Lista de parcelas sem juros derivada da fonte única (1..MAX).
   const parcelasSemJuros = Array.from({ length: MAX_PARCELAS_SEM_JUROS }, (_, i) => i + 1)
   const estoqueAtual = variacaoSelecionada ? variacaoSelecionada.estoque : produto.estoque
@@ -366,7 +367,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
           <div>
             <span className="text-gray-500 text-sm">por </span>
             <span className="text-base md:text-lg font-bold md:font-black text-gray-900">R$ {fmt(precoAtVista)}</span>
-            <span className="text-[#3cbfb3] text-sm font-semibold ml-1">com 3% de desconto</span>
+            <span className="text-[#3cbfb3] text-sm font-semibold ml-1">com {DESCONTO_PIX_PCT}% de desconto</span>
           </div>
         </div>
 

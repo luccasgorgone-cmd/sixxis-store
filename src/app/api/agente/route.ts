@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import Anthropic from '@anthropic-ai/sdk'
+import { precoPix } from '@/lib/preco-pix'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
           const precoNum = Number(p.preco)
           const promoNum = Number(p.precoPromocional)
           const desconto = Math.round(((precoNum - promoNum) / precoNum) * 100)
-          const pixPreco = (promoNum * 0.97).toFixed(2).replace('.', ',')
+          const pixPreco = precoPix(promoNum).toFixed(2).replace('.', ',')
           return (
             `• ${p.nome}: DE R$ ${precoNum.toLocaleString('pt-BR')} ` +
             `POR R$ ${promoNum.toLocaleString('pt-BR')} (${desconto}% OFF) ` +

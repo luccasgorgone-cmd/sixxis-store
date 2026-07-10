@@ -27,6 +27,7 @@ import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 import { FRETE_COPY } from '@/lib/copy/frete'
+import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import SelosConfianca from '@/components/checkout/SelosConfianca'
 
@@ -307,6 +308,11 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, tota
           <span className="font-extrabold text-gray-900">Total</span>
           <span className="text-xl font-black text-[#0f2e2b]">R$ {moeda(totalFinal)}</span>
         </div>
+        {totalFinal > 0 && (
+          <p className="mt-2 text-xs font-semibold text-right text-[#3cbfb3]">
+            R$ {moeda(precoPix(totalFinal))} no PIX ({DESCONTO_PIX_PCT}% OFF)
+          </p>
+        )}
       </div>
 
       <div className="px-5 pb-4 flex items-center justify-between">

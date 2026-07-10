@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { precoPix } from '@/lib/preco-pix'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export async function GET() {
           const desconto = Math.round(
             (1 - Number(p.precoPromocional) / Number(p.preco)) * 100,
           )
-          const pixPreco = (Number(p.precoPromocional) * 0.97).toFixed(2)
+          const pixPreco = precoPix(Number(p.precoPromocional)).toFixed(2)
           return `• ${p.nome}: DE R$ ${Number(p.preco).toLocaleString('pt-BR')} POR R$ ${Number(p.precoPromocional).toLocaleString('pt-BR')} (${desconto}% OFF) | PIX: R$ ${pixPreco}`
         })
         .join('\n')

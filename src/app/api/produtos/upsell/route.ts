@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { precoPix } from '@/lib/preco-pix'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
       precoFinal:       precoFinal,
       desconto:         desconto > 0 ? desconto : null,
       imagem:           (p!.imagens as string[])?.[0] ?? null,
-      pixPreco:         (precoFinal * 0.97).toFixed(2),
+      pixPreco:         precoPix(precoFinal).toFixed(2),
     }
   })
 

@@ -18,6 +18,7 @@ import UsarCashback from '@/components/checkout/UsarCashback'
 import SelosConfianca from '@/components/checkout/SelosConfianca'
 import { FRETE_COPY } from '@/lib/copy/frete'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
+import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { CUPOM_PC_CODIGO, CUPOM_PC_OFF, CUPOM_PC_DESCRICAO } from '@/lib/cupom-primeira-compra'
 
 // ─── TIPOS ───────────────────────────────────────────────────
@@ -251,7 +252,7 @@ export default function CarrinhoPage() {
   // Cashback aplicável só faz sentido sobre produtos; nunca deixa o total < 0.
   const cashbackAplicado = Math.min(cashbackCart, subtotal - descontoCupom)
   const totalFinal = Math.max(0, subtotal - descontoCupom + valorFrete - cashbackAplicado)
-  const totalPix = totalFinal * 0.97
+  const totalPix = precoPix(totalFinal)
 
   const totalItens = itens.reduce((s, i) => s + i.quantidade, 0)
 
@@ -668,7 +669,7 @@ export default function CarrinhoPage() {
                   <span className="text-2xl font-black text-gray-900">{fmtBRL(totalFinal)}</span>
                 </div>
                 <p className="text-xs font-semibold text-right" style={{ color: '#3cbfb3' }}>
-                  {fmtBRL(totalPix)} no PIX (3% OFF)
+                  {fmtBRL(totalPix)} no PIX ({DESCONTO_PIX_PCT}% OFF)
                 </p>
                 <p className="text-xs text-gray-400 text-center mt-2">
                   ou {MAX_PARCELAS_SEM_JUROS}× de {fmtBRL(valorParcela(totalFinal))} sem juros

@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { trackAddToCart } from '@/lib/analytics/events'
 import { feedIdProduto } from '@/lib/feed-id'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
+import { precoPix as aplicarDescontoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -43,7 +44,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const desconto = precoOriginal
     ? Math.round(((precoOriginal - precoFinal) / precoOriginal) * 100)
     : 0
-  const precoPix = precoFinal * 0.97
+  const precoPix = aplicarDescontoPix(precoFinal)
   const esgotado = (produto.estoque ?? 1) <= 0
   const isNovo = !desconto
 
@@ -215,7 +216,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
 
             <p className="text-[11px] sm:text-xs text-[#3cbfb3] font-semibold mb-3 whitespace-nowrap">
               R$ {fmt(precoPix)} no Pix
-              <span className="text-gray-400 font-normal whitespace-nowrap"> (3% OFF)</span>
+              <span className="text-gray-400 font-normal whitespace-nowrap"> ({DESCONTO_PIX_PCT}% OFF)</span>
             </p>
 
             {/* Botões — Comprar Agora primeiro, Adicionar segundo */}

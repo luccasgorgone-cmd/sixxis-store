@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import PurchaseTracker from '@/components/analytics/PurchaseTracker'
 import { feedId } from '@/lib/feed-id'
+import { FATOR_PIX, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,6 +73,13 @@ export default async function PedidoSucessoPage({
     (s, i) => s + Number(i.precoUnitario) * i.quantidade,
     0,
   )
+  // No PIX o total já vem com o desconto à vista aplicado. Sem esta linha o
+  // resumo teria um buraco de 5% sem rótulo entre Subtotal/Frete e Total.
+  // Derivado do próprio total cobrado (inverso do fator), não recalculado.
+  const descontoPix =
+    ultimoPagamento?.metodo === 'pix'
+      ? Math.round((Number(pedido.total) / FATOR_PIX - Number(pedido.total)) * 100) / 100
+      : 0
 
   return (
     <main className="min-h-[70vh] px-4 py-12 bg-[#f9fafb]">
@@ -189,6 +197,11 @@ export default async function PedidoSucessoPage({
             {Number(pedido.desconto) > 0 && (
               <div className="flex justify-between text-xs text-green-600">
                 <span>Desconto</span><span>-{moeda(Number(pedido.desconto))}</span>
+              </div>
+            )}
+            {descontoPix > 0 && (
+              <div className="flex justify-between text-xs text-green-600">
+                <span>Desconto PIX ({DESCONTO_PIX_PCT}%)</span><span>-{moeda(descontoPix)}</span>
               </div>
             )}
             <div className="flex justify-between font-extrabold text-gray-900 text-sm pt-2 border-t border-gray-100">

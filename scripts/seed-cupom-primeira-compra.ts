@@ -30,7 +30,7 @@ async function sincronizarPromptLuna() {
   const novo = cfg.valor
     .replaceAll(CODIGO_LEGADO, CUPOM_PC_CODIGO)
     // Só o "10% OFF" do CUPOM. Outros percentuais (ex.: "25% OFF" de promoção
-    // de produto, "3% OFF" do PIX) ficam intactos.
+    // de produto, "5% OFF" do PIX) ficam intactos.
     .replace(/ganhar 10% OFF/g, `ganhar ${CUPOM_PC_PERCENTUAL}% OFF`)
     .replace(/: 10% OFF na primeira compra/g, `: ${CUPOM_PC_PERCENTUAL}% OFF na primeira compra`)
 

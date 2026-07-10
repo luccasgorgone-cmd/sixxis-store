@@ -4,6 +4,7 @@ import { HelpCircle } from 'lucide-react'
 import FaqAccordion from '@/components/faq/FaqAccordion'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
+import { DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 
 export const revalidate = 3600
 
@@ -21,7 +22,7 @@ const faqs = [
   },
   {
     q: 'Quais são as formas de pagamento aceitas?',
-    a: `Aceitamos PIX (3% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até ${MAX_PARCELAS_SEM_JUROS}x sem juros e cartão de débito. Todos os pagamentos são processados com segurança via Mercado Pago.`,
+    a: `Aceitamos PIX (${DESCONTO_PIX_PCT}% de desconto à vista), cartão de crédito (Visa, Mastercard, Elo, Amex) parcelado em até ${MAX_PARCELAS_SEM_JUROS}x sem juros e cartão de débito. Todos os pagamentos são processados com segurança via Mercado Pago.`,
   },
   {
     q: 'Como funciona o frete?',

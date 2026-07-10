@@ -145,14 +145,21 @@ export async function POST(req: NextRequest) {
     const pedido = pagamento.pedido
 
     if (novoStatus === 'approved' && pedido.status !== 'pago') {
+      // `total` = valor REALMENTE cobrado, lido do pagamento que venceu.
+      // Não dá para confiar no `total` deixado pela última tentativa: gerar um
+      // PIX (que grava o total com o desconto à vista) e depois tentar um cartão
+      // rejeitado reescreve o total cheio, e o QR do PIX continua pagável. Aqui
+      // o pagamento aprovado é a fonte autoritativa — é o que o MP cobrou.
+      const totalPago = pagamento.valor / 100
+
       await prisma.pedido.update({
         where: { id: pedido.id },
-        data: { status: 'pago', pagoEm: new Date() },
+        data: { status: 'pago', pagoEm: new Date(), total: totalPago },
       })
 
       // Pontos de fidelidade
       try {
-        const pontos = await calcularPontos(Number(pedido.total))
+        const pontos = await calcularPontos(totalPago)
         if (pontos > 0) {
           await creditarPontos(
             pedido.clienteId,
@@ -196,7 +203,7 @@ export async function POST(req: NextRequest) {
           })),
           frete: Number(pedido.frete),
           desconto: Number(pedido.desconto),
-          total: Number(pedido.total),
+          total: totalPago,
           formaPagamento: pedido.formaPagamento,
           endereco: `${end.logradouro}, ${end.numero} — ${end.bairro}, ${end.cidade}/${end.estado}`,
         })
@@ -267,7 +274,9 @@ export async function POST(req: NextRequest) {
             fbc: pedido.fbc,
             clientIp: pedido.clientIp,
             clientUserAgent: pedido.clientUserAgent,
-            value: Number(pedido.total),
+            // Valor cobrado, não `pedido.total` (que aqui é a cópia lida antes
+            // do update acima, e pode estar sem o desconto PIX).
+            value: pagamento.valor / 100,
             currency: 'BRL',
             // content_ids/contents = g:id do feed (dedupe com o Purchase do
             // browser, que também manda o g:id). MESMA função do merchant-feed.

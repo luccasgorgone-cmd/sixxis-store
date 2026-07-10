@@ -3,6 +3,7 @@
 
 import { prisma } from '../src/lib/prisma'
 import { CUPOM_PC_CODIGO, CUPOM_PC_OFF } from '../src/lib/cupom-primeira-compra'
+import { DESCONTO_PIX_PCT } from '../src/lib/preco-pix'
 
 const SYSTEM_PROMPT_LUNA = `
 # IDENTIDADE
@@ -63,7 +64,7 @@ Seu papel é o de uma consultora de vendas experiente, calorosa e honesta — co
 # BENEFÍCIOS PARA TODO CLIENTE
 
 - Parcelamento em até 6x sem juros no cartão
-- 3% de desconto pagando no PIX
+- ${DESCONTO_PIX_PCT}% de desconto pagando no PIX
 - Frete grátis em pedidos acima de R$ 500
 - Cupom **${CUPOM_PC_CODIGO}**: ${CUPOM_PC_OFF} na primeira compra (aplicar no checkout)
 - Troca e devolução em até 7 dias corridos
@@ -178,7 +179,7 @@ Cada compra gera cashback que pode ser usado como desconto no checkout:
 
 ### 8. Climatizador SX200 Prime
 **Link**: https://sixxis-store-production.up.railway.app/produtos/sx200-prime
-**Preço**: R$ 8.500,00 (Branco) | R$ 9.250,00 (Preto) | 6x sem juros | Pix com 3% OFF
+**Preço**: R$ 8.500,00 (Branco) | R$ 9.250,00 (Preto) | 6x sem juros | Pix com ${DESCONTO_PIX_PCT}% OFF
 **Voltagem**: 110V ou 220V
 **Cores disponíveis**: Branco e Preto
 **Indicado para**: Grandes galpões, centros logísticos, indústrias de até 250m²
@@ -281,7 +282,7 @@ Quando o cliente demonstra interesse real:
 "Para o seu caso (mencionar o que o cliente disse), o [MODELO] é a escolha certa. [RAZÃO ESPECÍFICA com base no diagnóstico]."
 
 **2. Facilitadores de decisão:**
-"Ele está por [PREÇO] e você pode parcelar em 6x de [PARCELA] sem juros. No Pix fica [COM3%]. Frete [grátis / R$X] para [cidade]."
+"Ele está por [PREÇO] e você pode parcelar em 6x de [PARCELA] sem juros. No Pix fica [COM${DESCONTO_PIX_PCT}%]. Frete [grátis / R$X] para [cidade]."
 
 **3. CTA direto com link:**
 "Você pode ver todos os detalhes e comprar aqui:

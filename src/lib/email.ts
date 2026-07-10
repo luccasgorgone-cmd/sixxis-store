@@ -214,7 +214,7 @@ export async function enviarEmailConfirmacaoPedido(para: string, opts: {
 }) {
   if (!process.env.RESEND_API_KEY) return
 
-  const { nomeCliente, pedidoId, itens, frete, desconto, total, formaPagamento, endereco } = opts
+  const { nomeCliente, pedidoId, itens, frete, total, formaPagamento, endereco } = opts
   const idCurto = pedidoId.slice(-8).toUpperCase()
   const template = await getTemplate('confirmacao_pedido')
 
@@ -241,7 +241,10 @@ export async function enviarEmailConfirmacaoPedido(para: string, opts: {
     })
     assunto = renderTemplate(template.assunto, { nome: nomeCliente, pedido_id: idCurto })
   } else {
-    const subtotal = total - frete + desconto
+    // Somado dos itens, não derivado do total: o total já pode trazer descontos
+    // que não estão em `desconto` (PIX à vista, cashback), e um subtotal
+    // derivado contradiria os preços unitários listados logo abaixo.
+    const subtotal = itens.reduce((s, i) => s + Number(i.precoUnitario) * i.quantidade, 0)
     html = templateConfirmacaoPedido({
       nome: nomeCliente,
       pedidoId,

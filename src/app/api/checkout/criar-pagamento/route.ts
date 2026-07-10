@@ -10,6 +10,7 @@ import { creditarCashback } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
+import { precoPix } from '@/lib/preco-pix'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 
 const schema = z.object({
@@ -90,6 +91,8 @@ export async function POST(req: NextRequest) {
       },
       cliente: true,
       endereco: true,
+      // Compõem o total base junto com itens/frete/desconto/cashback (ver abaixo).
+      garantias: { select: { valorPago: true } },
     },
   })
 
@@ -112,7 +115,31 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const valorBRL = Number(pedido.total)
+  // ── Valor a cobrar ─────────────────────────────────────────────────────────
+  // `pedido.total` NÃO é a fonte: quem paga no PIX ganha o desconto à vista, e
+  // o método só é escolhido aqui (a criação do pedido grava 'mercado_pago').
+  // Reconstruímos o total base dos componentes do próprio pedido, então o valor
+  // é IDEMPOTENTE e reversível: gerar um PIX e depois pagar no cartão recomputa
+  // a base e cobra o valor cheio, sem arrastar o desconto da tentativa anterior.
+  const subtotalItens = pedido.itens.reduce(
+    (s, i) => s + Number(i.precoUnitario) * i.quantidade,
+    0,
+  )
+  const totalGarantias = pedido.garantias.reduce((s, g) => s + Number(g.valorPago), 0)
+  const totalBase =
+    Math.round(
+      Math.max(
+        0,
+        subtotalItens +
+          Number(pedido.frete) +
+          totalGarantias -
+          Number(pedido.desconto) -
+          Number(pedido.cashbackUsado),
+      ) * 100,
+    ) / 100
+
+  // O desconto PIX incide sobre o total JÁ com cupom e cashback — eles acumulam.
+  const valorBRL = metodo === 'pix' ? precoPix(totalBase) : totalBase
   const valorCentavos = Math.round(valorBRL * 100)
   const idempotencyKey = `pedido-${pedido.id}-${randomUUID()}`
   const emailPayer = payerEmail ?? pedido.cliente.email
@@ -249,24 +276,23 @@ export async function POST(req: NextRequest) {
       },
     })
 
+    // `total` passa a ser o valor REALMENTE cobrado (PIX já com o desconto à
+    // vista). O relatório de margem lê daqui: não pode divergir do
+    // transaction_amount enviado ao Mercado Pago.
+    const dadosPedido: Prisma.PedidoUpdateInput = { total: valorBRL }
+    if (pagamento.mpPaymentId) dadosPedido.mpPaymentId = pagamento.mpPaymentId
     if (mpResp.status === 'approved') {
-      await prisma.pedido.update({
-        where: { id: pedido.id },
-        data: {
-          status: 'pago',
-          pagoEm: new Date(),
-          mpPaymentId: pagamento.mpPaymentId,
-        },
-      })
+      dadosPedido.status = 'pago'
+      dadosPedido.pagoEm = new Date()
+    }
+    await prisma.pedido.update({ where: { id: pedido.id }, data: dadosPedido })
+
+    if (mpResp.status === 'approved') {
       // Cartão aprovado SÍNCRONO: o webhook veria status já 'pago' e pularia o
       // crédito. Credita aqui (pendente, % do nível, sobre o subtotal de
       // produtos). Idempotente: se o webhook também rodar, não credita 2x.
       try {
-        const subtotalProdutos = pedido.itens.reduce(
-          (s, i) => s + Number(i.precoUnitario) * i.quantidade,
-          0,
-        )
-        await creditarCashback(pedido.clienteId, subtotalProdutos, pedido.id)
+        await creditarCashback(pedido.clienteId, subtotalItens, pedido.id)
       } catch (e) {
         console.error('[mp:create] cashback:', (e as Error).message)
       }
@@ -292,19 +318,13 @@ export async function POST(req: NextRequest) {
           })),
           frete: Number(pedido.frete),
           desconto: Number(pedido.desconto),
-          total: Number(pedido.total),
+          total: valorBRL,
           formaPagamento: pedido.formaPagamento,
           endereco: `${end.logradouro}, ${end.numero} — ${end.bairro}, ${end.cidade}/${end.estado}`,
         })
       } catch (e) {
         console.error('[mp:create] email confirmacao:', (e as Error).message)
       }
-    } else if (pagamento.mpPaymentId) {
-      // mantém referência principal pra reconciliação via webhook
-      await prisma.pedido.update({
-        where: { id: pedido.id },
-        data: { mpPaymentId: pagamento.mpPaymentId },
-      })
     }
 
     return NextResponse.json({
