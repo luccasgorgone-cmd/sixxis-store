@@ -12,6 +12,16 @@ function soDigitos(v: string | number | null | undefined): string {
   return String(v).replace(/\D/g, '')
 }
 
+/** Moeda BRL: 1234.5 → "R$ 1.234,50". null/undefined/NaN → "R$ 0,00". */
+export function formatBRL(v: number | string | null | undefined): string {
+  const n = Number(v)
+  return (Number.isFinite(n) ? n : 0).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  })
+}
+
 /**
  * Telefone BR.
  *  - 11 dígitos → (DD)XXXXX-XXXX  (celular)

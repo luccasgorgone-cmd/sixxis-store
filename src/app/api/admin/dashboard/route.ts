@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { contarClientes } from '@/lib/clientes-count'
+import { resolverPeriodo } from '@/lib/periodo-admin'
 import {
   STATUS_PAGO_TODOS,
   STATUS_PENDENTE_TODOS,
@@ -10,14 +11,6 @@ import {
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-
-function startOfDay(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
-}
-
-function endOfDay(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999)
-}
 
 function formatDate(d: Date) {
   return d.toISOString().slice(0, 10)
@@ -28,34 +21,7 @@ export async function GET(request: NextRequest) {
   if (unauthorized) return unauthorized
 
   const { searchParams } = request.nextUrl
-  const periodoParam  = searchParams.get('periodo')
-  const fromParam     = searchParams.get('from') || searchParams.get('dataInicio')
-  const toParam       = searchParams.get('to') || searchParams.get('dataFim')
-
-  let from: Date
-  let to: Date
-
-  if (fromParam && toParam) {
-    from = startOfDay(new Date(fromParam))
-    to   = endOfDay(new Date(toParam))
-  } else {
-    to = endOfDay(new Date())
-    if (periodoParam === 'hoje') {
-      from = startOfDay(new Date())
-    } else if (periodoParam === '7d') {
-      from = startOfDay(new Date(Date.now() - 6 * 86400000))
-    } else if (periodoParam === 'mes') {
-      const now = new Date()
-      from = startOfDay(new Date(now.getFullYear(), now.getMonth(), 1))
-    } else {
-      // default: 30d
-      from = startOfDay(new Date(Date.now() - 29 * 86400000))
-    }
-  }
-
-  const diffMs  = to.getTime() - from.getTime()
-  const prevTo  = new Date(from.getTime() - 1)
-  const prevFrom = new Date(prevTo.getTime() - diffMs)
+  const { from, to, prevFrom, prevTo } = resolverPeriodo(searchParams)
 
   const pedidoWhere   = { createdAt: { gte: from, lte: to } }
   const prevWhere     = { createdAt: { gte: prevFrom, lte: prevTo } }

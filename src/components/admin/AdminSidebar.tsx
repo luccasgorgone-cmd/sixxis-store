@@ -11,6 +11,7 @@ import {
   Target, MessageSquare, Clock, Bot, UserCog, History,
   CreditCard, ShieldCheck, Bell, Sparkles, Truck, ShoppingCart,
   Handshake, Inbox,
+  TrendingUp,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { A } from '@/lib/admin-tokens'
@@ -34,6 +35,7 @@ const NAV_GROUPS = [
     items: [
       { href: `${ADMIN_BASE}/pedidos`,    label: 'Pedidos',        icon: ShoppingBag, exact: false },
       { href: `${ADMIN_BASE}/pagamentos`, label: 'Pagamentos',     icon: CreditCard,  exact: false },
+      { href: `${ADMIN_BASE}/margem`,     label: 'Margem',         icon: TrendingUp,  exact: false },
       { href: `${ADMIN_BASE}/cupons`,     label: 'Cupons',         icon: Tag,         exact: false },
       { href: `${ADMIN_BASE}/garantias`,  label: 'Garantias',      icon: ShieldCheck, exact: false },
       { href: `${ADMIN_BASE}/carrinhos-abandonados`, label: 'Carrinhos Abandonados', icon: ShoppingCart, exact: false },

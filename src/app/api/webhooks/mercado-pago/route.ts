@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import type { Prisma } from '@prisma/client'
-import { mpPayment, MP_WEBHOOK_SECRET } from '@/lib/mercadopago'
+import { mpPayment, MP_WEBHOOK_SECRET, somarTaxaMp } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auditLog } from '@/lib/audit'
 import { calcularPontos, creditarPontos } from '@/lib/fidelidade'
@@ -211,6 +211,28 @@ export async function POST(req: NextRequest) {
         target: pedido.id,
         metadata: { mpPaymentId, valor: pagamento.valor },
       })
+    }
+
+    // ── Tarifa real do MP (margem de contribuição) ─────────────────────────────
+    // Reusa o mpResp que ESTE webhook já buscou — nenhuma chamada de rede nova,
+    // logo nenhum risco novo de timeout na confirmação da venda. Idempotente:
+    // grava só quando ainda está null. A confirmação do pagamento NUNCA depende
+    // disto — qualquer falha vira log [mp-taxa] e o pedido segue pago.
+    if (novoStatus === 'approved') {
+      try {
+        const taxa = somarTaxaMp((mpResp as { fee_details?: unknown }).fee_details)
+        if (taxa == null) {
+          console.warn(`[mp-taxa] fee_details ausente no pagamento ${mpPaymentId} — taxa fica pendente`)
+        } else {
+          const r = await prisma.pedido.updateMany({
+            where: { id: pedido.id, mpTaxaReal: null },
+            data:  { mpTaxaReal: taxa },
+          })
+          if (r.count) console.info(`[mp-taxa] pedido ${pedido.id} taxa=R$${taxa.toFixed(2)}`)
+        }
+      } catch (e) {
+        console.error('[mp-taxa]', (e as Error).message)
+      }
     }
 
     // ── CAPI Purchase (server-side, Fase 2) ────────────────────────────────────

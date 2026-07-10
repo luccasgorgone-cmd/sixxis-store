@@ -130,6 +130,11 @@ model Pedido {
   transportadora String?             // nome da transportadora (texto livre)
   linkRastreio   String?             // URL de rastreio colada manualmente
   custoFreteReal Decimal?            @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
+  // INTERNO — tarifa REAL cobrada pelo Mercado Pago neste pedido, em R$ (soma
+  // dos fee_details com fee_payer=collector; inclui juros de parcelamento que a
+  // loja absorve). null = ainda não sincronizada, NÃO significa zero.
+  // O detalhamento cru NÃO é duplicado aqui: vive em Pagamento.rawResponse.fee_details.
+  mpTaxaReal     Decimal?            @db.Decimal(10, 2)
   enviadoEm      DateTime?           // quando o pedido foi despachado
   entregueEm     DateTime?           // quando foi marcado como entregue
   canceladoEm    DateTime?           // quando o pedido foi cancelado (auditoria)
