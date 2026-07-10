@@ -722,11 +722,16 @@ function PedidoDetalhe({
                 </button>
               </div>
 
+              <p className="text-[11px] text-gray-400 mb-2">
+                Consulta sempre todas as transportadoras ativas (Braspress e Melhor Envio), sem filtro por tipo de produto. Se uma não atender ao item, aparece “não disponível” com o motivo — as demais continuam visíveis.
+              </p>
+
               {cotErro && !cotResp?.cotacoes?.length && (
                 <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{cotErro}</p>
               )}
 
               {cotResp && cotResp.cotacoes.length > 0 && (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {cotResp.cotacoes.map((c) => {
                     const ehMaisBarata = c.ok && cotResp.maisBarata?.transportadora === c.transportadora
@@ -776,6 +781,13 @@ function PedidoDetalhe({
                     )
                   })}
                 </div>
+                {/* Todas as ativas responderam, mas nenhuma cotou → despacho manual. */}
+                {!cotResp.maisBarata && (
+                  <p className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    {cotResp.mensagem || 'Nenhuma transportadora cotou este envio — defina a transportadora e o custo manualmente.'}
+                  </p>
+                )}
+                </>
               )}
             </div>
 
