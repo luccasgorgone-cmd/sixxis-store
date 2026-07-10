@@ -1,6 +1,6 @@
 // ─── Validação de cupom no CLIENTE — chamada única a /api/cupons/validar ─────
-// Fonte única do fetch. Toda superfície (carrinho, checkout, CampoCupom e a
-// revalidação automática do cupom persistido) passa por aqui. A autoridade
+// Fonte única do fetch. Toda superfície (carrinho, checkout e a revalidação
+// automática do cupom persistido) passa por aqui. A autoridade
 // continua sendo o servidor: `avaliarCupom` (src/lib/cupom.ts). Este módulo só
 // fala com a rota e NORMALIZA a resposta.
 //
