@@ -7,20 +7,35 @@ import { mpPayment } from '@/lib/mercadopago'
 // POST /api/interno/pagamento/consultar
 //
 // Complementa /api/interno/pagamento/criar-cobranca. O token do Mercado Pago fica
-// SÓ na Loja (decisão do dono), então o CRM — ao receber o webhook do MP — não
-// consegue consultar o pagamento sozinho. Esta rota expõe uma leitura: o CRM
-// pergunta "esse pagamento está aprovado?" e a Loja responde com o status do MP.
+// SÓ na Loja (decisão do dono), então o CRM — ao receber o webhook do MP, OU ao
+// clicar "Verificar pagamento" quando o webhook não chegou — pergunta à Loja e a
+// Loja responde com o status do MP.
 //
-// READ-ONLY absoluto: usa mpPayment.get() (Payment do SDK, MESMO token da Loja).
+// Dois modos (retrocompatível):
+//   • { mpPaymentId }        → mpPayment.get()    (consulta direta por id)
+//   • { externalReference }  → mpPayment.search() (acha o pagamento pela
+//                              referência "crm-PED123" quando o CRM não tem o id)
+//
+// READ-ONLY absoluto: usa só Payment.get()/Payment.search() (MESMO token da Loja).
 // NÃO importa @/lib/prisma, NÃO cria Pedido/Pagamento, NÃO toca estoque/cashback/
 // email/CAPI. Só lê do MP e devolve.
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-const bodySchema = z.object({
-  // id de pagamento do MP: dígitos (às vezes com hífen), curto.
-  mpPaymentId: z.string().trim().regex(/^[0-9-]{1,64}$/, 'mpPaymentId inválido'),
-})
+const bodySchema = z
+  .object({
+    // id de pagamento do MP: dígitos (às vezes com hífen), curto.
+    mpPaymentId: z.string().trim().regex(/^[0-9-]{1,64}$/, 'mpPaymentId inválido').optional(),
+    // external_reference gerado pela criar-cobranca (ex.: "crm-PED123").
+    externalReference: z
+      .string()
+      .trim()
+      .regex(/^[A-Za-z0-9._-]{1,128}$/, 'externalReference inválido')
+      .optional(),
+  })
+  .refine((d) => d.mpPaymentId || d.externalReference, {
+    message: 'informe mpPaymentId ou externalReference',
+  })
 
 function jsonInterno(data: unknown, status = 200) {
   return Response.json(data, { status, headers: HEADERS_INTERNOS })
@@ -52,25 +67,62 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { mpPaymentId } = parsed.data
+  const { mpPaymentId, externalReference } = parsed.data
+
+  // ── Modo 1: por id (intacto, retrocompatível) ────────────────────────────────
+  // Prioridade quando ambos vierem — mantém o comportamento antigo.
+  if (mpPaymentId) {
+    try {
+      const pgto = await mpPayment.get({ id: mpPaymentId })
+      return jsonInterno({
+        ok: true,
+        encontrado: true,
+        status: pgto.status ?? null,
+        externalReference: pgto.external_reference ?? null,
+        valor: pgto.transaction_amount ?? null,
+        mpPaymentId,
+      })
+    } catch (err) {
+      // Pagamento inexistente no MP → 404 claro.
+      if (statusDoErro(err) === 404) {
+        return jsonInterno({ ok: false, mensagem: 'pagamento nao encontrado' }, 404)
+      }
+      console.error('[interno/consultar-pagamento] erro do Mercado Pago (get):', (err as Error).message)
+      return jsonInterno({ ok: false, mensagem: 'falha ao consultar pagamento' }, 502)
+    }
+  }
+
+  // ── Modo 2: por external_reference (busca) ───────────────────────────────────
+  // ISOLAMENTO CONTÁBIL na leitura: só cobranças do CRM (prefixo "crm-"). Uma
+  // referência sem o prefixo é de venda da Loja — NUNCA é buscada nem retornada.
+  const ref = externalReference as string
+  if (!ref.startsWith('crm-')) {
+    return jsonInterno({ ok: true, encontrado: false, status: null })
+  }
 
   try {
-    const pgto = await mpPayment.get({ id: mpPaymentId })
-
+    // Busca ordenada do mais recente para o mais antigo; entre os retornados,
+    // prioriza o approved; senão, o mais recente.
+    const busca = await mpPayment.search({
+      options: { external_reference: ref, sort: 'date_created', criteria: 'desc' },
+    })
+    // Defesa em profundidade: só resultados com external_reference "crm-*".
+    const results = (busca.results ?? []).filter((r) => (r.external_reference ?? '').startsWith('crm-'))
+    if (results.length === 0) {
+      return jsonInterno({ ok: true, encontrado: false, status: null })
+    }
+    const escolhido = results.find((r) => r.status === 'approved') ?? results[0]
     return jsonInterno({
       ok: true,
-      status: pgto.status ?? null,
-      externalReference: pgto.external_reference ?? null,
-      valor: pgto.transaction_amount ?? null,
-      mpPaymentId,
+      encontrado: true,
+      status: escolhido.status ?? null,
+      externalReference: escolhido.external_reference ?? ref,
+      valor: escolhido.transaction_amount ?? null,
+      mpPaymentId: escolhido.id ?? null,
     })
   } catch (err) {
-    // Pagamento inexistente no MP → 404 claro.
-    if (statusDoErro(err) === 404) {
-      return jsonInterno({ ok: false, mensagem: 'pagamento nao encontrado' }, 404)
-    }
-    // Loga sem vazar segredo (só a mensagem do erro).
-    console.error('[interno/consultar-pagamento] erro do Mercado Pago:', (err as Error).message)
-    return jsonInterno({ ok: false, mensagem: 'falha ao consultar pagamento' }, 502)
+    // Busca falhou → degrada para "não encontrado" (nunca 500). Logado sem segredo.
+    console.error('[interno/consultar-pagamento] erro do Mercado Pago (search):', (err as Error).message)
+    return jsonInterno({ ok: true, encontrado: false, status: null })
   }
 }
