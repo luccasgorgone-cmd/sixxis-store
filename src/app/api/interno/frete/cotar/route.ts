@@ -4,12 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { autorizarInterno, HEADERS_INTERNOS } from '@/lib/interno-auth'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
 import { cepParaUF, montarItensCotacaoProdutos } from '@/lib/frete-resolver'
-import {
-  cotarComCarriersDetalhado,
-  algumCarrierHabilitado,
-  type CotacaoDetalhada,
-  type ItemCotacao,
-} from '@/lib/carriers'
+import { type ItemCotacao } from '@/lib/carriers'
+import { cotarTransportadoras } from '@/lib/cotacao-transportadoras'
 
 // ─── API INTERNA de cotação de frete (CRM) ───────────────────────────────────
 // POST /api/interno/frete/cotar
@@ -209,67 +205,8 @@ export async function POST(request: NextRequest) {
   const itens = [...resolvido.itens, ...itensCaixa]
   const valorMercadoria = resolvido.valorMercadoria + valorCaixas
 
-  if (itens.length === 0) {
-    return jsonInterno({
-      ok: false,
-      uf,
-      cotacoes: [],
-      maisBarata: null,
-      status: 'a_combinar',
-      mensagem: 'Nenhum item cotável no carrinho.',
-    })
-  }
-
-  // 8. Nenhum carrier ativo → cotação automática indisponível (não é bloqueio).
-  if (!algumCarrierHabilitado()) {
-    return jsonInterno({
-      ok: false,
-      uf,
-      cotacoes: [],
-      maisBarata: null,
-      status: 'a_combinar',
-      mensagem: 'Cotação automática indisponível — nenhuma transportadora ativa.',
-    })
-  }
-
-  // 9. Cota POR transportadora (mesmo motor do checkout, sem colapsar na mais barata).
-  const detalhadas = await cotarComCarriersDetalhado({
-    cepOrigem: '', // adapters usam a env de origem própria
-    cepDestino,
-    valorMercadoria,
-    itens,
-  })
-
-  // Ordena: as que cotaram primeiro (mais barata → mais cara), falhas por último.
-  const cotacoes = [...detalhadas].sort((a, b) => {
-    if (a.ok !== b.ok) return a.ok ? -1 : 1
-    if (a.ok && b.ok) return (a.preco ?? Infinity) - (b.preco ?? Infinity)
-    return 0
-  })
-
-  const oks = cotacoes.filter((c): c is CotacaoDetalhada & { preco: number } => c.ok && c.preco != null)
-  const maisBarataCot = oks.length
-    ? oks.reduce((a, b) => (b.preco < a.preco ? b : a))
-    : null
-  const maisBarata = maisBarataCot
-    ? {
-        transportadora: maisBarataCot.transportadora,
-        preco: maisBarataCot.preco,
-        prazoDias: maisBarataCot.prazoDias,
-      }
-    : null
-
-  const status = maisBarata ? 'ok' : 'a_combinar'
-  const mensagem = maisBarata
-    ? ''
-    : 'Nenhuma transportadora cotou este envio — cotação manual.'
-
-  return jsonInterno({
-    ok: Boolean(maisBarata),
-    uf,
-    cotacoes,
-    maisBarata,
-    status,
-    mensagem,
-  })
+  // 8. Cota POR transportadora — estágio final compartilhado (fan-out + ordenação
+  // + mais barata). Mesmo helper usado pela rota admin de cotação por pedido.
+  const resposta = await cotarTransportadoras({ uf, cepDestino, itens, valorMercadoria })
+  return jsonInterno(resposta)
 }

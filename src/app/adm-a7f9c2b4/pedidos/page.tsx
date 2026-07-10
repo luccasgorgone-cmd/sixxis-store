@@ -60,6 +60,17 @@ interface Pedido {
 
 interface Stats { total: number; pendentes: number; enviados: number; receita: number; aguardandoEnvio: number }
 
+// Cotação por transportadora (sob demanda) — mesmo shape da rota admin/interna.
+interface CotTransportadora {
+  carrierId: string; transportadora: string; ok: boolean
+  preco: number | null; prazoDias: number | null; erro?: string
+}
+interface CotResposta {
+  ok: boolean; uf: string | null; cotacoes: CotTransportadora[]
+  maisBarata: { transportadora: string; preco: number; prazoDias: number | null } | null
+  status: string; mensagem: string
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATUSES = ['pendente', 'aguardando_frete', 'pago', 'enviado', 'entregue', 'cancelado']
@@ -339,6 +350,10 @@ function PedidoDetalhe({
   const [custoReal, setCustoReal] = useState(pedido.custoFreteReal != null ? String(pedido.custoFreteReal) : '')
   const [saving, setSaving] = useState<string | null>(null)
   const [nfOpen, setNfOpen] = useState(false)
+  // Cotação por transportadora — sob demanda (só ao clicar), nunca automática.
+  const [cotando, setCotando] = useState(false)
+  const [cotResp, setCotResp] = useState<CotResposta | null>(null)
+  const [cotErro, setCotErro] = useState<string | null>(null)
 
   const freteCobrado = Number(pedido.frete)
   const custoNum = custoReal.trim() === '' ? null : Number(custoReal)
@@ -390,6 +405,44 @@ function PedidoDetalhe({
   }
   function salvarStatus() {
     patch({ status }, 'status', 'Status atualizado')
+  }
+
+  // Cota Braspress × Melhor Envio para este pedido (endereço + produtos do pedido).
+  // SOB DEMANDA. Nunca grava — a escolha é um passo consciente separado.
+  async function cotarTransportadoras() {
+    setCotando(true)
+    setCotErro(null)
+    try {
+      const res = await fetch(`/api/admin/pedidos/${pedido.id}/cotar-transportadoras`, { method: 'POST' })
+      const d = await res.json().catch(() => null)
+      if (!res.ok || !d) throw new Error(d?.error || 'Falha ao cotar transportadoras')
+      setCotResp(d as CotResposta)
+      // Sem nenhuma cotação (carrier off / sem dimensões / CEP inválido): mostra o motivo.
+      if (!d.cotacoes?.length) setCotErro(d.mensagem || 'Nenhuma cotação disponível.')
+    } catch (err) {
+      setCotResp(null)
+      setCotErro((err as Error).message || 'Erro ao cotar')
+    }
+    setCotando(false)
+  }
+
+  // Escolhe uma transportadora cotada: pré-preenche o dropdown de despacho +
+  // grava Pedido.transportadora e Pedido.custoFreteReal (custo interno p/ margem).
+  // NÃO toca no frete/total do cliente. Reusa o MESMO PATCH de edição.
+  function escolherCotacao(nome: string, preco: number) {
+    if ((TRANSPORTADORAS as readonly string[]).includes(nome)) {
+      setTranspOpcao(nome)
+      setTranspOutro('')
+    } else {
+      setTranspOpcao(TRANSPORTADORA_OUTRO)
+      setTranspOutro(nome)
+    }
+    setCustoReal(String(preco))
+    patch(
+      { transportadora: nome, custoFreteReal: String(preco) },
+      'escolher-cotacao',
+      `Transportadora definida: ${nome} · custo real ${fmt(preco)}`,
+    )
   }
 
   const end = pedido.endereco
@@ -650,6 +703,80 @@ function PedidoDetalhe({
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Cotar transportadoras (sob demanda — Braspress × Melhor Envio) */}
+            <div className="border-t border-gray-100 pt-3">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <DollarSign className="w-3.5 h-3.5" /> Cotar transportadoras
+                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded normal-case">INTERNO — cliente não vê</span>
+                </p>
+                <button
+                  onClick={cotarTransportadoras}
+                  disabled={cotando}
+                  className="inline-flex items-center gap-1.5 border border-[#3cbfb3] text-[#2a9d8f] hover:bg-[#3cbfb3]/10 disabled:opacity-50 font-semibold rounded-lg px-3 py-1.5 text-xs transition"
+                >
+                  {cotando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
+                  {cotando ? 'Cotando…' : cotResp ? 'Recotar' : 'Cotar transportadoras'}
+                </button>
+              </div>
+
+              {cotErro && !cotResp?.cotacoes?.length && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{cotErro}</p>
+              )}
+
+              {cotResp && cotResp.cotacoes.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {cotResp.cotacoes.map((c) => {
+                    const ehMaisBarata = c.ok && cotResp.maisBarata?.transportadora === c.transportadora
+                    const escolhida = pedido.transportadora === c.transportadora
+                    return (
+                      <div
+                        key={c.carrierId}
+                        className={`rounded-xl border p-3 ${
+                          c.ok
+                            ? escolhida
+                              ? 'border-[#3cbfb3] bg-[#3cbfb3]/5'
+                              : 'border-gray-200 bg-white'
+                            : 'border-gray-100 bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-sm text-gray-700">{c.transportadora}</span>
+                          {ehMaisBarata && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">mais barata</span>
+                          )}
+                        </div>
+                        {c.ok ? (
+                          <>
+                            <div className="mt-1 flex items-baseline gap-2">
+                              <span className="text-lg font-bold text-gray-800">{fmt(Number(c.preco))}</span>
+                              <span className="text-xs text-gray-500">
+                                {c.prazoDias ? `${c.prazoDias} dias úteis` : 'prazo a confirmar'}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => escolherCotacao(c.transportadora, Number(c.preco))}
+                              disabled={saving !== null}
+                              className="mt-2 w-full inline-flex items-center justify-center gap-1.5 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-lg px-3 py-1.5 text-xs transition"
+                            >
+                              {saving === 'escolher-cotacao'
+                                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                : <CheckCircle className="w-3.5 h-3.5" />}
+                              {escolhida ? 'Selecionada' : 'Usar esta'}
+                            </button>
+                          </>
+                        ) : (
+                          <p className="mt-1 text-xs text-gray-400">
+                            não disponível{c.erro ? ` — ${c.erro}` : ''}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Botões de ação */}
