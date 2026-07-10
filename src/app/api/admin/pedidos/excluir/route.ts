@@ -10,9 +10,19 @@ export const dynamic = 'force-dynamic'
 
 const schema = z.object({
   ids: z.array(z.string().min(1)).min(1).max(200),
+  // preview=true calcula o que seria excluído/revertido/bloqueado SEM apagar nada
+  // (alimenta o modal de confirmação). Mesma lógica de trava, zero duplicação.
+  preview: z.boolean().optional(),
 })
 
 const round2 = (v: number) => parseFloat(v.toFixed(2))
+
+// TRAVA (decisão do dono): não excluir pedido PAGO (pago/enviado/entregue) que
+// tenha saldo vinculado (cashback ou pontos), a menos que esteja CANCELADO.
+// isStatusPago já é false para 'cancelado', então o "exceto se cancelado" é
+// automático. Cancelados/pendentes excluem normal.
+const MOTIVO_TRAVA =
+  'Pedido pago com cashback/pontos vinculados. Cancele o pedido antes de excluir (a exclusão reverte o saldo).'
 
 /**
  * Hard delete de pedidos (admin). Remove o pedido DE VERDADE, com a cascata
@@ -43,6 +53,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ids = [...new Set(parsed.data.ids)]
+  const preview = parsed.data.preview === true
 
   const pedidos = await prisma.pedido.findMany({
     where:  { id: { in: ids } },
@@ -54,23 +65,91 @@ export async function POST(request: NextRequest) {
 
   // Só os que existem de fato — nunca agimos sobre ids que o front mandou a mais.
   const idsReais = pedidos.map((p) => p.id)
-  const clientesAfetados = [...new Set(pedidos.map((p) => p.clienteId))]
-  const pagosExcluidos = pedidos.filter((p) => isStatusPago(p.status))
 
-  const [transacoes, pontos, usosCupom] = await Promise.all([
+  // Carrega TODAS as linhas de saldo dos ids pedidos — com pedidoId, pra saber
+  // POR pedido quem tem saldo vinculado (a trava) e pra restringir a reversão só
+  // aos pedidos realmente excluídos.
+  const [transacoesTodas, pontosTodos, usosCupomTodos] = await Promise.all([
     prisma.cashbackTransacao.findMany({
       where:  { pedidoId: { in: idsReais } },
-      select: { clienteId: true, tipo: true, status: true, valor: true },
+      select: { pedidoId: true, clienteId: true, tipo: true, status: true, valor: true },
     }),
     prisma.historicoPontos.findMany({
       where:  { pedidoId: { in: idsReais } },
-      select: { clienteId: true, pontos: true },
+      select: { pedidoId: true, clienteId: true, pontos: true },
     }),
     prisma.cupomUso.findMany({
       where:  { pedidoId: { in: idsReais } },
-      select: { cupomId: true },
+      select: { pedidoId: true, cupomId: true },
     }),
   ])
+
+  // Pedidos que têm saldo vinculado (cashback OU pontos). Cupom NÃO conta pra
+  // trava (é contador de uso, não saldo do cliente).
+  const cashbackPorPedido = new Map<string, number>() // total de crédito não-cancelado
+  const pontosPorPedido = new Map<string, number>()
+  for (const t of transacoesTodas) {
+    if (!t.pedidoId) continue
+    if (t.tipo === 'credito' && t.status !== 'cancelado') {
+      cashbackPorPedido.set(t.pedidoId, (cashbackPorPedido.get(t.pedidoId) ?? 0) + Number(t.valor))
+    }
+  }
+  for (const h of pontosTodos) {
+    if (!h.pedidoId) continue
+    pontosPorPedido.set(h.pedidoId, (pontosPorPedido.get(h.pedidoId) ?? 0) + h.pontos)
+  }
+  const temSaldoVinculado = (pid: string) =>
+    transacoesTodas.some((t) => t.pedidoId === pid) || pontosTodos.some((h) => h.pedidoId === pid)
+
+  // ── TRAVA: separa permitidos × bloqueados ──────────────────────────────────
+  const bloqueados = pedidos
+    .filter((p) => isStatusPago(p.status) && temSaldoVinculado(p.id))
+    .map((p) => ({
+      id:       p.id,
+      status:   p.status,
+      motivo:   MOTIVO_TRAVA,
+      cashback: round2(cashbackPorPedido.get(p.id) ?? 0),
+      pontos:   pontosPorPedido.get(p.id) ?? 0,
+    }))
+  const idsBloqueados = new Set(bloqueados.map((b) => b.id))
+
+  const pedidosPermitidos = pedidos.filter((p) => !idsBloqueados.has(p.id))
+  const idsPermitidos = pedidosPermitidos.map((p) => p.id)
+  const setPermitidos = new Set(idsPermitidos)
+  const clientesAfetados = [...new Set(pedidosPermitidos.map((p) => p.clienteId))]
+  const pagosExcluidos = pedidosPermitidos.filter((p) => isStatusPago(p.status))
+
+  // Só as linhas dos pedidos PERMITIDOS entram na reversão.
+  const transacoes = transacoesTodas.filter((t) => t.pedidoId && setPermitidos.has(t.pedidoId))
+  const pontos = pontosTodos.filter((h) => h.pedidoId && setPermitidos.has(h.pedidoId))
+  const usosCupom = usosCupomTodos.filter((u) => u.pedidoId && setPermitidos.has(u.pedidoId))
+
+  // Totais a reverter (para o modal e a resposta).
+  const reverter = {
+    cashback: round2(
+      transacoes
+        .filter((t) => t.tipo === 'credito' && t.status !== 'cancelado')
+        .reduce((s, t) => s + Number(t.valor), 0),
+    ),
+    pontos:    pontos.reduce((s, h) => s + h.pontos, 0),
+    cupomUsos: usosCupom.length,
+  }
+
+  // ── PREVIEW: não apaga nada, só devolve o que aconteceria ──────────────────
+  if (preview) {
+    return NextResponse.json({
+      preview: true,
+      aExcluir: idsPermitidos.length,
+      bloqueados,
+      reverter,
+    })
+  }
+
+  // Todos os selecionados caíram na trava → nada a excluir.
+  if (idsPermitidos.length === 0) {
+    console.info('[excluir-pedidos] todos bloqueados pela trava', { bloqueados: bloqueados.map((b) => b.id) })
+    return NextResponse.json({ ok: true, excluidos: 0, pagosExcluidos: 0, bloqueados })
+  }
 
   // ── Delta de cashback por cliente ──────────────────────────────────────────
   // Espelha o que cada lançamento somou ao saldo quando foi criado:
@@ -102,10 +181,10 @@ export async function POST(request: NextRequest) {
   }
 
   await prisma.$transaction(async (tx) => {
-    // Linhas sem FK: apagadas explicitamente, senão viram órfãs.
-    await tx.cupomUso.deleteMany({ where: { pedidoId: { in: idsReais } } })
-    await tx.historicoPontos.deleteMany({ where: { pedidoId: { in: idsReais } } })
-    await tx.cashbackTransacao.deleteMany({ where: { pedidoId: { in: idsReais } } })
+    // Linhas sem FK: apagadas explicitamente, senão viram órfãs. Só dos permitidos.
+    await tx.cupomUso.deleteMany({ where: { pedidoId: { in: idsPermitidos } } })
+    await tx.historicoPontos.deleteMany({ where: { pedidoId: { in: idsPermitidos } } })
+    await tx.cashbackTransacao.deleteMany({ where: { pedidoId: { in: idsPermitidos } } })
 
     // Saldos ajustados com UPDATE relativo + GREATEST, nunca lendo antes para
     // escrever um valor absoluto: um read-modify-write perderia o resgate de
@@ -137,7 +216,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ItemPedido / Pagamento / GarantiaEstendida caem por cascata no banco.
-    await tx.pedido.deleteMany({ where: { id: { in: idsReais } } })
+    await tx.pedido.deleteMany({ where: { id: { in: idsPermitidos } } })
   })
 
   // Fora da transação, de propósito: o agregado tem que ler o estado JÁ sem os
@@ -149,9 +228,10 @@ export async function POST(request: NextRequest) {
   }
 
   console.info('[excluir-pedidos]', {
-    quantidade:  idsReais.length,
-    ids:         idsReais,
+    quantidade:  idsPermitidos.length,
+    ids:         idsPermitidos,
     pagos:       pagosExcluidos.map((p) => p.id),
+    bloqueados:  bloqueados.map((b) => b.id),
     cashback:    transacoes.length,
     pontos:      pontos.length,
     usosCupom:   usosCupom.length,
@@ -161,10 +241,12 @@ export async function POST(request: NextRequest) {
   await auditLog({
     req: request,
     action: 'pedido.excluir',
-    target: idsReais.join(','),
+    target: idsPermitidos.join(','),
     metadata: {
-      quantidade: idsReais.length,
+      quantidade: idsPermitidos.length,
       pagos: pagosExcluidos.map((p) => ({ id: p.id, status: p.status, total: Number(p.total) })),
+      bloqueados: bloqueados.map((b) => ({ id: b.id, status: b.status })),
+      revertido: reverter,
       relacionadosRemovidos: {
         cashbackTransacao: transacoes.length,
         historicoPontos:   pontos.length,
@@ -175,7 +257,9 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    excluidos: idsReais.length,
+    excluidos: idsPermitidos.length,
     pagosExcluidos: pagosExcluidos.length,
+    bloqueados,
+    reverter,
   })
 }

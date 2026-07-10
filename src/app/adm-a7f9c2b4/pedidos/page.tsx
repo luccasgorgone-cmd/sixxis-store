@@ -71,6 +71,15 @@ interface CotResposta {
   status: string; mensagem: string
 }
 
+// Exclusão de pedidos — pré-cálculo (preview) da trava e da reversão de saldo.
+interface PedidoBloqueado {
+  id: string; status: string; motivo: string; cashback: number; pontos: number
+}
+interface ReverterSaldo { cashback: number; pontos: number; cupomUsos: number }
+interface PreviewExcluir {
+  aExcluir: number; bloqueados: PedidoBloqueado[]; reverter: ReverterSaldo
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATUSES = ['pendente', 'aguardando_frete', 'pago', 'enviado', 'entregue', 'cancelado']
@@ -883,6 +892,8 @@ export default function AdminPedidosPage() {
   const [bulkStatus, setBulkStatus] = useState('')
   const [bulkSaving, setBulkSaving] = useState<null | 'status' | 'excluir'>(null)
   const [modalExcluir, setModalExcluir] = useState(false)
+  const [preview, setPreview] = useState<PreviewExcluir | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   const limit = 20
   const totalPages = Math.ceil(total / limit)
@@ -1007,6 +1018,28 @@ export default function AdminPedidosPage() {
     }
   }
 
+  // Abre o modal e busca o preview (o que será excluído/revertido/bloqueado)
+  // pela MESMA rota, em modo preview — sem apagar nada.
+  async function abrirModalExcluir() {
+    const alvos = [...selecionadosVisiveis]
+    if (alvos.length === 0) return
+    setPreview(null)
+    setModalExcluir(true)
+    setPreviewLoading(true)
+    try {
+      const res = await fetch('/api/admin/pedidos/excluir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ids: alvos, preview: true }),
+      })
+      if (res.ok) setPreview((await res.json()) as PreviewExcluir)
+    } catch {
+      // Sem preview, o modal ainda funciona (só não mostra os números).
+    }
+    setPreviewLoading(false)
+  }
+
   async function excluirSelecionados() {
     const alvos = [...selecionadosVisiveis]
     if (alvos.length === 0) return
@@ -1023,10 +1056,17 @@ export default function AdminPedidosPage() {
         throw new Error(e.error || 'Falha ao excluir')
       }
       const d = await res.json()
+      const bloqueados: number = d.bloqueados?.length ?? 0
       setModalExcluir(false)
+      setPreview(null)
       setSelecionados(new Set())
       await fetch_()
-      showToast(`${d.excluidos} pedido${d.excluidos !== 1 ? 's' : ''} excluído${d.excluidos !== 1 ? 's' : ''} permanentemente`)
+      if (d.excluidos === 0 && bloqueados > 0) {
+        showToast(`Nenhum excluído — ${bloqueados} bloqueado${bloqueados !== 1 ? 's' : ''} (pago com saldo). Cancele antes de excluir.`, 'error')
+      } else {
+        const base = `${d.excluidos} pedido${d.excluidos !== 1 ? 's' : ''} excluído${d.excluidos !== 1 ? 's' : ''} permanentemente`
+        showToast(bloqueados > 0 ? `${base} · ${bloqueados} bloqueado${bloqueados !== 1 ? 's' : ''}` : base, bloqueados > 0 ? 'error' : 'success')
+      }
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -1181,7 +1221,7 @@ export default function AdminPedidosPage() {
                 Aplicar
               </button>
               <button
-                onClick={() => setModalExcluir(true)}
+                onClick={abrirModalExcluir}
                 disabled={bulkSaving !== null}
                 className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-semibold rounded-xl px-3 py-1.5 text-sm transition"
               >
@@ -1332,21 +1372,59 @@ export default function AdminPedidosPage() {
               </div>
             </div>
 
-            {pagosSelecionados.length > 0 && (
-              <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 space-y-1">
-                <p className="text-sm font-bold text-amber-800 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  Atenção: {pagosSelecionados.length} pedido{pagosSelecionados.length !== 1 ? 's' : ''} PAGO{pagosSelecionados.length !== 1 ? 'S' : ''} {pagosSelecionados.length !== 1 ? 'serão' : 'será'} excluído{pagosSelecionados.length !== 1 ? 's' : ''}
-                </p>
-                <p className="text-xs text-amber-700">
-                  Isso remove {pagosSelecionados.length !== 1 ? 'esses pedidos' : 'esse pedido'} do relatório de margem/lucro e da análise. O cashback e os pontos gerados por {pagosSelecionados.length !== 1 ? 'eles' : 'ele'} são revertidos do saldo do cliente, e o uso do cupom é devolvido.
+            {previewLoading && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Loader2 className="w-4 h-4 animate-spin" /> Calculando reversão de saldo…
+              </div>
+            )}
+
+            {preview && (
+              <div className="space-y-3">
+                {/* Reversão de saldo do cliente */}
+                {(preview.reverter.cashback > 0 || preview.reverter.pontos > 0 || preview.reverter.cupomUsos > 0) ? (
+                  <div className="rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 space-y-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Será revertido do cliente</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                      {preview.reverter.cashback > 0 && <span className="text-gray-700">Cashback <strong className="text-gray-900">{fmt(preview.reverter.cashback)}</strong></span>}
+                      {preview.reverter.pontos > 0 && <span className="text-gray-700">Pontos <strong className="text-gray-900">{preview.reverter.pontos}</strong></span>}
+                      {preview.reverter.cupomUsos > 0 && <span className="text-gray-700">Uso de cupom <strong className="text-gray-900">{preview.reverter.cupomUsos}</strong></span>}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400">Nenhum saldo (cashback/pontos/cupom) vinculado — nada a reverter.</p>
+                )}
+
+                {/* Bloqueados pela trava (pago com saldo) */}
+                {preview.bloqueados.length > 0 && (
+                  <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 space-y-1.5">
+                    <p className="text-sm font-bold text-amber-800 flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      {preview.bloqueados.length} pedido{preview.bloqueados.length !== 1 ? 's' : ''} {preview.bloqueados.length !== 1 ? 'não serão' : 'não será'} excluído{preview.bloqueados.length !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      Pago com cashback/pontos vinculados. Cancele o pedido antes de excluir.
+                    </p>
+                    <ul className="text-[11px] text-amber-700 font-mono space-y-0.5 max-h-24 overflow-auto">
+                      {preview.bloqueados.map((b) => (
+                        <li key={b.id}>#{b.id.slice(-8)} · {STATUS_LABELS[b.status] ?? b.status}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p className="text-sm text-gray-600">
+                  {preview.aExcluir > 0 ? (
+                    <>Serão excluídos <strong className="text-gray-900">{preview.aExcluir}</strong> pedido{preview.aExcluir !== 1 ? 's' : ''} permanentemente.</>
+                  ) : (
+                    <span className="text-amber-700 font-semibold">Nenhum pedido será excluído — todos bloqueados.</span>
+                  )}
                 </p>
               </div>
             )}
 
             <div className="flex justify-end gap-2 pt-1">
               <button
-                onClick={() => setModalExcluir(false)}
+                onClick={() => { setModalExcluir(false); setPreview(null) }}
                 disabled={bulkSaving === 'excluir'}
                 className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-40 transition"
               >
@@ -1354,11 +1432,11 @@ export default function AdminPedidosPage() {
               </button>
               <button
                 onClick={excluirSelecionados}
-                disabled={bulkSaving === 'excluir'}
+                disabled={bulkSaving === 'excluir' || previewLoading || (preview != null && preview.aExcluir === 0)}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-40 transition"
               >
                 {bulkSaving === 'excluir' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                Excluir
+                {preview && preview.aExcluir > 0 ? `Excluir ${preview.aExcluir}` : 'Excluir'}
               </button>
             </div>
           </div>
