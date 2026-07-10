@@ -18,7 +18,11 @@ export const revalidate = 0
 // LUCRO = total − taxa MP − custo de frete real − COGS.
 // (Antes da Fase 2 isto era só "margem de contribuição", sem o COGS.)
 //
-// COGS do pedido = Σ (item.quantidade × produto.custoProduto).
+// COGS do pedido = Σ (item.quantidade × item.custoUnitario).
+//
+// `custoUnitario` é o SNAPSHOT do custo do produto no instante da venda, gravado
+// na criação do pedido. Antes líamos `produto.custoProduto` (custo ATUAL), o que
+// fazia o lucro de vendas passadas mudar sozinho quando o custo era reajustado.
 //
 // Custos ZERO vs. custos DESCONHECIDOS — a regra que sustenta o relatório:
 //   • mpTaxaReal null      → taxa pendente de sincronização.
@@ -32,10 +36,9 @@ export const revalidate = 0
 // Por isso os totais trazem `completas` (linhas com TODOS os custos conhecidos):
 // a margem % média é calculada SÓ sobre elas, senão o número seria otimista.
 //
-// TODO (snapshot histórico): usamos o custo ATUAL do produto, não o custo na
-// data da venda. Se o custo de aquisição mudar, o lucro de pedidos antigos muda
-// junto. O correto é congelar `custoUnitario` em ItemPedido no momento do
-// pedido; fica para uma fase futura (exige coluna nova + backfill).
+// Pedidos anteriores à coluna `custoUnitario` têm snapshot null → ficam "custo
+// pendente" até rodar POST /api/admin/pedidos/snapshot-custos (que preenche com
+// o custo atual, a melhor aproximação disponível para o passado).
 export async function GET(request: NextRequest) {
   const unauthorized = await requireAdmin(request)
   if (unauthorized) return unauthorized
@@ -52,12 +55,7 @@ export async function GET(request: NextRequest) {
       custoFreteReal: true,
       formaPagamento: true,
       cliente: { select: { nome: true } },
-      itens: {
-        select: {
-          quantidade: true,
-          produto: { select: { custoProduto: true } },
-        },
-      },
+      itens: { select: { quantidade: true, custoUnitario: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -67,12 +65,13 @@ export async function GET(request: NextRequest) {
     const taxaMp = p.mpTaxaReal != null ? Number(p.mpTaxaReal) : null
     const custoFrete = p.custoFreteReal != null ? Number(p.custoFreteReal) : null
 
-    // COGS: só é conhecido se TODOS os itens tiverem custo. Um pedido sem itens
-    // (não deveria existir) também conta como pendente, não como COGS zero.
-    const semCusto = p.itens.some((i) => i.produto.custoProduto == null)
+    // COGS: só é conhecido se TODOS os itens tiverem o snapshot de custo. Um
+    // pedido sem itens (não deveria existir) também conta como pendente, não
+    // como COGS zero. Um COGS parcial mentiria tanto quanto um custo ausente.
+    const semCusto = p.itens.some((i) => i.custoUnitario == null)
     const custoProdutos =
       p.itens.length > 0 && !semCusto
-        ? p.itens.reduce((s, i) => s + Number(i.produto.custoProduto) * i.quantidade, 0)
+        ? p.itens.reduce((s, i) => s + Number(i.custoUnitario) * i.quantidade, 0)
         : null
 
     const completa = taxaMp != null && custoFrete != null && custoProdutos != null

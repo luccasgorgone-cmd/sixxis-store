@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { TrendingUp, RefreshCcw, AlertCircle, Loader2, Percent } from 'lucide-react'
+import { TrendingUp, RefreshCcw, AlertCircle, Loader2, Percent, History } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
 import { formatBRL } from '@/lib/format'
 
@@ -60,6 +60,8 @@ export default function MargemPage() {
   const [erro, setErro] = useState('')
   const [sincronizando, setSincronizando] = useState(false)
   const [msgSync, setMsgSync] = useState('')
+  const [snapshotando, setSnapshotando] = useState(false)
+  const [msgSnapshot, setMsgSnapshot] = useState('')
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -99,6 +101,24 @@ export default function MargemPage() {
       setMsgSync(`Erro: ${(e as Error).message}`)
     }
     setSincronizando(false)
+  }
+
+  async function snapshotCustos() {
+    setSnapshotando(true)
+    setMsgSnapshot('')
+    try {
+      const r = await fetch('/api/admin/pedidos/snapshot-custos', { method: 'POST' })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Falha no snapshot')
+      setMsgSnapshot(
+        `${d.atualizados} item(ns) congelado(s) · ${d.pendentes} sem custo` +
+        (d.produtosSemCusto ? ` · ${d.produtosSemCusto} produto(s) sem custo cadastrado` : ''),
+      )
+      await carregar()
+    } catch (e) {
+      setMsgSnapshot(`Erro: ${(e as Error).message}`)
+    }
+    setSnapshotando(false)
   }
 
   const cards = totais ? [
@@ -167,6 +187,28 @@ export default function MargemPage() {
             className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-xl px-4 py-2 text-sm transition flex items-center gap-2">
             {sincronizando ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
             Sincronizar taxas do MP
+          </button>
+        </div>
+      </div>
+
+      {/* Snapshot de custo nos pedidos antigos */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+        <div className="flex items-start gap-2">
+          <History size={16} className="text-[#3cbfb3] mt-0.5 shrink-0" />
+          <p className="text-xs text-gray-500">
+            Vendas novas já congelam o custo do produto no momento da compra. Para os pedidos
+            antigos, este botão grava o custo <strong>atual</strong> (aproximação — o custo
+            histórico real não existe).{' '}
+            <strong className="text-amber-700">Preencha o custo dos produtos antes de rodar.</strong>{' '}
+            Itens já congelados não são sobrescritos.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          {msgSnapshot && <span className="text-xs text-gray-500">{msgSnapshot}</span>}
+          <button onClick={snapshotCustos} disabled={snapshotando}
+            className="border border-gray-200 bg-white hover:border-[#3cbfb3]/40 hover:text-[#3cbfb3] disabled:opacity-50 text-gray-600 font-semibold rounded-xl px-4 py-2 text-sm transition flex items-center gap-2">
+            {snapshotando ? <Loader2 size={14} className="animate-spin" /> : <History size={14} />}
+            Snapshot de custos (pedidos antigos)
           </button>
         </div>
       </div>

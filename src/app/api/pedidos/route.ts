@@ -154,6 +154,8 @@ export async function POST(request: NextRequest) {
     produtoId:    string
     quantidade:   number
     precoUnitario: number
+    /** SNAPSHOT do custo do produto NESTE instante. null = custo não cadastrado. */
+    custoUnitario: number | null
     variacaoId?:  string
     variacaoNome?: string
   }[] = []
@@ -181,6 +183,11 @@ export async function POST(request: NextRequest) {
       produtoId:    item.produtoId,
       quantidade:   item.quantidade,
       precoUnitario,
+      // Congela o custo de aquisição no momento da venda (relatório de Lucro).
+      // `produto` já está carregado acima — nenhuma consulta extra. Custo não
+      // cadastrado grava null: NUNCA inventar zero, que inflaria o lucro.
+      // Nada aqui pode barrar o pedido: é uma cópia de valor, sem validação.
+      custoUnitario: produto.custoProduto != null ? Number(produto.custoProduto) : null,
       variacaoId:   item.variacaoId,
       variacaoNome: item.variacaoNome,
     })
@@ -298,6 +305,7 @@ export async function POST(request: NextRequest) {
             produtoId:    item.produtoId,
             quantidade:   item.quantidade,
             precoUnitario: item.precoUnitario,
+            custoUnitario: item.custoUnitario, // snapshot p/ o relatório de Lucro
             variacaoId:   item.variacaoId ?? null,
             variacaoNome: item.variacaoNome ?? null,
           })),

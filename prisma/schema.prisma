@@ -235,6 +235,11 @@ model ItemPedido {
   produtoId     String
   quantidade    Int
   precoUnitario Decimal @db.Decimal(10, 2)
+  // INTERNO — SNAPSHOT do Produto.custoProduto no instante da venda. Congelado:
+  // reajustar o custo do produto não altera o lucro de pedidos já feitos.
+  // null = custo não informado naquele momento (≠ zero) → o relatório marca a
+  // linha como "custo pendente" e a tira do cálculo de lucro.
+  custoUnitario Decimal? @db.Decimal(10, 2)
   variacaoId    String?
   variacaoNome  String?
   pedido        Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
