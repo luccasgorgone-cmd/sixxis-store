@@ -80,7 +80,8 @@ export async function POST(request: NextRequest) {
         status: pgto.status ?? null,
         externalReference: pgto.external_reference ?? null,
         valor: pgto.transaction_amount ?? null,
-        mpPaymentId,
+        // O MP devolve o id como NUMERO; a resposta interna sempre em String.
+        mpPaymentId: pgto.id != null ? String(pgto.id) : mpPaymentId,
       })
     } catch (err) {
       // Pagamento inexistente no MP → 404 claro.
@@ -118,7 +119,8 @@ export async function POST(request: NextRequest) {
       status: escolhido.status ?? null,
       externalReference: escolhido.external_reference ?? ref,
       valor: escolhido.transaction_amount ?? null,
-      mpPaymentId: escolhido.id ?? null,
+      // O MP devolve o id como NUMERO; a resposta interna sempre em String.
+      mpPaymentId: escolhido.id != null ? String(escolhido.id) : null,
     })
   } catch (err) {
     // Busca falhou → degrada para "não encontrado" (nunca 500). Logado sem segredo.
