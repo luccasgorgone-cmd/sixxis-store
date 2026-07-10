@@ -6,6 +6,32 @@ import Image from 'next/image'
 import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { ADMIN_BASE } from '@/lib/admin-path'
 
+/**
+ * Rota de retorno após o login, vinda do `?next=` que o aviso de sessão
+ * expirada anexa. Lida de window.location (e não de useSearchParams) para não
+ * exigir um limite de Suspense nesta página.
+ *
+ * Resolvemos contra a origin e comparamos o pathname JÁ normalizado: um
+ * `startsWith` sobre a string crua aceitaria `/adm-.../../../checkout`, que o
+ * browser resolve para fora do painel. Fora da origin ou fora do painel → home
+ * do admin.
+ */
+function destinoPosLogin(): string {
+  if (typeof window === 'undefined') return ADMIN_BASE
+  const next = new URLSearchParams(window.location.search).get('next')
+  if (!next) return ADMIN_BASE
+
+  try {
+    const url = new URL(next, window.location.origin)
+    if (url.origin !== window.location.origin) return ADMIN_BASE
+    const dentroDoPainel =
+      url.pathname === ADMIN_BASE || url.pathname.startsWith(`${ADMIN_BASE}/`)
+    return dentroDoPainel ? url.pathname + url.search : ADMIN_BASE
+  } catch {
+    return ADMIN_BASE
+  }
+}
+
 export default function AdminLoginPage() {
   const router = useRouter()
   const [senha, setSenha] = useState('')
@@ -26,7 +52,7 @@ export default function AdminLoginPage() {
       })
 
       if (res.ok) {
-        router.push(ADMIN_BASE)
+        router.push(destinoPosLogin())
         router.refresh()
       } else {
         let msg = 'Senha incorreta. Tente novamente.'

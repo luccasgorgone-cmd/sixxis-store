@@ -2,23 +2,24 @@
 // Substitui as 4 tabelas divergentes que existiam (lib/frete TABELA, api/frete/cep
 // PRAZOS, api/luna/frete REGIOES e o fallback inline do carrinho).
 //
-// Cadeia de resolução (produto × UF) — Braspress é o MOTOR DE PREÇO principal:
+// Cadeia de resolução (produto × UF) — o registry de carriers é o MOTOR DE PREÇO:
 //   1. Flags de negócio da FreteRegra (avaliadas PRIMEIRO):
 //        a. bloqueado = true  → 'bloqueado' (não vende). NÃO cota carrier. FIM.
 //        b. freteGratis = true → cliente vê "Frete Grátis" (preço 0). Em paralelo,
-//           tenta cotar a Braspress só para gravar o custoFreteReal do pedido; se
-//           falhar, custoFreteReal fica null (frete grátis NUNCA quebra a venda).
+//           cota os carriers só para gravar o custoFreteReal do pedido — a MAIS
+//           BARATA vence, igual ao caminho normal. Se falhar, custoFreteReal fica
+//           null (frete grátis NUNCA quebra a venda).
 //   2. Caso normal (sem bloqueio, sem grátis):
-//        a. Cota TODAS as transportadoras ATIVAS (registry de carriers, hoje só
-//           Braspress). Havendo várias no futuro: a MAIS BARATA (empate → menor prazo).
+//        a. Cota TODAS as transportadoras ATIVAS (registry: Braspress, Melhor
+//           Envio) e escolhe a MAIS BARATA (empate → menor prazo).
 //        b. Veio cotação → usa ela. Preço = CUSTO PURO (sem markup). custoFreteReal =
 //           mesmo valor. Cliente vê "Entrega" + prazo + preço, nunca a transportadora.
 //        c. Nenhum carrier retornou → FALLBACK para a tabela manual FreteRegra.
 //        d. Sem carrier E sem regra manual → 'a_combinar'.
 //
 // TRAVAS: qualquer exceção de carrier é capturada e cai no fallback — o checkout
-// nunca fica sem resposta. Feature flag CARRIERS_BRASPRESS_ENABLED OFF → cadeia
-// 100% tabela manual, byte-idêntica ao histórico ("sem regra" = bloqueado).
+// nunca fica sem resposta. Com TODAS as flags de carrier OFF → cadeia 100% tabela
+// manual, byte-idêntica ao histórico ("sem regra" = bloqueado).
 //
 // Carrinho com múltiplos produtos (frete é por produto):
 //   - QUALQUER item bloqueado    → pedido bloqueado
@@ -242,9 +243,10 @@ export async function resolverFrete(
   // Frete grátis ao cliente = todos os itens somam 0 no normal (grátis ou R$ 0).
   const normalGratis = temNormal && precoNormal === 0
 
-  // 1b. FRETE GRÁTIS: cliente vê "Frete Grátis" (preço 0). Em paralelo tenta cotar
-  // a Braspress só para registrar o custoFreteReal — se falhar, segue null (frete
-  // grátis NUNCA quebra a venda).
+  // 1b. FRETE GRÁTIS: cliente vê "Frete Grátis" (preço 0). Em paralelo cota os
+  // carriers só para registrar o custoFreteReal — mesma regra do caminho normal,
+  // a MAIS BARATA entre as ativas vence. Se falhar, segue null (frete grátis
+  // NUNCA quebra a venda).
   if (normalGratis) {
     const bg = carrierNaCadeia
       ? await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
@@ -282,7 +284,7 @@ export async function resolverFrete(
     }
   }
 
-  // 2a/2b. CASO NORMAL (precificado) — Braspress é o MOTOR DE PREÇO principal.
+  // 2a/2b. CASO NORMAL (precificado) — o registry é o MOTOR DE PREÇO.
   // Cota o carrinho inteiro; se veio cotação, ela VENCE a tabela manual (preço =
   // custo puro, sem markup). Se não veio, cai no fallback manual abaixo.
   if (carrierNaCadeia) {

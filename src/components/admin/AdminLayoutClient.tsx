@@ -4,12 +4,15 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import Image from 'next/image'
 import AdminSidebar from './AdminSidebar'
+import SessaoExpiradaGuard from './SessaoExpiradaGuard'
 
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="fixed inset-0 z-50 flex overflow-hidden bg-[#f8f9fa]">
+      {/* Único ponto de tratamento de 401 do painel. */}
+      <SessaoExpiradaGuard />
       <AdminSidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
