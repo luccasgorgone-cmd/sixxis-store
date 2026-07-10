@@ -27,7 +27,7 @@ export const revalidate = 0
 // Custos ZERO vs. custos DESCONHECIDOS — a regra que sustenta o relatório:
 //   • mpTaxaReal null      → taxa pendente de sincronização.
 //   • custoFreteReal null  → frete ainda não lançado pelo admin.
-//   • QUALQUER item do pedido com produto.custoProduto null → COGS incompleto.
+//   • QUALQUER item do pedido com custoUnitario null → COGS incompleto.
 // Nos três casos a linha NÃO soma 0: ela sai do cálculo (lucro `null`). Tratar
 // custo ausente como R$ 0 inflaria o lucro — o erro que um relatório financeiro
 // não pode cometer. Um COGS parcial (2 de 3 itens com custo) é igualmente
