@@ -47,10 +47,13 @@ const itemProdutoSchema = z
     sku: z.string().trim().min(1).optional(),
     produtoId: z.string().trim().min(1).optional(),
     chaveLoja: z.string().trim().min(1).optional(),
+    // slug é a chave que /api/interno/produtos devolve (junto do id) — aceita
+    // também para o CRM casar produto pela mesma referência que já consome.
+    slug: z.string().trim().min(1).optional(),
     quantidade: z.number().int().positive(),
   })
-  .refine((d) => d.sku || d.produtoId || d.chaveLoja, {
-    message: 'Informe sku, produtoId ou chaveLoja',
+  .refine((d) => d.sku || d.produtoId || d.chaveLoja || d.slug, {
+    message: 'Informe sku, produtoId, chaveLoja ou slug',
   })
 
 const bodySchema = z.object({
@@ -126,6 +129,7 @@ export async function POST(request: NextRequest) {
   const idsPedidos = refsProduto.map((r) => r.produtoId).filter(Boolean) as string[]
   const skusPedidos = refsProduto.map((r) => r.sku).filter(Boolean) as string[]
   const chavesPedidas = refsProduto.map((r) => r.chaveLoja).filter(Boolean) as string[]
+  const slugsPedidos = refsProduto.map((r) => r.slug).filter(Boolean) as string[]
 
   const encontrados = refsProduto.length
     ? await prisma.produto.findMany({
@@ -134,15 +138,17 @@ export async function POST(request: NextRequest) {
             { id: { in: idsPedidos } },
             { sku: { in: skusPedidos } },
             { erpProdutoId: { in: chavesPedidas } },
+            { slug: { in: slugsPedidos } },
           ],
         },
-        select: { id: true, sku: true, erpProdutoId: true },
+        select: { id: true, sku: true, erpProdutoId: true, slug: true },
       })
     : []
 
   const porId = new Map(encontrados.map((p) => [p.id, p]))
   const porSku = new Map(encontrados.filter((p) => p.sku).map((p) => [p.sku as string, p]))
   const porChave = new Map(encontrados.map((p) => [p.erpProdutoId, p]))
+  const porSlug = new Map(encontrados.map((p) => [p.slug, p]))
 
   // Soma quantidades por produtoId resolvido; guarda os que não casaram.
   const qtdPorProduto = new Map<string, number>()
@@ -152,9 +158,10 @@ export async function POST(request: NextRequest) {
       (ref.produtoId && porId.get(ref.produtoId)) ||
       (ref.sku && porSku.get(ref.sku)) ||
       (ref.chaveLoja && porChave.get(ref.chaveLoja)) ||
+      (ref.slug && porSlug.get(ref.slug)) ||
       null
     if (!prod) {
-      naoEncontrados.push(ref.produtoId ?? ref.sku ?? ref.chaveLoja ?? '?')
+      naoEncontrados.push(ref.produtoId ?? ref.sku ?? ref.chaveLoja ?? ref.slug ?? '?')
       continue
     }
     qtdPorProduto.set(prod.id, (qtdPorProduto.get(prod.id) ?? 0) + ref.quantidade)
