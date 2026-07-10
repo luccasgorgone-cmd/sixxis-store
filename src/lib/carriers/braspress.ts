@@ -9,7 +9,7 @@
 //   BRASPRESS_CEP_ORIGEM      — CEP de origem (só dígitos)
 //   CARRIERS_BRASPRESS_ENABLED — feature flag ('true' liga)
 
-import type { Carrier, Cotacao, CotacaoInput } from './types'
+import type { Carrier, Cotacao, CotacaoDetalhada, CotacaoInput } from './types'
 
 const BRASPRESS_ID = 'braspress'
 const ENDPOINT = 'https://api.braspress.com/v1/cotacao/calcular/json'
@@ -177,13 +177,40 @@ async function requestBraspress(input: CotacaoInput): Promise<BraspressResultado
   }
 }
 
+const BRASPRESS_NOME = 'Braspress'
+
 export const braspressCarrier: Carrier = {
   id: BRASPRESS_ID,
+  nome: BRASPRESS_NOME,
 
   async cotar(input: CotacaoInput): Promise<Cotacao[]> {
     if (!braspressEnabled()) return []
     const { cotacoes } = await requestBraspress(input)
     return cotacoes
+  },
+
+  // Mesmo request de cotar(), mas devolve sempre um resultado com nome — e o erro
+  // estruturado quando a Braspress não cota (rota não atendida, timeout, etc.).
+  async cotarDetalhado(input: CotacaoInput): Promise<CotacaoDetalhada> {
+    const { cotacoes, erro } = await requestBraspress(input)
+    const c = cotacoes[0]
+    if (c) {
+      return {
+        carrierId: BRASPRESS_ID,
+        transportadora: BRASPRESS_NOME,
+        ok: true,
+        preco: c.preco,
+        prazoDias: c.prazoDias > 0 ? c.prazoDias : null,
+      }
+    }
+    return {
+      carrierId: BRASPRESS_ID,
+      transportadora: BRASPRESS_NOME,
+      ok: false,
+      preco: null,
+      prazoDias: null,
+      erro: erro?.mensagem ?? 'sem cotação disponível',
+    }
   },
 }
 

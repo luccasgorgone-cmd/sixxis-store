@@ -31,9 +31,25 @@ export interface Cotacao {
   prazoDias: number // prazo de entrega em dias úteis
 }
 
+// Cotação POR transportadora, com NOME e (quando falha) o erro — para consumo
+// INTERNO/admin (ex.: pós-venda do CRM precisa ver Braspress E Melhor Envio para
+// escolher, não só a mais barata). O checkout público NÃO usa isto.
+export interface CotacaoDetalhada {
+  carrierId: string // id interno (braspress, melhorenvio)
+  transportadora: string // nome de exibição (Braspress, Melhor Envio)
+  ok: boolean
+  preco: number | null // R$ quando ok; null quando falhou
+  prazoDias: number | null // dias úteis quando ok; null quando falhou
+  erro?: string // motivo da falha (ex.: rota não atendida)
+}
+
 export interface Carrier {
   id: string
+  nome: string // nome de exibição da transportadora (uso interno/admin)
   cotar(input: CotacaoInput): Promise<Cotacao[]>
+  // Mesma cotação de cotar(), mas devolvendo SEMPRE um resultado por
+  // transportadora — inclusive falhas com o motivo — para a API interna.
+  cotarDetalhado(input: CotacaoInput): Promise<CotacaoDetalhada>
   // Declarados para o futuro — NÃO implementar agora.
   gerarEtiqueta?: (...args: unknown[]) => Promise<unknown>
   rastrear?: (...args: unknown[]) => Promise<unknown>

@@ -13,6 +13,7 @@ export type LimiterName =
   | 'esqueci-senha'
   | 'criar-pagamento'
   | 'validar-cupom'
+  | 'interno-frete'
 
 // Limites sensatos por IP/identificador (sliding window). Ajuste conforme tráfego.
 const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ratelimit.slidingWindow>[1] }> = {
@@ -21,6 +22,7 @@ const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ra
   'esqueci-senha':   { tokens: 5,  window: '15 m' },  // 5 pedidos / 15 min
   'criar-pagamento': { tokens: 12, window: '5 m' },   // 12 tentativas / 5 min
   'validar-cupom':   { tokens: 20, window: '1 m' },   // 20 validações / 1 min
+  'interno-frete':   { tokens: 60, window: '1 m' },   // 60 cotações / 1 min (CRM)
 }
 
 let _redis: Redis | null = null

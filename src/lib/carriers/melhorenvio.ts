@@ -12,7 +12,7 @@
 // ATENÇÃO às unidades: o Melhor Envio usa CENTÍMETROS e KG (nossos campos já
 // estão em cm/kg) — NÃO converter para metros como na Braspress.
 
-import type { Carrier, Cotacao, CotacaoInput } from './types'
+import type { Carrier, Cotacao, CotacaoDetalhada, CotacaoInput } from './types'
 
 const MELHORENVIO_ID = 'melhorenvio'
 // Ambiente PRODUÇÃO.
@@ -185,13 +185,40 @@ async function requestMelhorEnvio(input: CotacaoInput): Promise<MelhorEnvioResul
   }
 }
 
+const MELHORENVIO_NOME = 'Melhor Envio'
+
 export const melhorenvioCarrier: Carrier = {
   id: MELHORENVIO_ID,
+  nome: MELHORENVIO_NOME,
 
   async cotar(input: CotacaoInput): Promise<Cotacao[]> {
     if (!melhorenvioEnabled()) return []
     const { cotacoes } = await requestMelhorEnvio(input)
     return cotacoes
+  },
+
+  // Mesmo request de cotar(), mas devolve sempre um resultado com nome — e o erro
+  // estruturado quando o Melhor Envio não cota (ex.: não atende climatizador).
+  async cotarDetalhado(input: CotacaoInput): Promise<CotacaoDetalhada> {
+    const { cotacoes, erro } = await requestMelhorEnvio(input)
+    const c = cotacoes[0]
+    if (c) {
+      return {
+        carrierId: MELHORENVIO_ID,
+        transportadora: MELHORENVIO_NOME,
+        ok: true,
+        preco: c.preco,
+        prazoDias: c.prazoDias > 0 ? c.prazoDias : null,
+      }
+    }
+    return {
+      carrierId: MELHORENVIO_ID,
+      transportadora: MELHORENVIO_NOME,
+      ok: false,
+      preco: null,
+      prazoDias: null,
+      erro: erro?.mensagem ?? 'sem cotação disponível',
+    }
   },
 }
 

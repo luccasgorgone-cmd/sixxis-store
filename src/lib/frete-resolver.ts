@@ -343,16 +343,22 @@ interface CarrierResolucao {
   transportadora: string // nome interno do serviço (só admin)
 }
 
-// Cota o carrinho inteiro via carriers (Braspress). Retorna a MENOR cotação como
-// opção genérica ("Entrega") — o NOME da transportadora NUNCA vai ao cliente
-// (fica só em transportadora, p/ admin). null quando faltam dimensões, o carrier
-// falha/timeout ou está desligado. Nunca lança (cotarComCarriers já captura).
-async function cotarCarrinho(
+// Resultado de resolver as dimensões dos produtos do carrinho para cotação.
+export interface ItensCotacaoProdutos {
+  itens: ItemCotacao[] // itens prontos para o carrier (só os com dimensões completas)
+  valorMercadoria: number // soma preço × quantidade (promocional quando houver)
+  semDimensoes: string[] // produtoIds encontrados mas SEM peso/dimensões completas
+  naoEncontrados: string[] // produtoIds pedidos que não existem no banco
+}
+
+// FONTE ÚNICA de resolução produto → ItemCotacao (peso/dimensões + valor da
+// mercadoria). Reusada pelo checkout (cotarCarrinho, que aborta se faltar
+// dimensão) e pela API interna do CRM (que reporta o que faltou). NÃO chama
+// carrier — só monta os itens a partir do banco.
+export async function montarItensCotacaoProdutos(
   produtoIds: string[],
   qtdPorProduto: Map<string, number>,
-  cepDestino: string,
-  documentoDestinatario?: string,
-): Promise<CarrierResolucao | null> {
+): Promise<ItensCotacaoProdutos> {
   const produtos = await prisma.produto.findMany({
     where: { id: { in: produtoIds } },
     select: {
@@ -363,11 +369,14 @@ async function cotarCarrinho(
       alturaCm: true,
       larguraCm: true,
       comprimentoCm: true,
-      volumes: true,
     },
   })
 
+  const encontrados = new Set(produtos.map((p) => p.id))
+  const naoEncontrados = produtoIds.filter((id) => !encontrados.has(id))
+
   const itens: ItemCotacao[] = []
+  const semDimensoes: string[] = []
   let valorMercadoria = 0
 
   for (const p of produtos) {
@@ -377,8 +386,11 @@ async function cotarCarrinho(
     const largura = p.larguraCm != null ? Number(p.larguraCm) : 0
     const comprimento = p.comprimentoCm != null ? Number(p.comprimentoCm) : 0
 
-    // Sem peso/dimensões completas não dá para cotar com segurança → aborta.
-    if (peso <= 0 || altura <= 0 || largura <= 0 || comprimento <= 0) return null
+    // Sem peso/dimensões completas não dá para cotar com segurança.
+    if (peso <= 0 || altura <= 0 || largura <= 0 || comprimento <= 0) {
+      semDimensoes.push(p.id)
+      continue
+    }
 
     const preco = Number(p.precoPromocional ?? p.preco)
     valorMercadoria += preco * qtd
@@ -392,6 +404,27 @@ async function cotarCarrinho(
     })
   }
 
+  return { itens, valorMercadoria, semDimensoes, naoEncontrados }
+}
+
+// Cota o carrinho inteiro via carriers (Braspress). Retorna a MENOR cotação como
+// opção genérica ("Entrega") — o NOME da transportadora NUNCA vai ao cliente
+// (fica só em transportadora, p/ admin). null quando faltam dimensões, o carrier
+// falha/timeout ou está desligado. Nunca lança (cotarComCarriers já captura).
+async function cotarCarrinho(
+  produtoIds: string[],
+  qtdPorProduto: Map<string, number>,
+  cepDestino: string,
+  documentoDestinatario?: string,
+): Promise<CarrierResolucao | null> {
+  const { itens, valorMercadoria, semDimensoes } = await montarItensCotacaoProdutos(
+    produtoIds,
+    qtdPorProduto,
+  )
+
+  // Qualquer produto sem peso/dimensões completas → aborta (comportamento
+  // histórico: não cota o carrinho com dado incompleto).
+  if (semDimensoes.length > 0) return null
   if (itens.length === 0) return null
 
   const cotacoes = await cotarComCarriers({
