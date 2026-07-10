@@ -1,9 +1,11 @@
 'use client'
 
-// Relatório de LUCRO REAL por venda. Somente admin.
-// Lucro = venda − taxa MP − custo de frete real − COGS (custo dos produtos).
-// Linha com QUALQUER custo desconhecido (taxa/frete/custo) sai do cálculo em vez
-// de somar R$ 0 — ver a rota /api/admin/relatorios/margem.
+// Resultado por venda em DOIS níveis. Somente admin.
+//   Margem de contribuição = venda − taxa MP − frete        (não depende do COGS)
+//   Lucro real             = margem de contribuição − COGS  (exige o custo)
+// A margem de contribuição NUNCA é exibida como lucro: ela ignora o custo da
+// mercadoria. Custo desconhecido vira "a definir", jamais R$ 0.
+// Ver a rota /api/admin/relatorios/margem.
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -20,8 +22,10 @@ interface Linha {
   taxaMp: number | null
   custoFrete: number | null
   custoProdutos: number | null
-  margem: number | null
-  margemPct: number | null
+  margemContrib: number | null
+  margemContribPct: number | null
+  lucroReal: number | null
+  lucroRealPct: number | null
   taxaPendente: boolean
   fretePendente: boolean
   custoPendente: boolean
@@ -32,14 +36,25 @@ interface Totais {
   vendas: number
   taxaMp: number
   custoFrete: number
+  margemContrib: number
+  margemContribPctMedia: number | null
+  linhasComContrib: number
   custoProdutos: number
-  margem: number
-  margemPctMedia: number | null
-  linhasCompletas: number
+  lucroReal: number
+  lucroRealPctMedia: number | null
+  linhasComLucro: number
+  lucroDisponivel: boolean
   taxasPendentes: number
   fretesPendentes: number
   custosPendentes: number
-  vendasCompletas: number
+  vendasComContrib: number
+  vendasComLucro: number
+}
+
+interface ProdutosSemCusto {
+  total: number
+  totalProdutos: number
+  lista: { id: string; nome: string }[]
 }
 
 type Periodo = 'hoje' | '7d' | '30d' | 'mes' | 'personalizado'
@@ -56,6 +71,7 @@ export default function MargemPage() {
 
   const [linhas, setLinhas] = useState<Linha[]>([])
   const [totais, setTotais] = useState<Totais | null>(null)
+  const [semCusto, setSemCusto] = useState<ProdutosSemCusto | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [sincronizando, setSincronizando] = useState(false)
@@ -77,6 +93,7 @@ export default function MargemPage() {
       const d = await r.json()
       setLinhas(d.linhas)
       setTotais(d.totais)
+      setSemCusto(d.produtosSemCusto)
     } catch (e) {
       setErro((e as Error).message)
     }
@@ -122,12 +139,30 @@ export default function MargemPage() {
   }
 
   const cards = totais ? [
-    { label: 'Vendas',        valor: formatBRL(totais.vendas),     sub: `${totais.pedidos} pedido(s) pagos` },
-    { label: '(−) Taxa MP',   valor: formatBRL(totais.taxaMp),     sub: totais.taxasPendentes ? `${totais.taxasPendentes} pendente(s)` : 'todas sincronizadas' },
-    { label: '(−) Frete',     valor: formatBRL(totais.custoFrete), sub: totais.fretesPendentes ? `${totais.fretesPendentes} sem custo lançado` : 'todos lançados' },
-    { label: '(−) Custo produto', valor: formatBRL(totais.custoProdutos), sub: totais.custosPendentes ? `${totais.custosPendentes} sem custo cadastrado` : 'todos cadastrados' },
-    { label: '= Lucro',       valor: formatBRL(totais.margem),     sub: `${totais.linhasCompletas} de ${totais.pedidos} linha(s) completas` },
-    { label: 'Lucro % médio', valor: fmtPct(totais.margemPctMedia), sub: 'só sobre linhas completas' },
+    { label: 'Vendas', valor: formatBRL(totais.vendas), sub: `${totais.pedidos} pedido(s) pagos`, destaque: false },
+    { label: '(−) Taxa MP', valor: formatBRL(totais.taxaMp), sub: totais.taxasPendentes ? `${totais.taxasPendentes} pendente(s)` : 'todas sincronizadas', destaque: false },
+    { label: '(−) Frete', valor: formatBRL(totais.custoFrete), sub: totais.fretesPendentes ? `${totais.fretesPendentes} sem custo lançado` : 'todos lançados', destaque: false },
+    {
+      label: '= Margem de contribuição',
+      valor: formatBRL(totais.margemContrib),
+      sub: `antes do custo do produto · ${totais.linhasComContrib} de ${totais.pedidos} linha(s) · ${fmtPct(totais.margemContribPctMedia)}`,
+      destaque: true,
+    },
+    {
+      label: '(−) Custo produto',
+      valor: totais.lucroDisponivel ? formatBRL(totais.custoProdutos) : 'a definir',
+      sub: totais.custosPendentes ? `${totais.custosPendentes} pedido(s) sem custo` : 'todos cadastrados',
+      destaque: false,
+    },
+    {
+      label: '= Lucro real (com custo)',
+      // Sem nenhuma linha com custo, R$ 0,00 seria uma mentira: mostra o estado.
+      valor: totais.lucroDisponivel ? formatBRL(totais.lucroReal) : 'aguardando custos',
+      sub: totais.lucroDisponivel
+        ? `${totais.linhasComLucro} de ${totais.pedidos} linha(s) · ${fmtPct(totais.lucroRealPctMedia)}`
+        : 'preencha o custo dos produtos',
+      destaque: true,
+    },
   ] : []
 
   return (
@@ -138,7 +173,8 @@ export default function MargemPage() {
             <TrendingUp size={22} className="text-[#3cbfb3]" /> Lucro por venda
           </h1>
           <p className="text-sm text-gray-400 mt-0.5">
-            Venda − taxa do Mercado Pago − custo real de frete − custo dos produtos (COGS).
+            <strong>Margem de contribuição</strong> = venda − taxa MP − frete (antes do custo do
+            produto). <strong>Lucro real</strong> = margem de contribuição − custo dos produtos.
             Interno: o cliente nunca vê.
           </p>
         </div>
@@ -219,10 +255,36 @@ export default function MargemPage() {
         </div>
       )}
 
+      {/* Checklist: o que falta para o Lucro real existir */}
+      {semCusto && semCusto.total > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <p className="text-xs text-amber-800">
+              <strong>{semCusto.total} de {semCusto.totalProdutos} produtos</strong> ainda sem custo
+              cadastrado — o Lucro real fica em aberto até preenchê-los.
+            </p>
+            <Link href={`${ADMIN_BASE}/produtos`}
+              className="text-xs font-bold text-amber-800 hover:underline whitespace-nowrap shrink-0">
+              Cadastrar custos →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {semCusto.lista.map((p) => (
+              <Link key={p.id} href={`${ADMIN_BASE}/produtos/${p.id}`}
+                className="text-[11px] bg-white border border-amber-200 text-amber-800 rounded-lg px-2 py-0.5 hover:border-amber-400 transition">
+                {p.nome}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Totais do período */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
         {cards.map((c) => (
-          <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+          <div key={c.label} className={`rounded-2xl border shadow-sm p-4 ${
+            c.destaque ? 'bg-[#f0fffe] border-[#3cbfb3]/30' : 'bg-white border-gray-100'
+          }`}>
             <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">{c.label}</p>
             <p className="text-lg font-black text-gray-900 mt-1">{c.valor}</p>
             <p className="text-[11px] text-gray-400 mt-0.5">{c.sub}</p>
@@ -241,19 +303,21 @@ export default function MargemPage() {
                 <th className="px-4 py-3 text-right">Venda</th>
                 <th className="px-4 py-3 text-right">(−) Taxa MP</th>
                 <th className="px-4 py-3 text-right">(−) Frete</th>
+                <th className="px-4 py-3 text-right bg-[#f0fffe]">= Margem contrib.</th>
+                <th className="px-4 py-3 text-right bg-[#f0fffe]">%</th>
                 <th className="px-4 py-3 text-right">(−) Custo produto</th>
-                <th className="px-4 py-3 text-right">= Lucro</th>
-                <th className="px-4 py-3 text-right">%</th>
+                <th className="px-4 py-3 text-right bg-[#f0fffe]">= Lucro real</th>
+                <th className="px-4 py-3 text-right bg-[#f0fffe]">%</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {carregando && (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-gray-400">
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-gray-400">
                   <Loader2 size={18} className="animate-spin inline" />
                 </td></tr>
               )}
               {!carregando && linhas.length === 0 && (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-gray-400">
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-gray-400">
                   Nenhuma venda paga no período.
                 </td></tr>
               )}
@@ -278,17 +342,30 @@ export default function MargemPage() {
                       ? <span className="text-[11px] font-bold text-gray-400">não lançado</span>
                       : <span className="text-gray-600">{formatBRL(l.custoFrete)}</span>}
                   </td>
+                  {/* Nível 1 — margem de contribuição (não depende do custo). */}
+                  <td className="px-4 py-3 text-right whitespace-nowrap bg-[#f0fffe]/40">
+                    {l.margemContrib == null
+                      ? <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-2 py-0.5">
+                          falta {l.taxaPendente ? 'taxa' : 'frete'}
+                        </span>
+                      : <span className={`font-bold ${l.margemContrib >= 0 ? 'text-gray-900' : 'text-red-500'}`}>{formatBRL(l.margemContrib)}</span>}
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap bg-[#f0fffe]/40">{fmtPct(l.margemContribPct)}</td>
+
+                  {/* Nível 2 — COGS e lucro real. */}
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     {l.custoPendente
-                      ? <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-2 py-0.5">custo pendente</span>
+                      ? <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-2 py-0.5">a definir</span>
                       : <span className="text-gray-600">{formatBRL(l.custoProdutos)}</span>}
                   </td>
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    {l.margem == null
-                      ? <span className="text-gray-300">—</span>
-                      : <span className={`font-black ${l.margem >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{formatBRL(l.margem)}</span>}
+                  <td className="px-4 py-3 text-right whitespace-nowrap bg-[#f0fffe]/40">
+                    {l.lucroReal == null
+                      ? <span className="text-[11px] font-bold text-gray-400">
+                          {l.custoPendente ? 'adicione o custo' : '—'}
+                        </span>
+                      : <span className={`font-black ${l.lucroReal >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{formatBRL(l.lucroReal)}</span>}
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">{fmtPct(l.margemPct)}</td>
+                  <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap bg-[#f0fffe]/40">{fmtPct(l.lucroRealPct)}</td>
                 </tr>
               ))}
             </tbody>
