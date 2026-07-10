@@ -69,6 +69,11 @@ model Produto {
   descricao                String?             @db.Text
   preco                    Decimal             @db.Decimal(10, 2)
   precoPromocional         Decimal?            @db.Decimal(10, 2)
+  // INTERNO — custo unitário de aquisição/fábrica. NUNCA exposto ao cliente.
+  // null = custo não informado (≠ zero): o relatório de margem marca o pedido
+  // como "custo pendente" e o tira do cálculo de lucro, em vez de somar R$ 0.
+  // Custo é POR PRODUTO; variações herdam (custo por variação fica p/ depois).
+  custoProduto             Decimal?            @db.Decimal(10, 2)
   imagens                  Json
   estoque                  Int                 @default(0)
   categoria                String

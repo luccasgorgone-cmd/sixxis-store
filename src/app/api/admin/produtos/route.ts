@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
     variacoes,
     especificacoes,
     faqs,
+    custoProduto,
     pesoKg,
     alturaCm,
     larguraCm,
@@ -134,6 +135,8 @@ export async function POST(request: NextRequest) {
       temVariacoes: Boolean(temVariacoes),
       especificacoes: especificacoes ?? undefined,
       faqs: faqs ?? undefined,
+      // INTERNO: '' / null / undefined → null (custo não informado, ≠ zero).
+      custoProduto: custoProduto === null || custoProduto === '' || custoProduto === undefined ? null : Number(custoProduto),
       pesoKg: pesoKg === null || pesoKg === '' || pesoKg === undefined ? null : Number(pesoKg),
       alturaCm: alturaCm === null || alturaCm === '' || alturaCm === undefined ? null : Number(alturaCm),
       larguraCm: larguraCm === null || larguraCm === '' || larguraCm === undefined ? null : Number(larguraCm),

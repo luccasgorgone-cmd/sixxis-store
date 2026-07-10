@@ -66,6 +66,7 @@ export async function PUT(
     garantiaFabricaMeses,
     garantiaEstendida12Preco,
     garantiaEstendida24Preco,
+    custoProduto,
     pesoKg,
     alturaCm,
     larguraCm,
@@ -162,6 +163,8 @@ export async function PUT(
               ? null
               : Number(garantiaEstendida24Preco),
         }),
+        // Custo interno (COGS): '' / null → null (não informado, ≠ zero).
+        ...(custoProduto !== undefined && { custoProduto: custoProduto === null || custoProduto === '' ? null : Number(custoProduto) }),
         // Dimensões e peso (frete): '' / null → null; volumes vazio → null.
         ...(pesoKg !== undefined && { pesoKg: pesoKg === null || pesoKg === '' ? null : Number(pesoKg) }),
         ...(alturaCm !== undefined && { alturaCm: alturaCm === null || alturaCm === '' ? null : Number(alturaCm) }),
