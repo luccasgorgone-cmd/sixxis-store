@@ -5,9 +5,27 @@ import type { Cupom } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { STATUS_PAGO_TODOS } from '@/lib/pedido-status'
 
+/**
+ * Por que o cupom foi recusado. Código estável para o cliente decidir o que
+ * fazer — NÃO casar com o texto de `erro`, que é copy e muda.
+ *
+ * LOGIN_NECESSARIO é o único que não significa "cupom morto": o cupom existe e
+ * vale, só falta o cliente entrar na conta.
+ */
+export type MotivoRecusaCupom =
+  | 'INEXISTENTE_OU_INATIVO'
+  | 'EXPIRADO'
+  | 'LIMITE_USO'
+  | 'PEDIDO_MINIMO'
+  | 'LOGIN_NECESSARIO'
+  | 'NAO_E_PRIMEIRA_COMPRA'
+  | 'JA_USOU_PRIMEIRA_COMPRA'
+
 export interface ResultadoCupom {
   valido: boolean
   erro?: string
+  /** Preenchido sempre que `valido` for false. */
+  motivo?: MotivoRecusaCupom
   tipo?: string
   valor?: number
   desconto?: number
@@ -48,23 +66,24 @@ export async function avaliarCupom(
   total: number,
   clienteId: string | null,
 ): Promise<ResultadoCupom> {
-  if (!cupom || !cupom.ativo) return { valido: false, erro: 'Cupom inválido ou inativo' }
-  if (cupom.validade && new Date() > cupom.validade) return { valido: false, erro: 'Cupom expirado' }
+  if (!cupom || !cupom.ativo) return { valido: false, motivo: 'INEXISTENTE_OU_INATIVO', erro: 'Cupom inválido ou inativo' }
+  if (cupom.validade && new Date() > cupom.validade) return { valido: false, motivo: 'EXPIRADO', erro: 'Cupom expirado' }
   if (cupom.usoMaximo != null && cupom.totalUsos >= cupom.usoMaximo) {
-    return { valido: false, erro: 'Cupom atingiu o limite de uso' }
+    return { valido: false, motivo: 'LIMITE_USO', erro: 'Cupom atingiu o limite de uso' }
   }
   if (cupom.pedidoMinimo > 0 && total < cupom.pedidoMinimo) {
-    return { valido: false, erro: `Pedido mínimo de R$${Number(cupom.pedidoMinimo).toFixed(2)} para usar este cupom` }
+    return { valido: false, motivo: 'PEDIDO_MINIMO', erro: `Pedido mínimo de R$${Number(cupom.pedidoMinimo).toFixed(2)} para usar este cupom` }
   }
 
   if (cupom.primeiraCompra) {
     // Guests não podem: sem login não dá pra garantir que é a primeira compra.
-    if (!clienteId) return { valido: false, erro: 'Faça login para usar o cupom de primeira compra.' }
+    // O cupom NÃO está morto — só falta entrar na conta.
+    if (!clienteId) return { valido: false, motivo: 'LOGIN_NECESSARIO', erro: 'Faça login para usar o cupom de primeira compra.' }
     if (await clienteTemCompraAnterior(clienteId)) {
-      return { valido: false, erro: 'Cupom válido apenas na primeira compra.' }
+      return { valido: false, motivo: 'NAO_E_PRIMEIRA_COMPRA', erro: 'Cupom válido apenas na primeira compra.' }
     }
     if (await clienteJaUsouCupomPrimeiraCompra(clienteId)) {
-      return { valido: false, erro: 'Você já utilizou um cupom de primeira compra.' }
+      return { valido: false, motivo: 'JA_USOU_PRIMEIRA_COMPRA', erro: 'Você já utilizou um cupom de primeira compra.' }
     }
   }
 

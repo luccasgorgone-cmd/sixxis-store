@@ -28,8 +28,26 @@ export type ResultadoValidacao =
   | { estado: 'valido'; cupom: CupomValidado }
   /** O servidor respondeu e RECUSOU o cupom. Único caso que autoriza remover. */
   | { estado: 'invalido'; erro: string }
+  /**
+   * O cupom EXISTE e vale — falta o cliente entrar na conta (cupom de 1ª compra
+   * exige login para o servidor conseguir checar o histórico). Não é "cupom
+   * morto": não remover, só pedir login.
+   */
+  | { estado: 'precisa_login'; erro: string }
   /** Rede caiu, 429, 5xx, JSON quebrado. NÃO mexer no cupom aplicado. */
   | { estado: 'indeterminado'; erro: string }
+
+/** Mensagem única para o caso "falta logar". */
+export const AVISO_CUPOM_PRECISA_LOGIN =
+  'Entre na sua conta para aplicar o cupom de primeira compra.'
+
+// Preferimos o código `motivo` da API. O fallback por texto cobre a janela de
+// deploy em que um bundle novo conversa com a rota antiga (que ainda não manda
+// `motivo`) — sem ele, um guest veria seu cupom sumir com a mensagem errada.
+function precisaLogin(motivo: string | undefined, erro: string): boolean {
+  if (motivo) return motivo === 'LOGIN_NECESSARIO'
+  return /faça login|faca login/i.test(erro)
+}
 
 export async function validarCupomRemoto(
   codigo: string,
@@ -60,7 +78,7 @@ export async function validarCupomRemoto(
   }
 
   let d: {
-    valido?: boolean; erro?: string; error?: string
+    valido?: boolean; erro?: string; error?: string; motivo?: string
     tipo?: TipoCupom; valor?: number; desconto?: number; codigo?: string
   }
   try {
@@ -70,7 +88,11 @@ export async function validarCupomRemoto(
   }
 
   if (!res.ok || d.valido !== true) {
-    return { estado: 'invalido', erro: d.erro || d.error || 'Cupom inválido ou expirado.' }
+    const erro = d.erro || d.error || 'Cupom inválido ou expirado.'
+    if (precisaLogin(d.motivo, erro)) {
+      return { estado: 'precisa_login', erro: AVISO_CUPOM_PRECISA_LOGIN }
+    }
+    return { estado: 'invalido', erro }
   }
 
   return {

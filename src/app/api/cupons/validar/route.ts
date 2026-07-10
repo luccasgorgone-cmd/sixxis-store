@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
   const clienteId = session?.user?.id ?? null
 
   const r = await avaliarCupom(cupom, Number(total) || 0, clienteId)
-  if (!r.valido) return NextResponse.json({ valido: false, erro: r.erro })
+  // `motivo` é o código estável que o cliente usa para diferenciar "cupom morto"
+  // de "só falta logar". Ver MotivoRecusaCupom em src/lib/cupom.ts.
+  if (!r.valido) return NextResponse.json({ valido: false, erro: r.erro, motivo: r.motivo })
 
   return NextResponse.json({
     valido:   true,

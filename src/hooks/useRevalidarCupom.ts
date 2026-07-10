@@ -56,6 +56,18 @@ export function useRevalidarCupomPersistido(base: number) {
 
       jaChecado.current = chave
 
+      // Cupom de 1ª compra + visitante deslogado. O cupom existe e vale, mas o
+      // servidor não concede sem login — e /api/pedidos vai recusar igual. Se
+      // mantivéssemos aplicado, o carrinho exibiria um desconto que some no
+      // passo final: o desconto fantasma que este hook existe para eliminar.
+      // Então removemos, mas com a mensagem que diz o que fazer (entrar na conta),
+      // e não com "não está mais disponível", que seria mentira.
+      if (r.estado === 'precisa_login') {
+        setCupom(null)
+        setAviso(r.erro)
+        return
+      }
+
       if (r.estado === 'invalido') {
         setCupom(null)
         setAviso(`O cupom ${cupom.codigo} não está mais disponível.`)
