@@ -6,10 +6,10 @@ import React from 'react'
 import {
   ChevronDown, ChevronRight, Loader2, ShoppingCart,
   Search, Package, MapPin, CreditCard, Truck, CheckCircle,
-  Clock, AlertCircle, Save, DollarSign, FileText, X,
+  Clock, AlertCircle, Save, DollarSign, FileText, X, Trash2,
 } from 'lucide-react'
 import { Toast } from '@/components/admin/Toast'
-import { formatarPagamento, formatarMpStatus } from '@/lib/pedido-status'
+import { formatarPagamento, formatarMpStatus, isStatusPago } from '@/lib/pedido-status'
 import { formatarTelefone, formatarCpf } from '@/lib/format'
 import { ADMIN_BASE } from '@/lib/admin-path'
 
@@ -69,6 +69,12 @@ const STATUSES = ['pendente', 'aguardando_frete', 'pago', 'enviado', 'entregue',
 // campo livre — o valor final sempre grava em Pedido.transportadora.
 const TRANSPORTADORAS = ['Braspress', 'Rodonaves', 'Correios'] as const
 const TRANSPORTADORA_OUTRO = 'Outro'
+
+// Status oferecidos na ação em massa. 'enviado' fica DE FORA de propósito:
+// entrar em "enviado" dispara o e-mail de rastreio ao cliente, e despachar tem
+// fluxo próprio por pedido ("Confirmar envio"), que exige o código de rastreio.
+// Marcar em massa mandaria e-mails sem ninguém revisar o rastreio.
+const STATUSES_EM_MASSA = STATUSES.filter((s) => s !== 'enviado')
 
 const STATUS_BADGE: Record<string, string> = {
   pendente: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -392,7 +398,7 @@ function PedidoDetalhe({
 
   return (
     <tr>
-      <td colSpan={10} className="bg-gray-50 border-b border-gray-100">
+      <td colSpan={11} className="bg-gray-50 border-b border-gray-100">
         <div className="px-6 py-5 space-y-6">
           {/* Timeline */}
           <div>
@@ -734,6 +740,10 @@ export default function AdminPedidosPage() {
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [selecionados, setSelecionados] = useState<Set<string>>(new Set())
+  const [bulkStatus, setBulkStatus] = useState('')
+  const [bulkSaving, setBulkSaving] = useState<null | 'status' | 'excluir'>(null)
+  const [modalExcluir, setModalExcluir] = useState(false)
 
   const limit = 20
   const totalPages = Math.ceil(total / limit)
@@ -784,6 +794,10 @@ export default function AdminPedidosPage() {
 
   useEffect(() => setPage(1), [q, status, pagamento, from, to])
 
+  // Trocar de filtro/página some com as linhas da tela. Manter a seleção seria
+  // guardar ids invisíveis e agir sobre eles no próximo clique — limpa sempre.
+  useEffect(() => { setSelecionados(new Set()) }, [q, status, pagamento, from, to, page])
+
   function toggleExpand(id: string) {
     setExpanded((prev) => {
       const next = new Set(prev)
@@ -798,6 +812,86 @@ export default function AdminPedidosPage() {
 
   function showToast(message: string, type: 'success' | 'error' = 'success') {
     setToast({ message, type })
+  }
+
+  // ── Seleção em massa ────────────────────────────────────────────────────────
+  // O escopo é sempre "o que está na tela": os pedidos já filtrados desta página.
+  const idsVisiveis = pedidos.map((p) => p.id)
+  const selecionadosVisiveis = idsVisiveis.filter((id) => selecionados.has(id))
+  const todosSelecionados = idsVisiveis.length > 0 && selecionadosVisiveis.length === idsVisiveis.length
+  const pedidosSelecionados = pedidos.filter((p) => selecionados.has(p.id))
+  const pagosSelecionados = pedidosSelecionados.filter((p) => isStatusPago(p.status))
+
+  function toggleSelecionado(id: string) {
+    setSelecionados((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleTodos() {
+    setSelecionados(todosSelecionados ? new Set() : new Set(idsVisiveis))
+  }
+
+  // Reusa o PATCH por pedido — é ele que carimba datas, dispara o clawback de
+  // cashback no cancelamento e envia o e-mail de despacho. Nada disso é
+  // reimplementado aqui.
+  async function aplicarStatusEmMassa() {
+    if (!bulkStatus || selecionadosVisiveis.length === 0) return
+    setBulkSaving('status')
+    const alvos = [...selecionadosVisiveis]
+    const falhas: string[] = []
+    for (const id of alvos) {
+      try {
+        const res = await fetch(`/api/admin/pedidos/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status: bulkStatus }),
+        })
+        if (!res.ok) throw new Error(String(res.status))
+      } catch {
+        falhas.push(id)
+      }
+    }
+    setBulkSaving(null)
+    setSelecionados(new Set())
+    setBulkStatus('')
+    await fetch_()
+    const ok = alvos.length - falhas.length
+    if (falhas.length === 0) {
+      showToast(`${ok} pedido${ok !== 1 ? 's' : ''} atualizado${ok !== 1 ? 's' : ''}`)
+    } else {
+      showToast(`${ok} atualizado(s), ${falhas.length} falhou(ram)`, 'error')
+    }
+  }
+
+  async function excluirSelecionados() {
+    const alvos = [...selecionadosVisiveis]
+    if (alvos.length === 0) return
+    setBulkSaving('excluir')
+    try {
+      const res = await fetch('/api/admin/pedidos/excluir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ids: alvos }),
+      })
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}))
+        throw new Error(e.error || 'Falha ao excluir')
+      }
+      const d = await res.json()
+      setModalExcluir(false)
+      setSelecionados(new Set())
+      await fetch_()
+      showToast(`${d.excluidos} pedido${d.excluidos !== 1 ? 's' : ''} excluído${d.excluidos !== 1 ? 's' : ''} permanentemente`)
+    } catch (err) {
+      showToast((err as Error).message, 'error')
+    }
+    setBulkSaving(null)
   }
 
   return (
@@ -914,6 +1008,57 @@ export default function AdminPedidosPage() {
           </div>
         </div>
 
+        {/* Barra de ações em massa */}
+        {selecionadosVisiveis.length > 0 && (
+          <div className="flex flex-wrap items-center gap-3 bg-[#0f2e2b] text-white rounded-2xl px-4 py-3">
+            <span className="text-sm font-semibold">
+              {selecionadosVisiveis.length} pedido{selecionadosVisiveis.length !== 1 ? 's' : ''} selecionado{selecionadosVisiveis.length !== 1 ? 's' : ''}
+            </span>
+            {pagosSelecionados.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-300 bg-amber-500/10 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                <AlertCircle className="w-3 h-3" />
+                {pagosSelecionados.length} pago{pagosSelecionados.length !== 1 ? 's' : ''}
+              </span>
+            )}
+
+            <div className="flex items-center gap-2 ml-auto flex-wrap">
+              <select
+                value={bulkStatus}
+                onChange={(e) => setBulkStatus(e.target.value)}
+                disabled={bulkSaving !== null}
+                className="border border-white/20 bg-white/10 rounded-xl px-3 py-1.5 text-sm text-white disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+              >
+                <option value="" className="text-gray-900">Alterar status para…</option>
+                {STATUSES_EM_MASSA.map((s) => (
+                  <option key={s} value={s} className="text-gray-900">{STATUS_LABELS[s] ?? s}</option>
+                ))}
+              </select>
+              <button
+                onClick={aplicarStatusEmMassa}
+                disabled={!bulkStatus || bulkSaving !== null}
+                className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-40 text-white font-semibold rounded-xl px-3 py-1.5 text-sm transition"
+              >
+                {bulkSaving === 'status' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Aplicar
+              </button>
+              <button
+                onClick={() => setModalExcluir(true)}
+                disabled={bulkSaving !== null}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-semibold rounded-xl px-3 py-1.5 text-sm transition"
+              >
+                <Trash2 className="w-4 h-4" /> Excluir
+              </button>
+              <button
+                onClick={() => setSelecionados(new Set())}
+                disabled={bulkSaving !== null}
+                className="text-xs text-white/60 hover:text-white underline disabled:opacity-40"
+              >
+                Limpar
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Tabela */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {loading ? (
@@ -930,6 +1075,16 @@ export default function AdminPedidosPage() {
               <table className="w-full table-auto">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
+                    <th className="px-3 py-3.5 w-8">
+                      <input
+                        type="checkbox"
+                        checked={todosSelecionados}
+                        onChange={toggleTodos}
+                        aria-label="Selecionar todos os pedidos listados"
+                        title="Seleciona os pedidos desta página, conforme o filtro atual"
+                        className="w-4 h-4 rounded border-gray-300 text-[#3cbfb3] focus:ring-[#3cbfb3] cursor-pointer"
+                      />
+                    </th>
                     <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5 w-8"></th>
                     <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5">#ID</th>
                     <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-3.5">Cliente</th>
@@ -951,6 +1106,16 @@ export default function AdminPedidosPage() {
                           className={`border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer ${isOpen ? 'bg-gray-50' : ''}`}
                           onClick={() => toggleExpand(p.id)}
                         >
+                          {/* stopPropagation: a linha inteira alterna o detalhe. */}
+                          <td className="px-3 py-4 w-8" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={selecionados.has(p.id)}
+                              onChange={() => toggleSelecionado(p.id)}
+                              aria-label={`Selecionar pedido ${p.id.slice(-8).toUpperCase()}`}
+                              className="w-4 h-4 rounded border-gray-300 text-[#3cbfb3] focus:ring-[#3cbfb3] cursor-pointer"
+                            />
+                          </td>
                           <td className="px-3 py-4 w-8">
                             {isOpen
                               ? <ChevronDown className="w-4 h-4 text-[#3cbfb3]" />
@@ -1010,6 +1175,56 @@ export default function AdminPedidosPage() {
           )}
         </div>
       </div>
+
+      {modalExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <span className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-bold text-gray-900">
+                  Tem certeza que deseja excluir {selecionadosVisiveis.length} pedido{selecionadosVisiveis.length !== 1 ? 's' : ''}?
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Esta ação é <strong className="text-gray-900">PERMANENTE</strong> e não pode ser desfeita.
+                </p>
+              </div>
+            </div>
+
+            {pagosSelecionados.length > 0 && (
+              <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 space-y-1">
+                <p className="text-sm font-bold text-amber-800 flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  Atenção: {pagosSelecionados.length} pedido{pagosSelecionados.length !== 1 ? 's' : ''} PAGO{pagosSelecionados.length !== 1 ? 'S' : ''} {pagosSelecionados.length !== 1 ? 'serão' : 'será'} excluído{pagosSelecionados.length !== 1 ? 's' : ''}
+                </p>
+                <p className="text-xs text-amber-700">
+                  Isso remove {pagosSelecionados.length !== 1 ? 'esses pedidos' : 'esse pedido'} do relatório de margem/lucro e da análise. O cashback e os pontos gerados por {pagosSelecionados.length !== 1 ? 'eles' : 'ele'} são revertidos do saldo do cliente, e o uso do cupom é devolvido.
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                onClick={() => setModalExcluir(false)}
+                disabled={bulkSaving === 'excluir'}
+                className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-40 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={excluirSelecionados}
+                disabled={bulkSaving === 'excluir'}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-40 transition"
+              >
+                {bulkSaving === 'excluir' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

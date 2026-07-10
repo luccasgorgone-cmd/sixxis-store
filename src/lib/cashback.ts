@@ -20,6 +20,16 @@ async function totalGastoDe(clienteId: string): Promise<number> {
 }
 
 /**
+ * Recalcula Cliente.totalGasto a partir dos pedidos que ainda existem.
+ * Necessário quando um pedido pago some do banco (exclusão no admin): sem isto
+ * o nível de fidelidade continuaria apoiado num pedido inexistente.
+ */
+export async function recalcularTotalGasto(clienteId: string): Promise<void> {
+  const totalGasto = await totalGastoDe(clienteId)
+  await prisma.cliente.update({ where: { id: clienteId }, data: { totalGasto } })
+}
+
+/**
  * Credita cashback após uma compra virar 'pago'.
  * - valorElegivel = subtotal de PRODUTOS (sem frete); % = o do NÍVEL do cliente
  *   (Cristal 2% / Topázio 3% / Safira 4% / Diamante 5% / Esmeralda 7%).
