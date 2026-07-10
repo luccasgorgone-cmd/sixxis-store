@@ -51,6 +51,7 @@ interface Pedido {
   formaPagamento: string; mpPaymentId: string | null
   codigoRastreio: string | null; createdAt: string
   transportadora: string | null; linkRastreio: string | null
+  notaFiscal: string | null
   custoFreteReal: number | null; enviadoEm: string | null; entregueEm: string | null
   freteTipo: string | null; fretePrazo: number | null
   cliente: Cliente; endereco: Endereco; itens: ItemPedido[]
@@ -62,6 +63,12 @@ interface Stats { total: number; pendentes: number; enviados: number; receita: n
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATUSES = ['pendente', 'aguardando_frete', 'pago', 'enviado', 'entregue', 'cancelado']
+
+// Transportadoras oferecidas no select. Qualquer outro nome (inclusive o que o
+// resolver de frete grava na criação do pedido) cai em "Outro", que revela um
+// campo livre — o valor final sempre grava em Pedido.transportadora.
+const TRANSPORTADORAS = ['Braspress', 'Rodonaves', 'Correios'] as const
+const TRANSPORTADORA_OUTRO = 'Outro'
 
 const STATUS_BADGE: Record<string, string> = {
   pendente: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -310,9 +317,19 @@ function PedidoDetalhe({
   showToast: (msg: string, type?: 'success' | 'error') => void
 }) {
   const [status, setStatus] = useState(pedido.status)
-  const [transportadora, setTransportadora] = useState(pedido.transportadora ?? '')
+  // Transportadora: um pedido antigo com valor fora da lista abre em "Outro"
+  // já preenchido, sem perder o dado.
+  const transpSalva = pedido.transportadora ?? ''
+  const transpNaLista = (TRANSPORTADORAS as readonly string[]).includes(transpSalva)
+  const [transpOpcao, setTranspOpcao] = useState(
+    transpSalva === '' ? '' : transpNaLista ? transpSalva : TRANSPORTADORA_OUTRO,
+  )
+  const [transpOutro, setTranspOutro] = useState(transpNaLista ? '' : transpSalva)
+  const transportadora =
+    transpOpcao === TRANSPORTADORA_OUTRO ? transpOutro.trim() : transpOpcao
   const [rastreio, setRastreio] = useState(pedido.codigoRastreio ?? '')
   const [linkRastreio, setLinkRastreio] = useState(pedido.linkRastreio ?? '')
+  const [notaFiscal, setNotaFiscal] = useState(pedido.notaFiscal ?? '')
   const [custoReal, setCustoReal] = useState(pedido.custoFreteReal != null ? String(pedido.custoFreteReal) : '')
   const [saving, setSaving] = useState<string | null>(null)
   const [nfOpen, setNfOpen] = useState(false)
@@ -338,7 +355,7 @@ function PedidoDetalhe({
       const p = d.pedido
       onUpdate(pedido.id, {
         status: p.status, codigoRastreio: p.codigoRastreio, transportadora: p.transportadora,
-        linkRastreio: p.linkRastreio, custoFreteReal: p.custoFreteReal,
+        linkRastreio: p.linkRastreio, notaFiscal: p.notaFiscal, custoFreteReal: p.custoFreteReal,
         enviadoEm: p.enviadoEm, entregueEm: p.entregueEm,
       })
       setStatus(p.status)
@@ -352,7 +369,7 @@ function PedidoDetalhe({
   function confirmarEnvio() {
     if (!rastreio.trim()) { showToast('Informe o código de rastreio.', 'error'); return }
     patch(
-      { acao: 'despachar', transportadora, codigoRastreio: rastreio, linkRastreio, custoFreteReal: custoReal },
+      { acao: 'despachar', transportadora, codigoRastreio: rastreio, linkRastreio, notaFiscal, custoFreteReal: custoReal },
       'despachar', 'Envio confirmado — pedido marcado como Enviado',
     )
   }
@@ -361,7 +378,7 @@ function PedidoDetalhe({
   }
   function salvarEdicao() {
     patch(
-      { transportadora, codigoRastreio: rastreio, linkRastreio, custoFreteReal: custoReal },
+      { transportadora, codigoRastreio: rastreio, linkRastreio, notaFiscal, custoFreteReal: custoReal },
       'editar', 'Dados de envio atualizados (sem reenvio de email)',
     )
   }
@@ -549,11 +566,35 @@ function PedidoDetalhe({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Transportadora</label>
+                <select
+                  value={transpOpcao}
+                  onChange={(e) => setTranspOpcao(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                >
+                  <option value="">Selecione…</option>
+                  {TRANSPORTADORAS.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                  <option value={TRANSPORTADORA_OUTRO}>{TRANSPORTADORA_OUTRO}</option>
+                </select>
+                {transpOpcao === TRANSPORTADORA_OUTRO && (
+                  <input
+                    value={transpOutro}
+                    onChange={(e) => setTranspOutro(e.target.value)}
+                    placeholder="Nome da transportadora"
+                    maxLength={60}
+                    className="mt-2 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Nota Fiscal (NF)</label>
                 <input
-                  value={transportadora}
-                  onChange={(e) => setTransportadora(e.target.value)}
-                  placeholder="Ex: Correios, Jadlog, transportadora própria…"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                  value={notaFiscal}
+                  onChange={(e) => setNotaFiscal(e.target.value)}
+                  placeholder="Número da NF (opcional)"
+                  maxLength={60}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
                 />
               </div>
               <div>
@@ -848,7 +889,7 @@ export default function AdminPedidosPage() {
                 type="text"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Buscar por ID ou nome do cliente..."
+                placeholder="Buscar por ID, nome do cliente ou NF..."
                 className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
               />
             </div>

@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
     ...(q && {
       OR: [
         { id: { contains: q } },
+        { notaFiscal: { contains: q } },
         { cliente: { nome: { contains: q } } },
         { cliente: { email: { contains: q } } },
       ],

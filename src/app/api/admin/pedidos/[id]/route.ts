@@ -23,6 +23,7 @@ const patchSchema = z.object({
   codigoRastreio: z.string().nullable().optional(),
   transportadora: z.string().nullable().optional(),
   linkRastreio:   z.string().nullable().optional(),
+  notaFiscal:     z.string().max(60).nullable().optional(),
   custoFreteReal: custoField.optional(),
 })
 
@@ -91,6 +92,10 @@ export async function PATCH(
     if (dados.linkRastreio !== undefined) data.linkRastreio = limpar(dados.linkRastreio)
     if (dados.custoFreteReal !== undefined) data.custoFreteReal = dados.custoFreteReal
   }
+
+  // NF é ortogonal à ação: pode ser gravada no despacho ou numa edição avulsa,
+  // e nunca participa da decisão de status/email.
+  if (dados.notaFiscal !== undefined) data.notaFiscal = limpar(dados.notaFiscal)
 
   // ── Transições de status: carimba datas + decide email ─────────────────────
   // Centralizado p/ valer TANTO nas ações (despachar/entregue) QUANTO na troca

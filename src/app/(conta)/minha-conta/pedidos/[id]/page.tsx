@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import LayoutConta from '@/components/conta/LayoutConta'
 import Link from 'next/link'
-import { ArrowLeft, MapPin, Package, Truck, CheckCircle, Clock, ExternalLink } from 'lucide-react'
+import { ArrowLeft, MapPin, Package, Truck, CheckCircle, Clock, ExternalLink, FileText } from 'lucide-react'
 import { isStatusPendente, getStatusInfo } from '@/lib/pedido-status'
 import BotoesPedidoPendente from '@/components/pedido/BotoesPedidoPendente'
 
@@ -111,6 +111,19 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Nota fiscal — só aparece depois que o admin informa o número. */}
+        {pedido.notaFiscal && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+            <h2 className="font-bold text-gray-900 text-sm flex items-center gap-2 mb-2">
+              <FileText size={14} className="text-[#3cbfb3]" /> Nota fiscal
+            </h2>
+            <p className="text-sm text-gray-700">
+              <span className="text-gray-400">Número:</span>{' '}
+              <strong className="font-mono">{pedido.notaFiscal}</strong>
+            </p>
           </div>
         )}
 

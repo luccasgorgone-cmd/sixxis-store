@@ -132,8 +132,9 @@ model Pedido {
   cashbackUsado  Decimal             @default(0.00) @db.Decimal(10, 2) // cashback resgatado neste pedido
   freteTipo      String?             // "normal" | "expresso" | "a_combinar"
   fretePrazo     Int?                // prazo estimado em dias úteis
-  transportadora String?             // nome da transportadora (texto livre)
+  transportadora String?             // nome da transportadora (lista fixa ou "Outro" digitado)
   linkRastreio   String?             // URL de rastreio colada manualmente
+  notaFiscal     String?             // número da NF emitida (preenchido no admin)
   custoFreteReal Decimal?            @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
   // INTERNO — tarifa REAL cobrada pelo Mercado Pago neste pedido, em R$ (soma
   // dos fee_details com fee_payer=collector; inclui juros de parcelamento que a
@@ -162,6 +163,7 @@ model Pedido {
 
   @@index([clienteId])
   @@index([status])
+  @@index([notaFiscal])
   @@index([enderecoId], map: "Pedido_enderecoId_fkey")
 }
 
