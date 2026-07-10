@@ -3,6 +3,10 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { resolverPeriodo } from '@/lib/periodo-admin'
 import { STATUS_PAGO_TODOS } from '@/lib/pedido-status'
+import {
+  agregarTotais, agregarSerieTemporal, agregarPorForma,
+  DIAS_P_AGRUPAR_POR_SEMANA,
+} from '@/lib/margem-agregacoes'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -51,6 +55,28 @@ export const revalidate = 0
 // Pedidos anteriores à coluna `custoUnitario` têm snapshot null → ficam "custo
 // pendente" até rodar POST /api/admin/pedidos/snapshot-custos (que preenche com
 // o custo atual, a melhor aproximação disponível para o passado).
+
+/** Rótulos estáveis de forma de pagamento (também usados como valor de filtro). */
+export type FormaPagto = 'PIX' | 'Cartão à vista' | 'Parcelado' | 'Outros'
+
+/**
+ * Deriva a forma a partir do pagamento APROVADO do pedido (fallback: o mais
+ * recente). `Pedido.formaPagamento` não serve: é sempre 'mercado_pago'.
+ * Cartão com 1 parcela (ou sem parcelas informadas) = à vista; 2x+ = Parcelado.
+ */
+function normalizarForma(
+  pagamentos: { metodo: string; parcelas: number | null; mpStatus: string }[],
+): FormaPagto {
+  const pg = pagamentos.find((p) => p.mpStatus === 'approved') ?? pagamentos[0]
+  if (!pg) return 'Outros'
+  const m = pg.metodo.toLowerCase()
+  if (m.includes('pix')) return 'PIX'
+  if (m.includes('credit') || m.includes('cart')) {
+    return (pg.parcelas ?? 1) >= 2 ? 'Parcelado' : 'Cartão à vista'
+  }
+  return 'Outros'
+}
+
 export async function GET(request: NextRequest) {
   const unauthorized = await requireAdmin(request)
   if (unauthorized) return unauthorized
@@ -69,6 +95,12 @@ export async function GET(request: NextRequest) {
         formaPagamento: true,
         cliente: { select: { nome: true } },
         itens: { select: { quantidade: true, custoUnitario: true } },
+        // A forma REAL (pix / cartão / nº de parcelas) vive no Pagamento.
+        // `Pedido.formaPagamento` é sempre 'mercado_pago' — o gateway, não o meio.
+        pagamentos: {
+          select: { metodo: true, parcelas: true, mpStatus: true },
+          orderBy: { createdAt: 'desc' },
+        },
       },
       orderBy: { createdAt: 'desc' },
     }),
@@ -109,6 +141,8 @@ export async function GET(request: NextRequest) {
       data: p.createdAt.toISOString(),
       cliente: p.cliente.nome,
       formaPagamento: p.formaPagamento,
+      /** Forma normalizada (PIX / Cartão à vista / Parcelado / Outros). */
+      forma: normalizarForma(p.pagamentos),
       venda,
       taxaMp,
       custoFrete,
@@ -123,49 +157,22 @@ export async function GET(request: NextRequest) {
     }
   })
 
-  const soma = (ns: (number | null)[]) => ns.reduce<number>((s, n) => s + (n ?? 0), 0)
+  const dias = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000))
+  const agruparPorSemana = dias > DIAS_P_AGRUPAR_POR_SEMANA
 
-  // Duas bases distintas — cada resultado só soma as linhas em que ele existe.
-  const comContrib = linhas.filter((l) => l.margemContrib != null)
-  const comLucro   = linhas.filter((l) => l.lucroReal != null)
-
-  const vendasComContrib = soma(comContrib.map((l) => l.venda))
-  const vendasComLucro   = soma(comLucro.map((l) => l.venda))
-  const somaMargemContrib = soma(comContrib.map((l) => l.margemContrib))
-  const somaLucroReal     = soma(comLucro.map((l) => l.lucroReal))
+  // Agregações puras (fonte única, compartilhada com a página no filtro client).
+  const totais = agregarTotais(linhas)
+  const serieTemporal = agregarSerieTemporal(linhas, agruparPorSemana)
+  const porFormaPagamento = agregarPorForma(linhas)
 
   return NextResponse.json({
     periodo: { from: from.toISOString(), to: to.toISOString() },
     linhas,
-    totais: {
-      pedidos: linhas.length,
-      // Σ vendas de TODAS as linhas do período.
-      vendas: soma(linhas.map((l) => l.venda)),
-      // Σ dos custos CONHECIDOS (linhas pendentes simplesmente não somam).
-      taxaMp: soma(linhas.map((l) => l.taxaMp)),
-      custoFrete: soma(linhas.map((l) => l.custoFrete)),
-
-      // Nível 1 — disponível agora.
-      margemContrib: somaMargemContrib,
-      margemContribPctMedia: vendasComContrib > 0 ? (somaMargemContrib / vendasComContrib) * 100 : null,
-      linhasComContrib: comContrib.length,
-
-      // Nível 2 — COGS e lucro só sobre as linhas em que o lucro existe, senão
-      // o total não casaria com as linhas exibidas.
-      custoProdutos: soma(comLucro.map((l) => l.custoProdutos)),
-      lucroReal: somaLucroReal,
-      lucroRealPctMedia: vendasComLucro > 0 ? (somaLucroReal / vendasComLucro) * 100 : null,
-      linhasComLucro: comLucro.length,
-      /** false → a UI mostra "aguardando custos" em vez de R$ 0,00. */
-      lucroDisponivel: comLucro.length > 0,
-
-      // Transparência: o que ficou de fora e por quê.
-      taxasPendentes: linhas.filter((l) => l.taxaPendente).length,
-      fretesPendentes: linhas.filter((l) => l.fretePendente).length,
-      custosPendentes: linhas.filter((l) => l.custoPendente).length,
-      vendasComContrib,
-      vendasComLucro,
-    },
+    totais,
+    serieTemporal,
+    /** 'dia' | 'semana' — a UI usa para rotular o eixo. */
+    granularidade: agruparPorSemana ? 'semana' : 'dia',
+    porFormaPagamento,
     // Checklist acionável: quais produtos ainda precisam de custo cadastrado.
     produtosSemCusto: {
       total: produtosSemCusto.length,
