@@ -22,7 +22,7 @@ import GarantiaEstendidaStep, { type SelecaoGarantia } from '@/components/checko
 import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/EnderecosSalvos'
 import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
-import { trackAddPaymentInfo, trackBeginCheckout } from '@/lib/analytics/events'
+import { trackAddPaymentInfo, trackAddShippingInfo, trackBeginCheckout } from '@/lib/analytics/events'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
@@ -539,6 +539,17 @@ function CheckoutContent() {
   // eventID gerado aqui e guardado no ref → reuso futuro na dedupe com o CAPI.
   const initiateCheckoutEventIdRef = useRef<string | null>(null)
   const beginCheckoutDisparadoRef  = useRef(false)
+  // add_shipping_info: dispara UMA vez por carregamento do checkout, no primeiro
+  // frete calculado com sucesso. Trocar de CEP/UF recalcula o frete, mas o
+  // evento significa "informou o frete" — não deve repetir a cada recálculo.
+  const shippingInfoDisparadoRef = useRef(false)
+  // `calcularFrete` é um useCallback com deps [itens]: `total` deriva do carrinho
+  // (logo acompanha as deps), mas o cupom não. Incluí-lo nas deps recriaria o
+  // callback e faria o efeito de recálculo rodar de novo a cada cupom aplicado
+  // (POST /api/frete extra). Este ref mantém o código do cupom fresco dentro da
+  // closure sem tocar nas deps nem no cálculo de frete.
+  const cupomCodigoRef = useRef<string | undefined>(undefined)
+  useEffect(() => { cupomCodigoRef.current = cupom?.codigo }, [cupom?.codigo])
   useEffect(() => {
     if (beginCheckoutDisparadoRef.current) return
     // Espera o carrinho hidratar (Zustand persist) antes de disparar.
@@ -656,6 +667,26 @@ function CheckoutContent() {
         )
         setOpcoesFrete(opcoes)
         setFreteTipoSel(opcoes[0]?.id ?? null)
+        // GA4 add_shipping_info — frete calculado e opção de entrega definida.
+        // shipping_tier = nome da opção auto-selecionada ("Normal"/"Expresso").
+        // Mesmo mapeamento de itens do begin_checkout (feedId ?? produtoId).
+        if (!shippingInfoDisparadoRef.current && opcoes[0]) {
+          shippingInfoDisparadoRef.current = true
+          trackAddShippingInfo(
+            itens.map(i => ({
+              item_id:    i.feedId ?? i.produtoId,
+              produto_id: i.produtoId,
+              item_name:  i.nome,
+              item_brand: 'Sixxis',
+              price:      i.preco,
+              quantity:   i.quantidade,
+              variant:    i.variacaoNome,
+            })),
+            total,
+            opcoes[0].nome,
+            cupomCodigoRef.current,
+          )
+        }
       }
     } catch {
       setFreteStatus('bloqueado')
@@ -663,7 +694,10 @@ function CheckoutContent() {
     } finally {
       setCarregandoFrete(false)
     }
-  }, [itens])
+    // `total` deriva do carrinho (useTotalCarrinho): só muda quando `itens` muda,
+    // então declará-lo aqui não recria o callback com mais frequência — nenhum
+    // recálculo de frete a mais.
+  }, [itens, total])
 
   // Quando o hook ViaCEP encontra um endereço, popular o formulário.
   useEffect(() => {
