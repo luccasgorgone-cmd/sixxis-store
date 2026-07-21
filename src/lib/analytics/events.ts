@@ -170,6 +170,32 @@ export function trackAddPaymentInfo(
   })
 }
 
+// Irmão do add_payment_info: mesma forma, com shipping_tier (nome da opção de
+// entrega — "Normal"/"Expresso") no lugar do payment_type. Fecha o funil de
+// e-commerce do GA4/Google Ads, que espera add_shipping_info entre o
+// begin_checkout e o add_payment_info.
+//
+// Sem Meta: add_shipping_info NÃO é evento padrão do Pixel — só GA4/dataLayer
+// + pipeline interno, igual ao add_payment_info.
+export function trackAddShippingInfo(
+  items: ProdutoTracking[],
+  total: number,
+  shipping_tier: string,
+  coupon?: string,
+) {
+  push('add_shipping_info', {
+    currency: 'BRL',
+    value: total,
+    shipping_tier,
+    coupon,
+    items: items.map(paraGA4),
+  })
+  enviarInterno('add_shipping_info', {
+    valor: total,
+    dados: { shipping_tier, coupon },
+  })
+}
+
 export function trackPurchase(
   transactionId: string,
   items: ProdutoTracking[],
