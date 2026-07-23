@@ -58,9 +58,16 @@ export interface CrmAplicarResultado {
   pulados: { chave: string; motivo: string }[]
 }
 
-export type CrmResultado<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string; status?: number }
+// Interface ÚNICA (não união discriminada): o projeto usa `strict: false`, e sem
+// strictNullChecks o narrowing por `ok: true|false` não funciona (os literais
+// colapsam em boolean). Com um só shape, `r.data` e `r.error` são sempre
+// acessíveis — quem chama checa `r.ok` e usa o campo correspondente.
+export interface CrmResultado<T> {
+  ok: boolean
+  data?: T
+  error?: string
+  status?: number
+}
 
 // ── Chamador genérico (timeout + falha graciosa) ─────────────────────────────
 async function chamarCrm<T>(path: string, body: unknown): Promise<CrmResultado<T>> {
