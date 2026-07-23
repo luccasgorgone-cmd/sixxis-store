@@ -5,6 +5,7 @@ import { auditLog } from '@/lib/audit'
 import { enviarEmailRastreio } from '@/lib/email'
 import { liberarCashbackPedido, estornarCashbackPedido } from '@/lib/cashback'
 import { z } from 'zod'
+import { ancorarMeioDiaUtc } from '@/lib/data-nf'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,9 @@ const patchSchema = z.object({
   transportadora: z.string().nullable().optional(),
   linkRastreio:   z.string().nullable().optional(),
   notaFiscal:     z.string().max(60).nullable().optional(),
+  // "YYYY-MM-DD" (do <input type="date">) ou '' / null p/ limpar. Ancorada ao
+  // meio-dia UTC na gravação — nunca `new Date(valor)` cru.
+  dataNotaFiscal: z.string().nullable().optional(),
   custoFreteReal: custoField.optional(),
 })
 
@@ -96,6 +100,12 @@ export async function PATCH(
   // NF é ortogonal à ação: pode ser gravada no despacho ou numa edição avulsa,
   // e nunca participa da decisão de status/email.
   if (dados.notaFiscal !== undefined) data.notaFiscal = limpar(dados.notaFiscal)
+  // Data da NF: '' / null limpa; senão ancora ao meio-dia UTC (data pura).
+  if (dados.dataNotaFiscal !== undefined) {
+    data.dataNotaFiscal = limpar(dados.dataNotaFiscal)
+      ? ancorarMeioDiaUtc(dados.dataNotaFiscal)
+      : null
+  }
 
   // ── Transições de status: carimba datas + decide email ─────────────────────
   // Centralizado p/ valer TANTO nas ações (despachar/entregue) QUANTO na troca

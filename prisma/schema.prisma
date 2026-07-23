@@ -140,6 +140,13 @@ model Pedido {
   transportadora String?             // nome da transportadora (lista fixa ou "Outro" digitado)
   linkRastreio   String?             // URL de rastreio colada manualmente
   notaFiscal     String?             // número da NF emitida (preenchido no admin)
+  // DATA da NF (data pura, ancorada ao MEIO-DIA UTC — ver src/lib/data-nf.ts). O
+  // CRM precisa dela para a garantia contar. Pedidos antigos ficam nulos.
+  dataNotaFiscal DateTime?
+  // Marca informativa de sincronização com o CRM (nunca bloqueia; reaplicar é ok).
+  // crmLeadId = contato do CRM que recebeu os dados (rastreável em caso de engano).
+  crmSincronizadoEm DateTime?
+  crmLeadId         String?
   custoFreteReal Decimal?            @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
   // INTERNO — tarifa REAL cobrada pelo Mercado Pago neste pedido, em R$ (soma
   // dos fee_details com fee_payer=collector; inclui juros de parcelamento que a

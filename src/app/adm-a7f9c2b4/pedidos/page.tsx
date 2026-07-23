@@ -51,7 +51,8 @@ interface Pedido {
   formaPagamento: string; mpPaymentId: string | null
   codigoRastreio: string | null; createdAt: string
   transportadora: string | null; linkRastreio: string | null
-  notaFiscal: string | null
+  notaFiscal: string | null; dataNotaFiscal: string | null
+  crmSincronizadoEm: string | null; crmLeadId: string | null
   custoFreteReal: number | null; enviadoEm: string | null; entregueEm: string | null
   freteTipo: string | null; fretePrazo: number | null
   cliente: Cliente; endereco: Endereco; itens: ItemPedido[]
@@ -356,6 +357,9 @@ function PedidoDetalhe({
   const [rastreio, setRastreio] = useState(pedido.codigoRastreio ?? '')
   const [linkRastreio, setLinkRastreio] = useState(pedido.linkRastreio ?? '')
   const [notaFiscal, setNotaFiscal] = useState(pedido.notaFiscal ?? '')
+  // Data da NF em "YYYY-MM-DD" p/ o <input type="date">. A API vem em ISO
+  // (meio-dia UTC) — o slice(0,10) devolve o dia-calendário correto.
+  const [dataNota, setDataNota] = useState(pedido.dataNotaFiscal ? pedido.dataNotaFiscal.slice(0, 10) : '')
   const [custoReal, setCustoReal] = useState(pedido.custoFreteReal != null ? String(pedido.custoFreteReal) : '')
   const [saving, setSaving] = useState<string | null>(null)
   const [pedidoModalOpen, setPedidoModalOpen] = useState(false)
@@ -385,8 +389,8 @@ function PedidoDetalhe({
       const p = d.pedido
       onUpdate(pedido.id, {
         status: p.status, codigoRastreio: p.codigoRastreio, transportadora: p.transportadora,
-        linkRastreio: p.linkRastreio, notaFiscal: p.notaFiscal, custoFreteReal: p.custoFreteReal,
-        enviadoEm: p.enviadoEm, entregueEm: p.entregueEm,
+        linkRastreio: p.linkRastreio, notaFiscal: p.notaFiscal, dataNotaFiscal: p.dataNotaFiscal,
+        custoFreteReal: p.custoFreteReal, enviadoEm: p.enviadoEm, entregueEm: p.entregueEm,
       })
       setStatus(p.status)
       showToast(successMsg + (d.emailEnviado ? ' · email enviado ao cliente' : ''))
@@ -399,7 +403,7 @@ function PedidoDetalhe({
   function confirmarEnvio() {
     if (!rastreio.trim()) { showToast('Informe o código de rastreio.', 'error'); return }
     patch(
-      { acao: 'despachar', transportadora, codigoRastreio: rastreio, linkRastreio, notaFiscal, custoFreteReal: custoReal },
+      { acao: 'despachar', transportadora, codigoRastreio: rastreio, linkRastreio, notaFiscal, dataNotaFiscal: dataNota, custoFreteReal: custoReal },
       'despachar', 'Envio confirmado — pedido marcado como Enviado',
     )
   }
@@ -408,7 +412,7 @@ function PedidoDetalhe({
   }
   function salvarEdicao() {
     patch(
-      { transportadora, codigoRastreio: rastreio, linkRastreio, notaFiscal, custoFreteReal: custoReal },
+      { transportadora, codigoRastreio: rastreio, linkRastreio, notaFiscal, dataNotaFiscal: dataNota, custoFreteReal: custoReal },
       'editar', 'Dados de envio atualizados (sem reenvio de email)',
     )
   }
@@ -664,6 +668,16 @@ function PedidoDetalhe({
                   maxLength={60}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Data da NF</label>
+                <input
+                  type="date"
+                  value={dataNota}
+                  onChange={(e) => setDataNota(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">O CRM exige a data para a garantia contar.</p>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Código de rastreio</label>
