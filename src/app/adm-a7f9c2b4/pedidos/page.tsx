@@ -174,9 +174,9 @@ function Timeline({ status }: { status: string }) {
   )
 }
 
-// Modal "Gerar NF" — Espelho do Pedido / Solicitação de Faturamento.
+// Modal "Gerar Pedido" — Espelho do Pedido / Solicitação de Faturamento.
 // Campos editáveis pré-preenchidos; "Gerar PDF" abre a rota /nf em nova aba.
-function NfModal({
+function PedidoModal({
   pedido,
   onClose,
 }: {
@@ -223,7 +223,7 @@ function NfModal({
           <div className="flex items-center gap-2 text-white">
             <FileText className="w-4 h-4 text-[#3cbfb3]" />
             <div>
-              <p className="text-sm font-bold leading-tight">Gerar NF</p>
+              <p className="text-sm font-bold leading-tight">Gerar Pedido</p>
               <p className="text-[11px] text-[#9fd8d1] leading-tight">
                 Espelho do Pedido · #{pedido.id.slice(-8).toUpperCase()}
               </p>
@@ -358,7 +358,7 @@ function PedidoDetalhe({
   const [notaFiscal, setNotaFiscal] = useState(pedido.notaFiscal ?? '')
   const [custoReal, setCustoReal] = useState(pedido.custoFreteReal != null ? String(pedido.custoFreteReal) : '')
   const [saving, setSaving] = useState<string | null>(null)
-  const [nfOpen, setNfOpen] = useState(false)
+  const [pedidoModalOpen, setPedidoModalOpen] = useState(false)
   // Cotação por transportadora — sob demanda (só ao clicar), nunca automática.
   const [cotando, setCotando] = useState(false)
   const [cotResp, setCotResp] = useState<CotResposta | null>(null)
@@ -623,10 +623,10 @@ function PedidoDetalhe({
                   </span>
                 )}
                 <button
-                  onClick={() => setNfOpen(true)}
+                  onClick={() => setPedidoModalOpen(true)}
                   className="inline-flex items-center gap-1.5 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-semibold rounded-lg px-3 py-1.5 text-xs transition"
                 >
-                  <FileText className="w-3.5 h-3.5" /> Gerar NF
+                  <FileText className="w-3.5 h-3.5" /> Gerar Pedido
                 </button>
               </div>
             </div>
@@ -867,7 +867,7 @@ function PedidoDetalhe({
             </div>
           </div>
         </div>
-        {nfOpen && <NfModal pedido={pedido} onClose={() => setNfOpen(false)} />}
+        {pedidoModalOpen && <PedidoModal pedido={pedido} onClose={() => setPedidoModalOpen(false)} />}
       </td>
     </tr>
   )
