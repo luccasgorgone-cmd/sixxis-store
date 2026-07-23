@@ -14,6 +14,7 @@ import {
   type PDFFont, type PDFPage, type PDFImage,
 } from 'pdf-lib'
 import { formatarTelefone, formatarDocumento } from '@/lib/format'
+import { DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 
 // ─── Marca / paleta (contraste calibrado p/ impressão) ──────────────────────
 const TIFFANY = rgb(0x3c / 255, 0xbf / 255, 0xb3 / 255) // #3cbfb3
@@ -143,7 +144,12 @@ export interface NfData {
   }
   itens: NfItem[]
   subtotal: number
-  desconto: number
+  desconto: number // cupom (persistido em Pedido.desconto)
+  // Desconto à vista do PIX (5%): NÃO persistido — derivado do valor cobrado na
+  // rota. 0 para pagamentos não-PIX. Abate o Total como o cupom.
+  descontoPix: number
+  // Cashback resgatado neste pedido (Pedido.cashbackUsado). Abate o Total.
+  cashbackUsado: number
   // Frete nos TOTAIS: null = não faturado (não renderiza a linha nem soma ao
   // Total). Número (inclui 0 = "Grátis") = frete por conta do cliente.
   frete: number | null
@@ -318,6 +324,12 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
   if (data.desconto > 0) {
     totLinha(`Desconto${data.cupomCodigo ? ` (${data.cupomCodigo})` : ''}`, `- ${moeda(data.desconto)}`, { color: VERDE })
   }
+  if (data.descontoPix > 0) {
+    totLinha(`Desconto PIX (${DESCONTO_PIX_PCT}%)`, `- ${moeda(data.descontoPix)}`, { color: VERDE })
+  }
+  if (data.cashbackUsado > 0) {
+    totLinha('Cashback utilizado', `- ${moeda(data.cashbackUsado)}`, { color: VERDE })
+  }
   if (data.frete != null) totLinha('Frete', data.frete === 0 ? 'Grátis' : moeda(data.frete))
   y -= 3 // respiro antes do Total
   hline(y + 11, totLabelX, X_DIR, LINHA, 0.7)
@@ -373,6 +385,8 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
     ['Data do pagamento', dataHora(data.pagoEm)],
     ['Cupom', data.cupomCodigo || '-'],
     ['Desconto', data.desconto > 0 ? `- ${moeda(data.desconto)}` : moeda(0)],
+    ['Desconto PIX', data.descontoPix > 0 ? `- ${moeda(data.descontoPix)}` : '-'],
+    ['Cashback utilizado', data.cashbackUsado > 0 ? `- ${moeda(data.cashbackUsado)}` : '-'],
     ['Transportadora', data.logistica.transportadora || '-'],
     ['Código de rastreio', data.logistica.codigoRastreio || '-'],
     ['Prazo', data.logistica.prazo || '-'],

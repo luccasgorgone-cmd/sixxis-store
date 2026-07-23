@@ -7,6 +7,7 @@ import { formatarPagamento, formatarMpStatus, getStatusInfo } from '@/lib/pedido
 import { feedId } from '@/lib/feed-id'
 import { obterConfig } from '@/lib/fidelidade'
 import { gerarNfPdf, type NfItem, type NfPagamento, type NfTentativa } from '@/lib/nf-pdf'
+import { FATOR_PIX } from '@/lib/preco-pix'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -134,11 +135,26 @@ export async function GET(
     freteClienteParam != null ? freteClienteParam === '1' : Number(pedido.frete) > 0
 
   const freteTotais = freteCliente ? valorFrete ?? 0 : null
-  const total = Math.max(0, subtotal - desconto + (freteTotais ?? 0))
 
   // ── Pagamento: prioriza o aprovado; senão o mais recente. Valor é Int (cents).
   const pgAprovado =
     pedido.pagamentos.find((p) => p.mpStatus === 'approved') ?? pedido.pagamentos[0] ?? null
+
+  // ── Desconto PIX: NÃO é campo persistido — está embutido no valor cobrado
+  //    (Pagamento.valor, em centavos). Derivado do valor cobrado pelo inverso do
+  //    fator, a MESMA matemática de /pedido/[id]/sucesso. Só quando o pagamento
+  //    aprovado é PIX; cartão/boleto/pendente → 0 (Total idêntico ao anterior).
+  //    O cashback resgatado (cashbackUsado) também abate o Total. ──────────────
+  const pixAprovado = pgAprovado?.mpStatus === 'approved' && pgAprovado.metodo === 'pix'
+  const valorCobrado = pgAprovado ? pgAprovado.valor / 100 : null
+  const descontoPix =
+    pixAprovado && valorCobrado != null
+      ? Math.round((valorCobrado / FATOR_PIX - valorCobrado) * 100) / 100
+      : 0
+  const cashbackUsado = Number(pedido.cashbackUsado ?? 0)
+
+  const total = Math.max(0, subtotal - desconto - descontoPix - cashbackUsado + (freteTotais ?? 0))
+
   const pagamento: NfPagamento = {
     metodo: formatarPagamento(pgAprovado?.metodo ?? pedido.formaPagamento),
     bandeira: pgAprovado?.bandeira ?? null,
@@ -197,6 +213,8 @@ export async function GET(
     itens,
     subtotal,
     desconto,
+    descontoPix,
+    cashbackUsado,
     frete: freteTotais,
     total,
     cupomCodigo: pedido.cupomCodigo,
