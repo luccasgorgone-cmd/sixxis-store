@@ -6,8 +6,9 @@ import React from 'react'
 import {
   ChevronDown, ChevronRight, Loader2, ShoppingCart,
   Search, Package, MapPin, CreditCard, Truck, CheckCircle,
-  Clock, AlertCircle, Save, DollarSign, FileText, X, Trash2,
+  Clock, AlertCircle, Save, DollarSign, FileText, X, Trash2, UserCheck,
 } from 'lucide-react'
+import { CrmSyncModal } from './CrmSyncModal'
 import { Toast } from '@/components/admin/Toast'
 import { formatarPagamento, formatarMpStatus, isStatusPago } from '@/lib/pedido-status'
 import { formatarTelefone, formatarCpf } from '@/lib/format'
@@ -363,6 +364,7 @@ function PedidoDetalhe({
   const [custoReal, setCustoReal] = useState(pedido.custoFreteReal != null ? String(pedido.custoFreteReal) : '')
   const [saving, setSaving] = useState<string | null>(null)
   const [pedidoModalOpen, setPedidoModalOpen] = useState(false)
+  const [crmOpen, setCrmOpen] = useState(false)
   // Cotação por transportadora — sob demanda (só ao clicar), nunca automática.
   const [cotando, setCotando] = useState(false)
   const [cotResp, setCotResp] = useState<CotResposta | null>(null)
@@ -632,6 +634,17 @@ function PedidoDetalhe({
                 >
                   <FileText className="w-3.5 h-3.5" /> Gerar Pedido
                 </button>
+                <button
+                  onClick={() => setCrmOpen(true)}
+                  title={statusLower === 'pago' ? undefined : 'Pedido ainda não está pago — envie só quando confirmado.'}
+                  className={`inline-flex items-center gap-1.5 font-semibold rounded-lg px-3 py-1.5 text-xs transition border ${
+                    statusLower === 'pago'
+                      ? 'bg-[#0f2e2b] hover:bg-[#123b37] text-white border-[#0f2e2b]'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-[#3cbfb3]/40'
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5" /> Enviar dados ao CRM
+                </button>
               </div>
             </div>
 
@@ -882,6 +895,16 @@ function PedidoDetalhe({
           </div>
         </div>
         {pedidoModalOpen && <PedidoModal pedido={pedido} onClose={() => setPedidoModalOpen(false)} />}
+        {crmOpen && (
+          <CrmSyncModal
+            pedidoId={pedido.id}
+            codigo={`#${pedido.id.slice(-8).toUpperCase()}`}
+            onClose={() => setCrmOpen(false)}
+            onSincronizado={(crmSincronizadoEm, crmLeadId) =>
+              onUpdate(pedido.id, { crmSincronizadoEm, crmLeadId })
+            }
+          />
+        )}
       </td>
     </tr>
   )
