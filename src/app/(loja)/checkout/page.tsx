@@ -493,7 +493,10 @@ function CheckoutContent() {
 
     fetch('/api/conta/perfil', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then((data: { cliente?: { nome?: string | null; email?: string | null; cpf?: string | null; telefone?: string | null } }) => {
+      .then((data: { cliente?: {
+        nome?: string | null; email?: string | null; cpf?: string | null; telefone?: string | null
+        cnpj?: string | null; razaoSocial?: string | null; inscricaoEstadual?: string | null; indicadorIE?: number | null
+      } }) => {
         if (cancelled) return
         const c = data.cliente
         if (c) {
@@ -501,8 +504,22 @@ function CheckoutContent() {
             ...prev,
             nome:     prev.nome     || (c.nome     ?? ''),
             email:    prev.email    || (c.email    ?? ''),
-            cpf:      prev.cpf      || (c.cpf      ? maskCpf(c.cpf)      : ''),
             telefone: prev.telefone || (c.telefone ? maskTel(c.telefone) : ''),
+            // Documento: se o user ainda não digitou, prioriza CPF (PF); se não
+            // houver CPF salvo mas houver CNPJ, entra pré-selecionado como PJ.
+            ...(prev.cpf
+              ? {}
+              : c.cpf
+                ? { tipoPessoa: 'PF' as const, cpf: maskCpf(c.cpf) }
+                : c.cnpj
+                  ? {
+                      tipoPessoa: 'PJ' as const,
+                      cpf: maskCnpj(c.cnpj),
+                      razaoSocial: prev.razaoSocial || (c.razaoSocial ?? ''),
+                      inscricaoEstadual: prev.inscricaoEstadual || (c.inscricaoEstadual ?? ''),
+                      isentoIE: c.indicadorIE === 2,
+                    }
+                  : {}),
           }))
         }
         setPerfilFetched(true) // sucesso: não busca de novo
@@ -894,16 +911,29 @@ function CheckoutContent() {
     }
     setCarregando(true)
     try {
-      // Persiste cpf/telefone no perfil p/ prefill futuro. Não bloqueia o
+      // Persiste documento/telefone no perfil p/ prefill futuro. Não bloqueia o
       // checkout: falha/conflito é ignorado (ex.: guest sem sessão → 401).
+      // indicadorIE (NF-e): PJ com IE → 1, PJ isento → 2, PF → 9. PJ grava CNPJ
+      // (nunca no campo cpf) + razão social + IE; PF grava cpf, como hoje.
       try {
+        const indicadorIE = ident.tipoPessoa === 'PJ' ? (ident.isentoIE ? 2 : 1) : 9
+        const perfilBody = ident.tipoPessoa === 'PJ'
+          ? {
+              cnpj:              soDigitos(ident.cpf),
+              razaoSocial:       ident.razaoSocial.trim(),
+              inscricaoEstadual: ident.isentoIE ? null : soDigitos(ident.inscricaoEstadual),
+              indicadorIE,
+              telefone:          soDigitos(ident.telefone),
+            }
+          : {
+              cpf:         soDigitos(ident.cpf),
+              indicadorIE, // 9 — consumidor final PF
+              telefone:    soDigitos(ident.telefone),
+            }
         await fetch('/api/conta/perfil', {
           method:  'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({
-            cpf:      soDigitos(ident.cpf),
-            telefone: soDigitos(ident.telefone),
-          }),
+          body:    JSON.stringify(perfilBody),
         })
       } catch { /* não bloqueia o pagamento */ }
 

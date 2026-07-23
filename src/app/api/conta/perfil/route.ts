@@ -12,6 +12,7 @@ export async function GET() {
     where: { id: session.user.id },
     select: {
       nome: true, email: true, cpf: true, telefone: true,
+      cnpj: true, razaoSocial: true, inscricaoEstadual: true, indicadorIE: true,
       dataNascimento: true, genero: true,
       avatar: true, avatarGradiente: true,
       notifEmail: true, notifWhatsapp: true,
@@ -28,6 +29,11 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json() as {
     nome?: string
     cpf?: string
+    // Pessoa jurídica (consumidor final) — vindo do checkout.
+    cnpj?: string
+    razaoSocial?: string | null
+    inscricaoEstadual?: string | null
+    indicadorIE?: number | null
     telefone?: string
     dataNascimento?: string | null
     genero?: string | null
@@ -40,6 +46,11 @@ export async function PATCH(req: NextRequest) {
   const data: Record<string, unknown> = {}
   if (body.nome !== undefined)            data.nome = body.nome
   if (body.cpf !== undefined)             data.cpf = body.cpf ? body.cpf.replace(/\D/g, '') : null
+  // CNPJ só dígitos, nunca gravado no campo cpf.
+  if (body.cnpj !== undefined)            data.cnpj = body.cnpj ? body.cnpj.replace(/\D/g, '') : null
+  if (body.razaoSocial !== undefined)     data.razaoSocial = body.razaoSocial || null
+  if (body.inscricaoEstadual !== undefined) data.inscricaoEstadual = body.inscricaoEstadual ? String(body.inscricaoEstadual).replace(/\D/g, '') : null
+  if (body.indicadorIE !== undefined)     data.indicadorIE = body.indicadorIE ?? null
   if (body.telefone !== undefined)        data.telefone = body.telefone ? body.telefone.replace(/\D/g, '') : null
   if (body.dataNascimento !== undefined)  data.dataNascimento = body.dataNascimento ? new Date(body.dataNascimento) : null
   if (body.genero !== undefined)          data.genero = body.genero ?? null
@@ -56,10 +67,13 @@ export async function PATCH(req: NextRequest) {
     })
     return NextResponse.json({ cliente })
   } catch (e) {
-    // cpf é @unique: se outro cadastro já usa esse CPF, retorna 409 sem 500.
+    // cpf/cnpj são @unique: se outro cadastro já usa esse documento, retorna 409
+    // sem 500. A mensagem reflete qual documento colidiu.
     if ((e as { code?: string }).code === 'P2002') {
+      const target = String((e as { meta?: { target?: unknown } }).meta?.target ?? '')
+      const doc = target.includes('cnpj') ? 'CNPJ' : 'CPF'
       return NextResponse.json(
-        { error: 'CPF já cadastrado em outra conta.' },
+        { error: `${doc} já cadastrado em outra conta.` },
         { status: 409 },
       )
     }
