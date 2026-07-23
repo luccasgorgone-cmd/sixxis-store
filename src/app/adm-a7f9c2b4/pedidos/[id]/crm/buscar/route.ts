@@ -24,11 +24,17 @@ export async function POST(
   if (!pedido) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
 
   const body = await request.json().catch(() => ({})) as {
-    telefone?: string; cpf?: string; nome?: string
+    telefone?: string; cpf?: string; cnpj?: string; nome?: string
   }
-  const manual: { telefone?: string; cpf?: string; nome?: string } = {}
+  const manual: { telefone?: string; cpf?: string; cnpj?: string; nome?: string } = {}
   if (body.telefone?.trim()) manual.telefone = body.telefone.trim()
-  if (body.cpf?.trim()) manual.cpf = body.cpf.replace(/\D/g, '') // (c) só dígitos
+  // O modal tem um campo único "CPF/CNPJ" (chega em body.cpf); um cnpj explícito
+  // também é aceito. Roteia por nº de dígitos: 14 -> cnpj, senão -> cpf. Só dígitos.
+  const docManual = (body.cnpj?.replace(/\D/g, '') || body.cpf?.replace(/\D/g, '')) ?? ''
+  if (docManual) {
+    if (docManual.length === 14) manual.cnpj = docManual
+    else manual.cpf = docManual
+  }
   if (body.nome?.trim()) manual.nome = body.nome.trim()
 
   const input = Object.keys(manual).length > 0 ? manual : montarBuscaCrm(pedido.cliente)

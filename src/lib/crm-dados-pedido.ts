@@ -6,10 +6,13 @@
 //  a) `estado` -> `uf` (OBRIGATÓRIO). O CRM espera `dados.endereco.uf`; enviar
 //     "estado" faz o campo ser IGNORADO EM SILÊNCIO. É a falha mais traiçoeira.
 //  b) Data da NF: SEMPRE "YYYY-MM-DD" (só o dia), via formatarDiaISO do Bloco 1.2.
-//  c) CPF e CEP: SOMENTE DÍGITOS.
+//  c) CPF/CNPJ e CEP: SOMENTE DÍGITOS.
 //  d) Telefone (na busca): como está no cadastro — o CRM já casa variantes.
-//  e) PJ: se o cliente tem `cnpj` e não `cpf`, envia o CNPJ no MESMO campo `cpf`
-//     do contrato (o CRM trata documento por dígitos).
+//  e) Documento: `cpf` (PF) e `cnpj` (PJ) são campos PRÓPRIOS do CRM e
+//     MUTUAMENTE EXCLUSIVOS — envia só o que existir, nunca CNPJ dentro de `cpf`.
+//     `razaoSocial` vai quando existir (o CRM mapeia p/ a chave `empresa`).
+//     `inscricaoEstadual`/`indicadorIE` NÃO são enviados (o CRM não tem destino;
+//     ficam só na Loja, para a NF-e).
 //
 // Campos vazios simplesmente não entram no objeto.
 
@@ -24,7 +27,7 @@ export const SELECT_PEDIDO_CRM = {
   dataNotaFiscal: true,
   codigoRastreio: true,
   transportadora: true,
-  cliente: { select: { nome: true, cpf: true, cnpj: true, email: true, telefone: true } },
+  cliente: { select: { nome: true, cpf: true, cnpj: true, razaoSocial: true, email: true, telefone: true } },
   endereco: {
     select: {
       cep: true, logradouro: true, numero: true, complemento: true,
@@ -39,15 +42,17 @@ function soDigitos(v: string | null | undefined): string {
   return (v ?? '').replace(/\D/g, '')
 }
 
-// Documento do contrato: CPF (PF) ou, se não houver CPF mas houver CNPJ (PJ), o
-// CNPJ no mesmo campo. Sempre só dígitos. Vazio -> undefined.
-export function documentoDoCliente(
+// Documento em campos PRÓPRIOS e mutuamente exclusivos: PF -> { cpf }, PJ ->
+// { cnpj } (só dígitos). Cliente sem documento -> {}. Nunca os dois juntos, nunca
+// CNPJ dentro de `cpf`.
+export function documentoCrm(
   cliente: { cpf: string | null; cnpj: string | null },
-): string | undefined {
+): { cpf?: string; cnpj?: string } {
   const cpf = soDigitos(cliente.cpf)
-  if (cpf) return cpf
+  if (cpf) return { cpf }
   const cnpj = soDigitos(cliente.cnpj)
-  return cnpj || undefined
+  if (cnpj) return { cnpj }
+  return {}
 }
 
 // Objeto `dados` completo (nome/cpf/email + endereço + NF + rastreio).
@@ -56,8 +61,10 @@ export function montarDadosCrm(pedido: PedidoParaCrm): DadosCrm {
 
   const nome = pedido.cliente.nome?.trim()
   if (nome) dados.nome = nome
-  const doc = documentoDoCliente(pedido.cliente)
-  if (doc) dados.cpf = doc
+  // (e) cpf (PF) OU cnpj (PJ) em campos próprios; nunca os dois.
+  Object.assign(dados, documentoCrm(pedido.cliente))
+  const razao = pedido.cliente.razaoSocial?.trim()
+  if (razao) dados.razaoSocial = razao
   const email = pedido.cliente.email?.trim()
   if (email) dados.email = email
 
@@ -95,15 +102,15 @@ export function montarDadosCrm(pedido: PedidoParaCrm): DadosCrm {
   return dados
 }
 
-// Input da busca a partir do cadastro do cliente do pedido.
+// Input da busca a partir do cadastro do cliente do pedido. Envia o documento no
+// campo próprio: cpf (PF) ou cnpj (PJ).
 export function montarBuscaCrm(
   cliente: { nome: string | null; cpf: string | null; cnpj: string | null; telefone: string | null },
-): { telefone?: string; cpf?: string; nome?: string } {
-  const out: { telefone?: string; cpf?: string; nome?: string } = {}
+): { telefone?: string; cpf?: string; cnpj?: string; nome?: string } {
+  const out: { telefone?: string; cpf?: string; cnpj?: string; nome?: string } = {}
   const tel = cliente.telefone?.trim()
   if (tel) out.telefone = tel // (d) como está no cadastro
-  const doc = documentoDoCliente(cliente)
-  if (doc) out.cpf = doc
+  Object.assign(out, documentoCrm(cliente))
   const nome = cliente.nome?.trim()
   if (nome) out.nome = nome
   return out

@@ -27,7 +27,11 @@ export interface DadosCrmEndereco {
 
 export interface DadosCrm {
   nome?: string
-  cpf?: string // dígitos (CPF ou CNPJ — o CRM trata documento por dígitos)
+  // Documento: cpf (PF) e cnpj (PJ) são campos PRÓPRIOS e mutuamente exclusivos —
+  // o CRM tem destino separado p/ cada um. Só dígitos. NUNCA CNPJ no campo cpf.
+  cpf?: string
+  cnpj?: string
+  razaoSocial?: string // o CRM o mapeia p/ a chave `empresa` dele
   email?: string
   endereco?: DadosCrmEndereco
   notaFiscal?: { numero?: string; data?: string } // data = "YYYY-MM-DD"
@@ -108,7 +112,7 @@ async function chamarCrm<T>(path: string, body: unknown): Promise<CrmResultado<T
 
 // ── As três chamadas do contrato ─────────────────────────────────────────────
 export function crmBuscarCliente(
-  input: { telefone?: string; cpf?: string; nome?: string },
+  input: { telefone?: string; cpf?: string; cnpj?: string; nome?: string },
 ): Promise<CrmResultado<{ candidatos: CrmCandidato[] }>> {
   return chamarCrm('/api/interno/crm/buscar-cliente', input)
 }
