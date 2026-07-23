@@ -64,8 +64,14 @@ interface EnderecoData {
 }
 
 interface IdentData {
-  nome:     string
-  cpf:      string
+  nome:       string
+  tipoPessoa: 'PF' | 'PJ'
+  // Documento: CPF (PF) ou CNPJ (PJ). Um campo só — o rótulo/máscara mudam com
+  // tipoPessoa (evita refactor amplo do fluxo existente).
+  cpf:        string
+  razaoSocial:       string
+  inscricaoEstadual: string
+  isentoIE:          boolean
   email:    string
   telefone: string
 }
@@ -82,6 +88,15 @@ function maskCpf(v: string) {
   if (d.length <= 6) return `${d.slice(0,3)}.${d.slice(3)}`
   if (d.length <= 9) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`
   return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`
+}
+
+function maskCnpj(v: string) {
+  const d = v.replace(/\D/g, '').slice(0, 14)
+  if (d.length <= 2) return d
+  if (d.length <= 5) return `${d.slice(0,2)}.${d.slice(2)}`
+  if (d.length <= 8) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5)}`
+  if (d.length <= 12) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8)}`
+  return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`
 }
 
 function maskTel(v: string) {
@@ -440,7 +455,11 @@ function CheckoutContent() {
   // Só envia quando AUMENTA — evita request a cada re-render.
   const etapaMaxRef = useRef(0)
 
-  const [ident, setIdent] = useState<IdentData>({ nome: '', cpf: '', email: '', telefone: '' })
+  const [ident, setIdent] = useState<IdentData>({
+    nome: '', tipoPessoa: 'PF', cpf: '',
+    razaoSocial: '', inscricaoEstadual: '', isentoIE: false,
+    email: '', telefone: '',
+  })
   const [perfilLoading, setPerfilLoading] = useState(false)
   const [perfilFetched, setPerfilFetched] = useState(false)
 
@@ -479,6 +498,7 @@ function CheckoutContent() {
         const c = data.cliente
         if (c) {
           setIdent(prev => ({
+            ...prev,
             nome:     prev.nome     || (c.nome     ?? ''),
             email:    prev.email    || (c.email    ?? ''),
             cpf:      prev.cpf      || (c.cpf      ? maskCpf(c.cpf)      : ''),
@@ -812,7 +832,20 @@ function CheckoutContent() {
         setErro('Preencha nome e e-mail.')
         return
       }
-      if (!isCpfValido(ident.cpf)) {
+      if (ident.tipoPessoa === 'PJ') {
+        if (!isCnpjValido(ident.cpf)) {
+          setErro('Informe um CNPJ válido.')
+          return
+        }
+        if (!ident.razaoSocial.trim()) {
+          setErro('Informe a razão social.')
+          return
+        }
+        if (!ident.isentoIE && !ident.inscricaoEstadual.trim()) {
+          setErro('Informe a Inscrição Estadual ou marque Isento.')
+          return
+        }
+      } else if (!isCpfValido(ident.cpf)) {
         setErro('Informe um CPF válido.')
         return
       }
@@ -1119,12 +1152,73 @@ function CheckoutContent() {
                         onChange={v => setIdent(d => ({ ...d, nome: v }))}
                         placeholder={perfilLoading ? 'Carregando…' : 'João da Silva'} />
                     </div>
-                    <Campo label="CPF" required value={ident.cpf}
-                      onChange={v => setIdent(d => ({ ...d, cpf: maskCpf(v) }))}
-                      placeholder={perfilLoading ? 'Carregando…' : '000.000.000-00'} inputMode="numeric" />
+
+                    {/* Pessoa física × jurídica — PJ sempre consumidor final. */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Tipo de cadastro
+                      </label>
+                      <div className="flex gap-2">
+                        {([['PF', 'Pessoa física'], ['PJ', 'Pessoa jurídica']] as const).map(([val, lbl]) => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setIdent(d => d.tipoPessoa === val ? d : { ...d, tipoPessoa: val, cpf: '' })}
+                            className={`flex-1 rounded-xl px-4 py-3 text-sm font-bold border transition ${
+                              ident.tipoPessoa === val
+                                ? 'bg-[#3cbfb3] text-white border-[#3cbfb3]'
+                                : 'bg-white text-gray-600 border-gray-200 hover:border-[#3cbfb3]/40'
+                            }`}
+                          >
+                            {lbl}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {ident.tipoPessoa === 'PJ' ? (
+                      <Campo label="CNPJ" required value={ident.cpf}
+                        onChange={v => setIdent(d => ({ ...d, cpf: maskCnpj(v) }))}
+                        placeholder="00.000.000/0000-00" inputMode="numeric" />
+                    ) : (
+                      <Campo label="CPF" required value={ident.cpf}
+                        onChange={v => setIdent(d => ({ ...d, cpf: maskCpf(v) }))}
+                        placeholder={perfilLoading ? 'Carregando…' : '000.000.000-00'} inputMode="numeric" />
+                    )}
+
                     <Campo label="Telefone / WhatsApp" required value={ident.telefone}
                       onChange={v => setIdent(d => ({ ...d, telefone: maskTel(v) }))}
                       placeholder={perfilLoading ? 'Carregando…' : '(11) 99999-9999'} inputMode="tel" />
+
+                    {ident.tipoPessoa === 'PJ' && (
+                      <>
+                        <div className="sm:col-span-2">
+                          <Campo label="Razão social" required value={ident.razaoSocial}
+                            onChange={v => setIdent(d => ({ ...d, razaoSocial: v }))}
+                            placeholder="Empresa Ltda" />
+                        </div>
+                        <Campo label="Inscrição Estadual" required={!ident.isentoIE} value={ident.inscricaoEstadual}
+                          onChange={v => setIdent(d => ({ ...d, inscricaoEstadual: v.replace(/\D/g, '').slice(0, 14) }))}
+                          placeholder={ident.isentoIE ? 'Isento' : 'Somente números'}
+                          disabled={ident.isentoIE} inputMode="numeric" />
+                        <div className="flex items-end pb-3">
+                          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={ident.isentoIE}
+                              onChange={e => setIdent(d => ({
+                                ...d,
+                                isentoIE: e.target.checked,
+                                inscricaoEstadual: e.target.checked ? '' : d.inscricaoEstadual,
+                              }))}
+                              className="w-4 h-4 rounded border-gray-300 accent-[#3cbfb3] focus:ring-[#3cbfb3]/40"
+                            />
+                            Isento de Inscrição Estadual
+                          </label>
+                        </div>
+                      </>
+                    )}
+
                     <div className="sm:col-span-2">
                       <Campo label="E-mail" required type="email" value={ident.email}
                         onChange={v => setIdent(d => ({ ...d, email: v }))}
