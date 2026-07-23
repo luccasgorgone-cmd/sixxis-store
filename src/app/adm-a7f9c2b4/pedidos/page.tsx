@@ -648,6 +648,13 @@ function PedidoDetalhe({
               </div>
             </div>
 
+            {pedido.crmSincronizadoEm && (
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0f2e2b] bg-[#e8f8f7] border border-[#3cbfb3]/30 px-2.5 py-1 rounded-lg">
+                <UserCheck className="w-3.5 h-3.5 text-[#3cbfb3]" />
+                Sincronizado com o CRM em {fmtDate(pedido.crmSincronizadoEm)}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Transportadora</label>
@@ -922,6 +929,8 @@ export default function AdminPedidosPage() {
   const [pagamento, setPagamento] = useState('')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  // Fila de trabalho do dono: pagos ainda não sincronizados com o CRM.
+  const [crmPendente, setCrmPendente] = useState(false)
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -938,6 +947,7 @@ export default function AdminPedidosPage() {
   const fetch_ = useCallback(async () => {
     try {
       const params = new URLSearchParams({ page: String(page), q, status, pagamento, from, to })
+      if (crmPendente) params.set('crmPendente', '1')
       const res = await fetch(`/api/admin/pedidos?${params}`, { credentials: 'include', cache: 'no-store' })
       console.log('[admin/pedidos] response:', { ok: res.ok, status: res.status })
       if (!res.ok) throw new Error('Erro ' + res.status)
@@ -960,7 +970,7 @@ export default function AdminPedidosPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, q, status, pagamento, from, to])
+  }, [page, q, status, pagamento, from, to, crmPendente])
 
   // Mount: fetch imediato + safety-net que força loading=false em 5s se algo travar.
   useEffect(() => {
@@ -979,11 +989,11 @@ export default function AdminPedidosPage() {
     return () => clearTimeout(t)
   }, [fetch_])
 
-  useEffect(() => setPage(1), [q, status, pagamento, from, to])
+  useEffect(() => setPage(1), [q, status, pagamento, from, to, crmPendente])
 
   // Trocar de filtro/página some com as linhas da tela. Manter a seleção seria
   // guardar ids invisíveis e agir sobre eles no próximo clique — limpa sempre.
-  useEffect(() => { setSelecionados(new Set()) }, [q, status, pagamento, from, to, page])
+  useEffect(() => { setSelecionados(new Set()) }, [q, status, pagamento, from, to, page, crmPendente])
 
   function toggleExpand(id: string) {
     setExpanded((prev) => {
@@ -1221,6 +1231,17 @@ export default function AdminPedidosPage() {
               <button onClick={() => { setFrom(''); setTo('') }}
                 className="text-xs text-gray-400 hover:text-gray-600 underline">Limpar</button>
             )}
+            <button
+              onClick={() => setCrmPendente((v) => !v)}
+              title="Pedidos pagos que ainda não foram enviados ao CRM — a sua fila de trabalho."
+              className={`ml-auto inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold border transition ${
+                crmPendente
+                  ? 'bg-[#0f2e2b] text-white border-[#0f2e2b]'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-[#3cbfb3]/40'
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" /> Pagos não sincronizados
+            </button>
           </div>
         </div>
 
@@ -1346,6 +1367,14 @@ export default function AdminPedidosPage() {
                           <td className="px-3 py-4 max-w-[180px]">
                             <p className="text-sm font-medium text-gray-900 truncate" title={p.cliente.nome}>{p.cliente.nome}</p>
                             <p className="text-xs text-gray-400 truncate" title={p.cliente.email}>{p.cliente.email}</p>
+                            {p.crmSincronizadoEm && (
+                              <span
+                                title={`Sincronizado com o CRM em ${fmtDate(p.crmSincronizadoEm)}`}
+                                className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-[#0f2e2b] bg-[#e8f8f7] border border-[#3cbfb3]/30 px-1.5 py-0.5 rounded"
+                              >
+                                <UserCheck className="w-3 h-3" /> CRM {new Date(p.crmSincronizadoEm).toLocaleDateString('pt-BR')}
+                              </span>
+                            )}
                           </td>
                           <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{fmtDate(p.createdAt)}</td>
                           <td className="px-3 py-4 text-sm text-gray-500 hidden xl:table-cell">{p.itens.length} item{p.itens.length !== 1 ? 's' : ''}</td>

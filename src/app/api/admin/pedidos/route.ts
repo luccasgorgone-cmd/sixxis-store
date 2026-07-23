@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
   const q = searchParams.get('q') ?? ''
   const pagamento = searchParams.get('pagamento') ?? ''
   const semRastreio = searchParams.get('semRastreio') === '1'
+  // Fila de trabalho: pagos ainda não sincronizados com o CRM.
+  const crmPendente = searchParams.get('crmPendente') === '1'
   const from = searchParams.get('from')
   const to = searchParams.get('to')
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'))
@@ -24,6 +26,9 @@ export async function GET(request: NextRequest) {
     ...(status && { status }),
     ...(semRastreio && { codigoRastreio: null }),
     ...(pagamento && { formaPagamento: pagamento }),
+    // Vem por último: sobrepõe o filtro de status simples (força pagos) e exige
+    // não sincronizado. É literalmente a fila de trabalho do dono.
+    ...(crmPendente && { status: { in: STATUS_PAGO_TODOS }, crmSincronizadoEm: null }),
     ...(from || to
       ? {
           createdAt: {
