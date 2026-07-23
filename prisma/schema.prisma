@@ -12,6 +12,11 @@ model Cliente {
   email                 String                 @unique
   senha                 String
   cpf                   String?                @unique
+  // Pessoa jurídica (consumidor final). Aditivo: PF fica com tudo NULL.
+  cnpj                  String?                @unique
+  razaoSocial           String?
+  inscricaoEstadual     String?
+  indicadorIE           Int?                   // NF-e: 1=Contribuinte ICMS, 2=Isento de inscrição, 9=Não contribuinte
   telefone              String?
   erpClienteId          String?                @unique
   createdAt             DateTime               @default(now())
