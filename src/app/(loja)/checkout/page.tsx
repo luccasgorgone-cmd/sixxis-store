@@ -118,6 +118,34 @@ function isCpfValido(cpf: string): boolean {
   return resto === Number(d[10])
 }
 
+// CNPJ com validação dos 2 dígitos verificadores (rejeita repetidos), módulo 11
+// com os pesos padrão da Receita.
+function isCnpjValido(cnpj: string): boolean {
+  const d = soDigitos(cnpj)
+  if (d.length !== 14) return false
+  if (/^(\d)\1{13}$/.test(d)) return false
+  const pesos1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  const pesos2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  let soma = 0
+  for (let i = 0; i < 12; i++) soma += Number(d[i]) * pesos1[i]
+  let resto = soma % 11
+  const dv1 = resto < 2 ? 0 : 11 - resto
+  if (dv1 !== Number(d[12])) return false
+  soma = 0
+  for (let i = 0; i < 13; i++) soma += Number(d[i]) * pesos2[i]
+  resto = soma % 11
+  const dv2 = resto < 2 ? 0 : 11 - resto
+  return dv2 === Number(d[13])
+}
+
+// Roteia por nº de dígitos: 11 → CPF, 14 → CNPJ, qualquer outro → inválido.
+function isDocumentoValido(valor: string): boolean {
+  const d = soDigitos(valor)
+  if (d.length === 11) return isCpfValido(d)
+  if (d.length === 14) return isCnpjValido(d)
+  return false
+}
+
 // Telefone BR: 10 (fixo) ou 11 (celular) dígitos com DDD.
 function isTelefoneValido(tel: string): boolean {
   const d = soDigitos(tel)
@@ -824,8 +852,9 @@ function CheckoutContent() {
 
   async function irParaPagamento() {
     setErro('')
-    // Guard final: nunca abre o pagamento (MP Bricks) sem CPF/telefone válidos.
-    if (!isCpfValido(ident.cpf) || !isTelefoneValido(ident.telefone)) {
+    // Guard final: nunca abre o pagamento (MP Bricks) sem documento (CPF ou
+    // CNPJ) e telefone válidos.
+    if (!isDocumentoValido(ident.cpf) || !isTelefoneValido(ident.telefone)) {
       setErro('Revise CPF e telefone na etapa de identificação.')
       setEtapa(1)
       return
