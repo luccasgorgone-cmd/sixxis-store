@@ -206,11 +206,30 @@ export async function GET(
     logoBytes,
   })
 
+  // ── Nome do arquivo: "Pedido - {Cliente} - {COD}.pdf". ──────────────────────
+  const cod = pedido.id.slice(-8).toUpperCase() // sem o "#"
+  const nomeLimpo =
+    (pedido.cliente.nome ?? '')
+      .replace(/[/\\:*?"<>|]/g, '') // proibidos em nome de arquivo (inclui aspas duplas)
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\x00-\x1f\x7f]/g, '') // caracteres de controle
+      .replace(/\s+/g, ' ') // colapsa espaços múltiplos
+      .trim()
+      .slice(0, 60)
+      .trim() || 'Cliente'
+  const nomeFinal = `Pedido - ${nomeLimpo} - ${cod}.pdf`
+  // RFC 5987: fallback ASCII (sem acento) + versão UTF-8 codificada. Nomes com
+  // acento em Content-Disposition cru quebram em vários navegadores.
+  const asciiFallback = nomeFinal
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // remove diacríticos
+    .replace(/[^\x20-\x7e]/g, '_') // troca qualquer não-ASCII restante
+
   return new NextResponse(pdf as unknown as BodyInit, {
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="espelho-pedido-${pedido.id.slice(-8).toUpperCase()}.pdf"`,
+      'Content-Disposition': `inline; filename="${asciiFallback}"; filename*=UTF-8''${encodeURIComponent(nomeFinal)}`,
       'Cache-Control': 'no-store',
     },
   })
