@@ -80,7 +80,9 @@ async function chamarCrm<T>(path: string, body: unknown): Promise<CrmResultado<T
   if (!base) return { ok: false, error: 'Integração com o CRM não configurada (CRM_API_URL ausente).' }
   if (!key) return { ok: false, error: 'Chave interna do CRM não configurada no servidor.' }
 
-  const url = `${base.replace(/\/$/, '')}${path}`
+  // .trim() antes de tirar a barra final: espaço/quebra de linha no fim do valor
+  // da env é causa comum e invisível de URL malformada.
+  const url = `${base.trim().replace(/\/$/, '')}${path}`
   console.log('[crm:url]', url) // sem a chave — jamais logar a chave
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
@@ -96,13 +98,23 @@ async function chamarCrm<T>(path: string, body: unknown): Promise<CrmResultado<T
     console.log('[crm:chamada]', path, res.status, res.headers.get('content-type'),
                 `len=${texto.length}`, texto.slice(0, 300))
     let json: unknown = null
-    try { json = texto ? JSON.parse(texto) : null } catch { /* resposta não-JSON */ }
+    let jsonOk = false
+    try {
+      if (texto) { json = JSON.parse(texto); jsonOk = true }
+    } catch { /* resposta não-JSON */ }
+
+    // O CRM usa `erro` (pt); o código antigo só lia `error`. Aceitar ambos.
+    const msgErro = (json as { erro?: string; error?: string } | null)?.erro
+      ?? (json as { erro?: string; error?: string } | null)?.error
 
     if (!res.ok) {
-      const msg = (json as { error?: string } | null)?.error
-      return { ok: false, error: msg || `O CRM respondeu ${res.status}.`, status: res.status }
+      return { ok: false, error: msgErro || `O CRM respondeu ${res.status}.`, status: res.status }
     }
-    return { ok: true, data: (json ?? {}) as T }
+    // res.ok mas corpo vazio OU parse falhou NÃO é sucesso — nunca virar {}.
+    if (!jsonOk) {
+      return { ok: false, error: `O CRM respondeu ${res.status} sem JSON válido.`, status: res.status }
+    }
+    return { ok: true, data: json as T }
   } catch (e) {
     if ((e as { name?: string }).name === 'AbortError') {
       return { ok: false, error: 'O CRM demorou para responder (timeout). Tente de novo.' }
