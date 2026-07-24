@@ -93,10 +93,27 @@ async function chamarCrm<T>(path: string, body: unknown): Promise<CrmResultado<T
       body: JSON.stringify(body),
       signal: ctrl.signal,
       cache: 'no-store',
+      // NÃO seguir redirecionamentos: um 3xx do CRM (rota bloqueada no
+      // middleware -> /login) seguido virava HTML de login com status 200,
+      // um "sucesso" falso. Aqui ele fica visível como erro.
+      redirect: 'manual',
     })
     const texto = await res.text()
     console.log('[crm:chamada]', path, res.status, res.headers.get('content-type'),
                 `len=${texto.length}`, texto.slice(0, 300))
+
+    // Redirecionamento é ERRO explícito, antes de res.ok. Cobre as duas formas:
+    // no runtime nodejs (undici) vem o status real 3xx; num runtime que devolve
+    // `opaqueredirect`, o status é 0 — ambos apontam rota não liberada no CRM.
+    if ((res.status >= 300 && res.status < 400) || res.type === 'opaqueredirect') {
+      const st = res.type === 'opaqueredirect' ? '3xx' : res.status
+      return {
+        ok: false,
+        error: `O CRM redirecionou (${st}) — a rota provavelmente não está liberada no middleware dele.`,
+        status: res.status,
+      }
+    }
+
     let json: unknown = null
     let jsonOk = false
     try {
