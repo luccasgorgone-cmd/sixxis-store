@@ -131,29 +131,6 @@ export default function GarantiaPage() {
         </div>
       </section>
 
-      {/* ─── Garantia estendida (disponível no checkout) ─── */}
-      <section className="py-12 bg-gray-50/40 border-y border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <Reveal>
-            <div className="bg-white border border-[#3cbfb3]/25 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className="w-12 h-12 shrink-0 rounded-2xl bg-[#3cbfb3]/15 border border-[#3cbfb3]/25 flex items-center justify-center">
-                <Shield size={20} className="text-[#3cbfb3]" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base sm:text-lg font-extrabold text-gray-900 mb-1">
-                  Garantia Estendida
-                </h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  Quer mais tranquilidade? A garantia estendida opcional está disponível no
-                  <strong className="text-gray-700"> checkout</strong> — adicione até
-                  <strong className="text-gray-700"> +24 meses</strong> de cobertura ao finalizar a compra.
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
       {/* ─── Não coberto ─── */}
       <section className="py-12 bg-gray-50/40 border-y border-gray-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

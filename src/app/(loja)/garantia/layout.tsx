@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Termo de Garantia',
   description:
-    'Garantia Sixxis de 12 meses contra defeitos de fabricação, em conformidade com o CDC. Veja o que está coberto, como acionar e a garantia estendida disponível no checkout.',
+    'Garantia Sixxis de 12 meses contra defeitos de fabricação, em conformidade com o CDC. Veja o que está coberto e como acionar.',
   alternates: { canonical: '/garantia' },
 }
 
