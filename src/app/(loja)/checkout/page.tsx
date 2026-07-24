@@ -18,7 +18,6 @@ import {
   User, MapPin, ChevronRight, Package, Star,
 } from 'lucide-react'
 import { type ItemCarrinho } from '@/hooks/useCarrinho'
-import GarantiaEstendidaStep, { type SelecaoGarantia } from '@/components/checkout/GarantiaEstendidaStep'
 import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/EnderecosSalvos'
 import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
@@ -35,16 +34,12 @@ const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Etapa = 1 | 2 | 3 | 4
+// Etapas do checkout: Identificação(1) → Entrega(2) → Pagamento(3).
+// A antiga etapa de Garantia estendida foi descontinuada (era seguro sob
+// regulação SUSEP, fora do enquadramento da Sixxis).
+type Etapa = 1 | 2 | 3
 type Fase = 'checkout' | 'bricks' | 'sucesso' | 'orcamento'
 type FreteStatus = 'ok' | 'a_combinar' | 'bloqueado'
-
-interface ProdutoGarantiaInfo {
-  id: string
-  garantiaFabricaMeses: number
-  garantiaEstendida12Preco: number | string | null
-  garantiaEstendida24Preco: number | string | null
-}
 
 interface OpcaoFrete {
   id:    'normal' | 'expresso'
@@ -202,22 +197,15 @@ function Campo({
 
 // ─── StepIndicator ────────────────────────────────────────────────────────────
 
-const ETAPAS_FULL = [
+const ETAPAS = [
   { n: 1 as Etapa, label: 'Identificação', icon: User },
   { n: 2 as Etapa, label: 'Entrega',       icon: MapPin },
-  { n: 3 as Etapa, label: 'Garantia',      icon: Shield },
-  { n: 4 as Etapa, label: 'Pagamento',     icon: CreditCard },
-]
-const ETAPAS_SEM_GARANTIA = [
-  { n: 1 as Etapa, label: 'Identificação', icon: User },
-  { n: 2 as Etapa, label: 'Entrega',       icon: MapPin },
-  { n: 4 as Etapa, label: 'Pagamento',     icon: CreditCard },
+  { n: 3 as Etapa, label: 'Pagamento',     icon: CreditCard },
 ]
 
 function StepIndicator({
-  etapa, onBack, mostrarGarantia,
-}: { etapa: Etapa; onBack?: () => void; mostrarGarantia: boolean }) {
-  const ETAPAS = mostrarGarantia ? ETAPAS_FULL : ETAPAS_SEM_GARANTIA
+  etapa, onBack,
+}: { etapa: Etapa; onBack?: () => void }) {
   return (
     <div className="flex items-center gap-0 mb-8">
       {ETAPAS.map((e, idx) => {
@@ -268,11 +256,10 @@ interface ResumoProps {
   desconto:    number
   cupom:       { codigo: string; desconto: number } | null
   totalFinal:  number
-  totalGarantias?: number
   cashback?:   number
 }
 
-function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, totalFinal, totalGarantias = 0, cashback = 0 }: ResumoProps) {
+function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, totalFinal, cashback = 0 }: ResumoProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden border-l-4 border-l-[#3cbfb3]">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -324,12 +311,6 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, tota
           <div className="flex justify-between text-sm text-gray-600">
             <span>Frete</span>
             <span className="font-semibold text-amber-600">{FRETE_COPY.aCombinar}</span>
-          </div>
-        )}
-        {totalGarantias > 0 && (
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Garantia estendida</span>
-            <span className="font-semibold">R$ {moeda(totalGarantias)}</span>
           </div>
         )}
         {cupom && (
@@ -579,10 +560,6 @@ function CheckoutContent() {
   const [erro, setErro]             = useState('')
   const [pedidoId, setPedidoId]     = useState<string | null>(null)
 
-  // Garantia estendida — opcional por item
-  const [garantiaSelecao, setGarantiaSelecao] = useState<SelecaoGarantia>({})
-  const [garantiaInfo, setGarantiaInfo]       = useState<Record<string, ProdutoGarantiaInfo>>({})
-
   // Cashback resgatado nesta compra (R$). O servidor recapa em 10% do subtotal.
   const [cashbackUsar, setCashbackUsar] = useState(0)
 
@@ -662,41 +639,13 @@ function CheckoutContent() {
     })
   }, [ident.email, ident.telefone, ident.nome, end.cidade, end.estado, end.cep, session?.user?.id])
 
-  // Verifica quais produtos do carrinho oferecem garantia. Se nenhum oferecer,
-  // a etapa 3 é pulada automaticamente.
-  useEffect(() => {
-    if (itens.length === 0) { setGarantiaInfo({}); return }
-    const ids = [...new Set(itens.map((i) => i.produtoId))].join(',')
-    if (!ids) return
-    fetch(`/api/produtos/garantia-info?ids=${ids}`, { cache: 'no-store' })
-      .then((r) => r.json())
-      .then((d) => {
-        const map: Record<string, ProdutoGarantiaInfo> = {}
-        for (const p of (d.produtos ?? []) as ProdutoGarantiaInfo[]) map[p.id] = p
-        setGarantiaInfo(map)
-      })
-      .catch(() => {})
-  }, [itens])
-
-  const temGarantiaDisponivel = Object.values(garantiaInfo).some(
-    (p) => p.garantiaEstendida12Preco != null || p.garantiaEstendida24Preco != null,
-  )
-
-  const totalGarantias = Object.entries(garantiaSelecao).reduce((acc, [pid, meses]) => {
-    if (meses === 0) return acc
-    const p = garantiaInfo[pid]
-    if (!p) return acc
-    const preco = meses === 12 ? p.garantiaEstendida12Preco : p.garantiaEstendida24Preco
-    return acc + Number(preco ?? 0)
-  }, 0)
-
   const freteSelObj = opcoesFrete.find((o) => o.id === freteTipoSel) ?? null
   const frete       = freteStatus === 'ok' ? (freteSelObj?.preco ?? 0) : 0
   const desconto    = cupom?.desconto ?? 0
   // Cashback aplicado (capado a 10% do subtotal de produtos pelo componente; o
   // servidor recapa por segurança). Só vale em pedido real (não em orçamento).
   const cashbackAplicado = freteStatus === 'a_combinar' ? 0 : cashbackUsar
-  const totalFinal  = Math.max(0, total + frete + totalGarantias - desconto - cashbackAplicado)
+  const totalFinal  = Math.max(0, total + frete - desconto - cashbackAplicado)
 
   // Calcular frete (fonte única: tabela produto × UF). Resolve por UF; o CEP só
   // serve de fallback caso a UF ainda não esteja preenchida no formulário.
@@ -801,8 +750,7 @@ function CheckoutContent() {
     if (sessionStatus !== 'authenticated' || itens.length === 0) return
     // Mapeia o estado da UI para a escala única (carrinho→pagamento).
     let step: number = ETAPA.IDENTIFICACAO // checkout aberto = identificação à vista
-    if (fase === 'bricks' || etapa === 4) step = ETAPA.PAGAMENTO
-    else if (etapa === 3) step = ETAPA.FRETE      // garantia: frete já resolvido
+    if (fase === 'bricks' || etapa === 3) step = ETAPA.PAGAMENTO
     else if (etapa === 2) {
       step = (freteStatus === 'ok' && freteTipoSel) ? ETAPA.FRETE : ETAPA.ENDERECO
     }
@@ -893,10 +841,7 @@ function CheckoutContent() {
         setErro('Selecione uma opção de frete.')
         return
       }
-      // Pula etapa 3 (Garantia) se nenhum produto oferece — vai direto pra Pagamento.
-      setEtapa(temGarantiaDisponivel ? 3 : 4)
-    } else if (etapa === 3) {
-      setEtapa(4)
+      setEtapa(3)
     }
   }
 
@@ -953,15 +898,6 @@ function CheckoutContent() {
         enderecoId = data.enderecoId
       }
 
-      const garantiasPayload = Object.entries(garantiaSelecao)
-        .filter(([, meses]) => meses === 12 || meses === 24)
-        .map(([produtoId, meses]) => ({
-          produtoId,
-          mesesAdicionais: meses as 12 | 24,
-          // valor é validado/sobrescrito no servidor — passa 0 só pra cumprir schema
-          valorPago: 0,
-        }))
-
       // Atribuição Meta: cookies _fbp/_fbc (ou _fbc montado do ?fbclid=) p/ o
       // CAPI Purchase ligar a compra ao clique no anúncio. Best-effort.
       const { fbp, fbc } = capturarFbpFbc()
@@ -984,7 +920,6 @@ function CheckoutContent() {
           })),
           cupomCodigo: cupom?.codigo,
           desconto:    cupom?.desconto ?? 0,
-          garantias:   garantiasPayload.length > 0 ? garantiasPayload : undefined,
           cashbackUsar: cashbackAplicado > 0 ? cashbackAplicado : undefined,
           idempotencyKey,
         }),
@@ -1081,7 +1016,7 @@ function CheckoutContent() {
 
   const resumoProps: ResumoProps = {
     itens, total, frete, freteStatus, desconto, cupom, totalFinal,
-    totalGarantias, cashback: cashbackAplicado,
+    cashback: cashbackAplicado,
   }
 
   return (
@@ -1153,12 +1088,7 @@ function CheckoutContent() {
             <>
               <StepIndicator
                 etapa={etapa}
-                mostrarGarantia={temGarantiaDisponivel}
-                onBack={etapa > 1 ? () => {
-                  // Voltar respeita o pulo da etapa 3 quando não há garantia
-                  if (etapa === 4 && !temGarantiaDisponivel) setEtapa(2)
-                  else setEtapa((etapa - 1) as Etapa)
-                } : undefined}
+                onBack={etapa > 1 ? () => setEtapa((etapa - 1) as Etapa) : undefined}
               />
 
               {etapa === 1 && (
@@ -1399,34 +1329,12 @@ function CheckoutContent() {
                     onClick={proximaEtapa}
                     className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
                   >
-                    Continuar para {temGarantiaDisponivel ? 'Garantia' : 'Pagamento'} <ChevronRight size={15} />
-                  </button>
-                </div>
-              )}
-
-              {etapa === 3 && (
-                <div className="space-y-4">
-                  <GarantiaEstendidaStep
-                    itens={itens.map((i) => ({
-                      produtoId: i.produtoId,
-                      nome: i.nome + (i.variacaoNome ? ` — ${i.variacaoNome}` : ''),
-                      imagem: i.imagem,
-                      quantidade: i.quantidade,
-                    }))}
-                    selecao={garantiaSelecao}
-                    onChange={setGarantiaSelecao}
-                  />
-                  <button
-                    type="button"
-                    onClick={proximaEtapa}
-                    className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-[#3cbfb3]/20 flex items-center justify-center gap-2"
-                  >
                     Continuar para Pagamento <ChevronRight size={15} />
                   </button>
                 </div>
               )}
 
-              {etapa === 4 && (
+              {etapa === 3 && (
                 <div className="space-y-4">
                   {/* Card único: Cupom + Forma de Pagamento. Antes eram 2 cards
                       separados — cliente percebia como 2 ações sem conexão. */}
