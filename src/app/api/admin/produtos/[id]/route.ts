@@ -64,8 +64,6 @@ export async function PUT(
     faqs,
     imagensPorVariacao,
     garantiaFabricaMeses,
-    garantiaEstendida12Preco,
-    garantiaEstendida24Preco,
     custoProduto,
     pesoKg,
     alturaCm,
@@ -151,18 +149,9 @@ export async function PUT(
         ...(garantiaFabricaMeses !== undefined && {
           garantiaFabricaMeses: Number(garantiaFabricaMeses) || 12,
         }),
-        ...(garantiaEstendida12Preco !== undefined && {
-          garantiaEstendida12Preco:
-            garantiaEstendida12Preco === null || garantiaEstendida12Preco === ''
-              ? null
-              : Number(garantiaEstendida12Preco),
-        }),
-        ...(garantiaEstendida24Preco !== undefined && {
-          garantiaEstendida24Preco:
-            garantiaEstendida24Preco === null || garantiaEstendida24Preco === ''
-              ? null
-              : Number(garantiaEstendida24Preco),
-        }),
+        // Garantia estendida DESCONTINUADA: os campos garantiaEstendida12Preco/
+        // 24Preco não são mais aceitos no payload (colunas preservadas no banco,
+        // apenas deixam de ser editáveis). Histórico de preços não é zerado.
         // Custo interno (COGS): '' / null → null (não informado, ≠ zero).
         ...(custoProduto !== undefined && { custoProduto: custoProduto === null || custoProduto === '' ? null : Number(custoProduto) }),
         // Dimensões e peso (frete): '' / null → null; volumes vazio → null.

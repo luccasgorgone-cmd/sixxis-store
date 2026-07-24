@@ -56,10 +56,6 @@ export default async function EditarProdutoPage({
             } catch { return null }
           })(),
           garantiaFabricaMeses: String(produto.garantiaFabricaMeses ?? 12),
-          garantiaEstendida12Preco: produto.garantiaEstendida12Preco != null
-            ? String(produto.garantiaEstendida12Preco) : '',
-          garantiaEstendida24Preco: produto.garantiaEstendida24Preco != null
-            ? String(produto.garantiaEstendida24Preco) : '',
           custoProduto: produto.custoProduto != null ? String(produto.custoProduto) : '',
           pesoKg: produto.pesoKg != null ? String(produto.pesoKg) : '',
           alturaCm: produto.alturaCm != null ? String(produto.alturaCm) : '',
