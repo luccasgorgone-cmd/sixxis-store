@@ -88,8 +88,16 @@ export function CrmSyncModal({
         body: JSON.stringify(manual ?? {}),
       })
       const d = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(d.error || 'Falha ao buscar no CRM')
-      setCandidatos(Array.isArray(d.candidatos) ? d.candidatos : [])
+      // Falha de comunicação (502 da nossa rota): mensagem própria de erro,
+      // NUNCA cai no estado neutro de "nenhum contato".
+      if (!res.ok) throw new Error(d.error || 'Falha de comunicação com o CRM. Tente de novo.')
+      // `candidatos` AUSENTE (não apenas vazia) é quebra de contrato: registra e
+      // trata como falha — não silencia virando lista vazia (= "nenhum contato").
+      if (!Array.isArray(d.candidatos)) {
+        console.error('[crm:contrato] resposta de busca sem `candidatos`:', d)
+        throw new Error('O CRM respondeu em formato inesperado. Tente de novo.')
+      }
+      setCandidatos(d.candidatos)
       setLeadSel(null)
       setBuscou(true)
     } catch (e) {
