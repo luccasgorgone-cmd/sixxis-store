@@ -81,6 +81,7 @@ async function chamarCrm<T>(path: string, body: unknown): Promise<CrmResultado<T
   if (!key) return { ok: false, error: 'Chave interna do CRM não configurada no servidor.' }
 
   const url = `${base.replace(/\/$/, '')}${path}`
+  console.log('[crm:url]', url) // sem a chave — jamais logar a chave
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
   try {
@@ -92,6 +93,8 @@ async function chamarCrm<T>(path: string, body: unknown): Promise<CrmResultado<T
       cache: 'no-store',
     })
     const texto = await res.text()
+    console.log('[crm:chamada]', path, res.status, res.headers.get('content-type'),
+                `len=${texto.length}`, texto.slice(0, 300))
     let json: unknown = null
     try { json = texto ? JSON.parse(texto) : null } catch { /* resposta não-JSON */ }
 
