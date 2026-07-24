@@ -285,7 +285,10 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
 
   // ── Itens (tabela: header tiffany-claro + hairlines) ────────────────────────
   secTitle('Itens do pedido')
-  const cSku = X_DIR - 220
+  // Coluna SKU recuada à esquerda: os SKUs reais chegam a ~102pt no tamanho 8
+  // (CLIM-SX200-PRIME-Branco). Com X_DIR-220 sobravam só 44pt e todos truncavam.
+  // Quem cede o espaço é a coluna Produto — Qtd/Vl. Unit./Subtotal não se movem.
+  const cSku = X_DIR - 285
   const cQtd = X_DIR - 150
   const cUnit = X_DIR - 78
   const cSub = X_DIR
