@@ -2,7 +2,6 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
-import { criarGarantiasPedido } from '@/lib/garantia'
 import { resolverFrete } from '@/lib/frete-resolver'
 import { resgatarCashback } from '@/lib/cashback'
 import { avaliarCupom } from '@/lib/cupom'
@@ -13,12 +12,6 @@ const itemSchema = z.object({
   quantidade:   z.number().int().positive(),
   variacaoId:   z.string().optional(),
   variacaoNome: z.string().optional(),
-})
-
-const garantiaSchema = z.object({
-  produtoId: z.string(),
-  mesesAdicionais: z.union([z.literal(12), z.literal(24)]),
-  valorPago: z.number().nonnegative(),
 })
 
 const criarPedidoSchema = z.object({
@@ -32,7 +25,10 @@ const criarPedidoSchema = z.object({
   itens:          z.array(itemSchema).min(1),
   cupomCodigo:    z.string().optional(),
   desconto:       z.number().nonnegative().optional(),
-  garantias:      z.array(garantiaSchema).optional(),
+  // `garantias` (garantia estendida) foi DESCONTINUADO. z.object() descarta
+  // chaves desconhecidas por padrão, então um cliente com página em cache que
+  // ainda envie `garantias` no POST tem o campo IGNORADO em silêncio — o pedido
+  // não é rejeitado. Nada é criado a partir dele.
   // Cashback que o cliente quer resgatar. É só um PEDIDO: o servidor cap a
   // min(saldo disponível, 10% do subtotal de produtos). Nunca confiar no client.
   cashbackUsar:   z.number().nonnegative().optional(),
@@ -99,7 +95,7 @@ export async function POST(request: NextRequest) {
   }
 
   // desconto do client é IGNORADO — recomputado no servidor a partir do cupom.
-  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, garantias, cashbackUsar, idempotencyKey, fbp, fbc } = parsed.data
+  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, cashbackUsar, idempotencyKey, fbp, fbc } = parsed.data
 
   // Atribuição Meta: IP/UA do request ORIGINAL do cliente (este POST), p/ o CAPI
   // Purchase — o webhook do MP vem do servidor do MP, não serviria. Persistidos
@@ -208,36 +204,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Validar e calcular custo das garantias contratadas (se houver)
-  const garantiasItens = garantias ?? []
-  let totalGarantias = 0
-  if (garantiasItens.length > 0) {
-    const garantiaProdutos = await prisma.produto.findMany({
-      where: { id: { in: garantiasItens.map((g) => g.produtoId) } },
-      select: {
-        id: true,
-        garantiaEstendida12Preco: true,
-        garantiaEstendida24Preco: true,
-      },
-    })
-    const garantiaPorId = new Map(garantiaProdutos.map((p) => [p.id, p]))
-    for (const g of garantiasItens) {
-      const p = garantiaPorId.get(g.produtoId)
-      const precoOferecido = g.mesesAdicionais === 12
-        ? p?.garantiaEstendida12Preco
-        : p?.garantiaEstendida24Preco
-      if (!p || precoOferecido == null) {
-        return Response.json(
-          { error: `Garantia +${g.mesesAdicionais}m não disponível para o produto ${g.produtoId}` },
-          { status: 400 },
-        )
-      }
-      // Confiar no servidor — sobrescreve qualquer valor que tenha vindo do client.
-      g.valorPago = Number(precoOferecido)
-      totalGarantias += g.valorPago
-    }
-  }
-
   // ── Resolver frete no servidor (fonte única) ───────────────────────────────
   // O cliente não controla preço nem status: tudo deriva da UF/CEP + cadeia
   // (FreteRegra/Braspress). Passa o CEP para que a Braspress cote o MESMO preço
@@ -293,7 +259,7 @@ export async function POST(request: NextRequest) {
         transportadora: transportadoraFinal, // nome interno do carrier (admin)
         desconto:       descontoFinal,
         cupomCodigo:    cupomCodigoFinal,
-        total:          Math.max(0, subtotal + freteValor + totalGarantias - descontoFinal),
+        total:          Math.max(0, subtotal + freteValor - descontoFinal),
         status:         statusPedido,
         idempotencyKey: idempotencyKey ?? null,
         fbp:             fbp ?? null,
@@ -358,19 +324,6 @@ export async function POST(request: NextRequest) {
         data: { estoque: { decrement: item.quantidade } },
       })
     }
-  }
-
-  // Criar garantias estendidas vinculadas ao pedido
-  if (garantiasItens.length > 0) {
-    await criarGarantiasPedido(
-      pedido.id,
-      pedido.createdAt,
-      garantiasItens.map((g) => ({
-        produtoId: g.produtoId,
-        mesesAdicionais: g.mesesAdicionais as 12 | 24,
-        valorPago: g.valorPago,
-      })),
-    )
   }
 
   // ── Resgate de cashback (server-side, com teto de 10% do subtotal) ─────────
