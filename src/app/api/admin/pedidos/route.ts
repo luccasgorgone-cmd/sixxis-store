@@ -5,6 +5,7 @@ import {
   STATUS_PAGO_TODOS,
   STATUS_PENDENTE_TODOS,
 } from '@/lib/pedido-status'
+import { ambienteNfe } from '@/lib/focusnfe'
 
 export async function GET(request: NextRequest) {
   const unauthorized = await requireAdmin(request)
@@ -90,6 +91,10 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     pedidos, total, page, limit,
+    // Ambiente da NF-e ('homologacao' | 'producao'). Vem do SERVIDOR porque a
+    // env não é NEXT_PUBLIC_ — é só o rótulo, o token nunca sai daqui. A UI usa
+    // para estampar o selo "sem valor fiscal" ao lado do botão de emitir.
+    nfeAmbiente: ambienteNfe(),
     stats: {
       total,
       pendentes:         statsPendentes,
