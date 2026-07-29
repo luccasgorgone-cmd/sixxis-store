@@ -7,6 +7,7 @@ import {
   ChevronDown, ChevronRight, Loader2, ShoppingCart,
   Search, Package, MapPin, CreditCard, Truck, CheckCircle,
   Clock, AlertCircle, Save, DollarSign, FileText, X, Trash2, UserCheck,
+  FileCheck, ShieldAlert,
 } from 'lucide-react'
 import { CrmSyncModal } from './CrmSyncModal'
 import { Toast } from '@/components/admin/Toast'
@@ -53,6 +54,11 @@ interface Pedido {
   codigoRastreio: string | null; createdAt: string
   transportadora: string | null; linkRastreio: string | null
   notaFiscal: string | null; dataNotaFiscal: string | null
+  // NF-e emitida pela Focus NFe (coexiste com o número manual acima).
+  nfeStatus: string | null; nfeChave: string | null
+  nfeNumero: number | null; nfeSerie: number | null
+  nfeDanfeUrl: string | null; nfeXmlUrl: string | null
+  nfeMensagemErro: string | null
   crmSincronizadoEm: string | null; crmLeadId: string | null
   custoFreteReal: number | null; enviadoEm: string | null; entregueEm: string | null
   freteTipo: string | null; fretePrazo: number | null
@@ -339,10 +345,13 @@ function PedidoDetalhe({
   pedido,
   onUpdate,
   showToast,
+  nfeAmbiente,
 }: {
   pedido: Pedido
   onUpdate: (id: string, updates: Partial<Pedido>) => void
   showToast: (msg: string, type?: 'success' | 'error') => void
+  /** 'homologacao' | 'producao' — vem do servidor (a env não é NEXT_PUBLIC_). */
+  nfeAmbiente: string
 }) {
   const [status, setStatus] = useState(pedido.status)
   // Transportadora: um pedido antigo com valor fora da lista abre em "Outro"
@@ -365,6 +374,9 @@ function PedidoDetalhe({
   const [saving, setSaving] = useState<string | null>(null)
   const [pedidoModalOpen, setPedidoModalOpen] = useState(false)
   const [crmOpen, setCrmOpen] = useState(false)
+  // NF-e: emissão manual, um clique consciente. `emitindo` cobre os segundos que
+  // a SEFAZ leva para responder (a emissão é síncrona).
+  const [emitindo, setEmitindo] = useState(false)
   // Cotação por transportadora — sob demanda (só ao clicar), nunca automática.
   const [cotando, setCotando] = useState(false)
   const [cotResp, setCotResp] = useState<CotResposta | null>(null)
@@ -422,6 +434,45 @@ function PedidoDetalhe({
     patch({ status }, 'status', 'Status atualizado')
   }
 
+  // ── NF-e (Focus NFe) ────────────────────────────────────────────────────────
+  // A rota revalida o pagamento e a idempotência no servidor — o botão
+  // desabilitado é conveniência, não a trava. Rejeição da SEFAZ volta 200 com a
+  // mensagem: não é falha de rede, é resposta do fisco.
+  async function emitirNfe() {
+    setEmitindo(true)
+    try {
+      const res = await fetch(`${ADMIN_BASE}/pedidos/${pedido.id}/nfe/emitir`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+      const d = await res.json().catch(() => null)
+      if (!res.ok || !d) throw new Error(d?.error || 'Falha ao emitir a NF-e')
+
+      onUpdate(pedido.id, {
+        nfeStatus: d.nfe?.status ?? null,
+        nfeChave: d.nfe?.chave ?? null,
+        nfeNumero: d.nfe?.numero ?? null,
+        nfeSerie: d.nfe?.serie ?? null,
+        nfeDanfeUrl: d.nfe?.danfeUrl ?? null,
+        nfeXmlUrl: d.nfe?.xmlUrl ?? null,
+        nfeMensagemErro: d.nfe?.erro ?? null,
+        ...(d.dataNotaFiscal ? { dataNotaFiscal: d.dataNotaFiscal } : {}),
+      })
+      if (d.dataNotaFiscal) setDataNota(String(d.dataNotaFiscal).slice(0, 10))
+
+      if (d.nfe?.status === 'autorizado') {
+        showToast(d.jaEmitida ? 'Este pedido já tinha NF-e autorizada.' : 'NF-e autorizada pela SEFAZ')
+      } else if (d.nfe?.status === 'processando') {
+        showToast('NF-e em processamento na SEFAZ — clique de novo em instantes.', 'error')
+      } else {
+        showToast(d.nfe?.erro || 'A SEFAZ recusou a NF-e', 'error')
+      }
+    } catch (err) {
+      showToast((err as Error).message || 'Erro ao emitir a NF-e', 'error')
+    }
+    setEmitindo(false)
+  }
+
   // Cota Braspress × Melhor Envio para este pedido (endereço + produtos do pedido).
   // SOB DEMANDA. Nunca grava — a escolha é um passo consciente separado.
   async function cotarTransportadoras() {
@@ -463,6 +514,11 @@ function PedidoDetalhe({
   const end = pedido.endereco
   const payerCpf = pedido.pagamentos?.find(p => p.payerCpf)?.payerCpf
   const statusLower = (pedido.status || '').toLowerCase()
+
+  // NF-e: só depois do pagamento confirmado (mesma regra do servidor).
+  const podeEmitirNfe = isStatusPago(pedido.status)
+  const nfeHomologacao = nfeAmbiente === 'homologacao'
+  const nfeAutorizada = pedido.nfeStatus === 'autorizado'
 
   return (
     <tr>
@@ -632,6 +688,26 @@ function PedidoDetalhe({
                   <FileText className="w-3.5 h-3.5" /> Gerar Pedido
                 </button>
                 <button
+                  onClick={emitirNfe}
+                  disabled={!podeEmitirNfe || emitindo}
+                  title={
+                    podeEmitirNfe
+                      ? nfeAutorizada
+                        ? 'NF-e já autorizada — o botão devolve a nota existente, não emite outra.'
+                        : undefined
+                      : 'Disponível após confirmação do pagamento'
+                  }
+                  className={`inline-flex items-center gap-1.5 font-semibold rounded-lg px-3 py-1.5 text-xs transition border ${
+                    podeEmitirNfe
+                      ? 'bg-[#0f2e2b] hover:bg-[#123b37] text-white border-[#0f2e2b] disabled:opacity-60'
+                      : 'bg-white text-gray-400 border-gray-200 cursor-not-allowed'
+                  }`}
+                >
+                  {emitindo
+                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Emitindo…</>
+                    : <><FileCheck className="w-3.5 h-3.5" /> {nfeAutorizada ? 'NF-e emitida' : 'Gerar NF-e'}</>}
+                </button>
+                <button
                   onClick={() => setCrmOpen(true)}
                   title={statusLower === 'pago' ? undefined : 'Pedido ainda não está pago — envie só quando confirmado.'}
                   className={`inline-flex items-center gap-1.5 font-semibold rounded-lg px-3 py-1.5 text-xs transition border ${
@@ -649,6 +725,84 @@ function PedidoDetalhe({
               <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0f2e2b] bg-[#e8f8f7] border border-[#3cbfb3]/30 px-2.5 py-1 rounded-lg">
                 <UserCheck className="w-3.5 h-3.5 text-[#3cbfb3]" />
                 Sincronizado com o CRM em {fmtDate(pedido.crmSincronizadoEm)}
+              </div>
+            )}
+
+            {/* ── NF-e ────────────────────────────────────────────────────────
+                O selo de HOMOLOGAÇÃO fica sempre visível enquanto o ambiente for
+                de teste — é o que impede confundir uma nota sem valor fiscal com
+                uma real. Some sozinho quando FOCUS_NFE_AMBIENTE virar producao. */}
+            {(nfeHomologacao || pedido.nfeStatus) && (
+              <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-3 space-y-2">
+                {nfeHomologacao && (
+                  <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-lg">
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    HOMOLOGAÇÃO — sem valor fiscal
+                  </div>
+                )}
+
+                {nfeAutorizada && (
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0f2e2b] bg-[#e8f8f7] border border-[#3cbfb3]/30 px-2.5 py-1 rounded-lg">
+                      <FileCheck className="w-3.5 h-3.5 text-[#3cbfb3]" />
+                      NF-e emitida
+                      {pedido.nfeNumero != null && <> · nº {pedido.nfeNumero}</>}
+                      {pedido.nfeSerie != null && <> · série {pedido.nfeSerie}</>}
+                    </div>
+                    {pedido.nfeChave && (
+                      <p className="text-[11px] text-gray-500 font-mono break-all">
+                        Chave: {pedido.nfeChave}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-2 pt-0.5">
+                      {pedido.nfeDanfeUrl && (
+                        <a
+                          href={pedido.nfeDanfeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-white bg-[#3cbfb3] hover:bg-[#2a9d8f] rounded-lg px-2.5 py-1 transition"
+                        >
+                          <FileText className="w-3 h-3" /> DANFE (PDF)
+                        </a>
+                      )}
+                      {pedido.nfeXmlUrl && (
+                        <a
+                          href={pedido.nfeXmlUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0f2e2b] bg-white border border-gray-200 hover:border-[#3cbfb3]/50 rounded-lg px-2.5 py-1 transition"
+                        >
+                          <FileText className="w-3 h-3" /> XML
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {pedido.nfeStatus === 'processando' && (
+                  <p className="text-[11px] text-amber-700 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    NF-e enviada, aguardando a SEFAZ. Clique em “Gerar NF-e” de novo para consultar.
+                  </p>
+                )}
+
+                {pedido.nfeStatus === 'erro' && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-semibold text-red-700 flex items-start gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" />
+                      <span>{pedido.nfeMensagemErro || 'A SEFAZ recusou a NF-e.'}</span>
+                    </p>
+                    <button
+                      onClick={emitirNfe}
+                      disabled={emitindo}
+                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-white bg-[#0f2e2b] hover:bg-[#123b37] rounded-lg px-2.5 py-1 transition disabled:opacity-60"
+                    >
+                      {emitindo
+                        ? <><Loader2 className="w-3 h-3 animate-spin" /> Emitindo…</>
+                        : <>Tentar de novo</>}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -937,6 +1091,9 @@ export default function AdminPedidosPage() {
   const [modalExcluir, setModalExcluir] = useState(false)
   const [preview, setPreview] = useState<PreviewExcluir | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  // Ambiente da NF-e — vem do servidor junto com a listagem. Default de segurança:
+  // 'homologacao', para o selo "sem valor fiscal" aparecer se a resposta falhar.
+  const [nfeAmbiente, setNfeAmbiente] = useState('homologacao')
 
   const limit = 20
   const totalPages = Math.ceil(total / limit)
@@ -952,6 +1109,7 @@ export default function AdminPedidosPage() {
       console.log('[admin/pedidos] data:', { pedidos: data.pedidos?.length, total: data.total, stats: data.stats })
       setPedidos(Array.isArray(data.pedidos) ? data.pedidos : [])
       setTotal(Number(data.total) || 0)
+      if (data.nfeAmbiente) setNfeAmbiente(String(data.nfeAmbiente))
       setStats({
         total:     Number(data.stats?.total)     || Number(data.total) || 0,
         pendentes: Number(data.stats?.pendentes) || 0,
@@ -1394,7 +1552,7 @@ export default function AdminPedidosPage() {
                           </td>
                         </tr>
                         {isOpen && (
-                          <PedidoDetalhe pedido={p} onUpdate={handleUpdate} showToast={showToast} />
+                          <PedidoDetalhe pedido={p} onUpdate={handleUpdate} showToast={showToast} nfeAmbiente={nfeAmbiente} />
                         )}
                       </React.Fragment>
                     )
