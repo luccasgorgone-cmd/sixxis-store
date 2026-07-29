@@ -143,6 +143,18 @@ model Pedido {
   // DATA da NF (data pura, ancorada ao MEIO-DIA UTC — ver src/lib/data-nf.ts). O
   // CRM precisa dela para a garantia contar. Pedidos antigos ficam nulos.
   dataNotaFiscal DateTime?
+  // ── NF-e via Focus NFe (emissão manual pelo admin) ──────────────────────────
+  // COEXISTEM com `notaFiscal` (número digitado à mão): pedidos antigos seguem
+  // com o número manual, novos ganham os campos abaixo. Nada aqui sobrescreve
+  // `notaFiscal` — quem preenche o número manual continua sendo o admin.
+  nfeRef          String?  // referência enviada à Focus (= Pedido.id)
+  nfeChave        String?  // chave de acesso, 44 dígitos
+  nfeStatus       String?  // autorizado | erro | processando | cancelado
+  nfeNumero       Int?
+  nfeSerie        Int?
+  nfeDanfeUrl     String?  // PDF do DANFE hospedado pela Focus
+  nfeXmlUrl       String?
+  nfeMensagemErro String?  @db.Text // rejeição da SEFAZ, legível, quando houver
   // Marca informativa de sincronização com o CRM (nunca bloqueia; reaplicar é ok).
   // crmLeadId = contato do CRM que recebeu os dados (rastreável em caso de engano).
   crmSincronizadoEm DateTime?
