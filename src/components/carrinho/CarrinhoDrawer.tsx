@@ -17,6 +17,7 @@ interface UpsellItem {
   desconto: number | null
   imagem: string | null
   pixPreco: string
+  temVariacoes?: boolean
 }
 
 function fmt(v: number) {
@@ -204,12 +205,25 @@ export default function CarrinhoDrawer() {
                       </div>
                       <p className="text-[10px] text-[#3cbfb3]">R$ {fmt(Number(p.pixPreco))} no PIX</p>
                     </div>
-                    <button
-                      onClick={() => adicionarItem({ produtoId: p.id, nome: p.nome, preco: p.precoFinal, quantidade: 1, imagem: p.imagem ?? undefined, feedId: feedIdProduto({ sku: p.sku, slug: p.slug }) })}
-                      className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
-                    >
-                      + Add
-                    </button>
+                    {/* Produto com variação não entra por aqui: sem seletor no
+                        drawer, o "+ Add" criaria item sem voltagem/cor. Vira
+                        link p/ a página do produto, onde a escolha é obrigatória. */}
+                    {p.temVariacoes ? (
+                      <Link
+                        href={`/produtos/${p.slug}`}
+                        onClick={() => setDrawerAberto(false)}
+                        className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
+                      >
+                        Escolher
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => adicionarItem({ produtoId: p.id, nome: p.nome, preco: p.precoFinal, quantidade: 1, imagem: p.imagem ?? undefined, feedId: feedIdProduto({ sku: p.sku, slug: p.slug }) })}
+                        className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
+                      >
+                        + Add
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

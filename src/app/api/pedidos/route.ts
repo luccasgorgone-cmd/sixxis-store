@@ -162,6 +162,20 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: `Produto ${item.produtoId} não encontrado` }, { status: 400 })
     }
 
+    // Barreira autoritativa: produto com variação NÃO pode ser vendido sem a
+    // opção escolhida. Pedido sem variacaoId sai sem voltagem/cor — não aparece
+    // no admin nem na NF-e e não dá para despachar (não se sabe qual aparelho
+    // enviar), e 110V x 220V errado queima o aparelho. Caso real: pedido
+    // K531UFIN (Climatizador M45) criado pelo "Comprar Agora" do card de
+    // listagem, que não pedia a escolha. A UI foi corrigida, mas esta guarda
+    // vale também p/ carrinho antigo no localStorage e p/ qualquer bug futuro.
+    if (produto.temVariacoes && !item.variacaoId) {
+      return Response.json(
+        { error: `Escolha a opção (voltagem/cor) de "${produto.nome}" antes de finalizar o pedido.` },
+        { status: 400 },
+      )
+    }
+
     let precoUnitario = Number(produto.precoPromocional ?? produto.preco)
 
     if (item.variacaoId) {

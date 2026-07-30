@@ -48,7 +48,15 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
   const descPct = promocional ? Math.round((1 - promocional / preco) * 100) : 0
   const imagem = Array.isArray(produto.imagens) ? produto.imagens[0] : null
 
+  // Produto com variação (voltagem/cor) não tem seletor aqui: comprar direto
+  // criaria pedido sem a opção escolhida. Encaminha p/ a página do produto.
+  const precisaEscolherVariacao = Boolean(produto.temVariacoes)
+
   function comprarAgora() {
+    if (precisaEscolherVariacao) {
+      router.push(`/produtos/${produto.slug}`)
+      return
+    }
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
@@ -136,7 +144,7 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
         <button onClick={comprarAgora}
           className="w-full py-3 rounded-xl font-black text-sm transition-all hover:shadow-lg hover:-translate-y-px active:translate-y-0"
           style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
-          Comprar Agora
+          {precisaEscolherVariacao ? 'Escolher opção' : 'Comprar Agora'}
         </button>
       </div>
     </div>

@@ -22,6 +22,9 @@ export async function GET(req: NextRequest) {
           precoPromocional: true,
           imagens:          true,
           ativo:            true,
+          // O drawer precisa saber se o produto tem variação: com variação, o
+          // "+ Add" viraria item de carrinho sem voltagem/cor.
+          temVariacoes:     true,
         },
       },
     },
@@ -47,6 +50,7 @@ export async function GET(req: NextRequest) {
       desconto:         desconto > 0 ? desconto : null,
       imagem:           (p!.imagens as string[])?.[0] ?? null,
       pixPreco:         precoPix(precoFinal).toFixed(2),
+      temVariacoes:     p!.temVariacoes,
     }
   })
 

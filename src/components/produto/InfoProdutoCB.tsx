@@ -125,10 +125,17 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
   const tipoVariacao = inferirTipoVariacao(variacoesAtivas.map(v => v.nome))
   const isCor = tipoVariacao === 'Cor'
 
-  // Pre-select first color variant (prefer Branco)
+  // Pré-seleção SOMENTE para cor (prefere Branco). Voltagem NUNCA é
+  // pré-selecionada: 110V x 220V errado queima o aparelho, então a escolha tem
+  // que ser ativa do cliente.
   const defaultVariacao = isCor
     ? (variacoesAtivas.find(v => v.nome.toLowerCase().includes('branco')) ?? variacoesAtivas[0] ?? null)
     : null
+
+  // Escolha obrigatória. Usa temVariacoes OU a existência de variação ativa: se
+  // a flag estiver dessincronizada no banco, a existência da variação manda —
+  // nunca deixar sair item sem opção definida.
+  const exigeVariacao = produto.temVariacoes || variacoesAtivas.length > 0
 
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(defaultVariacao)
   const [adicionado, setAdicionado] = useState(false)
@@ -179,7 +186,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
   }
 
   function handleAddToCart() {
-    if (produto.temVariacoes && !variacaoSelecionada) {
+    if (exigeVariacao && !variacaoSelecionada) {
       setModalVariacaoAberto(true)
       return
     }
@@ -212,7 +219,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
   }
 
   function handleComprar() {
-    if (produto.temVariacoes && !variacaoSelecionada) {
+    if (exigeVariacao && !variacaoSelecionada) {
       setModalVariacaoAberto(true)
       return
     }
@@ -494,8 +501,10 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
             </div>
           )}
 
-          {produto.temVariacoes && !variacaoSelecionada && (
-            <p className="text-amber-600 text-xs font-medium mt-2">Selecione a opção para continuar</p>
+          {exigeVariacao && !variacaoSelecionada && (
+            <p className="text-amber-600 text-xs font-medium mt-2">
+              Selecione a {tipoVariacao === 'Variação' ? 'opção' : tipoVariacao.toLowerCase()} para continuar
+            </p>
           )}
         </div>
       )}

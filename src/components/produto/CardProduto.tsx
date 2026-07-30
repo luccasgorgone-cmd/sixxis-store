@@ -48,6 +48,14 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const esgotado = (produto.estoque ?? 1) <= 0
   const isNovo = !desconto
 
+  // Produto com variação (voltagem/cor) NÃO pode ser comprado daqui: o card não
+  // tem seletor, e adicionar sem escolher gerava pedido sem voltagem (caso real:
+  // K531UFIN, Climatizador M45). Aqui só encaminhamos p/ a página do produto,
+  // onde a escolha é obrigatória. `variacoes` não vem em todas as origens do
+  // card (a home busca o produto sem include) — por isso a guarda usa apenas
+  // temVariacoes, que vem em todas.
+  const precisaEscolherVariacao = Boolean(produto.temVariacoes)
+
   // g:id do feed p/ este card (sem variação → item único: sku ?? slug).
   const gId = feedIdProduto({ sku: produto.sku, slug: produto.slug })
 
@@ -58,6 +66,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
     e.preventDefault()
     e.stopPropagation()
     if (esgotado || adicionado) return
+    if (precisaEscolherVariacao) { router.push(`/produtos/${produto.slug}`); return }
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
@@ -85,6 +94,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
     e.preventDefault()
     e.stopPropagation()
     if (esgotado) return
+    if (precisaEscolherVariacao) { router.push(`/produtos/${produto.slug}`); return }
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
@@ -226,25 +236,31 @@ export default function CardProduto({ produto, priority = false }: Props) {
                   onClick={handleComprarAgora}
                   className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
                 >
-                  Comprar Agora
+                  {precisaEscolherVariacao ? 'Escolher opção' : 'Comprar Agora'}
                 </button>
               )}
 
-              <button
-                onClick={handleAddToCart}
-                disabled={esgotado}
-                className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center transition-all duration-200 active:scale-[0.98] ${
-                  esgotado
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : adicionado
-                      ? 'bg-green-500 text-white border-2 border-green-500'
-                      : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
-                }`}
-              >
-                <span className="whitespace-nowrap">
-                  {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
-                </span>
-              </button>
+              {/* "Adicionar ao Carrinho" só p/ item único. Com variação a escolha
+                  é obrigatória e acontece na página do produto — um add daqui
+                  entraria no carrinho sem voltagem/cor. Esgotado continua
+                  mostrando o botão (com o rótulo "Esgotado"). */}
+              {(!precisaEscolherVariacao || esgotado) && (
+                <button
+                  onClick={handleAddToCart}
+                  disabled={esgotado}
+                  className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center transition-all duration-200 active:scale-[0.98] ${
+                    esgotado
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : adicionado
+                        ? 'bg-green-500 text-white border-2 border-green-500'
+                        : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
+                  }`}
+                >
+                  <span className="whitespace-nowrap">
+                    {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+                  </span>
+                </button>
+              )}
 
               {/* Comparar — oculto em mobile */}
               <button
