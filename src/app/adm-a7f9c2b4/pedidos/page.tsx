@@ -7,7 +7,7 @@ import {
   ChevronDown, ChevronRight, Loader2, ShoppingCart,
   Search, Package, MapPin, CreditCard, Truck, CheckCircle,
   Clock, AlertCircle, Save, DollarSign, FileText, X, Trash2, UserCheck,
-  FileCheck, ShieldAlert,
+  FileCheck, ShieldAlert, Copy,
 } from 'lucide-react'
 import { CrmSyncModal } from './CrmSyncModal'
 import { Toast } from '@/components/admin/Toast'
@@ -59,6 +59,8 @@ interface Pedido {
   nfeNumero: number | null; nfeSerie: number | null
   nfeDanfeUrl: string | null; nfeXmlUrl: string | null
   nfeMensagemErro: string | null
+  // Ambiente DESTA nota. null = emitida antes do campo existir (tudo era teste).
+  nfeAmbiente: string | null
   crmSincronizadoEm: string | null; crmLeadId: string | null
   custoFreteReal: number | null; enviadoEm: string | null; entregueEm: string | null
   freteTipo: string | null; fretePrazo: number | null
@@ -456,6 +458,8 @@ function PedidoDetalhe({
         nfeDanfeUrl: d.nfe?.danfeUrl ?? null,
         nfeXmlUrl: d.nfe?.xmlUrl ?? null,
         nfeMensagemErro: d.nfe?.erro ?? null,
+        // O servidor devolve o ambiente que ele acabou de gravar na nota.
+        nfeAmbiente: d.ambiente ?? null,
         ...(d.dataNotaFiscal ? { dataNotaFiscal: d.dataNotaFiscal } : {}),
       })
       if (d.dataNotaFiscal) setDataNota(String(d.dataNotaFiscal).slice(0, 10))
@@ -519,6 +523,29 @@ function PedidoDetalhe({
   const podeEmitirNfe = isStatusPago(pedido.status)
   const nfeHomologacao = nfeAmbiente === 'homologacao'
   const nfeAutorizada = pedido.nfeStatus === 'autorizado'
+
+  // Ambiente a estampar. Havendo nota, vale o ambiente DELA — não o de agora:
+  // depois que a env virar produção, as notas de teste continuam identificadas.
+  // Nota anterior ao campo nfeAmbiente vira "legado" (tudo até então foi teste).
+  // Sem nota ainda, mostra o ambiente atual, que é o da próxima emissão.
+  const ambienteNota = pedido.nfeStatus
+    ? (pedido.nfeAmbiente ?? 'homologacao-legado')
+    : nfeAmbiente
+  const notaEmProducao = ambienteNota === 'producao'
+  const rotuloAmbiente =
+    ambienteNota === 'producao'          ? 'PRODUÇÃO — nota com valor fiscal'
+    : ambienteNota === 'homologacao-legado' ? 'HOMOLOGAÇÃO (LEGADO) — sem valor fiscal'
+    : 'HOMOLOGAÇÃO — sem valor fiscal'
+
+  async function copiarChave() {
+    if (!pedido.nfeChave) return
+    try {
+      await navigator.clipboard.writeText(pedido.nfeChave)
+      showToast('Chave de acesso copiada')
+    } catch {
+      showToast('Não foi possível copiar a chave', 'error')
+    }
+  }
 
   return (
     <tr>
@@ -729,17 +756,21 @@ function PedidoDetalhe({
             )}
 
             {/* ── NF-e ────────────────────────────────────────────────────────
-                O selo de HOMOLOGAÇÃO fica sempre visível enquanto o ambiente for
-                de teste — é o que impede confundir uma nota sem valor fiscal com
-                uma real. Some sozinho quando FOCUS_NFE_AMBIENTE virar producao. */}
+                O selo de ambiente fica sempre visível — é o que impede confundir
+                uma nota sem valor fiscal com uma real. Havendo nota, o selo é o
+                do ambiente EM QUE ELA foi emitida, não o de agora. */}
             {(nfeHomologacao || pedido.nfeStatus) && (
               <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-3 space-y-2">
-                {nfeHomologacao && (
-                  <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-lg">
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                    HOMOLOGAÇÃO — sem valor fiscal
-                  </div>
-                )}
+                <div
+                  className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg border ${
+                    notaEmProducao
+                      ? 'text-emerald-800 bg-emerald-50 border-emerald-300'
+                      : 'text-amber-800 bg-amber-50 border-amber-300'
+                  }`}
+                >
+                  {notaEmProducao ? <FileCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                  {rotuloAmbiente}
+                </div>
 
                 {nfeAutorizada && (
                   <div className="space-y-1.5">
@@ -750,9 +781,18 @@ function PedidoDetalhe({
                       {pedido.nfeSerie != null && <> · série {pedido.nfeSerie}</>}
                     </div>
                     {pedido.nfeChave && (
-                      <p className="text-[11px] text-gray-500 font-mono break-all">
-                        Chave: {pedido.nfeChave}
-                      </p>
+                      <div className="flex items-start gap-1.5">
+                        <p className="text-[11px] text-gray-500 font-mono break-all flex-1">
+                          Chave: {pedido.nfeChave}
+                        </p>
+                        <button
+                          onClick={copiarChave}
+                          title="Copiar a chave de acesso"
+                          className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-gray-600 bg-white border border-gray-200 hover:border-[#3cbfb3]/50 rounded-lg px-2 py-1 transition"
+                        >
+                          <Copy className="w-3 h-3" /> Copiar
+                        </button>
+                      </div>
                     )}
                     <div className="flex flex-wrap gap-2 pt-0.5">
                       {pedido.nfeDanfeUrl && (
@@ -762,7 +802,7 @@ function PedidoDetalhe({
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-white bg-[#3cbfb3] hover:bg-[#2a9d8f] rounded-lg px-2.5 py-1 transition"
                         >
-                          <FileText className="w-3 h-3" /> DANFE (PDF)
+                          <FileText className="w-3 h-3" /> Ver DANFE (PDF)
                         </a>
                       )}
                       {pedido.nfeXmlUrl && (
@@ -772,7 +812,7 @@ function PedidoDetalhe({
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0f2e2b] bg-white border border-gray-200 hover:border-[#3cbfb3]/50 rounded-lg px-2.5 py-1 transition"
                         >
-                          <FileText className="w-3 h-3" /> XML
+                          <FileText className="w-3 h-3" /> Ver XML
                         </a>
                       )}
                     </div>
