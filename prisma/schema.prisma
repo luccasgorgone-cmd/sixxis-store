@@ -155,6 +155,11 @@ model Pedido {
   nfeDanfeUrl     String?  // PDF do DANFE hospedado pela Focus
   nfeXmlUrl       String?
   nfeMensagemErro String?  @db.Text // rejeição da SEFAZ, legível, quando houver
+  // Ambiente EM QUE ESTA NOTA foi emitida ("homologacao" | "producao"). Sem ele,
+  // uma nota de teste e uma real ficam indistinguíveis no banco quando a env
+  // FOCUS_NFE_AMBIENTE muda. Notas anteriores a este campo ficam null e a UI as
+  // mostra como "homologação (legado)" — até aqui tudo foi teste.
+  nfeAmbiente     String?
   // Marca informativa de sincronização com o CRM (nunca bloqueia; reaplicar é ok).
   // crmLeadId = contato do CRM que recebeu os dados (rastreável em caso de engano).
   crmSincronizadoEm DateTime?

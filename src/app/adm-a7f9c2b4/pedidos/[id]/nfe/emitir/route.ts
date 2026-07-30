@@ -89,6 +89,10 @@ export async function POST(
     where: { id },
     data: {
       nfeRef: pedido.id,
+      // Ambiente DESTA nota. Grava sempre (inclusive em erro/processando): é o
+      // que permite distinguir nota de teste de nota real depois que a env
+      // FOCUS_NFE_AMBIENTE mudar.
+      nfeAmbiente: ambiente,
       nfeStatus: r.status,
       nfeChave: r.chave,
       nfeNumero: r.numero,
