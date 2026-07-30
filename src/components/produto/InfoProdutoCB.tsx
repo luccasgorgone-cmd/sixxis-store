@@ -161,6 +161,17 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
     if (onVariacaoChange) onVariacaoChange(v?.nome ?? null)
   }
 
+  // Imagem que vai pro item do carrinho. Cascata: capa da COR escolhida →
+  // capa do produto (comportamento antigo) → nada (drawer mostra placeholder).
+  // Sem isso, adicionar "Branco" mostrava a foto preta (a capa) no carrinho.
+  function imagemCarrinho(variacaoNome?: string | null): string | undefined {
+    if (variacaoNome) {
+      const capaDaCor = imagensPorVariacao?.[variacaoNome]?.[0]
+      if (capaDaCor) return capaDaCor
+    }
+    return produto.imagem
+  }
+
   // g:id do feed p/ este produto/variação (Meta content_ids / GA4 item_id).
   // `variacoes` (todas) decide se o produto é vendido por variação precificada.
   function gIdCarrinho(v?: { sku?: string | null; preco?: number | null } | null): string {
@@ -177,7 +188,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
       nome: produto.nome,
       preco: precoAtual,
       quantidade,
-      imagem: produto.imagem,
+      imagem: imagemCarrinho(variacaoSelecionada?.nome),
       feedId: gIdCarrinho(variacaoSelecionada),
       ...(variacaoSelecionada && {
         variacaoId: variacaoSelecionada.id,
@@ -210,7 +221,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
       nome: produto.nome,
       preco: precoAtual,
       quantidade,
-      imagem: produto.imagem,
+      imagem: imagemCarrinho(variacaoSelecionada?.nome),
       feedId: gIdCarrinho(variacaoSelecionada),
       ...(variacaoSelecionada && {
         variacaoId: variacaoSelecionada.id,
@@ -239,7 +250,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
       nome: produto.nome,
       preco,
       quantidade: qty,
-      imagem: produto.imagem,
+      imagem: imagemCarrinho(v.nome),
       feedId: gid,
       variacaoId: v.id,
       variacaoNome: v.nome,
@@ -267,7 +278,7 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
       nome: produto.nome,
       preco,
       quantidade: qty,
-      imagem: produto.imagem,
+      imagem: imagemCarrinho(v.nome),
       feedId: gid,
       variacaoId: v.id,
       variacaoNome: v.nome,
