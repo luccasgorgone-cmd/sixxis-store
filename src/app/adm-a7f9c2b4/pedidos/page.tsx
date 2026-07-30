@@ -1127,6 +1127,14 @@ export default function AdminPedidosPage() {
     }
   }, [page, q, status, pagamento, from, to, crmPendente])
 
+  // Deep link vindo da aba Notas Fiscais: /pedidos?q=<código do pedido>. Lido do
+  // window (e não com useSearchParams) para não exigir Suspense na página toda,
+  // e num efeito — no initializer do useState quebraria a hidratação.
+  useEffect(() => {
+    const inicial = new URLSearchParams(window.location.search).get('q')
+    if (inicial) setQ(inicial)
+  }, [])
+
   // Mount: fetch imediato + safety-net que força loading=false em 5s se algo travar.
   useEffect(() => {
     let alive = true
