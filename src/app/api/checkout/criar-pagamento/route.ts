@@ -11,6 +11,7 @@ import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
 import { precoPix } from '@/lib/preco-pix'
+import { calcularTotalBaseReais } from '@/lib/checkout-total'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 
 const schema = z.object({
@@ -125,18 +126,7 @@ export async function POST(req: NextRequest) {
     (s, i) => s + Number(i.precoUnitario) * i.quantidade,
     0,
   )
-  const totalGarantias = pedido.garantias.reduce((s, g) => s + Number(g.valorPago), 0)
-  const totalBase =
-    Math.round(
-      Math.max(
-        0,
-        subtotalItens +
-          Number(pedido.frete) +
-          totalGarantias -
-          Number(pedido.desconto) -
-          Number(pedido.cashbackUsado),
-      ) * 100,
-    ) / 100
+  const totalBase = calcularTotalBaseReais(pedido)
 
   // O desconto PIX incide sobre o total JÁ com cupom e cashback — eles acumulam.
   const valorBRL = metodo === 'pix' ? precoPix(totalBase) : totalBase

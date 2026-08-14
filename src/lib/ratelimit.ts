@@ -12,17 +12,19 @@ export type LimiterName =
   | 'cadastro'
   | 'esqueci-senha'
   | 'criar-pagamento'
+  | 'checkout-multi-metodo'
   | 'validar-cupom'
   | 'interno-frete'
 
 // Limites sensatos por IP/identificador (sliding window). Ajuste conforme tráfego.
 const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ratelimit.slidingWindow>[1] }> = {
-  'login':           { tokens: 10, window: '5 m' },   // 10 tentativas / 5 min
-  'cadastro':        { tokens: 5,  window: '10 m' },  // 5 cadastros / 10 min
-  'esqueci-senha':   { tokens: 5,  window: '15 m' },  // 5 pedidos / 15 min
-  'criar-pagamento': { tokens: 12, window: '5 m' },   // 12 tentativas / 5 min
-  'validar-cupom':   { tokens: 20, window: '1 m' },   // 20 validações / 1 min
-  'interno-frete':   { tokens: 60, window: '1 m' },   // 60 cotações / 1 min (CRM)
+  'login':                 { tokens: 10, window: '5 m' },   // 10 tentativas / 5 min
+  'cadastro':              { tokens: 5,  window: '10 m' },  // 5 cadastros / 10 min
+  'esqueci-senha':         { tokens: 5,  window: '15 m' },  // 5 pedidos / 15 min
+  'criar-pagamento':       { tokens: 12, window: '5 m' },   // 12 tentativas / 5 min
+  'checkout-multi-metodo': { tokens: 8,  window: '5 m' },   // 8 tentativas / 5 min — orquestra 2 transações reais, mais caro que criar-pagamento
+  'validar-cupom':         { tokens: 20, window: '1 m' },   // 20 validações / 1 min
+  'interno-frete':         { tokens: 60, window: '1 m' },   // 60 cotações / 1 min (CRM)
 }
 
 let _redis: Redis | null = null

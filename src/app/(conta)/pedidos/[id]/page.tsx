@@ -81,6 +81,17 @@ export default async function PedidoDetalheContaPage({
         </span>
       </div>
 
+      {/* Checkout multi-método: Pix (etapa 1) confirmado, falta o cartão do
+          restante (etapa 2). Sem formulário de cartão aqui ainda — completar
+          via API /api/checkout/multi-metodo/pix-mais-cartao/completar é o
+          próximo passo de UI (ver M3, marco separado). */}
+      {pedido.multiMetodoStatus === 'aguardando_pagamento_restante' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-sm text-amber-800">
+          Recebemos o Pix deste pedido. Falta confirmar o pagamento do valor restante no
+          cartão — entraremos em contato para concluir.
+        </div>
+      )}
+
       {/* Timeline */}
       {pedido.status !== 'cancelado' && (
         <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6">

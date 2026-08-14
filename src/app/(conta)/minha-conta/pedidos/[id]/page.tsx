@@ -35,6 +35,9 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
   if (!pedido) notFound()
 
   const pendente   = isStatusPendente(pedido.status)
+  // Rota é force-dynamic (sempre renderizada por request, sem PPR/cache);
+  // Date.now() aqui é a janela de cancelamento real, não estado de render.
+  // eslint-disable-next-line react-hooks/purity
   const horasDesde = (Date.now() - pedido.createdAt.getTime()) / 36e5
   const dentroJanela = horasDesde < JANELA_CANCELAMENTO_HORAS
   const statusInfo = getStatusInfo(pedido.status)
@@ -60,6 +63,17 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
 
         {pendente && (
           <BotoesPedidoPendente pedidoId={pedido.id} podeCancelar={dentroJanela} />
+        )}
+
+        {/* Checkout multi-método: Pix (etapa 1) confirmado, falta o cartão do
+            restante (etapa 2). Sem formulário de cartão aqui ainda — completar
+            via API /api/checkout/multi-metodo/pix-mais-cartao/completar é o
+            próximo passo de UI (ver M3, marco separado). */}
+        {pedido.multiMetodoStatus === 'aguardando_pagamento_restante' && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-sm text-amber-800">
+            Recebemos o Pix deste pedido. Falta confirmar o pagamento do valor restante no
+            cartão — entraremos em contato para concluir.
+          </div>
         )}
 
         {/* Acompanhamento da entrega (Pago → Enviado → Entregue) */}

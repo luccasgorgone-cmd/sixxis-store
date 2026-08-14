@@ -64,8 +64,18 @@ interface Pedido {
   crmSincronizadoEm: string | null; crmLeadId: string | null
   custoFreteReal: number | null; enviadoEm: string | null; entregueEm: string | null
   freteTipo: string | null; fretePrazo: number | null
+  // Sub-estado do checkout multi-método (2 cartões / pix + cartão do restante).
+  // null = fluxo clássico. Ver src/lib/checkout-multi-metodo.ts.
+  multiMetodoStatus: string | null
   cliente: Cliente; endereco: Endereco; itens: ItemPedido[]
   pagamentos?: Pagamento[]
+}
+
+const MULTI_METODO_LABELS: Record<string, string> = {
+  aguardando_pix: 'Aguardando Pix (multi-método)',
+  aguardando_pagamento_restante: 'Aguardando cartão do restante',
+  falhou: 'Multi-método falhou',
+  cancelado: 'Multi-método cancelado',
 }
 
 interface Stats { total: number; pendentes: number; enviados: number; receita: number; aguardandoEnvio: number }
@@ -1590,6 +1600,14 @@ export default function AdminPedidosPage() {
                             <span className={`text-xs font-semibold rounded-full px-2.5 py-1 border capitalize whitespace-nowrap ${STATUS_BADGE[p.status] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                               {STATUS_LABELS[p.status] ?? p.status}
                             </span>
+                            {p.multiMetodoStatus && (
+                              <span
+                                title="Checkout multi-método (2 cartões ou Pix + cartão) — ver detalhe do pedido"
+                                className="block mt-1 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded whitespace-nowrap"
+                              >
+                                {MULTI_METODO_LABELS[p.multiMetodoStatus] ?? p.multiMetodoStatus}
+                              </span>
+                            )}
                           </td>
                           <td className="px-3 py-4 hidden 2xl:table-cell">
                             {p.codigoRastreio && (

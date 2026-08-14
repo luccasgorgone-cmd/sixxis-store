@@ -144,6 +144,39 @@ export async function POST(req: NextRequest) {
 
     const pedido = pagamento.pedido
 
+    // ── Checkout multi-método: Pix da etapa 1 (pix + cartão pro restante) ──────
+    // TODO-SANDBOX (ver checkout-multi-metodo.ts): assume que a transação Pix
+    // criada DENTRO de uma Order (Orders API) dispara este MESMO webhook
+    // topic=payment, pelo id da transação (gravado como Pagamento.mpPaymentId
+    // em pix-mais-cartao/iniciar/route.ts) — não confirmado contra o MP real,
+    // só o Luccas tem credencial de sandbox pra validar isso.
+    //
+    // Roda ANTES do bloco genérico logo abaixo DE PROPÓSITO: sem este guard,
+    // a confirmação do Pix marcaria o pedido inteiro como 'pago' mesmo
+    // faltando cobrar o cartão do restante (etapa 2, disparada manualmente
+    // pelo cliente em pix-mais-cartao/completar/route.ts, nunca por aqui).
+    if (pagamento.metodo === 'pix' && pedido.multiMetodoStatus === 'aguardando_pix') {
+      if (novoStatus === 'approved') {
+        await prisma.pedido.update({
+          where: { id: pedido.id },
+          data: { multiMetodoStatus: 'aguardando_pagamento_restante' },
+        })
+        await auditLog({
+          req,
+          actor: 'mercado-pago',
+          action: 'pedido.multi_metodo.pix_confirmado',
+          target: pedido.id,
+          metadata: { mpPaymentId },
+        })
+      } else if (novoStatus === 'rejected' || novoStatus === 'cancelled') {
+        await prisma.pedido.update({
+          where: { id: pedido.id },
+          data: { multiMetodoStatus: novoStatus === 'cancelled' ? 'cancelado' : 'falhou' },
+        })
+      }
+      return NextResponse.json({ ok: true, status: novoStatus })
+    }
+
     if (novoStatus === 'approved' && pedido.status !== 'pago') {
       // `total` = valor REALMENTE cobrado, lido do pagamento que venceu.
       // Não dá para confiar no `total` deixado pela última tentativa: gerar um
