@@ -184,6 +184,21 @@ model Pedido {
   clientIp              String?           // IP do cliente na criação do pedido
   clientUserAgent       String?  @db.Text // user-agent do cliente na criação
   capiPurchaseEnviadoEm DateTime?         // guard de idempotência do CAPI Purchase
+  // ── Checkout multi-método (Orders API MP) ───────────────────────────────────
+  // ADITIVO, de propósito: NÃO reaproveita `status` pra descrever o sub-estado
+  // de um pagamento parcial (2 cartões, ou pix + cartão pro restante) porque
+  // `status` já é comparado literalmente (=== 'pago' / 'pendente') em ~10
+  // lugares (webhook MP, admin, página do cliente, cashback, exclusão) — mudar
+  // esse espaço de valores quebraria tudo isso de uma vez. Em vez disso, o
+  // sub-estado do fluxo multi-método vive aqui, num campo próprio. Quando o
+  // fluxo aprova de verdade, `status` vira 'pago' pelo caminho já existente
+  // (webhook) — este campo nunca chega a valer 'pago', só os estados
+  // intermediários/de erro de StatusCheckoutMultiMetodo (ver checkout-multi-metodo.ts).
+  multiMetodoStatus String?  // aguardando_pix | aguardando_pagamento_restante | falhou | cancelado — null = fluxo clássico (não usa checkout multi-método)
+  // Id da ORDER da Orders API (namespace diferente de mpPaymentId, que é da
+  // Payment API de pagamento único). Necessário pra retomar a fase 2 do fluxo
+  // pix+cartão: o webhook usa este id pra chamar completarCheckoutPixMaisCartao.
+  mpOrderId         String?  @unique
   itens          ItemPedido[]
   cliente        Cliente             @relation(fields: [clienteId], references: [id])
   endereco       Endereco            @relation(fields: [enderecoId], references: [id])
@@ -193,6 +208,7 @@ model Pedido {
   @@index([clienteId])
   @@index([status])
   @@index([notaFiscal])
+  @@index([multiMetodoStatus])
   @@index([enderecoId], map: "Pedido_enderecoId_fkey")
 }
 
