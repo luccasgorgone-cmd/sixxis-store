@@ -129,15 +129,21 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export default async function ProdutoPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
 
-  const [produto, taxaConfig] = await Promise.all([
+  const [produto, taxaConfig, avaliacoesAgg] = await Promise.all([
     prisma.produto.findUnique({
       where: { slug },
       include: {
         variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
-        avaliacoes: { where: { aprovada: true }, select: { nota: true } },
       },
     }),
     prisma.configuracao.findUnique({ where: { chave: 'juros_cartao_taxa_mensal' } }),
+    // Agregação no banco em vez de carregar todas as linhas de avaliacoes só
+    // para tirar a média em JS — evita over-fetch em produtos com muitas avaliações.
+    prisma.avaliacao.aggregate({
+      where: { produto: { slug }, aprovada: true },
+      _avg: { nota: true },
+      _count: { _all: true },
+    }),
   ])
 
   if (!produto || !produto.ativo) notFound()
@@ -164,10 +170,8 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   const preco = Number(produto.preco)
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
 
-  const totalAv = produto.avaliacoes.length
-  const mediaAv = totalAv > 0
-    ? produto.avaliacoes.reduce((s, a) => s + a.nota, 0) / totalAv
-    : 0
+  const totalAv = avaliacoesAgg._count._all
+  const mediaAv = totalAv > 0 ? (avaliacoesAgg._avg.nota ?? 0) : 0
 
   const variacoes = produto.variacoes.map(v => ({
     id: v.id,
@@ -238,6 +242,9 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
       url: `${SITE_URL}/produtos/${produto.slug}`,
       priceCurrency: 'BRL',
       price: (promocional ?? preco).toFixed(2),
+      // Rota é force-dynamic (sempre renderizada por request, sem PPR/cache);
+      // Date.now() aqui é a validade real do preço anunciado, não estado de render.
+      // eslint-disable-next-line react-hooks/purity
       priceValidUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
       availability: produto.estoque > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Sixxis' },

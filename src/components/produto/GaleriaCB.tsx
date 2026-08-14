@@ -180,6 +180,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
                         : 'w-2 h-2 bg-white/50 hover:bg-white/80'
                     }`}
                     aria-label={`Ir para ${i + 1}`}
+                    aria-current={i === ativo}
                   />
                 ))}
               </div>

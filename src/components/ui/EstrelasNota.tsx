@@ -10,8 +10,8 @@ export default function EstrelasNota({ nota, size = 14, showNumber = false }: Pr
   const estrelas = [1, 2, 3, 4, 5]
 
   return (
-    <div className="flex items-center gap-1">
-      <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-1" role="img" aria-label={`${nota.toFixed(1)} de 5 estrelas`}>
+      <div className="flex items-center gap-0.5" aria-hidden="true">
         {estrelas.map(i => {
           const fill = Math.min(1, Math.max(0, nota - (i - 1)))
           const percent = Math.round(fill * 100)

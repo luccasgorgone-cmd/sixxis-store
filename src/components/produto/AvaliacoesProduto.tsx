@@ -115,7 +115,21 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
     }
   }
 
-  if (!data) return null
+  if (!data) {
+    return (
+      <div className="mt-2 animate-pulse" aria-busy="true" aria-live="polite">
+        <div className="h-6 w-56 bg-gray-100 rounded-lg mb-6" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="h-40 bg-gray-100 rounded-2xl" />
+          <div className="lg:col-span-2 flex flex-col justify-center gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-3 bg-gray-100 rounded-full" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const { avaliacoes, media, total, distribuicao } = data
 
@@ -332,7 +346,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
                   <div className="flex gap-2 flex-wrap mb-3">
                     {av.fotos.map((foto) => (
                       <div key={foto.id} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-100">
-                        <Image src={foto.url} alt="" fill className="object-cover" unoptimized />
+                        <Image src={foto.url} alt={`Foto enviada por ${nomeExibido} na avaliação`} fill className="object-cover" unoptimized />
                       </div>
                     ))}
                   </div>
