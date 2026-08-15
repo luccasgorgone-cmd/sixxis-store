@@ -108,7 +108,6 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                 {banner.imagemTablet && (
                   <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={banner.imagemTablet} />
                 )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={banner.imagem}
                   alt={banner.titulo || 'Banner Sixxis'}
@@ -127,7 +126,6 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
               {banner.imagemTablet && (
                 <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={banner.imagemTablet} />
               )}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={banner.imagem}
                 alt={banner.titulo || 'Banner Sixxis'}

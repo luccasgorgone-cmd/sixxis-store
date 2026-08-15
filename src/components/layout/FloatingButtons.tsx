@@ -76,6 +76,13 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
       localStorage.setItem(LS_KEY, JSON.stringify(estadoMigrado))
       localStorage.removeItem('sixxis_wa_oculto')
       localStorage.removeItem('sixxis_luna_oculto')
+      // Migração + leitura inicial de localStorage só é possível no efeito (não
+      // existe no server). Preexistente — só ficou visível ao remover, acima,
+      // o eslint-disable de exhaustive-deps que (por limitação do plugin)
+      // suprimia TODO diagnóstico de hooks deste componente, não só o dele.
+      // Refatorar pra lazy initializer é mudança de comportamento maior,
+      // fora do escopo deste burndown de lint.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOculto(estadoMigrado)
     } else {
       setOculto(lerEstado())
@@ -106,13 +113,17 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
     return () => io.disconnect()
   }, [])
 
+  function restaurarTodos() {
+    setOculto({ wa: false, luna: false, expiresAt: null })
+    limparEstado()
+  }
+
   // Expose restore function globally
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(window as any).sixxisRestaurarBotoes = restaurarTodos
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return () => { delete (window as any).sixxisRestaurarBotoes }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Hide everything on mobile when drawer is open
@@ -128,11 +139,6 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
     const novoEstado = { ...oculto, [tipo]: true }
     setOculto({ ...novoEstado, expiresAt: Date.now() + 86400000 })
     salvarEstado(novoEstado)
-  }
-
-  function restaurarTodos() {
-    setOculto({ wa: false, luna: false, expiresAt: null })
-    limparEstado()
   }
 
   const ocultarPorFooter = footerVisivel ? 'opacity-0 pointer-events-none' : 'opacity-100'

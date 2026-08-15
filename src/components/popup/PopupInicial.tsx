@@ -121,7 +121,6 @@ export default function PopupInicial() {
               <picture>
                 {config.bannerMobile && <source media="(max-width: 767px)" srcSet={config.bannerMobile} />}
                 {config.bannerTablet && <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={config.bannerTablet} />}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={config.bannerDesktop || config.bannerTablet || config.bannerMobile || ''} alt={config.altText || ''} className="w-full h-auto block" />
               </picture>
             </a>
@@ -129,7 +128,6 @@ export default function PopupInicial() {
             <picture>
               {config.bannerMobile && <source media="(max-width: 767px)" srcSet={config.bannerMobile} />}
               {config.bannerTablet && <source media="(min-width: 768px) and (max-width: 1023px)" srcSet={config.bannerTablet} />}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={config.bannerDesktop || config.bannerTablet || config.bannerMobile || ''} alt={config.altText || ''} className="w-full h-auto block" />
             </picture>
           )

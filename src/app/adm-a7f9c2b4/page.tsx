@@ -129,9 +129,7 @@ export default function AdminDashboard() {
     </div>
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const m    = dados?.metrics || {}
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const var_ = dados?.variacao || {}
 
   const totalDecisoes = (m.totalPedidos || 0) + (m.totalPedidosPendentesPeriodo || 0)

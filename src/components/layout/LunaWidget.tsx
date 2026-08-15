@@ -357,7 +357,6 @@ export default function LunaWidget({ onOcultar, discreto = false }: LunaWidgetPr
         }
       }, 3000)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, aberto])
 
   // ── Reagir às mensagens para iniciar/cancelar timers ─────────────────────

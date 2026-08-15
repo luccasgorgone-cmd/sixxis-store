@@ -229,7 +229,6 @@ export async function GET(
   const nomeLimpo =
     (pedido.cliente.nome ?? '')
       .replace(/[/\\:*?"<>|]/g, '') // proibidos em nome de arquivo (inclui aspas duplas)
-      // eslint-disable-next-line no-control-regex
       .replace(/[\x00-\x1f\x7f]/g, '') // caracteres de controle
       .replace(/\s+/g, ' ') // colapsa espaços múltiplos
       .trim()
