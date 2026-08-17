@@ -8,6 +8,7 @@ import {
   Tag, Truck, MapPin, Search, User, ShoppingCart,
   Menu, X, Navigation, Clock, Mail, HelpCircle,
   Wind, Fan, Bike, Info, Phone, UserPlus, ShoppingBag, LogOut, ChevronDown, Handshake,
+  CreditCard, QrCode,
 } from 'lucide-react'
 import CarrinhoDrawer from '@/components/carrinho/CarrinhoDrawer'
 import { useSession } from 'next-auth/react'
@@ -15,6 +16,8 @@ import { logout } from '@/lib/logout'
 import { trackSearch } from '@/lib/analytics/events'
 import { useCarrinho, useTotalItens } from '@/hooks/useCarrinho'
 import { useScrollHeader } from '@/hooks/useScrollHeader'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
+import { DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Sugestao {
@@ -243,7 +246,9 @@ const NAV_LINKS = [
 // ── HEADER ────────────────────────────────────────────────────────────────────
 const TICKER_ITEMS = [
   { icon: Truck, text: 'Envio em até 24h para todo Brasil' },
-  { icon: MapPin,text: 'Entrega para todo o Brasil' },
+  { icon: MapPin, text: 'Entrega para todo o Brasil' },
+  { icon: CreditCard, text: `${MAX_PARCELAS_SEM_JUROS}x sem juros no cartão` },
+  { icon: QrCode, text: `${DESCONTO_PIX_PCT}% OFF no Pix` },
 ]
 
 export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: string }) {
@@ -427,10 +432,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         aria-hidden={!isTop}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-8 md:h-11">
+          <div className="flex items-center justify-center h-8 md:h-11">
 
-            {/* Mobile: ticker rotativo com fade */}
-            <div className="relative flex md:hidden items-center justify-center flex-1 h-full overflow-hidden">
+            {/* Ticker rotativo com fade — mesmo comportamento em mobile e desktop */}
+            <div className="relative flex items-center justify-center w-full h-full overflow-hidden">
               {TICKER_ITEMS.map((item, i) => {
                 const Icon = item.icon
                 const ativo = tickerIdx === i
@@ -445,27 +450,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
                     aria-hidden={!ativo}
                   >
                     <Icon size={13} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-                    <span className="text-[#0f2e2b] text-[11px] font-bold truncate">{item.text}</span>
+                    <span className="text-[#0f2e2b] text-[11px] md:text-sm font-bold md:font-extrabold truncate">{item.text}</span>
                   </div>
                 )
               })}
-            </div>
-
-            {/* Desktop: layout completo */}
-            <div className="hidden md:flex items-center gap-1.5 lg:gap-2">
-              <Truck size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-              <span className="text-[#0f2e2b] text-xs lg:text-sm font-extrabold whitespace-nowrap">
-                Envio em até 24h para todo Brasil
-              </span>
-            </div>
-
-            {/* 3o item — escondido em iPad pra evitar overflow, aparece so em lg+ */}
-            <div className="hidden lg:flex items-center gap-2">
-              <div className="w-px h-5 bg-[#0f2e2b]/20" />
-              <MapPin size={14} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-              <span className="text-[#0f2e2b]/85 text-sm font-semibold">
-                Entrega para todo o Brasil
-              </span>
             </div>
 
           </div>
