@@ -1,6 +1,5 @@
 import { emailBase, emailBotao, emailDivisor, svg, BRAND } from './sixxis-email-design'
 import { MAX_PARCELAS_SEM_JUROS } from './parcelamento'
-import { CUPOM_PC_CODIGO, CUPOM_PC_PERCENTUAL, CUPOM_PC_OFF, CUPOM_PC_DESCRICAO } from './cupom-primeira-compra'
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif"
 const fmtValor = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -53,17 +52,9 @@ export function templateBoasVindas({
     ${hero({
       eyebrow: 'Bem-vindo à família',
       titulo: `Olá, ${nome}`,
-      subtitulo: `Seu desconto de ${CUPOM_PC_PERCENTUAL}% já está ativo`,
     })}
     <div class="email-content-pad" style="padding:40px 32px;">
-      ${paragrafo(`Sua conta na <strong>Sixxis</strong> foi criada. Já liberamos um cupom exclusivo de boas-vindas para você usar na sua primeira compra.`)}
-
-      <div style="background:linear-gradient(135deg, ${BRAND.corEscura}, ${BRAND.corMedia});border-radius:16px;padding:28px;text-align:center;margin-bottom:28px;">
-        ${svg('gift', BRAND.corPrincipal, 32)}
-        <p style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin:10px 0 4px;font-family:${FONT};">Seu cupom de boas-vindas</p>
-        <p style="color:${BRAND.corPrincipal};font-size:32px;font-weight:900;letter-spacing:0.08em;margin-bottom:6px;font-family:${FONT};">${CUPOM_PC_CODIGO}</p>
-        <p style="color:#ffffff;font-size:14px;margin:0;font-family:${FONT};">${CUPOM_PC_DESCRICAO}</p>
-      </div>
+      ${paragrafo(`Sua conta na <strong>Sixxis</strong> foi criada com sucesso.`)}
 
       <div style="text-align:center;margin-bottom:24px;">
         ${emailBotao({ texto: 'Explorar produtos agora', href: `${siteUrl}/produtos` })}
@@ -73,8 +64,8 @@ export function templateBoasVindas({
       ${paragrafo(`Dúvidas? Fale com nossa equipe humana via WhatsApp <strong>(18) 99747-4701</strong>.`)}
     </div>`
   return emailBase({
-    assunto: `Bem-vindo à Sixxis, ${nome} — seu desconto de ${CUPOM_PC_PERCENTUAL}% já está ativo`,
-    preview: `Sua conta foi criada. Aproveite ${CUPOM_PC_OFF} com ${CUPOM_PC_CODIGO}.`,
+    assunto: `Bem-vindo à Sixxis, ${nome}`,
+    preview: `Sua conta foi criada. Explore nossos produtos.`,
     conteudo,
   })
 }
@@ -232,7 +223,7 @@ export function templateFollowupEntrega({
 // 5. ABANDONO DE CARRINHO (1h)
 // ══════════════════════════════════════════════
 export function templateAbandonoCarrinho({
-  nome, produto, imagemProduto, preco, carrinhoUrl, cupom = CUPOM_PC_CODIGO,
+  nome, produto, imagemProduto, preco, carrinhoUrl, cupom,
 }: {
   nome: string
   produto: string
@@ -248,7 +239,7 @@ export function templateAbandonoCarrinho({
       subtitulo: `Guardamos seu ${produto} por algumas horas`,
     })}
     <div class="email-content-pad" style="padding:40px 32px;">
-      ${paragrafo(`Seu carrinho te espera. Para facilitar, liberamos um cupom exclusivo para você finalizar hoje.`)}
+      ${paragrafo(`Seu carrinho te espera. Finalize hoje antes que o estoque acabe.`)}
 
       <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:24px;">
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
@@ -259,7 +250,7 @@ export function templateAbandonoCarrinho({
             <td style="padding-left:16px;font-family:${FONT};">
               <p style="font-size:15px;color:${BRAND.corEscura};font-weight:800;margin:0 0 6px;">${produto}</p>
               <p style="font-size:18px;color:${BRAND.corPrincipal};font-weight:900;margin:0 0 4px;">${fmtValor(preco)}</p>
-              <p style="font-size:11px;color:#6b7280;margin:0;">Use o cupom <strong style="color:${BRAND.corEscura};">${cupom}</strong> e ganhe ${CUPOM_PC_OFF}</p>
+              ${cupom ? `<p style="font-size:11px;color:#6b7280;margin:0;">Use o cupom <strong style="color:${BRAND.corEscura};">${cupom}</strong> no checkout</p>` : ''}
             </td>
           </tr>
         </table>
@@ -272,7 +263,7 @@ export function templateAbandonoCarrinho({
     </div>`
   return emailBase({
     assunto: `${nome}, esqueceu algo no carrinho? Guardamos para você`,
-    preview: `Finalize seu pedido com ${cupom} e ganhe ${CUPOM_PC_OFF}.`,
+    preview: cupom ? `Finalize seu pedido com ${cupom}.` : `Finalize seu pedido antes que o estoque acabe.`,
     conteudo,
   })
 }

@@ -19,7 +19,6 @@ import SelosConfianca from '@/components/checkout/SelosConfianca'
 import { FRETE_COPY } from '@/lib/copy/frete'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
-import { CUPOM_PC_CODIGO, CUPOM_PC_OFF, CUPOM_PC_DESCRICAO } from '@/lib/cupom-primeira-compra'
 
 // ─── TIPOS ───────────────────────────────────────────────────
 interface CarrinhoItem {
@@ -124,6 +123,10 @@ export default function CarrinhoPage() {
     // CEP salvo (descarta valor dummy "16015-480")
     const cepSalvo = localStorage.getItem('sixxis_cep') || ''
     if (cepSalvo && !/^16015-?480$/.test(cepSalvo)) {
+      // Real: hidrata o input de CEP a partir do localStorage no mount. Refatorar
+      // para tirar o setState do efeito exige mudar onde o valor inicial do
+      // input é lido (fora do escopo desta limpeza de cupom) — não mascarar de novo.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCepInput(cepSalvo)
     } else if (cepSalvo) {
       localStorage.removeItem('sixxis_cep')
@@ -291,9 +294,6 @@ export default function CarrinhoPage() {
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-black text-base transition-all hover:shadow-lg hover:-translate-y-0.5 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
             <Zap size={18} /> Explorar produtos
           </Link>
-          <p className="text-xs text-gray-400 mt-6">
-            Use o cupom <span className="font-bold text-[#3cbfb3]">{CUPOM_PC_CODIGO}</span> para {CUPOM_PC_DESCRICAO}
-          </p>
         </div>
       </div>
     )
@@ -486,10 +486,6 @@ export default function CarrinhoPage() {
                       <AlertCircle size={12} />{cupomErro}
                     </p>
                   )}
-                  <button onClick={() => setCupomInput(CUPOM_PC_CODIGO)}
-                    className="mt-2 text-xs text-[#3cbfb3] hover:underline">
-                    Primeira compra? Use <strong>{CUPOM_PC_CODIGO}</strong> para {CUPOM_PC_OFF} →
-                  </button>
                 </>
               )}
             </div>

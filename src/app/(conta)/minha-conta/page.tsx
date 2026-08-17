@@ -11,14 +11,13 @@ import {
 } from 'lucide-react'
 import { IconeNivel } from '@/components/ui/NivelIcons'
 import { NIVEIS_CONFIG, ORDEM_NIVEIS_GEM, normalizarNivel, getNivelSVGString } from '@/lib/avatares'
-import { CUPOM_PC_CODIGO } from '@/lib/cupom-primeira-compra'
 
 function formatValor(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 const VANTAGENS_NIVEL: Record<string, string[]> = {
-  Cristal:   ['2% cashback em compras', 'Acesso ao extrato completo', `Cupom de boas-vindas ${CUPOM_PC_CODIGO}`],
+  Cristal:   ['2% cashback em compras', 'Acesso ao extrato completo'],
   Topázio:   ['3% cashback em compras', 'Frete grátis acima de R$300', 'Acesso antecipado a ofertas', 'Suporte prioritário'],
   Safira:    ['4% cashback em compras', 'Frete grátis a partir de R$200', 'Desconto exclusivo 5%', 'Atendimento VIP', 'Brindes surpresa'],
   Diamante:  ['5% cashback em compras', 'Frete grátis em qualquer pedido', 'Desconto 8% exclusivo', 'Gerente dedicado', 'Acesso a lançamentos'],
