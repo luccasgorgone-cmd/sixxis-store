@@ -103,6 +103,12 @@ export default function AdminDashboard() {
   const [abaGraf,    setAbaGraf]    = useState<'receita' | 'pedidos'>('receita')
   const [atualizando, setAtualizando] = useState(false)
 
+  // Período "personalizado" só busca quando as duas datas estiverem preenchidas —
+  // sem isso, o efeito disparava com `periodo=personalizado` sem `dataInicio`/`dataFim`,
+  // e o backend caía silenciosamente no padrão de 30 dias enquanto a tela mostrava
+  // "Personalizado" selecionado (dado errado sem aviso nenhum).
+  const personalizadoIncompleto = periodo === 'personalizado' && (!dataInicio || !dataFim)
+
   async function carregar() {
     setAtualizando(true)
     const p = new URLSearchParams({ periodo })
@@ -116,7 +122,11 @@ export default function AdminDashboard() {
     finally { setLoading(false); setAtualizando(false) }
   }
 
-  useEffect(() => { carregar() }, [periodo, dataInicio, dataFim]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (personalizadoIncompleto) return
+    carregar()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [periodo, dataInicio, dataFim])
 
   if (loading) return (
     <div className="p-6 space-y-6">
@@ -200,11 +210,16 @@ export default function AdminDashboard() {
           </div>
           {periodo === 'personalizado' && (
             <div className="flex items-center gap-2">
-              <input type="date" value={dataInicio} onChange={e=>setDataInicio(e.target.value)}
+              <input type="date" value={dataInicio} max={dataFim || undefined}
+                onChange={e=>setDataInicio(e.target.value)}
                 className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm" />
               <span className="text-gray-400 text-sm">até</span>
-              <input type="date" value={dataFim} onChange={e=>setDataFim(e.target.value)}
+              <input type="date" value={dataFim} min={dataInicio || undefined}
+                onChange={e=>setDataFim(e.target.value)}
                 className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm" />
+              {personalizadoIncompleto && (
+                <span className="text-xs text-amber-600 font-semibold">Escolha as duas datas</span>
+              )}
             </div>
           )}
           <button onClick={carregar}
@@ -213,6 +228,11 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
+      {periodo === 'personalizado' && !personalizadoIncompleto && (
+        <p className="text-xs text-gray-400 -mt-4">
+          Exibindo: {fmtData(dataInicio)} – {fmtData(dataFim)}
+        </p>
+      )}
 
       {/* Alerta estoque crítico */}
       {(dados?.estoqueCritico?.length||0) > 0 && (

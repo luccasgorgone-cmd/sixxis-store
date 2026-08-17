@@ -1435,10 +1435,10 @@ export default function AdminPedidosPage() {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-gray-400 font-medium">Período:</span>
-            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
+            <input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)}
               className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]" />
             <span className="text-gray-400 text-sm">até</span>
-            <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
+            <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)}
               className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]" />
             {(from || to) && (
               <button onClick={() => { setFrom(''); setTo('') }}

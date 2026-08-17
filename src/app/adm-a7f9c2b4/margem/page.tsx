@@ -64,7 +64,13 @@ export default function MargemPage() {
   const [snapshotando, setSnapshotando] = useState(false)
   const [msgSnapshot, setMsgSnapshot] = useState('')
 
+  // Período "personalizado" só busca quando as duas datas estiverem preenchidas —
+  // sem isso, o fetch disparava com `periodo=personalizado` sem `from`/`to`, e o
+  // relatório mostrava dado de outro período com "Personalizado" marcado, sem aviso.
+  const personalizadoIncompleto = periodo === 'personalizado' && (!dataInicio || !dataFim)
+
   const carregar = useCallback(async () => {
+    if (personalizadoIncompleto) return
     setCarregando(true)
     setErro('')
     try {
@@ -85,7 +91,7 @@ export default function MargemPage() {
       setErro((e as Error).message)
     }
     setCarregando(false)
-  }, [periodo, dataInicio, dataFim])
+  }, [periodo, dataInicio, dataFim, personalizadoIncompleto])
 
   useEffect(() => { carregar() }, [carregar])
 
@@ -227,11 +233,16 @@ export default function MargemPage() {
           </div>
           {periodo === 'personalizado' && (
             <div className="flex items-center gap-2">
-              <input type="date" value={dataInicio} onChange={e=>setDataInicio(e.target.value)}
+              <input type="date" value={dataInicio} max={dataFim || undefined}
+                onChange={e=>setDataInicio(e.target.value)}
                 className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm" />
               <span className="text-gray-400 text-sm">até</span>
-              <input type="date" value={dataFim} onChange={e=>setDataFim(e.target.value)}
+              <input type="date" value={dataFim} min={dataInicio || undefined}
+                onChange={e=>setDataFim(e.target.value)}
                 className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm" />
+              {personalizadoIncompleto && (
+                <span className="text-xs text-amber-600 font-semibold">Escolha as duas datas</span>
+              )}
             </div>
           )}
           <button onClick={carregar}
@@ -240,6 +251,11 @@ export default function MargemPage() {
           </button>
         </div>
       </div>
+      {periodo === 'personalizado' && !personalizadoIncompleto && (
+        <p className="text-xs text-gray-400 -mt-4">
+          Exibindo: {fmtData(dataInicio)} – {fmtData(dataFim)}
+        </p>
+      )}
 
       {/* Filtro por forma + exportar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
