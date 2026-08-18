@@ -203,14 +203,11 @@ export function trackPurchase(
   frete: number,
   coupon?: string,
 ) {
-  push('purchase', {
-    transaction_id: transactionId,
-    currency: 'BRL',
-    value: total,
-    shipping: frete,
-    coupon,
-    items: items.map(paraGA4),
-  })
+  // GA4 (dataLayer 'purchase') NÃO dispara mais daqui — o webhook do Mercado
+  // Pago agora é a ÚNICA fonte desse evento (via Measurement Protocol,
+  // ver ga4-measurement-protocol.ts), pra cobrir Pix/boleto assíncrono e
+  // evitar contar a venda 2x. Meta Pixel (abaixo) e pipeline interno
+  // continuam disparando daqui, sem mudança.
   // Meta: Purchase. content_ids = g:id do feed. eventID = id do pedido →
   // DEDUPLICA com o CAPI (fase 2): o mesmo id sai no browser (aqui) e no servidor.
   trackMeta(

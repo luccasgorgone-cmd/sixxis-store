@@ -38,6 +38,8 @@ const criarPedidoSchema = z.object({
   // Atribuição Meta — cookies capturados no browser (CAPI Purchase os reutiliza).
   fbp: z.string().max(255).optional(),
   fbc: z.string().max(255).optional(),
+  // Atribuição GA4 — client_id capturado no browser (Measurement Protocol o reutiliza).
+  gaClientId: z.string().max(255).optional(),
 })
 
 export async function GET() {
@@ -95,7 +97,7 @@ export async function POST(request: NextRequest) {
   }
 
   // desconto do client é IGNORADO — recomputado no servidor a partir do cupom.
-  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, cashbackUsar, idempotencyKey, fbp, fbc } = parsed.data
+  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, cashbackUsar, idempotencyKey, fbp, fbc, gaClientId } = parsed.data
 
   // Atribuição Meta: IP/UA do request ORIGINAL do cliente (este POST), p/ o CAPI
   // Purchase — o webhook do MP vem do servidor do MP, não serviria. Persistidos
@@ -278,6 +280,7 @@ export async function POST(request: NextRequest) {
         idempotencyKey: idempotencyKey ?? null,
         fbp:             fbp ?? null,
         fbc:             fbc ?? null,
+        gaClientId:      gaClientId ?? null,
         clientIp,
         clientUserAgent,
         itens: {

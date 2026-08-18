@@ -24,6 +24,7 @@ import { useViaCep } from '@/hooks/useViaCep'
 import { trackAddPaymentInfo, trackAddShippingInfo, trackBeginCheckout } from '@/lib/analytics/events'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
+import { capturarGaClientId } from '@/lib/analytics/ga-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 import { FRETE_COPY } from '@/lib/copy/frete'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
@@ -901,6 +902,9 @@ function CheckoutContent() {
       // Atribuição Meta: cookies _fbp/_fbc (ou _fbc montado do ?fbclid=) p/ o
       // CAPI Purchase ligar a compra ao clique no anúncio. Best-effort.
       const { fbp, fbc } = capturarFbpFbc()
+      // Atribuição GA4: client_id do cookie _ga p/ o Measurement Protocol
+      // (webhook) ligar a compra à sessão/campanha de origem. Best-effort.
+      const gaClientId = capturarGaClientId()
 
       const pr = await fetch('/api/pedidos', {
         method:  'POST',
@@ -910,6 +914,7 @@ function CheckoutContent() {
           formaPagamento: 'mercado_pago',
           fbp,
           fbc,
+          gaClientId,
           frete,
           freteTipo: freteStatus === 'ok' ? freteTipoSel ?? undefined : undefined,
           itens: itens.map(i => ({

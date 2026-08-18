@@ -184,6 +184,13 @@ model Pedido {
   clientIp              String?           // IP do cliente na criação do pedido
   clientUserAgent       String?  @db.Text // user-agent do cliente na criação
   capiPurchaseEnviadoEm DateTime?         // guard de idempotência do CAPI Purchase
+  // ── Atribuição/GA4 Measurement Protocol ─────────────────────────────────────
+  // client_id do GA4 (cookie _ga, sem o prefixo GA1.N.), capturado no checkout
+  // (browser) e persistido p/ o Measurement Protocol do webhook atribuir a
+  // compra à sessão/campanha de origem. Best-effort: com Consent Mode v2, só
+  // existe se o cliente já aceitou cookies analíticos — null é esperado, não erro.
+  gaClientId            String?
+  ga4PurchaseEnviadoEm  DateTime?         // guard de idempotência do GA4 Measurement Protocol Purchase
   // ── Checkout multi-método (Orders API MP) ───────────────────────────────────
   // ADITIVO, de propósito: NÃO reaproveita `status` pra descrever o sub-estado
   // de um pagamento parcial (2 cartões, ou pix + cartão pro restante) porque

@@ -9,6 +9,7 @@ import { creditarCashback, estornarCashbackPedido } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 import { enviarPurchaseCapi } from '@/lib/analytics/meta-capi'
+import { enviarPurchaseGa4 } from '@/lib/analytics/ga4-measurement-protocol'
 import { feedId } from '@/lib/feed-id'
 import { isStatusPago, isStatusCancelado } from '@/lib/pedido-status'
 
@@ -332,6 +333,47 @@ export async function POST(req: NextRequest) {
         }
       } catch (e) {
         console.error('[mp:webhook] CAPI Purchase:', (e as Error).message)
+      }
+    }
+
+    // ── GA4 Measurement Protocol Purchase (server-side) ─────────────────────────
+    // Espelha o bloco do CAPI Meta acima, mesma estrutura de claim atômico. Vira
+    // a ÚNICA fonte do evento `purchase` pro GA4 (o dataLayer.push do browser foi
+    // removido de trackPurchase() em events.ts) — cobre Pix/boleto assíncrono,
+    // onde o cliente pode nunca voltar pra `/pedido/[id]/sucesso`.
+    if (novoStatus === 'approved') {
+      try {
+        const claimGa4 = await prisma.pedido.updateMany({
+          where: { id: pedido.id, ga4PurchaseEnviadoEm: null },
+          data: { ga4PurchaseEnviadoEm: new Date() },
+        })
+        if (claimGa4.count === 1) {
+          const resultadoGa4 = await enviarPurchaseGa4({
+            clientId: pedido.gaClientId,
+            transactionId: pedido.id,
+            value: pagamento.valor / 100,
+            currency: 'BRL',
+            items: pedido.itens.map((i) => ({
+              item_id: gIdItem(i),
+              price: Number(i.precoUnitario),
+              quantity: i.quantidade,
+            })),
+            shipping: Number(pedido.frete),
+            coupon: pedido.cupomCodigo ?? undefined,
+          })
+          if (!resultadoGa4.ok && !resultadoGa4.skipped) {
+            // skipped (sem gaClientId) não é falha — não libera o guard, não há
+            // motivo pra retry. Falha real (rede/API) libera pro próximo webhook.
+            await prisma.pedido
+              .update({ where: { id: pedido.id }, data: { ga4PurchaseEnviadoEm: null } })
+              .catch(() => {})
+            console.error('[mp:webhook] GA4 Purchase falhou:', resultadoGa4.error)
+          } else if (resultadoGa4.skipped) {
+            console.info(`[mp:webhook] GA4 Purchase pulado (pedido ${pedido.id}): ${resultadoGa4.error}`)
+          }
+        }
+      } catch (e) {
+        console.error('[mp:webhook] GA4 Purchase:', (e as Error).message)
       }
     }
 
