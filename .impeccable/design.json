@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-18T00:00:00Z",
+  "title": "Design System: Sixxis Store",
+  "extensions": {
+    "colorMeta": {
+      "tiffany": { "role": "primary", "displayName": "Verde Tiffany", "canonical": "#3cbfb3" },
+      "tiffany-dark": { "role": "primary-hover", "displayName": "Verde Tiffany Escuro", "canonical": "#2a9d8f" },
+      "tiffany-deep": { "role": "surface", "displayName": "Verde Tiffany Profundo", "canonical": "#0f2e2b" },
+      "destaque": { "role": "secondary", "displayName": "Laranja Urgência", "canonical": "#f59e0b" },
+      "brand-black": { "role": "neutral", "displayName": "Preto Marca", "canonical": "#0a0a0a" },
+      "texto-corpo": { "role": "neutral", "displayName": "Cinza Corpo", "canonical": "#1f2937" }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "Inter (corpo)", "purpose": "Texto de produto, preço, UI geral — carregado por padrão em todo o site." },
+      "display": { "displayName": "Poppins (opcional)", "purpose": "Disponível como tema configurável pelo admin; não confirmado como padrão de título em toda a superfície." }
+    },
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)", "purpose": "Elevação mínima — busca, dropdown leve." },
+      { "name": "shadow-md", "value": "0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.05)", "purpose": "Hover de card de produto." },
+      { "name": "shadow-lg", "value": "0 12px 28px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.06)", "purpose": "Modais e dropdown de busca expandido." }
+    ],
+    "motion": [
+      { "name": "hover-lift", "value": "transform 200ms ease, box-shadow 200ms ease", "purpose": "Transição padrão de hover em cards e botões (translateY -2px + sombra)." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Botão Primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA principal — adicionar ao carrinho, buscar, ações de conversão.",
+      "html": "<button class=\"ds-btn-primary\">Adicionar ao carrinho</button>",
+      "css": ".ds-btn-primary { background: #3cbfb3; color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; transition: background 0.2s, transform 0.2s, box-shadow 0.2s; } .ds-btn-primary:hover { background: #2a9d8f; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.06); } .ds-btn-primary:focus-visible { outline: 2px solid #3cbfb3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Badge de Promoção",
+      "kind": "chip",
+      "refersTo": "badge-promo",
+      "description": "Tag de desconto sobre a imagem do produto.",
+      "html": "<span class=\"ds-badge-promo\">-15%</span>",
+      "css": ".ds-badge-promo { background: #3cbfb3; color: #fff; font-weight: 900; font-size: 10px; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; }"
+    },
+    {
+      "name": "Card de Produto",
+      "kind": "card",
+      "refersTo": "card-produto",
+      "description": "Unidade repetida da grade de listagem de produtos.",
+      "html": "<article class=\"ds-card-produto\"><div class=\"ds-card-produto-img\"></div><div class=\"ds-card-produto-body\"><p class=\"ds-card-produto-nome\">Nome do produto</p><p class=\"ds-card-produto-preco\">R$ 999</p></div></article>",
+      "css": ".ds-card-produto { background: #fff; border: 1px solid rgba(229,231,235,0.8); border-radius: 16px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; } .ds-card-produto:hover { border-color: rgba(60,191,179,0.3); box-shadow: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.05); transform: translateY(-2px); } .ds-card-produto-body { padding: 12px; } .ds-card-produto-nome { font-size: 13px; font-weight: 500; color: #1f2937; } .ds-card-produto-preco { font-size: 17px; font-weight: 900; color: #111827; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Vitrine de Confiança",
+    "overview": "O sistema visual da Sixxis Store é o de uma loja de eletrodomésticos/fitness que quer parecer segura e organizada antes de parecer moderna — cartões brancos com borda sutil, um único verde-tiffany usado com moderação para ação e confiança, e hierarquia de preço/parcelamento sempre mais evidente que decoração. A paleta é estreita de propósito: um verde-tiffany carrega toda a marca sobre uma base neutra de branco e cinzas frios, sem gradientes e sem roxo/azul genérico de SaaS.",
+    "keyCharacteristics": [
+      "Cartões brancos com borda cinza clara, raio grande (16px), elevação só no hover",
+      "Verde-tiffany único como cor de ação",
+      "Tipografia utilitária (Inter) sem fonte decorativa de personalidade",
+      "Densidade tradicional de e-commerce priorizando escaneabilidade de preço"
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "O verde-tiffany é a única cor com peso de ação no sistema; ênfase adicional usa o laranja de urgência, nunca um acento novo.", "section": "colors" },
+      { "name": "The Price-First Rule", "body": "Em qualquer card/listagem, o preço leva peso tipográfico maior que o nome do produto.", "section": "typography" },
+      { "name": "The Hover-Only Elevation Rule", "body": "Cartões e botões ficam planos em repouso; sombra e elevação só aparecem em hover.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar o verde-tiffany (#3cbfb3) como única cor de ação/CTA em toda a superfície pública.",
+      "Do manter cards planos em repouso, com elevação só reagindo a hover.",
+      "Do dar ao preço mais peso tipográfico que o nome do produto em qualquer listagem.",
+      "Do manter o raio de card grande (16px) e o de botão pequeno (8px)."
+    ],
+    "donts": [
+      "Don't introduzir uma segunda cor de CTA competindo com o verde-tiffany.",
+      "Don't pré-selecionar ou esconder a escolha de variação (voltagem) em nenhum componente novo de compra.",
+      "Don't adicionar sombra permanente/decorativa a cards em repouso.",
+      "Don't assumir que Poppins está em uso consistente como fonte de display."
+    ]
+  }
+}
