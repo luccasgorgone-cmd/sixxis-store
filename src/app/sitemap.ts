@@ -1,6 +1,11 @@
 import type { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 
+// force-dynamic: sem isso o Next renderia isto estaticamente no build, e todo
+// lastModified congelaria na data do deploy em vez de refletir a data real do
+// produto/página — mata o benefício de crawl-priority pro Google.
+export const dynamic = 'force-dynamic'
+
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -6,7 +6,10 @@ import { feedIdProduto } from '@/lib/feed-id'
 // Substitui o feed MORTO do WooCommerce antigo. Sem auth; o único "redirect"
 // possível é o canônico apex→www do proxy.ts (registre a URL com www no MC).
 // force-dynamic (lê o DB no request, como o resto do app) + Cache-Control
-// s-maxage=1h: o CDN/borda guarda o XML por ~1h sem depender do DB no build.
+// s-maxage=10min: o CDN/borda guarda o XML por ~10min sem depender do DB no
+// build. Antes era s-maxage=1h + stale=24h (até 25h de preço desatualizado no
+// Merchant Center — causa provável do price_updated); encurtado pra reduzir
+// essa janela sem voltar a bater no DB a cada request do crawler do Google.
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +28,10 @@ const CATEGORIA_MAP: Record<string, { google: string; tipo: string }> = {
     tipo: 'Aspiradores',
   },
   spinning: {
-    google: 'Sporting Goods > Exercise & Fitness > Cardio > Exercise Bikes',
+    // Taxonomia oficial do Google (id 994, taxonomy-with-ids.en-US.txt) — faltava
+    // o nível "Cardio Machines" entre Cardio e Exercise Bikes, causando
+    // google_category_unrecognized no Merchant Center pras bikes Spinning.
+    google: 'Sporting Goods > Exercise & Fitness > Cardio > Cardio Machines > Exercise Bikes',
     tipo: 'Spinning & Fitness',
   },
 }
@@ -216,7 +222,7 @@ export async function GET() {
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+      'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
     },
   })
 }
