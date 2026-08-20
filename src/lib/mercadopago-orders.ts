@@ -17,7 +17,8 @@ import type { CreateOrderRequest } from 'mercadopago/dist/clients/order/create/t
 // updateTransaction/deleteTransaction operam por transactionId. NÃO está
 // confirmado contra o ambiente real do MP se deleteTransaction reverte uma
 // autorização de cartão não capturada — isso precisa de teste em sandbox
-// com credencial real (ver TODO-SANDBOX em checkout-multi-metodo.ts).
+// com credencial real (ver STATUS em checkout-multi-metodo.ts — a Orders API
+// está bloqueada pra conta da Sixxis, então isso segue sem teste possível).
 
 const accessToken =
   process.env.MERCADOPAGO_ACCESS_TOKEN ?? process.env.MP_ACCESS_TOKEN

@@ -11,11 +11,13 @@ import { calcularTotalBaseReais } from '@/lib/checkout-total'
 import { ordersClientDeps } from '@/lib/checkout-multi-metodo-deps'
 import { iniciarCheckoutPixMaisCartao } from '@/lib/checkout-multi-metodo'
 
-// TODO-SANDBOX (ver checkout-multi-metodo.ts): fluxo nunca exercitado contra
-// o MP real. Além disso, esta etapa 1 assume que a transação Pix criada
-// dentro de uma Order dispara o MESMO webhook topic=payment (por
-// mpPaymentId) que um pagamento Pix clássico — não confirmado. Ver o branch
-// novo em webhooks/mercado-pago/route.ts.
+// STATUS (ver checkout-multi-metodo.ts): testado em produção em 2026-08-20 —
+// a Orders API está bloqueada pra conta da Sixxis (403
+// PA_UNAUTHORIZED_RESULT_FROM_POLICIES), então esta rota não funciona ainda.
+// Além disso, esta etapa 1 assume que a transação Pix criada dentro de uma
+// Order dispara o MESMO webhook topic=payment (por mpPaymentId) que um
+// pagamento Pix clássico — não confirmado. Ver o branch novo em
+// webhooks/mercado-pago/route.ts.
 
 const schema = z.object({
   pedidoId: z.string().min(1),

@@ -5,16 +5,56 @@ import type { PaymentRequest } from 'mercadopago/dist/clients/order/commonTypes'
 // (OrdersClientDeps) — não importa o singleton direto — pra dar pra testar
 // sem token real e sem rede (ver checkout-multi-metodo.test.ts).
 //
-// TODO-SANDBOX (bloqueado por credencial — só o Luccas tem acesso à conta MP):
-// nada aqui foi validado contra o ambiente real do Mercado Pago ainda. Duas
-// coisas específicas NÃO estão confirmadas e podem mudar o desenho:
-//   1. Se `deleteTransaction` de fato reverte/desfaz uma transação de cartão
-//      já criada mas ainda não processada (ou se ela já gera cobrança).
-//   2. Se a Orders API aceita de fato 2 transações de tipos DIFERENTES
-//      (cartão + pix) na mesma order — a documentação pública nunca mostra
-//      esse combo, só exemplos de 1 método por vez (pesquisa anterior).
-// Antes de qualquer uso em produção: testar os dois fluxos abaixo em sandbox
-// com token de teste do Mercado Pago.
+// STATUS (testado em produção real em 2026-08-20): a conta MP da Sixxis
+// bloqueia toda a Orders API com 403 PA_UNAUTHORIZED_RESULT_FROM_POLICIES —
+// confirmado até num POST /v1/orders mínimo, sem nada de multi-método. Não é
+// bug de código, é autorização de conta que só o Mercado Pago libera (Suporte
+// MP, não um toggle no painel). Nenhum cartão chega a ser cobrado nesse
+// cenário: criarOrderManual falha antes de qualquer transação ser criada.
+// A dúvida original sobre `deleteTransaction` desfazer uma transação de
+// cartão segue sem resposta — só é testável depois da Orders API liberada.
+
+// O SDK oficial (mercadopago npm) lança o corpo de erro bruto da API em
+// requests não-2xx (`throw await response.json()`), não uma instância de
+// Error — por isso os catches abaixo tratam `unknown`, não `Error`.
+function detalheDoErro(e: unknown): string {
+  if (e && typeof e === 'object') {
+    const obj = e as Record<string, unknown>
+    const partes = [obj.code, obj.message].filter((v) => typeof v === 'string')
+    if (partes.length > 0) return partes.join(': ')
+  }
+  return e instanceof Error ? e.message : String(e)
+}
+
+// Limpeza best-effort: uma falha ao cancelar/remover não pode derrubar a
+// resposta ao cliente (o erro original já é o que importa reportar).
+async function cancelarOrderSemQuebrar(deps: OrdersClientDeps, orderId: string): Promise<void> {
+  try {
+    await deps.cancelarOrder(orderId)
+  } catch (e) {
+    console.error('[checkout-multi-metodo] falha ao cancelar order', orderId, detalheDoErro(e))
+  }
+}
+
+async function reverterCartaoA(
+  deps: OrdersClientDeps,
+  orderId: string,
+  transacaoA: { id?: string } | undefined,
+): Promise<void> {
+  if (transacaoA?.id) {
+    try {
+      await deps.removerTransacao(orderId, transacaoA.id)
+    } catch (e) {
+      console.error(
+        '[checkout-multi-metodo] falha ao remover transação A',
+        orderId,
+        transacaoA.id,
+        detalheDoErro(e),
+      )
+    }
+  }
+  await cancelarOrderSemQuebrar(deps, orderId)
+}
 
 export interface OrdersClientDeps {
   criarOrderManual(params: {
@@ -67,9 +107,9 @@ export interface CartaoCheckout {
 
 /**
  * Fluxo "2 cartões": cria 1 order manual, adiciona a transação do cartão A,
- * só adiciona a do cartão B se A foi aprovado. Se B falhar, tenta remover a
- * transação de A (ver TODO-SANDBOX acima — não confirmado que isso desfaz a
- * cobrança) e cancela a order.
+ * só adiciona a do cartão B se A foi aprovado. Se B falhar (recusa OU erro da
+ * API), tenta remover a transação de A (ver STATUS acima — deleteTransaction
+ * desfazer a cobrança segue não confirmado) e cancela a order.
  */
 export async function executarCheckoutDoisCartoes(
   deps: OrdersClientDeps,
@@ -90,50 +130,68 @@ export async function executarCheckoutDoisCartoes(
     }
   }
 
-  const order = await deps.criarOrderManual({
-    externalReference: params.externalReference,
-    totalAmount: centavosParaString(totalCentavos),
-    payerEmail: params.payerEmail,
-  })
-  if (!order.id) return { status: 'falhou', erro: 'order_sem_id' }
-  const orderId = order.id
+  let orderId: string
+  try {
+    const order = await deps.criarOrderManual({
+      externalReference: params.externalReference,
+      totalAmount: centavosParaString(totalCentavos),
+      payerEmail: params.payerEmail,
+    })
+    if (!order.id) return { status: 'falhou', erro: 'order_sem_id' }
+    orderId = order.id
+  } catch (e) {
+    return { status: 'falhou', erro: 'order_falhou_criar', detalhe: detalheDoErro(e) }
+  }
 
-  const respA = await deps.adicionarTransacao(orderId, {
-    amount: centavosParaString(cartaoA.valorCentavos),
-    payment_method: {
-      id: cartaoA.bandeiraId,
-      type: 'credit_card',
-      token: cartaoA.token,
-      installments: cartaoA.parcelas,
-    },
-  })
-  const transacaoA = respA.payments?.[0]
+  let transacaoA: { id?: string; status?: string; status_detail?: string } | undefined
+  try {
+    const respA = await deps.adicionarTransacao(orderId, {
+      amount: centavosParaString(cartaoA.valorCentavos),
+      payment_method: {
+        id: cartaoA.bandeiraId,
+        type: 'credit_card',
+        token: cartaoA.token,
+        installments: cartaoA.parcelas,
+      },
+    })
+    transacaoA = respA.payments?.[0]
+  } catch (e) {
+    await cancelarOrderSemQuebrar(deps, orderId)
+    return { status: 'falhou', orderId, erro: 'cartao_a_falhou', detalhe: detalheDoErro(e) }
+  }
   if (!pagamentoAprovado(transacaoA)) {
-    await deps.cancelarOrder(orderId)
+    await cancelarOrderSemQuebrar(deps, orderId)
     return { status: 'falhou', orderId, erro: 'cartao_a_recusado', detalhe: transacaoA?.status_detail }
   }
 
-  const respB = await deps.adicionarTransacao(orderId, {
-    amount: centavosParaString(cartaoB.valorCentavos),
-    payment_method: {
-      id: cartaoB.bandeiraId,
-      type: 'credit_card',
-      token: cartaoB.token,
-      installments: cartaoB.parcelas,
-    },
-  })
-  const transacaoB = respB.payments?.[0]
+  let transacaoB: { id?: string; status?: string; status_detail?: string } | undefined
+  try {
+    const respB = await deps.adicionarTransacao(orderId, {
+      amount: centavosParaString(cartaoB.valorCentavos),
+      payment_method: {
+        id: cartaoB.bandeiraId,
+        type: 'credit_card',
+        token: cartaoB.token,
+        installments: cartaoB.parcelas,
+      },
+    })
+    transacaoB = respB.payments?.[0]
+  } catch (e) {
+    await reverterCartaoA(deps, orderId, transacaoA)
+    return { status: 'falhou', orderId, erro: 'cartao_b_falhou', detalhe: detalheDoErro(e) }
+  }
   if (!pagamentoAprovado(transacaoB)) {
-    if (transacaoA?.id) {
-      await deps.removerTransacao(orderId, transacaoA.id)
-    }
-    await deps.cancelarOrder(orderId)
+    await reverterCartaoA(deps, orderId, transacaoA)
     return { status: 'falhou', orderId, erro: 'cartao_b_recusado', detalhe: transacaoB?.status_detail }
   }
 
-  const processado = await deps.processarOrder(orderId)
-  if (processado.status !== 'processed') {
-    return { status: 'falhou', orderId, erro: 'process_nao_confirmou', detalhe: processado.status_detail }
+  try {
+    const processado = await deps.processarOrder(orderId)
+    if (processado.status !== 'processed') {
+      return { status: 'falhou', orderId, erro: 'process_nao_confirmou', detalhe: processado.status_detail }
+    }
+  } catch (e) {
+    return { status: 'falhou', orderId, erro: 'process_falhou', detalhe: detalheDoErro(e) }
   }
 
   return { status: 'pago', orderId }
@@ -153,19 +211,29 @@ export async function iniciarCheckoutPixMaisCartao(
     valorPixCentavos: number
   },
 ): Promise<ResultadoCheckoutMultiMetodo & { qrCode?: unknown }> {
-  const order = await deps.criarOrderManual({
-    externalReference: params.externalReference,
-    totalAmount: centavosParaString(params.valorPixCentavos),
-    payerEmail: params.payerEmail,
-  })
-  if (!order.id) return { status: 'falhou', erro: 'order_sem_id' }
+  let orderId: string
+  try {
+    const order = await deps.criarOrderManual({
+      externalReference: params.externalReference,
+      totalAmount: centavosParaString(params.valorPixCentavos),
+      payerEmail: params.payerEmail,
+    })
+    if (!order.id) return { status: 'falhou', erro: 'order_sem_id' }
+    orderId = order.id
+  } catch (e) {
+    return { status: 'falhou', erro: 'order_falhou_criar', detalhe: detalheDoErro(e) }
+  }
 
-  const respPix = await deps.adicionarTransacao(order.id, {
-    amount: centavosParaString(params.valorPixCentavos),
-    payment_method: { id: 'pix', type: 'bank_transfer' },
-  })
-
-  return { status: 'aguardando_pix', orderId: order.id, qrCode: respPix.payments?.[0] }
+  try {
+    const respPix = await deps.adicionarTransacao(orderId, {
+      amount: centavosParaString(params.valorPixCentavos),
+      payment_method: { id: 'pix', type: 'bank_transfer' },
+    })
+    return { status: 'aguardando_pix', orderId, qrCode: respPix.payments?.[0] }
+  } catch (e) {
+    await cancelarOrderSemQuebrar(deps, orderId)
+    return { status: 'falhou', orderId, erro: 'pix_falhou', detalhe: detalheDoErro(e) }
+  }
 }
 
 /**
@@ -180,16 +248,26 @@ export async function completarCheckoutPixMaisCartao(
   params: { orderId: string; valorRestanteCentavos: number; cartao: CartaoCheckout },
 ): Promise<ResultadoCheckoutMultiMetodo> {
   const { orderId, cartao } = params
-  const resp = await deps.adicionarTransacao(orderId, {
-    amount: centavosParaString(params.valorRestanteCentavos),
-    payment_method: {
-      id: cartao.bandeiraId,
-      type: 'credit_card',
-      token: cartao.token,
-      installments: cartao.parcelas,
-    },
-  })
-  const transacaoCartao = resp.payments?.[0]
+  let transacaoCartao: { status?: string; status_detail?: string } | undefined
+  try {
+    const resp = await deps.adicionarTransacao(orderId, {
+      amount: centavosParaString(params.valorRestanteCentavos),
+      payment_method: {
+        id: cartao.bandeiraId,
+        type: 'credit_card',
+        token: cartao.token,
+        installments: cartao.parcelas,
+      },
+    })
+    transacaoCartao = resp.payments?.[0]
+  } catch (e) {
+    return {
+      status: 'aguardando_pagamento_restante',
+      orderId,
+      erro: 'cartao_falhou_apos_pix',
+      detalhe: detalheDoErro(e),
+    }
+  }
   if (!pagamentoAprovado(transacaoCartao)) {
     return {
       status: 'aguardando_pagamento_restante',
@@ -199,9 +277,18 @@ export async function completarCheckoutPixMaisCartao(
     }
   }
 
-  const processado = await deps.processarOrder(orderId)
-  if (processado.status !== 'processed') {
-    return { status: 'aguardando_pagamento_restante', orderId, erro: 'process_nao_confirmou' }
+  try {
+    const processado = await deps.processarOrder(orderId)
+    if (processado.status !== 'processed') {
+      return { status: 'aguardando_pagamento_restante', orderId, erro: 'process_nao_confirmou' }
+    }
+  } catch (e) {
+    return {
+      status: 'aguardando_pagamento_restante',
+      orderId,
+      erro: 'process_falhou_apos_pix',
+      detalhe: detalheDoErro(e),
+    }
   }
 
   return { status: 'pago', orderId }

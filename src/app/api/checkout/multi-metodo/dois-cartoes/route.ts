@@ -15,9 +15,10 @@ import { ordersClientDeps } from '@/lib/checkout-multi-metodo-deps'
 import { executarCheckoutDoisCartoes } from '@/lib/checkout-multi-metodo'
 import { buscarOrder } from '@/lib/mercadopago-orders'
 
-// TODO-SANDBOX (ver checkout-multi-metodo.ts): esta rota nunca foi exercitada
-// contra o Mercado Pago real — falta credencial de sandbox (só o Luccas tem
-// acesso à conta MP). Não usar em produção sem validar os 2 fluxos primeiro.
+// STATUS (ver checkout-multi-metodo.ts): testado em produção em 2026-08-20 —
+// a Orders API está bloqueada pra conta da Sixxis (403
+// PA_UNAUTHORIZED_RESULT_FROM_POLICIES), então esta rota não funciona ainda.
+// Não é bug de código; precisa do Mercado Pago liberar a Orders API na conta.
 
 const cartaoSchema = z.object({
   token: z.string().min(1),

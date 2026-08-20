@@ -109,6 +109,75 @@ describe('executarCheckoutDoisCartoes', () => {
     })
     expect(r).toMatchObject({ status: 'falhou', erro: 'process_nao_confirmou' })
   })
+
+  it('reporta falha (sem crash) se criarOrderManual lançar erro da API, ex. bloqueio de política', async () => {
+    const erroMp = { blocked_by: 'PolicyAgent', code: 'PA_UNAUTHORIZED_RESULT_FROM_POLICIES', status: 403, message: 'At least one policy returned UNAUTHORIZED.' }
+    const deps = mockDeps({
+      criarOrderManual: vi.fn().mockRejectedValue(erroMp),
+    })
+    const r = await executarCheckoutDoisCartoes(deps, {
+      externalReference: 'ped_6',
+      payerEmail: 'a@b.com',
+      totalCentavos: 10000,
+      cartaoA: cartao(4000),
+      cartaoB: cartao(6000),
+    })
+    expect(r).toMatchObject({
+      status: 'falhou',
+      erro: 'order_falhou_criar',
+      detalhe: expect.stringContaining('PA_UNAUTHORIZED_RESULT_FROM_POLICIES'),
+    })
+    expect(deps.adicionarTransacao).not.toHaveBeenCalled()
+  })
+
+  it('reporta falha (sem crash) e cancela a order se adicionarTransacao do cartão A lançar erro', async () => {
+    const deps = mockDeps({
+      adicionarTransacao: vi.fn().mockRejectedValue(new Error('timeout de rede')),
+    })
+    const r = await executarCheckoutDoisCartoes(deps, {
+      externalReference: 'ped_7',
+      payerEmail: 'a@b.com',
+      totalCentavos: 10000,
+      cartaoA: cartao(4000),
+      cartaoB: cartao(6000),
+    })
+    expect(r).toMatchObject({ status: 'falhou', erro: 'cartao_a_falhou', orderId: 'order_1', detalhe: 'timeout de rede' })
+    expect(deps.cancelarOrder).toHaveBeenCalledWith('order_1')
+  })
+
+  it('reporta falha (sem crash), remove a transação A e cancela a order se adicionarTransacao do cartão B lançar erro', async () => {
+    const deps = mockDeps({
+      adicionarTransacao: vi
+        .fn()
+        .mockResolvedValueOnce({ payments: [{ id: 'txA', ...APROVADO }] })
+        .mockRejectedValueOnce(new Error('timeout de rede')),
+    })
+    const r = await executarCheckoutDoisCartoes(deps, {
+      externalReference: 'ped_8',
+      payerEmail: 'a@b.com',
+      totalCentavos: 10000,
+      cartaoA: cartao(4000),
+      cartaoB: cartao(6000),
+    })
+    expect(r).toMatchObject({ status: 'falhou', erro: 'cartao_b_falhou' })
+    expect(deps.removerTransacao).toHaveBeenCalledWith('order_1', 'txA')
+    expect(deps.cancelarOrder).toHaveBeenCalledWith('order_1')
+  })
+
+  it('não crasha mesmo se a limpeza (cancelarOrder) também lançar erro', async () => {
+    const deps = mockDeps({
+      adicionarTransacao: vi.fn().mockRejectedValue(new Error('falhou')),
+      cancelarOrder: vi.fn().mockRejectedValue(new Error('cancelamento também falhou')),
+    })
+    const r = await executarCheckoutDoisCartoes(deps, {
+      externalReference: 'ped_9',
+      payerEmail: 'a@b.com',
+      totalCentavos: 10000,
+      cartaoA: cartao(4000),
+      cartaoB: cartao(6000),
+    })
+    expect(r).toMatchObject({ status: 'falhou', erro: 'cartao_a_falhou' })
+  })
 })
 
 describe('iniciarCheckoutPixMaisCartao', () => {
@@ -127,6 +196,31 @@ describe('iniciarCheckoutPixMaisCartao', () => {
       'order_1',
       expect.objectContaining({ payment_method: { id: 'pix', type: 'bank_transfer' } }),
     )
+  })
+
+  it('reporta falha (sem crash) e cancela a order se adicionarTransacao do pix lançar erro', async () => {
+    const deps = mockDeps({
+      adicionarTransacao: vi.fn().mockRejectedValue(new Error('falhou')),
+    })
+    const r = await iniciarCheckoutPixMaisCartao(deps, {
+      externalReference: 'ped_7',
+      payerEmail: 'a@b.com',
+      valorPixCentavos: 3000,
+    })
+    expect(r).toMatchObject({ status: 'falhou', erro: 'pix_falhou', orderId: 'order_1' })
+    expect(deps.cancelarOrder).toHaveBeenCalledWith('order_1')
+  })
+
+  it('reporta falha (sem crash) se criarOrderManual lançar erro da API', async () => {
+    const deps = mockDeps({
+      criarOrderManual: vi.fn().mockRejectedValue({ code: 'PA_UNAUTHORIZED_RESULT_FROM_POLICIES' }),
+    })
+    const r = await iniciarCheckoutPixMaisCartao(deps, {
+      externalReference: 'ped_8',
+      payerEmail: 'a@b.com',
+      valorPixCentavos: 3000,
+    })
+    expect(r).toMatchObject({ status: 'falhou', erro: 'order_falhou_criar' })
   })
 })
 
@@ -155,5 +249,32 @@ describe('completarCheckoutPixMaisCartao', () => {
     expect(r).toMatchObject({ status: 'aguardando_pagamento_restante', erro: 'cartao_recusado_apos_pix' })
     expect(deps.cancelarOrder).not.toHaveBeenCalled()
     expect(deps.removerTransacao).not.toHaveBeenCalled()
+  })
+
+  it('NÃO estorna o pix quando adicionarTransacao do cartão lançar erro — vira aguardando_pagamento_restante', async () => {
+    const deps = mockDeps({
+      adicionarTransacao: vi.fn().mockRejectedValue(new Error('timeout de rede')),
+    })
+    const r = await completarCheckoutPixMaisCartao(deps, {
+      orderId: 'order_1',
+      valorRestanteCentavos: 7000,
+      cartao: cartao(7000),
+    })
+    expect(r).toMatchObject({ status: 'aguardando_pagamento_restante', erro: 'cartao_falhou_apos_pix' })
+    expect(deps.cancelarOrder).not.toHaveBeenCalled()
+    expect(deps.removerTransacao).not.toHaveBeenCalled()
+  })
+
+  it('reporta falha (sem crash) se o process final lançar erro mesmo com o cartão aprovado', async () => {
+    const deps = mockDeps({
+      adicionarTransacao: vi.fn().mockResolvedValue({ payments: [{ id: 'txCard', ...APROVADO }] }),
+      processarOrder: vi.fn().mockRejectedValue(new Error('falhou')),
+    })
+    const r = await completarCheckoutPixMaisCartao(deps, {
+      orderId: 'order_1',
+      valorRestanteCentavos: 7000,
+      cartao: cartao(7000),
+    })
+    expect(r).toMatchObject({ status: 'aguardando_pagamento_restante', erro: 'process_falhou_apos_pix' })
   })
 })

@@ -14,8 +14,9 @@ import { ordersClientDeps } from '@/lib/checkout-multi-metodo-deps'
 import { completarCheckoutPixMaisCartao } from '@/lib/checkout-multi-metodo'
 import { buscarOrder } from '@/lib/mercadopago-orders'
 
-// TODO-SANDBOX (ver checkout-multi-metodo.ts): fluxo nunca exercitado contra
-// o MP real.
+// STATUS (ver checkout-multi-metodo.ts): testado em produção em 2026-08-20 —
+// a Orders API está bloqueada pra conta da Sixxis (403
+// PA_UNAUTHORIZED_RESULT_FROM_POLICIES), então esta rota não funciona ainda.
 //
 // Só chamável quando o Pix da etapa 1 já foi confirmado pelo webhook
 // (Pedido.multiMetodoStatus === 'aguardando_pagamento_restante') — o cliente
