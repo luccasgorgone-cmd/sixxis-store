@@ -10,6 +10,11 @@ interface Props {
   pgtoId: string
   expiraEm: string | null
   onPago: () => void
+  // Polling customizado, opcional. Ausente → comportamento original (consulta
+  // /api/checkout/status/[pagamentoId], que marca o Pedido inteiro como pago).
+  // Usado pelo checkout multi-método, onde essa consulta padrão seria errada:
+  // a perna Pix aprovar sozinha não pode fechar o pedido (falta a perna cartão).
+  pollStatus?: () => Promise<'approved' | 'rejected' | 'cancelled' | 'pending'>
 }
 
 const POLL_MS = 4000
@@ -20,6 +25,7 @@ export default function PixPainel({
   pgtoId,
   expiraEm,
   onPago,
+  pollStatus,
 }: Props) {
   const [copiado, setCopiado] = useState(false)
   const [statusInfo, setStatusInfo] = useState<string>('Aguardando pagamento...')
@@ -36,15 +42,21 @@ export default function PixPainel({
 
     async function check() {
       try {
-        const r = await fetch(`/api/checkout/status/${pgtoId}`, {
-          credentials: 'include',
-        })
-        if (!r.ok) return
-        const d = (await r.json()) as { status?: string }
+        let status: string | undefined
+        if (pollStatus) {
+          status = await pollStatus()
+        } else {
+          const r = await fetch(`/api/checkout/status/${pgtoId}`, {
+            credentials: 'include',
+          })
+          if (!r.ok) return
+          const d = (await r.json()) as { status?: string }
+          status = d.status
+        }
         if (cancelled) return
-        if (d.status === 'approved') {
+        if (status === 'approved') {
           onPago()
-        } else if (d.status === 'rejected' || d.status === 'cancelled') {
+        } else if (status === 'rejected' || status === 'cancelled') {
           setStatusInfo('Pagamento não foi concluído. Tente novamente.')
         }
       } catch {
@@ -59,7 +71,7 @@ export default function PixPainel({
       cancelled = true
       clearInterval(tick)
     }
-  }, [pgtoId, onPago])
+  }, [pgtoId, onPago, pollStatus])
 
   useEffect(() => {
     const t = setInterval(() => {

@@ -32,6 +32,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb'
 import SelosConfianca from '@/components/checkout/SelosConfianca'
 
 const CheckoutBricks = dynamic(() => import('./CheckoutBricks'), { ssr: false })
+const CheckoutMultiMetodo = dynamic(() => import('./CheckoutMultiMetodo'), { ssr: false })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -561,6 +562,22 @@ function CheckoutContent() {
   const [erro, setErro]             = useState('')
   const [pedidoId, setPedidoId]     = useState<string | null>(null)
 
+  // Pagamento em 2 métodos (2 cartões, ou Pix+cartão) — atrás de feature flag
+  // server-side (CHECKOUT_MULTI_METODO_HABILITADO), oculto até validado em
+  // sandbox contra o MP real. 'normal' = fluxo clássico de sempre.
+  const [multiMetodoHabilitado, setMultiMetodoHabilitado] = useState(false)
+  const [modoPagamento, setModoPagamento] = useState<'normal' | 'multi'>('normal')
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/checkout/config')
+      .then((r) => r.json())
+      .then((d: { multiMetodoHabilitado?: boolean }) => {
+        if (!cancelled) setMultiMetodoHabilitado(Boolean(d.multiMetodoHabilitado))
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
   // Cashback resgatado nesta compra (R$). O servidor recapa em 10% do subtotal.
   const [cashbackUsar, setCashbackUsar] = useState(0)
 
@@ -1059,12 +1076,51 @@ function CheckoutContent() {
                   ← Voltar
                 </button>
               </div>
-              {pedidoId && (
-                <CheckoutBricks
+              {pedidoId && modoPagamento === 'normal' && (
+                <>
+                  <CheckoutBricks
+                    pedidoId={pedidoId}
+                    valor={totalFinal}
+                    payerEmail={ident.email}
+                    payerNome={ident.nome}
+                    payerCpf={ident.cpf}
+                    onMetodoSelecionado={(metodo) => {
+                      trackAddPaymentInfo(
+                        itens.map(i => ({
+                          item_id: i.feedId ?? i.produtoId,
+                          produto_id: i.produtoId,
+                          item_name: i.nome,
+                          item_brand: 'Sixxis',
+                          price: i.preco,
+                          quantity: i.quantidade,
+                          variant: i.variacaoNome,
+                        })),
+                        totalFinal,
+                        metodo,
+                        cupom?.codigo,
+                      )
+                    }}
+                    onSucesso={() => {
+                      limparCarrinho()
+                      router.push(`/pedido/${pedidoId}/sucesso`)
+                    }}
+                  />
+                  {multiMetodoHabilitado && (
+                    <button
+                      type="button"
+                      onClick={() => setModoPagamento('multi')}
+                      className="w-full text-center text-xs text-gray-400 hover:text-[#3cbfb3] mt-3"
+                    >
+                      Prefere dividir o pagamento em 2 métodos?
+                    </button>
+                  )}
+                </>
+              )}
+              {pedidoId && modoPagamento === 'multi' && (
+                <CheckoutMultiMetodo
                   pedidoId={pedidoId}
                   valor={totalFinal}
                   payerEmail={ident.email}
-                  payerNome={ident.nome}
                   payerCpf={ident.cpf}
                   onMetodoSelecionado={(metodo) => {
                     trackAddPaymentInfo(
@@ -1086,6 +1142,7 @@ function CheckoutContent() {
                     limparCarrinho()
                     router.push(`/pedido/${pedidoId}/sucesso`)
                   }}
+                  onVoltar={() => setModoPagamento('normal')}
                 />
               )}
             </>

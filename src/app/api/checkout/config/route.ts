@@ -6,5 +6,6 @@ export async function GET() {
     publicKey: MP_PUBLIC_KEY,
     env: MP_ENV,
     enabled: Boolean(MP_PUBLIC_KEY),
+    multiMetodoHabilitado: process.env.CHECKOUT_MULTI_METODO_HABILITADO === 'true',
   })
 }
