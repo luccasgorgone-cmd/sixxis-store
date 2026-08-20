@@ -210,6 +210,7 @@ model Pedido {
   cliente        Cliente             @relation(fields: [clienteId], references: [id])
   endereco       Endereco            @relation(fields: [enderecoId], references: [id])
   pagamentos     Pagamento[]
+  tentativasMultiMetodo TentativaMultiMetodo[]
   garantias      GarantiaEstendida[]
 
   @@index([clienteId])
@@ -277,10 +278,71 @@ model Pagamento {
   aprovadoEm  DateTime?
   rejeitadoEm DateTime?
 
+  // ── Checkout multi-método (Payments API — ver checkout-multi-metodo.ts) ────
+  // Uma "perna" é 1 chamada de pagamento dentro de uma TentativaMultiMetodo
+  // (ex.: cartão A, cartão B, pix, cartão-restante). idempotencyKey é
+  // determinística (tentativaId+perna) e vai como requestOptions.idempotencyKey
+  // pro SDK do MP — dedup NATIVO do lado do MP, não só no nosso banco (uma
+  // chamada repetida com a mesma key retorna o MESMO pagamento, nunca cobra 2x).
+  tentativaMultiMetodoId String?
+  tentativaMultiMetodo   TentativaMultiMetodo? @relation(fields: [tentativaMultiMetodoId], references: [id])
+  perna                  String? // 'A' | 'B' | 'pix' | 'restante'
+  idempotencyKey         String? @unique
+  // Estado do estorno/cancelamento desta perna quando a tentativa falha depois
+  // dela já ter movido dinheiro. null = nunca precisou reverter.
+  // nao_aplicavel = revisado e não havia nada pra reverter (ex.: recusado).
+  // pendente = reversão em andamento (guard contra duplo-estorno).
+  // estornado = PaymentRefund confirmado. cancelado = Payment.cancel confirmado
+  // (perna só autorizada, nunca capturada). falhou_estorno = tentativa(s)
+  // falharam — pega retry pela reconciliação, ver checkout-multi-metodo.ts.
+  estornoStatus      String?
+  estornoTentativas  Int     @default(0)
+  estornoErro        String? @db.Text
+
   @@index([pedidoId])
   @@index([mpPaymentId])
   @@index([mpStatus])
   @@index([createdAt])
+  @@index([tentativaMultiMetodoId])
+  @@index([estornoStatus])
+}
+
+// Uma tentativa de checkout multi-método (2 cartões, ou pix + cartão pro
+// restante) — agrupa as 1-2 "pernas" (Pagamento) que a compõem e guarda o
+// estado da orquestração em si (não cabe em Pedido.multiMetodoStatus, que já
+// é reaproveitado pra exibição/compat com o desenho anterior via Orders API).
+model TentativaMultiMetodo {
+  id       String @id @default(cuid())
+  pedidoId String
+  pedido   Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  tipo String // 'dois_cartoes' | 'pix_mais_cartao'
+  // em_andamento | aguardando_confirmacao (perna pendente, esperando webhook) |
+  // aguardando_pix | aguardando_pagamento_restante | pago | falhou | cancelado
+  status        String @default("em_andamento")
+  totalCentavos Int
+
+  // Só pix_mais_cartao: prazo pro Pix confirmar (= Pagamento.pixExpiraEm da
+  // perna pix). Passado o prazo, a reconciliação cancela a tentativa e reverte
+  // qualquer perna que tenha, por acaso, movido dinheiro.
+  prazoExpiracao DateTime?
+
+  // Payload da PRÓXIMA perna a cobrar quando uma perna pendente resolver via
+  // webhook (ex.: dados do cartão B, se o cartão A ficou "pending"/"in_process"
+  // até a decisão poder ser tomada). Guarda só o token já tokenizado (de uso
+  // único, expira em dias) — nunca dado de cartão cru.
+  proximaAcao Json?
+
+  erro    String?
+  detalhe String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pagamentos Pagamento[]
+
+  @@index([pedidoId])
+  @@index([status])
 }
 
 model ItemPedido {

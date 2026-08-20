@@ -48,3 +48,22 @@ export function feedId(
   }
   return feedIdProduto(p)
 }
+
+// g:id de 1 item de PEDIDO (resolve variação selecionada → SKU da variação;
+// senão item único) — usado pelo webhook do MP (CAPI/GA4) e pela orquestração
+// do checkout multi-método, que precisam do MESMO id que o merchant-feed.xml.
+export function gIdItemPedido(i: {
+  variacaoId: string | null
+  produto: {
+    sku: string | null
+    slug: string
+    variacoes: { id: string; sku: string; preco: unknown }[]
+  }
+}): string {
+  const v = i.variacaoId ? i.produto.variacoes.find((x) => x.id === i.variacaoId) : null
+  return feedId(
+    { sku: i.produto.sku, slug: i.produto.slug },
+    v ? { sku: v.sku, preco: v.preco as number | null } : null,
+    i.produto.variacoes.map((x) => ({ sku: x.sku, preco: x.preco as number | null })),
+  )
+}

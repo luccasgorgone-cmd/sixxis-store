@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { auditLog } from '@/lib/audit'
@@ -8,16 +7,15 @@ import { isStatusPendente } from '@/lib/pedido-status'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 import { calcularTotalBaseReais } from '@/lib/checkout-total'
-import { ordersClientDeps } from '@/lib/checkout-multi-metodo-deps'
-import { iniciarCheckoutPixMaisCartao } from '@/lib/checkout-multi-metodo'
+import { paymentsClientDeps } from '@/lib/mercadopago-payments-deps'
+import { processarTentativa } from '@/lib/checkout-multi-metodo-orquestrador'
 
-// STATUS (ver checkout-multi-metodo.ts): testado em produção em 2026-08-20 —
-// a Orders API está bloqueada pra conta da Sixxis (403
-// PA_UNAUTHORIZED_RESULT_FROM_POLICIES), então esta rota não funciona ainda.
-// Além disso, esta etapa 1 assume que a transação Pix criada dentro de uma
-// Order dispara o MESMO webhook topic=payment (por mpPaymentId) que um
-// pagamento Pix clássico — não confirmado. Ver o branch novo em
-// webhooks/mercado-pago/route.ts.
+// STATUS (ver checkout-multi-metodo.ts): reconstruído sobre a Payments API
+// clássica em 2026-08-20 depois de confirmar em produção que a Orders API
+// está bloqueada pra conta da Sixxis (403 PA_UNAUTHORIZED_RESULT_FROM_POLICIES,
+// sem previsão de desbloqueio). O pix desta etapa 1 é um pagamento Pix
+// CLÁSSICO (mesmo tipo já usado no checkout de 1 método) — o webhook que já
+// existe pra ele funciona sem nenhuma suposição nova.
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -76,62 +74,51 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const resultado = await iniciarCheckoutPixMaisCartao(ordersClientDeps, {
-    externalReference: pedido.id,
-    payerEmail: payerEmail ?? pedido.cliente.email,
-    valorPixCentavos,
+  const tentativa = await prisma.tentativaMultiMetodo.create({
+    data: {
+      pedidoId: pedido.id,
+      tipo: 'pix_mais_cartao',
+      totalCentavos,
+      proximaAcao: {
+        payerEmail: payerEmail ?? pedido.cliente.email,
+        valorPixCentavos,
+      },
+    },
   })
 
-  if (resultado.status !== 'aguardando_pix' || !resultado.orderId) {
+  await processarTentativa(paymentsClientDeps, tentativa.id)
+
+  const final = await prisma.tentativaMultiMetodo.findUniqueOrThrow({
+    where: { id: tentativa.id },
+    include: { pagamentos: { where: { perna: 'pix' } } },
+  })
+  const pernaPix = final.pagamentos[0]
+
+  if (!pernaPix) {
     await auditLog({
       req,
       actor: session.user.id,
       action: 'checkout.multi_metodo.pix_mais_cartao.iniciar.falhou',
       target: pedido.id,
-      metadata: { erro: resultado.erro },
+      metadata: { erro: final.erro, tentativaId: tentativa.id },
     })
-    return NextResponse.json({ error: 'Não foi possível iniciar o Pix', erro: resultado.erro }, { status: 502 })
+    return NextResponse.json({ error: 'Não foi possível iniciar o Pix', erro: final.erro }, { status: 502 })
   }
-
-  const qrCode = resultado.qrCode as
-    | { id?: string; status?: string; date_of_expiration?: string; payment_method?: { qr_code?: string; qr_code_base64?: string } }
-    | undefined
-
-  await prisma.$transaction([
-    prisma.pedido.update({
-      where: { id: pedido.id },
-      data: { mpOrderId: resultado.orderId, multiMetodoStatus: 'aguardando_pix' },
-    }),
-    prisma.pagamento.create({
-      data: {
-        pedidoId: pedido.id,
-        mpPaymentId: qrCode?.id ? String(qrCode.id) : null,
-        mpStatus: qrCode?.status ?? 'pending',
-        metodo: 'pix',
-        valor: valorPixCentavos,
-        qrCodeBase64: qrCode?.payment_method?.qr_code_base64 ?? null,
-        qrCodeCopiaECola: qrCode?.payment_method?.qr_code ?? null,
-        pixExpiraEm: qrCode?.date_of_expiration ? new Date(qrCode.date_of_expiration) : null,
-        payerEmail: payerEmail ?? pedido.cliente.email,
-        rawResponse: qrCode ? (JSON.parse(JSON.stringify(qrCode)) as Prisma.InputJsonValue) : undefined,
-      },
-    }),
-  ])
 
   await auditLog({
     req,
     actor: session.user.id,
     action: 'checkout.multi_metodo.pix_mais_cartao.iniciado',
     target: pedido.id,
-    metadata: { orderId: resultado.orderId, valorPixCentavos },
+    metadata: { tentativaId: tentativa.id, valorPixCentavos },
   })
 
   return NextResponse.json({
     ok: true,
-    orderId: resultado.orderId,
-    status: 'aguardando_pix',
-    qrCodeBase64: qrCode?.payment_method?.qr_code_base64 ?? null,
-    qrCodeCopiaECola: qrCode?.payment_method?.qr_code ?? null,
+    tentativaId: tentativa.id,
+    status: final.status,
+    qrCodeBase64: pernaPix.qrCodeBase64,
+    qrCodeCopiaECola: pernaPix.qrCodeCopiaECola,
     valorRestanteCentavos: totalCentavos - valorPixCentavos,
   })
 }

@@ -9,6 +9,30 @@ function moeda(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+// O backend pode responder 202 (pagamento em análise — ex.: revisão
+// antifraude do MP) em vez de decidir na hora. Nesse caso NÃO é sucesso nem
+// falha ainda (requisito "pending não é falha nem pago") — espera confirmar
+// via polling antes de mostrar qualquer tela final ao cliente.
+const POLL_CONFIRMACAO_MS = 4000
+const POLL_CONFIRMACAO_MAX_TENTATIVAS = 45 // ~3min
+
+async function aguardarConfirmacaoFinal(pedidoId: string): Promise<'pago' | 'falhou'> {
+  for (let i = 0; i < POLL_CONFIRMACAO_MAX_TENTATIVAS; i++) {
+    await new Promise((r) => setTimeout(r, POLL_CONFIRMACAO_MS))
+    try {
+      const r = await fetch(`/api/checkout/multi-metodo/status/${pedidoId}`, { credentials: 'include' })
+      if (r.ok) {
+        const d = (await r.json()) as { pedidoStatus?: string; multiMetodoStatus?: string | null }
+        if (d.pedidoStatus === 'pago') return 'pago'
+        if (d.multiMetodoStatus === 'falhou' || d.multiMetodoStatus === 'cancelado') return 'falhou'
+      }
+    } catch {
+      // rede falhou nesta tentativa — só tenta de novo no próximo ciclo
+    }
+  }
+  return 'falhou'
+}
+
 interface Props {
   pedidoId: string
   valor: number // BRL, total do pedido
@@ -162,7 +186,9 @@ function FluxoDoisCartoes({
   onSucesso: () => void
 }) {
   const totalCentavos = Math.round(valor * 100)
-  const [subEtapa, setSubEtapa] = useState<'valor' | 'cartaoA' | 'cartaoB' | 'enviando'>('valor')
+  const [subEtapa, setSubEtapa] = useState<
+    'valor' | 'cartaoA' | 'cartaoB' | 'enviando' | 'aguardando_confirmacao'
+  >('valor')
   const [valorAInput, setValorAInput] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [cartaoA, setCartaoA] = useState<CartaoTokenizado | null>(null)
@@ -188,8 +214,21 @@ function FluxoDoisCartoes({
         }),
       })
       const data = await resp.json()
+      if (data.status === 'pago') {
+        onSucesso()
+        return
+      }
       if (!resp.ok) throw new Error(data.error || 'Pagamento não aprovado')
-      onSucesso()
+      // 202 aguardando_confirmacao — MP ainda avaliando (ex.: revisão
+      // antifraude). Não é sucesso nem falha: espera confirmar.
+      setSubEtapa('aguardando_confirmacao')
+      const resultado = await aguardarConfirmacaoFinal(pedidoId)
+      if (resultado === 'pago') {
+        onSucesso()
+        return
+      }
+      setErro('Pagamento não foi aprovado. Tente novamente.')
+      setSubEtapa('cartaoB')
     } catch (e) {
       const err = e as { message?: string }
       setErro(err.message || 'Falha ao processar os 2 cartões')
@@ -261,6 +300,11 @@ function FluxoDoisCartoes({
           <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
           Processando os 2 cartões...
         </div>
+      ) : subEtapa === 'aguardando_confirmacao' ? (
+        <div className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 text-sm text-gray-500 text-center">
+          <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+          <span>Confirmando seu pagamento — isso pode levar alguns minutos, não feche esta página.</span>
+        </div>
       ) : (
         <CartaoBrick
           publicKey={publicKey}
@@ -294,7 +338,13 @@ function FluxoPixMaisCartao({
 }) {
   const totalCentavos = Math.round(valor * 100)
   const [subEtapa, setSubEtapa] = useState<
-    'valor' | 'iniciando' | 'aguardando_pix' | 'cartao_restante' | 'enviando' | 'falhou'
+    | 'valor'
+    | 'iniciando'
+    | 'aguardando_pix'
+    | 'cartao_restante'
+    | 'enviando'
+    | 'aguardando_confirmacao'
+    | 'falhou'
   >('valor')
   const [valorPixInput, setValorPixInput] = useState('')
   const [erro, setErro] = useState<string | null>(null)
@@ -351,8 +401,20 @@ function FluxoPixMaisCartao({
         }),
       })
       const data = await resp.json()
+      if (data.status === 'pago') {
+        onSucesso()
+        return
+      }
       if (!resp.ok) throw new Error(data.error || 'Pagamento do restante não aprovado')
-      onSucesso()
+      // 202 aguardando_confirmacao — mesmo caso do fluxo de 2 cartões.
+      setSubEtapa('aguardando_confirmacao')
+      const resultado = await aguardarConfirmacaoFinal(pedidoId)
+      if (resultado === 'pago') {
+        onSucesso()
+        return
+      }
+      setErro('Pagamento do restante não foi aprovado. Tente novamente.')
+      setSubEtapa('cartao_restante')
     } catch (e) {
       const err = e as { message?: string }
       setErro(err.message || 'Falha ao cobrar o restante no cartão')
@@ -431,6 +493,11 @@ function FluxoPixMaisCartao({
         <div className="bg-white border border-gray-100 rounded-2xl p-8 flex items-center justify-center gap-2 text-sm text-gray-500">
           <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
           Cobrando o cartão...
+        </div>
+      ) : subEtapa === 'aguardando_confirmacao' ? (
+        <div className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 text-sm text-gray-500 text-center">
+          <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+          <span>Confirmando seu pagamento — isso pode levar alguns minutos, não feche esta página.</span>
         </div>
       ) : (
         <CartaoBrick

@@ -1,23 +1,25 @@
-import type { PaymentRequest } from 'mercadopago/dist/clients/order/commonTypes'
-
 // Orquestração de negócio pro checkout multi-método (2 cartões, ou Pix +
-// cartão pro restante). Depende de mercadopago-orders.ts só por injeção
-// (OrdersClientDeps) — não importa o singleton direto — pra dar pra testar
-// sem token real e sem rede (ver checkout-multi-metodo.test.ts).
+// cartão pro restante), sobre a Payments API clássica (`POST /v1/payments`,
+// mesma usada pelo checkout de 1 método em criar-pagamento/route.ts).
 //
-// STATUS (testado em produção real em 2026-08-20): a conta MP da Sixxis
-// bloqueia toda a Orders API com 403 PA_UNAUTHORIZED_RESULT_FROM_POLICIES —
-// confirmado até num POST /v1/orders mínimo, sem nada de multi-método. Não é
-// bug de código, é autorização de conta que só o Mercado Pago libera (Suporte
-// MP, não um toggle no painel). Nenhum cartão chega a ser cobrado nesse
-// cenário: criarOrderManual falha antes de qualquer transação ser criada.
-// A dúvida original sobre `deleteTransaction` desfazer uma transação de
-// cartão segue sem resposta — só é testável depois da Orders API liberada.
-
+// STATUS: a Orders API foi tentada primeiro e está BLOQUEADA pra conta da
+// Sixxis (403 PA_UNAUTHORIZED_RESULT_FROM_POLICIES, confirmado em produção
+// real em 2026-08-20, sem previsão de desbloqueio — ver mercadopago-orders.ts,
+// que fica intacto mas não é mais usado por este módulo). A Payments API já
+// está ativa e é o que roda hoje pro checkout de 1 método — "2 métodos" aqui
+// é literalmente 2 chamadas independentes de payment.create(), cada uma
+// virando 1 linha de Pagamento ligada ao mesmo Pedido.
+//
+// Este arquivo só tem funções PURAS (nenhum Prisma aqui) — toda decisão
+// (cobrar a próxima perna, aguardar, reverter, marcar pago) é calculada a
+// partir de estado explícito passado por parâmetro, pra caber num teste sem
+// rede e sem banco. Quem lê/escreve Prisma é a camada de orquestração nas
+// rotas e no webhook (mercado-pago/route.ts), que chamam estas funções.
+//
 // O SDK oficial (mercadopago npm) lança o corpo de erro bruto da API em
 // requests não-2xx (`throw await response.json()`), não uma instância de
 // Error — por isso os catches abaixo tratam `unknown`, não `Error`.
-function detalheDoErro(e: unknown): string {
+export function detalheDoErro(e: unknown): string {
   if (e && typeof e === 'object') {
     const obj = e as Record<string, unknown>
     const partes = [obj.code, obj.message].filter((v) => typeof v === 'string')
@@ -26,270 +28,304 @@ function detalheDoErro(e: unknown): string {
   return e instanceof Error ? e.message : String(e)
 }
 
-// Limpeza best-effort: uma falha ao cancelar/remover não pode derrubar a
-// resposta ao cliente (o erro original já é o que importa reportar).
-async function cancelarOrderSemQuebrar(deps: OrdersClientDeps, orderId: string): Promise<void> {
-  try {
-    await deps.cancelarOrder(orderId)
-  } catch (e) {
-    console.error('[checkout-multi-metodo] falha ao cancelar order', orderId, detalheDoErro(e))
-  }
+export interface PaymentsClientDeps {
+  /** Corpo EXATO do POST /v1/payments (mesmo shape de criar-pagamento/route.ts). */
+  criarPagamento(params: {
+    idempotencyKey: string
+    body: Record<string, unknown>
+  }): Promise<{
+    id?: string
+    status?: string
+    status_detail?: string
+    point_of_interaction?: { transaction_data?: { qr_code?: string; qr_code_base64?: string } }
+  }>
+  /** Busca o status REAL na MP — nunca decide reversão a partir do status local. */
+  buscarPagamento(mpPaymentId: string): Promise<{ status?: string; status_detail?: string }>
+  /** Refund total. Só chamar quando o status real for 'approved'. */
+  estornarPagamento(mpPaymentId: string): Promise<void>
+  /** Cancel (perna autorizada mas nunca capturada). Só quando status real 'authorized'. */
+  cancelarPagamento(mpPaymentId: string): Promise<void>
 }
 
-async function reverterCartaoA(
-  deps: OrdersClientDeps,
-  orderId: string,
-  transacaoA: { id?: string } | undefined,
-): Promise<void> {
-  if (transacaoA?.id) {
-    try {
-      await deps.removerTransacao(orderId, transacaoA.id)
-    } catch (e) {
-      console.error(
-        '[checkout-multi-metodo] falha ao remover transação A',
-        orderId,
-        transacaoA.id,
-        detalheDoErro(e),
-      )
+export function idempotencyKeyPerna(tentativaId: string, perna: string): string {
+  return `mm:${tentativaId}:${perna}`
+}
+
+// ─── Reversão de 1 perna (requisitos 1, 6, 7) ────────────────────────────────
+
+export const MAX_TENTATIVAS_ESTORNO = 3
+
+export interface PagamentoParaReverter {
+  mpPaymentId: string | null
+  estornoStatus: string | null
+  estornoTentativas: number
+}
+
+export type EstornoStatus =
+  | 'nao_aplicavel'
+  | 'pendente'
+  | 'estornado'
+  | 'cancelado'
+  | 'falhou_estorno'
+
+export interface ResultadoReversao {
+  estornoStatus: EstornoStatus
+  estornoTentativas: number
+  estornoErro: string | null
+  /** true quando bateu o teto de tentativas — quem chama deve emitir alerta alto. */
+  precisaAlertar: boolean
+}
+
+const ESTADOS_TERMINAIS_ESTORNO: EstornoStatus[] = ['nao_aplicavel', 'estornado', 'cancelado']
+
+/**
+ * Reverte 1 perna com base no status REAL na MP (nunca no que o nosso banco
+ * acha que é — requisito 1). 'approved' → refund. 'authorized' → cancel.
+ * Qualquer outra coisa (rejected/cancelled/pending/in_process/refunded) →
+ * dinheiro nunca moveu (ou já voltou por conta própria) → nao_aplicavel.
+ *
+ * Idempotente (requisito 7): se já está num estado terminal, retorna sem
+ * chamar a API de novo. Quem chama é responsável pelo claim atômico contra
+ * concorrência (2 gatilhos disparando ao mesmo tempo) — ver
+ * reverterPernaComClaim nas rotas/webhook, que faz o
+ * `UPDATE ... WHERE estornoStatus IS NULL OR 'falhou_estorno'` antes de invocar
+ * esta função.
+ */
+export async function reverterPerna(
+  deps: PaymentsClientDeps,
+  pagamento: PagamentoParaReverter,
+): Promise<ResultadoReversao> {
+  if (
+    pagamento.estornoStatus &&
+    ESTADOS_TERMINAIS_ESTORNO.includes(pagamento.estornoStatus as EstornoStatus)
+  ) {
+    return {
+      estornoStatus: pagamento.estornoStatus as EstornoStatus,
+      estornoTentativas: pagamento.estornoTentativas,
+      estornoErro: null,
+      precisaAlertar: false,
     }
   }
-  await cancelarOrderSemQuebrar(deps, orderId)
+  if (!pagamento.mpPaymentId) {
+    return {
+      estornoStatus: 'nao_aplicavel',
+      estornoTentativas: pagamento.estornoTentativas,
+      estornoErro: null,
+      precisaAlertar: false,
+    }
+  }
+
+  const tentativas = pagamento.estornoTentativas + 1
+  const precisaAlertar = tentativas >= MAX_TENTATIVAS_ESTORNO
+
+  let statusReal: string | undefined
+  try {
+    const atual = await deps.buscarPagamento(pagamento.mpPaymentId)
+    statusReal = atual.status
+  } catch (e) {
+    return {
+      estornoStatus: 'falhou_estorno',
+      estornoTentativas: tentativas,
+      estornoErro: `falha ao confirmar status real antes de reverter: ${detalheDoErro(e)}`,
+      precisaAlertar,
+    }
+  }
+
+  try {
+    if (statusReal === 'approved') {
+      await deps.estornarPagamento(pagamento.mpPaymentId)
+      return { estornoStatus: 'estornado', estornoTentativas: tentativas, estornoErro: null, precisaAlertar: false }
+    }
+    if (statusReal === 'authorized') {
+      await deps.cancelarPagamento(pagamento.mpPaymentId)
+      return { estornoStatus: 'cancelado', estornoTentativas: tentativas, estornoErro: null, precisaAlertar: false }
+    }
+    return { estornoStatus: 'nao_aplicavel', estornoTentativas: tentativas, estornoErro: null, precisaAlertar: false }
+  } catch (e) {
+    return {
+      estornoStatus: 'falhou_estorno',
+      estornoTentativas: tentativas,
+      estornoErro: detalheDoErro(e),
+      precisaAlertar,
+    }
+  }
 }
 
-export interface OrdersClientDeps {
-  criarOrderManual(params: {
-    externalReference: string
-    totalAmount: string
-    payerEmail: string
-  }): Promise<{ id?: string }>
-  adicionarTransacao(
-    orderId: string,
-    payment: PaymentRequest,
-  ): Promise<{ payments?: Array<{ id?: string; status?: string; status_detail?: string }> }>
-  removerTransacao(orderId: string, transactionId: string): Promise<void>
-  processarOrder(orderId: string): Promise<{ status?: string; status_detail?: string }>
-  cancelarOrder(orderId: string): Promise<{ status?: string }>
-}
+// ─── Cobrança de 1 perna, idempotente (requisito 4) ──────────────────────────
 
-export type StatusCheckoutMultiMetodo =
-  | 'pago'
-  | 'aguardando_pix'
-  | 'aguardando_pagamento_restante'
-  | 'falhou'
-  | 'cancelado'
-
-export interface ResultadoCheckoutMultiMetodo {
-  status: StatusCheckoutMultiMetodo
-  orderId?: string
-  erro?: string
-  detalhe?: string
-}
-
-/** Um pagamento é considerado aprovado quando status "processed" +
- * status_detail "accredited" — combinação vista no único exemplo oficial
- * disponível. NÃO É a lista completa de status possíveis do MP (rejected,
- * in_process, etc. também existem) — cobrir esses casos exige validação em
- * sandbox real, não só a doc pública. */
-function pagamentoAprovado(p?: { status?: string; status_detail?: string }): boolean {
-  return p?.status === 'processed' && p?.status_detail === 'accredited'
-}
-
-function centavosParaString(centavos: number): string {
-  return (centavos / 100).toFixed(2)
-}
-
-export interface CartaoCheckout {
+export interface PernaCartao {
   token: string
   bandeiraId: string
   parcelas: number
   valorCentavos: number
 }
 
-/**
- * Fluxo "2 cartões": cria 1 order manual, adiciona a transação do cartão A,
- * só adiciona a do cartão B se A foi aprovado. Se B falhar (recusa OU erro da
- * API), tenta remover a transação de A (ver STATUS acima — deleteTransaction
- * desfazer a cobrança segue não confirmado) e cancela a order.
- */
-export async function executarCheckoutDoisCartoes(
-  deps: OrdersClientDeps,
-  params: {
-    externalReference: string
-    payerEmail: string
-    totalCentavos: number
-    cartaoA: CartaoCheckout
-    cartaoB: CartaoCheckout
-  },
-): Promise<ResultadoCheckoutMultiMetodo> {
-  const { cartaoA, cartaoB, totalCentavos } = params
-  if (cartaoA.valorCentavos + cartaoB.valorCentavos !== totalCentavos) {
-    return {
-      status: 'falhou',
-      erro: 'soma_nao_bate',
-      detalhe: `cartaoA(${cartaoA.valorCentavos}) + cartaoB(${cartaoB.valorCentavos}) != total(${totalCentavos})`,
-    }
-  }
-
-  let orderId: string
-  try {
-    const order = await deps.criarOrderManual({
-      externalReference: params.externalReference,
-      totalAmount: centavosParaString(totalCentavos),
-      payerEmail: params.payerEmail,
-    })
-    if (!order.id) return { status: 'falhou', erro: 'order_sem_id' }
-    orderId = order.id
-  } catch (e) {
-    return { status: 'falhou', erro: 'order_falhou_criar', detalhe: detalheDoErro(e) }
-  }
-
-  let transacaoA: { id?: string; status?: string; status_detail?: string } | undefined
-  try {
-    const respA = await deps.adicionarTransacao(orderId, {
-      amount: centavosParaString(cartaoA.valorCentavos),
-      payment_method: {
-        id: cartaoA.bandeiraId,
-        type: 'credit_card',
-        token: cartaoA.token,
-        installments: cartaoA.parcelas,
-      },
-    })
-    transacaoA = respA.payments?.[0]
-  } catch (e) {
-    await cancelarOrderSemQuebrar(deps, orderId)
-    return { status: 'falhou', orderId, erro: 'cartao_a_falhou', detalhe: detalheDoErro(e) }
-  }
-  if (!pagamentoAprovado(transacaoA)) {
-    await cancelarOrderSemQuebrar(deps, orderId)
-    return { status: 'falhou', orderId, erro: 'cartao_a_recusado', detalhe: transacaoA?.status_detail }
-  }
-
-  let transacaoB: { id?: string; status?: string; status_detail?: string } | undefined
-  try {
-    const respB = await deps.adicionarTransacao(orderId, {
-      amount: centavosParaString(cartaoB.valorCentavos),
-      payment_method: {
-        id: cartaoB.bandeiraId,
-        type: 'credit_card',
-        token: cartaoB.token,
-        installments: cartaoB.parcelas,
-      },
-    })
-    transacaoB = respB.payments?.[0]
-  } catch (e) {
-    await reverterCartaoA(deps, orderId, transacaoA)
-    return { status: 'falhou', orderId, erro: 'cartao_b_falhou', detalhe: detalheDoErro(e) }
-  }
-  if (!pagamentoAprovado(transacaoB)) {
-    await reverterCartaoA(deps, orderId, transacaoA)
-    return { status: 'falhou', orderId, erro: 'cartao_b_recusado', detalhe: transacaoB?.status_detail }
-  }
-
-  try {
-    const processado = await deps.processarOrder(orderId)
-    if (processado.status !== 'processed') {
-      return { status: 'falhou', orderId, erro: 'process_nao_confirmou', detalhe: processado.status_detail }
-    }
-  } catch (e) {
-    return { status: 'falhou', orderId, erro: 'process_falhou', detalhe: detalheDoErro(e) }
-  }
-
-  return { status: 'pago', orderId }
+export interface ResultadoCobrancaPerna {
+  mpPaymentId: string | null
+  status: string | null
+  statusDetail: string | null
+  erro: string | null
 }
 
 /**
- * Fluxo "Pix + cartão" — etapa 1: cria a order manual e adiciona só a
- * transação Pix. Pix não confirma na hora (é assíncrono via QR/copia-e-cola),
- * então esta função só INICIA — a etapa 2 (completarCheckoutPixMaisCartao)
- * roda depois, disparada pelo webhook quando o Pix confirmar.
+ * Cria 1 pagamento com idempotencyKey determinística (tentativaId+perna) —
+ * dedup NATIVO do lado do Mercado Pago via requestOptions.idempotencyKey
+ * (mesma chave numa retentativa, mesmo corpo → MP devolve o MESMO pagamento
+ * em vez de cobrar de novo). Isso cobre retry de rede E crash-recovery: não
+ * importa quantas vezes esta função for chamada com a mesma tentativaId+perna,
+ * nunca cobra 2x.
  */
-export async function iniciarCheckoutPixMaisCartao(
-  deps: OrdersClientDeps,
+export async function cobrarPernaCartao(
+  deps: PaymentsClientDeps,
   params: {
+    idempotencyKey: string
     externalReference: string
     payerEmail: string
-    valorPixCentavos: number
+    notificationUrl: string
+    metadata: Record<string, unknown>
+    cartao: PernaCartao
   },
-): Promise<ResultadoCheckoutMultiMetodo & { qrCode?: unknown }> {
-  let orderId: string
+): Promise<ResultadoCobrancaPerna> {
   try {
-    const order = await deps.criarOrderManual({
-      externalReference: params.externalReference,
-      totalAmount: centavosParaString(params.valorPixCentavos),
-      payerEmail: params.payerEmail,
+    const resp = await deps.criarPagamento({
+      idempotencyKey: params.idempotencyKey,
+      body: {
+        transaction_amount: params.cartao.valorCentavos / 100,
+        token: params.cartao.token,
+        installments: params.cartao.parcelas,
+        payment_method_id: params.cartao.bandeiraId,
+        capture: true,
+        payer: { email: params.payerEmail },
+        external_reference: params.externalReference,
+        notification_url: params.notificationUrl,
+        metadata: params.metadata,
+      },
     })
-    if (!order.id) return { status: 'falhou', erro: 'order_sem_id' }
-    orderId = order.id
+    return {
+      mpPaymentId: resp.id ? String(resp.id) : null,
+      status: resp.status ?? null,
+      statusDetail: resp.status_detail ?? null,
+      erro: null,
+    }
   } catch (e) {
-    return { status: 'falhou', erro: 'order_falhou_criar', detalhe: detalheDoErro(e) }
-  }
-
-  try {
-    const respPix = await deps.adicionarTransacao(orderId, {
-      amount: centavosParaString(params.valorPixCentavos),
-      payment_method: { id: 'pix', type: 'bank_transfer' },
-    })
-    return { status: 'aguardando_pix', orderId, qrCode: respPix.payments?.[0] }
-  } catch (e) {
-    await cancelarOrderSemQuebrar(deps, orderId)
-    return { status: 'falhou', orderId, erro: 'pix_falhou', detalhe: detalheDoErro(e) }
+    return { mpPaymentId: null, status: null, statusDetail: null, erro: detalheDoErro(e) }
   }
 }
 
-/**
- * Fluxo "Pix + cartão" — etapa 2: chamada pelo webhook quando o Pix já foi
- * confirmado. Adiciona a transação do cartão pro valor restante. Se o cartão
- * falhar, NÃO tenta estornar o Pix automaticamente (Pix não tem captura
- * controlável — já liquidou) — decisão de negócio de como tratar isso
- * (estorno manual vs cobrar o resto depois) fica pro Luccas, não pro código.
- */
-export async function completarCheckoutPixMaisCartao(
-  deps: OrdersClientDeps,
-  params: { orderId: string; valorRestanteCentavos: number; cartao: CartaoCheckout },
-): Promise<ResultadoCheckoutMultiMetodo> {
-  const { orderId, cartao } = params
-  let transacaoCartao: { status?: string; status_detail?: string } | undefined
+export async function cobrarPernaPix(
+  deps: PaymentsClientDeps,
+  params: {
+    idempotencyKey: string
+    externalReference: string
+    payerEmail: string
+    notificationUrl: string
+    metadata: Record<string, unknown>
+    valorCentavos: number
+  },
+): Promise<ResultadoCobrancaPerna & { qrCodeBase64?: string; qrCodeCopiaECola?: string }> {
   try {
-    const resp = await deps.adicionarTransacao(orderId, {
-      amount: centavosParaString(params.valorRestanteCentavos),
-      payment_method: {
-        id: cartao.bandeiraId,
-        type: 'credit_card',
-        token: cartao.token,
-        installments: cartao.parcelas,
+    const resp = await deps.criarPagamento({
+      idempotencyKey: params.idempotencyKey,
+      body: {
+        transaction_amount: params.valorCentavos / 100,
+        payment_method_id: 'pix',
+        payer: { email: params.payerEmail },
+        external_reference: params.externalReference,
+        notification_url: params.notificationUrl,
+        metadata: params.metadata,
       },
     })
-    transacaoCartao = resp.payments?.[0]
-  } catch (e) {
+    const txData = resp.point_of_interaction?.transaction_data
     return {
-      status: 'aguardando_pagamento_restante',
-      orderId,
-      erro: 'cartao_falhou_apos_pix',
-      detalhe: detalheDoErro(e),
-    }
-  }
-  if (!pagamentoAprovado(transacaoCartao)) {
-    return {
-      status: 'aguardando_pagamento_restante',
-      orderId,
-      erro: 'cartao_recusado_apos_pix',
-      detalhe: transacaoCartao?.status_detail,
-    }
-  }
-
-  try {
-    const processado = await deps.processarOrder(orderId)
-    if (processado.status !== 'processed') {
-      return { status: 'aguardando_pagamento_restante', orderId, erro: 'process_nao_confirmou' }
+      mpPaymentId: resp.id ? String(resp.id) : null,
+      status: resp.status ?? null,
+      statusDetail: resp.status_detail ?? null,
+      erro: null,
+      qrCodeBase64: txData?.qr_code_base64,
+      qrCodeCopiaECola: txData?.qr_code,
     }
   } catch (e) {
-    return {
-      status: 'aguardando_pagamento_restante',
-      orderId,
-      erro: 'process_falhou_apos_pix',
-      detalhe: detalheDoErro(e),
-    }
+    return { mpPaymentId: null, status: null, statusDetail: null, erro: detalheDoErro(e) }
+  }
+}
+
+// ─── Decisão pura: o que fazer com uma tentativa, dado o estado das pernas ───
+// (requisitos 2, 3, 5 — pending nunca vira falha nem pago, timeout do pix
+// reverte, soma exata é revalidada com os valores REAIS cobrados.)
+
+export interface EstadoPerna {
+  status: string | null
+  valorCentavos: number
+}
+
+export type DecisaoTentativa =
+  | { acao: 'cobrar_proxima'; perna: string }
+  | { acao: 'aguardar' }
+  | { acao: 'pago' }
+  | { acao: 'falhou'; erro: string; pernasParaReverter: string[] }
+
+/** approved=aprovado. pending/in_process/authorized=pendente (req 2 — nunca
+ * decide nada em cima disso, só espera resolver). Qualquer outra coisa
+ * (rejected, cancelled, ou ausente) = recusado. */
+export function classificarStatusPerna(status: string | null | undefined): 'aprovado' | 'pendente' | 'recusado' {
+  if (status === 'approved') return 'aprovado'
+  if (status === 'pending' || status === 'in_process' || status === 'authorized') return 'pendente'
+  return 'recusado'
+}
+
+export function avaliarTentativaDoisCartoes(
+  totalCentavos: number,
+  pernaA: EstadoPerna | undefined,
+  pernaB: EstadoPerna | undefined,
+): DecisaoTentativa {
+  if (!pernaA) return { acao: 'cobrar_proxima', perna: 'A' }
+  const a = classificarStatusPerna(pernaA.status)
+  if (a === 'recusado') return { acao: 'falhou', erro: 'cartao_a_recusado', pernasParaReverter: [] }
+  if (a === 'pendente') return { acao: 'aguardar' }
+
+  if (!pernaB) return { acao: 'cobrar_proxima', perna: 'B' }
+  const b = classificarStatusPerna(pernaB.status)
+  if (b === 'pendente') return { acao: 'aguardar' }
+  if (b === 'recusado') return { acao: 'falhou', erro: 'cartao_b_recusado', pernasParaReverter: ['A'] }
+
+  // Ambas aprovadas — revalida a soma com os valores REAIS cobrados (req 5),
+  // não confia só na checagem feita antes de cobrar.
+  if (pernaA.valorCentavos + pernaB.valorCentavos !== totalCentavos) {
+    return { acao: 'falhou', erro: 'soma_nao_bate_pos_cobranca', pernasParaReverter: ['A', 'B'] }
+  }
+  return { acao: 'pago' }
+}
+
+export function avaliarTentativaPixMaisCartao(
+  totalCentavos: number,
+  pernaPix: EstadoPerna | undefined,
+  pernaRestante: EstadoPerna | undefined,
+  pixExpirado: boolean,
+): DecisaoTentativa {
+  if (!pernaPix) return { acao: 'cobrar_proxima', perna: 'pix' }
+  const pix = classificarStatusPerna(pernaPix.status)
+  if (pix === 'recusado') return { acao: 'falhou', erro: 'pix_recusado', pernasParaReverter: [] }
+  if (pix === 'pendente') {
+    // requisito 3: pix assíncrono espera o webhook — só vira falha no prazo
+    // esgotado, e aí reverte (via cancel/refund conforme status real de cada
+    // perna que porventura tenha sido criada, ver reconciliarTimeoutPix).
+    if (pixExpirado) return { acao: 'falhou', erro: 'pix_expirou', pernasParaReverter: ['pix', 'restante'] }
+    return { acao: 'aguardar' }
   }
 
-  return { status: 'pago', orderId }
+  // pix aprovado
+  if (!pernaRestante) return { acao: 'cobrar_proxima', perna: 'restante' }
+  const restante = classificarStatusPerna(pernaRestante.status)
+  if (restante === 'pendente') return { acao: 'aguardar' }
+  if (restante === 'recusado') {
+    // Decisão de negócio já documentada: NÃO estorna o pix automaticamente
+    // quando só o cartão do restante falha (pix não tem captura controlável —
+    // já liquidou; diferente do timeout, que é decisão explícita do Luccas).
+    return { acao: 'falhou', erro: 'cartao_restante_recusado', pernasParaReverter: [] }
+  }
+
+  if (pernaPix.valorCentavos + pernaRestante.valorCentavos !== totalCentavos) {
+    return { acao: 'falhou', erro: 'soma_nao_bate_pos_cobranca', pernasParaReverter: ['pix', 'restante'] }
+  }
+  return { acao: 'pago' }
 }

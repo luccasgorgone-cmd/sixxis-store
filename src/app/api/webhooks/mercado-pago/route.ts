@@ -10,26 +10,10 @@ import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
 import { enviarPurchaseCapi } from '@/lib/analytics/meta-capi'
 import { enviarPurchaseGa4 } from '@/lib/analytics/ga4-measurement-protocol'
-import { feedId } from '@/lib/feed-id'
+import { gIdItemPedido as gIdItem } from '@/lib/feed-id'
 import { isStatusPago, isStatusCancelado } from '@/lib/pedido-status'
-
-// g:id do feed p/ um item de pedido (content_ids do CAPI). Resolve variação
-// precificada → SKU da variação; senão item único (sku ?? slug do produto).
-function gIdItem(i: {
-  variacaoId: string | null
-  produto: {
-    sku: string | null
-    slug: string
-    variacoes: { id: string; sku: string; preco: unknown }[]
-  }
-}): string {
-  const v = i.variacaoId ? i.produto.variacoes.find((x) => x.id === i.variacaoId) : null
-  return feedId(
-    { sku: i.produto.sku, slug: i.produto.slug },
-    v ? { sku: v.sku, preco: v.preco as number | null } : null,
-    i.produto.variacoes.map((x) => ({ sku: x.sku, preco: x.preco as number | null })),
-  )
-}
+import { processarTentativa } from '@/lib/checkout-multi-metodo-orquestrador'
+import { paymentsClientDeps } from '@/lib/mercadopago-payments-deps'
 
 function validarAssinatura(req: NextRequest): boolean {
   if (!MP_WEBHOOK_SECRET) return false
@@ -145,36 +129,22 @@ export async function POST(req: NextRequest) {
 
     const pedido = pagamento.pedido
 
-    // ── Checkout multi-método: Pix da etapa 1 (pix + cartão pro restante) ──────
-    // TODO-SANDBOX (ver checkout-multi-metodo.ts): assume que a transação Pix
-    // criada DENTRO de uma Order (Orders API) dispara este MESMO webhook
-    // topic=payment, pelo id da transação (gravado como Pagamento.mpPaymentId
-    // em pix-mais-cartao/iniciar/route.ts) — não confirmado contra o MP real,
-    // só o Luccas tem credencial de sandbox pra validar isso.
-    //
-    // Roda ANTES do bloco genérico logo abaixo DE PROPÓSITO: sem este guard,
-    // a confirmação do Pix marcaria o pedido inteiro como 'pago' mesmo
-    // faltando cobrar o cartão do restante (etapa 2, disparada manualmente
-    // pelo cliente em pix-mais-cartao/completar/route.ts, nunca por aqui).
-    if (pagamento.metodo === 'pix' && pedido.multiMetodoStatus === 'aguardando_pix') {
-      if (novoStatus === 'approved') {
-        await prisma.pedido.update({
-          where: { id: pedido.id },
-          data: { multiMetodoStatus: 'aguardando_pagamento_restante' },
-        })
-        await auditLog({
-          req,
-          actor: 'mercado-pago',
-          action: 'pedido.multi_metodo.pix_confirmado',
-          target: pedido.id,
-          metadata: { mpPaymentId },
-        })
-      } else if (novoStatus === 'rejected' || novoStatus === 'cancelled') {
-        await prisma.pedido.update({
-          where: { id: pedido.id },
-          data: { multiMetodoStatus: novoStatus === 'cancelled' ? 'cancelado' : 'falhou' },
-        })
-      }
+    // ── Checkout multi-método (Payments API — ver checkout-multi-metodo.ts) ────
+    // Esta perna (cartão A/B, pix, ou cartão-restante) NUNCA decide sozinha se
+    // o pedido inteiro está pago — só processarTentativa sabe, olhando TODAS
+    // as pernas da tentativa + a soma. Roda ANTES do bloco genérico logo abaixo
+    // DE PROPÓSITO e retorna cedo: sem este guard, a aprovação de UMA perna
+    // (ex.: só o cartão A) marcaria o pedido inteiro como 'pago' e disparia
+    // CAPI/GA4/cashback/e-mail faltando cobrar a outra perna.
+    if (pagamento.tentativaMultiMetodoId) {
+      await processarTentativa(paymentsClientDeps, pagamento.tentativaMultiMetodoId)
+      await auditLog({
+        req,
+        actor: 'mercado-pago',
+        action: 'pagamento.multi_metodo.perna_atualizada',
+        target: pagamento.id,
+        metadata: { mpPaymentId, novoStatus, tentativaMultiMetodoId: pagamento.tentativaMultiMetodoId },
+      })
       return NextResponse.json({ ok: true, status: novoStatus })
     }
 
