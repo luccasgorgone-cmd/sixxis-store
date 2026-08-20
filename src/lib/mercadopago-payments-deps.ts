@@ -19,8 +19,11 @@ function requireRefund() {
 }
 
 export const paymentsClientDeps: PaymentsClientDeps = {
-  async criarPagamento({ idempotencyKey, body }) {
-    const resp = await requirePayment().create({ body, requestOptions: { idempotencyKey } })
+  async criarPagamento({ idempotencyKey, body, meliSessionId }) {
+    const resp = await requirePayment().create({
+      body,
+      requestOptions: { idempotencyKey, ...(meliSessionId ? { meliSessionId } : {}) },
+    })
     return {
       id: resp.id != null ? String(resp.id) : undefined,
       status: resp.status,

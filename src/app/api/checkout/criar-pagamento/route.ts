@@ -5,7 +5,7 @@ import type { Prisma } from '@prisma/client'
 import { mpPayment } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { isStatusPendente } from '@/lib/pedido-status'
+import { isStatusPendente, STATUS_PEDIDO_PAGO } from '@/lib/pedido-status'
 import { creditarCashback } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
@@ -24,6 +24,9 @@ const schema = z.object({
   parcelas: z.number().int().positive().optional(),
   issuerId: z.string().optional(),
   paymentMethodId: z.string().optional(),
+  // Device ID gerado pelo SDK do MP no navegador (window.MP_DEVICE_SESSION_ID)
+  // — sinal de antifraude deles, repassado como requestOptions.meliSessionId.
+  deviceId: z.string().optional(),
 })
 
 const APP_URL =
@@ -77,6 +80,7 @@ export async function POST(req: NextRequest) {
     parcelas,
     issuerId,
     paymentMethodId,
+    deviceId,
   } = parsed.data
 
   const pedido = await prisma.pedido.findFirst({
@@ -183,13 +187,35 @@ export async function POST(req: NextRequest) {
     unit_price: Number(i.precoUnitario),
   }))
 
-  // additional_info: items + espelho do payer + endereço de entrega. Tudo isso
-  // alimenta a Qualidade da Integração e o score de aprovação.
-  const additionalInfo: Record<string, unknown> = { items: itemsMP }
+  // Compra anterior PAGA deste cliente (se houver) — alimenta
+  // is_first_purchase_online/last_purchase abaixo. Consulta em tempo real, não
+  // o contador denormalizado Cliente.totalPedidos (esse nunca é atualizado
+  // pelo app hoje — não é fonte confiável pra sinal de antifraude).
+  const pedidoAnterior = await prisma.pedido.findFirst({
+    where: {
+      clienteId: pedido.clienteId,
+      id: { not: pedido.id },
+      status: { in: [...STATUS_PEDIDO_PAGO] },
+    },
+    orderBy: { pagoEm: 'desc' },
+    select: { pagoEm: true },
+  })
+
+  // additional_info: items + espelho do payer + endereço de entrega + IP +
+  // histórico de compra. Tudo isso alimenta a Qualidade da Integração e o
+  // score de aprovação do antifraude do MP — quanto mais contexto real a
+  // gente entrega, menos a decisão deles depende de heurística "às cegas".
+  const additionalInfo: Record<string, unknown> = {
+    items: itemsMP,
+    ip_address: getClientIp(req),
+  }
   const aiPayer: Record<string, unknown> = {
     first_name: firstName || 'Cliente',
     last_name: lastName,
+    registration_date: pedido.cliente.createdAt.toISOString(),
+    is_first_purchase_online: !pedidoAnterior,
   }
+  if (pedidoAnterior?.pagoEm) aiPayer.last_purchase = pedidoAnterior.pagoEm.toISOString()
   if (phone) aiPayer.phone = phone
   if (address) aiPayer.address = address
   additionalInfo.payer = aiPayer
@@ -218,13 +244,18 @@ export async function POST(req: NextRequest) {
     },
   }
 
+  const requestOptions = {
+    idempotencyKey,
+    ...(deviceId ? { meliSessionId: deviceId } : {}),
+  }
+
   try {
     let mpResp: Awaited<ReturnType<typeof mpPayment.create>>
 
     if (metodo === 'pix') {
       mpResp = await mpPayment.create({
         body: { ...basePayload, payment_method_id: 'pix' },
-        requestOptions: { idempotencyKey },
+        requestOptions,
       })
     } else {
       mpResp = await mpPayment.create({
@@ -236,7 +267,7 @@ export async function POST(req: NextRequest) {
           issuer_id: issuerId ? Number(issuerId) : undefined,
           capture: true,
         },
-        requestOptions: { idempotencyKey },
+        requestOptions,
       })
     }
 

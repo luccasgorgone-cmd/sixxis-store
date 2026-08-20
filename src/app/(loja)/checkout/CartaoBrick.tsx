@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { initMercadoPago } from '@mercadopago/sdk-react'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
+import { capturarDeviceIdMp } from '@/lib/mp-device-id'
 
 const Payment = dynamic(
   () => import('@mercadopago/sdk-react').then((m) => m.Payment),
@@ -24,6 +25,7 @@ export interface CartaoTokenizado {
   metodo: 'credit_card' | 'debit_card'
   parcelas: number
   issuerId?: string
+  deviceId?: string
 }
 
 interface Props {
@@ -127,6 +129,7 @@ export default function CartaoBrick({ publicKey, valor, payerEmail, payerCpf, la
                 metodo: isDebit ? 'debit_card' : 'credit_card',
                 parcelas: formData.installments ?? 1,
                 issuerId: formData.issuer_id,
+                deviceId: capturarDeviceIdMp(),
               })
             } catch (e) {
               const err = e as { message?: string }

@@ -6,6 +6,7 @@ import { initMercadoPago } from '@mercadopago/sdk-react'
 import { Loader2, AlertCircle } from 'lucide-react'
 import PixPainel from './PixPainel'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
+import { capturarDeviceIdMp } from '@/lib/mp-device-id'
 
 const Payment = dynamic(
   () => import('@mercadopago/sdk-react').then((m) => m.Payment),
@@ -197,6 +198,8 @@ export default function CheckoutBricks({
                 onMetodoSelecionado(isPix ? 'pix' : isCard ? metodoCartao : (pmId || 'unknown'))
               }
 
+              const deviceId = capturarDeviceIdMp()
+
               const body = isPix
                 ? {
                     pedidoId,
@@ -205,6 +208,7 @@ export default function CheckoutBricks({
                     payerNome,
                     payerCpf:
                       formData.payer?.identification?.number ?? payerCpf,
+                    deviceId,
                   }
                 : isCard
                   ? {
@@ -218,6 +222,7 @@ export default function CheckoutBricks({
                       payerNome,
                       payerCpf:
                         formData.payer?.identification?.number ?? payerCpf,
+                      deviceId,
                     }
                   : null
 
@@ -251,7 +256,7 @@ export default function CheckoutBricks({
                 )
               } else if (data.status === 'rejected') {
                 setErro(
-                  'Pagamento recusado. Verifique os dados do cartão ou tente outro método.',
+                  'Pagamento recusado pela operadora do cartão. Isso costuma ser uma avaliação de segurança do banco/operadora — não é um erro nos dados digitados. Tente novamente em alguns minutos, use outro cartão ou pague com Pix.',
                 )
               } else {
                 setErro('Pagamento em processamento. Aguarde a confirmação.')

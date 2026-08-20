@@ -21,6 +21,7 @@ const schema = z.object({
   pedidoId: z.string().min(1),
   payerEmail: z.string().email().optional(),
   valorPixCentavos: z.number().int().positive(),
+  deviceId: z.string().optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     )
   }
-  const { pedidoId, payerEmail, valorPixCentavos } = parsed.data
+  const { pedidoId, payerEmail, valorPixCentavos, deviceId } = parsed.data
 
   const pedido = await prisma.pedido.findFirst({
     where: { id: pedidoId, clienteId: session.user.id },
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest) {
       proximaAcao: {
         payerEmail: payerEmail ?? pedido.cliente.email,
         valorPixCentavos,
+        deviceId,
       },
     },
   })

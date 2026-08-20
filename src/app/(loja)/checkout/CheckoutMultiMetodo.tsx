@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Loader2, AlertCircle, CreditCard, QrCode, ArrowLeft } from 'lucide-react'
 import PixPainel from './PixPainel'
 import CartaoBrick, { type CartaoTokenizado } from './CartaoBrick'
+import { capturarDeviceIdMp } from '@/lib/mp-device-id'
 
 function moeda(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -211,6 +212,7 @@ function FluxoDoisCartoes({
           payerEmail,
           cartaoA: { token: cartaoA.token, bandeiraId: cartaoA.bandeiraId, parcelas: cartaoA.parcelas, valorCentavos: valorACentavos },
           cartaoB: { token: cartaoB.token, bandeiraId: cartaoB.bandeiraId, parcelas: cartaoB.parcelas, valorCentavos: valorBCentavos },
+          deviceId: cartaoA.deviceId ?? cartaoB.deviceId,
         }),
       })
       const data = await resp.json()
@@ -362,7 +364,7 @@ function FluxoPixMaisCartao({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ pedidoId, payerEmail, valorPixCentavos }),
+        body: JSON.stringify({ pedidoId, payerEmail, valorPixCentavos, deviceId: capturarDeviceIdMp() }),
       })
       const data = await resp.json()
       if (!resp.ok) throw new Error(data.error || 'Não foi possível gerar o Pix')
@@ -398,6 +400,7 @@ function FluxoPixMaisCartao({
           cardToken: cartao.token,
           bandeiraId: cartao.bandeiraId,
           parcelas: cartao.parcelas,
+          deviceId: cartao.deviceId ?? capturarDeviceIdMp(),
         }),
       })
       const data = await resp.json()

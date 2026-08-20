@@ -76,6 +76,37 @@ describe('cobrarPernaCartao / cobrarPernaPix', () => {
     expect(r.mpPaymentId).toBeNull()
   })
 
+  it('cobrarPernaCartao repassa o meliSessionId (device ID) pro deps.criarPagamento quando presente', async () => {
+    const deps = mockDeps({ criarPagamento: vi.fn().mockResolvedValue({ id: 123, status: 'approved' }) })
+    await cobrarPernaCartao(deps, {
+      idempotencyKey: 'mm:t1:A',
+      externalReference: 'ped_1',
+      payerEmail: 'a@b.com',
+      notificationUrl: 'https://x/webhook',
+      metadata: {},
+      cartao: { token: 'tok', bandeiraId: 'master', parcelas: 1, valorCentavos: 1000 },
+      meliSessionId: 'device-abc',
+    })
+    expect(deps.criarPagamento).toHaveBeenCalledWith(
+      expect.objectContaining({ meliSessionId: 'device-abc' }),
+    )
+  })
+
+  it('cobrarPernaCartao não quebra quando o device ID não veio (undefined é aceitável)', async () => {
+    const deps = mockDeps({ criarPagamento: vi.fn().mockResolvedValue({ id: 123, status: 'approved' }) })
+    await cobrarPernaCartao(deps, {
+      idempotencyKey: 'mm:t1:A',
+      externalReference: 'ped_1',
+      payerEmail: 'a@b.com',
+      notificationUrl: 'https://x/webhook',
+      metadata: {},
+      cartao: { token: 'tok', bandeiraId: 'master', parcelas: 1, valorCentavos: 1000 },
+    })
+    expect(deps.criarPagamento).toHaveBeenCalledWith(
+      expect.objectContaining({ meliSessionId: undefined }),
+    )
+  })
+
   it('cobrarPernaPix devolve o qrCode e nunca crasha em erro', async () => {
     const deps = mockDeps({
       criarPagamento: vi.fn().mockResolvedValue({

@@ -23,9 +23,15 @@ const schema = z.object({
   cardToken: z.string().min(1),
   bandeiraId: z.string().min(1),
   parcelas: z.number().int().positive(),
+  deviceId: z.string().optional(),
 })
 
-type ProximaAcaoPixMaisCartao = { payerEmail: string; valorPixCentavos: number; cartaoRestante?: unknown }
+type ProximaAcaoPixMaisCartao = {
+  payerEmail: string
+  valorPixCentavos: number
+  cartaoRestante?: unknown
+  deviceId?: string
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -53,7 +59,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     )
   }
-  const { pedidoId, cardToken, bandeiraId, parcelas } = parsed.data
+  const { pedidoId, cardToken, bandeiraId, parcelas, deviceId } = parsed.data
 
   const pedido = await prisma.pedido.findFirst({
     where: { id: pedidoId, clienteId: session.user.id },
@@ -94,6 +100,7 @@ export async function POST(req: NextRequest) {
       proximaAcao: {
         ...proximaAcaoAtual,
         cartaoRestante: { token: cardToken, bandeiraId, parcelas, valorCentavos: valorRestanteCentavos },
+        deviceId: deviceId ?? proximaAcaoAtual.deviceId,
       },
     },
   })

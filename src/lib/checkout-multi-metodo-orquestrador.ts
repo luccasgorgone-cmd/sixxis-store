@@ -34,6 +34,9 @@ type ProximaAcao = {
   cartaoB?: PernaCartao
   valorPixCentavos?: number
   cartaoRestante?: PernaCartao
+  /** Device ID capturado no navegador na submissão original — reaproveitado
+   *  em toda perna desta tentativa (inclusive as cobradas depois, via webhook). */
+  deviceId?: string
 }
 
 // Máximo de iterações do laço abaixo: no pior caso (2 cartões) são 4 ações
@@ -160,6 +163,7 @@ async function cobrarProximaPerna(
       notificationUrl: NOTIFICATION_URL,
       metadata,
       valorCentavos: proximaAcao.valorPixCentavos!,
+      meliSessionId: proximaAcao.deviceId,
     })
     if (r.erro || !r.mpPaymentId) {
       await marcarFalhou(tentativaId, pedidoId, `pix_falhou: ${r.erro ?? 'sem id'}`)
@@ -202,6 +206,7 @@ async function cobrarProximaPerna(
     // 2 autorizarem (ver capturarProximaPerna). 'restante': captura na hora,
     // igual o checkout de 1 método (o Pix já confirmou antes desta perna existir).
     capturarAoCriar: perna === 'restante',
+    meliSessionId: proximaAcao.deviceId,
   })
   if (r.erro || !r.mpPaymentId) {
     await marcarFalhou(tentativaId, pedidoId, `${perna}_falhou: ${r.erro ?? 'sem id'}`)

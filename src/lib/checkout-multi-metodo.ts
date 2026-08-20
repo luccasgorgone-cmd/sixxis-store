@@ -33,6 +33,8 @@ export interface PaymentsClientDeps {
   criarPagamento(params: {
     idempotencyKey: string
     body: Record<string, unknown>
+    /** Device ID do navegador (window.MP_DEVICE_SESSION_ID) — sinal de antifraude do MP. */
+    meliSessionId?: string
   }): Promise<{
     id?: string
     status?: string
@@ -196,11 +198,13 @@ export async function cobrarPernaCartao(
     metadata: Record<string, unknown>
     cartao: PernaCartao
     capturarAoCriar?: boolean
+    meliSessionId?: string
   },
 ): Promise<ResultadoCobrancaPerna> {
   try {
     const resp = await deps.criarPagamento({
       idempotencyKey: params.idempotencyKey,
+      meliSessionId: params.meliSessionId,
       body: {
         transaction_amount: params.cartao.valorCentavos / 100,
         token: params.cartao.token,
@@ -256,11 +260,13 @@ export async function cobrarPernaPix(
     notificationUrl: string
     metadata: Record<string, unknown>
     valorCentavos: number
+    meliSessionId?: string
   },
 ): Promise<ResultadoCobrancaPerna & { qrCodeBase64?: string; qrCodeCopiaECola?: string }> {
   try {
     const resp = await deps.criarPagamento({
       idempotencyKey: params.idempotencyKey,
+      meliSessionId: params.meliSessionId,
       body: {
         transaction_amount: params.valorCentavos / 100,
         payment_method_id: 'pix',
