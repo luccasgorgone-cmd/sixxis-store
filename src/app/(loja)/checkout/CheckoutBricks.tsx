@@ -88,6 +88,7 @@ export default function CheckoutBricks({
         pgtoId={pix.pgtoId}
         expiraEm={pix.expiraEm}
         onPago={onSucesso}
+        onExpirar={() => setPix(null)}
       />
     )
   }
@@ -183,91 +184,106 @@ export default function CheckoutBricks({
               },
             },
           }}
-          onSubmit={async ({ formData }: { formData: BricksFormData }) => {
-            setErro(null)
-            setCarregando(true)
-            try {
-              const pmId = formData.payment_method_id ?? ''
-              const isPix = pmId === 'pix'
-              const isCard = !isPix && Boolean(formData.token) && Boolean(pmId)
-              // Débito: payment_method_id do MP começa com "deb" (debvisa, debmaster, debelo…).
-              const isDebit = isCard && /^deb|debit/i.test(pmId)
-              const metodoCartao = isDebit ? ('debit_card' as const) : ('credit_card' as const)
+          onSubmit={({ formData }: { formData: BricksFormData }) =>
+            // O Brick só libera o botão/formulário pra uma nova tentativa se
+            // esta Promise for REJEITADA numa falha — resolver sempre (mesmo
+            // em recusa) trava o cliente no mesmo cartão pra sempre, mesmo
+            // trocando os dados. Documentado pela própria MP:
+            // https://github.com/mercadopago/sdk-react/discussions/137
+            new Promise<void>((resolve, reject) => {
+              ;(async () => {
+                setErro(null)
+                setCarregando(true)
+                try {
+                  const pmId = formData.payment_method_id ?? ''
+                  const isPix = pmId === 'pix'
+                  const isCard = !isPix && Boolean(formData.token) && Boolean(pmId)
+                  // Débito: payment_method_id do MP começa com "deb" (debvisa, debmaster, debelo…).
+                  const isDebit = isCard && /^deb|debit/i.test(pmId)
+                  const metodoCartao = isDebit ? ('debit_card' as const) : ('credit_card' as const)
 
-              if (onMetodoSelecionado) {
-                onMetodoSelecionado(isPix ? 'pix' : isCard ? metodoCartao : (pmId || 'unknown'))
-              }
-
-              const deviceId = capturarDeviceIdMp()
-
-              const body = isPix
-                ? {
-                    pedidoId,
-                    metodo: 'pix' as const,
-                    payerEmail: formData.payer?.email ?? payerEmail,
-                    payerNome,
-                    payerCpf:
-                      formData.payer?.identification?.number ?? payerCpf,
-                    deviceId,
+                  if (onMetodoSelecionado) {
+                    onMetodoSelecionado(isPix ? 'pix' : isCard ? metodoCartao : (pmId || 'unknown'))
                   }
-                : isCard
-                  ? {
-                      pedidoId,
-                      metodo: metodoCartao,
-                      cardToken: formData.token,
-                      parcelas: formData.installments ?? 1,
-                      issuerId: formData.issuer_id,
-                      paymentMethodId: formData.payment_method_id,
-                      payerEmail: formData.payer?.email ?? payerEmail,
-                      payerNome,
-                      payerCpf:
-                        formData.payer?.identification?.number ?? payerCpf,
-                      deviceId,
-                    }
-                  : null
 
-              if (!body) {
-                throw new Error('Forma de pagamento não suportada')
-              }
+                  const deviceId = capturarDeviceIdMp()
 
-              const resp = await fetch('/api/checkout/criar-pagamento', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-                credentials: 'include',
-              })
-              const data = await resp.json()
-              if (!resp.ok) {
-                throw new Error(data.error || 'Erro ao processar pagamento')
-              }
+                  const body = isPix
+                    ? {
+                        pedidoId,
+                        metodo: 'pix' as const,
+                        payerEmail: formData.payer?.email ?? payerEmail,
+                        payerNome,
+                        payerCpf:
+                          formData.payer?.identification?.number ?? payerCpf,
+                        deviceId,
+                      }
+                    : isCard
+                      ? {
+                          pedidoId,
+                          metodo: metodoCartao,
+                          cardToken: formData.token,
+                          parcelas: formData.installments ?? 1,
+                          issuerId: formData.issuer_id,
+                          paymentMethodId: formData.payment_method_id,
+                          payerEmail: formData.payer?.email ?? payerEmail,
+                          payerNome,
+                          payerCpf:
+                            formData.payer?.identification?.number ?? payerCpf,
+                          deviceId,
+                        }
+                      : null
 
-              if (data.qrCodeBase64) {
-                setPix({
-                  qr: data.qrCodeBase64,
-                  copy: data.qrCodeCopiaECola,
-                  pgtoId: data.pagamentoId,
-                  expiraEm: data.pixExpiraEm ?? null,
-                })
-              } else if (data.status === 'approved') {
-                onSucesso()
-              } else if (data.status === 'in_process' || data.status === 'pending') {
-                setErro(
-                  'Pagamento em análise. Você receberá um e-mail assim que for aprovado.',
-                )
-              } else if (data.status === 'rejected') {
-                setErro(
-                  'Pagamento recusado pela operadora do cartão. Isso costuma ser uma avaliação de segurança do banco/operadora — não é um erro nos dados digitados. Tente novamente em alguns minutos, use outro cartão ou pague com Pix.',
-                )
-              } else {
-                setErro('Pagamento em processamento. Aguarde a confirmação.')
-              }
-            } catch (e) {
-              const err = e as { message?: string }
-              setErro(err.message || 'Falha ao processar pagamento')
-            } finally {
-              setCarregando(false)
-            }
-          }}
+                  if (!body) {
+                    throw new Error('Forma de pagamento não suportada')
+                  }
+
+                  const resp = await fetch('/api/checkout/criar-pagamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                    credentials: 'include',
+                  })
+                  const data = await resp.json()
+                  if (!resp.ok) {
+                    throw new Error(data.error || 'Erro ao processar pagamento')
+                  }
+
+                  if (data.qrCodeBase64) {
+                    setPix({
+                      qr: data.qrCodeBase64,
+                      copy: data.qrCodeCopiaECola,
+                      pgtoId: data.pagamentoId,
+                      expiraEm: data.pixExpiraEm ?? null,
+                    })
+                    resolve()
+                  } else if (data.status === 'approved') {
+                    onSucesso()
+                    resolve()
+                  } else if (data.status === 'in_process' || data.status === 'pending') {
+                    setErro(
+                      'Pagamento em análise. Você receberá um e-mail assim que for aprovado, ou pode tentar outro método agora.',
+                    )
+                    reject(new Error(data.status))
+                  } else if (data.status === 'rejected') {
+                    setErro(
+                      'Pagamento recusado pela operadora do cartão. Isso costuma ser uma avaliação de segurança do banco/operadora — não é um erro nos dados digitados. Tente novamente em alguns minutos, use outro cartão ou pague com Pix.',
+                    )
+                    reject(new Error('rejected'))
+                  } else {
+                    setErro('Pagamento em processamento. Aguarde a confirmação.')
+                    reject(new Error(data.status || 'unknown'))
+                  }
+                } catch (e) {
+                  const err = e as { message?: string }
+                  setErro(err.message || 'Falha ao processar pagamento')
+                  reject(e)
+                } finally {
+                  setCarregando(false)
+                }
+              })()
+            })
+          }
           onError={(err) => {
             console.error('[bricks:error]', err)
             setErro('Erro ao validar dados de pagamento')

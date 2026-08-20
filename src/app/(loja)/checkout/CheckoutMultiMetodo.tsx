@@ -229,13 +229,23 @@ function FluxoDoisCartoes({
         onSucesso()
         return
       }
-      setErro('Pagamento não foi aprovado. Tente novamente.')
-      setSubEtapa('cartaoB')
+      falharEReiniciar('Pagamento não foi aprovado. Tente novamente com os 2 cartões.')
     } catch (e) {
       const err = e as { message?: string }
-      setErro(err.message || 'Falha ao processar os 2 cartões')
-      setSubEtapa('cartaoB')
+      falharEReiniciar(err.message || 'Falha ao processar os 2 cartões. Tente novamente com os 2 cartões.')
     }
+  }
+
+  // Os tokens dos 2 cartões já foram enviados à MP nesta tentativa (cartão A
+  // é autorizado ANTES de saber se B vai funcionar) — token de cartão é de
+  // uso único, reenviar o mesmo token numa nova tentativa falha de novo por
+  // um motivo diferente (token já usado), mascarando a causa real e deixando
+  // o cliente "travado" mesmo trocando de cartão. Por isso volta pro início:
+  // os 2 cartões precisam ser tokenizados de novo, não só o B.
+  function falharEReiniciar(mensagem: string) {
+    setErro(mensagem)
+    setCartaoA(null)
+    setSubEtapa('cartaoA')
   }
 
   if (subEtapa === 'valor') {
@@ -275,17 +285,26 @@ function FluxoDoisCartoes({
 
   if (subEtapa === 'cartaoA') {
     return (
-      <CartaoBrick
-        publicKey={publicKey}
-        valor={valorACentavos / 100}
-        payerEmail={payerEmail}
-        payerCpf={payerCpf}
-        label={`Cartão 1 de 2 — R$ ${moeda(valorACentavos / 100)}`}
-        onToken={(dados) => {
-          setCartaoA(dados)
-          setSubEtapa('cartaoB')
-        }}
-      />
+      <div className="space-y-3">
+        {erro && (
+          <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 flex gap-2 text-xs text-red-600">
+            <AlertCircle size={14} className="shrink-0" />
+            {erro}
+          </div>
+        )}
+        <CartaoBrick
+          publicKey={publicKey}
+          valor={valorACentavos / 100}
+          payerEmail={payerEmail}
+          payerCpf={payerCpf}
+          label={`Cartão 1 de 2 — R$ ${moeda(valorACentavos / 100)}`}
+          onToken={(dados) => {
+            setCartaoA(dados)
+            setErro(null)
+            setSubEtapa('cartaoB')
+          }}
+        />
+      </div>
     )
   }
 
@@ -477,6 +496,11 @@ function FluxoPixMaisCartao({
         expiraEm={pix.expiraEm}
         pollStatus={pollMultiMetodoStatus}
         onPago={() => setSubEtapa('cartao_restante')}
+        onExpirar={() => {
+          setPix(null)
+          setErro(null)
+          setSubEtapa('valor')
+        }}
       />
     )
   }

@@ -114,30 +114,39 @@ export default function CartaoBrick({ publicKey, valor, payerEmail, payerCpf, la
               },
             },
           }}
-          onSubmit={async ({ formData }: { formData: BricksFormData }) => {
-            setErro(null)
-            setCarregando(true)
-            try {
-              const pmId = formData.payment_method_id ?? ''
-              if (!formData.token || !pmId) {
-                throw new Error('Não foi possível validar o cartão')
+          onSubmit={({ formData }: { formData: BricksFormData }) =>
+            // Mesmo requisito do CheckoutBricks.tsx: sem reject() numa falha,
+            // o Brick trava o formulário e o cliente não consegue tokenizar
+            // de novo. Aqui a tokenização em si quase nunca falha (a própria
+            // Payment Brick já valida antes de chamar onSubmit), mas mantém
+            // o contrato correto por segurança.
+            new Promise<void>((resolve, reject) => {
+              setErro(null)
+              setCarregando(true)
+              try {
+                const pmId = formData.payment_method_id ?? ''
+                if (!formData.token || !pmId) {
+                  throw new Error('Não foi possível validar o cartão')
+                }
+                const isDebit = /^deb|debit/i.test(pmId)
+                onToken({
+                  token: formData.token,
+                  bandeiraId: pmId,
+                  metodo: isDebit ? 'debit_card' : 'credit_card',
+                  parcelas: formData.installments ?? 1,
+                  issuerId: formData.issuer_id,
+                  deviceId: capturarDeviceIdMp(),
+                })
+                resolve()
+              } catch (e) {
+                const err = e as { message?: string }
+                setErro(err.message || 'Falha ao validar cartão')
+                reject(e)
+              } finally {
+                setCarregando(false)
               }
-              const isDebit = /^deb|debit/i.test(pmId)
-              onToken({
-                token: formData.token,
-                bandeiraId: pmId,
-                metodo: isDebit ? 'debit_card' : 'credit_card',
-                parcelas: formData.installments ?? 1,
-                issuerId: formData.issuer_id,
-                deviceId: capturarDeviceIdMp(),
-              })
-            } catch (e) {
-              const err = e as { message?: string }
-              setErro(err.message || 'Falha ao validar cartão')
-            } finally {
-              setCarregando(false)
-            }
-          }}
+            })
+          }
           onError={(err) => {
             console.error('[cartao-brick:error]', err)
             setErro('Erro ao validar dados do cartão')

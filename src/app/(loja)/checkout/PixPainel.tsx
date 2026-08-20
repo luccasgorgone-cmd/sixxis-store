@@ -15,6 +15,10 @@ interface Props {
   // Usado pelo checkout multi-método, onde essa consulta padrão seria errada:
   // a perna Pix aprovar sozinha não pode fechar o pedido (falta a perna cartão).
   pollStatus?: () => Promise<'approved' | 'rejected' | 'cancelled' | 'pending'>
+  // Chamado quando o QR expira (ou o pagamento é recusado/cancelado) e o
+  // cliente pede pra tentar de novo. Sem isso, a tela ficava travada num QR
+  // morto sem nenhum jeito de continuar a compra.
+  onExpirar: () => void
 }
 
 const POLL_MS = 4000
@@ -26,9 +30,11 @@ export default function PixPainel({
   expiraEm,
   onPago,
   pollStatus,
+  onExpirar,
 }: Props) {
   const [copiado, setCopiado] = useState(false)
   const [statusInfo, setStatusInfo] = useState<string>('Aguardando pagamento...')
+  const [naoConcluido, setNaoConcluido] = useState(false)
   const [tempoRestante, setTempoRestante] = useState<number>(() => {
     if (expiraEm) {
       const ms = new Date(expiraEm).getTime() - Date.now()
@@ -57,7 +63,8 @@ export default function PixPainel({
         if (status === 'approved') {
           onPago()
         } else if (status === 'rejected' || status === 'cancelled') {
-          setStatusInfo('Pagamento não foi concluído. Tente novamente.')
+          setStatusInfo('Pagamento não foi concluído.')
+          setNaoConcluido(true)
         }
       } catch {
         // ignore
@@ -142,8 +149,19 @@ export default function PixPainel({
         </div>
 
         <div className="flex items-center gap-2 text-xs text-[#3cbfb3]">
-          <Loader2 size={12} className="animate-spin" /> {statusInfo}
+          {!expirou && !naoConcluido && <Loader2 size={12} className="animate-spin" />}
+          {statusInfo}
         </div>
+
+        {(expirou || naoConcluido) && (
+          <button
+            type="button"
+            onClick={onExpirar}
+            className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold py-3 rounded-xl text-sm transition"
+          >
+            Gerar novo Pix ou trocar de método
+          </button>
+        )}
       </div>
 
       <div className="bg-[#e8f8f7] border border-[#3cbfb3]/20 rounded-xl px-4 py-3 text-xs text-gray-600 leading-relaxed">
