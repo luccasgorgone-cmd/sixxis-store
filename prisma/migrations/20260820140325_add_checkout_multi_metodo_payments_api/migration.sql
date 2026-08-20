@@ -20,7 +20,7 @@ CREATE TABLE `TentativaMultiMetodo` (
     INDEX `TentativaMultiMetodo_pedidoId_idx`(`pedidoId`),
     INDEX `TentativaMultiMetodo_status_idx`(`status`),
     PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4;
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AlterTable
 ALTER TABLE `Pagamento`
