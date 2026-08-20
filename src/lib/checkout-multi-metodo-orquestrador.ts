@@ -15,6 +15,7 @@ import {
   classificarStatusPerna,
   cobrarPernaCartao,
   cobrarPernaPix,
+  capturarPernaCartao,
   reverterPerna,
   idempotencyKeyPerna,
   detalheDoErro,
@@ -35,9 +36,10 @@ type ProximaAcao = {
   cartaoRestante?: PernaCartao
 }
 
-// Máximo de iterações do laço abaixo: nunca há mais de 2 pernas por
-// tentativa, então 4 sobra de folga (cobrir A, reavaliar, cobrar B, reavaliar).
-const MAX_ITERACOES = 4
+// Máximo de iterações do laço abaixo: no pior caso (2 cartões) são 4 ações
+// sequenciais — cobrar A, cobrar B, capturar A, capturar B — cada uma reavaliada
+// antes da próxima; 6 dá folga.
+const MAX_ITERACOES = 6
 
 /**
  * Ponto ÚNICO de decisão do checkout multi-método — chamado tanto no caminho
@@ -89,6 +91,12 @@ export async function processarTentativa(deps: PaymentsClientDeps, tentativaId: 
       }
       if (!cobrada) return // marcou falhou dentro de cobrarProximaPerna
       continue // perna nova persistida — reavalia com estado fresco
+    }
+
+    if (decisao.acao === 'capturar_proxima') {
+      const capturada = await capturarProximaPerna(deps, tentativaId, tentativa.pedidoId, decisao.perna, pernaPor)
+      if (!capturada) return // marcou falhou e reverteu dentro de capturarProximaPerna
+      continue
     }
 
     if (decisao.acao === 'falhou') {
@@ -190,6 +198,10 @@ async function cobrarProximaPerna(
     notificationUrl: NOTIFICATION_URL,
     metadata,
     cartao,
+    // 'A'/'B' (2 cartões): só autoriza — captura de verdade só depois que as
+    // 2 autorizarem (ver capturarProximaPerna). 'restante': captura na hora,
+    // igual o checkout de 1 método (o Pix já confirmou antes desta perna existir).
+    capturarAoCriar: perna === 'restante',
   })
   if (r.erro || !r.mpPaymentId) {
     await marcarFalhou(tentativaId, pedidoId, `${perna}_falhou: ${r.erro ?? 'sem id'}`)
@@ -206,6 +218,43 @@ async function cobrarProximaPerna(
       metodo: 'credit_card', valor: cartao.valorCentavos, parcelas: cartao.parcelas,
       bandeira: cartao.bandeiraId, payerEmail: proximaAcao.payerEmail,
     },
+  })
+  return true
+}
+
+/**
+ * Etapa 2 do fluxo "2 cartões": captura uma perna já autorizada. Se a
+ * captura falhar (rede, ou a MP recusar) DEPOIS que as 2 já autorizaram,
+ * reverte as 2 pelo status REAL de cada uma (reverterPerna decide sozinho se
+ * é cancel — ainda só autorizada — ou refund — já chegou a capturar antes de
+ * falhar no meio do caminho).
+ */
+async function capturarProximaPerna(
+  deps: PaymentsClientDeps,
+  tentativaId: string,
+  pedidoId: string,
+  perna: string,
+  pernaPor: (nome: string) => { id: string; mpPaymentId: string | null } | undefined,
+): Promise<boolean> {
+  const alvo = pernaPor(perna)
+  if (!alvo?.mpPaymentId) {
+    await marcarFalhou(tentativaId, pedidoId, `${perna}_sem_mpPaymentId_para_capturar`)
+    return false
+  }
+
+  const r = await capturarPernaCartao(deps, alvo.mpPaymentId)
+  if (r.erro || r.status !== 'approved') {
+    await marcarFalhou(tentativaId, pedidoId, `${perna}_falhou_captura: ${r.erro ?? r.status ?? 'sem status'}`)
+    const outraA = pernaPor('A')
+    const outraB = pernaPor('B')
+    if (outraA) await reverterPernaComClaim(deps, outraA.id)
+    if (outraB) await reverterPernaComClaim(deps, outraB.id)
+    return false
+  }
+
+  await prisma.pagamento.update({
+    where: { id: alvo.id },
+    data: { mpStatus: r.status, mpStatusDetail: r.statusDetail, aprovadoEm: new Date() },
   })
   return true
 }

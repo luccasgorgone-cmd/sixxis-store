@@ -34,6 +34,10 @@ export const paymentsClientDeps: PaymentsClientDeps = {
     const resp = await requirePayment().get({ id: mpPaymentId })
     return { status: resp.status, status_detail: resp.status_detail }
   },
+  async capturarPagamento(mpPaymentId) {
+    const resp = await requirePayment().capture({ id: mpPaymentId })
+    return { status: resp.status, status_detail: resp.status_detail }
+  },
   async estornarPagamento(mpPaymentId) {
     await requireRefund().create({ payment_id: mpPaymentId })
   },

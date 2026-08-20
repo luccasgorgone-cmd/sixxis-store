@@ -41,6 +41,8 @@ export interface PaymentsClientDeps {
   }>
   /** Busca o status REAL na MP — nunca decide reversão a partir do status local. */
   buscarPagamento(mpPaymentId: string): Promise<{ status?: string; status_detail?: string }>
+  /** Captura total de um pagamento criado com capture:false (autorizado, não capturado). */
+  capturarPagamento(mpPaymentId: string): Promise<{ status?: string; status_detail?: string }>
   /** Refund total. Só chamar quando o status real for 'approved'. */
   estornarPagamento(mpPaymentId: string): Promise<void>
   /** Cancel (perna autorizada mas nunca capturada). Só quando status real 'authorized'. */
@@ -174,6 +176,15 @@ export interface ResultadoCobrancaPerna {
  * em vez de cobrar de novo). Isso cobre retry de rede E crash-recovery: não
  * importa quantas vezes esta função for chamada com a mesma tentativaId+perna,
  * nunca cobra 2x.
+ *
+ * `capturarAoCriar` (default true) controla `capture` no corpo da MP:
+ *  - true  → cobrança normal, 1 etapa (usado no restante do pix+cartão: quando
+ *    esta perna é criada o Pix já confirmou, não tem "esperar a outra perna
+ *    também dar certo" — captura na hora, igual o checkout de 1 método).
+ *  - false → só AUTORIZA (reserva no limite, nada é cobrado ainda). Usado no
+ *    fluxo "2 cartões": as 2 pernas só viram cobrança de verdade (capturarPerna
+ *    Cartao) depois que as 2 autorizarem — assim, se uma falhar, a outra nunca
+ *    chegou a tirar dinheiro do cliente (cancela em vez de estornar).
  */
 export async function cobrarPernaCartao(
   deps: PaymentsClientDeps,
@@ -184,6 +195,7 @@ export async function cobrarPernaCartao(
     notificationUrl: string
     metadata: Record<string, unknown>
     cartao: PernaCartao
+    capturarAoCriar?: boolean
   },
 ): Promise<ResultadoCobrancaPerna> {
   try {
@@ -194,7 +206,7 @@ export async function cobrarPernaCartao(
         token: params.cartao.token,
         installments: params.cartao.parcelas,
         payment_method_id: params.cartao.bandeiraId,
-        capture: true,
+        capture: params.capturarAoCriar ?? true,
         payer: { email: params.payerEmail },
         external_reference: params.externalReference,
         notification_url: params.notificationUrl,
@@ -209,6 +221,29 @@ export async function cobrarPernaCartao(
     }
   } catch (e) {
     return { mpPaymentId: null, status: null, statusDetail: null, erro: detalheDoErro(e) }
+  }
+}
+
+/**
+ * Captura uma perna criada com capture:false (fluxo "2 cartões", etapa 2 —
+ * só chamada depois que as 2 pernas já autorizaram). Se a captura em si
+ * falhar (rede, ou a MP recusar), quem chama deve reverter pelo status REAL
+ * (reverterPerna) — não assumir nada aqui.
+ */
+export async function capturarPernaCartao(
+  deps: PaymentsClientDeps,
+  mpPaymentId: string,
+): Promise<ResultadoCobrancaPerna> {
+  try {
+    const resp = await deps.capturarPagamento(mpPaymentId)
+    return {
+      mpPaymentId,
+      status: resp.status ?? null,
+      statusDetail: resp.status_detail ?? null,
+      erro: null,
+    }
+  } catch (e) {
+    return { mpPaymentId, status: null, statusDetail: null, erro: detalheDoErro(e) }
   }
 }
 
@@ -260,6 +295,7 @@ export interface EstadoPerna {
 
 export type DecisaoTentativa =
   | { acao: 'cobrar_proxima'; perna: string }
+  | { acao: 'capturar_proxima'; perna: string }
   | { acao: 'aguardar' }
   | { acao: 'pago' }
   | { acao: 'falhou'; erro: string; pernasParaReverter: string[] }
@@ -273,22 +309,48 @@ export function classificarStatusPerna(status: string | null | undefined): 'apro
   return 'recusado'
 }
 
+/** Fase de autorização de UMA perna criada com capture:false (fluxo "2
+ * cartões"). Distingue 'authorized' (reservou, ainda não cobrou) de
+ * 'approved' (já capturado de verdade) — classificarStatusPerna trata os
+ * dois como "pendente" porque é genérico pro resto do sistema; aqui a
+ * distinção é o requisito inteiro. */
+function faseAutorizacao(status: string | null | undefined): 'autorizado' | 'capturado' | 'pendente' | 'recusado' {
+  if (status === 'approved') return 'capturado'
+  if (status === 'authorized') return 'autorizado'
+  if (status === 'pending' || status === 'in_process') return 'pendente'
+  return 'recusado'
+}
+
+/**
+ * "2 cartões" em 2 fases — nunca cobra de verdade até as 2 pernas autorizarem:
+ *  Fase 1 (autorizar): cobra A (capture:false) → cobra B (capture:false).
+ *  Fase 2 (capturar): só depois das 2 autorizadas, captura A → captura B.
+ * Se qualquer autorização falhar, cancela a outra (nunca tirou dinheiro do
+ * cliente — não precisa de refund, só solta a reserva no limite). Só existe
+ * risco de precisar de refund de verdade na borda rara de uma CAPTURA em si
+ * falhar depois que a outra perna já foi capturada (requisito 5/6 cobrem
+ * isso via reverterPerna, que sempre confere o status real antes de agir).
+ */
 export function avaliarTentativaDoisCartoes(
   totalCentavos: number,
   pernaA: EstadoPerna | undefined,
   pernaB: EstadoPerna | undefined,
 ): DecisaoTentativa {
   if (!pernaA) return { acao: 'cobrar_proxima', perna: 'A' }
-  const a = classificarStatusPerna(pernaA.status)
-  if (a === 'recusado') return { acao: 'falhou', erro: 'cartao_a_recusado', pernasParaReverter: [] }
-  if (a === 'pendente') return { acao: 'aguardar' }
+  const faseA = faseAutorizacao(pernaA.status)
+  if (faseA === 'recusado') return { acao: 'falhou', erro: 'cartao_a_recusado', pernasParaReverter: [] }
+  if (faseA === 'pendente') return { acao: 'aguardar' }
 
   if (!pernaB) return { acao: 'cobrar_proxima', perna: 'B' }
-  const b = classificarStatusPerna(pernaB.status)
-  if (b === 'pendente') return { acao: 'aguardar' }
-  if (b === 'recusado') return { acao: 'falhou', erro: 'cartao_b_recusado', pernasParaReverter: ['A'] }
+  const faseB = faseAutorizacao(pernaB.status)
+  if (faseB === 'pendente') return { acao: 'aguardar' }
+  if (faseB === 'recusado') return { acao: 'falhou', erro: 'cartao_b_recusado', pernasParaReverter: ['A'] }
 
-  // Ambas aprovadas — revalida a soma com os valores REAIS cobrados (req 5),
+  // As 2 autorizadas (ou já capturadas, numa retomada) — captura uma de cada vez.
+  if (faseA === 'autorizado') return { acao: 'capturar_proxima', perna: 'A' }
+  if (faseB === 'autorizado') return { acao: 'capturar_proxima', perna: 'B' }
+
+  // As 2 capturadas — revalida a soma com os valores REAIS cobrados (req 5),
   // não confia só na checagem feita antes de cobrar.
   if (pernaA.valorCentavos + pernaB.valorCentavos !== totalCentavos) {
     return { acao: 'falhou', erro: 'soma_nao_bate_pos_cobranca', pernasParaReverter: ['A', 'B'] }

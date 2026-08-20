@@ -6,6 +6,7 @@ import {
   classificarStatusPerna,
   cobrarPernaCartao,
   cobrarPernaPix,
+  capturarPernaCartao,
   detalheDoErro,
   idempotencyKeyPerna,
   reverterPerna,
@@ -16,6 +17,7 @@ function mockDeps(overrides: Partial<PaymentsClientDeps> = {}): PaymentsClientDe
   return {
     criarPagamento: vi.fn(),
     buscarPagamento: vi.fn(),
+    capturarPagamento: vi.fn(),
     estornarPagamento: vi.fn().mockResolvedValue(undefined),
     cancelarPagamento: vi.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -91,6 +93,47 @@ describe('cobrarPernaCartao / cobrarPernaPix', () => {
     })
     expect(r.qrCodeCopiaECola).toBe('copia-e-cola')
     expect(r.status).toBe('pending')
+  })
+
+  it('capturarAoCriar=false manda capture:false no corpo (2 cartões — só autoriza)', async () => {
+    const deps = mockDeps({ criarPagamento: vi.fn().mockResolvedValue({ id: 1, status: 'authorized' }) })
+    await cobrarPernaCartao(deps, {
+      idempotencyKey: 'mm:t1:A', externalReference: 'ped_1', payerEmail: 'a@b.com',
+      notificationUrl: 'https://x/webhook', metadata: {},
+      cartao: { token: 'tok', bandeiraId: 'master', parcelas: 1, valorCentavos: 1000 },
+      capturarAoCriar: false,
+    })
+    expect(deps.criarPagamento).toHaveBeenCalledWith(
+      expect.objectContaining({ body: expect.objectContaining({ capture: false }) }),
+    )
+  })
+
+  it('sem capturarAoCriar (default) manda capture:true (restante do pix — captura na hora)', async () => {
+    const deps = mockDeps({ criarPagamento: vi.fn().mockResolvedValue({ id: 1, status: 'approved' }) })
+    await cobrarPernaCartao(deps, {
+      idempotencyKey: 'mm:t1:restante', externalReference: 'ped_1', payerEmail: 'a@b.com',
+      notificationUrl: 'https://x/webhook', metadata: {},
+      cartao: { token: 'tok', bandeiraId: 'master', parcelas: 1, valorCentavos: 1000 },
+    })
+    expect(deps.criarPagamento).toHaveBeenCalledWith(
+      expect.objectContaining({ body: expect.objectContaining({ capture: true }) }),
+    )
+  })
+})
+
+describe('capturarPernaCartao', () => {
+  it('chama deps.capturarPagamento com o mpPaymentId e devolve o status', async () => {
+    const deps = mockDeps({ capturarPagamento: vi.fn().mockResolvedValue({ status: 'approved' }) })
+    const r = await capturarPernaCartao(deps, 'mp_1')
+    expect(deps.capturarPagamento).toHaveBeenCalledWith('mp_1')
+    expect(r).toMatchObject({ mpPaymentId: 'mp_1', status: 'approved' })
+  })
+
+  it('nunca crasha quando a captura lança erro — devolve erro no resultado', async () => {
+    const deps = mockDeps({ capturarPagamento: vi.fn().mockRejectedValue(new Error('timeout')) })
+    const r = await capturarPernaCartao(deps, 'mp_1')
+    expect(r.erro).toContain('timeout')
+    expect(r.status).toBeNull()
   })
 })
 
@@ -210,27 +253,54 @@ describe('avaliarTentativaDoisCartoes', () => {
     expect(d).toEqual({ acao: 'aguardar' })
   })
 
-  it('A aprovado, sem B ainda => cobrar B', () => {
-    const d = avaliarTentativaDoisCartoes(10000, { status: 'approved', valorCentavos: 4000 }, undefined)
+  it('A autorizado (não capturado ainda), sem B ainda => cobrar B', () => {
+    const d = avaliarTentativaDoisCartoes(10000, { status: 'authorized', valorCentavos: 4000 }, undefined)
     expect(d).toEqual({ acao: 'cobrar_proxima', perna: 'B' })
   })
 
-  it('requisito 2 — A aprovado, B pending => aguardar (nunca decide em cima de pending)', () => {
+  it('requisito 2 — A autorizado, B pending => aguardar (nunca decide em cima de pending)', () => {
     const d = avaliarTentativaDoisCartoes(
       10000,
-      { status: 'approved', valorCentavos: 4000 },
+      { status: 'authorized', valorCentavos: 4000 },
       { status: 'in_process', valorCentavos: 6000 },
     )
     expect(d).toEqual({ acao: 'aguardar' })
   })
 
-  it('A aprovado, B recusado => falhou e reverte A', () => {
+  it('A autorizado, B recusado => falhou e reverte A (cancel, nunca chegou a capturar)', () => {
     const d = avaliarTentativaDoisCartoes(
       10000,
-      { status: 'approved', valorCentavos: 4000 },
+      { status: 'authorized', valorCentavos: 4000 },
       { status: 'rejected', valorCentavos: 6000 },
     )
     expect(d).toMatchObject({ acao: 'falhou', erro: 'cartao_b_recusado', pernasParaReverter: ['A'] })
+  })
+
+  it('modelo autoriza-depois-captura — as 2 autorizadas: captura A primeiro, nunca as 2 juntas', () => {
+    const d = avaliarTentativaDoisCartoes(
+      10000,
+      { status: 'authorized', valorCentavos: 4000 },
+      { status: 'authorized', valorCentavos: 6000 },
+    )
+    expect(d).toEqual({ acao: 'capturar_proxima', perna: 'A' })
+  })
+
+  it('A já capturado (retomada), B ainda só autorizado => captura B', () => {
+    const d = avaliarTentativaDoisCartoes(
+      10000,
+      { status: 'approved', valorCentavos: 4000 },
+      { status: 'authorized', valorCentavos: 6000 },
+    )
+    expect(d).toEqual({ acao: 'capturar_proxima', perna: 'B' })
+  })
+
+  it('A autorizado, B já capturado (retomada) => captura A', () => {
+    const d = avaliarTentativaDoisCartoes(
+      10000,
+      { status: 'authorized', valorCentavos: 4000 },
+      { status: 'approved', valorCentavos: 6000 },
+    )
+    expect(d).toEqual({ acao: 'capturar_proxima', perna: 'A' })
   })
 
   it('ambos aprovados e soma bate => pago', () => {

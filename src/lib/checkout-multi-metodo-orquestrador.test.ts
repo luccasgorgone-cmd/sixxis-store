@@ -193,6 +193,7 @@ function mockDeps(overrides: Partial<PaymentsClientDeps> = {}): PaymentsClientDe
   return {
     criarPagamento: vi.fn(),
     buscarPagamento: vi.fn(),
+    capturarPagamento: vi.fn().mockResolvedValue({ status: 'approved' }),
     estornarPagamento: vi.fn().mockResolvedValue(undefined),
     cancelarPagamento: vi.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -204,7 +205,7 @@ beforeEach(() => {
 })
 
 describe('processarTentativa — fluxo dois_cartoes', () => {
-  it('feliz: cobra A, cobra B, marca tentativa e pedido pago (requisito 5 soma bate)', async () => {
+  it('feliz: autoriza A, autoriza B, CAPTURA os 2 só depois das 2 autorizarem, marca pago (requisito 5 soma bate)', async () => {
     const pedido = criarPedidoFake()
     const tentativa = await prismaFake.tentativaMultiMetodo.create({
       data: {
@@ -220,18 +221,26 @@ describe('processarTentativa — fluxo dois_cartoes', () => {
     const deps = mockDeps({
       criarPagamento: vi
         .fn()
-        .mockResolvedValueOnce({ id: 'mpA', status: 'approved' })
-        .mockResolvedValueOnce({ id: 'mpB', status: 'approved' }),
+        .mockResolvedValueOnce({ id: 'mpA', status: 'authorized' })
+        .mockResolvedValueOnce({ id: 'mpB', status: 'authorized' }),
+      capturarPagamento: vi.fn().mockResolvedValue({ status: 'approved' }),
     })
 
     await processarTentativa(deps, tentativa.id)
 
     expect(tentativas[tentativa.id].status).toBe('pago')
     expect(pedidos[pedido.id].status).toBe('pago')
-    expect(deps.criarPagamento).toHaveBeenCalledTimes(2)
+    expect(deps.criarPagamento).toHaveBeenCalledTimes(2) // só autoriza — capture:false nas duas
+    expect(deps.criarPagamento).toHaveBeenNthCalledWith(1, expect.objectContaining({ body: expect.objectContaining({ capture: false }) }))
+    expect(deps.capturarPagamento).toHaveBeenCalledTimes(2)
+    expect(deps.capturarPagamento).toHaveBeenCalledWith('mpA')
+    expect(deps.capturarPagamento).toHaveBeenCalledWith('mpB')
+    // nenhum dinheiro precisou de estorno — as 2 pernas foram só autorizadas
+    // e capturadas direto, nunca precisou de refund
+    expect(deps.estornarPagamento).not.toHaveBeenCalled()
   })
 
-  it('requisito 2 — cartão A pending: para no aguardar, NÃO cobra B ainda; webhook resolve depois e o mesmo laço prossegue', async () => {
+  it('requisito 2 — cartão A pending: para no aguardar, NÃO autoriza B ainda; webhook resolve depois e o mesmo laço prossegue até capturar', async () => {
     const pedido = criarPedidoFake()
     const tentativa = await prismaFake.tentativaMultiMetodo.create({
       data: {
@@ -248,24 +257,26 @@ describe('processarTentativa — fluxo dois_cartoes', () => {
       criarPagamento: vi
         .fn()
         .mockResolvedValueOnce({ id: 'mpA', status: 'pending' })
-        .mockResolvedValueOnce({ id: 'mpB', status: 'approved' }),
+        .mockResolvedValueOnce({ id: 'mpB', status: 'authorized' }),
+      capturarPagamento: vi.fn().mockResolvedValue({ status: 'approved' }),
     })
 
     await processarTentativa(deps, tentativa.id)
     expect(tentativas[tentativa.id].status).toBe('aguardando_confirmacao')
     expect(pedidos[pedido.id].multiMetodoStatus).toBe('aguardando_confirmacao')
-    expect(deps.criarPagamento).toHaveBeenCalledTimes(1) // NUNCA cobrou B com A ainda incerto
+    expect(deps.criarPagamento).toHaveBeenCalledTimes(1) // NUNCA autorizou B com A ainda incerto
 
-    // simula o webhook: perna A resolveu pra approved, chama de novo (mesmo caminho)
+    // simula o webhook: perna A resolveu pra autorizada, chama de novo (mesmo caminho)
     const pernaA = Object.values(pagamentos).find((p: any) => p.perna === 'A') as any
-    pernaA.mpStatus = 'approved'
+    pernaA.mpStatus = 'authorized'
     await processarTentativa(deps, tentativa.id)
 
-    expect(deps.criarPagamento).toHaveBeenCalledTimes(2) // agora sim cobrou B
+    expect(deps.criarPagamento).toHaveBeenCalledTimes(2) // agora sim autorizou B
+    expect(deps.capturarPagamento).toHaveBeenCalledTimes(2) // e capturou as 2
     expect(tentativas[tentativa.id].status).toBe('pago')
   })
 
-  it('B recusado depois de A aprovado: marca falhou e reverte A pelo status REAL', async () => {
+  it('B recusado depois de A autorizado: marca falhou e CANCELA A (nunca precisou de refund — A nunca foi capturado)', async () => {
     const pedido = criarPedidoFake()
     const tentativa = await prismaFake.tentativaMultiMetodo.create({
       data: {
@@ -281,9 +292,9 @@ describe('processarTentativa — fluxo dois_cartoes', () => {
     const deps = mockDeps({
       criarPagamento: vi
         .fn()
-        .mockResolvedValueOnce({ id: 'mpA', status: 'approved' })
+        .mockResolvedValueOnce({ id: 'mpA', status: 'authorized' })
         .mockResolvedValueOnce({ id: 'mpB', status: 'rejected' }),
-      buscarPagamento: vi.fn().mockResolvedValue({ status: 'approved' }), // status real de A na hora de reverter
+      buscarPagamento: vi.fn().mockResolvedValue({ status: 'authorized' }), // status real de A na hora de reverter
     })
 
     await processarTentativa(deps, tentativa.id)
@@ -291,8 +302,48 @@ describe('processarTentativa — fluxo dois_cartoes', () => {
     expect(tentativas[tentativa.id].status).toBe('falhou')
     expect(pedidos[pedido.id].multiMetodoStatus).toBe('falhou')
     const pernaA = Object.values(pagamentos).find((p: any) => p.perna === 'A') as any
-    expect(pernaA.estornoStatus).toBe('estornado')
+    expect(pernaA.estornoStatus).toBe('cancelado')
+    expect(deps.cancelarPagamento).toHaveBeenCalledWith('mpA')
+    expect(deps.estornarPagamento).not.toHaveBeenCalled() // A nunca foi capturado — nunca precisa de refund
+    expect(deps.capturarPagamento).not.toHaveBeenCalled() // B recusou antes de chegar na fase de captura
+  })
+
+  it('captura de B falha DEPOIS de A já capturado: reverte A por refund (já tinha dinheiro de verdade) e B por cancel', async () => {
+    const pedido = criarPedidoFake()
+    const tentativa = await prismaFake.tentativaMultiMetodo.create({
+      data: {
+        pedidoId: pedido.id, tipo: 'dois_cartoes', totalCentavos: 10000,
+        proximaAcao: {
+          payerEmail: 'a@b.com',
+          cartaoA: { token: 'tokA', bandeiraId: 'master', parcelas: 1, valorCentavos: 4000 },
+          cartaoB: { token: 'tokB', bandeiraId: 'visa', parcelas: 1, valorCentavos: 6000 },
+        },
+      },
+    })
+
+    const deps = mockDeps({
+      criarPagamento: vi
+        .fn()
+        .mockResolvedValueOnce({ id: 'mpA', status: 'authorized' })
+        .mockResolvedValueOnce({ id: 'mpB', status: 'authorized' }),
+      capturarPagamento: vi
+        .fn()
+        .mockResolvedValueOnce({ status: 'approved' }) // captura A: ok
+        .mockRejectedValueOnce(new Error('captura de B falhou')), // captura B: falha de verdade
+      buscarPagamento: vi.fn().mockImplementation(async (id: string) =>
+        id === 'mpA' ? { status: 'approved' } : { status: 'authorized' },
+      ),
+    })
+
+    await processarTentativa(deps, tentativa.id)
+
+    expect(tentativas[tentativa.id].status).toBe('falhou')
+    const pernaA = Object.values(pagamentos).find((p: any) => p.perna === 'A') as any
+    const pernaB = Object.values(pagamentos).find((p: any) => p.perna === 'B') as any
+    expect(pernaA.estornoStatus).toBe('estornado') // já tinha sido capturado — refund de verdade
+    expect(pernaB.estornoStatus).toBe('cancelado') // nunca chegou a capturar — só cancel
     expect(deps.estornarPagamento).toHaveBeenCalledWith('mpA')
+    expect(deps.cancelarPagamento).toHaveBeenCalledWith('mpB')
   })
 
   it('tentativa já terminal (pago) — chamar de novo é no-op total, nunca chama a MP outra vez', async () => {
@@ -479,15 +530,16 @@ describe('reconciliarMultiMetodo — requisito 8 (crash recovery)', () => {
     })
 
     const deps = mockDeps({
-      buscarPagamento: vi.fn().mockResolvedValue({ status: 'approved' }), // webhook nunca chegou, mas a MP já tinha aprovado
-      criarPagamento: vi.fn().mockResolvedValue({ id: 'mpB', status: 'approved' }),
+      buscarPagamento: vi.fn().mockResolvedValue({ status: 'authorized' }), // webhook nunca chegou, mas a MP já tinha autorizado
+      criarPagamento: vi.fn().mockResolvedValue({ id: 'mpB', status: 'authorized' }),
     })
 
     const resultado = await reconciliarMultiMetodo(deps, 5 * 60_000)
 
     expect(resultado.tentativasProcessadas).toBe(1)
     expect(deps.buscarPagamento).toHaveBeenCalledWith('mpA')
-    expect(tentativas[tentativa.id].status).toBe('pago') // convergiu: cobrou B e fechou
+    expect(tentativas[tentativa.id].status).toBe('pago') // convergiu: autorizou B, capturou os 2 e fechou
+    expect(deps.capturarPagamento).toHaveBeenCalledTimes(2)
   })
 
   it('ignora tentativas recentes (dentro do corte) — não interfere em request em andamento', async () => {
