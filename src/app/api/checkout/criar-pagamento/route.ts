@@ -5,7 +5,7 @@ import type { Prisma } from '@prisma/client'
 import { mpPayment } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { isStatusPendente, STATUS_PEDIDO_PAGO } from '@/lib/pedido-status'
+import { isStatusPendente } from '@/lib/pedido-status'
 import { creditarCashback } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
 import { enviarEmailConfirmacaoPedido } from '@/lib/email'
@@ -13,6 +13,7 @@ import { rateLimit, getClientIp } from '@/lib/ratelimit'
 import { precoPix } from '@/lib/preco-pix'
 import { calcularTotalBaseReais } from '@/lib/checkout-total'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
+import { construirSinaisAntifraude } from '@/lib/mercadopago-antifraude'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -138,98 +139,19 @@ export async function POST(req: NextRequest) {
   const idempotencyKey = `pedido-${pedido.id}-${randomUUID()}`
   const emailPayer = payerEmail ?? pedido.cliente.email
   const nomePayer = payerNome ?? pedido.cliente.nome ?? ''
-  const [firstName, ...rest] = nomePayer.trim().split(/\s+/)
-  const lastName = rest.join(' ') || firstName
   const cpfDigits = payerCpf?.replace(/\D/g, '')
 
-  // Telefone -> { area_code (DDD), number }. Tolera "(11) 98765-4321", "+55 11…", etc.
-  const telDigits = (pedido.cliente.telefone ?? '').replace(/\D/g, '')
-  const telLocal = telDigits.length > 11 && telDigits.startsWith('55')
-    ? telDigits.slice(2)
-    : telDigits
-  const phone =
-    telLocal.length >= 10
-      ? { area_code: telLocal.slice(0, 2), number: telLocal.slice(2) }
-      : undefined
+  // payer enriquecido (nome/CPF/telefone/endereço) + additional_info (items,
+  // IP, histórico de compra) — sinais de antifraude do MP. Função ÚNICA
+  // compartilhada com o checkout multi-método (mercadopago-antifraude.ts),
+  // pra nunca mais divergir entre os fluxos.
+  const { payer: payerExtra, additionalInfo } = await construirSinaisAntifraude(
+    req,
+    pedido,
+    { nome: payerNome, cpf: payerCpf },
+  )
 
-  // Endereço do pedido -> payer.address (e additional_info abaixo).
-  const end = pedido.endereco
-  const zipCode = (end?.cep ?? '').replace(/\D/g, '')
-  const address =
-    end && (end.logradouro || zipCode)
-      ? {
-          zip_code: zipCode || undefined,
-          street_name: end.logradouro || undefined,
-          street_number: end.numero || undefined,
-        }
-      : undefined
-
-  const basePayer: Record<string, unknown> = {
-    email: emailPayer,
-    first_name: firstName || 'Cliente',
-    last_name: lastName,
-  }
-  if (cpfDigits && cpfDigits.length === 11) {
-    basePayer.identification = { type: 'CPF', number: cpfDigits }
-  }
-  if (phone) basePayer.phone = phone
-  if (address) basePayer.address = address
-
-  // Itens do carrinho -> additional_info.items (lido pelo antifraude do MP).
-  // category_id deve ser uma categoria do MP; a loja vende climatização/eletro.
-  const MP_CATEGORY = 'home_appliances'
-  const itemsMP = pedido.itens.map((i) => ({
-    id: i.produto.sku || i.produtoId,
-    title: i.variacaoNome ? `${i.produto.nome} — ${i.variacaoNome}` : i.produto.nome,
-    description: (i.produto.descricao || i.produto.nome).replace(/\s+/g, ' ').trim().slice(0, 256),
-    category_id: MP_CATEGORY,
-    quantity: i.quantidade,
-    unit_price: Number(i.precoUnitario),
-  }))
-
-  // Compra anterior PAGA deste cliente (se houver) — alimenta
-  // is_first_purchase_online/last_purchase abaixo. Consulta em tempo real, não
-  // o contador denormalizado Cliente.totalPedidos (esse nunca é atualizado
-  // pelo app hoje — não é fonte confiável pra sinal de antifraude).
-  const pedidoAnterior = await prisma.pedido.findFirst({
-    where: {
-      clienteId: pedido.clienteId,
-      id: { not: pedido.id },
-      status: { in: [...STATUS_PEDIDO_PAGO] },
-    },
-    orderBy: { pagoEm: 'desc' },
-    select: { pagoEm: true },
-  })
-
-  // additional_info: items + espelho do payer + endereço de entrega + IP +
-  // histórico de compra. Tudo isso alimenta a Qualidade da Integração e o
-  // score de aprovação do antifraude do MP — quanto mais contexto real a
-  // gente entrega, menos a decisão deles depende de heurística "às cegas".
-  const additionalInfo: Record<string, unknown> = {
-    items: itemsMP,
-    ip_address: getClientIp(req),
-  }
-  const aiPayer: Record<string, unknown> = {
-    first_name: firstName || 'Cliente',
-    last_name: lastName,
-    registration_date: pedido.cliente.createdAt.toISOString(),
-    is_first_purchase_online: !pedidoAnterior,
-  }
-  if (pedidoAnterior?.pagoEm) aiPayer.last_purchase = pedidoAnterior.pagoEm.toISOString()
-  if (phone) aiPayer.phone = phone
-  if (address) aiPayer.address = address
-  additionalInfo.payer = aiPayer
-  if (end) {
-    additionalInfo.shipments = {
-      receiver_address: {
-        zip_code: zipCode || undefined,
-        street_name: end.logradouro || undefined,
-        street_number: end.numero || undefined,
-        city_name: end.cidade || undefined,
-        state_name: end.estado || undefined,
-      },
-    }
-  }
+  const basePayer: Record<string, unknown> = { email: emailPayer, ...payerExtra }
 
   const basePayload = {
     transaction_amount: valorBRL,

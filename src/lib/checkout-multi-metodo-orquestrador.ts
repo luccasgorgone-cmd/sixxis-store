@@ -37,6 +37,11 @@ type ProximaAcao = {
   /** Device ID capturado no navegador na submissão original — reaproveitado
    *  em toda perna desta tentativa (inclusive as cobradas depois, via webhook). */
   deviceId?: string
+  /** Sinais de antifraude (payer enriquecido + additional_info), montados 1x
+   *  na rota que cria/atualiza a tentativa (mercadopago-antifraude.ts) e
+   *  reaproveitados em toda perna — mesmo padrão do checkout de 1 método. */
+  payerExtra?: Record<string, unknown>
+  additionalInfo?: Record<string, unknown>
 }
 
 // Máximo de iterações do laço abaixo: no pior caso (2 cartões) são 4 ações
@@ -164,6 +169,8 @@ async function cobrarProximaPerna(
       metadata,
       valorCentavos: proximaAcao.valorPixCentavos!,
       meliSessionId: proximaAcao.deviceId,
+      payerExtra: proximaAcao.payerExtra,
+      additionalInfo: proximaAcao.additionalInfo,
     })
     if (r.erro || !r.mpPaymentId) {
       await marcarFalhou(tentativaId, pedidoId, `pix_falhou: ${r.erro ?? 'sem id'}`)
@@ -207,6 +214,8 @@ async function cobrarProximaPerna(
     // igual o checkout de 1 método (o Pix já confirmou antes desta perna existir).
     capturarAoCriar: perna === 'restante',
     meliSessionId: proximaAcao.deviceId,
+    payerExtra: proximaAcao.payerExtra,
+    additionalInfo: proximaAcao.additionalInfo,
   })
   if (r.erro || !r.mpPaymentId) {
     await marcarFalhou(tentativaId, pedidoId, `${perna}_falhou: ${r.erro ?? 'sem id'}`)

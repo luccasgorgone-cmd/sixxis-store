@@ -199,6 +199,11 @@ export async function cobrarPernaCartao(
     cartao: PernaCartao
     capturarAoCriar?: boolean
     meliSessionId?: string
+    /** Sinais de antifraude (payer enriquecido + additional_info) — ver
+     *  mercadopago-antifraude.ts. Sem isso o MP tem menos contexto pra
+     *  aprovar (foi a causa real de um cc_rejected_high_risk em produção). */
+    payerExtra?: Record<string, unknown>
+    additionalInfo?: Record<string, unknown>
   },
 ): Promise<ResultadoCobrancaPerna> {
   try {
@@ -211,10 +216,11 @@ export async function cobrarPernaCartao(
         installments: params.cartao.parcelas,
         payment_method_id: params.cartao.bandeiraId,
         capture: params.capturarAoCriar ?? true,
-        payer: { email: params.payerEmail },
+        payer: { email: params.payerEmail, ...params.payerExtra },
         external_reference: params.externalReference,
         notification_url: params.notificationUrl,
         metadata: params.metadata,
+        ...(params.additionalInfo ? { additional_info: params.additionalInfo } : {}),
       },
     })
     return {
@@ -261,6 +267,8 @@ export async function cobrarPernaPix(
     metadata: Record<string, unknown>
     valorCentavos: number
     meliSessionId?: string
+    payerExtra?: Record<string, unknown>
+    additionalInfo?: Record<string, unknown>
   },
 ): Promise<ResultadoCobrancaPerna & { qrCodeBase64?: string; qrCodeCopiaECola?: string }> {
   try {
@@ -270,10 +278,11 @@ export async function cobrarPernaPix(
       body: {
         transaction_amount: params.valorCentavos / 100,
         payment_method_id: 'pix',
-        payer: { email: params.payerEmail },
+        payer: { email: params.payerEmail, ...params.payerExtra },
         external_reference: params.externalReference,
         notification_url: params.notificationUrl,
         metadata: params.metadata,
+        ...(params.additionalInfo ? { additional_info: params.additionalInfo } : {}),
       },
     })
     const txData = resp.point_of_interaction?.transaction_data

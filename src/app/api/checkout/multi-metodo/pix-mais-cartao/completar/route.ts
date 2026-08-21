@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { auditLog } from '@/lib/audit'
@@ -31,6 +32,8 @@ type ProximaAcaoPixMaisCartao = {
   valorPixCentavos: number
   cartaoRestante?: unknown
   deviceId?: string
+  payerExtra?: Record<string, unknown>
+  additionalInfo?: Record<string, unknown>
 }
 
 export async function POST(req: NextRequest) {
@@ -101,7 +104,7 @@ export async function POST(req: NextRequest) {
         ...proximaAcaoAtual,
         cartaoRestante: { token: cardToken, bandeiraId, parcelas, valorCentavos: valorRestanteCentavos },
         deviceId: deviceId ?? proximaAcaoAtual.deviceId,
-      },
+      } as Prisma.InputJsonValue,
     },
   })
 

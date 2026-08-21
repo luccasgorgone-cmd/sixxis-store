@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { auditLog } from '@/lib/audit'
@@ -9,6 +10,7 @@ import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 import { calcularTotalBaseReais } from '@/lib/checkout-total'
 import { paymentsClientDeps } from '@/lib/mercadopago-payments-deps'
 import { processarTentativa } from '@/lib/checkout-multi-metodo-orquestrador'
+import { construirSinaisAntifraude } from '@/lib/mercadopago-antifraude'
 
 // STATUS (ver checkout-multi-metodo.ts): reconstruído sobre a Payments API
 // clássica em 2026-08-20 depois de confirmar em produção que a Orders API
@@ -62,8 +64,9 @@ export async function POST(req: NextRequest) {
     where: { id: pedidoId, clienteId: session.user.id },
     include: {
       garantias: { select: { valorPago: true } },
-      itens: { select: { precoUnitario: true, quantidade: true } },
-      cliente: { select: { email: true } },
+      itens: { include: { produto: { select: { sku: true, nome: true, descricao: true } } } },
+      cliente: { select: { email: true, nome: true, cpf: true, telefone: true, createdAt: true } },
+      endereco: true,
     },
   })
   if (!pedido) {
@@ -86,6 +89,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const { payer: payerExtra, additionalInfo } = await construirSinaisAntifraude(req, pedido)
+
   const tentativa = await prisma.tentativaMultiMetodo.create({
     data: {
       pedidoId: pedido.id,
@@ -96,7 +101,9 @@ export async function POST(req: NextRequest) {
         cartaoA,
         cartaoB,
         deviceId,
-      },
+        payerExtra,
+        additionalInfo,
+      } as Prisma.InputJsonValue,
     },
   })
 

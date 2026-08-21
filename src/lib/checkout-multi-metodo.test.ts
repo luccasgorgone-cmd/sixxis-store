@@ -150,6 +150,59 @@ describe('cobrarPernaCartao / cobrarPernaPix', () => {
       expect.objectContaining({ body: expect.objectContaining({ capture: true }) }),
     )
   })
+
+  // Regressão: o fluxo "2 cartões" só mandava o Device ID pro MP — nada de
+  // nome/CPF/telefone/endereço/IP/histórico de compra — e isso contribuiu
+  // pra um cc_rejected_high_risk em produção (2026-08-20). payerExtra/
+  // additionalInfo (mercadopago-antifraude.ts) fecham essa lacuna.
+  it('cobrarPernaCartao mescla payerExtra no payer e manda additional_info quando presentes', async () => {
+    const deps = mockDeps({ criarPagamento: vi.fn().mockResolvedValue({ id: 1, status: 'approved' }) })
+    await cobrarPernaCartao(deps, {
+      idempotencyKey: 'mm:t1:A', externalReference: 'ped_1', payerEmail: 'a@b.com',
+      notificationUrl: 'https://x/webhook', metadata: {},
+      cartao: { token: 'tok', bandeiraId: 'master', parcelas: 1, valorCentavos: 1000 },
+      payerExtra: { first_name: 'Fulano', last_name: 'Silva' },
+      additionalInfo: { ip_address: '1.2.3.4', items: [] },
+    })
+    expect(deps.criarPagamento).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          payer: { email: 'a@b.com', first_name: 'Fulano', last_name: 'Silva' },
+          additional_info: { ip_address: '1.2.3.4', items: [] },
+        }),
+      }),
+    )
+  })
+
+  it('cobrarPernaCartao não manda additional_info quando ausente (sem quebrar o corpo)', async () => {
+    const deps = mockDeps({ criarPagamento: vi.fn().mockResolvedValue({ id: 1, status: 'approved' }) })
+    await cobrarPernaCartao(deps, {
+      idempotencyKey: 'mm:t1:A', externalReference: 'ped_1', payerEmail: 'a@b.com',
+      notificationUrl: 'https://x/webhook', metadata: {},
+      cartao: { token: 'tok', bandeiraId: 'master', parcelas: 1, valorCentavos: 1000 },
+    })
+    const body = vi.mocked(deps.criarPagamento).mock.calls[0][0].body
+    expect(body).not.toHaveProperty('additional_info')
+    expect(body.payer).toEqual({ email: 'a@b.com' })
+  })
+
+  it('cobrarPernaPix mescla payerExtra e additional_info quando presentes', async () => {
+    const deps = mockDeps({ criarPagamento: vi.fn().mockResolvedValue({ id: 9, status: 'pending' }) })
+    await cobrarPernaPix(deps, {
+      idempotencyKey: 'mm:t1:pix', externalReference: 'ped_1', payerEmail: 'a@b.com',
+      notificationUrl: 'https://x/webhook', metadata: {}, valorCentavos: 3000,
+      payerExtra: { first_name: 'Fulano', last_name: 'Silva' },
+      additionalInfo: { ip_address: '1.2.3.4', items: [] },
+    })
+    expect(deps.criarPagamento).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          payer: { email: 'a@b.com', first_name: 'Fulano', last_name: 'Silva' },
+          additional_info: { ip_address: '1.2.3.4', items: [] },
+        }),
+      }),
+    )
+  })
 })
 
 describe('capturarPernaCartao', () => {
