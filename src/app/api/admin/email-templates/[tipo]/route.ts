@@ -1,19 +1,10 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { requireAdmin } from '@/lib/adminAuth'
 
-async function checkAdmin() {
-  const session = await auth()
-  if (!session?.user?.id) return false
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (adminEmail && session.user.email !== adminEmail) return false
-  return true
-}
-
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ tipo: string }> }) {
-  if (!(await checkAdmin())) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+export async function GET(request: NextRequest, { params }: { params: Promise<{ tipo: string }> }) {
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
 
   const { tipo } = await params
   const template = await prisma.emailTemplate.findUnique({ where: { tipo } })
@@ -23,9 +14,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ tip
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ tipo: string }> }) {
-  if (!(await checkAdmin())) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const unauthorized = await requireAdmin(request)
+  if (unauthorized) return unauthorized
 
   const { tipo } = await params
   const body = await request.json()
