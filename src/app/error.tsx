@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 
 export default function RootError({
   error, reset,
@@ -13,6 +14,7 @@ export default function RootError({
       stack:    error.stack?.substring(0, 800),
       pathname: typeof window !== 'undefined' ? window.location.pathname : '',
     })
+    Sentry.captureException(error)
   }, [error])
 
   return (

@@ -12,6 +12,13 @@
 // (Railway Cron Job batendo nessa rota, por exemplo) — não implementado aqui,
 // fora do escopo de código.
 export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./sentry.server.config')
+  }
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./sentry.edge.config')
+  }
+
   if (process.env.NEXT_RUNTIME !== 'nodejs') return
 
   try {
@@ -26,3 +33,8 @@ export async function register() {
     console.error('[instrumentation] falha na reconciliação de boot:', e)
   }
 }
+
+// Erros de Server Components, middleware e proxies — captura automática pelo
+// Next.js quando exportado daqui. Sem SENTRY_DSN configurado o SDK está
+// inerte (ver src/sentry.server.config.ts), então isto não envia nada hoje.
+export { captureRequestError as onRequestError } from '@sentry/nextjs'
