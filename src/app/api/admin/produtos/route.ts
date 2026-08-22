@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
+import { sanitizarHtmlRico } from '@/lib/sanitize-html'
 
 const NO_CACHE = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
       sku: sku || null,
       nome,
       slug,
-      descricao: descricao || null,
+      descricao: descricao ? sanitizarHtmlRico(descricao) : null,
       categoria,
       modelo: modelo || null,
       preco: Number(preco),

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
+import { sanitizarHtmlRico } from '@/lib/sanitize-html'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -52,10 +53,15 @@ export async function PATCH(req: NextRequest) {
     )
   }
 
+  const data = {
+    ...parsed.data,
+    ...(parsed.data.texto != null ? { texto: sanitizarHtmlRico(parsed.data.texto) } : {}),
+  }
+
   await obter()
   const updated = await prisma.popupInicial.update({
     where: { id: 'singleton' },
-    data:  parsed.data,
+    data,
   })
 
   await auditLog({

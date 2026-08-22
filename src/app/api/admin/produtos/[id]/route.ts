@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { deleteFromR2 } from '@/lib/r2'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
+import { sanitizarHtmlRico } from '@/lib/sanitize-html'
 
 export async function GET(
   request: NextRequest,
@@ -133,7 +134,7 @@ export async function PUT(
         sku: sku || null,
         nome,
         slug,
-        descricao: descricao || null,
+        descricao: descricao ? sanitizarHtmlRico(descricao) : null,
         categoria,
         modelo: modelo || null,
         preco: Number(preco),
