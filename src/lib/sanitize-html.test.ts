@@ -21,6 +21,11 @@ describe('sanitizarHtmlRico', () => {
     expect(sanitizarHtmlRico(html)).toBe(html)
   })
 
+  it('mantém div/section com class (wrapper estrutural real do site)', () => {
+    const html = '<div class="produto-hero"><h2>T</h2></div><section><p>x</p></section>'
+    expect(sanitizarHtmlRico(html)).toBe(html)
+  })
+
   it('remove tag não permitida (iframe) mas mantém o texto interno seguro', () => {
     const out = sanitizarHtmlRico('<iframe src="https://evil.example"></iframe><p>ok</p>')
     expect(out).not.toContain('iframe')
