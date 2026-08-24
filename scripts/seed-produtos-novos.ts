@@ -46,8 +46,8 @@ const DESC_M45 = `<div class="produto-hero">
   <li>Reservatório de 45 litros com alto rendimento</li>
   <li>3 velocidades de ventilação ajustáveis</li>
   <li>Filtro ANTI-PÓ com colmeias de 4 cm remove impurezas do ar</li>
-  <li>Oscilação vertical automática para distribuição uniforme do ar</li>
-  <li>Oscilação horizontal manual</li>
+  <li>Oscilação horizontal automática para distribuição uniforme do ar</li>
+  <li>Oscilação vertical manual</li>
   <li>Rodízios reforçados para mobilidade total</li>
   <li>Design moderno e elegante</li>
   <li>Operação silenciosa abaixo de 60 dB</li>
@@ -86,7 +86,7 @@ const DESC_SX060 = `<div class="produto-hero">
   <li>Reservatório de 60 litros — menos enchimentos, mais conforto</li>
   <li>Filtragem ANTI-PÓ com colmeias de 4 cm</li>
   <li>Controle remoto incluso</li>
-  <li>Oscilação vertical automática</li>
+  <li>Oscilação horizontal automática</li>
   <li>90% mais econômico que ar-condicionado convencional</li>
   <li>Indicador frontal de nível de água</li>
   <li>Rodízios reforçados para mobilidade</li>
@@ -126,7 +126,7 @@ const DESC_SX070 = `<div class="produto-hero">
   <li>3 velocidades de ventilação ajustáveis</li>
   <li>Controle remoto incluso para operação à distância</li>
   <li>Filtro ANTI-PÓ com colmeias de 4 cm</li>
-  <li>Oscilação vertical automática e horizontal manual</li>
+  <li>Oscilação horizontal automática e vertical manual</li>
   <li>90% mais econômico que ar-condicionado</li>
   <li>Rodízios reforçados para mobilidade total</li>
   <li>Design elegante e moderno</li>
@@ -167,7 +167,7 @@ const DESC_SX100 = `<div class="produto-hero">
   <li>3 velocidades de ventilação</li>
   <li>Controle remoto incluso</li>
   <li>Filtro ANTI-PÓ com colmeias de 4 cm</li>
-  <li>Oscilação vertical automática</li>
+  <li>Oscilação horizontal automática</li>
   <li>90% mais econômico que ar-condicionado convencional</li>
   <li>Ideal para ambientes comerciais e industriais</li>
   <li>Rodízios reforçados com trava</li>
@@ -207,7 +207,7 @@ const DESC_SX120 = `<div class="produto-hero">
   <li>Potência de 450W para máxima eficiência</li>
   <li>Controle remoto incluso</li>
   <li>Filtro ANTI-PÓ com colmeias de 4 cm</li>
-  <li>Oscilação vertical automática e horizontal manual</li>
+  <li>Oscilação horizontal automática e vertical manual</li>
   <li>90% mais econômico que ar-condicionado convencional</li>
   <li>Estrutura robusta com rodízios industriais</li>
   <li>Operação silenciosa abaixo de 60 dB</li>
@@ -248,7 +248,7 @@ const DESC_SX200_PRIME = `<div class="produto-hero">
   <li>Disponível em Branco e Preto</li>
   <li>Controle remoto incluso</li>
   <li>Filtro ANTI-PÓ com colmeias de 4 cm</li>
-  <li>Oscilação vertical automática e horizontal manual</li>
+  <li>Oscilação horizontal automática e vertical manual</li>
   <li>90% mais econômico que ar-condicionado convencional</li>
   <li>Estrutura industrial com rodízios reforçados</li>
 </ul>
@@ -286,7 +286,7 @@ const DESC_SX200_TREND = `<div class="produto-hero">
   <li>Potência de 750W com controle de 3 velocidades</li>
   <li>Controle remoto incluso</li>
   <li>Filtro ANTI-PÓ com colmeias de 4 cm</li>
-  <li>Oscilação vertical automática e horizontal manual</li>
+  <li>Oscilação horizontal automática e vertical manual</li>
   <li>90% mais econômico que ar-condicionado convencional</li>
   <li>Estrutura robusta com rodízios reforçados</li>
   <li>Design moderno em Preto e Branco</li>
@@ -409,8 +409,8 @@ const SPECS_M45 = [
   { label: 'Consumo de Água', valor: '4 a 6 L/h' },
   { label: 'Nível de Ruído', valor: '<60 dB' },
   { label: 'Tipo de Ventilação', valor: 'Hélice' },
-  { label: 'Oscilação Vertical', valor: 'Automática' },
-  { label: 'Oscilação Horizontal', valor: 'Manual' },
+  { label: 'Oscilação Horizontal', valor: 'Automática' },
+  { label: 'Oscilação Vertical', valor: 'Manual' },
   { label: 'Filtro', valor: 'ANTI-PÓ com Colmeias 4 cm' },
   { label: 'Eficiência Energética', valor: 'A' },
   { label: 'Peso', valor: '15 kg' },
@@ -430,8 +430,8 @@ const SPECS_SX060 = [
   { label: 'Consumo de Água', valor: '4 a 6 L/h' },
   { label: 'Nível de Ruído', valor: '<60 dB' },
   { label: 'Tipo de Ventilação', valor: 'Hélice' },
-  { label: 'Oscilação Vertical', valor: 'Automática' },
-  { label: 'Oscilação Horizontal', valor: 'Manual' },
+  { label: 'Oscilação Horizontal', valor: 'Automática' },
+  { label: 'Oscilação Vertical', valor: 'Manual' },
   { label: 'Filtro', valor: 'ANTI-PÓ com Colmeias 4 cm' },
   { label: 'Controle Remoto', valor: 'Incluso' },
   { label: 'Eficiência Energética', valor: 'A' },
@@ -452,8 +452,8 @@ const SPECS_SX070 = [
   { label: 'Consumo de Água', valor: '4 a 6 L/h' },
   { label: 'Nível de Ruído', valor: '<60 dB' },
   { label: 'Tipo de Ventilação', valor: 'Hélice' },
-  { label: 'Oscilação Vertical', valor: 'Automática' },
-  { label: 'Oscilação Horizontal', valor: 'Manual' },
+  { label: 'Oscilação Horizontal', valor: 'Automática' },
+  { label: 'Oscilação Vertical', valor: 'Manual' },
   { label: 'Filtro', valor: 'ANTI-PÓ com Colmeias 4 cm' },
   { label: 'Controle Remoto', valor: 'Incluso' },
   { label: 'Eficiência Energética', valor: 'A' },
@@ -474,8 +474,8 @@ const SPECS_SX100 = [
   { label: 'Consumo de Água', valor: '4 a 6 L/h' },
   { label: 'Nível de Ruído', valor: '<60 dB' },
   { label: 'Tipo de Ventilação', valor: 'Hélice' },
-  { label: 'Oscilação Vertical', valor: 'Automática' },
-  { label: 'Oscilação Horizontal', valor: 'Manual' },
+  { label: 'Oscilação Horizontal', valor: 'Automática' },
+  { label: 'Oscilação Vertical', valor: 'Manual' },
   { label: 'Filtro', valor: 'ANTI-PÓ com Colmeias 4 cm' },
   { label: 'Controle Remoto', valor: 'Incluso' },
   { label: 'Eficiência Energética', valor: 'A' },
@@ -496,8 +496,8 @@ const SPECS_SX120 = [
   { label: 'Consumo de Água', valor: '4 a 6 L/h' },
   { label: 'Nível de Ruído', valor: '<60 dB' },
   { label: 'Tipo de Ventilação', valor: 'Hélice' },
-  { label: 'Oscilação Vertical', valor: 'Automática' },
-  { label: 'Oscilação Horizontal', valor: 'Manual' },
+  { label: 'Oscilação Horizontal', valor: 'Automática' },
+  { label: 'Oscilação Vertical', valor: 'Manual' },
   { label: 'Filtro', valor: 'ANTI-PÓ com Colmeias 4 cm' },
   { label: 'Controle Remoto', valor: 'Incluso' },
   { label: 'Eficiência Energética', valor: 'A' },
@@ -518,8 +518,8 @@ const SPECS_SX200_PRIME = [
   { label: 'Consumo de Água', valor: '4 a 6 L/h' },
   { label: 'Nível de Ruído', valor: '<60 dB' },
   { label: 'Tipo de Ventilação', valor: 'Hélice' },
-  { label: 'Oscilação Vertical', valor: 'Automática' },
-  { label: 'Oscilação Horizontal', valor: 'Manual' },
+  { label: 'Oscilação Horizontal', valor: 'Automática' },
+  { label: 'Oscilação Vertical', valor: 'Manual' },
   { label: 'Filtro', valor: 'ANTI-PÓ com Colmeias 4 cm' },
   { label: 'Controle Remoto', valor: 'Incluso' },
   { label: 'Eficiência Energética', valor: 'A' },
@@ -540,8 +540,8 @@ const SPECS_SX200_TREND = [
   { label: 'Consumo de Água', valor: '4 a 6 L/h' },
   { label: 'Nível de Ruído', valor: '<60 dB' },
   { label: 'Tipo de Ventilação', valor: 'Hélice' },
-  { label: 'Oscilação Vertical', valor: 'Automática' },
-  { label: 'Oscilação Horizontal', valor: 'Manual' },
+  { label: 'Oscilação Horizontal', valor: 'Automática' },
+  { label: 'Oscilação Vertical', valor: 'Manual' },
   { label: 'Filtro', valor: 'ANTI-PÓ com Colmeias 4 cm' },
   { label: 'Controle Remoto', valor: 'Incluso' },
   { label: 'Eficiência Energética', valor: 'A' },
