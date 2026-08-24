@@ -9,9 +9,11 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos, useComparador } from '@/hooks/useListas'
 import { useState } from 'react'
 import { trackAddToCart } from '@/lib/analytics/events'
-import { feedIdProduto } from '@/lib/feed-id'
+import { feedId, feedIdProduto } from '@/lib/feed-id'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import { precoPix as aplicarDescontoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
+import { inferirTipoVariacao } from '@/lib/variacao'
+import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import type { Produto } from '@/types'
 
 interface Props {
@@ -34,6 +36,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const isCmp = cmpIds.includes(produto.id)
   const [adicionado, setAdicionado] = useState(false)
   const [imgError, setImgError] = useState(false)
+  const [modalVariacaoAberto, setModalVariacaoAberto] = useState(false)
 
   const imagens = produto.imagens as string[]
   const imagemCapa = !imgError && imagens?.[0] ? imagens[0] : null
@@ -48,16 +51,26 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const esgotado = (produto.estoque ?? 1) <= 0
   const isNovo = !desconto
 
-  // Produto com variação (voltagem/cor) NÃO pode ser comprado daqui: o card não
-  // tem seletor, e adicionar sem escolher gerava pedido sem voltagem (caso real:
-  // K531UFIN, Climatizador M45). Aqui só encaminhamos p/ a página do produto,
-  // onde a escolha é obrigatória. `variacoes` não vem em todas as origens do
-  // card (a home busca o produto sem include) — por isso a guarda usa apenas
-  // temVariacoes, que vem em todas.
+  // Produto com variação (voltagem/cor) nunca pode ir pro carrinho sem a escolha
+  // feita ativamente: adicionar sem escolher já gerou pedido com voltagem nula
+  // (caso real: K531UFIN, Climatizador M45), e voltagem errada queima o aparelho
+  // do cliente. O modal abaixo replica a mesma trava da PDP (SelectVariacaoModal
+  // só libera Comprar/Adicionar depois de uma opção selecionada, nunca
+  // pré-selecionada). `variacoes` não vem de todas as origens do card (algumas
+  // buscas de produto não incluem o relacionamento) — nesse caso raro caímos de
+  // volta pra página do produto, que sempre exige a escolha.
   const precisaEscolherVariacao = Boolean(produto.temVariacoes)
+  const variacoesAtivas = (produto.variacoes ?? []).filter((v) => v.ativo)
+  const temVariacoesCarregadas = variacoesAtivas.length > 0
+  const tipoVariacao = inferirTipoVariacao(variacoesAtivas.map((v) => v.nome))
 
   // g:id do feed p/ este card (sem variação → item único: sku ?? slug).
   const gId = feedIdProduto({ sku: produto.sku, slug: produto.slug })
+
+  function gIdVariacao(v: VariacaoSelecionavel): string {
+    const completa = produto.variacoes?.find((x) => x.id === v.id)
+    return feedId({ sku: produto.sku, slug: produto.slug }, completa, produto.variacoes)
+  }
 
   const mediaAvaliacoes = (produto as { mediaAvaliacoes?: number }).mediaAvaliacoes ?? 0
   const totalAvaliacoes = (produto as { totalAvaliacoes?: number }).totalAvaliacoes ?? 0
@@ -66,7 +79,11 @@ export default function CardProduto({ produto, priority = false }: Props) {
     e.preventDefault()
     e.stopPropagation()
     if (esgotado || adicionado) return
-    if (precisaEscolherVariacao) { router.push(`/produtos/${produto.slug}`); return }
+    if (precisaEscolherVariacao) {
+      if (!temVariacoesCarregadas) { router.push(`/produtos/${produto.slug}`); return }
+      setModalVariacaoAberto(true)
+      return
+    }
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
@@ -94,7 +111,11 @@ export default function CardProduto({ produto, priority = false }: Props) {
     e.preventDefault()
     e.stopPropagation()
     if (esgotado) return
-    if (precisaEscolherVariacao) { router.push(`/produtos/${produto.slug}`); return }
+    if (precisaEscolherVariacao) {
+      if (!temVariacoesCarregadas) { router.push(`/produtos/${produto.slug}`); return }
+      setModalVariacaoAberto(true)
+      return
+    }
     adicionarItem({
       produtoId: produto.id,
       nome: produto.nome,
@@ -116,7 +137,68 @@ export default function CardProduto({ produto, priority = false }: Props) {
     router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
   }
 
+  // Callbacks do SelectVariacaoModal — só disparam depois que o usuário
+  // escolheu ativamente uma opção (o modal bloqueia os dois CTAs até lá).
+  function handleModalConfirmarCarrinho(v: VariacaoSelecionavel, quantidade: number) {
+    const preco = v.preco ?? precoFinal
+    const gid = gIdVariacao(v)
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco,
+      quantidade,
+      imagem: imagemCapa || undefined,
+      feedId: gid,
+      variacaoId: v.id,
+      variacaoNome: v.nome,
+    })
+    trackAddToCart({
+      item_id: gid,
+      produto_id: produto.id,
+      item_slug: produto.slug,
+      item_name: produto.nome,
+      item_category: produto.categoria,
+      item_brand: 'Sixxis',
+      price: preco,
+      quantity: quantidade,
+      variant: v.nome,
+    })
+    setModalVariacaoAberto(false)
+    setAdicionado(true)
+    setDrawerAberto(true)
+    setTimeout(() => setAdicionado(false), 2000)
+  }
+
+  function handleModalConfirmarCheckout(v: VariacaoSelecionavel, quantidade: number) {
+    const preco = v.preco ?? precoFinal
+    const gid = gIdVariacao(v)
+    adicionarItem({
+      produtoId: produto.id,
+      nome: produto.nome,
+      preco,
+      quantidade,
+      imagem: imagemCapa || undefined,
+      feedId: gid,
+      variacaoId: v.id,
+      variacaoNome: v.nome,
+    })
+    trackAddToCart({
+      item_id: gid,
+      produto_id: produto.id,
+      item_slug: produto.slug,
+      item_name: produto.nome,
+      item_category: produto.categoria,
+      item_brand: 'Sixxis',
+      price: preco,
+      quantity: quantidade,
+      variant: v.nome,
+    })
+    setModalVariacaoAberto(false)
+    router.push(`/checkout?compra_direta=1&produto=${produto.id}`)
+  }
+
   return (
+    <>
     <Link href={`/produtos/${produto.slug}`} className="block h-full group">
       <article className="bg-white h-full flex flex-col border border-gray-200/80 rounded-2xl overflow-hidden hover:border-[#3cbfb3]/30 hover:shadow-lg hover:shadow-gray-200/80 hover:-translate-y-0.5 transition-all duration-200">
 
@@ -229,38 +311,34 @@ export default function CardProduto({ produto, priority = false }: Props) {
               <span className="text-gray-400 font-normal whitespace-nowrap"> ({DESCONTO_PIX_PCT}% OFF)</span>
             </p>
 
-            {/* Botões — Comprar Agora primeiro, Adicionar segundo */}
+            {/* Botões — Comprar Agora primeiro, Adicionar segundo. Sempre os dois,
+                pra todo produto (com ou sem variação): quando exige escolha, o
+                clique abre o modal de seleção em vez de agir direto. */}
             <div className="space-y-2">
               {!esgotado && (
                 <button
                   onClick={handleComprarAgora}
                   className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
                 >
-                  {precisaEscolherVariacao ? 'Escolher opção' : 'Comprar Agora'}
+                  Comprar Agora
                 </button>
               )}
 
-              {/* "Adicionar ao Carrinho" só p/ item único. Com variação a escolha
-                  é obrigatória e acontece na página do produto — um add daqui
-                  entraria no carrinho sem voltagem/cor. Esgotado continua
-                  mostrando o botão (com o rótulo "Esgotado"). */}
-              {(!precisaEscolherVariacao || esgotado) && (
-                <button
-                  onClick={handleAddToCart}
-                  disabled={esgotado}
-                  className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center transition-all duration-200 active:scale-[0.98] ${
-                    esgotado
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : adicionado
-                        ? 'bg-green-500 text-white border-2 border-green-500'
-                        : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
-                  }`}
-                >
-                  <span className="whitespace-nowrap">
-                    {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
-                  </span>
-                </button>
-              )}
+              <button
+                onClick={handleAddToCart}
+                disabled={esgotado}
+                className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center transition-all duration-200 active:scale-[0.98] ${
+                  esgotado
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : adicionado
+                      ? 'bg-green-500 text-white border-2 border-green-500'
+                      : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
+                }`}
+              >
+                <span className="whitespace-nowrap">
+                  {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+                </span>
+              </button>
 
               {/* Comparar — oculto em mobile */}
               <button
@@ -277,5 +355,19 @@ export default function CardProduto({ produto, priority = false }: Props) {
         </div>
       </article>
     </Link>
+
+    {temVariacoesCarregadas && (
+      <SelectVariacaoModal
+        aberto={modalVariacaoAberto}
+        fechar={() => setModalVariacaoAberto(false)}
+        produto={{ id: produto.id, nome: produto.nome, imagem: imagemCapa || undefined }}
+        variacoes={variacoesAtivas}
+        precoBase={precoFinal}
+        tipoVariacao={tipoVariacao}
+        onConfirmarCheckout={handleModalConfirmarCheckout}
+        onConfirmarCarrinho={handleModalConfirmarCarrinho}
+      />
+    )}
+    </>
   )
 }

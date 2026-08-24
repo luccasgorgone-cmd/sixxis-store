@@ -173,9 +173,8 @@ function buildClimatizadores(_produtos: ProdutoRow[]): GrupoFiltro[] {
       id: 'voltagem',
       label: 'Voltagem',
       opcoes: [
-        { label: '110V',   valor: '110v'   },
-        { label: '220V',   valor: '220v'   },
-        { label: 'Bivolt', valor: 'bivolt' },
+        { label: '110V', valor: '110v' },
+        { label: '220V', valor: '220v' },
       ],
     },
     {
@@ -208,8 +207,9 @@ function buildClimatizadores(_produtos: ProdutoRow[]): GrupoFiltro[] {
       id: 'velocidades',
       label: 'Velocidades',
       opcoes: [
-        { label: '3 velocidades', valor: '3' },
-        { label: '9 velocidades', valor: '9' },
+        { label: '3 velocidades',  valor: '3'  },
+        { label: '9 velocidades',  valor: '9'  },
+        { label: '50 velocidades', valor: '50' },
       ],
     },
     {
