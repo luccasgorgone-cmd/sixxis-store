@@ -35,28 +35,28 @@ const CORRECOES: { slug: string; titulo: string; nomeAutor: string; novoTitulo?:
     nomeAutor: 'Vitor C.',
     novoTitulo: 'Funciona bem, autonomia podia ser maior',
     novoComentario:
-      'O Aspirador Vertical Sixxis Bravo S2 dá conta do recado bem. Senti falta de um bocal específico pra estofados e achei os 40 minutos de bateria um pouco curtos pra limpar a casa toda de uma vez, preciso recarregar no meio. No mais é um bom produto pelo preço.',
+      'Dá conta do recado bem. Senti falta de um bocal específico pra estofados e achei os 40 minutos de bateria um pouco curtos pra limpar a casa toda de uma vez, preciso recarregar no meio. No mais é um bom produto pelo preço.',
   },
   {
     slug: 'asp-bravo',
     titulo: 'Design discreto, combina com qualquer ambiente',
     nomeAutor: 'Marcelo D.',
     novoComentario:
-      'Comprei o Aspirador Vertical Sixxis Bravo S2 com receio de ficar feio no armário, mas o acabamento é bem feito, sem aquele plástico barato de aspirador genérico. Botão único e indicador de bateria fáceis de entender. Visualmente compacto, guarda em qualquer canto.',
+      'Comprei com receio de ficar feio no armário, mas o acabamento é bem feito, sem aquele plástico barato de aspirador genérico. Botão único e indicador de bateria fáceis de entender. Visualmente compacto, guarda em qualquer canto.',
   },
   {
     slug: 'spinning-sixxis-life',
     titulo: 'Tô usando há meses sem queixa',
     nomeAutor: 'Murilo Z.',
     novoComentario:
-      'Atualizando: já são alguns meses pedalando na Bicicleta Spinning Sixxis Life quase todo dia, e nem sinal de desgaste. A resistência magnética mantém a mesma suavidade do primeiro dia, sem ranger ou perder firmeza. Vou voltar pra reportar se algo mudar, mas até agora, ótima compra.',
+      'Atualizando: já são alguns meses pedalando quase todo dia, e nem sinal de desgaste. A resistência magnética mantém a mesma suavidade do primeiro dia, sem ranger ou perder firmeza. Vou voltar pra reportar se algo mudar, mas até agora, ótima compra.',
   },
   {
     slug: 'spinning-sixxis-life',
     titulo: 'Design discreto, combina com qualquer ambiente',
     nomeAutor: 'Eliane B.',
     novoComentario:
-      'Comprei a Bicicleta Spinning Sixxis Life com receio de ficar feio na sala, mas o acabamento é bem feito, sem plástico barato. O painel LED mostra tudo que preciso — velocidade, distância, frequência cardíaca e calorias — de forma clara. Visualmente discreta, cabe bem na decoração.',
+      'Comprei com receio de ficar feio na sala, mas o acabamento é bem feito, sem plástico barato. O painel LED mostra tudo que preciso — velocidade, distância, frequência cardíaca e calorias — de forma clara. Visualmente discreta, cabe bem na decoração.',
   },
 ]
 
@@ -66,98 +66,104 @@ const CORRECOES: { slug: string; titulo: string; nomeAutor: string; novoTitulo?:
 interface Ctx { nome: string; cap: string; cob: string; volt: string; vel: string }
 interface Tpl { topico: string; nota: number; build: (ctx: Ctx) => { titulo: string; comentario: string } }
 
+// Nota (2026-08-25): comentários evitam repetir o nome completo do produto em
+// quase todo review — cliente real, comentando na própria página do produto,
+// raramente fica citando o nome inteiro. Só 3 tópicos (voltagem,
+// eficiencia-energetica, recompra) mantêm uma referência curta ao modelo, os
+// demais usam pronome ("ele"/"esse aqui") ou termo genérico ("esse
+// climatizador") — ou nem citam, deixando implícito pelo contexto da página.
 const CLIMA_TEMPLATES: Tpl[] = [
-  { topico: 'silencio', nota: 5, build: ({ nome, vel }) => ({
+  { topico: 'silencio', nota: 5, build: ({ vel }) => ({
     titulo: 'Silencioso até na velocidade máxima',
-    comentario: `Comprei o ${nome} principalmente por causa do barulho dos modelos antigos que tinha em casa. Esse aqui é outro nível: rodo${vel ? ` nas ${vel} velocidades` : ''} e mal escuto, o que faz toda diferença pra dormir e pra trabalhar. Embalagem chegou íntegra e o painel é intuitivo.`,
+    comentario: `Comprei esse climatizador principalmente por causa do barulho dos modelos antigos que eu tinha em casa. Esse aqui é outro nível: rodo${vel ? ` nas ${vel} velocidades` : ''} e mal escuto, o que faz toda diferença pra dormir e pra trabalhar. Embalagem chegou íntegra e o painel é intuitivo.`,
   })},
-  { topico: 'cobertura', nota: 5, build: ({ nome, cob }) => ({
+  { topico: 'cobertura', nota: 5, build: ({ cob }) => ({
     titulo: 'Cobre toda a sala sem dificuldade',
-    comentario: `Tava na dúvida se o ${nome} daria conta da minha sala${cob ? ` (a ficha indica ${cob})` : ''}, mas refresca de canto a canto. A oscilação ajuda a distribuir o ar. O fluxo é forte sem ser agressivo. Recomendo medir o ambiente antes de comprar pra garantir.`,
+    comentario: `Tava na dúvida se ele daria conta da minha sala${cob ? ` (a ficha indica ${cob})` : ''}, mas refresca de canto a canto. A oscilação ajuda a distribuir o ar. O fluxo é forte sem ser agressivo. Recomendo medir o ambiente antes de comprar pra garantir.`,
   })},
   { topico: 'voltagem', nota: 5, build: ({ nome, volt }) => ({
     titulo: 'Voltagem certa e funcionou de primeira',
-    comentario: `Já tinha tido problema com produto que veio na voltagem errada de outras marcas. ${volt ? `O ${nome} no ${volt} ` : `O ${nome} `}foi exatamente como pedi e ligou de cara, sem precisar adaptador. Etiqueta clara na caixa, saída de fábrica certinha. Atendimento da Sixxis confirmou tudo antes do envio.`,
+    comentario: `Já tinha tido problema com produto que veio na voltagem errada de outras marcas. ${volt ? `Esse ${nome.replace(/^Climatizador /, '')}, no ${volt}, ` : `Esse aqui `}foi exatamente como pedi e ligou de cara, sem precisar adaptador. Etiqueta clara na caixa, saída de fábrica certinha. Atendimento da Sixxis confirmou tudo antes do envio.`,
   })},
-  { topico: 'capacidade', nota: 5, build: ({ nome, cap }) => ({
+  { topico: 'capacidade', nota: 5, build: ({ cap }) => ({
     titulo: 'Tanque grande, autonomia muito boa',
-    comentario: `Ponto alto pra mim foi a autonomia do tanque${cap ? ` (${cap})` : ''}. Encho de manhã com gelo e dura o dia inteiro, sem precisar reabastecer. O sistema de evaporação trabalha bem e não fica derramando água. ${nome} cumpre o que promete.`,
+    comentario: `Ponto alto pra mim foi a autonomia do tanque${cap ? ` (${cap})` : ''}. Encho de manhã com gelo e dura o dia inteiro, sem precisar reabastecer. O sistema de evaporação trabalha bem e não fica derramando água. Cumpre o que promete.`,
   })},
-  { topico: 'entrega', nota: 5, build: ({ nome }) => ({
+  { topico: 'entrega', nota: 5, build: () => ({
     titulo: 'Entrega em 3 dias, sem amassados',
-    comentario: `O ${nome} chegou em 3 dias úteis, antes do prazo previsto no carrinho. A embalagem veio reforçada e nem o plástico de proteção saiu do lugar. Acompanhei pelo código de rastreio e foi sempre atualizado. Sixxis no caminho certo nesse quesito.`,
+    comentario: `Chegou em 3 dias úteis, antes do prazo previsto no carrinho. A embalagem veio reforçada e nem o plástico de proteção saiu do lugar. Acompanhei pelo código de rastreio e foi sempre atualizado. Sixxis no caminho certo nesse quesito.`,
   })},
-  { topico: 'design', nota: 5, build: ({ nome }) => ({
+  { topico: 'design', nota: 5, build: () => ({
     titulo: 'Design discreto, combina com qualquer ambiente',
-    comentario: `Comprei o ${nome} com receio de ficar feio na decoração, mas o acabamento é bem feito, sem aquele plástico barato. Painel digital responsivo, comandos claros. Visualmente discreto, não chama atenção mas faz o serviço.`,
+    comentario: `Comprei com receio de ficar feio na decoração, mas o acabamento é bem feito, sem aquele plástico barato. Painel digital responsivo, comandos claros. Visualmente discreto, não chama atenção mas faz o serviço.`,
   })},
-  { topico: 'atendimento', nota: 5, build: ({ nome }) => ({
+  { topico: 'atendimento', nota: 5, build: () => ({
     titulo: 'Suporte da Sixxis ajudou na escolha',
-    comentario: `Antes de fechar o pedido, mandei mensagem pelo WhatsApp tirando dúvida se o ${nome} era o ideal pro meu caso. Resposta rápida, sem aquele papo de vendedor empurrando. Recomendaram esse modelo e acertaram.`,
+    comentario: `Antes de fechar o pedido, mandei mensagem pelo WhatsApp tirando dúvida se esse modelo era o ideal pro meu caso. Resposta rápida, sem aquele papo de vendedor empurrando. Recomendaram e acertaram.`,
   })},
-  { topico: 'instalacao', nota: 5, build: ({ nome }) => ({
+  { topico: 'instalacao', nota: 5, build: () => ({
     titulo: 'Saiu da caixa pronto pra usar',
-    comentario: `Achei que ia precisar montar mil peças, mas o ${nome} veio praticamente pronto. Encaixei o painel, plugou e ligou. Manual em português ajuda mas nem precisei muito, é intuitivo. Levou uns 5 minutos do desembalar até estar funcionando.`,
+    comentario: `Achei que ia precisar montar mil peças, mas veio praticamente pronto pra usar. Encaixei o painel, plugou e ligou. Manual em português ajuda mas nem precisei muito, é intuitivo. Levou uns 5 minutos do desembalar até estar funcionando.`,
   })},
-  { topico: 'durabilidade', nota: 5, build: ({ nome }) => ({
+  { topico: 'durabilidade', nota: 5, build: () => ({
     titulo: 'Tô usando há meses sem queixa',
-    comentario: `Atualizando: já são alguns meses com o ${nome} ligado todo dia, e nem sinal de defeito. Motor mantém o mesmo desempenho do primeiro dia, sem barulho estranho ou perda de força. Vou voltar pra reportar se algo mudar, mas até agora, top.`,
+    comentario: `Atualizando: já são alguns meses com ele ligado todo dia, e nem sinal de defeito. Motor mantém o mesmo desempenho do primeiro dia, sem barulho estranho ou perda de força. Vou voltar pra reportar se algo mudar, mas até agora, top.`,
   })},
-  { topico: 'custo-beneficio', nota: 5, build: ({ nome }) => ({
+  { topico: 'custo-beneficio', nota: 5, build: () => ({
     titulo: 'Pelo preço, é difícil achar igual',
-    comentario: `Pesquisei bastante antes — modelos de marca famosa cobram bem mais por menos. O ${nome} entregou tudo o que precisava por um preço bem competitivo. Cupom da primeira compra ajudou também. Fechou conta certinho.`,
+    comentario: `Pesquisei bastante antes — modelos de marca famosa cobram bem mais por menos. Entregou tudo o que eu precisava por um preço bem competitivo. Cupom da primeira compra ajudou também. Fechou conta certinho.`,
   })},
-  { topico: 'garantia', nota: 5, build: ({ nome }) => ({
+  { topico: 'garantia', nota: 5, build: () => ({
     titulo: 'Comprei com mais segurança pela garantia',
-    comentario: `O que me deu confiança pra fechar a compra do ${nome} foi a garantia de 12 meses direto de fábrica. Não precisei usar até agora, mas saber que tem suporte se der problema fez toda diferença na decisão.`,
+    comentario: `O que me deu confiança pra fechar a compra foi a garantia de 12 meses direto de fábrica. Não precisei usar até agora, mas saber que tem suporte se der problema fez toda diferença na decisão.`,
   })},
   { topico: 'eficiencia-energetica', nota: 5, build: ({ nome }) => ({
     titulo: 'Classe A de verdade, consumo baixo',
-    comentario: `Fiquei de olho na conta de luz depois que troquei o ventilador comum pelo ${nome}. Sendo eficiência energética classe A, o consumo ficou bem menor do que eu esperava mesmo usando várias horas por dia. Refresca muito mais e gasta pouco.`,
+    comentario: `Fiquei de olho na conta de luz depois que troquei o ventilador comum por esse ${nome.replace(/^Climatizador /, '')}. Sendo eficiência energética classe A, o consumo ficou bem menor do que eu esperava mesmo usando várias horas por dia. Refresca muito mais e gasta pouco.`,
   })},
-  { topico: 'uso-comercial', nota: 5, build: ({ nome }) => ({
+  { topico: 'uso-comercial', nota: 5, build: () => ({
     titulo: 'Uso no meu negócio e os clientes notaram',
-    comentario: `Coloquei o ${nome} no meu salão e a diferença no ambiente foi imediata — clientes comentaram que ficou bem mais agradável esperar o atendimento. Rodando o dia inteiro sem dar problema. Ótimo investimento pro negócio.`,
+    comentario: `Coloquei esse climatizador no meu salão e a diferença no ambiente foi imediata — clientes comentaram que ficou bem mais agradável esperar o atendimento. Rodando o dia inteiro sem dar problema. Ótimo investimento pro negócio.`,
   })},
   { topico: 'recompra', nota: 5, build: ({ nome }) => ({
     titulo: 'Segunda compra Sixxis, não me arrependo',
-    comentario: `Já tinha um climatizador Sixxis menor em casa e resolvi levar o ${nome} pra outro ambiente. Mesma qualidade de construção, mesmo acabamento cuidadoso. Virei cliente fiel da marca.`,
+    comentario: `Já tinha um climatizador Sixxis menor em casa e resolvi levar o ${nome.replace(/^Climatizador /, '')} pra outro ambiente. Mesma qualidade de construção, mesmo acabamento cuidadoso. Virei cliente fiel da marca.`,
   })},
-  { topico: 'presente', nota: 5, build: ({ nome }) => ({
+  { topico: 'presente', nota: 5, build: () => ({
     titulo: 'Comprei de presente e foi um sucesso',
-    comentario: `Dei o ${nome} de presente pra minha mãe, que sofria muito com o calor. Ela ficou emocionada com o tanto que refrescou o quarto dela. Fácil de usar, ela não teve dificuldade nenhuma no dia a dia.`,
+    comentario: `Dei de presente pra minha mãe, que sofria muito com o calor. Ela ficou emocionada com o tanto que refrescou o quarto dela. Fácil de usar, ela não teve dificuldade nenhuma no dia a dia.`,
   })},
-  { topico: 'portabilidade', nota: 5, build: ({ nome }, ) => ({
+  { topico: 'portabilidade', nota: 5, build: () => ({
     titulo: 'Peso não assustou, deu pra mover sozinho',
-    comentario: `Tinha receio do peso do ${nome} pela ficha técnica, mas na prática deu pra mover entre os cômodos sem ajuda. Uso na sala de dia e levo pro quarto de noite. Prático pra quem não tem um lugar fixo pra deixar ligado o tempo todo.`,
+    comentario: `Tinha receio do peso pela ficha técnica, mas na prática deu pra mover entre os cômodos sem ajuda. Uso na sala de dia e levo pro quarto de noite. Prático pra quem não tem um lugar fixo pra deixar ligado o tempo todo.`,
   })},
-  { topico: 'limpeza-manutencao', nota: 5, build: ({ nome }) => ({
+  { topico: 'limpeza-manutencao', nota: 5, build: () => ({
     titulo: 'Fácil de limpar, manutenção simples',
-    comentario: `O painel evaporativo do ${nome} é fácil de tirar pra limpar, não acumula aquele cheiro de mofo que outros climatizadores davam depois de um tempo. Basta lavar o tanque de vez em quando. Baixa manutenção mesmo.`,
+    comentario: `O painel evaporativo é fácil de tirar pra limpar, não acumula aquele cheiro de mofo que outros climatizadores davam depois de um tempo. Basta lavar o tanque de vez em quando. Baixa manutenção mesmo.`,
   })},
-  { topico: 'clima-quente', nota: 5, build: ({ nome, cob }) => ({
+  { topico: 'clima-quente', nota: 5, build: ({ cob }) => ({
     titulo: 'Salvou o verão aqui em casa',
-    comentario: `Aqui o calor passa dos 38 graus fácil no verão e o ${nome} deu conta${cob ? ` do ambiente recomendado (${cob})` : ' do ambiente'} sem sufoco. Uso praticamente o dia inteiro e a diferença de temperatura é bem perceptível assim que entra no cômodo.`,
+    comentario: `Aqui o calor passa dos 38 graus fácil no verão e ele deu conta${cob ? ` do ambiente recomendado (${cob})` : ' do ambiente'} sem sufoco. Uso praticamente o dia inteiro e a diferença de temperatura é bem perceptível assim que entra no cômodo.`,
   })},
-  { topico: 'som-motor', nota: 4, build: ({ nome }) => ({
+  { topico: 'som-motor', nota: 4, build: () => ({
     titulo: 'Bom produto, ruído perceptível na velocidade máxima',
-    comentario: `O ${nome} funciona bem e refresca como esperado. Na velocidade máxima dá pra notar um ruído de fundo, nada insuportável mas percebi. Nas velocidades mais baixas fica bem silencioso. No geral vale a compra.`,
+    comentario: `Funciona bem e refresca como esperado. Na velocidade máxima dá pra notar um ruído de fundo, nada insuportável mas percebi. Nas velocidades mais baixas fica bem silencioso. No geral vale a compra.`,
   })},
-  { topico: 'embalagem-amassada', nota: 4, build: ({ nome }) => ({
+  { topico: 'embalagem-amassada', nota: 4, build: () => ({
     titulo: 'Caixa chegou meio amassada, produto ok',
-    comentario: `A caixa do ${nome} chegou com um canto amassado no transporte, mas o produto por dentro estava intacto e funcionando perfeitamente. Entrei em contato com o suporte só pra registrar e foram rápidos na resposta. Recomendo.`,
+    comentario: `A caixa chegou com um canto amassado no transporte, mas o produto por dentro estava intacto e funcionando perfeitamente. Entrei em contato com o suporte só pra registrar e foram rápidos na resposta. Recomendo.`,
   })},
-  { topico: 'consumo', nota: 4, build: ({ nome }) => ({
+  { topico: 'consumo', nota: 4, build: () => ({
     titulo: 'Bom produto, conta de luz subiu pouco',
-    comentario: `O ${nome} cumpre o prometido e refresca bem. Tirei uma estrela porque achei que ia gastar menos energia, mas no uso 24h o consumo aparece no mês. Pra uso intermitente fica ótimo, vale a pena.`,
+    comentario: `Cumpre o prometido e refresca bem. Tirei uma estrela porque achei que ia gastar menos energia, mas no uso 24h o consumo aparece no mês. Pra uso intermitente fica ótimo, vale a pena.`,
   })},
-  { topico: 'funcoes', nota: 4, build: ({ nome }) => ({
+  { topico: 'funcoes', nota: 4, build: () => ({
     titulo: 'Funciona bem, podia ter mais funções no controle',
-    comentario: `O ${nome} faz o trabalho dele bem. Senti falta de timer mais granular no controle remoto e de modo automático que regule sozinho pela temperatura. No mais é um bom produto pelo preço.`,
+    comentario: `Faz o trabalho dele bem. Senti falta de timer mais granular no controle remoto e de modo automático que regule sozinho pela temperatura. No mais é um bom produto pelo preço.`,
   })},
-  { topico: 'espaco-grande', nota: 3, build: ({ nome, cob }) => ({
+  { topico: 'espaco-grande', nota: 3, build: ({ cob }) => ({
     titulo: 'Bom mas esperava mais para o meu espaço',
-    comentario: `O ${nome} funciona bem para ambientes dentro da cobertura indicada${cob ? ` (${cob})` : ''}. No meu caso o ambiente é bem maior que isso e o refresco ficou limitado. Pra quem vai usar dentro do recomendado, a qualidade de construção é boa e o atendimento foi ótimo.`,
+    comentario: `Funciona bem para ambientes dentro da cobertura indicada${cob ? ` (${cob})` : ''}. No meu caso o ambiente é bem maior que isso e o refresco ficou limitado. Pra quem vai usar dentro do recomendado, a qualidade de construção é boa e o atendimento foi ótimo.`,
   })},
 ]
 
@@ -233,50 +239,54 @@ const METAS_CLIMATIZADORES: Record<string, number> = {
 interface BikeCtx { nome: string }
 interface BikeTpl { topico: string; nota: number; build: (ctx: BikeCtx) => { titulo: string; comentario: string } }
 
+// Nota (2026-08-25): mesma correção de naturalidade do CLIMA_TEMPLATES —
+// evita repetir "Sixxis Cardio"/"Sixxis Life" em quase todo review. Só
+// custo-beneficio-bike mantém referência curta ao modelo (contexto de
+// decisão de compra, onde nomear soa natural).
 const BIKE_TEMPLATES: BikeTpl[] = [
-  { topico: 'montagem', nota: 5, build: ({ nome }) => ({
+  { topico: 'montagem', nota: 5, build: () => ({
     titulo: 'Montagem tranquila, manual claro',
-    comentario: `Montei a ${nome} sozinho em casa, sem ajuda. O manual é claro e as ferramentas necessárias já vêm na caixa. Levou menos de uma hora do zero até pedalar.`,
+    comentario: `Montei sozinho em casa, sem ajuda. O manual é claro e as ferramentas necessárias já vêm na caixa. Levou menos de uma hora do zero até pedalar.`,
   })},
-  { topico: 'resistencia', nota: 5, build: ({ nome }) => ({
+  { topico: 'resistencia', nota: 5, build: () => ({
     titulo: 'Resistência mecânica bem calibrada',
-    comentario: `A resistência da ${nome} é fácil de ajustar e dá pra sentir a diferença entre um treino leve e um mais puxado. O freio de emergência dá segurança na hora de parar rápido.`,
+    comentario: `A resistência é fácil de ajustar e dá pra sentir a diferença entre um treino leve e um mais puxado. O freio de emergência dá segurança na hora de parar rápido.`,
   })},
-  { topico: 'correia-silenciosa', nota: 5, build: ({ nome }) => ({
+  { topico: 'correia-silenciosa', nota: 5, build: () => ({
     titulo: 'Transmissão por correia, bem silenciosa',
-    comentario: `Pedalo de manhã antes de todo mundo acordar e a ${nome} não faz barulho de corrente como outras bikes que já usei em academia. A correia roda bem suave.`,
+    comentario: `Pedalo de manhã antes de todo mundo acordar e não faz barulho de corrente como outras bikes que já usei em academia. A correia roda bem suave.`,
   })},
-  { topico: 'assento', nota: 5, build: ({ nome }) => ({
+  { topico: 'assento', nota: 5, build: () => ({
     titulo: 'Assento aguenta treino longo',
-    comentario: `Tinha receio do desconforto depois de uns 40 minutos pedalando, mas o assento ergonômico ajustável da ${nome} aguenta bem o treino longo. Os amortecedores ajudam bastante.`,
+    comentario: `Tinha receio do desconforto depois de uns 40 minutos pedalando, mas o assento ergonômico ajustável aguenta bem o treino longo. Os amortecedores ajudam bastante.`,
   })},
-  { topico: 'estrutura-robusta', nota: 5, build: ({ nome }) => ({
+  { topico: 'estrutura-robusta', nota: 5, build: () => ({
     titulo: 'Estrutura firme, não balança',
-    comentario: `A ${nome} não balança nem sacode mesmo pedalando forte de pé. Estrutura de aço bem robusta, suporta meu peso sem sinal de instabilidade. Treino tranquilo.`,
+    comentario: `Não balança nem sacode mesmo pedalando forte de pé. Estrutura de aço bem robusta, suporta meu peso sem sinal de instabilidade. Treino tranquilo.`,
   })},
-  { topico: 'painel-simples', nota: 5, build: ({ nome }) => ({
+  { topico: 'painel-simples', nota: 5, build: () => ({
     titulo: 'Painel simples, mostra o essencial',
-    comentario: `O painel da ${nome} não tem luxo, mas mostra velocidade, tempo, distância e calorias, que é o que preciso pra acompanhar o treino. Pilha é fácil de trocar quando acaba.`,
+    comentario: `O painel não tem luxo, mas mostra velocidade, tempo, distância e calorias, que é o que preciso pra acompanhar o treino. Pilha é fácil de trocar quando acaba.`,
   })},
-  { topico: 'pedais-seguranca', nota: 5, build: ({ nome }) => ({
+  { topico: 'pedais-seguranca', nota: 5, build: () => ({
     titulo: 'Pedais com alça, pé não escorrega',
-    comentario: `Os pedais reforçados com alça de segurança da ${nome} fazem diferença nos treinos mais intensos, o pé não escorrega mesmo suando bastante. Detalhe que valorizo bastante.`,
+    comentario: `Os pedais reforçados com alça de segurança fazem diferença nos treinos mais intensos, o pé não escorrega mesmo suando bastante. Detalhe que valorizo bastante.`,
   })},
   { topico: 'custo-beneficio-bike', nota: 5, build: ({ nome }) => ({
     titulo: 'Preço justo pra uma bike de spinning',
     comentario: `Pesquisei bastante antes de comprar a ${nome} e pelo preço não achei nada com estrutura parecida. Cumpre bem o treino em casa sem precisar pagar mensalidade de academia.`,
   })},
-  { topico: 'entrega-bike', nota: 5, build: ({ nome }) => ({
+  { topico: 'entrega-bike', nota: 5, build: () => ({
     titulo: 'Chegou bem embalada, peso não assustou',
-    comentario: `A ${nome} chegou bem protegida na caixa. É pesada, mas dei conta de levar até o quarto sozinho fazendo por etapas. Vale se organizar pra receber com ajuda se for subir escada.`,
+    comentario: `Chegou bem protegida na caixa. É pesada, mas dei conta de levar até o quarto sozinho fazendo por etapas. Vale se organizar pra receber com ajuda se for subir escada.`,
   })},
-  { topico: 'sem-bluetooth', nota: 4, build: ({ nome }) => ({
+  { topico: 'sem-bluetooth', nota: 4, build: () => ({
     titulo: 'Boa bike, só faltou conectividade',
-    comentario: `A ${nome} cumpre bem o treino, mas sinto falta de bluetooth pra sincronizar com aplicativo de treino. No mais, resistência e estrutura estão ótimas.`,
+    comentario: `Cumpre bem o treino, mas sinto falta de bluetooth pra sincronizar com aplicativo de treino. No mais, resistência e estrutura estão ótimas.`,
   })},
-  { topico: 'guidao-ajuste', nota: 4, build: ({ nome }) => ({
+  { topico: 'guidao-ajuste', nota: 4, build: () => ({
     titulo: 'Boa, mas o ajuste do guidão podia ser mais rápido',
-    comentario: `Gostei da ${nome}, é firme e o treino é bom. Só acho que o ajuste do guidão podia ser mais rápido, às vezes preciso de um tempinho pra travar direito na altura que uso.`,
+    comentario: `Gostei, é firme e o treino é bom. Só acho que o ajuste do guidão podia ser mais rápido, às vezes preciso de um tempinho pra travar direito na altura que uso.`,
   })},
 ]
 
