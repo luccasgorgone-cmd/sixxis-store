@@ -153,19 +153,21 @@ export async function POST(req: NextRequest) {
       timeStyle: 'short',
     })
 
-    // ── Contexto dinâmico a ser injetado no prompt ────────────────────────────
-    const contextoLive = `
+    // ── Contexto do catálogo — cacheável (só muda quando produto/preço/estoque muda) ──
+    const contextoCatalogo = `
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DADOS DINÂMICOS EM TEMPO REAL — ${agora}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 ⚡ OFERTAS RELÂMPAGO ATIVAS AGORA (${ofertasAtivas.length} ativa(s)):
 ${resumoOfertas}
 
 📦 CATÁLOGO ATUALIZADO:
 ${catalogoTexto}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+
+    // ── Contexto variável — muda a cada request, NUNCA vai dentro do bloco cacheado ──
+    const contextoTempo = `
+
+DATA/HORA ATUAL — ${agora}`
 
     // ── Detectar CEP na última mensagem e consultar frete ─────────────────────
     const ultimaMensagem =
@@ -204,8 +206,12 @@ ${catalogoTexto}
       cfg.agente_system_prompt ||
       `Você é ${nomeLuna}, assistente virtual da Sixxis. Responda em português brasileiro de forma simpática e objetiva. WhatsApp de vendas: https://wa.me/${vendas} | Suporte: https://wa.me/${suporte}`
 
-    // ── System prompt final = base + contexto live + frete (se houver) ────────
-    const systemPromptFinal = systemPromptBase + contextoLive + contextoFrete
+    // ── System prompt em blocos: base+catálogo cacheável (prompt caching nativo
+    // da Anthropic) separado do timestamp/frete, que mudam a cada request e por
+    // isso ficam FORA do bloco marcado com cache_control — senão invalidariam o
+    // cache a cada chamada.
+    const systemBlocoCacheavel = systemPromptBase + contextoCatalogo
+    const systemBlocoVariavel = contextoTempo + contextoFrete
 
     // ── Chamar Claude API ─────────────────────────────────────────────────────
     const apiKey = process.env.ANTHROPIC_API_KEY
@@ -227,7 +233,10 @@ ${catalogoTexto}
       model:       cfg.agente_modelo    || 'claude-haiku-4-5-20251001',
       max_tokens:  Number(cfg.agente_max_tokens) || 400,
       temperature: Number(cfg.agente_temperatura) || 0.7,
-      system:      systemPromptFinal,
+      system: [
+        { type: 'text', text: systemBlocoCacheavel, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: systemBlocoVariavel },
+      ],
       messages:    historico,
     })
 
