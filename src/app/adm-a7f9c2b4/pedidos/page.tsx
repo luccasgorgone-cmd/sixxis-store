@@ -107,8 +107,27 @@ const STATUSES = ['pendente', 'aguardando_frete', 'pago', 'enviado', 'entregue',
 // Transportadoras oferecidas no select. Qualquer outro nome (inclusive o que o
 // resolver de frete grava na criação do pedido) cai em "Outro", que revela um
 // campo livre — o valor final sempre grava em Pedido.transportadora.
-const TRANSPORTADORAS = ['Braspress', 'Rodonaves', 'Correios'] as const
+//
+// "Braspress Rodoviário" (não "Braspress" solto) porque é o nome exato do
+// serviço que a cotação real da Braspress devolve (ver src/lib/carriers/
+// braspress.ts) — assim a escolha de uma cotação já cai direto num item da
+// lista, sem passar por "Outro".
+const TRANSPORTADORAS = [
+  'Braspress Rodoviário', 'Rodonaves', 'Correios',
+  'Alfa Transportes', 'Andorinha Transportes', 'Entrega Local',
+] as const
 const TRANSPORTADORA_OUTRO = 'Outro'
+
+// Link de rastreio sugerido ao escolher a transportadora — só um ponto de
+// partida (o campo continua livre pra editar). "Entrega Local" não tem
+// rastreio de terceiro, então não tem entrada aqui.
+const LINK_RASTREIO_POR_TRANSPORTADORA: Record<string, string> = {
+  'Braspress Rodoviário': 'https://www.braspress.com/rastreie-sua-encomenda/',
+  'Rodonaves': 'https://rodonaves.com.br/rastreio-de-mercadoria',
+  'Correios': 'https://www.correios.com.br/rastreamento',
+  'Alfa Transportes': 'https://alfatransportes.com.br/',
+  'Andorinha Transportes': 'https://www.andorinhaexpress.com.br/Novo_site/rastreamento',
+}
 
 // Status oferecidos na ação em massa. 'enviado' fica DE FORA de propósito:
 // entrar em "enviado" dispara o e-mail de rastreio ao cliente, e despachar tem
@@ -376,8 +395,21 @@ function PedidoDetalhe({
   const [transpOutro, setTranspOutro] = useState(transpNaLista ? '' : transpSalva)
   const transportadora =
     transpOpcao === TRANSPORTADORA_OUTRO ? transpOutro.trim() : transpOpcao
-  const [rastreio, setRastreio] = useState(pedido.codigoRastreio ?? '')
+  // Sugestão de rastreio: CPF/CNPJ de quem pagou, sem pontuação — é só um
+  // ponto de partida (adianta o admin em vários casos), o campo continua livre.
+  const payerCpf = pedido.pagamentos?.find(p => p.payerCpf)?.payerCpf
+  const [rastreio, setRastreio] = useState(pedido.codigoRastreio ?? payerCpf ?? '')
   const [linkRastreio, setLinkRastreio] = useState(pedido.linkRastreio ?? '')
+
+  // Ao trocar a transportadora, sugere o link oficial de rastreio dela — só
+  // quando o campo ainda não foi preenchido manualmente (nunca sobrescreve
+  // uma edição do admin) e o pedido ainda não tinha um link salvo.
+  function selecionarTransportadora(nome: string) {
+    setTranspOpcao(nome)
+    if (!linkRastreio.trim() && LINK_RASTREIO_POR_TRANSPORTADORA[nome]) {
+      setLinkRastreio(LINK_RASTREIO_POR_TRANSPORTADORA[nome])
+    }
+  }
   const [notaFiscal, setNotaFiscal] = useState(pedido.notaFiscal ?? '')
   // Data da NF em "YYYY-MM-DD" p/ o <input type="date">. A API vem em ISO
   // (meio-dia UTC) — o slice(0,10) devolve o dia-calendário correto.
@@ -511,7 +543,7 @@ function PedidoDetalhe({
   // NÃO toca no frete/total do cliente. Reusa o MESMO PATCH de edição.
   function escolherCotacao(nome: string, preco: number) {
     if ((TRANSPORTADORAS as readonly string[]).includes(nome)) {
-      setTranspOpcao(nome)
+      selecionarTransportadora(nome)
       setTranspOutro('')
     } else {
       setTranspOpcao(TRANSPORTADORA_OUTRO)
@@ -526,7 +558,6 @@ function PedidoDetalhe({
   }
 
   const end = pedido.endereco
-  const payerCpf = pedido.pagamentos?.find(p => p.payerCpf)?.payerCpf
   const statusLower = (pedido.status || '').toLowerCase()
 
   // NF-e: só depois do pagamento confirmado (mesma regra do servidor).
@@ -861,7 +892,7 @@ function PedidoDetalhe({
                 <label className="block text-xs font-medium text-gray-600 mb-1">Transportadora</label>
                 <select
                   value={transpOpcao}
-                  onChange={(e) => setTranspOpcao(e.target.value)}
+                  onChange={(e) => selecionarTransportadora(e.target.value)}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]"
                 >
                   <option value="">Selecione…</option>

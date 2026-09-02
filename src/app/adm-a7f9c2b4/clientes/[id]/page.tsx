@@ -5,12 +5,13 @@ import {
   ArrowLeft, Phone, CreditCard, MapPin,
   ShoppingBag, Coins, ShieldOff, ShieldCheck, Calendar,
   TrendingUp, Clock, CheckCircle, XCircle, Package,
-  Truck, AlertCircle, RotateCcw
+  Truck, AlertCircle, RotateCcw, Pencil, Check, X as XIcon,
 } from 'lucide-react'
 import NivelLoyaltyIcon from '@/components/loyalty/NivelLoyaltyIcon'
 import { calcularNivel, nivelPorId } from '@/lib/loyalty'
 import { ADMIN_BASE } from '@/lib/admin-path'
 import { formatarTelefone, formatarCpf } from '@/lib/format'
+import { nomeCompletoValido } from '@/lib/validacao-nome'
 
 const STATUS_PEDIDO: Record<string, { label: string; cor: string; bg: string; icone: React.ElementType }> = {
   PENDENTE:    { label: 'Aguardando',   cor: '#d97706', bg: '#fef3c7', icone: Clock         },
@@ -24,16 +25,45 @@ const STATUS_PEDIDO: Record<string, { label: string; cor: string; bg: string; ic
 
 type Aba = 'visao' | 'pedidos' | 'cashback' | 'enderecos' | 'seguranca'
 
+interface PedidoResumo {
+  id: string; status: string; total: number; createdAt: string
+  formaPagamento: string | null
+  itens?: { nomeProduto?: string | null; produto?: { nome?: string | null } | null }[]
+}
+
+interface CashbackEntry {
+  id: string; descricao: string; createdAt: string; tipo: string; valor: number
+}
+
+interface EnderecoCliente {
+  id?: string; principal?: boolean
+  logradouro: string; numero: string; complemento?: string | null
+  bairro: string; cidade: string; estado: string; cep: string
+}
+
+interface ClienteDetalhado {
+  id: string; nome: string | null; email: string
+  cpf?: string | null; telefone?: string | null
+  createdAt: string; ultimaCompra?: string | null
+  bloqueado: boolean; motivoBloqueio?: string | null; bloqueadoEm?: string | null
+  cashbackSaldo: number; totalGasto: number; totalPedidos: number
+  pedidos?: PedidoResumo[]; cashback?: CashbackEntry[]; enderecos?: EnderecoCliente[]
+}
+
 export default function ClienteDetalhe() {
   const { id } = useParams<{ id: string }>()
   const router  = useRouter()
-  const [cliente, setCliente]               = useState<any>(null)
+  const [cliente, setCliente]               = useState<ClienteDetalhado | null>(null)
   const [loading, setLoading]               = useState(true)
   const [erro, setErro]                     = useState('')
   const [abaAtiva, setAbaAtiva]             = useState<Aba>('visao')
   const [abaBloqueio, setAbaBloqueio]       = useState(false)
   const [motivoBloqueio, setMotivoBloqueio] = useState('')
   const [salvando, setSalvando]             = useState(false)
+  const [editandoNome, setEditandoNome]     = useState(false)
+  const [nomeInput, setNomeInput]           = useState('')
+  const [erroNome, setErroNome]             = useState('')
+  const [salvandoNome, setSalvandoNome]     = useState(false)
 
   useEffect(() => {
     fetch(`/api/admin/clientes/${id}`)
@@ -45,6 +75,38 @@ export default function ClienteDetalhe() {
       })
       .catch(() => { setErro('Erro ao carregar cliente'); setLoading(false) })
   }, [id])
+
+  function abrirEdicaoNome() {
+    setNomeInput(cliente?.nome || '')
+    setErroNome('')
+    setEditandoNome(true)
+  }
+
+  async function salvarNome() {
+    const nome = nomeInput.trim()
+    if (!nomeCompletoValido(nome)) {
+      setErroNome('Informe nome e sobrenome, sem números.')
+      return
+    }
+    setSalvandoNome(true)
+    setErroNome('')
+    try {
+      const res  = await fetch(`/api/admin/clientes/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Falha ao salvar')
+      const c = data.cliente || data
+      setCliente((prev) => (prev ? { ...prev, nome: c.nome } : prev))
+      setEditandoNome(false)
+    } catch (err) {
+      setErroNome((err as Error).message || 'Erro ao salvar')
+    } finally {
+      setSalvandoNome(false)
+    }
+  }
 
   async function toggleBloqueio() {
     if (!cliente) return
@@ -59,7 +121,7 @@ export default function ClienteDetalhe() {
       })
       const data = await res.json()
       const c    = data.cliente || data
-      setCliente((prev: any) => ({ ...prev, bloqueado: c.bloqueado, motivoBloqueio: c.motivoBloqueio, bloqueadoEm: c.bloqueadoEm }))
+      setCliente((prev) => (prev ? { ...prev, bloqueado: c.bloqueado, motivoBloqueio: c.motivoBloqueio, bloqueadoEm: c.bloqueadoEm } : prev))
       setAbaBloqueio(false)
       setMotivoBloqueio('')
     } finally {
@@ -107,7 +169,7 @@ export default function ClienteDetalhe() {
   const cashbackHistorico = cliente.cashback || []
   const enderecos        = cliente.enderecos || []
   const ticketMedio      = pedidos.length > 0
-    ? pedidos.reduce((s: number, p: any) => s + Number(p.total || 0), 0) / pedidos.length
+    ? pedidos.reduce((s: number, p: PedidoResumo) => s + Number(p.total || 0), 0) / pedidos.length
     : 0
 
   const ABAS: { id: Aba; label: string }[] = [
@@ -131,7 +193,36 @@ export default function ClienteDetalhe() {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-gray-900">{cliente.nome || 'Cliente sem nome'}</h1>
+            {editandoNome ? (
+              <div>
+                <div className="flex items-center gap-2">
+                  <input
+                    autoFocus
+                    value={nomeInput}
+                    onChange={e => setNomeInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') salvarNome(); if (e.key === 'Escape') setEditandoNome(false) }}
+                    className="text-2xl font-black text-gray-900 border-b-2 border-[#3cbfb3] outline-none bg-transparent"
+                  />
+                  <button onClick={salvarNome} disabled={salvandoNome}
+                    className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition disabled:opacity-50">
+                    <Check size={18} />
+                  </button>
+                  <button onClick={() => setEditandoNome(false)} disabled={salvandoNome}
+                    className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition disabled:opacity-50">
+                    <XIcon size={18} />
+                  </button>
+                </div>
+                {erroNome && <p className="text-xs text-red-600 mt-1">{erroNome}</p>}
+              </div>
+            ) : (
+              <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2 group">
+                {cliente.nome || 'Cliente sem nome'}
+                <button onClick={abrirEdicaoNome}
+                  className="p-1 rounded-lg text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition opacity-0 group-hover:opacity-100">
+                  <Pencil size={15} />
+                </button>
+              </h1>
+            )}
             <p className="text-sm text-gray-500">Cadastrado em {fmtData(cliente.createdAt)}</p>
           </div>
         </div>
@@ -258,7 +349,7 @@ export default function ClienteDetalhe() {
                     <div>
                       <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">Últimos Pedidos</h3>
                       <div className="space-y-2">
-                        {pedidos.slice(0, 3).map((p: any) => {
+                        {pedidos.slice(0, 3).map((p: PedidoResumo) => {
                           const cfg  = STATUS_PEDIDO[p.status] || STATUS_PEDIDO.PENDENTE
                           const Icon = cfg.icone
                           return (
@@ -301,7 +392,7 @@ export default function ClienteDetalhe() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {pedidos.map((p: any) => {
+                      {pedidos.map((p: PedidoResumo) => {
                         const cfg  = STATUS_PEDIDO[p.status] || STATUS_PEDIDO.PENDENTE
                         const Icon = cfg.icone
                         return (
@@ -317,7 +408,7 @@ export default function ClienteDetalhe() {
                                 </div>
                                 {p.itens?.length > 0 && (
                                   <p className="text-sm text-gray-600 mb-1">
-                                    {p.itens.map((it: any) => it.nomeProduto || it.produto?.nome).filter(Boolean).join(', ')}
+                                    {p.itens.map((it) => it.nomeProduto || it.produto?.nome).filter(Boolean).join(', ')}
                                   </p>
                                 )}
                                 <p className="text-xs text-gray-400">{fmtData(p.createdAt)}</p>
@@ -351,7 +442,7 @@ export default function ClienteDetalhe() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {cashbackHistorico.map((t: any) => (
+                      {cashbackHistorico.map((t: CashbackEntry) => (
                         <div key={t.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                           <div>
                             <p className="text-sm font-semibold text-gray-900">{t.descricao}</p>
@@ -378,7 +469,7 @@ export default function ClienteDetalhe() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {enderecos.map((e: any, i: number) => (
+                      {enderecos.map((e: EnderecoCliente, i: number) => (
                         <div key={e.id || i} className={`border rounded-xl p-4 ${e.principal ? 'border-[#3cbfb3]/40 bg-[#f0fffe]' : 'border-gray-100'}`}>
                           <div className="flex items-start gap-3">
                             <MapPin size={16} className="text-[#3cbfb3] mt-0.5 shrink-0" />

@@ -773,7 +773,7 @@ function CheckoutContent() {
         return
       }
       if (!nomeCompletoValido(ident.nome)) {
-        setErro('Informe nome e sobrenome.')
+        setErro('Informe nome e sobrenome, sem números.')
         return
       }
       if (ident.tipoPessoa === 'PJ') {

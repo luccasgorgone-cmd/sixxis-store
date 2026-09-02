@@ -133,6 +133,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'CPF/CNPJ inválido' }, { status: 400 })
   }
 
+  // Sincroniza o cadastro com o nome completo validado nesta compra. Cobre
+  // contas criadas via login Google, onde o nome vem do provedor OAuth sem
+  // passar por nomeCompletoSchema (ex.: "08GEOVANNI" — cliente real, nome do
+  // Google incompleto/estranho). Best-effort: nunca bloqueia o pagamento.
+  if (payerNome !== pedido.cliente.nome) {
+    await prisma.cliente
+      .update({ where: { id: session.user.id }, data: { nome: payerNome } })
+      .catch(() => {})
+  }
+
   // ── Lock anti-corrida ───────────────────────────────────────────────────────
   // Claim atômico (updateMany só afeta linha sem lock ativo) — impede que 2
   // chamadas concorrentes pro MESMO pedido (duplo clique, 2 abas, retry de

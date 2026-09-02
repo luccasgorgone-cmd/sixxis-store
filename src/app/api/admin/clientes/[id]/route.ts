@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
 import { STATUS_PAGO_TODOS, STATUS_PENDENTE_TODOS } from '@/lib/pedido-status'
+import { nomeCompletoSchema } from '@/lib/validacao-nome'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,6 +71,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
     telefone?: string
   }
 
+  // Nome completo (2+ palavras, sem números) — mesma regra usada no cadastro
+  // e no checkout, pra admin nunca gravar o mesmo tipo de dado inválido que
+  // motivou essa edição manual em primeiro lugar.
+  if (nome !== undefined) {
+    const parsedNome = nomeCompletoSchema.safeParse(nome)
+    if (!parsedNome.success) {
+      return NextResponse.json(
+        { error: parsedNome.error.issues[0]?.message || 'Nome inválido' },
+        { status: 400 },
+      )
+    }
+  }
+
   const data: Record<string, unknown> = {}
   if (bloqueado !== undefined) {
     data.bloqueado   = bloqueado
@@ -80,7 +94,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<Para
   // motivoBloqueio explícito só vale quando NÃO é um desbloqueio.
   if (motivoBloqueio !== undefined && bloqueado !== false) data.motivoBloqueio = motivoBloqueio
   if (cashbackSaldo  !== undefined) data.cashbackSaldo  = cashbackSaldo
-  if (nome           !== undefined) data.nome           = nome
+  if (nome           !== undefined) data.nome           = nome.trim()
   if (telefone       !== undefined) data.telefone       = telefone
 
   // select explícito — NUNCA retorna o hash de senha.
