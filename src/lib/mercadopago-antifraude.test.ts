@@ -21,6 +21,7 @@ function basePedido(overrides: Partial<PedidoParaAntifraude> = {}): PedidoParaAn
     cliente: {
       nome: 'Fulano da Silva',
       cpf: '11144477735',
+      cnpj: null,
       telefone: '11987654321',
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
     },
@@ -114,7 +115,10 @@ describe('construirSinaisAntifraude', () => {
   it('sem telefone/endereço/CPF válidos, não quebra e omite os campos opcionais', async () => {
     findFirstMock.mockResolvedValue(null)
     const pedido = basePedido({
-      cliente: { nome: 'Sem Dados', cpf: null, telefone: null, createdAt: new Date('2026-01-01T00:00:00.000Z') },
+      cliente: {
+        nome: 'Sem Dados', cpf: null, cnpj: null, telefone: null,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      },
       endereco: null,
     })
     const { payer, additionalInfo } = await construirSinaisAntifraude(fakeReq(), pedido)
@@ -123,5 +127,26 @@ describe('construirSinaisAntifraude', () => {
     expect(additionalInfo).not.toHaveProperty('shipments')
     expect(additionalInfo.payer).not.toHaveProperty('phone')
     expect(additionalInfo.payer).not.toHaveProperty('address')
+  })
+
+  it('override com CNPJ (14 dígitos) manda identification type CNPJ', async () => {
+    findFirstMock.mockResolvedValue(null)
+    const { payer } = await construirSinaisAntifraude(fakeReq(), basePedido(), {
+      nome: 'Empresa Teste',
+      cpf: '11222333000181',
+    })
+    expect(payer.identification).toEqual({ type: 'CNPJ', number: '11222333000181' })
+  })
+
+  it('cliente PJ sem override usa cliente.cnpj como fallback (identification CNPJ)', async () => {
+    findFirstMock.mockResolvedValue(null)
+    const pedido = basePedido({
+      cliente: {
+        nome: 'Empresa Teste', cpf: null, cnpj: '11222333000181', telefone: '11987654321',
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      },
+    })
+    const { payer } = await construirSinaisAntifraude(fakeReq(), pedido)
+    expect(payer.identification).toEqual({ type: 'CNPJ', number: '11222333000181' })
   })
 })

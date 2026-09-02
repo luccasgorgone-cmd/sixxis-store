@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     where: { id: pedidoId, clienteId: session.user.id },
     include: {
       itens: { include: { produto: { select: { sku: true, nome: true, descricao: true } } } },
-      cliente: { select: { email: true, nome: true, cpf: true, telefone: true, createdAt: true } },
+      cliente: { select: { email: true, nome: true, cpf: true, cnpj: true, telefone: true, createdAt: true } },
       garantias: { select: { valorPago: true } },
       endereco: true,
     },

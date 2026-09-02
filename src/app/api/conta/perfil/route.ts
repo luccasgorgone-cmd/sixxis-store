@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { cnpjValido, cpfValido } from '@/lib/validacao-documento'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +42,16 @@ export async function PATCH(req: NextRequest) {
     avatarGradiente?: string | null
     notifEmail?: boolean
     notifWhatsapp?: boolean
+  }
+
+  // CPF/CNPJ com dígito verificador inválido nunca é persistido nem mandado ao
+  // Mercado Pago como se fosse real — barreira autoritativa (só existia no
+  // client antes disso).
+  if (body.cpf && !cpfValido(body.cpf)) {
+    return NextResponse.json({ error: 'CPF inválido.' }, { status: 400 })
+  }
+  if (body.cnpj && !cnpjValido(body.cnpj)) {
+    return NextResponse.json({ error: 'CNPJ inválido.' }, { status: 400 })
   }
 
   const data: Record<string, unknown> = {}

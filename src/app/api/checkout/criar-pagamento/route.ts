@@ -15,6 +15,9 @@ import { calcularTotalBaseReais } from '@/lib/checkout-total'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 import { construirSinaisAntifraude } from '@/lib/mercadopago-antifraude'
 import { nomeCompletoSchema } from '@/lib/validacao-nome'
+import { documentoValido } from '@/lib/validacao-documento'
+import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
+import { cutoffLockPagamento } from '@/lib/pagamento-lock'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -23,7 +26,10 @@ const schema = z.object({
   payerNome: nomeCompletoSchema,
   payerCpf: z.string().optional(),
   cardToken: z.string().optional(),
-  parcelas: z.number().int().positive().optional(),
+  // Teto = MAX_PARCELAS_SEM_JUROS (fonte única — ver src/lib/parcelamento.ts).
+  // A tela já limita o seletor a isso; aqui é a barreira autoritativa contra
+  // uma chamada direta pedindo mais parcelas do que a conta MP absorve sem juro.
+  parcelas: z.number().int().positive().max(MAX_PARCELAS_SEM_JUROS).optional(),
   issuerId: z.string().optional(),
   paymentMethodId: z.string().optional(),
   // Device ID gerado pelo SDK do MP no navegador (window.MP_DEVICE_SESSION_ID)
@@ -119,6 +125,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: 'cardToken obrigatório para cartão' },
       { status: 400 },
+    )
+  }
+  // CPF/CNPJ com dígito verificador inválido nunca é repassado ao Mercado
+  // Pago como sinal de antifraude real — antes só era barrado no client.
+  if (payerCpf && !documentoValido(payerCpf)) {
+    return NextResponse.json({ error: 'CPF/CNPJ inválido' }, { status: 400 })
+  }
+
+  // ── Lock anti-corrida ───────────────────────────────────────────────────────
+  // Claim atômico (updateMany só afeta linha sem lock ativo) — impede que 2
+  // chamadas concorrentes pro MESMO pedido (duplo clique, 2 abas, retry de
+  // rede) cheguem as duas a criar uma cobrança de verdade no Mercado Pago.
+  // Liberado no finally, sempre — nunca trava um retry legítimo depois de uma
+  // falha, e expira sozinho (ver pagamento-lock.ts) se o processo cair no meio.
+  const agoraLock = new Date()
+  const claimLock = await prisma.pedido.updateMany({
+    where: {
+      id: pedido.id,
+      OR: [
+        { pagamentoEmProcessamentoEm: null },
+        { pagamentoEmProcessamentoEm: { lt: cutoffLockPagamento(agoraLock) } },
+      ],
+    },
+    data: { pagamentoEmProcessamentoEm: agoraLock },
+  })
+  if (claimLock.count === 0) {
+    return NextResponse.json(
+      { error: 'Já existe uma tentativa de pagamento em andamento para este pedido. Aguarde alguns segundos e tente novamente.' },
+      { status: 409 },
     )
   }
 
@@ -290,5 +325,11 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 },
     )
+  } finally {
+    // Libera o lock sempre — sucesso, erro ou exceção. Best-effort: nunca deve
+    // derrubar a resposta já decidida acima.
+    await prisma.pedido
+      .updateMany({ where: { id: pedido.id }, data: { pagamentoEmProcessamentoEm: null } })
+      .catch((e) => console.error('[mp:create] falha ao liberar lock de pagamento:', (e as Error).message))
   }
 }

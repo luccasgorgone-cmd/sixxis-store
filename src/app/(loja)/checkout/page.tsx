@@ -23,6 +23,7 @@ import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
 import { trackAddPaymentInfo, trackAddShippingInfo, trackBeginCheckout } from '@/lib/analytics/events'
 import { nomeCompletoValido } from '@/lib/validacao-nome'
+import { cnpjValido, cpfValido, documentoValido } from '@/lib/validacao-documento'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
 import { capturarGaClientId } from '@/lib/analytics/ga-attribution'
@@ -112,51 +113,6 @@ function maskCep(v: string) {
 
 function soDigitos(v: string) {
   return v.replace(/\D/g, '')
-}
-
-// CPF com validação dos 2 dígitos verificadores (rejeita 000... e repetidos).
-function isCpfValido(cpf: string): boolean {
-  const d = soDigitos(cpf)
-  if (d.length !== 11) return false
-  if (/^(\d)\1{10}$/.test(d)) return false
-  let soma = 0
-  for (let i = 0; i < 9; i++) soma += Number(d[i]) * (10 - i)
-  let resto = (soma * 10) % 11
-  if (resto === 10) resto = 0
-  if (resto !== Number(d[9])) return false
-  soma = 0
-  for (let i = 0; i < 10; i++) soma += Number(d[i]) * (11 - i)
-  resto = (soma * 10) % 11
-  if (resto === 10) resto = 0
-  return resto === Number(d[10])
-}
-
-// CNPJ com validação dos 2 dígitos verificadores (rejeita repetidos), módulo 11
-// com os pesos padrão da Receita.
-function isCnpjValido(cnpj: string): boolean {
-  const d = soDigitos(cnpj)
-  if (d.length !== 14) return false
-  if (/^(\d)\1{13}$/.test(d)) return false
-  const pesos1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-  const pesos2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-  let soma = 0
-  for (let i = 0; i < 12; i++) soma += Number(d[i]) * pesos1[i]
-  let resto = soma % 11
-  const dv1 = resto < 2 ? 0 : 11 - resto
-  if (dv1 !== Number(d[12])) return false
-  soma = 0
-  for (let i = 0; i < 13; i++) soma += Number(d[i]) * pesos2[i]
-  resto = soma % 11
-  const dv2 = resto < 2 ? 0 : 11 - resto
-  return dv2 === Number(d[13])
-}
-
-// Roteia por nº de dígitos: 11 → CPF, 14 → CNPJ, qualquer outro → inválido.
-function isDocumentoValido(valor: string): boolean {
-  const d = soDigitos(valor)
-  if (d.length === 11) return isCpfValido(d)
-  if (d.length === 14) return isCnpjValido(d)
-  return false
 }
 
 // Telefone BR: 10 (fixo) ou 11 (celular) dígitos com DDD.
@@ -821,7 +777,7 @@ function CheckoutContent() {
         return
       }
       if (ident.tipoPessoa === 'PJ') {
-        if (!isCnpjValido(ident.cpf)) {
+        if (!cnpjValido(ident.cpf)) {
           setErro('Informe um CNPJ válido.')
           return
         }
@@ -833,7 +789,7 @@ function CheckoutContent() {
           setErro('Informe a Inscrição Estadual ou marque Isento.')
           return
         }
-      } else if (!isCpfValido(ident.cpf)) {
+      } else if (!cpfValido(ident.cpf)) {
         setErro('Informe um CPF válido.')
         return
       }
@@ -872,7 +828,7 @@ function CheckoutContent() {
     setErro('')
     // Guard final: nunca abre o pagamento (MP Bricks) sem documento (CPF ou
     // CNPJ) e telefone válidos.
-    if (!isDocumentoValido(ident.cpf) || !isTelefoneValido(ident.telefone)) {
+    if (!documentoValido(ident.cpf) || !isTelefoneValido(ident.telefone)) {
       setErro('Revise CPF e telefone na etapa de identificação.')
       setEtapa(1)
       return

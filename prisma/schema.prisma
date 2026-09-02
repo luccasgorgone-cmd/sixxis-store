@@ -206,6 +206,12 @@ model Pedido {
   // Payment API de pagamento único). Necessário pra retomar a fase 2 do fluxo
   // pix+cartão: o webhook usa este id pra chamar completarCheckoutPixMaisCartao.
   mpOrderId         String?  @unique
+  // Lock anti-corrida do POST /api/checkout/criar-pagamento (ver
+  // src/lib/pagamento-lock.ts): impede que 2 chamadas concorrentes pro mesmo
+  // pedido (duplo clique, 2 abas, retry de rede) gerem 2 cobranças aprovadas
+  // de verdade no Mercado Pago. Setado ao entrar na rota, limpo no finally —
+  // stale depois de LOCK_PAGAMENTO_STALE_MS pra nunca travar um retry legítimo.
+  pagamentoEmProcessamentoEm DateTime?
   itens          ItemPedido[]
   cliente        Cliente             @relation(fields: [clienteId], references: [id])
   endereco       Endereco            @relation(fields: [enderecoId], references: [id])

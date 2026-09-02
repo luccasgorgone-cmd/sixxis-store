@@ -18,6 +18,7 @@ export interface PedidoParaAntifraude {
   cliente: {
     nome: string
     cpf: string | null
+    cnpj: string | null
     telefone: string | null
     createdAt: Date
   }
@@ -51,7 +52,11 @@ export async function construirSinaisAntifraude(
   const nomePayer = overrides?.nome ?? pedido.cliente.nome ?? ''
   const [firstName, ...rest] = nomePayer.trim().split(/\s+/)
   const lastName = rest.join(' ') || firstName
-  const cpfDigits = (overrides?.cpf ?? pedido.cliente.cpf ?? '').replace(/\D/g, '')
+  // Documento: override do checkout (CPF ou CNPJ, um campo só) tem prioridade;
+  // sem override, cai pro que estiver salvo no cliente — CPF (PF) ou CNPJ (PJ,
+  // nunca os dois ao mesmo tempo — ver /api/conta/perfil).
+  const documento = overrides?.cpf || pedido.cliente.cpf || pedido.cliente.cnpj || ''
+  const cpfDigits = documento.replace(/\D/g, '')
 
   const telDigits = (pedido.cliente.telefone ?? '').replace(/\D/g, '')
   const telLocal =
@@ -77,6 +82,7 @@ export async function construirSinaisAntifraude(
     last_name: lastName,
   }
   if (cpfDigits.length === 11) payer.identification = { type: 'CPF', number: cpfDigits }
+  else if (cpfDigits.length === 14) payer.identification = { type: 'CNPJ', number: cpfDigits }
   if (phone) payer.phone = phone
   if (address) payer.address = address
 
