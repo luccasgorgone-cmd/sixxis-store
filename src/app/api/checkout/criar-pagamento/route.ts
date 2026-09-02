@@ -14,12 +14,13 @@ import { precoPix } from '@/lib/preco-pix'
 import { calcularTotalBaseReais } from '@/lib/checkout-total'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 import { construirSinaisAntifraude } from '@/lib/mercadopago-antifraude'
+import { nomeCompletoSchema } from '@/lib/validacao-nome'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
   metodo: z.enum(['pix', 'credit_card', 'debit_card']),
   payerEmail: z.string().email().optional(),
-  payerNome: z.string().optional(),
+  payerNome: nomeCompletoSchema,
   payerCpf: z.string().optional(),
   cardToken: z.string().optional(),
   parcelas: z.number().int().positive().optional(),

@@ -4,10 +4,11 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
 import { verifyTurnstile } from '@/lib/turnstile'
+import { nomeCompletoSchema } from '@/lib/validacao-nome'
 
 // CPF e telefone são coletados/validados no checkout, não no cadastro.
 const cadastroSchema = z.object({
-  nome: z.string().min(2),
+  nome: nomeCompletoSchema,
   email: z.string().email(),
   senha: z.string().min(8),
 })

@@ -9,10 +9,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, User, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
 import TurnstileWidget, { TURNSTILE_ENABLED } from '@/components/security/TurnstileWidget'
+import { nomeCompletoSchema } from '@/lib/validacao-nome'
 
 // CPF e telefone NÃO são pedidos no cadastro — são coletados/validados no checkout.
 const cadastroSchema = z.object({
-  nome: z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
+  nome: nomeCompletoSchema,
   email: z.string().email('Email inválido'),
   senha: z.string().min(8, 'Senha deve ter ao menos 8 caracteres'),
   confirmarSenha: z.string(),

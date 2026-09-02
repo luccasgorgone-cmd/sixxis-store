@@ -22,6 +22,7 @@ import EnderecosSalvos, { type EnderecoSalvo } from '@/components/checkout/Ender
 import UsarCashback from '@/components/checkout/UsarCashback'
 import { useViaCep } from '@/hooks/useViaCep'
 import { trackAddPaymentInfo, trackAddShippingInfo, trackBeginCheckout } from '@/lib/analytics/events'
+import { nomeCompletoValido } from '@/lib/validacao-nome'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
 import { capturarGaClientId } from '@/lib/analytics/ga-attribution'
@@ -813,6 +814,10 @@ function CheckoutContent() {
     if (etapa === 1) {
       if (!ident.nome.trim() || !ident.email.trim()) {
         setErro('Preencha nome e e-mail.')
+        return
+      }
+      if (!nomeCompletoValido(ident.nome)) {
+        setErro('Informe nome e sobrenome.')
         return
       }
       if (ident.tipoPessoa === 'PJ') {
