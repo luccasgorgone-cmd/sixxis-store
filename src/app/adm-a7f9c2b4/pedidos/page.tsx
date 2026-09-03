@@ -114,7 +114,7 @@ const STATUSES = ['pendente', 'aguardando_frete', 'pago', 'enviado', 'entregue',
 // lista, sem passar por "Outro".
 const TRANSPORTADORAS = [
   'Braspress Rodoviário', 'Rodonaves', 'Correios',
-  'Alfa Transportes', 'Andorinha Transportes', 'Entrega Local',
+  'Alfa Transportes', 'Andorinha Express', 'Entrega Local',
 ] as const
 const TRANSPORTADORA_OUTRO = 'Outro'
 
@@ -126,7 +126,7 @@ const LINK_RASTREIO_POR_TRANSPORTADORA: Record<string, string> = {
   'Rodonaves': 'https://rodonaves.com.br/rastreio-de-mercadoria',
   'Correios': 'https://www.correios.com.br/rastreamento',
   'Alfa Transportes': 'https://alfatransportes.com.br/',
-  'Andorinha Transportes': 'https://www.andorinhaexpress.com.br/Novo_site/rastreamento',
+  'Andorinha Express': 'https://www.andorinhaexpress.com.br/Novo_site/rastreamento',
 }
 
 // Status oferecidos na ação em massa. 'enviado' fica DE FORA de propósito:
