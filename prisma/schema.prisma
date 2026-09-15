@@ -853,6 +853,11 @@ model SessaoVisitante {
   utmCampaign     String?
   utmContent      String?
   utmTerm         String?
+  // Google Ads faz auto-tagging (gclid na URL) em vez de UTM manual — sem
+  // isso, todo tráfego google/cpc chegava com utm_source nulo (extrairUTMs
+  // só lia utm_*). Capturado como fallback quando não há utm_source mas há
+  // gclid (ver extrairUTMs em src/lib/tracking.ts).
+  gclid           String?
   referer         String?          @db.Text
   landingPage     String?          @db.Text
   totalPaginas    Int              @default(0)

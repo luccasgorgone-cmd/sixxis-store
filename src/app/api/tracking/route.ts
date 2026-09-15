@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
         utmCampaign: utms.utmCampaign,
         utmContent: utms.utmContent,
         utmTerm: utms.utmTerm,
+        gclid: utms.gclid,
         referer: referer?.substring(0, 500) || null,
         totalPaginas: tipo === 'page_view' ? 1 : 0,
       },

@@ -56,15 +56,35 @@ export function obterSidClient(): string {
   return sid
 }
 
+// Google Ads faz auto-tagging (gclid na URL) em vez de UTM manual — sem
+// utm_source, esse tráfego ficava invisível pra atribuição (Meta continua
+// normal, que sempre manda utm_* de verdade). Fallback ADITIVO: só entra em
+// ação quando NÃO há utm_source; se houver (Meta ou UTM manual do Google),
+// o comportamento de sempre continua intacto e gclid não é sintetizado.
 export function extrairUTMs(url: string) {
   try {
     const u = new URL(url)
+    const utmSource = u.searchParams.get('utm_source') || undefined
+    const gclid = u.searchParams.get('gclid') || undefined
+
+    if (!utmSource && gclid) {
+      return {
+        utmSource: 'google',
+        utmMedium: 'cpc',
+        utmCampaign: u.searchParams.get('utm_campaign') || undefined,
+        utmContent:  u.searchParams.get('utm_content')  || undefined,
+        utmTerm:     u.searchParams.get('utm_term')     || undefined,
+        gclid,
+      }
+    }
+
     return {
-      utmSource:   u.searchParams.get('utm_source')   || undefined,
+      utmSource,
       utmMedium:   u.searchParams.get('utm_medium')   || undefined,
       utmCampaign: u.searchParams.get('utm_campaign') || undefined,
       utmContent:  u.searchParams.get('utm_content')  || undefined,
       utmTerm:     u.searchParams.get('utm_term')     || undefined,
+      gclid,
     }
   } catch {
     return {}
