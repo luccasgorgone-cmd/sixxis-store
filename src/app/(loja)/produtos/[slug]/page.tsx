@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
@@ -58,15 +59,22 @@ interface Params { slug: string }
 interface EspecificacaoRow { label: string; valor: string }
 interface FaqRow { pergunta: string; resposta: string }
 
+// Dedupe via React cache(): generateMetadata() e a página chamavam CADA UM sua
+// própria prisma.produto.findUnique — 2 idas ao banco pro mesmo produto na
+// MESMA request. cache() garante 1 query só, reaproveitada por quem chamar
+// com o mesmo slug durante o render desta request (não é cache entre requests).
+const getProdutoPorSlug = cache((slug: string) =>
+  prisma.produto.findUnique({
+    where: { slug },
+    include: {
+      variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
+    },
+  }),
+)
+
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
-  const produto = await prisma.produto.findUnique({
-    where: { slug },
-    select: {
-      nome: true, descricao: true, imagens: true, categoria: true,
-      preco: true, precoPromocional: true, especificacoes: true,
-    },
-  })
+  const produto = await getProdutoPorSlug(slug)
   if (!produto) return { title: 'Produto não encontrado' }
 
   const categoria = getNomeCategoria(produto.categoria)
@@ -130,12 +138,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
   const { slug } = await params
 
   const [produto, taxaConfig, avaliacoesAgg] = await Promise.all([
-    prisma.produto.findUnique({
-      where: { slug },
-      include: {
-        variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
-      },
-    }),
+    getProdutoPorSlug(slug),
     prisma.configuracao.findUnique({ where: { chave: 'juros_cartao_taxa_mensal' } }),
     // Agregação no banco em vez de carregar todas as linhas de avaliacoes só
     // para tirar a média em JS — evita over-fetch em produtos com muitas avaliações.
