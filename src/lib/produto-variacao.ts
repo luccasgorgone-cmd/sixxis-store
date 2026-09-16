@@ -18,3 +18,7 @@ export function urlProdutoComVariacao(siteUrl: string, slug: string, sku: string
   url.searchParams.set(VARIANTE_QUERY_PARAM, sku)
   return url.toString()
 }
+
+export function estoqueDisponivel(estoque: number): boolean {
+  return estoque > 0
+}

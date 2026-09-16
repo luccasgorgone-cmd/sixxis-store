@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { encontrarVariacaoPorSku, urlProdutoComVariacao } from './produto-variacao'
+import { encontrarVariacaoPorSku, estoqueDisponivel, urlProdutoComVariacao } from './produto-variacao'
 
 const variacoes = [
   { sku: 'SX200 Branco', ativo: true, preco: 8500 },
@@ -15,5 +15,11 @@ describe('deep-link de variante', () => {
     expect(encontrarVariacaoPorSku(variacoes, 'SX200 Preto')?.preco).toBe(9250)
     expect(encontrarVariacaoPorSku(variacoes, 'SX200 Inativo')).toBeNull()
     expect(encontrarVariacaoPorSku(variacoes, ['SX200 Preto'])).toBeNull()
+  })
+
+  it('trata estoque zerado ou negativo como indisponível', () => {
+    expect(estoqueDisponivel(1)).toBe(true)
+    expect(estoqueDisponivel(0)).toBe(false)
+    expect(estoqueDisponivel(-20)).toBe(false)
   })
 })

@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { feedIdProduto } from '@/lib/feed-id'
-import { urlProdutoComVariacao } from '@/lib/produto-variacao'
+import { estoqueDisponivel, urlProdutoComVariacao } from '@/lib/produto-variacao'
 
 // ─── Google Merchant Center — feed de produtos (RSS 2.0 + namespace g:) ───────
 // URL pública estável: https://www.sixxis.com.br/merchant-feed.xml
@@ -188,7 +188,7 @@ export async function GET() {
           link: urlProdutoComVariacao(SITE_URL, p.slug, v.sku),
           id: v.sku,
           title: `${p.nome} — ${v.nome}`,
-          disponivel: v.estoque > 0,
+          disponivel: estoqueDisponivel(v.estoque),
           precoRegular: precoVar,
           precoPromo: null, // não há promo por variação hoje
           itemGroupId: sku,
@@ -202,7 +202,7 @@ export async function GET() {
       itens.push({
         ...base,
         id: sku,
-        disponivel: p.estoque > 0,
+        disponivel: estoqueDisponivel(p.estoque),
         precoRegular: precoBase,
         precoPromo: promoBase,
         mpn: sku,

@@ -16,6 +16,7 @@ import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { feedId } from '@/lib/feed-id'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { inferirTipoVariacao } from '@/lib/variacao'
+import { estoqueDisponivel } from '@/lib/produto-variacao'
 
 const SELOS_CONFIANCA = [
   { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
@@ -154,7 +155,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
   // Lista de parcelas sem juros derivada da fonte única (1..MAX).
   const parcelasSemJuros = Array.from({ length: MAX_PARCELAS_SEM_JUROS }, (_, i) => i + 1)
   const estoqueAtual = variacaoSelecionada ? variacaoSelecionada.estoque : produto.estoque
-  const esgotado = estoqueAtual === 0
+  const esgotado = !estoqueDisponivel(estoqueAtual)
 
   function selecionarVariacao(v: Variacao | null) {
     setVariacaoSelecionada(v)
@@ -444,10 +445,10 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
                   <button
                     key={v.id}
                     onClick={() => selecionarVariacao(v)}
-                    disabled={v.estoque === 0}
+                    disabled={!estoqueDisponivel(v.estoque)}
                     title={v.nome}
                     className={`relative w-10 h-10 rounded-full transition-all duration-150 focus:outline-none ${
-                      v.estoque === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'
+                      !estoqueDisponivel(v.estoque) ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'
                     } ${isSelected ? 'ring-2 ring-offset-2 ring-[#3cbfb3] scale-110' : 'ring-1 ring-gray-200'}`}
                     style={{ backgroundColor: hex, border: isBranco ? '1px solid #e5e7eb' : 'none' }}
                     aria-label={v.nome}
@@ -461,7 +462,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
                         </svg>
                       </span>
                     )}
-                    {v.estoque === 0 && (
+                    {!estoqueDisponivel(v.estoque) && (
                       <span className="absolute inset-0 flex items-center justify-center">
                         <svg width="28" height="28" viewBox="0 0 40 40">
                           <line x1="4" y1="36" x2="36" y2="4" stroke="#6b7280" strokeWidth="2"/>
@@ -479,11 +480,11 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
                 <button
                   key={v.id}
                   onClick={() => selecionarVariacao(v)}
-                  disabled={v.estoque === 0}
+                  disabled={!estoqueDisponivel(v.estoque)}
                   className={`px-5 py-2.5 rounded-2xl text-sm font-bold border-2 transition-all ${
                     variacaoSelecionada?.id === v.id
                       ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#1a4f4a]'
-                      : v.estoque === 0
+                      : !estoqueDisponivel(v.estoque)
                         ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
                         : 'border-gray-200 text-gray-600 hover:border-[#3cbfb3]/50'
                   }`}

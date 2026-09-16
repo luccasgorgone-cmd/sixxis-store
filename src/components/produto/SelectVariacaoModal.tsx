@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { X, Minus, Plus, ShoppingCart, ShoppingBag, Package } from 'lucide-react'
+import { estoqueDisponivel } from '@/lib/produto-variacao'
 
 export interface VariacaoSelecionavel {
   id: string
@@ -37,15 +38,14 @@ export default function SelectVariacaoModal({
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<VariacaoSelecionavel | null>(null)
   const [quantidade, setQuantidade] = useState(1)
 
-  useEffect(() => {
-    if (!aberto) {
-      setVariacaoSelecionada(null)
-      setQuantidade(1)
-    }
-  }, [aberto])
+  const fecharModal = useCallback(() => {
+    setVariacaoSelecionada(null)
+    setQuantidade(1)
+    fechar()
+  }, [fechar])
 
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') fechar() }
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') fecharModal() }
     if (aberto) {
       document.addEventListener('keydown', onKey)
       document.body.style.overflow = 'hidden'
@@ -56,7 +56,7 @@ export default function SelectVariacaoModal({
       document.body.style.overflow = ''
       document.body.removeAttribute('data-drawer-open')
     }
-  }, [aberto, fechar])
+  }, [aberto, fecharModal])
 
   if (!aberto) return null
 
@@ -68,7 +68,7 @@ export default function SelectVariacaoModal({
     <>
       <div
         className="fixed inset-0 bg-black/60 z-[80] transition-opacity"
-        onClick={fechar}
+        onClick={fecharModal}
         aria-hidden="true"
       />
       <div
@@ -94,7 +94,7 @@ export default function SelectVariacaoModal({
             <p className="text-base font-black text-[#3cbfb3] mt-0.5">R$ {fmt(precoExibido)}</p>
           </div>
           <button
-            onClick={fechar}
+            onClick={fecharModal}
             className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition shrink-0"
             aria-label="Fechar"
           >
@@ -114,7 +114,7 @@ export default function SelectVariacaoModal({
           <div className="flex flex-wrap gap-2">
             {variacoesAtivas.map(v => {
               const sel = variacaoSelecionada?.id === v.id
-              const sem = v.estoque === 0
+              const sem = !estoqueDisponivel(v.estoque)
               return (
                 <button
                   key={v.id}
@@ -156,7 +156,7 @@ export default function SelectVariacaoModal({
             </div>
           </div>
 
-          {variacaoSelecionada && variacaoSelecionada.estoque === 0 && (
+          {variacaoSelecionada && !estoqueDisponivel(variacaoSelecionada.estoque) && (
             <p className="text-red-500 text-xs font-medium mt-3">Esta opção está esgotada.</p>
           )}
         </div>

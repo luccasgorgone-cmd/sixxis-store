@@ -14,7 +14,7 @@ import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
 import ViewItemTracker from '@/components/analytics/ViewItemTracker'
 import { feedId } from '@/lib/feed-id'
-import { encontrarVariacaoPorSku, VARIANTE_QUERY_PARAM, urlProdutoComVariacao } from '@/lib/produto-variacao'
+import { encontrarVariacaoPorSku, estoqueDisponivel, VARIANTE_QUERY_PARAM, urlProdutoComVariacao } from '@/lib/produto-variacao'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 export const dynamic = 'force-dynamic'
@@ -265,7 +265,7 @@ export default async function ProdutoPage({
       // Date.now() aqui é a validade real do preço anunciado, não estado de render.
       // eslint-disable-next-line react-hooks/purity
       priceValidUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-      availability: (variacaoDeepLink?.estoque ?? produto.estoque) > 0
+      availability: estoqueDisponivel(variacaoDeepLink?.estoque ?? produto.estoque)
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Sixxis' },
