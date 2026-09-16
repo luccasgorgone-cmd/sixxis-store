@@ -29,6 +29,7 @@ interface Props {
     categoria?: string | null
   }
   variacoes: Variacao[]
+  initialVariacaoId?: string
   taxaJuros: number
   mediaAvaliacoes: number
   totalAvaliacoes: number
@@ -40,6 +41,7 @@ interface Props {
 export default function ProdutoGaleriaInfo({
   produto,
   variacoes,
+  initialVariacaoId,
   taxaJuros,
   mediaAvaliacoes,
   totalAvaliacoes,
@@ -51,6 +53,7 @@ export default function ProdutoGaleriaInfo({
     if (!imagensPorVariacao) return itensIniciais
     const ativas = variacoes.filter(v => v.ativo)
     const defaultNome =
+      ativas.find(v => v.id === initialVariacaoId)?.nome ??
       ativas.find(v => v.nome.toLowerCase().includes('branco'))?.nome ??
       ativas[0]?.nome
     if (!defaultNome) return itensIniciais
@@ -89,6 +92,7 @@ export default function ProdutoGaleriaInfo({
       <InfoProdutoCB
         produto={produto}
         variacoes={variacoes}
+        initialVariacaoId={initialVariacaoId}
         taxaJuros={taxaJuros}
         mediaAvaliacoes={mediaAvaliacoes}
         totalAvaliacoes={totalAvaliacoes}

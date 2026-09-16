@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ShoppingCart, ShoppingBag, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart,
+  ShoppingCart, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart,
   ShieldCheck, Truck, Lock, CreditCard, BadgeCheck, Headphones,
 } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
@@ -90,6 +90,7 @@ interface Props {
     categoria?: string | null
   }
   variacoes: Variacao[]
+  initialVariacaoId?: string
   // Legado: não é mais usado desde que o parcelamento virou "até Nx sem juros"
   // (fonte única em @/lib/parcelamento). Mantido só para não quebrar os callers.
   taxaJuros?: number
@@ -103,7 +104,7 @@ function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, onVariacaoChange }: Props) {
+export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, onVariacaoChange }: Props) {
   const router = useRouter()
   const { adicionarItem, setDrawerAberto } = useCarrinho()
   const favIds = useFavoritos((s) => s.ids)
@@ -119,7 +120,9 @@ export default function InfoProdutoCB({ produto, variacoes, mediaAvaliacoes, tot
   // pré-selecionada: 110V x 220V errado queima o aparelho, então a escolha tem
   // que ser ativa do cliente.
   const defaultVariacao = isCor
-    ? (variacoesAtivas.find(v => v.nome.toLowerCase().includes('branco')) ?? variacoesAtivas[0] ?? null)
+    ? (variacoesAtivas.find(v => v.id === initialVariacaoId) ??
+      variacoesAtivas.find(v => v.nome.toLowerCase().includes('branco')) ??
+      variacoesAtivas[0] ?? null)
     : null
 
   // Escolha obrigatória. Usa temVariacoes OU a existência de variação ativa: se

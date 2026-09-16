@@ -13,7 +13,8 @@ import { PorQueComprarSixxis } from '@/components/produto/PorQueComprarSixxis'
 import RevealInit from '@/components/produto/RevealInit'
 import ContadorAnimado from '@/components/ui/ContadorAnimado'
 import ViewItemTracker from '@/components/analytics/ViewItemTracker'
-import { feedIdProduto } from '@/lib/feed-id'
+import { feedId } from '@/lib/feed-id'
+import { encontrarVariacaoPorSku, VARIANTE_QUERY_PARAM, urlProdutoComVariacao } from '@/lib/produto-variacao'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 export const dynamic = 'force-dynamic'
@@ -56,6 +57,7 @@ function getNomeCategoria(cat: string | null): string {
 }
 
 interface Params { slug: string }
+interface SearchParams { variante?: string | string[] }
 interface EspecificacaoRow { label: string; valor: string }
 interface FaqRow { pergunta: string; resposta: string }
 
@@ -134,8 +136,14 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   }
 }
 
-export default async function ProdutoPage({ params }: { params: Promise<Params> }) {
-  const { slug } = await params
+export default async function ProdutoPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>
+  searchParams: Promise<SearchParams>
+}) {
+  const [{ slug }, query] = await Promise.all([params, searchParams])
 
   const [produto, taxaConfig, avaliacoesAgg] = await Promise.all([
     getProdutoPorSlug(slug),
@@ -184,6 +192,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     estoque: v.estoque,
     ativo: v.ativo,
   }))
+  const variacaoDeepLink = encontrarVariacaoPorSku(variacoes, query[VARIANTE_QUERY_PARAM])
 
   const categoriaLabel = getNomeCategoria(produto.categoria)
 
@@ -229,27 +238,36 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
     categoria: produto.categoria,
   }
 
+  const precoSchema = variacaoDeepLink?.preco ?? promocional ?? preco
+  const urlSchema = variacaoDeepLink
+    ? urlProdutoComVariacao(SITE_URL, produto.slug, variacaoDeepLink.sku)
+    : `${SITE_URL}/produtos/${produto.slug}`
+  const imagensSchema = variacaoDeepLink
+    ? imagensPorVariacao?.[variacaoDeepLink.nome] ?? imagens
+    : imagens
   const schemaProduct = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: produto.nome,
+    name: variacaoDeepLink ? `${produto.nome} — ${variacaoDeepLink.nome}` : produto.nome,
     description: limparHTML(produto.descricao, 300),
-    image: imagens?.length ? imagens : undefined,
-    sku: produto.sku || produto.slug,
+    image: imagensSchema?.length ? imagensSchema : undefined,
+    sku: variacaoDeepLink?.sku ?? produto.sku ?? produto.slug,
     // Sem GTIN/EAN: brand + mpn identificam o produto (Sixxis é a marca). Conserta
     // o aviso de "identificador ausente" e ajuda o rastreio automático do Google.
-    mpn: produto.sku || produto.slug,
+    mpn: variacaoDeepLink?.sku ?? produto.sku ?? produto.slug,
     brand: { '@type': 'Brand', name: 'Sixxis' },
     offers: {
       '@type': 'Offer',
-      url: `${SITE_URL}/produtos/${produto.slug}`,
+      url: urlSchema,
       priceCurrency: 'BRL',
-      price: (promocional ?? preco).toFixed(2),
+      price: precoSchema.toFixed(2),
       // Rota é force-dynamic (sempre renderizada por request, sem PPR/cache);
       // Date.now() aqui é a validade real do preço anunciado, não estado de render.
       // eslint-disable-next-line react-hooks/purity
       priceValidUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-      availability: produto.estoque > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability: (variacaoDeepLink?.estoque ?? produto.estoque) > 0
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Sixxis' },
     },
     ...(totalAv > 0 && {
@@ -281,13 +299,18 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
         produto={{
           // item_id = g:id do feed (sku ?? slug) → content_ids do Meta batem com
           // o catálogo. produto_id = CUID (só pipeline interno).
-          item_id: feedIdProduto({ sku: produto.sku, slug: produto.slug }),
+          item_id: feedId(
+            { sku: produto.sku, slug: produto.slug },
+            variacaoDeepLink,
+            variacoes,
+          ),
           produto_id: produto.id,
           item_slug: produto.slug,
           item_name: produto.nome,
           item_category: produto.categoria ?? undefined,
           item_brand: 'Sixxis',
-          price: Number(promocional ?? preco),
+          price: precoSchema,
+          variant: variacaoDeepLink?.nome,
         }}
       />
       {/* JSON-LD renderizado DIRETO no Server Component (tag <script> simples,
@@ -313,6 +336,7 @@ export default async function ProdutoPage({ params }: { params: Promise<Params> 
           <ProdutoGaleriaInfo
             produto={produtoParaInfo}
             variacoes={variacoes}
+            initialVariacaoId={variacaoDeepLink?.id}
             taxaJuros={taxaJuros}
             mediaAvaliacoes={mediaAv}
             totalAvaliacoes={totalAv}
