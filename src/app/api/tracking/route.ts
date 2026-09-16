@@ -52,6 +52,8 @@ export async function POST(req: NextRequest) {
         utmContent: atributo(utms.utmContent),
         utmTerm: atributo(utms.utmTerm),
         gclid: atributo(utms.gclid),
+        gbraid: atributo(utms.gbraid),
+        wbraid: atributo(utms.wbraid),
         referer: referer?.substring(0, 500) || null,
         totalPaginas: tipo === 'page_view' ? 1 : 0,
       },

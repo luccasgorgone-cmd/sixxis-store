@@ -46,10 +46,15 @@ export function capturarGaSessionId(): string | undefined {
   return extrairGaSessionId(decodeURIComponent(cookie.slice(cookie.indexOf('=') + 1)))
 }
 
-export function capturarGclid(): string | undefined {
-  if (typeof window === 'undefined') return undefined
-  if (!analyticsConsentido()) return undefined
+export function capturarGoogleClickIds(): {
+  gclid?: string
+  gbraid?: string
+  wbraid?: string
+} {
+  if (typeof window === 'undefined') return {}
+  if (!analyticsConsentido()) return {}
   const sid = lerSidClient()
   const landingPage = lerLandingPageSessao(window.sessionStorage, sid) || window.location.href
-  return extrairUTMs(landingPage).gclid
+  const { gclid, gbraid, wbraid } = extrairUTMs(landingPage)
+  return { gclid, gbraid, wbraid }
 }

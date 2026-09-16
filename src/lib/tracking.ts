@@ -87,18 +87,21 @@ export function lerLandingPageSessao(
   }
 }
 
-// Google Ads faz auto-tagging (gclid na URL) em vez de UTM manual — sem
+// Google Ads faz auto-tagging (gclid/gbraid/wbraid) em vez de UTM manual — sem
 // utm_source, esse tráfego ficava invisível pra atribuição (Meta continua
 // normal, que sempre manda utm_* de verdade). Fallback ADITIVO: só entra em
 // ação quando NÃO há utm_source; se houver (Meta ou UTM manual do Google),
-// o comportamento de sempre continua intacto e gclid não é sintetizado.
+// o comportamento de sempre continua intacto e nenhum click id é sintetizado.
 export function extrairUTMs(url: string) {
   try {
     const u = new URL(url)
     const utmSource = u.searchParams.get('utm_source') || undefined
     const gclid = u.searchParams.get('gclid') || undefined
+    const gbraid = u.searchParams.get('gbraid') || undefined
+    const wbraid = u.searchParams.get('wbraid') || undefined
+    const googleClickId = gclid || gbraid || wbraid
 
-    if (!utmSource && gclid) {
+    if (!utmSource && googleClickId) {
       return {
         utmSource: 'google',
         utmMedium: 'cpc',
@@ -106,6 +109,8 @@ export function extrairUTMs(url: string) {
         utmContent:  u.searchParams.get('utm_content')  || undefined,
         utmTerm:     u.searchParams.get('utm_term')     || undefined,
         gclid,
+        gbraid,
+        wbraid,
       }
     }
 
@@ -116,6 +121,8 @@ export function extrairUTMs(url: string) {
       utmContent:  u.searchParams.get('utm_content')  || undefined,
       utmTerm:     u.searchParams.get('utm_term')     || undefined,
       gclid,
+      gbraid,
+      wbraid,
     }
   } catch {
     return {}

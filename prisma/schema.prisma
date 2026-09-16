@@ -192,6 +192,8 @@ model Pedido {
   gaClientId            String?
   gaSessionId           String?           // session_id do cookie GA4 (_ga_<stream>) p/ atribuição do Purchase
   gclid                 String?           // click id do Google Ads p/ futuro Offline Import
+  gbraid                String?           // click id Google Ads iOS (app-to-web), sob consentimento
+  wbraid                String?           // click id Google Ads iOS (web-to-app), sob consentimento
   ga4PurchaseEnviadoEm  DateTime?         // guard de idempotência do GA4 Measurement Protocol Purchase
   // ── Checkout multi-método (Orders API MP) ───────────────────────────────────
   // ADITIVO, de propósito: NÃO reaproveita `status` pra descrever o sub-estado
@@ -855,11 +857,13 @@ model SessaoVisitante {
   utmCampaign     String?
   utmContent      String?
   utmTerm         String?
-  // Google Ads faz auto-tagging (gclid na URL) em vez de UTM manual — sem
+  // Google Ads faz auto-tagging (gclid/gbraid/wbraid) em vez de UTM manual — sem
   // isso, todo tráfego google/cpc chegava com utm_source nulo (extrairUTMs
   // só lia utm_*). Capturado como fallback quando não há utm_source mas há
-  // gclid (ver extrairUTMs em src/lib/tracking.ts).
+  // esses ids (ver extrairUTMs em src/lib/tracking.ts).
   gclid           String?
+  gbraid          String?
+  wbraid          String?
   referer         String?          @db.Text
   landingPage     String?          @db.Text
   totalPaginas    Int              @default(0)

@@ -20,6 +20,11 @@ describe('extrairUTMs', () => {
     expect(r).toMatchObject({ utmSource: 'google', utmMedium: 'cpc', gclid: 'Cj0KCQjw123abc' })
   })
 
+  it.each(['gbraid', 'wbraid'])('fallback: %s também atribui google/cpc e preserva o click id', (campo) => {
+    const r = extrairUTMs(`https://sixxis.com.br/produtos/sx040?${campo}=ios-click-123`)
+    expect(r).toMatchObject({ utmSource: 'google', utmMedium: 'cpc', [campo]: 'ios-click-123' })
+  })
+
   it('não sintetiza source/medium quando já há utm_source, mesmo com gclid presente', () => {
     const r = extrairUTMs('https://sixxis.com.br/?utm_source=google&utm_medium=email&gclid=abc123')
     expect(r).toMatchObject({ utmSource: 'google', utmMedium: 'email', gclid: 'abc123' })

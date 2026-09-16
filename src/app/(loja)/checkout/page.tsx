@@ -26,7 +26,7 @@ import { nomeCompletoValido } from '@/lib/validacao-nome'
 import { cnpjValido, cpfValido, documentoValido } from '@/lib/validacao-documento'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
-import { capturarGaClientId, capturarGaSessionId, capturarGclid } from '@/lib/analytics/ga-attribution'
+import { capturarGaClientId, capturarGaSessionId, capturarGoogleClickIds } from '@/lib/analytics/ga-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 import { FRETE_COPY } from '@/lib/copy/frete'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
@@ -884,7 +884,7 @@ function CheckoutContent() {
       // (webhook) ligar a compra à sessão/campanha de origem. Best-effort.
       const gaClientId = capturarGaClientId()
       const gaSessionId = capturarGaSessionId()
-      const gclid = capturarGclid()
+      const { gclid, gbraid, wbraid } = capturarGoogleClickIds()
 
       const pr = await fetch('/api/pedidos', {
         method:  'POST',
@@ -897,6 +897,8 @@ function CheckoutContent() {
           gaClientId,
           gaSessionId,
           gclid,
+          gbraid,
+          wbraid,
           frete,
           freteTipo: freteStatus === 'ok' ? freteTipoSel ?? undefined : undefined,
           itens: itens.map(i => ({
