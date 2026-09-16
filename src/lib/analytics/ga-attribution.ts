@@ -1,5 +1,8 @@
 'use client'
 
+import { extrairUTMs, lerLandingPageSessao, lerSidClient } from '../tracking'
+import { analyticsConsentido } from '../consent'
+
 // Captura o cookie _ga (client_id do GA4) no browser pra persistir no Pedido e
 // repassar ao Measurement Protocol do webhook — liga a compra à sessão/
 // campanha de origem. Best-effort: com Consent Mode v2, o cookie só existe
@@ -19,4 +22,34 @@ export function capturarGaClientId(): string | undefined {
   // O Measurement Protocol espera só o client_id (as 2 últimas partes).
   const partes = raw.split('.')
   return partes.length >= 4 ? partes.slice(2).join('.') : undefined
+}
+
+export function extrairGaSessionId(raw: string): string | undefined {
+  if (!raw) return undefined
+
+  // Formato atual: GS2.1.s<session_id>$o...; formato legado:
+  // GS1.1.<session_id>.<session_number>...
+  if (raw.startsWith('GS2.')) {
+    return raw.match(/(?:^|[.$])s(\d+)(?:\$|$)/)?.[1]
+  }
+
+  const partes = raw.split('.')
+  return /^\d+$/.test(partes[2] || '') ? partes[2] : undefined
+}
+
+export function capturarGaSessionId(): string | undefined {
+  if (typeof document === 'undefined') return undefined
+  const cookie = document.cookie.split(';')
+    .map((item) => item.trim())
+    .find((item) => /^_ga_[^=]+=/.test(item))
+  if (!cookie) return undefined
+  return extrairGaSessionId(decodeURIComponent(cookie.slice(cookie.indexOf('=') + 1)))
+}
+
+export function capturarGclid(): string | undefined {
+  if (typeof window === 'undefined') return undefined
+  if (!analyticsConsentido()) return undefined
+  const sid = lerSidClient()
+  const landingPage = lerLandingPageSessao(window.sessionStorage, sid) || window.location.href
+  return extrairUTMs(landingPage).gclid
 }

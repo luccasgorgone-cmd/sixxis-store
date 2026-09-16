@@ -1,7 +1,7 @@
 'use client'
 
 import { analyticsConsentido } from '@/lib/consent'
-import { obterSidClient } from '@/lib/tracking'
+import { lerLandingPageSessao, obterSidClient } from '@/lib/tracking'
 import { trackMeta } from '@/lib/analytics/meta-pixel'
 
 declare global {
@@ -55,6 +55,7 @@ function enviarInterno(
   if (!analyticsConsentido()) return
   const sessaoId = obterSidClient()
   if (!sessaoId) return
+  const landingPage = lerLandingPageSessao(window.sessionStorage, sessaoId) || window.location.href
   fetch('/api/tracking', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -62,7 +63,8 @@ function enviarInterno(
     body: JSON.stringify({
       tipo,
       sessaoId,
-      pagina: window.location.href,
+      pagina: window.location.pathname,
+      landingPage,
       produtoId: payload.produtoId,
       produtoSlug: payload.produtoSlug,
       valor: payload.valor,

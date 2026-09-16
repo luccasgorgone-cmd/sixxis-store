@@ -14,12 +14,37 @@ const API_SECRET = process.env.GA4_MP_API_SECRET
 
 export interface Ga4PurchaseInput {
   clientId: string | null | undefined
+  sessionId?: string | null
   transactionId: string // = pedido.id
   value: number
   currency: string
   items: { item_id: string; price: number; quantity: number }[]
   shipping?: number
   coupon?: string
+}
+
+export function montarPayloadGa4Purchase(input: Ga4PurchaseInput) {
+  const sessionId = input.sessionId && /^\d+$/.test(input.sessionId)
+    ? Number(input.sessionId)
+    : undefined
+
+  return {
+    client_id: input.clientId,
+    events: [
+      {
+        name: 'purchase',
+        params: {
+          transaction_id: input.transactionId,
+          value: input.value,
+          currency: input.currency,
+          shipping: input.shipping,
+          coupon: input.coupon,
+          items: input.items,
+          ...(sessionId ? { session_id: sessionId, engagement_time_msec: 1000 } : {}),
+        },
+      },
+    ],
+  }
 }
 
 // Envia o Purchase ao Measurement Protocol. NUNCA lança — retorna
@@ -37,22 +62,7 @@ export async function enviarPurchaseGa4(
     return { ok: false, skipped: true, error: 'gaClientId ausente no pedido' }
   }
 
-  const body = {
-    client_id: input.clientId,
-    events: [
-      {
-        name: 'purchase',
-        params: {
-          transaction_id: input.transactionId,
-          value: input.value,
-          currency: input.currency,
-          shipping: input.shipping,
-          coupon: input.coupon,
-          items: input.items,
-        },
-      },
-    ],
-  }
+  const body = montarPayloadGa4Purchase(input)
 
   try {
     const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(MEASUREMENT_ID)}&api_secret=${encodeURIComponent(API_SECRET)}`

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { tipo, sessaoId, pagina, produtoId, produtoSlug, valor, dados } = body
+    const { tipo, sessaoId, pagina, landingPage, produtoId, produtoSlug, valor, dados } = body
 
     if (!tipo || !sessaoId) {
       return NextResponse.json({ ok: false }, { status: 400 })
@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
       ? (rawIp.includes('.') ? rawIp.split('.').slice(0, 3).join('.') + '.0' : rawIp)
       : null
 
-    const utms = extrairUTMs(pagina || '')
+    const paginaLimpa = typeof pagina === 'string' ? pagina.substring(0, 500) : ''
+    const landingPageCompleta = typeof landingPage === 'string' ? landingPage.substring(0, 2000) : ''
+    const utms = extrairUTMs(landingPageCompleta)
+    const atributo = (valorAtributo: string | undefined) => valorAtributo?.substring(0, 191)
     const referer = req.headers.get('referer') || null
 
     await prisma.sessaoVisitante.upsert({
@@ -42,13 +45,13 @@ export async function POST(req: NextRequest) {
         dispositivo: detectDispositivo(userAgent),
         browser: detectBrowser(userAgent),
         os: detectOS(userAgent),
-        landingPage: pagina?.substring(0, 500) || null,
-        utmSource: utms.utmSource,
-        utmMedium: utms.utmMedium,
-        utmCampaign: utms.utmCampaign,
-        utmContent: utms.utmContent,
-        utmTerm: utms.utmTerm,
-        gclid: utms.gclid,
+        landingPage: landingPageCompleta || null,
+        utmSource: atributo(utms.utmSource),
+        utmMedium: atributo(utms.utmMedium),
+        utmCampaign: atributo(utms.utmCampaign),
+        utmContent: atributo(utms.utmContent),
+        utmTerm: atributo(utms.utmTerm),
+        gclid: atributo(utms.gclid),
         referer: referer?.substring(0, 500) || null,
         totalPaginas: tipo === 'page_view' ? 1 : 0,
       },
@@ -61,7 +64,7 @@ export async function POST(req: NextRequest) {
       data: {
         sessaoId,
         tipo,
-        pagina: pagina?.substring(0, 500),
+        pagina: paginaLimpa || null,
         produtoId: produtoId || null,
         produtoSlug: produtoSlug || null,
         valor: valor ?? null,

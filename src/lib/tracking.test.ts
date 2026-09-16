@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { extrairUTMs } from './tracking'
+import { extrairUTMs, lerLandingPageSessao, obterLandingPageSessao } from './tracking'
+
+function storageFake() {
+  const dados = new Map<string, string>()
+  return {
+    getItem: (key: string) => dados.get(key) ?? null,
+    setItem: (key: string, value: string) => { dados.set(key, value) },
+  }
+}
 
 describe('extrairUTMs', () => {
   it('lê os utm_* normalmente quando presentes (Meta/UTM manual)', () => {
@@ -26,5 +34,22 @@ describe('extrairUTMs', () => {
 
   it('URL inválida retorna objeto vazio, sem lançar', () => {
     expect(extrairUTMs('não-é-uma-url')).toEqual({})
+  })
+
+  it('persiste a URL completa do primeiro contato da sessão', () => {
+    const storage = storageFake()
+    const primeira = 'https://sixxis.com.br/produtos/sx040?gclid=primeiro&utm_campaign=pmax'
+
+    expect(obterLandingPageSessao(storage, 'sid-1', primeira)).toBe(primeira)
+    expect(lerLandingPageSessao(storage, 'sid-1')).toBe(primeira)
+  })
+
+  it('não sobrescreve o primeiro contato em eventos ou navegações duplicadas', () => {
+    const storage = storageFake()
+    const primeira = 'https://sixxis.com.br/?gclid=primeiro'
+    obterLandingPageSessao(storage, 'sid-1', primeira)
+
+    expect(obterLandingPageSessao(storage, 'sid-1', 'https://sixxis.com.br/produtos/sx040?gclid=segundo')).toBe(primeira)
+    expect(lerLandingPageSessao(storage, 'sid-1')).toBe(primeira)
   })
 })

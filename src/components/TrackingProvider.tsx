@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { COOKIE_SESSION, gerarSessaoId, detectDispositivo } from '@/lib/tracking'
+import { COOKIE_SESSION, gerarSessaoId, detectDispositivo, obterLandingPageSessao } from '@/lib/tracking'
 import { analyticsConsentido, CONSENT_EVENT } from '@/lib/consent'
 import { ADMIN_BASE, ADMIN_INTERNAL } from '@/lib/admin-path'
 
@@ -70,11 +70,17 @@ function setCookieClient(name: string, value: string, days = 1) {
 export function TrackingProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const sessaoIdRef = useRef<string>('')
+  const primeiroContatoRef = useRef<string>('')
+  const landingPageRef = useRef<string>('')
   const inicializadoRef = useRef(false)
 
   // Só cria o cookie de sessão e persiste UTMs APÓS o consentimento de analytics.
   // Sem consentimento → nada de sixxis_sid nem eventos.
   const garantirSessao = useCallback((): boolean => {
+    // Guarda em memória antes do consentimento para não perder o primeiro
+    // contato se o usuário navegar e só depois aceitar analytics. Nada é
+    // persistido nem enviado antes do opt-in.
+    if (!primeiroContatoRef.current) primeiroContatoRef.current = window.location.href
     if (inicializadoRef.current) return true
     if (!analyticsConsentido()) return false
 
@@ -84,12 +90,17 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
       setCookieClient(COOKIE_SESSION, sid, 1)
     }
     sessaoIdRef.current = sid
+    landingPageRef.current = obterLandingPageSessao(
+      window.sessionStorage,
+      sid,
+      primeiroContatoRef.current,
+    )
     inicializadoRef.current = true
 
     try {
-      const params = new URLSearchParams(window.location.search)
+      const params = new URL(landingPageRef.current).searchParams
       const utms: Record<string, string> = {}
-      ;['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(k => {
+      ;['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid'].forEach(k => {
         const v = params.get(k)
         if (v) utms[k] = v
       })
@@ -113,12 +124,13 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        ...dados,
         tipo,
         sessaoId: sid,
         // Grava o pathname (não a URL completa) → "Top Páginas" agrupa limpo e
         // o feed mostra o path. UTMs ficam na SessaoVisitante.
         pagina: path,
-        ...dados,
+        landingPage: landingPageRef.current,
       }),
       keepalive: true,
     }).catch(() => {})
@@ -202,6 +214,8 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
   }, [pathname, track])
 
   return (
+    // sessaoId é informativo; o tracking lê o ref apenas nos callbacks acima.
+    // eslint-disable-next-line react-hooks/refs
     <TrackingContext.Provider value={{ track, sessaoId: sessaoIdRef.current }}>
       {children}
     </TrackingContext.Provider>

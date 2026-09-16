@@ -190,6 +190,8 @@ model Pedido {
   // compra à sessão/campanha de origem. Best-effort: com Consent Mode v2, só
   // existe se o cliente já aceitou cookies analíticos — null é esperado, não erro.
   gaClientId            String?
+  gaSessionId           String?           // session_id do cookie GA4 (_ga_<stream>) p/ atribuição do Purchase
+  gclid                 String?           // click id do Google Ads p/ futuro Offline Import
   ga4PurchaseEnviadoEm  DateTime?         // guard de idempotência do GA4 Measurement Protocol Purchase
   // ── Checkout multi-método (Orders API MP) ───────────────────────────────────
   // ADITIVO, de propósito: NÃO reaproveita `status` pra descrever o sub-estado

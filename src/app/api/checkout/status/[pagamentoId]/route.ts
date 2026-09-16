@@ -81,6 +81,7 @@ async function dispararConversoesPurchase(pedidoId: string, valorCentavos: numbe
     if (claimGa4.count === 1) {
       const resultadoGa4 = await enviarPurchaseGa4({
         clientId: pedido.gaClientId,
+        sessionId: pedido.gaSessionId,
         transactionId: pedido.id,
         value: valor,
         currency: 'BRL',

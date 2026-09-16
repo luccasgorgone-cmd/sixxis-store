@@ -4,6 +4,7 @@
 
 export const COOKIE_SESSION = 'sixxis_sid'
 export const COOKIE_CONSENT = 'sixxis_cookie_consent'
+const SESSION_LANDING_PAGE_PREFIX = 'sixxis_landing_page:'
 
 export function detectDispositivo(ua: string): string {
   if (!ua) return 'desktop'
@@ -54,6 +55,36 @@ export function obterSidClient(): string {
     document.cookie = `${COOKIE_SESSION}=${sid};expires=${expires};path=/;SameSite=Lax`
   }
   return sid
+}
+
+// Mantém a URL completa do PRIMEIRO contato vinculada ao sid atual. O pathname
+// continua separado nos eventos; query params de atribuição nunca poluem o feed
+// de páginas. Chamado apenas depois do opt-in de analytics.
+export function obterLandingPageSessao(
+  storage: Pick<Storage, 'getItem' | 'setItem'>,
+  sessaoId: string,
+  hrefAtual: string,
+): string {
+  if (!sessaoId) return hrefAtual
+  const key = `${SESSION_LANDING_PAGE_PREFIX}${sessaoId}`
+  try {
+    const existente = storage.getItem(key)
+    if (existente) return existente
+    storage.setItem(key, hrefAtual)
+  } catch { /* sessionStorage indisponível: usa a URL atual sem bloquear tracking */ }
+  return hrefAtual
+}
+
+export function lerLandingPageSessao(
+  storage: Pick<Storage, 'getItem'>,
+  sessaoId: string,
+): string | undefined {
+  if (!sessaoId) return undefined
+  try {
+    return storage.getItem(`${SESSION_LANDING_PAGE_PREFIX}${sessaoId}`) || undefined
+  } catch {
+    return undefined
+  }
 }
 
 // Google Ads faz auto-tagging (gclid na URL) em vez de UTM manual — sem

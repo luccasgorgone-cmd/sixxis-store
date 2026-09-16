@@ -320,6 +320,7 @@ export async function POST(req: NextRequest) {
         if (claimGa4.count === 1) {
           const resultadoGa4 = await enviarPurchaseGa4({
             clientId: pedido.gaClientId,
+            sessionId: pedido.gaSessionId,
             transactionId: pedido.id,
             value: pagamento.valor / 100,
             currency: 'BRL',

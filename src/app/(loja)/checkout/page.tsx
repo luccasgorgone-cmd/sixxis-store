@@ -26,7 +26,7 @@ import { nomeCompletoValido } from '@/lib/validacao-nome'
 import { cnpjValido, cpfValido, documentoValido } from '@/lib/validacao-documento'
 import { initMetaAdvancedMatching } from '@/lib/analytics/meta-pixel'
 import { capturarFbpFbc } from '@/lib/analytics/fb-attribution'
-import { capturarGaClientId } from '@/lib/analytics/ga-attribution'
+import { capturarGaClientId, capturarGaSessionId, capturarGclid } from '@/lib/analytics/ga-attribution'
 import { syncCarrinhoCliente, ETAPA } from '@/lib/carrinho-cliente-sync'
 import { FRETE_COPY } from '@/lib/copy/frete'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
@@ -883,6 +883,8 @@ function CheckoutContent() {
       // Atribuição GA4: client_id do cookie _ga p/ o Measurement Protocol
       // (webhook) ligar a compra à sessão/campanha de origem. Best-effort.
       const gaClientId = capturarGaClientId()
+      const gaSessionId = capturarGaSessionId()
+      const gclid = capturarGclid()
 
       const pr = await fetch('/api/pedidos', {
         method:  'POST',
@@ -893,6 +895,8 @@ function CheckoutContent() {
           fbp,
           fbc,
           gaClientId,
+          gaSessionId,
+          gclid,
           frete,
           freteTipo: freteStatus === 'ok' ? freteTipoSel ?? undefined : undefined,
           itens: itens.map(i => ({
