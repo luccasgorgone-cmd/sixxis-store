@@ -59,6 +59,9 @@ Trocar em todos:
 
 ### 4c. Credenciais em env var (trocar no Railway, sem código)
 - Mercado Pago: `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MERCADOPAGO_WEBHOOK_SECRET`.
+  **O recebível passa a cair na conta MP da Comercial ao trocar esses 3 tokens.**
+  Conta MP da Comercial confirmada como **já ativa e recebendo** (2026-09-28) — sem risco
+  de retenção de primeiros pagamentos. Basta obter os tokens e trocar.
 - Focus NF-e: `FOCUS_NFE_TOKEN_PRODUCAO`, `FOCUS_NFE_TOKEN_HOMOLOGACAO`.
 - Frete: `BRASPRESS_CNPJ_REMETENTE` (se o contrato Braspress for por CNPJ — confirmar).
 
