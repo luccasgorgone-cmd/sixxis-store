@@ -176,14 +176,14 @@ export default async function HomePage() {
             {/* Banner Climatizadores */}
             <Link
               href="/produtos?categoria=climatizadores"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[3/1] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/10] sm:aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-climatizadores-1791346860.jpg"
                 alt="Climatizadores Sixxis"
                 fill
                 sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 priority
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
@@ -203,14 +203,14 @@ export default async function HomePage() {
             {/* Banner Spinning */}
             <Link
               href="/produtos?categoria=spinning"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[3/1] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/10] sm:aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-spinning-1791346860.jpg"
                 alt="Bikes Spinning Sixxis"
                 fill
                 sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
               <div className="relative z-10 flex-1">
@@ -232,10 +232,9 @@ export default async function HomePage() {
       {/* ── 7. Stats ──────────────────────────────────────────────── */}
       <section className="bg-transparent border-b border-white/10 py-10">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-3 gap-0 divide-x divide-white/20">
+          <div className="grid grid-cols-2 gap-0 divide-x divide-white/20">
             {[
               { num: '1 Milhão+', label: 'Clientes Atendidos'    },
-              { num: '12 meses',  label: 'Garantia Sixxis'       },
               { num: '100%',      label: 'Entrega para o Brasil' },
             ].map(({ num, label }) => (
               <div key={label} className="flex flex-col items-center text-center py-4 px-6">
@@ -254,8 +253,9 @@ export default async function HomePage() {
             <h2 className="text-xl font-extrabold text-white">Por que Sixxis?</h2>
             <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-            {PQ_SIXXIS_NUMS.map((n, idx) => {
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+            {PQ_SIXXIS_NUMS.filter((n) => n !== 1).map((n) => {
+              const idx = n - 1
               const def = PQ_SIXXIS_CARDS[idx]
               const titulo = cfg[`pq_sixxis_${n}_titulo`] || def.titulo
               const texto  = cfg[`pq_sixxis_${n}_texto`]  || def.texto
