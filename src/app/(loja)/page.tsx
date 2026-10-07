@@ -100,7 +100,7 @@ export default async function HomePage() {
 
       {/* ── 2. TrustBar ───────────────────────────────────────────── */}
       <TrustBar
-        transparent={false}
+        fundoVerde
         items={[
           { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Despacho em 24h'    },
           { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos'            },
@@ -183,7 +183,7 @@ export default async function HomePage() {
                 alt="Bikes Spinning Sixxis"
                 fill
                 sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                className="object-cover object-[72%_center] group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
               <div className="relative z-10 flex-1">
