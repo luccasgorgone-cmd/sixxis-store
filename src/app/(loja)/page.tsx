@@ -66,7 +66,7 @@ export default async function HomePage() {
     <main className="min-h-screen bg-transparent">
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
-      <div className="pt-2 sm:pt-3">
+      <div>
       {banners.length > 0 ? (
         <BannerCarousel banners={banners} />
       ) : (

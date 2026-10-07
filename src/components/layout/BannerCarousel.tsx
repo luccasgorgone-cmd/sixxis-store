@@ -85,9 +85,9 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
   return (
     /* Outer: full width, sem background — sem espaço acima/abaixo */
     <section className="w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="w-full">
         <div
-          className="banner-container relative w-full overflow-hidden rounded-2xl select-none"
+          className="banner-container relative w-full overflow-hidden select-none"
           style={{
             background:
               'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 100%)',
