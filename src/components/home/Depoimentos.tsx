@@ -33,17 +33,17 @@ const depoimentos = [
 
 export default function Depoimentos() {
   return (
-    <section className="bg-transparent border-b border-white/10 py-10 min-h-[260px] md:min-h-[340px]">
+    <section className="bg-white border-b border-gray-100 py-10 min-h-[260px] md:min-h-[340px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mb-6">
-          <h2 className="text-xl font-extrabold text-white">O que nossos clientes dizem</h2>
+          <h2 className="text-xl font-extrabold text-gray-900">O que nossos clientes dizem</h2>
           <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {depoimentos.map((d, i) => (
             <div
               key={i}
-              className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-2xl p-5 flex flex-col gap-3"
+              className="bg-white border border-gray-200/80 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: d.nota }).map((_, s) => (
@@ -52,10 +52,10 @@ export default function Depoimentos() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-white/80 leading-relaxed flex-1">"{d.texto}"</p>
-              <div className="pt-2 border-t border-white/10">
-                <p className="text-xs font-bold text-white">{d.nome}</p>
-                <p className="text-xs text-white/40">{d.cidade} · {d.produto}</p>
+              <p className="text-sm text-gray-600 leading-relaxed flex-1">&ldquo;{d.texto}&rdquo;</p>
+              <div className="pt-2 border-t border-gray-100">
+                <p className="text-xs font-bold text-gray-900">{d.nome}</p>
+                <p className="text-xs text-gray-400">{d.cidade} · {d.produto}</p>
               </div>
             </div>
           ))}

@@ -8,7 +8,6 @@ import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
-import OfertasRelampago from '@/components/home/OfertasRelampago'
 import Depoimentos from '@/components/home/Depoimentos'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
@@ -28,12 +27,11 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   let banners:         Awaited<ReturnType<typeof prisma.banner.findMany>>  = []
   let produtosMostrar: Awaited<ReturnType<typeof prisma.produto.findMany>> = []
-  let produtosOferta:  Awaited<ReturnType<typeof prisma.produto.findMany>> = []
   let cfg:   Record<string, string> = {}
   let trust: Record<string, string> = {}
 
   try {
-    const [bannersDb, destaques, produtosGerais, configRows, trustRows, ofertasDb] = await Promise.all([
+    const [bannersDb, destaques, produtosGerais, configRows, trustRows] = await Promise.all([
       prisma.banner.findMany({ where: { ativo: true }, orderBy: { ordem: 'asc' } }),
       prisma.produtoDestaque.findMany({
         where: { secao: 'mais-vendidos' },
@@ -52,11 +50,6 @@ export default async function HomePage() {
           },
         },
       }),
-      prisma.produto.findMany({
-        where: { ativo: true, precoPromocional: { not: null } },
-        take: 4,
-        orderBy: { createdAt: 'desc' },
-      }),
     ])
 
     banners = bannersDb
@@ -65,7 +58,6 @@ export default async function HomePage() {
     produtosMostrar = destaques.length > 0
       ? destaques.map((d) => d.produto)
       : produtosGerais
-    produtosOferta = ofertasDb
   } catch (error) {
     console.error('[HOME DB ERROR]', error)
   }
@@ -146,10 +138,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 4. Ofertas Relâmpago ──────────────────────────────────── */}
-      <OfertasRelampago produtos={produtosOferta} />
-
-      {/* ── 5. Depoimentos ───────────────────────────────────────── */}
+      {/* ── 4. Depoimentos ───────────────────────────────────────── */}
       <Depoimentos />
 
       {/* ── 6. Banners duplos ─────────────────────────────────────── */}
@@ -213,24 +202,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 7. Stats ──────────────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 py-10">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-2 gap-0 divide-x divide-gray-200">
-            {[
-              { num: '1 Milhão+', label: 'Clientes Atendidos'    },
-              { num: '100%',      label: 'Entrega para o Brasil' },
-            ].map(({ num, label }) => (
-              <div key={label} className="flex flex-col items-center text-center py-4 px-6">
-                <p className="text-2xl md:text-3xl font-extrabold text-gray-900">{num}</p>
-                <p className="text-gray-500 text-xs font-medium mt-1">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 8. Por que Sixxis? ────────────────────────────────────── */}
+      {/* ── 7. Por que Sixxis? ────────────────────────────────────── */}
       <section className="bg-white border-b border-gray-100 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="mb-6">
