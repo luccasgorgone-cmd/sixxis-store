@@ -138,10 +138,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 4. Depoimentos ───────────────────────────────────────── */}
-      <Depoimentos />
-
-      {/* ── 6. Banners duplos ─────────────────────────────────────── */}
+      {/* ── 4. Banners duplos ─────────────────────────────────────── */}
       <section className="bg-white border-b border-gray-100 pb-8 pt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -234,7 +231,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 9. Newsletter ─────────────────────────────────────────── */}
+      {/* ── 6. Depoimentos (O que nossos clientes dizem) ──────────── */}
+      <Depoimentos />
+
+      {/* ── 7. Newsletter ─────────────────────────────────────────── */}
       {cfg.newsletter_ativo !== 'false' && (
         <section className="bg-white border-b border-gray-100 py-10">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
