@@ -89,8 +89,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
         <div
           className="banner-container relative w-full overflow-hidden select-none"
           style={{
-            background:
-              'linear-gradient(135deg, rgba(26,79,74,0.35) 0%, rgba(15,46,43,0.55) 100%)',
+            backgroundColor: '#0f2e2b',
             ...aspectVars,
           } as React.CSSProperties}
           onMouseEnter={() => setPaused(true)}
@@ -111,8 +110,8 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                 <img
                   src={banner.imagem}
                   alt={banner.titulo || 'Banner Sixxis'}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ objectPosition: 'center top' }}
+                  className="absolute inset-0 w-full h-full object-contain"
+                  style={{ objectPosition: 'center' }}
                   loading="eager"
                   onError={() => markFailed(banner.id)}
                 />
@@ -129,8 +128,8 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
               <img
                 src={banner.imagem}
                 alt={banner.titulo || 'Banner Sixxis'}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ objectPosition: 'center top' }}
+                className="absolute inset-0 w-full h-full object-contain"
+                style={{ objectPosition: 'center' }}
                 loading="eager"
                 onError={() => markFailed(banner.id)}
               />
