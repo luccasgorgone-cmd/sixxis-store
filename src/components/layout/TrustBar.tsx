@@ -1,7 +1,7 @@
-import { Truck, ShieldCheck, CreditCard, Star } from 'lucide-react'
+import { Truck, ShieldCheck, CreditCard } from 'lucide-react'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 
-const ICONS = [Truck, ShieldCheck, CreditCard, Star] as const
+const ICONS = [Truck, ShieldCheck, CreditCard] as const
 
 interface TrustItem {
   titulo: string
@@ -12,7 +12,6 @@ const DEFAULT_ITEMS: TrustItem[] = [
   { titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
   { titulo: 'Compra 100% Segura',         sub: 'Seus dados protegidos' },
   { titulo: `${MAX_PARCELAS_SEM_JUROS}x sem juros no cartão`, sub: 'Débito, crédito e PIX' },
-  { titulo: 'Qualidade Sixxis',           sub: 'Garantia Sixxis' },
 ]
 
 interface Props {
@@ -20,17 +19,29 @@ interface Props {
   transparent?: boolean
 }
 
+const LG_COLS: Record<number, string> = {
+  1: 'lg:grid-cols-1',
+  2: 'lg:grid-cols-2',
+  3: 'lg:grid-cols-3',
+  4: 'lg:grid-cols-4',
+}
+
 export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false }: Props) {
+  const n = items.length
+  // No mobile, nº ímpar de itens fica numa única coluna empilhada (evita item
+  // órfão no grid 2-col); nº par mantém 2x2. No desktop, uma coluna por item.
+  const mobileCols = n % 2 === 0 ? 'grid-cols-2' : 'grid-cols-1'
+  const lgCols = LG_COLS[n] ?? 'lg:grid-cols-4'
   return (
     <div className={`w-full py-3.5 ${
       transparent
         ? 'bg-transparent border-t border-b border-white/15'
         : 'bg-white border-t border-b border-gray-100'
     }`}>
-      {/* Mobile + Tablet: 2x2 (max-w-3xl pra centralizar bem em tablet) /
-          Desktop lg+: 1x4 (max-w-7xl, divisores verticais) */}
+      {/* Grid responsivo por quantidade: empilha no mobile se ímpar, 2x2 se par;
+          uma coluna por item no desktop (divisores verticais). */}
       <div className="max-w-3xl lg:max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-0">
+        <div className={`grid ${mobileCols} ${lgCols} gap-2 md:gap-4 lg:gap-0`}>
           {items.map(({ titulo, sub }, i) => {
             const Icon = ICONS[i % ICONS.length]
             return (

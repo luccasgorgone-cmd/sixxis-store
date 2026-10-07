@@ -10,7 +10,6 @@ import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
 import OfertasRelampago from '@/components/home/OfertasRelampago'
 import Depoimentos from '@/components/home/Depoimentos'
-import CategoriaImagemHero from '@/components/produto/CategoriaImagemHero'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
@@ -130,7 +129,6 @@ export default async function HomePage() {
           { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Despacho em 24h'    },
           { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos'            },
           { titulo: trust.trust_3_titulo || `${MAX_PARCELAS_SEM_JUROS}x sem juros no cartão`, sub: trust.trust_3_sub || 'Débito, crédito e PIX'            },
-          { titulo: trust.trust_4_titulo || 'Qualidade Sixxis',           sub: trust.trust_4_sub || 'Garantia Sixxis'                  },
         ]}
       />
 
@@ -178,56 +176,53 @@ export default async function HomePage() {
             {/* Banner Climatizadores */}
             <Link
               href="/produtos?categoria=climatizadores"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 hover:scale-[1.02] transition-transform duration-300"
-              style={{ minHeight: '220px', background: 'linear-gradient(135deg, #0d3d3a 0%, #1a7a74 60%, #3cbfb3 100%)' }}
+              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[3/1] hover:scale-[1.02] transition-transform duration-300"
             >
-              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #fff, transparent)' }} />
+              <Image
+                src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-climatizadores-1791346860.jpg"
+                alt="Climatizadores Sixxis"
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
               <div className="relative z-10 flex-1">
                 <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
                   Linha Residencial e Comercial
                 </span>
-                <h3 className="text-white text-2xl font-extrabold leading-tight mb-4">
+                <h3 className="text-white text-2xl font-extrabold leading-tight mb-4 drop-shadow">
                   Climatizadores<br />Sixxis
                 </h3>
-                <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-bold px-4 py-2 rounded-xl transition">
+                <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-bold px-4 py-2 rounded-xl transition backdrop-blur-sm">
                   Ver linha <ArrowRight size={14} />
                 </span>
-              </div>
-              <div className="absolute right-4 bottom-0 w-[42%] h-[115%] group-hover:scale-105 group-hover:-translate-y-1 transition-all duration-500 pointer-events-none">
-                <CategoriaImagemHero
-                  src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775737122831-k4d1lc1.jpg"
-                  alt="Climatizador Sixxis"
-                  categoria="climatizadores"
-                  className="object-contain object-bottom drop-shadow-2xl"
-                />
               </div>
             </Link>
 
             {/* Banner Spinning */}
             <Link
               href="/produtos?categoria=spinning"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 hover:scale-[1.02] transition-transform duration-300"
-              style={{ minHeight: '220px', background: 'linear-gradient(135deg, #0a0a0a 0%, #111827 60%, #1f2937 100%)' }}
+              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[3/1] hover:scale-[1.02] transition-transform duration-300"
             >
-              <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #3cbfb3, transparent)' }} />
+              <Image
+                src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-spinning-1791346860.jpg"
+                alt="Bikes Spinning Sixxis"
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
               <div className="relative z-10 flex-1">
-                <span className="inline-block bg-[#3cbfb3]/20 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide border border-[#3cbfb3]/30">
+                <span className="inline-block bg-[#3cbfb3]/25 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide border border-[#3cbfb3]/40">
                   Spinning &amp; Fitness
                 </span>
-                <h3 className="text-white text-2xl font-extrabold leading-tight mb-4">
+                <h3 className="text-white text-2xl font-extrabold leading-tight mb-4 drop-shadow">
                   Equipamentos<br />Fitness
                 </h3>
-                <span className="inline-flex items-center gap-2 bg-[#3cbfb3]/20 hover:bg-[#3cbfb3]/30 text-[#3cbfb3] text-sm font-bold px-4 py-2 rounded-xl transition border border-[#3cbfb3]/40">
+                <span className="inline-flex items-center gap-2 bg-[#3cbfb3]/25 hover:bg-[#3cbfb3]/40 text-white text-sm font-bold px-4 py-2 rounded-xl transition border border-[#3cbfb3]/40 backdrop-blur-sm">
                   Ver linha <ArrowRight size={14} />
                 </span>
-              </div>
-              <div className="absolute right-4 bottom-0 w-[38%] h-[110%] group-hover:scale-105 group-hover:-translate-y-1 transition-all duration-500 pointer-events-none">
-                <CategoriaImagemHero
-                  src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1775754930452-4ixi773.png"
-                  alt="Bike Spinning Sixxis"
-                  categoria="spinning"
-                  className="object-contain object-bottom drop-shadow-2xl"
-                />
               </div>
             </Link>
           </div>
