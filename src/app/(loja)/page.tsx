@@ -142,14 +142,14 @@ export default async function HomePage() {
       <Depoimentos />
 
       {/* ── 6. Banners duplos ─────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 pb-8 pt-8">
+      <section className="bg-white pb-4 pt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
             {/* Banner Climatizadores */}
             <Link
               href="/produtos?categoria=climatizadores"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/10] sm:aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/11] sm:aspect-[16/9] hover:scale-[1.02] transition-transform duration-300"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-climatizadores-1791346860.jpg"
@@ -176,7 +176,7 @@ export default async function HomePage() {
             {/* Banner Spinning */}
             <Link
               href="/produtos?categoria=spinning"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/10] sm:aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/11] sm:aspect-[16/9] hover:scale-[1.02] transition-transform duration-300"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-spinning-1791346860.jpg"
