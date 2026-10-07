@@ -39,7 +39,8 @@ export default function NewsletterForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Seu melhor e-mail"
-        className="flex-1 bg-white text-gray-800 placeholder-gray-400 px-5 py-3.5 rounded-xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#3cbfb3]"
+        className="flex-1 text-white placeholder-white/60 border border-white/15 px-5 py-3.5 rounded-xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#3cbfb3]"
+        style={{ backgroundColor: '#0f2e2b' }}
       />
       <button
         type="submit"
