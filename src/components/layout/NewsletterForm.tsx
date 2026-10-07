@@ -44,7 +44,8 @@ export default function NewsletterForm() {
       />
       <button
         type="submit"
-        className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors shrink-0"
+        className="text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors shrink-0 hover:opacity-90"
+        style={{ backgroundColor: '#0f2e2b' }}
       >
         Cadastrar
       </button>
