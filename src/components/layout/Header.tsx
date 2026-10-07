@@ -251,7 +251,7 @@ const TICKER_ITEMS = [
   { icon: QrCode, text: `${DESCONTO_PIX_PCT}% OFF no Pix` },
 ]
 
-export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: string }) {
+export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = false }: { logoUrl?: string; anuncioAtivo?: boolean }) {
   const [logoErro, setLogoErro] = useState(false)
   const logoFinal = logoErro || !logoUrl ? '/logo-sixxis.png' : logoUrl
   const [drawerOpen,    setDrawerOpen]    = useState(false)
@@ -419,48 +419,53 @@ export default function Header({ logoUrl = '/logo-sixxis.png' }: { logoUrl?: str
         } ${isCompact ? 'shadow-xl shadow-black/30' : 'shadow-md'}`}
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
-      {/* Linha cinza ACIMA do announcement */}
-      <div className="w-full h-px bg-gray-200" />
-
       {/* ═══════════════════════════════════════════════════════
           CAMADA 1 — ANNOUNCEMENT BAR (some ao scrollar)
+          Visível só quando ativada no editor visual (config anuncio_ativo).
       ═══════════════════════════════════════════════════════ */}
-      <div
-        className={`bg-[#3cbfb3] w-full overflow-hidden transition-all duration-500 ease-in-out ${
-          isTop ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-        }`}
-        aria-hidden={!isTop}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-center h-8 md:h-11">
+      {anuncioAtivo && (
+        <>
+          {/* Linha cinza ACIMA do announcement */}
+          <div className="w-full h-px bg-gray-200" />
 
-            {/* Ticker rotativo com fade — mesmo comportamento em mobile e desktop */}
-            <div className="relative flex items-center justify-center w-full h-full overflow-hidden">
-              {TICKER_ITEMS.map((item, i) => {
-                const Icon = item.icon
-                const ativo = tickerIdx === i
-                return (
-                  <div
-                    key={i}
-                    className="absolute inset-0 flex items-center justify-center gap-2 transition-opacity duration-500 ease-in-out"
-                    style={{
-                      opacity: ativo ? 1 : 0,
-                      pointerEvents: ativo ? 'auto' : 'none',
-                    }}
-                    aria-hidden={!ativo}
-                  >
-                    <Icon size={13} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-                    <span className="text-[#0f2e2b] text-[11px] md:text-sm font-bold md:font-extrabold truncate">{item.text}</span>
-                  </div>
-                )
-              })}
+          <div
+            className={`bg-[#3cbfb3] w-full overflow-hidden transition-all duration-500 ease-in-out ${
+              isTop ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+            }`}
+            aria-hidden={!isTop}
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <div className="flex items-center justify-center h-8 md:h-11">
+
+                {/* Ticker rotativo com fade — mesmo comportamento em mobile e desktop */}
+                <div className="relative flex items-center justify-center w-full h-full overflow-hidden">
+                  {TICKER_ITEMS.map((item, i) => {
+                    const Icon = item.icon
+                    const ativo = tickerIdx === i
+                    return (
+                      <div
+                        key={i}
+                        className="absolute inset-0 flex items-center justify-center gap-2 transition-opacity duration-500 ease-in-out"
+                        style={{
+                          opacity: ativo ? 1 : 0,
+                          pointerEvents: ativo ? 'auto' : 'none',
+                        }}
+                        aria-hidden={!ativo}
+                      >
+                        <Icon size={13} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
+                        <span className="text-[#0f2e2b] text-[11px] md:text-sm font-bold md:font-extrabold truncate">{item.text}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+              </div>
             </div>
-
           </div>
-        </div>
-      </div>
-      {/* Separador entre announcement e header */}
-      <div className="w-full border-b border-[#0f2e2b]/20" />
+          {/* Separador entre announcement e header */}
+          <div className="w-full border-b border-[#0f2e2b]/20" />
+        </>
+      )}
 
       {/* ═══════════════════════════════════════════════════════
           CAMADA 2 — HEADER PRINCIPAL

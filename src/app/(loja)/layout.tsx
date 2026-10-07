@@ -67,7 +67,7 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
             {horarioLoja ? ` Atendimento: ${horarioLoja}.` : ''} Você pode navegar normalmente.
           </div>
         )}
-        <Header logoUrl={logoUrl} />
+        <Header logoUrl={logoUrl} anuncioAtivo={cfg.anuncio_ativo === 'true'} />
         {/* Spacer: reserva o espaço do header fixed; altura real via CSS var --sixxis-header-h */}
         <div aria-hidden="true" style={{ height: 'var(--sixxis-header-h, 140px)' }} />
         <div className="flex-1">{children}</div>

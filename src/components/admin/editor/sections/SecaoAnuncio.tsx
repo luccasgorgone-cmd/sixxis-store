@@ -2,7 +2,7 @@
 
 import { Megaphone } from 'lucide-react'
 import { EditorSection } from '../EditorSection'
-import { ColorField, TextField } from '../FormFields'
+import { ColorField, TextField, ToggleField } from '../FormFields'
 import type { SectionProps } from '../types'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { CUPOM_PC_BANNER } from '@/lib/cupom-primeira-compra'
@@ -10,6 +10,8 @@ import { CUPOM_PC_BANNER } from '@/lib/cupom-primeira-compra'
 export function SecaoAnuncio({ config, setConfig, device }: SectionProps) {
   const update = (key: string) => (v: string) =>
     setConfig((p) => ({ ...p, [key]: v }))
+
+  const anuncioAtivo = config.anuncio_ativo === 'true'
 
   return (
     <EditorSection
@@ -19,6 +21,11 @@ export function SecaoAnuncio({ config, setConfig, device }: SectionProps) {
       visibleFor={['desktop', 'tablet', 'mobile']}
       currentDevice={device}
     >
+      <ToggleField
+        label="Mostrar barra de anúncio no topo"
+        value={anuncioAtivo}
+        onChange={(v) => setConfig((p) => ({ ...p, anuncio_ativo: v ? 'true' : 'false' }))}
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ColorField label="Cor de fundo"  value={config.cor_anuncio_fundo || ''} onChange={update('cor_anuncio_fundo')} />
         <ColorField label="Cor do texto"  value={config.cor_anuncio_texto || ''} onChange={update('cor_anuncio_texto')} />
