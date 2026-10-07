@@ -43,7 +43,8 @@ export default function Depoimentos() {
           {depoimentos.map((d, i) => (
             <div
               key={i}
-              className="bg-white border border-gray-200/80 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="border border-white/10 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              style={{ backgroundColor: '#0f2e2b' }}
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: d.nota }).map((_, s) => (
@@ -52,10 +53,10 @@ export default function Depoimentos() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-gray-600 leading-relaxed flex-1">&ldquo;{d.texto}&rdquo;</p>
-              <div className="pt-2 border-t border-gray-100">
-                <p className="text-xs font-bold text-gray-900">{d.nome}</p>
-                <p className="text-xs text-gray-400">{d.cidade} · {d.produto}</p>
+              <p className="text-sm text-white/80 leading-relaxed flex-1">&ldquo;{d.texto}&rdquo;</p>
+              <div className="pt-2 border-t border-white/10">
+                <p className="text-xs font-bold text-white">{d.nome}</p>
+                <p className="text-xs text-white/50">{d.cidade} · {d.produto}</p>
               </div>
             </div>
           ))}

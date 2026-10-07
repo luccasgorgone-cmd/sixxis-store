@@ -219,14 +219,14 @@ export default async function HomePage() {
               return (
                 <div
                   key={n}
-                  className="bg-white border border-gray-200/80 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:border-[#3cbfb3]/30 hover:-translate-y-0.5 transition-all duration-300"
-                  style={{ borderTop: '4px solid #3cbfb3' }}
+                  className="border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  style={{ backgroundColor: '#0f2e2b', borderTop: '4px solid #3cbfb3' }}
                 >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#3cbfb3]/10 flex items-center justify-center mb-3 sm:mb-5 mx-auto">
-                    <Icon size={20} className="text-[#2a9d8f] sm:w-[22px] sm:h-[22px]" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center mb-3 sm:mb-5 mx-auto">
+                    <Icon size={20} className="text-[#3cbfb3] sm:w-[22px] sm:h-[22px]" />
                   </div>
-                  <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
-                  <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{texto}</p>
+                  <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
+                  <p className="text-xs sm:text-sm text-white/70 leading-relaxed">{texto}</p>
                 </div>
               )
             })}
