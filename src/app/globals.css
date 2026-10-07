@@ -99,8 +99,8 @@
 }
 @media (min-width: 1024px) {
   .banner-container {
-    aspect-ratio: var(--aspect-desktop, 1920 / 560);
-    max-height: var(--max-h-desktop, 560px);
+    aspect-ratio: var(--aspect-desktop, 1920 / 680);
+    max-height: var(--max-h-desktop, 680px);
   }
 }
 
