@@ -5,7 +5,7 @@ import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 // ── Column Title ──────────────────────────────────────────────────────────────
 function ColTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-4 pb-2 border-b border-white/15">
+    <h4 className="text-gray-900 font-bold text-xs uppercase tracking-wider mb-4 pb-2 border-b border-gray-200">
       {children}
     </h4>
   )
@@ -60,7 +60,7 @@ export default async function Footer() {
   } catch {}
 
   return (
-    <footer style={{ backgroundColor: '#0f2e2b' }} className="text-white/60">
+    <footer className="bg-[#f9fafb] text-gray-500 border-t border-gray-200">
 
       {/* ── Linha tiffany topo ─────────────────────────────────────────────── */}
       <div className="h-1 bg-[#3cbfb3]" />
@@ -83,7 +83,7 @@ export default async function Footer() {
               />
 
               {/* Slogan (config: rodape_tagline) */}
-              <p className="text-white/65 text-xs text-center leading-relaxed mt-2 mb-5">
+              <p className="text-gray-500 text-xs text-center leading-relaxed mt-2 mb-5">
                 {tagline}
               </p>
 
@@ -103,16 +103,16 @@ export default async function Footer() {
                   href={`https://wa.me/${whatsappSuporte}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-medium text-sm text-white transition"
-                  style={{ border: '1.5px solid rgba(255,255,255,0.30)' }}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-medium text-sm text-gray-700 hover:border-gray-400 hover:text-gray-900 transition"
+                  style={{ border: '1.5px solid rgba(0,0,0,0.15)' }}
                 >
                   <WaSVG />
                   Assistência Técnica
                 </a>
                 <Link
                   href="/contato"
-                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm text-white/55 hover:text-white/85 hover:border-white/30 transition"
-                  style={{ border: '1.5px solid rgba(255,255,255,0.12)' }}
+                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm text-gray-500 hover:text-gray-900 hover:border-gray-400 transition"
+                  style={{ border: '1.5px solid rgba(0,0,0,0.10)' }}
                 >
                   Entre em Contato
                 </Link>
@@ -134,7 +134,7 @@ export default async function Footer() {
                   { label: 'Fale Conosco',     href: '/contato'         },
                 ].map(item => (
                   <li key={item.label}>
-                    <Link href={item.href} className="text-white/70 hover:text-white text-sm transition block py-0.5">
+                    <Link href={item.href} className="text-gray-600 hover:text-[#2a9d8f] text-sm transition block py-0.5">
                       {item.label}
                     </Link>
                   </li>
@@ -153,7 +153,7 @@ export default async function Footer() {
                   { label: 'Termo de Garantia',        href: '/garantia'          },
                 ].map(item => (
                   <li key={item.label}>
-                    <Link href={item.href} className="text-white/70 hover:text-white text-sm transition block py-0.5">
+                    <Link href={item.href} className="text-gray-600 hover:text-[#2a9d8f] text-sm transition block py-0.5">
                       {item.label}
                     </Link>
                   </li>
@@ -173,7 +173,7 @@ export default async function Footer() {
                   { label: 'FAQ',             href: '/faq'         },
                 ].map(item => (
                   <li key={item.label}>
-                    <Link href={item.href} className="text-white/70 hover:text-white text-sm transition block py-0.5">
+                    <Link href={item.href} className="text-gray-600 hover:text-[#2a9d8f] text-sm transition block py-0.5">
                       {item.label}
                     </Link>
                   </li>
@@ -191,10 +191,10 @@ export default async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                  style={{ width: '42px', height: '42px', backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}
+                  style={{ width: '42px', height: '42px', backgroundColor: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0 }}
                   aria-label="Instagram Sixxis"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
                     <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
@@ -207,10 +207,10 @@ export default async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                  style={{ width: '42px', height: '42px', backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}
+                  style={{ width: '42px', height: '42px', backgroundColor: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0 }}
                   aria-label="Facebook Sixxis do Brasil"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#374151">
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                   </svg>
                 </a>
@@ -221,7 +221,7 @@ export default async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                  style={{ width: '42px', height: '42px', backgroundColor: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.3)', flexShrink: 0 }}
+                  style={{ width: '42px', height: '42px', backgroundColor: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.35)', flexShrink: 0 }}
                   aria-label="WhatsApp Sixxis"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true">
@@ -239,10 +239,10 @@ export default async function Footer() {
                 ].map(cert => (
                   <div
                     key={cert.label}
-                    className="flex items-center gap-2 bg-white/[0.08] border border-white/15 rounded-xl px-3 py-2"
+                    className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
                   >
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cert.cor }} />
-                    <span className="text-white/75 text-xs font-medium">{cert.label}</span>
+                    <span className="text-gray-700 text-xs font-medium">{cert.label}</span>
                   </div>
                 ))}
               </div>
@@ -253,14 +253,14 @@ export default async function Footer() {
       </div>
 
       {/* ── Formas de pagamento ───────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#0f2e2b' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+      <div className="border-t border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
-              <span className="text-white/60 text-xs font-semibold uppercase tracking-wide shrink-0">
+              <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide shrink-0">
                 Formas de Pagamento:
               </span>
-              <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
                 {formasPagamento.length > 0 ? (
                   formasPagamento.map((forma) => (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -269,39 +269,39 @@ export default async function Footer() {
                       src={forma.iconeUrl}
                       alt={forma.nome}
                       title={forma.nome}
-                      className="h-7 w-auto object-contain rounded bg-white/10 px-2 py-1 shrink-0"
+                      className="h-9 w-auto object-contain rounded-lg bg-white border border-gray-200 shadow-sm px-2.5 py-1.5 shrink-0"
                     />
                   ))
                 ) : (
-                  <span className="text-white/65 text-xs">
+                  <span className="text-gray-500 text-xs">
                     PIX • Cartão de Crédito
                   </span>
                 )}
               </div>
             </div>
-            <span className="text-white/70 text-xs font-semibold shrink-0">
-              Parcele em até <strong className="text-white">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
+            <span className="text-gray-600 text-xs font-semibold shrink-0">
+              Parcele em até <strong className="text-gray-900">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
             </span>
           </div>
         </div>
       </div>
 
       {/* ── Copyright ─────────────────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#0f2e2b' }}>
+      <div className="border-t border-gray-200 bg-[#f9fafb]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
             <div className="space-y-0.5">
-              <p className="text-white/65 text-xs">
+              <p className="text-gray-500 text-xs">
                 © {new Date().getFullYear()} Sixxis — SIXXIS IMPORTAÇÃO, EXPORTAÇÃO E COMÉRCIO LTDA
               </p>
-              <p className="text-white/55 text-xs">
+              <p className="text-gray-400 text-xs">
                 CNPJ: 54.978.947/0001-09&nbsp;&nbsp;|&nbsp;&nbsp;IE: 117.633.347.114
               </p>
-              <p className="text-white/55 text-xs">
+              <p className="text-gray-400 text-xs">
                 R. Anhanguera, 1711 - Icaray, Araçatuba - SP, 16020-355
               </p>
             </div>
-            <p className="text-white/55 text-xs shrink-0">Todos os direitos reservados.</p>
+            <p className="text-gray-400 text-xs shrink-0">Todos os direitos reservados.</p>
           </div>
         </div>
       </div>

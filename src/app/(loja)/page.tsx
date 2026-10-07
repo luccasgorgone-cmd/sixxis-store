@@ -32,20 +32,6 @@ export default async function HomePage() {
   let cfg:   Record<string, string> = {}
   let trust: Record<string, string> = {}
 
-  // Dedicated BG query — isolated from product data queries
-  let bgCfg: Record<string, string> = {}
-  try {
-    const bgRows = await prisma.configuracao.findMany({
-      where: {
-        chave: {
-          in: ['bg_body_url', 'bg_body_ativo', 'bg_body_size',
-               'bg_body_attachment', 'bg_body_position', 'bg_body_overlay']
-        }
-      }
-    })
-    bgCfg = Object.fromEntries(bgRows.map(r => [r.chave, r.valor]))
-  } catch {}
-
   try {
     const [bannersDb, destaques, produtosGerais, configRows, trustRows, ofertasDb] = await Promise.all([
       prisma.banner.findMany({ where: { ativo: true }, orderBy: { ordem: 'asc' } }),
@@ -83,8 +69,6 @@ export default async function HomePage() {
   } catch (error) {
     console.error('[HOME DB ERROR]', error)
   }
-
-  const bgAtivo = bgCfg.bg_body_ativo === 'true' && !!bgCfg.bg_body_url
 
   return (
     <main className="min-h-screen bg-transparent">
@@ -124,7 +108,7 @@ export default async function HomePage() {
 
       {/* ── 2. TrustBar ───────────────────────────────────────────── */}
       <TrustBar
-        transparent={bgAtivo}
+        transparent={false}
         items={[
           { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Despacho em 24h'    },
           { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos'            },
@@ -133,13 +117,13 @@ export default async function HomePage() {
       />
 
       {/* ── 3. Mais Vendidos ─────────────────────────────────────── */}
-      <section className="bg-transparent border-b border-white/10 py-8 min-h-[280px] md:min-h-[420px]">
+      <section className="bg-white border-b border-gray-100 py-8 min-h-[280px] md:min-h-[420px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header da seção */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-xl font-extrabold text-white">Mais Vendidos</h2>
+              <h2 className="text-xl font-extrabold text-gray-900">Mais Vendidos</h2>
               <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
             </div>
             <Link
@@ -169,7 +153,7 @@ export default async function HomePage() {
       <Depoimentos />
 
       {/* ── 6. Banners duplos ─────────────────────────────────────── */}
-      <section className="bg-transparent border-b border-white/10 pb-8 pt-8">
+      <section className="bg-white border-b border-gray-100 pb-8 pt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -230,16 +214,16 @@ export default async function HomePage() {
       </section>
 
       {/* ── 7. Stats ──────────────────────────────────────────────── */}
-      <section className="bg-transparent border-b border-white/10 py-10">
+      <section className="bg-white border-b border-gray-100 py-10">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-2 gap-0 divide-x divide-white/20">
+          <div className="grid grid-cols-2 gap-0 divide-x divide-gray-200">
             {[
               { num: '1 Milhão+', label: 'Clientes Atendidos'    },
               { num: '100%',      label: 'Entrega para o Brasil' },
             ].map(({ num, label }) => (
               <div key={label} className="flex flex-col items-center text-center py-4 px-6">
-                <p className="text-2xl md:text-3xl font-extrabold text-white">{num}</p>
-                <p className="text-white/70 text-xs font-medium mt-1">{label}</p>
+                <p className="text-2xl md:text-3xl font-extrabold text-gray-900">{num}</p>
+                <p className="text-gray-500 text-xs font-medium mt-1">{label}</p>
               </div>
             ))}
           </div>
@@ -247,10 +231,10 @@ export default async function HomePage() {
       </section>
 
       {/* ── 8. Por que Sixxis? ────────────────────────────────────── */}
-      <section className="bg-transparent border-b border-white/10 py-10">
+      <section className="bg-white border-b border-gray-100 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="mb-6">
-            <h2 className="text-xl font-extrabold text-white">Por que Sixxis?</h2>
+            <h2 className="text-xl font-extrabold text-gray-900">Por que Sixxis?</h2>
             <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
@@ -263,14 +247,14 @@ export default async function HomePage() {
               return (
                 <div
                   key={n}
-                  className="bg-white/[0.08] border border-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:bg-white/[0.12] transition-all duration-300"
+                  className="bg-white border border-gray-200/80 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:border-[#3cbfb3]/30 hover:-translate-y-0.5 transition-all duration-300"
                   style={{ borderTop: '4px solid #3cbfb3' }}
                 >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a4f4a] flex items-center justify-center mb-3 sm:mb-5 mx-auto">
-                    <Icon size={20} className="text-[#3cbfb3] sm:w-[22px] sm:h-[22px]" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#3cbfb3]/10 flex items-center justify-center mb-3 sm:mb-5 mx-auto">
+                    <Icon size={20} className="text-[#2a9d8f] sm:w-[22px] sm:h-[22px]" />
                   </div>
-                  <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
-                  <p className="text-xs sm:text-sm text-white/70 leading-relaxed">{texto}</p>
+                  <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{texto}</p>
                 </div>
               )
             })}
@@ -280,12 +264,12 @@ export default async function HomePage() {
 
       {/* ── 9. Newsletter ─────────────────────────────────────────── */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="bg-transparent border-b border-white/10 py-10">
+        <section className="bg-white border-b border-gray-100 py-10">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-2xl font-extrabold text-white mb-1">
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
             </h2>
-            <p className="text-white/70 text-sm mb-6">
+            <p className="text-gray-500 text-sm mb-6">
               {cfg.newsletter_subtitulo || 'Cadastre-se e ganhe 5% OFF na próxima compra + ofertas exclusivas em primeira mão.'}
             </p>
             <NewsletterForm />
