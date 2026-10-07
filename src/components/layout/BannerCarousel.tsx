@@ -110,7 +110,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                 <img
                   src={banner.imagem}
                   alt={banner.titulo || 'Banner Sixxis'}
-                  className="absolute inset-0 w-full h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-cover"
                   style={{ objectPosition: 'center' }}
                   loading="eager"
                   onError={() => markFailed(banner.id)}
@@ -128,7 +128,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
               <img
                 src={banner.imagem}
                 alt={banner.titulo || 'Banner Sixxis'}
-                className="absolute inset-0 w-full h-full object-contain"
+                className="absolute inset-0 w-full h-full object-cover"
                 style={{ objectPosition: 'center' }}
                 loading="eager"
                 onError={() => markFailed(banner.id)}
