@@ -89,7 +89,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
         <div
           className="banner-container relative w-full overflow-hidden select-none"
           style={{
-            backgroundColor: '#0f2e2b',
+            backgroundColor: '#ffffff',
             ...aspectVars,
           } as React.CSSProperties}
           onMouseEnter={() => setPaused(true)}
