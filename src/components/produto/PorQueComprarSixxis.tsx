@@ -89,7 +89,7 @@ export function PorQueComprarSixxis() {
             <div
               key={i}
               ref={(el) => { refs.current[i] = el }}
-              className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[20px] border transition-all duration-200 hover:-translate-y-0.5"
+              className="relative overflow-hidden p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[20px] border transition-all duration-200 hover:-translate-y-0.5"
               style={{
                 backgroundColor: '#0f2e2b',
                 borderColor: 'transparent',
@@ -102,18 +102,31 @@ export function PorQueComprarSixxis() {
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3cbfb3' }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent' }}
             >
+              {/* Fundo premium da marca + scrim p/ manter contraste do texto branco */}
               <div
-                className="flex items-center justify-center rounded-full mb-3 sm:mb-5 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto"
-                style={{ backgroundColor: 'rgba(60, 191, 179, 0.10)' }}
-              >
-                <Icone className="w-6 h-6 sm:w-9 sm:h-9 lg:w-12 lg:h-12" color="#3cbfb3" strokeWidth={1.75} />
+                aria-hidden
+                className="absolute inset-0 bg-cover bg-center opacity-55"
+                style={{ backgroundImage: 'url(/bg-porque-comprar.jpg)' }}
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(to bottom, rgba(15,46,43,0.55) 0%, rgba(15,46,43,0.72) 100%)' }}
+              />
+              <div className="relative z-10">
+                <div
+                  className="flex items-center justify-center rounded-full mb-3 sm:mb-5 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto"
+                  style={{ backgroundColor: 'rgba(60, 191, 179, 0.12)' }}
+                >
+                  <Icone className="w-6 h-6 sm:w-9 sm:h-9 lg:w-12 lg:h-12" color="#3cbfb3" strokeWidth={1.75} />
+                </div>
+                <h3 className="font-bold mb-1.5 sm:mb-2 text-sm sm:text-lg lg:text-xl text-center" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>
+                  {r.titulo}
+                </h3>
+                <p className="text-xs sm:text-sm leading-snug sm:leading-relaxed" style={{ color: '#e5e7eb', textShadow: '0 1px 4px rgba(0,0,0,0.45)' }}>
+                  {r.desc}
+                </p>
               </div>
-              <h3 className="font-bold mb-1.5 sm:mb-2 text-sm sm:text-lg lg:text-xl text-center" style={{ color: '#ffffff' }}>
-                {r.titulo}
-              </h3>
-              <p className="text-xs sm:text-sm leading-snug sm:leading-relaxed" style={{ color: '#d1d5db' }}>
-                {r.desc}
-              </p>
             </div>
           )
         })}

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ShoppingCart, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart,
-  ShieldCheck, Truck, Lock, CreditCard, BadgeCheck, Headphones,
 } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
@@ -17,15 +16,6 @@ import { feedId } from '@/lib/feed-id'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { inferirTipoVariacao } from '@/lib/variacao'
 import { estoqueDisponivel } from '@/lib/produto-variacao'
-
-const SELOS_CONFIANCA = [
-  { icon: ShieldCheck, titulo: '12 meses de garantia',     sub: 'Garantia real e documentada' },
-  { icon: Truck,       titulo: 'Entrega para todo o Brasil', sub: 'Despacho em 24h' },
-  { icon: Lock,        titulo: 'Compra 100% segura',       sub: 'SSL 256-bit + Antifraude' },
-  { icon: CreditCard,  titulo: `${MAX_PARCELAS_SEM_JUROS}x sem juros`, sub: 'No cartão de crédito' },
-  { icon: BadgeCheck,  titulo: 'Qualidade Sixxis',         sub: 'Direto da fábrica' },
-  { icon: Headphones,  titulo: 'Suporte especializado',    sub: 'Seg–Sex 8h às 18h' },
-] as const
 
 interface Variacao {
   id: string
@@ -572,28 +562,6 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
       {/* Frete — antes dos selos pra reduzir fricção pós-CTA (mobile/tablet/desktop) */}
       <div className="mt-4 border-t border-gray-100 pt-4">
         <CalcFrete produtoId={produto.id} />
-      </div>
-
-      {/* 6 Selos de confiança — grid 2x3 */}
-      <div className="grid grid-cols-2 gap-2 mb-5">
-        {SELOS_CONFIANCA.map(({ icon: Icon, titulo, sub }) => (
-          <div
-            key={titulo}
-            className="flex items-start gap-2.5 p-2.5 rounded-xl border border-gray-100 bg-white hover:border-[#3cbfb3]/30 hover:bg-[#3cbfb3]/5 transition-all duration-200"
-          >
-            <div className="shrink-0 w-8 h-8 rounded-lg bg-[#3cbfb3]/10 flex items-center justify-center">
-              <Icon size={15} className="text-[#3cbfb3]" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[12px] font-semibold text-gray-800 leading-tight">
-                {titulo}
-              </p>
-              <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
-                {sub}
-              </p>
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* Compartilhar + Favoritar */}

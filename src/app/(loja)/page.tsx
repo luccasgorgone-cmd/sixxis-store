@@ -8,6 +8,7 @@ import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
+import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import Depoimentos from '@/components/home/Depoimentos'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
@@ -98,15 +99,26 @@ export default async function HomePage() {
       )}
       </div>
 
-      {/* ── 2. TrustBar ───────────────────────────────────────────── */}
-      <TrustBar
-        fundoVerde
-        items={[
+      {/* ── 2. TrustBar / Barra de anúncio ────────────────────────── */}
+      {(() => {
+        const trustItems = [
           { titulo: trust.trust_1_titulo || 'Entrega para todo o Brasil', sub: trust.trust_1_sub || 'Despacho em 24h'    },
           { titulo: trust.trust_2_titulo || 'Compra 100% Segura',         sub: trust.trust_2_sub || 'Seus dados protegidos'            },
           { titulo: trust.trust_3_titulo || `${MAX_PARCELAS_SEM_JUROS}x sem juros no cartão`, sub: trust.trust_3_sub || 'Débito, crédito e PIX'            },
-        ]}
-      />
+        ]
+        return (
+          <>
+            {/* Mobile: barra fina rotativa (1 dizer por vez) — topo mais limpo */}
+            <div className="md:hidden">
+              <AnnouncementBar items={trustItems} />
+            </div>
+            {/* Tablet/Desktop: 3 selos lado a lado */}
+            <div className="hidden md:block">
+              <TrustBar fundoVerde items={trustItems} />
+            </div>
+          </>
+        )
+      })()}
 
       {/* ── 3. Mais Vendidos ─────────────────────────────────────── */}
       <section className="bg-white border-b border-gray-100 py-8 min-h-[280px] md:min-h-[420px]">
@@ -146,22 +158,22 @@ export default async function HomePage() {
             {/* Banner Climatizadores */}
             <Link
               href="/produtos?categoria=climatizadores"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/10] sm:aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative overflow-hidden rounded-xl flex items-end p-5 sm:p-7 aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-climatizadores-1791346860.jpg"
                 alt="Climatizadores Sixxis"
                 fill
                 sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                className="object-cover object-[62%_center] group-hover:scale-105 transition-transform duration-500"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent" />
               <div className="relative z-10 flex-1">
-                <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
+                <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-2 sm:mb-3 uppercase tracking-wide">
                   Linha Residencial e Comercial
                 </span>
-                <h3 className="text-white text-2xl font-extrabold leading-tight mb-4 drop-shadow">
+                <h3 className="text-white text-xl sm:text-2xl font-extrabold leading-tight mb-3 sm:mb-4 drop-shadow">
                   Climatizadores<br />Sixxis
                 </h3>
                 <span className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-bold px-4 py-2 rounded-xl transition backdrop-blur-sm">
@@ -173,21 +185,21 @@ export default async function HomePage() {
             {/* Banner Spinning */}
             <Link
               href="/produtos?categoria=spinning"
-              className="group relative overflow-hidden rounded-xl flex items-end p-7 aspect-[16/10] sm:aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative overflow-hidden rounded-xl flex items-end p-5 sm:p-7 aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-spinning-1791346860.jpg"
                 alt="Bikes Spinning Sixxis"
                 fill
                 sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover object-[72%_center] group-hover:scale-105 transition-transform duration-500"
+                className="object-cover object-[66%_center] group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent" />
               <div className="relative z-10 flex-1">
-                <span className="inline-block bg-[#3cbfb3]/25 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide border border-[#3cbfb3]/40">
+                <span className="inline-block bg-[#3cbfb3]/25 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-2 sm:mb-3 uppercase tracking-wide border border-[#3cbfb3]/40">
                   Spinning &amp; Fitness
                 </span>
-                <h3 className="text-white text-2xl font-extrabold leading-tight mb-4 drop-shadow">
+                <h3 className="text-white text-xl sm:text-2xl font-extrabold leading-tight mb-3 sm:mb-4 drop-shadow">
                   Equipamentos<br />Fitness
                 </h3>
                 <span className="inline-flex items-center gap-2 bg-[#3cbfb3]/25 hover:bg-[#3cbfb3]/40 text-white text-sm font-bold px-4 py-2 rounded-xl transition border border-[#3cbfb3]/40 backdrop-blur-sm">

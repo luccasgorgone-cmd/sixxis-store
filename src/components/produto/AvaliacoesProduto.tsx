@@ -145,12 +145,25 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
 
       {/* ── Resumo ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2e2b] to-[#1a4f4a] rounded-2xl p-8 text-white">
-          <span className="text-6xl font-black leading-none mb-2">{total > 0 ? media.toFixed(1) : '—'}</span>
-          <div className="flex gap-1 mb-2">
-            <EstrelasNota nota={media} size={20} />
+        <div className="relative overflow-hidden flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2e2b] to-[#1a4f4a] rounded-2xl p-8 text-white">
+          {/* Fundo premium da marca + scrim p/ legibilidade da nota */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-cover bg-center opacity-50"
+            style={{ backgroundImage: 'url(/bg-avaliacoes.jpg)' }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to bottom, rgba(15,46,43,0.45) 0%, rgba(15,46,43,0.65) 100%)' }}
+          />
+          <div className="relative z-10 flex flex-col items-center justify-center" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>
+            <span className="text-6xl font-black leading-none mb-2">{total > 0 ? media.toFixed(1) : '—'}</span>
+            <div className="flex gap-1 mb-2">
+              <EstrelasNota nota={media} size={20} />
+            </div>
+            <span className="text-white/80 text-sm">{total} avaliação{total !== 1 ? 'ões' : ''}</span>
           </div>
-          <span className="text-white/70 text-sm">{total} avaliação{total !== 1 ? 'ões' : ''}</span>
         </div>
         <div className="lg:col-span-2 flex flex-col justify-center gap-2">
           {distribuicao.map(({ nota, count }) => {
