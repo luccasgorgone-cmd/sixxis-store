@@ -213,17 +213,36 @@ export default async function HomePage() {
               const titulo = cfg[`pq_sixxis_${n}_titulo`] || def.titulo
               const texto  = cfg[`pq_sixxis_${n}_texto`]  || def.texto
               const Icon   = getPqSixxisIcon(cfg[`pq_sixxis_${n}_icone`] || def.icone)
+              // Imagem de fundo por box (n=2 entrega rápida, n=3 suporte, n=4 todo Brasil).
+              const bgImg = n === 2
+                ? '/bg-entrega-rapida.jpg'
+                : n === 3
+                ? '/bg-suporte-especializado.jpg'
+                : '/bg-entrega-brasil.jpg'
               return (
                 <div
                   key={n}
-                  className="border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  className="relative overflow-hidden border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   style={{ backgroundColor: '#0f2e2b', borderTop: '4px solid #3cbfb3' }}
                 >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center mb-3 sm:mb-5 mx-auto">
-                    <Icon size={20} className="text-[#3cbfb3] sm:w-[22px] sm:h-[22px]" />
+                  {/* Imagem de fundo + overlay escuro: mantém o texto branco legível. */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-cover bg-center opacity-60"
+                    style={{ backgroundImage: `url(${bgImg})` }}
+                  />
+                  <div
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to bottom, rgba(15,46,43,0.62) 0%, rgba(15,46,43,0.82) 100%)' }}
+                  />
+                  <div className="relative z-10">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center mb-3 sm:mb-5 mx-auto">
+                      <Icon size={20} className="text-[#3cbfb3] sm:w-[22px] sm:h-[22px]" />
+                    </div>
+                    <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
+                    <p className="text-xs sm:text-sm text-white/80 leading-relaxed">{texto}</p>
                   </div>
-                  <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
-                  <p className="text-xs sm:text-sm text-white/70 leading-relaxed">{texto}</p>
                 </div>
               )
             })}
