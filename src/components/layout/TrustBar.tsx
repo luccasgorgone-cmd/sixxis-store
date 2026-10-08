@@ -34,7 +34,8 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false, f
   const escuro = transparent || fundoVerde
   // No mobile, nº ímpar de itens fica numa única coluna empilhada (evita item
   // órfão no grid 2-col); nº par mantém 2x2. No desktop, uma coluna por item.
-  const mobileCols = n % 2 === 0 ? 'grid-cols-2' : 'grid-cols-1'
+  // Mobile: 3 itens lado a lado (3 colunas); par = 2x2; outros ímpares empilham.
+  const mobileCols = n === 3 ? 'grid-cols-3' : n % 2 === 0 ? 'grid-cols-2' : 'grid-cols-1'
   const lgCols = LG_COLS[n] ?? 'lg:grid-cols-4'
   return (
     <div
@@ -56,17 +57,17 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false, f
             return (
               <div
                 key={titulo}
-                className={`flex items-center justify-start lg:justify-center gap-2 md:gap-3 py-1 px-2 md:px-3 hover:bg-white/5 transition-colors min-w-0 ${
+                className={`flex flex-col items-center text-center justify-center gap-1.5 lg:flex-row lg:items-center lg:text-left lg:gap-3 py-2 px-1.5 md:px-3 hover:bg-white/5 transition-colors min-w-0 ${
                   i > 0 ? (escuro ? 'lg:border-l lg:border-white/15' : 'lg:border-l lg:border-gray-200') : ''
                 }`}
               >
-                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 ${
+                <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shrink-0 ${
                   escuro ? 'bg-white/10' : 'bg-[#e8f8f7]'
                 }`}>
-                  <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#3cbfb3]" strokeWidth={2} />
+                  <Icon className="w-4 h-4 md:w-[18px] md:h-[18px] text-[#3cbfb3]" strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-[11px] md:text-xs lg:text-sm font-bold leading-tight ${
+                  <p className={`text-[10px] sm:text-[11px] md:text-xs lg:text-sm font-bold leading-tight ${
                     escuro ? 'text-white' : 'text-gray-900'
                   }`}>
                     {titulo}

@@ -90,11 +90,11 @@
 /* ── Banner principal: aspect-ratio responsivo via CSS vars ─────────────── */
 /* CSS vars permitem que o admin sobrescreva por banner sem rebuild Tailwind. */
 .banner-container {
-  aspect-ratio: var(--aspect-mobile, 1 / 1);
+  aspect-ratio: var(--aspect-mobile, 16 / 9);
 }
 @media (min-width: 768px) {
   .banner-container {
-    aspect-ratio: var(--aspect-tablet, 4 / 3);
+    aspect-ratio: var(--aspect-tablet, 2 / 1);
   }
 }
 @media (min-width: 1024px) {
