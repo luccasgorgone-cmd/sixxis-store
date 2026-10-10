@@ -11,18 +11,36 @@ function createPrisma(): PrismaClient {
     throw new Error('DATABASE_URL não está definido no ambiente.')
   }
 
-  // O adapter @prisma/adapter-mariadb exige scheme 'mariadb://' e rejeita
-  // 'mysql://' (formato canônico do Prisma e o que o Railway/.env.local usa).
-  // Normaliza só na variável local — não muta process.env.DATABASE_URL global
-  // (scripts/_db.ts e prisma.config.ts continuam vendo o valor original).
-  const adapterUrl = rawUrl.startsWith('mysql://')
-    ? rawUrl.replace(/^mysql:\/\//, 'mariadb://')
-    : rawUrl
+  // Passamos um PoolConfig (objeto) em vez da string de conexão de propósito:
+  // os params ?connection_limit / ?pool_timeout da URL estão em snake_case
+  // (convenção do engine Prisma), mas o driver mariadb só entende camelCase —
+  // então eram SILENCIOSAMENTE IGNORADOS. Resultado: connectTimeout caía no
+  // default de 1000ms, curto demais pro handshake via proxy do Railway (~1.7s).
+  // Quando o banco reiniciava, toda tentativa de recriar conexão estourava em
+  // 1s, o pool nunca reenchia (active=0 idle=0) e o site ficava fora até um
+  // restart manual. Setar os tempos corretos faz o pool se curar sozinho.
+  const u = new URL(rawUrl)
+  const connectionLimit = Number(u.searchParams.get('connection_limit')) || 10
+  const poolTimeoutSec = Number(u.searchParams.get('pool_timeout')) || 20
 
-  // connection_limit, pool_timeout e connect_timeout são parâmetros de URL
-  // suportados pelo adapter MariaDB para controle do pool de conexões.
-  // Configure no Railway: DATABASE_URL=...?connection_limit=20&pool_timeout=30
-  const adapter = new PrismaMariaDb(adapterUrl)
+  const adapter = new PrismaMariaDb({
+    host: u.hostname,
+    port: u.port ? Number(u.port) : 3306,
+    user: decodeURIComponent(u.username),
+    password: decodeURIComponent(u.password),
+    database: u.pathname.replace(/^\//, ''),
+    connectionLimit,
+    // Handshake via proxy público do Railway leva ~1.5-2s; 1000ms (default) era
+    // curto demais e impedia a recriação do pool após restart do banco.
+    connectTimeout: 15000,
+    // Precisa ser > connectTimeout, senão o mariadb clampa o connectTimeout.
+    acquireTimeout: Math.max(20000, poolTimeoutSec * 1000),
+    // Em segundos. Default é 1800 (30min): sockets mortos ficavam retidos tempo
+    // demais. 120s recicla conexões ociosas/mortas rápido depois de um blip.
+    idleTimeout: 120,
+    // Valida a conexão ao retirá-la do pool (default) — descarta socket morto.
+    minDelayValidation: 500,
+  })
 
   return new PrismaClient({
     adapter,

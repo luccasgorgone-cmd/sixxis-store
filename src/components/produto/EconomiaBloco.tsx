@@ -13,7 +13,7 @@ const AC_POR_MODELO: Record<string, { area: number; wattsAC: number; setup: stri
   'm45-trend':   { area: 45,  wattsAC: 2900,  setup: '1× ar-condicionado 30.000 BTU',                 descricaoAC: '1× 30.000 BTU' },
   'sx040':       { area: 45,  wattsAC: 2900,  setup: '1× ar-condicionado 30.000 BTU',                 descricaoAC: '1× 30.000 BTU' },
   'sx060-prime': { area: 60,  wattsAC: 3770,  setup: '1× ar-condicionado 30.000 BTU + 1× 9.000 BTU',  descricaoAC: '30.000 + 9.000 BTU' },
-  'sx070-trend': { area: 80,  wattsAC: 4600,  setup: '2× ar-condicionado 24.000 BTU',                 descricaoAC: '2× 24.000 BTU' },
+  'sx070-trend': { area: 70,  wattsAC: 4050,  setup: '1× ar-condicionado 30.000 BTU + 1× 12.000 BTU', descricaoAC: '30.000 + 12.000 BTU' },
   'sx100-trend': { area: 120, wattsAC: 6950,  setup: '2× ar-condicionado 30.000 BTU + 1× 12.000 BTU', descricaoAC: '2× 30.000 + 12.000 BTU' },
   'sx120-prime': { area: 140, wattsAC: 8700,  setup: '3× ar-condicionado 30.000 BTU',                 descricaoAC: '3× 30.000 BTU' },
   'sx180-trend': { area: 180, wattsAC: 11600, setup: '4× ar-condicionado 30.000 BTU',                 descricaoAC: '4× 30.000 BTU' },
@@ -90,6 +90,9 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
   const percentual   = Math.round((economiaMes / custoAC) * 100)
   const retornoAnos  = economiaAno > 0 ? (preco / economiaAno).toFixed(1) : '—'
 
+  // Largura da barra do climatizador relativa ao AC (piso de 6% p/ legibilidade).
+  const pctBarraProduto = Math.max(6, Math.round((custoProduto / custoAC) * 100))
+
   return (
     <div
       ref={ref}
@@ -99,172 +102,150 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
         transform: visivel ? 'translateY(0)' : 'translateY(24px)',
       }}
     >
-      {/* Card interno sobre o wallpaper */}
       <div
-        className="rounded-2xl overflow-hidden"
-        style={{ backgroundColor: '#ffffff', border: '2px solid #0f2e2b' }}
+        className="rounded-[20px] overflow-hidden"
+        style={{ backgroundColor: '#ffffff', border: '1px solid rgba(15,46,43,0.12)', boxShadow: '0 18px 50px -24px rgba(15,46,43,0.45)' }}
       >
-        {/* Cabeçalho com título + badge */}
-        <div className="px-4 sm:px-5 pt-5 pb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-2">
-              <TrendingDown size={20} strokeWidth={2} color="#0f2e2b" className="mt-0.5 shrink-0 sm:w-6 sm:h-6" />
-              <h3 className="font-bold text-sm sm:text-base leading-snug" style={{ color: '#0f2e2b' }}>
-                Faça as contas: quanto você deixa de pagar por mês
+        {/* ── HERO escuro: título + destaque da economia ──────────────── */}
+        <div
+          className="relative px-5 sm:px-7 pt-5 pb-6 sm:pt-6 sm:pb-7 overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
+        >
+          {/* glow decorativo tiffany */}
+          <div
+            aria-hidden
+            className="absolute -top-16 -right-10 w-52 h-52 rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(60,191,179,0.22) 0%, rgba(60,191,179,0) 70%)' }}
+          />
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2 min-w-0">
+              <TrendingDown size={18} strokeWidth={2.25} color="#3cbfb3" className="mt-0.5 shrink-0 sm:w-5 sm:h-5" />
+              <h3 className="font-bold text-sm sm:text-[15px] leading-snug text-white">
+                Quanto você deixa de pagar por mês
               </h3>
             </div>
-            <p className="text-[11px] sm:text-xs mt-1 leading-snug" style={{ color: '#0f2e2b', opacity: 0.75 }}>
-              Equivalente a {ac.setup} para climatizar {ac.area} m² · 8h/dia, 30 dias — tarifa R$ 0,85/kWh
+            <span
+              className="self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold shrink-0"
+              style={{ backgroundColor: 'rgba(60,191,179,0.14)', color: '#3cbfb3', border: '1px solid rgba(60,191,179,0.35)' }}
+            >
+              <BadgeCheck size={13} strokeWidth={2.5} />
+              Comprovado
+            </span>
+          </div>
+
+          <div className="relative mt-4 sm:mt-5 text-center">
+            <p className="font-black leading-none text-[44px] sm:text-[60px] tracking-tight" style={{ color: '#3cbfb3' }}>
+              R$ {fmt(economiaMes)}
+            </p>
+            <p className="text-sm font-semibold mt-1.5 text-white/90">
+              de economia <span className="text-white/60">todo mês</span>
             </p>
           </div>
-          <span
-            className="self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold shrink-0"
-            style={{ backgroundColor: '#0f2e2b', color: '#3cbfb3' }}
-          >
-            <BadgeCheck size={14} strokeWidth={2.5} />
-            Economia comprovada
-          </span>
-        </div>
 
-        {/* Valor em destaque */}
-        <div className="px-4 sm:px-5 pb-5 text-center">
-          <p className="font-bold leading-none text-4xl sm:text-[56px]" style={{ color: '#0f2e2b' }}>
-            R$ {fmt(economiaMes)}
-          </p>
-          <p className="text-sm font-semibold mt-2" style={{ color: '#0f2e2b' }}>
-            você economiza <span className="opacity-80">por mês</span>
-          </p>
-        </div>
-
-        {/* MOBILE: cards empilhados Ar-condicionado vs Climatizador */}
-        <div className="md:hidden px-4 pb-5 space-y-2">
-          {/* Card AC */}
-          <div className="rounded-xl p-3" style={{ border: '1px solid rgba(15,46,43,0.20)', backgroundColor: 'rgba(15,46,43,0.03)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <AirVent size={18} strokeWidth={2} color="#0f2e2b" />
-              <span className="font-bold text-sm" style={{ color: '#0f2e2b' }}>Ar-condicionado</span>
-              <span className="ml-auto text-[10px]" style={{ color: '#0f2e2b', opacity: 0.6 }}>{ac.descricaoAC}</span>
-            </div>
-            <dl className="text-xs space-y-1.5">
-              <div className="flex items-center justify-between">
-                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Consumo</dt>
-                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>{ac.wattsAC} W</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / mês</dt>
-                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC)}</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / ano</dt>
-                <dd className="font-semibold" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC * 12)}</dd>
-              </div>
-            </dl>
+          {/* pills de reforço */}
+          <div className="relative mt-4 flex items-center justify-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black" style={{ backgroundColor: '#3cbfb3', color: '#0f2e2b' }}>
+              {percentual}% menos energia
+            </span>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold text-white/85" style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
+              se paga em {retornoAnos} anos
+            </span>
           </div>
+        </div>
 
-          {/* Card Climatizador Sixxis (destaque tiffany) */}
-          <div className="rounded-xl p-3 relative" style={{ border: '2px solid #3cbfb3', backgroundColor: 'rgba(60,191,179,0.06)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Wind size={18} strokeWidth={2} color="#0f2e2b" />
-              <span className="font-bold text-sm" style={{ color: '#0f2e2b' }}>Climatizador Sixxis</span>
-            </div>
-            <div className="flex justify-center mb-2">
-              <span
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black"
-                style={{ backgroundColor: '#3cbfb3', color: '#ffffff' }}
-              >
-                {percentual}% mais econômico
+        {/* ── Comparação visual: barras proporcionais de custo/mês ────── */}
+        <div className="px-5 sm:px-7 pt-5 pb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-3" style={{ color: '#0f2e2b', opacity: 0.55 }}>
+            Custo de energia por mês
+          </p>
+
+          {/* Linha AC */}
+          <div className="mb-3.5">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold" style={{ color: '#0f2e2b' }}>
+                <AirVent size={16} strokeWidth={2} color="#0f2e2b" />
+                Ar-condicionado
+                <span className="hidden sm:inline text-[11px] font-normal" style={{ opacity: 0.55 }}>· {ac.descricaoAC}</span>
               </span>
+              <span className="text-sm font-bold tabular-nums" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC)}</span>
             </div>
-            <dl className="text-xs space-y-1.5">
-              <div className="flex items-center justify-between">
-                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Consumo</dt>
-                <dd className="font-bold" style={{ color: '#3cbfb3' }}>{consumoW} W</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / mês</dt>
-                <dd className="font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto)}</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt style={{ color: '#0f2e2b', opacity: 0.75 }}>Custo / ano</dt>
-                <dd className="font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto * 12)}</dd>
-              </div>
-            </dl>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(15,46,43,0.08)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{ width: visivel ? '100%' : '0%', backgroundColor: 'rgba(15,46,43,0.55)' }}
+              />
+            </div>
+          </div>
+
+          {/* Linha Climatizador Sixxis (destaque) */}
+          <div className="mb-2">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold" style={{ color: '#0f2e2b' }}>
+                <Wind size={16} strokeWidth={2} color="#0f2e2b" />
+                Climatizador Sixxis
+              </span>
+              <span className="text-sm font-bold tabular-nums" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto)}</span>
+            </div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(15,46,43,0.08)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-700 delay-150"
+                style={{ width: visivel ? `${pctBarraProduto}%` : '0%', background: 'linear-gradient(90deg, #3cbfb3 0%, #2aa89c 100%)' }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* DESKTOP: tabela comparativa */}
-        <div className="hidden md:block px-5 pb-5">
-          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(15,46,43,0.30)' }}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
-                  <th className="text-left px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}></th>
-                  <th className="text-center px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}>
-                    <div className="inline-flex items-center gap-1.5 justify-center">
-                      <AirVent size={24} strokeWidth={2} color="#0f2e2b" />
-                      Ar-condicionado
-                    </div>
-                  </th>
-                  <th className="text-center px-3 py-2 font-semibold" style={{ color: '#0f2e2b' }}>
-                    <div className="inline-flex items-center gap-1.5 justify-center">
-                      <Wind size={24} strokeWidth={2} color="#0f2e2b" />
-                      Climatizador Sixxis
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
-                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Consumo</td>
-                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>{ac.wattsAC}W</td>
-                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>{consumoW}W</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
-                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Custo por mês</td>
-                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC)}</td>
-                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto)}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid rgba(15,46,43,0.30)' }}>
-                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Custo por ano</td>
-                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC * 12)}</td>
-                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto * 12)}</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-2.5" style={{ color: '#0f2e2b' }}>Redução</td>
-                  <td className="px-3 py-2.5 text-center" style={{ color: '#0f2e2b' }}>—</td>
-                  <td className="px-3 py-2.5 text-center font-bold" style={{ color: '#3cbfb3' }}>{percentual}%</td>
-                </tr>
-              </tbody>
-            </table>
+        {/* ── Detalhe comparativo: consumo e custo anual ──────────────── */}
+        <div className="px-5 sm:px-7 pt-3 pb-5">
+          <div className="grid grid-cols-2 gap-2.5">
+            {/* AC */}
+            <div className="rounded-xl p-3" style={{ border: '1px solid rgba(15,46,43,0.12)', backgroundColor: 'rgba(15,46,43,0.025)' }}>
+              <p className="text-[11px] font-bold mb-2 flex items-center gap-1.5" style={{ color: '#0f2e2b' }}>
+                <AirVent size={14} strokeWidth={2} color="#0f2e2b" /> Ar-condicionado
+              </p>
+              <dl className="space-y-1 text-[11px] sm:text-xs">
+                <div className="flex justify-between"><dt style={{ color: '#0f2e2b', opacity: 0.6 }}>Consumo</dt><dd className="font-semibold tabular-nums" style={{ color: '#0f2e2b' }}>{ac.wattsAC} W</dd></div>
+                <div className="flex justify-between"><dt style={{ color: '#0f2e2b', opacity: 0.6 }}>Por ano</dt><dd className="font-semibold tabular-nums" style={{ color: '#0f2e2b' }}>R$ {fmt(custoAC * 12)}</dd></div>
+              </dl>
+            </div>
+            {/* Climatizador */}
+            <div className="rounded-xl p-3" style={{ border: '1px solid rgba(60,191,179,0.45)', backgroundColor: 'rgba(60,191,179,0.06)' }}>
+              <p className="text-[11px] font-bold mb-2 flex items-center gap-1.5" style={{ color: '#0f2e2b' }}>
+                <Wind size={14} strokeWidth={2} color="#0f2e2b" /> Climatizador Sixxis
+              </p>
+              <dl className="space-y-1 text-[11px] sm:text-xs">
+                <div className="flex justify-between"><dt style={{ color: '#0f2e2b', opacity: 0.6 }}>Consumo</dt><dd className="font-bold tabular-nums" style={{ color: '#3cbfb3' }}>{consumoW} W</dd></div>
+                <div className="flex justify-between"><dt style={{ color: '#0f2e2b', opacity: 0.6 }}>Por ano</dt><dd className="font-bold tabular-nums" style={{ color: '#3cbfb3' }}>R$ {fmt(custoProduto * 12)}</dd></div>
+              </dl>
+            </div>
           </div>
         </div>
 
-        {/* Métricas em 3 colunas — items-stretch + min-h pra altura igual,
-            flex-col + justify-between alinha label no topo e valor no rodape */}
-        <div className="grid grid-cols-3 items-stretch" style={{ borderTop: '1px solid rgba(15,46,43,0.30)' }}>
-          <div className="p-3 text-center flex flex-col justify-between min-h-[80px]" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
-            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/mês</p>
-            <p className="text-base sm:text-lg font-bold mt-1" style={{ color: '#3cbfb3' }}>R$ {fmt(economiaMes)}</p>
+        {/* ── Métricas em 3 colunas ───────────────────────────────────── */}
+        <div className="grid grid-cols-3 items-stretch" style={{ borderTop: '1px solid rgba(15,46,43,0.10)' }}>
+          <div className="p-3 text-center flex flex-col justify-between min-h-[78px]" style={{ borderRight: '1px solid rgba(15,46,43,0.10)' }}>
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.6 }}>Economia/mês</p>
+            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: '#3cbfb3' }}>R$ {fmt(economiaMes)}</p>
           </div>
-          <div className="p-3 text-center flex flex-col justify-between min-h-[80px]" style={{ borderRight: '1px solid rgba(15,46,43,0.30)' }}>
-            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.75 }}>Economia/ano</p>
-            <p className="text-base sm:text-lg font-bold mt-1" style={{ color: '#3cbfb3' }}>
+          <div className="p-3 text-center flex flex-col justify-between min-h-[78px]" style={{ borderRight: '1px solid rgba(15,46,43,0.10)' }}>
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.6 }}>Economia/ano</p>
+            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: '#3cbfb3' }}>
               R$ {(economiaAno / 1000).toFixed(1)}k
             </p>
           </div>
-          <div className="p-3 text-center flex flex-col justify-between min-h-[80px]">
-            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.75 }}>Produto se<br />paga em</p>
-            <p className="text-base sm:text-lg font-bold mt-1" style={{ color: '#0f2e2b' }}>{retornoAnos} anos</p>
+          <div className="p-3 text-center flex flex-col justify-between min-h-[78px]">
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#0f2e2b', opacity: 0.6 }}>Produto se<br />paga em</p>
+            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: '#0f2e2b' }}>{retornoAnos} anos</p>
           </div>
         </div>
 
-        {/* Rodapé de disclaimer */}
-        <div className="px-4 py-2.5" style={{ borderTop: '1px solid rgba(15,46,43,0.30)', backgroundColor: 'rgba(15,46,43,0.04)' }}>
-          <p className="text-[10px] leading-relaxed flex items-center gap-1.5" style={{ color: '#0f2e2b', opacity: 0.70 }}>
-            <Zap size={24} strokeWidth={2} color="#0f2e2b" style={{ width: 12, height: 12, flexShrink: 0 }} />
-            Consumo AC calculado para {ac.setup} ({ac.wattsAC}W).
-            Baseado em {HORAS_DIA}h/dia × {DIAS_MES} dias × R$ {TARIFA.toFixed(2)}/kWh (tarifa ANEEL 2024).
-            Consumo real pode variar conforme uso.
+        {/* ── Rodapé de disclaimer ────────────────────────────────────── */}
+        <div className="px-4 sm:px-5 py-2.5" style={{ borderTop: '1px solid rgba(15,46,43,0.10)', backgroundColor: 'rgba(15,46,43,0.03)' }}>
+          <p className="text-[10px] leading-relaxed flex items-start gap-1.5" style={{ color: '#0f2e2b', opacity: 0.65 }}>
+            <Zap strokeWidth={2} color="#0f2e2b" style={{ width: 12, height: 12, flexShrink: 0, marginTop: 2 }} />
+            <span>
+              Equivale a {ac.setup} para climatizar {ac.area} m². Base: {HORAS_DIA}h/dia × {DIAS_MES} dias × R$ {TARIFA.toFixed(2)}/kWh (tarifa ANEEL 2024). Consumo real pode variar conforme uso.
+            </span>
           </p>
         </div>
       </div>

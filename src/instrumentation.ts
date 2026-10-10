@@ -32,6 +32,36 @@ export async function register() {
     // Nunca derruba o boot do server por causa disto — só loga.
     console.error('[instrumentation] falha na reconciliação de boot:', e)
   }
+
+  // Watchdog de banco: auto-recuperação em runtime. O healthcheck do Railway só
+  // roda no deploy, não continuamente — então, se o pool do Prisma travar (ex.:
+  // banco reinicia e as conexões morrem), nada reinicia o container e o site
+  // fica fora até um restart manual (incidente de 2026-10-10, ~7h fora).
+  // Aqui pingamos o pool periodicamente; se falhar de forma sustentada, saímos
+  // com código !=0 e o Railway (restartPolicy ON_FAILURE) sobe um processo novo,
+  // reconstruindo o pool — bounded recovery de minutos em vez de horas.
+  if (process.env.NODE_ENV === 'production' && process.env.DB_WATCHDOG_DISABLED !== '1') {
+    const { prisma } = await import('./lib/prisma')
+    const INTERVALO_MS = 30_000
+    const MAX_FALHAS = 6 // ~3 min de banco inacessível antes de reiniciar
+    let falhas = 0
+    const timer = setInterval(async () => {
+      try {
+        await prisma.$queryRaw`SELECT 1`
+        if (falhas > 0) console.info(`[db-watchdog] banco recuperado após ${falhas} falha(s)`)
+        falhas = 0
+      } catch (e) {
+        falhas++
+        console.error(`[db-watchdog] ping falhou (${falhas}/${MAX_FALHAS}): ${String(e).slice(0, 200)}`)
+        if (falhas >= MAX_FALHAS) {
+          console.error('[db-watchdog] banco inacessível de forma sustentada — reiniciando o processo para reconstruir o pool')
+          process.exit(1)
+        }
+      }
+    }, INTERVALO_MS)
+    // Não manter o processo vivo só por causa do timer.
+    timer.unref()
+  }
 }
 
 // Erros de Server Components, middleware e proxies — captura automática pelo
