@@ -14,6 +14,9 @@ describe('gclidValido', () => {
     expect(gclidValido(GCLID)).toBe(true)
     expect(gclidValido('abc-123_XYZ')).toBe(true)
   })
+  it('aceita ponto no charset (acordo CRM v1 [A-Za-z0-9_.-])', () => {
+    expect(gclidValido('abc.def-123_XYZ')).toBe(true)
+  })
   it('rejeita vazio, nulo e com caracteres perigosos', () => {
     expect(gclidValido('')).toBe(false)
     expect(gclidValido(null)).toBe(false)

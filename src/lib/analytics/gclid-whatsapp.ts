@@ -19,9 +19,10 @@
 const TAG_PREFIX = '[#g:'
 const TAG_SUFFIX = ']'
 
-// gclid válido é alfanumérico com - e _ (base64url-ish). Rejeita qualquer coisa
-// com espaço/quebra/colchete p/ não corromper o marcador nem permitir injeção.
-const GCLID_RE = /^[A-Za-z0-9_-]{1,200}$/
+// Charset acordado com o CRM (v1): [A-Za-z0-9_.-]. O CRM captura com
+// \[#g:([^\]]+)\] e revalida. Rejeita espaço/quebra/colchete p/ não corromper o
+// marcador nem permitir injeção. Inclui ponto porque faz parte do charset combinado.
+const GCLID_RE = /^[A-Za-z0-9_.-]{1,200}$/
 
 export function gclidValido(v: string | null | undefined): v is string {
   return !!v && GCLID_RE.test(v)
@@ -68,16 +69,22 @@ function lerCookie(nome: string): string | undefined {
 }
 
 // Leitura client do gclid, em ordem de confiança:
-//   1) param da URL atual (gclid > gbraid > wbraid) — sempre presente no clique
+//   1) param `gclid` da URL atual — sempre presente no clique
 //   2) cookie `_gcl_aw` (GCL.<ts>.<gclid>) — Google tag, sobrevive à navegação
 //   3) sessionStorage `sixxis_utms.gclid` — gravado pelo TrackingProvider
 // Qualquer fonte inválida é ignorada. Fora do browser → undefined.
+//
+// v1 = SÓ gclid. gbraid/wbraid (iOS) NÃO entram na v1 — ficam pra v1.1 com
+// marcadores próprios, conforme acordo com o Marketing/CRM.
+//
+// O valor é devolvido CRU (URL-decoded): URLSearchParams.get() já decodifica o
+// percent-encoding do param; cookie/sessionStorage guardam o gclid sem encode.
 export function lerGclidClient(): string | undefined {
   if (typeof window === 'undefined') return undefined
 
   try {
     const sp = new URLSearchParams(window.location.search)
-    const daUrl = sp.get('gclid') || sp.get('gbraid') || sp.get('wbraid')
+    const daUrl = sp.get('gclid') // v1: apenas gclid (já URL-decoded)
     if (gclidValido(daUrl)) return daUrl
   } catch { /* ignora */ }
 
