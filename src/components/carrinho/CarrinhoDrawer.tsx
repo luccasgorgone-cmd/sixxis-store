@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { X, ShoppingBag, Minus, Plus, Trash2, Package, Zap } from 'lucide-react'
+import { X, ShoppingBag, Minus, Plus, Trash2, Package, Zap, Truck, Clock, AlertCircle, Loader2 } from 'lucide-react'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 import { feedIdProduto } from '@/lib/feed-id'
 import { FRETE_COPY } from '@/lib/copy/frete'
+import {
+  cepValido, formatarCep, soDigitosCep, montarProdutosFrete,
+  normalizarRespostaFrete, estadoFreteView, type RespostaFreteNormalizada,
+} from '@/lib/frete-estimativa'
 
 interface UpsellItem {
   id: string
@@ -29,8 +33,56 @@ export default function CarrinhoDrawer() {
   const total = useTotalCarrinho()
   const [upsell, setUpsell] = useState<UpsellItem[]>([])
 
+  // ── Estimativa de frete (CEP antes do checkout) ──────────────
+  const [cepFrete, setCepFrete] = useState('')
+  const [calculandoFrete, setCalculandoFrete] = useState(false)
+  const [freteErro, setFreteErro] = useState('')
+  const [freteResult, setFreteResult] = useState<RespostaFreteNormalizada | null>(null)
+  const estadoFrete = estadoFreteView(calculandoFrete, freteResult)
+
+  // Prefill a partir do CEP salvo (descarta o valor dummy histórico "16015-480").
+  useEffect(() => {
+    const salvo = localStorage.getItem('sixxis_cep') || ''
+    if (salvo && !/^16015-?480$/.test(salvo)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCepFrete(formatarCep(salvo))
+    }
+  }, [])
+
+  const calcularFrete = async () => {
+    if (!cepValido(cepFrete)) {
+      setFreteErro('Digite um CEP válido com 8 dígitos.')
+      return
+    }
+    if (itens.length === 0) return
+    setCalculandoFrete(true)
+    setFreteErro('')
+    setFreteResult(null)
+    try {
+      // Fonte única: /api/frete → resolverFrete (tabela produto × UF + carriers).
+      const res = await fetch('/api/frete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cepDestino: soDigitosCep(cepFrete),
+          produtos: montarProdutosFrete(itens),
+        }),
+      })
+      setFreteResult(normalizarRespostaFrete(await res.json()))
+      try { localStorage.setItem('sixxis_cep', soDigitosCep(cepFrete)) } catch { /* storage indisponível */ }
+    } catch {
+      setFreteResult({
+        status: 'bloqueado',
+        opcoes: [],
+        mensagem: 'Não foi possível calcular o frete. Tente novamente.',
+      })
+    }
+    setCalculandoFrete(false)
+  }
+
   // Fetch upsell products whenever cart opens or items change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!drawerAberto || itens.length === 0) { setUpsell([]); return }
     const exclude = itens.map(i => i.produtoId).join(',')
     fetch(`/api/produtos/upsell?limit=3&exclude=${exclude}`)
@@ -239,7 +291,72 @@ export default function CarrinhoDrawer() {
               <span className="text-sm text-gray-600">Subtotal</span>
               <span className="text-lg font-black text-gray-900">R$ {fmt(total)}</span>
             </div>
-            <p className="text-xs text-gray-400 -mt-1">{FRETE_COPY.calculadoNoCheckout}</p>
+            {/* Estimativa de frete — mostra o custo ANTES do checkout */}
+            <div className="-mt-1">
+              <div className="flex gap-2">
+                <input
+                  inputMode="numeric"
+                  value={cepFrete}
+                  onChange={e => { setCepFrete(formatarCep(e.target.value)); setFreteErro('') }}
+                  onKeyDown={e => e.key === 'Enter' && calcularFrete()}
+                  placeholder="CEP para calcular o frete"
+                  maxLength={9}
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-transparent transition"
+                  aria-label="CEP para calcular o frete"
+                />
+                <button
+                  onClick={calcularFrete}
+                  disabled={!cepValido(cepFrete) || calculandoFrete}
+                  className="shrink-0 flex items-center gap-1.5 bg-[#0f2e2b] hover:bg-[#1a4f4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-3.5 py-2 rounded-xl text-sm transition active:scale-95"
+                >
+                  {calculandoFrete ? <Loader2 size={14} className="animate-spin" /> : <Truck size={14} />}
+                  {calculandoFrete ? FRETE_COPY.calculando : FRETE_COPY.calcular}
+                </button>
+              </div>
+
+              {freteErro && (
+                <p className="text-[11px] text-red-500 mt-1.5 flex items-center gap-1">
+                  <AlertCircle size={11} /> {freteErro}
+                </p>
+              )}
+
+              {estadoFrete === 'ok' && freteResult && (
+                <div className="mt-2 space-y-1.5">
+                  {freteResult.opcoes.map(op => (
+                    <div key={op.id}
+                      className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Truck size={13} className="text-[#3cbfb3] shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-gray-800 truncate">{op.nome}</p>
+                          {op.prazo && (
+                            <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                              <Clock size={9} /> {op.prazo}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <p className={`text-xs font-extrabold shrink-0 ${op.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
+                        {op.preco === 0 ? FRETE_COPY.gratisPreco : `R$ ${fmt(op.preco)}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {estadoFrete === 'a_combinar' && (
+                <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-2">
+                  {FRETE_COPY.aCombinarDescricao}
+                </p>
+              )}
+
+              {(estadoFrete === 'bloqueado' || estadoFrete === 'sem-opcoes') && (
+                <p className="text-[11px] text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 mt-2 flex items-start gap-1.5">
+                  <AlertCircle size={12} className="shrink-0 mt-0.5" />
+                  {freteResult?.mensagem || 'Ainda não entregamos na sua região.'}
+                </p>
+              )}
+            </div>
 
             {/* Selos */}
             <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-xl py-2 px-3 flex-wrap">

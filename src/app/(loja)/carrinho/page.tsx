@@ -18,6 +18,9 @@ import { useRevalidarCupomPersistido } from '@/hooks/useRevalidarCupom'
 import UsarCashback from '@/components/checkout/UsarCashback'
 import SelosConfianca from '@/components/checkout/SelosConfianca'
 import { FRETE_COPY } from '@/lib/copy/frete'
+import {
+  soDigitosCep, cepValido, montarProdutosFrete, normalizarRespostaFrete,
+} from '@/lib/frete-estimativa'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 
@@ -211,35 +214,30 @@ export default function CarrinhoPage() {
 
   // ── CALCULAR FRETE ────────────────────────────────────────
   const calcularFrete = async () => {
-    const cepLimpo = cepInput.replace(/\D/g, '')
-    if (cepLimpo.length < 8 || itens.length === 0) return
+    const cepLimpo = soDigitosCep(cepInput)
+    if (!cepValido(cepLimpo) || itens.length === 0) return
     setCalculandoFrete(true)
     setFreteStatus(null)
     setFreteMsg('')
     setFreteOpcoes([])
     setFreteSelecionado(null)
     try {
-      // Fonte única: tabela produto × UF. A UF é derivada do CEP no servidor.
+      // Fonte única: /api/frete → resolverFrete (tabela produto × UF + carriers).
+      // A UF é derivada do CEP no servidor; montagem/normalização em frete-estimativa.
       const res = await fetch('/api/frete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cepDestino: cepLimpo,
-          produtos: itens.map(i => ({ id: i.produtoId || i.id, quantidade: i.quantidade })),
+          produtos: montarProdutosFrete(itens),
         }),
       })
-      const data = await res.json()
-      const status: 'ok' | 'a_combinar' | 'bloqueado' = data.status ?? 'bloqueado'
-      setFreteStatus(status)
-      setFreteMsg(data.mensagem ?? '')
-      if (status === 'ok') {
-        const opcoes = (data.opcoes ?? []).map(
-          (o: { id: string; nome: string; prazo: string; preco: number }) => ({
-            id: o.id, nome: o.nome, prazo: o.prazo, preco: Number(o.preco),
-          }),
-        )
-        setFreteOpcoes(opcoes)
-        if (opcoes[0]) setFreteSelecionado(opcoes[0])
+      const norm = normalizarRespostaFrete(await res.json())
+      setFreteStatus(norm.status)
+      setFreteMsg(norm.mensagem)
+      if (norm.status === 'ok') {
+        setFreteOpcoes(norm.opcoes)
+        if (norm.opcoes[0]) setFreteSelecionado(norm.opcoes[0])
       }
       localStorage.setItem('sixxis_cep', cepLimpo)
     } catch {
