@@ -36,9 +36,12 @@ function adminLegacyRedirect(pathname: string): boolean {
 }
 
 // ── CLIENTE ──────────────────────────────────────────────────────────────────
-// Sprint 2B: Sixxis exige login antes de checkout/minha-conta/pedidos.
+// Login continua exigido em minha-conta/pedidos. O /checkout foi LIBERADO para
+// convidados (guest checkout): visitante abre /checkout sem redirect p/ login e
+// finaliza até o pagamento sem criar conta. O fluxo logado é inalterado.
+// /checkout/retomar/[id] mantém a própria proteção server-side (page.tsx) por
+// depender de um pedido pertencente ao cliente.
 const CLIENTE_PROTEGIDAS = [
-  /^\/checkout(\/.*)?$/,
   /^\/minha-conta(\/.*)?$/,
   /^\/pedidos(\/.*)?$/,
   /^\/pedido\/[^/]+(\/.*)?$/,
