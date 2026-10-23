@@ -1,8 +1,15 @@
 // Rate-limit por IP/identificador usando Upstash (Redis REST + sliding window).
 //
-// DEGRADAÇÃO GRACIOSA (regra inegociável): se UPSTASH_REDIS_REST_URL ou
-// UPSTASH_REDIS_REST_TOKEN não estiverem definidos, NÃO limita — retorna
-// { success: true } sempre. Assim nada é bloqueado antes das vars existirem.
+// PRODUÇÃO = FAIL-CLOSED quando mal configurado: se UPSTASH_REDIS_REST_URL ou
+// UPSTASH_REDIS_REST_TOKEN não estiverem definidos em produção, NÃO liberamos
+// silenciosamente — retornamos { success: false } (bloqueia), para que um deploy
+// sem rate-limit configurado não rode com login/checkout/reset de senha sem
+// proteção. Em erros de rede do Redis em produção, falhamos fechado apenas nos
+// limiters sensíveis a auth (login/cadastro/esqueci-senha) e mantemos
+// fail-open nos demais (evita derrubar checkout num blip transitório).
+//
+// DEV = degradação graciosa: fora de produção, sem credenciais ou em erro de
+// rede, retorna { success: true } (pula) para não bloquear o ambiente local.
 
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
@@ -26,6 +33,16 @@ const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ra
   'validar-cupom':         { tokens: 20, window: '1 m' },   // 20 validações / 1 min
   'interno-frete':         { tokens: 60, window: '1 m' },   // 60 cotações / 1 min (CRM)
 }
+
+// Limiters que protegem credenciais/auth — em produção falham fechado também em
+// erro de rede do Redis (não só quando desconfigurados).
+const AUTH_SENSITIVE: ReadonlySet<LimiterName> = new Set<LimiterName>([
+  'login',
+  'cadastro',
+  'esqueci-senha',
+])
+
+const IS_PROD = process.env.NODE_ENV === 'production'
 
 let _redis: Redis | null = null
 const _limiters = new Map<LimiterName, Ratelimit>()
@@ -66,14 +83,27 @@ export async function rateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
   const limiter = getLimiter(name)
-  if (!limiter) return { success: true, remaining: -1, reset: 0 } // pula
+  if (!limiter) {
+    if (IS_PROD) {
+      // Fail-closed: rate-limit obrigatório não configurado em produção → bloqueia.
+      console.error(`[ratelimit] Upstash não configurado em produção; bloqueando "${name}" (fail-closed).`)
+      return { success: false, remaining: 0, reset: 0 }
+    }
+    return { success: true, remaining: -1, reset: 0 } // dev → pula
+  }
 
   try {
     const r = await limiter.limit(identifier)
     return { success: r.success, remaining: r.remaining, reset: r.reset }
   } catch {
-    // Erro de rede no Redis não deve derrubar o fluxo — "fail-open".
-    console.error('[ratelimit] falha ao consultar Upstash; liberando requisição')
+    // Erro de rede no Redis: em produção, falha fechado nos limiters sensíveis a
+    // auth (não liberar guessing de senha num blip do Redis); demais mantêm
+    // fail-open para não derrubar checkout/cupom por indisponibilidade transitória.
+    if (IS_PROD && AUTH_SENSITIVE.has(name)) {
+      console.error(`[ratelimit] falha ao consultar Upstash; bloqueando "${name}" (fail-closed, auth-sensitive)`)
+      return { success: false, remaining: 0, reset: 0 }
+    }
+    console.error(`[ratelimit] falha ao consultar Upstash; liberando "${name}" (fail-open)`)
     return { success: true, remaining: -1, reset: 0 }
   }
 }
