@@ -858,46 +858,80 @@ function CheckoutContent() {
     }
     setCarregando(true)
     try {
-      // Persiste documento/telefone no perfil p/ prefill futuro. Não bloqueia o
-      // checkout: falha/conflito é ignorado (ex.: guest sem sessão → 401).
-      // indicadorIE (NF-e): PJ com IE → 1, PJ isento → 2, PF → 9. PJ grava CNPJ
-      // (nunca no campo cpf) + razão social + IE; PF grava cpf, como hoje.
-      try {
-        const indicadorIE = ident.tipoPessoa === 'PJ' ? (ident.isentoIE ? 2 : 1) : 9
-        const perfilBody = ident.tipoPessoa === 'PJ'
-          ? {
-              cnpj:              soDigitos(ident.cpf),
-              razaoSocial:       ident.razaoSocial.trim(),
-              inscricaoEstadual: ident.isentoIE ? null : soDigitos(ident.inscricaoEstadual),
-              indicadorIE,
-              telefone:          soDigitos(ident.telefone),
-            }
-          : {
-              cpf:         soDigitos(ident.cpf),
-              indicadorIE, // 9 — consumidor final PF
-              telefone:    soDigitos(ident.telefone),
-            }
-        await fetch('/api/conta/perfil', {
-          method:  'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(perfilBody),
-        })
-      } catch { /* não bloqueia o pagamento */ }
+      // Convidado (sem sessão) × logado. O convidado NÃO chama /api/conta/perfil
+      // nem /api/enderecos (ambas auth-gated): envia identificação + endereço
+      // inline pro /api/pedidos, que cria o pseudo-cliente/endereço (Option A).
+      const logado = sessionStatus === 'authenticated'
 
-      let enderecoId = enderecoSalvoId
-      // Endereço salvo: reaproveita. Caso contrário, cria um novo.
-      if (!enderecoId) {
-        const er = await fetch('/api/enderecos', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ ...end, cep: end.cep.replace(/\D/g, ''), principal: false }),
-        })
-        if (!er.ok) {
-          const ed = await er.json().catch(() => ({}))
-          throw new Error(ed.error === 'Não autorizado' ? 'Faça login para continuar' : 'Erro ao salvar endereço')
+      // Identificação do convidado. Campo único `cpf` guarda CPF (PF) ou CNPJ
+      // (PJ) — o servidor revalida e normaliza tudo (ver @/lib/guest-checkout).
+      const guestDados = {
+        nome:       ident.nome.trim(),
+        email:      ident.email.trim(),
+        telefone:   ident.telefone,
+        tipoPessoa: ident.tipoPessoa,
+        documento:  ident.cpf,
+        ...(ident.tipoPessoa === 'PJ'
+          ? {
+              razaoSocial:       ident.razaoSocial.trim(),
+              inscricaoEstadual: ident.isentoIE ? undefined : ident.inscricaoEstadual,
+              isentoIE:          ident.isentoIE,
+            }
+          : {}),
+      }
+      const enderecoDados = {
+        cep:         end.cep.replace(/\D/g, ''),
+        logradouro:  end.logradouro,
+        numero:      end.numero,
+        complemento: end.complemento || undefined,
+        bairro:      end.bairro,
+        cidade:      end.cidade,
+        estado:      end.estado,
+      }
+
+      let enderecoId: string | null = null
+      if (logado) {
+        // Persiste documento/telefone no perfil p/ prefill futuro. Não bloqueia o
+        // checkout: falha/conflito é ignorado.
+        // indicadorIE (NF-e): PJ com IE → 1, PJ isento → 2, PF → 9. PJ grava CNPJ
+        // (nunca no campo cpf) + razão social + IE; PF grava cpf, como hoje.
+        try {
+          const indicadorIE = ident.tipoPessoa === 'PJ' ? (ident.isentoIE ? 2 : 1) : 9
+          const perfilBody = ident.tipoPessoa === 'PJ'
+            ? {
+                cnpj:              soDigitos(ident.cpf),
+                razaoSocial:       ident.razaoSocial.trim(),
+                inscricaoEstadual: ident.isentoIE ? null : soDigitos(ident.inscricaoEstadual),
+                indicadorIE,
+                telefone:          soDigitos(ident.telefone),
+              }
+            : {
+                cpf:         soDigitos(ident.cpf),
+                indicadorIE, // 9 — consumidor final PF
+                telefone:    soDigitos(ident.telefone),
+              }
+          await fetch('/api/conta/perfil', {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(perfilBody),
+          })
+        } catch { /* não bloqueia o pagamento */ }
+
+        enderecoId = enderecoSalvoId
+        // Endereço salvo: reaproveita. Caso contrário, cria um novo.
+        if (!enderecoId) {
+          const er = await fetch('/api/enderecos', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ ...enderecoDados, principal: false }),
+          })
+          if (!er.ok) {
+            const ed = await er.json().catch(() => ({}))
+            throw new Error(ed.error === 'Não autorizado' ? 'Faça login para continuar' : 'Erro ao salvar endereço')
+          }
+          const data = await er.json()
+          enderecoId = data.enderecoId
         }
-        const data = await er.json()
-        enderecoId = data.enderecoId
       }
 
       // Atribuição Meta: cookies _fbp/_fbc (ou _fbc montado do ?fbclid=) p/ o
@@ -913,7 +947,8 @@ function CheckoutContent() {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          enderecoId,
+          // Logado manda enderecoId; convidado manda guest+endereco inline.
+          ...(logado ? { enderecoId } : { guest: guestDados, endereco: enderecoDados }),
           formaPagamento: 'mercado_pago',
           fbp,
           fbc,

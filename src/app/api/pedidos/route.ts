@@ -7,6 +7,9 @@ import { resgatarCashback } from '@/lib/cashback'
 import { avaliarCupom } from '@/lib/cupom'
 import { calcularPromoServidor } from '@/lib/promo-segunda-unidade'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
+import {
+  guestDadosSchema, guestEnderecoSchema, montarClienteGuestData,
+} from '@/lib/guest-checkout'
 
 const itemSchema = z.object({
   produtoId:    z.string(),
@@ -16,7 +19,12 @@ const itemSchema = z.object({
 })
 
 const criarPedidoSchema = z.object({
-  enderecoId:     z.string(),
+  // Logado: enderecoId do /api/enderecos. Convidado: NÃO envia enderecoId e sim
+  // `guest` + `endereco` inline (a rota cria pseudo-cliente/endereço). Um dos
+  // dois caminhos é exigido no handler conforme exista sessão.
+  enderecoId:     z.string().optional(),
+  guest:          guestDadosSchema.optional(),
+  endereco:       guestEnderecoSchema.optional(),
   formaPagamento: z.string(),
   frete:          z.number().nonnegative(),
   // Modalidade escolhida pelo cliente. O preço/prazo é sempre re-resolvido no
@@ -86,14 +94,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const session = await auth()
-  if (!session?.user?.id) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 })
-  }
-
-  // Gate autoritativo: cliente bloqueado NÃO cria pedido, mesmo que a UI deixe.
-  if (await isClienteBloqueado(session.user.id)) {
-    return Response.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
-  }
 
   const body = await request.json()
   const parsed = criarPedidoSchema.safeParse(body)
@@ -102,7 +102,39 @@ export async function POST(request: NextRequest) {
   }
 
   // desconto do client é IGNORADO — recomputado no servidor a partir do cupom.
-  const { enderecoId, formaPagamento, freteTipo, itens, cupomCodigo, cashbackUsar, idempotencyKey, fbp, fbc, gaClientId, gaSessionId, gclid, gbraid, wbraid } = parsed.data
+  const { enderecoId: enderecoIdBody, guest, endereco: enderecoGuest, formaPagamento, freteTipo, itens, cupomCodigo, cashbackUsar, idempotencyKey, fbp, fbc, gaClientId, gaSessionId, gclid, gbraid, wbraid } = parsed.data
+
+  // ── Resolver o cliente: logado (sessão) OU convidado (pseudo-cliente) ───────
+  // Checkout convidado (Option A): sem sessão, exige `guest` + `endereco` e
+  // cria/reaproveita um Cliente chaveado pelo email (upsert; senha '' =
+  // não-logável via credentials) — satisfaz as FKs NOT NULL clienteId/enderecoId
+  // SEM migração. O caminho logado abaixo é idêntico ao de sempre.
+  const isGuest = !session?.user?.id
+  let clienteId: string
+
+  if (!isGuest) {
+    clienteId = session!.user!.id
+  } else {
+    if (!guest || !enderecoGuest) {
+      return Response.json({ error: 'Informe seus dados e endereço para continuar.' }, { status: 400 })
+    }
+    const clienteData = montarClienteGuestData(guest)
+    // upsert por email: reaproveita conta existente (sem sobrescrever) ou cria
+    // o pseudo-cliente. Também resolve a corrida de 1º pedido (email @unique).
+    const clienteGuest = await prisma.cliente.upsert({
+      where:  { email: clienteData.email },
+      create: clienteData,
+      update: {},
+      select: { id: true },
+    })
+    clienteId = clienteGuest.id
+  }
+
+  // Gate autoritativo: cliente bloqueado NÃO cria pedido (vale também quando o
+  // email do convidado cai numa conta existente que está bloqueada).
+  if (await isClienteBloqueado(clienteId)) {
+    return Response.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
+  }
 
   // Atribuição Meta: IP/UA do request ORIGINAL do cliente (este POST), p/ o CAPI
   // Purchase — o webhook do MP vem do servidor do MP, não serviria. Persistidos
@@ -114,11 +146,11 @@ export async function POST(request: NextRequest) {
   const clientUserAgent = request.headers.get('user-agent') || null
 
   // ── Idempotência: cliques repetidos com a MESMA key retornam o mesmo pedido ──
-  // (não cria pedido/cobrança duplicado). Checagem antecipada; a condição de
-  // corrida é coberta pelo índice @unique + catch P2002 na criação abaixo.
+  // (não cria pedido/cobrança duplicado). Por clienteId — que é estável por email
+  // também no convidado. Corrida coberta pelo @unique + catch P2002 na criação.
   if (idempotencyKey) {
     const jaCriado = await prisma.pedido.findFirst({
-      where:  { clienteId: session.user.id, idempotencyKey },
+      where:  { clienteId, idempotencyKey },
       select: { id: true, status: true, total: true, cashbackUsado: true },
     })
     if (jaCriado) {
@@ -134,13 +166,31 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Endereço deve pertencer ao cliente — e dele extraímos a UF de destino.
-  const endereco = await prisma.endereco.findUnique({
-    where: { id: enderecoId },
-    select: { clienteId: true, estado: true, cep: true },
-  })
-  if (!endereco || endereco.clienteId !== session.user.id) {
-    return Response.json({ error: 'Endereço inválido' }, { status: 400 })
+  // ── Endereço (dele extraímos a UF/CEP de destino) ──────────────────────────
+  // Logado: usa o enderecoId enviado e confere a posse. Convidado: cria o
+  // endereço inline sob o pseudo-cliente (posse trivialmente satisfeita).
+  let enderecoId: string
+  let endereco: { estado: string; cep: string }
+  if (isGuest) {
+    const novo = await prisma.endereco.create({
+      data:   { ...enderecoGuest!, clienteId },
+      select: { id: true, estado: true, cep: true },
+    })
+    enderecoId = novo.id
+    endereco   = { estado: novo.estado, cep: novo.cep }
+  } else {
+    if (!enderecoIdBody) {
+      return Response.json({ error: 'Endereço inválido' }, { status: 400 })
+    }
+    const existente = await prisma.endereco.findUnique({
+      where:  { id: enderecoIdBody },
+      select: { clienteId: true, estado: true, cep: true },
+    })
+    if (!existente || existente.clienteId !== clienteId) {
+      return Response.json({ error: 'Endereço inválido' }, { status: 400 })
+    }
+    enderecoId = enderecoIdBody
+    endereco   = { estado: existente.estado, cep: existente.cep }
   }
 
   // Buscar produtos e variações para calcular preços
@@ -240,7 +290,9 @@ export async function POST(request: NextRequest) {
       produtoId: i.produtoId,
       subtotal:  i.precoUnitario * i.quantidade,
     }))
-    const avaliacao = await avaliarCupom(cupom, subtotal, session.user.id, itensCupom)
+    // Convidado avalia o cupom como SEM login (clienteId null): preserva a regra
+    // de que cupom de 1ª compra exige conta (cupom.ts). Logado usa seu clienteId.
+    const avaliacao = await avaliarCupom(cupom, subtotal, isGuest ? null : clienteId, itensCupom)
     if (avaliacao.valido && cupom) {
       descontoFinal = avaliacao.desconto ?? 0
       cupomCodigoFinal = cupom.codigo
@@ -292,7 +344,7 @@ export async function POST(request: NextRequest) {
   try {
     pedido = await prisma.pedido.create({
       data: {
-        clienteId:      session.user.id,
+        clienteId,
         enderecoId,
         formaPagamento,
         frete:          freteValor,
@@ -331,7 +383,7 @@ export async function POST(request: NextRequest) {
     // dispara P2002. Retorna o pedido já criado, sem duplicar nem debitar de novo.
     if ((e as { code?: string }).code === 'P2002' && idempotencyKey) {
       const jaCriado = await prisma.pedido.findFirst({
-        where:  { clienteId: session.user.id, idempotencyKey },
+        where:  { clienteId, idempotencyKey },
         select: { id: true, status: true, total: true, cashbackUsado: true },
       })
       if (jaCriado) {
@@ -378,9 +430,12 @@ export async function POST(request: NextRequest) {
   // Só em pedido real (não em orçamento 'aguardando_frete'). O valor é capado
   // em min(solicitado, saldo disponível, 10% do subtotal de produtos) e abatido
   // do total. Idempotente por natureza (roda 1x na criação do pedido).
+  // Convidado NÃO resgata cashback: sem login não dá pra garantir a posse do
+  // saldo (o email poderia cair numa conta existente com saldo). Só o fluxo
+  // logado abate cashback. UI do guest também não oferece a opção.
   let cashbackAplicado = 0
-  if (statusPedido === 'pendente' && cashbackUsar && cashbackUsar > 0) {
-    cashbackAplicado = await resgatarCashback(session.user.id, cashbackUsar, subtotal, pedido.id)
+  if (!isGuest && statusPedido === 'pendente' && cashbackUsar && cashbackUsar > 0) {
+    cashbackAplicado = await resgatarCashback(clienteId, cashbackUsar, subtotal, pedido.id)
     if (cashbackAplicado > 0) {
       await prisma.pedido.update({
         where: { id: pedido.id },
@@ -395,7 +450,7 @@ export async function POST(request: NextRequest) {
   // nunca quebra a criação do pedido.
   try {
     await prisma.carrinhoCliente.updateMany({
-      where: { clienteId: session.user.id },
+      where: { clienteId },
       data:  { status: 'convertido' },
     })
   } catch (e) {
