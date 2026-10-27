@@ -13,6 +13,7 @@ import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/pro
 import { trackAddToCart } from '@/lib/analytics/events'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { feedId } from '@/lib/feed-id'
+import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { inferirTipoVariacao } from '@/lib/variacao'
 import { estoqueDisponivel } from '@/lib/produto-variacao'
@@ -136,6 +137,8 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
   }, [])
 
   const precoBase = produto.precoPromocional ?? produto.preco
+  // Promo "2ª unidade" vigente p/ este produto (casa por sku ?? slug = feedId).
+  const promoBadge = promoVigentePorFeedId(produto.sku ?? produto.slug)
   const precoAtual = variacaoSelecionada?.preco ?? precoBase
   const precoOriginal = produto.preco
   const desconto = precoOriginal > precoAtual
@@ -341,6 +344,16 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
           <span className="bg-[#dc2626] text-white text-xs font-black px-2.5 py-1 rounded-lg">
             Baixou {desconto}%
           </span>
+        </div>
+      )}
+
+      {/* Badge promo "2ª unidade" — desconto automático por quantidade no carrinho */}
+      {promoBadge && (
+        <div className="flex items-center gap-2 mb-2">
+          <span className="bg-[#3cbfb3] text-white text-xs font-black px-2.5 py-1 rounded-lg">
+            🔥 {promoBadge.descricao}
+          </span>
+          <span className="text-xs text-gray-500">leve 2 e economize</span>
         </div>
       )}
 

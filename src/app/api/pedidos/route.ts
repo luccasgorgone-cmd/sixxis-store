@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { resolverFrete } from '@/lib/frete-resolver'
 import { resgatarCashback } from '@/lib/cashback'
 import { avaliarCupom } from '@/lib/cupom'
+import { calcularPromoServidor } from '@/lib/promo-segunda-unidade'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 
 const itemSchema = z.object({
@@ -209,13 +210,28 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  // ── Barreira final do cupom (server-side, autoritativa) ────────────────────
-  // Revalida o cupom (inclui a regra de 1ª compra) e RECOMPUTA o desconto sobre
-  // o subtotal. Se a regra falhar, zera o desconto e NÃO grava o cupom — assim
-  // nem o desconto nem o registro de uso acontecem para um cupom indevido.
+  // ── Promo "2ª unidade" (server-side, autoritativa) ─────────────────────────
+  // Desconto automático por quantidade (floor(qtd/2) a 50%), casado pela chave
+  // de negócio Produto.erpProdutoId. Config/regra em lib/promo-segunda-unidade.
+  const promo = calcularPromoServidor(
+    itensPedido.map((i) => ({
+      erpProdutoId:  produtoMap.get(i.produtoId)!.erpProdutoId,
+      precoUnitario: i.precoUnitario,
+      quantidade:    i.quantidade,
+    })),
+  )
+
+  // ── Desconto final: promo OU cupom — NUNCA os dois ─────────────────────────
+  // Regra de negócio: com a promo da 2ª unidade ativa, o cupom é ignorado no
+  // pedido inteiro (não acumula). Sem promo, revalida o cupom (inclui a regra
+  // de 1ª compra) e RECOMPUTA o desconto sobre o subtotal; se a regra falhar,
+  // zera o desconto e NÃO grava o cupom (nem desconto nem registro de uso).
   let descontoFinal = 0
   let cupomCodigoFinal: string | null = null
-  if (cupomCodigo) {
+  if (promo.ativo) {
+    // promo não excede o subtotal (segurança).
+    descontoFinal = Math.min(promo.desconto, subtotal)
+  } else if (cupomCodigo) {
     const cupom = await prisma.cupom.findUnique({ where: { codigo: cupomCodigo.toUpperCase().trim() } })
     const avaliacao = await avaliarCupom(cupom, subtotal, session.user.id)
     if (avaliacao.valido && cupom) {

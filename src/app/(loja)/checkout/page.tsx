@@ -10,6 +10,7 @@ import { useRevalidarCupomPersistido } from '@/hooks/useRevalidarCupom'
 import {
   type TipoCupom, descricaoCupom, calcularDescontoCupom,
 } from '@/lib/preco-cupom'
+import { calcularPromoCliente } from '@/lib/promo-segunda-unidade'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -214,11 +215,14 @@ interface ResumoProps {
   freteStatus: FreteStatus | null
   desconto:    number
   cupom:       { codigo: string; desconto: number } | null
+  // Promo "2ª unidade" aplicada (desconto automático por quantidade). Quando
+  // presente, substitui a linha do cupom no resumo (não acumulam).
+  promo?:      { descricao: string | null; desconto: number } | null
   totalFinal:  number
   cashback?:   number
 }
 
-function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, totalFinal, cashback = 0 }: ResumoProps) {
+function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, promo, totalFinal, cashback = 0 }: ResumoProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden border-l-4 border-l-[#3cbfb3]">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -272,7 +276,12 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, tota
             <span className="font-semibold text-amber-600">{FRETE_COPY.aCombinar}</span>
           </div>
         )}
-        {cupom && (
+        {promo ? (
+          <div className="flex justify-between text-sm text-green-600 font-bold">
+            <span>{promo.descricao ?? 'Promo'}</span>
+            <span>-R$ {moeda(promo.desconto)}</span>
+          </div>
+        ) : cupom && (
           <div className="flex justify-between text-sm text-green-600 font-bold">
             <span>Cupom {cupom.codigo}</span>
             <span>-R$ {moeda(desconto)}</span>
@@ -616,7 +625,13 @@ function CheckoutContent() {
 
   const freteSelObj = opcoesFrete.find((o) => o.id === freteTipoSel) ?? null
   const frete       = freteStatus === 'ok' ? (freteSelObj?.preco ?? 0) : 0
-  const desconto    = cupom?.desconto ?? 0
+  // Promo "2ª unidade" (exibição; o servidor é autoritativo). Ativa → não
+  // acumula com cupom: o desconto vem da promo e o campo de cupom é bloqueado.
+  const promo        = calcularPromoCliente(
+    itens.map((i) => ({ feedId: i.feedId, preco: i.preco, quantidade: i.quantidade })),
+  )
+  const cupomBloqueado = promo.ativo
+  const desconto    = promo.ativo ? Math.min(promo.desconto, total) : (cupom?.desconto ?? 0)
   // Cashback aplicado (capado a 10% do subtotal de produtos pelo componente; o
   // servidor recapa por segurança). Só vale em pedido real (não em orçamento).
   const cashbackAplicado = freteStatus === 'a_combinar' ? 0 : cashbackUsar
@@ -1005,6 +1020,7 @@ function CheckoutContent() {
 
   const resumoProps: ResumoProps = {
     itens, total, frete, freteStatus, desconto, cupom, totalFinal,
+    promo: promo.ativo ? { descricao: promo.descricao, desconto } : null,
     cashback: cashbackAplicado,
   }
 
@@ -1372,11 +1388,17 @@ function CheckoutContent() {
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                         <Tag size={11} /> Cupom de Desconto
                       </p>
-                      <CupomField
-                        cupom={cupom} cupomInput={cupomInput} setCupomInput={v => { setCupomInput(v); setCupomErro('') }}
-                        cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom} aviso={avisoCupom}
-                        remover={() => { setCupom(null); setCupomInput('') }}
-                      />
+                      {cupomBloqueado ? (
+                        <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5">
+                          {promo.descricao ?? 'Promo'} aplicada — não acumula com cupom.
+                        </p>
+                      ) : (
+                        <CupomField
+                          cupom={cupom} cupomInput={cupomInput} setCupomInput={v => { setCupomInput(v); setCupomErro('') }}
+                          cupomErro={cupomErro} cupomLoading={cupomLoading} aplicarCupom={aplicarCupom} aviso={avisoCupom}
+                          remover={() => { setCupom(null); setCupomInput('') }}
+                        />
+                      )}
                     </div>
 
                     {freteStatus !== 'a_combinar' && (

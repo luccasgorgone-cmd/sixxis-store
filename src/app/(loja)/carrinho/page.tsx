@@ -11,6 +11,7 @@ import {
   type TipoCupom,
   descricaoCupom, calcularDescontoCupom,
 } from '@/lib/preco-cupom'
+import { calcularPromoCliente } from '@/lib/promo-segunda-unidade'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { validarCupomRemoto } from '@/lib/cupom-client'
 import { useRevalidarCupomPersistido } from '@/hooks/useRevalidarCupom'
@@ -26,6 +27,8 @@ interface CarrinhoItem {
   produtoId?: string
   nome: string
   slug: string
+  // g:id do feed (sku ?? slug) — usado p/ casar a promo "2ª unidade" na exibição.
+  feedId?: string
   preco: number
   precoPromocional?: number
   imagem?: string
@@ -47,6 +50,7 @@ function normalizeZustandItem(i: any): CarrinhoItem {
     produtoId: i.produtoId || i.id,
     nome: i.nome || '',
     slug: i.slug || i.produtoId || i.id || '',
+    feedId: i.feedId,
     preco: i.precoOriginal ?? i.preco ?? 0,
     precoPromocional: i.precoOriginal ? (i.preco ?? undefined) : i.precoPromocional,
     imagem: i.imagem,
@@ -251,10 +255,17 @@ export default function CarrinhoPage() {
   const descontoCupom = cupomAplicado
     ? calcularDescontoCupom(cupomAplicado.tipo, cupomAplicado.valor, subtotal)
     : 0
+  // Promo "2ª unidade" (exibição; servidor é autoritativo). Ativa → não acumula
+  // com cupom: o desconto vem da promo e o campo de cupom fica bloqueado.
+  const promo = calcularPromoCliente(
+    itens.map((i) => ({ feedId: i.feedId ?? i.slug, preco: i.precoPromocional ?? i.preco, quantidade: i.quantidade })),
+  )
+  const cupomBloqueado = promo.ativo
+  const descontoEfetivo = promo.ativo ? Math.min(promo.desconto, subtotal) : descontoCupom
   const valorFrete = freteSelecionado?.preco ?? 0
   // Cashback aplicável só faz sentido sobre produtos; nunca deixa o total < 0.
-  const cashbackAplicado = Math.min(cashbackCart, subtotal - descontoCupom)
-  const totalFinal = Math.max(0, subtotal - descontoCupom + valorFrete - cashbackAplicado)
+  const cashbackAplicado = Math.min(cashbackCart, subtotal - descontoEfetivo)
+  const totalFinal = Math.max(0, subtotal - descontoEfetivo + valorFrete - cashbackAplicado)
   const totalPix = precoPix(totalFinal)
 
   const totalItens = itens.reduce((s, i) => s + i.quantidade, 0)
@@ -442,7 +453,11 @@ export default function CarrinhoPage() {
                 </p>
               )}
 
-              {cupomAplicado ? (
+              {cupomBloqueado ? (
+                <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                  {promo.descricao ?? 'Promo'} aplicada — não acumula com cupom.
+                </p>
+              ) : cupomAplicado ? (
                 <div className="flex items-center justify-between bg-emerald-50
                                 border border-emerald-200 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-2.5">
@@ -619,7 +634,16 @@ export default function CarrinhoPage() {
                   </span>
                   <span className="font-semibold text-gray-900">{fmtBRL(subtotal)}</span>
                 </div>
-                {cupomAplicado && (
+                {promo.ativo ? (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-emerald-600 flex items-center gap-1">
+                      <Tag size={11} /> {promo.descricao ?? 'Promo'}
+                    </span>
+                    <span className="font-bold text-emerald-600">
+                      -{fmtBRL(descontoEfetivo)}
+                    </span>
+                  </div>
+                ) : cupomAplicado && (
                   <div className="flex justify-between text-sm">
                     <span className="text-emerald-600 flex items-center gap-1">
                       <Tag size={11} /> {cupomAplicado.codigo}
