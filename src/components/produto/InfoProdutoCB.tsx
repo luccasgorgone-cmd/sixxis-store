@@ -347,13 +347,21 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
         </div>
       )}
 
-      {/* Badge promo "2ª unidade" — desconto automático por quantidade no carrinho */}
+      {/* Promo "2ª unidade" — bloco informativo; desconto automático por quantidade no carrinho */}
       {promoBadge && (
-        <div className="flex items-center gap-2 mb-2">
-          <span className="bg-[#3cbfb3] text-white text-xs font-black px-2.5 py-1 rounded-lg">
-            🔥 {promoBadge.descricao}
-          </span>
-          <span className="text-xs text-gray-500">leve 2 e economize</span>
+        <div className="mb-3 rounded-xl border border-[#3cbfb3]/30 bg-[#f0fffe] p-3">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="bg-[#3cbfb3] text-white text-xs font-black px-2.5 py-1 rounded-lg">
+              🔥 {promoBadge.descricao}
+            </span>
+          </div>
+          <p className="text-sm text-gray-700 leading-snug">
+            Compre <strong>2 unidades</strong> e a <strong>2ª sai com {promoBadge.percentual}% OFF</strong>. O
+            desconto é aplicado <strong>automaticamente no carrinho</strong>.
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Válido até {promoBadge.fim.slice(8, 10)}/{promoBadge.fim.slice(5, 7)} · não acumula com cupom
+          </p>
         </div>
       )}
 
