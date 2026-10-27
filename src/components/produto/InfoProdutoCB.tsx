@@ -547,6 +547,17 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
         </div>
       )}
 
+      {/* Lembrete da promo no ponto de decisão — além do selo do topo, reforça o "leve 2" antes do CTA */}
+      {promoBadge && !esgotado && (
+        <div className="-mt-1 mb-5 flex items-start gap-2 rounded-xl bg-[#e8f8f7] border border-[#3cbfb3]/30 px-3 py-2.5">
+          <span className="text-base leading-none">💡</span>
+          <p className="text-xs font-semibold text-[#1a4f4a] leading-snug">
+            Leve <strong>2 unidades</strong> e a 2ª sai com <strong>{promoBadge.percentual}% OFF</strong> — o
+            desconto entra <strong>automaticamente no carrinho</strong>.
+          </p>
+        </div>
+      )}
+
       {/* Botões */}
       <div className="flex flex-col gap-3 mb-6 px-4 md:px-0">
         {/* COMPRAR AGORA — principal, sempre sólido */}
