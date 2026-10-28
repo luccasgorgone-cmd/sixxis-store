@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { X, Wind, Fan, Bike, HelpCircle, Info, Phone, User, UserPlus, Zap, Mail, Clock } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
+import WaLink from './WaLink'
 
 interface Props {
   isOpen: boolean
@@ -140,15 +141,14 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
 
         {/* Footer do menu — contato e redes sociais */}
         <div className="px-5 py-5 border-t border-white/10 space-y-3">
-          <a
-            href="https://wa.me/5518997474701"
-            target="_blank"
-            rel="noopener noreferrer"
+          <WaLink
+            fone="5518997474701"
+            texto="Olá! Vim pelo site Sixxis e gostaria de mais informações."
             className="flex items-center gap-3 w-full bg-[#25D366] text-white text-sm font-semibold px-4 py-3 rounded-xl transition hover:bg-[#128C7E]"
           >
             <WaIcon />
             (18) 99747-4701 — Vendas
-          </a>
+          </WaLink>
           <div className="flex items-center gap-2 text-xs text-white/50">
             <Clock size={12} />
             <span>Seg–Sex 8h às 18h&nbsp;&nbsp;|&nbsp;&nbsp;Sáb 8h às 12h</span>
