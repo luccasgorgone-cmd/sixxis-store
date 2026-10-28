@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import {
   type TipoCupom,
-  descricaoCupom, calcularDescontoCupom,
+  descricaoCupom,
 } from '@/lib/preco-cupom'
 import { calcularPromoCliente } from '@/lib/promo-segunda-unidade'
 import { useCarrinho } from '@/hooks/useCarrinho'
@@ -257,8 +257,13 @@ export default function CarrinhoPage() {
   // reconfirma com o servidor e remove sozinho se não valer mais.
   const { aviso: avisoCupom, limparAviso: limparAvisoCupom } = useRevalidarCupomPersistido(subtotal)
 
+  // Desconto do cupom = valor ESCOPADO que o servidor calculou (avaliarCupom),
+  // NUNCA 10% recalculado sobre o carrinho inteiro. Cupom de modelo único
+  // (produtoIds) incide só no subtotal dos itens elegíveis; recalcular por % aqui
+  // dava desconto no carrinho todo. useRevalidarCupomPersistido mantém esse
+  // número em dia quando a quantidade muda. Clampa ao subtotal por segurança.
   const descontoCupom = cupomAplicado
-    ? calcularDescontoCupom(cupomAplicado.tipo, cupomAplicado.valor, subtotal)
+    ? Math.min(cupomAplicado.desconto, subtotal)
     : 0
   // Promo "2ª unidade" (exibição; servidor é autoritativo). Ativa → não acumula
   // com cupom: o desconto vem da promo e o campo de cupom fica bloqueado.

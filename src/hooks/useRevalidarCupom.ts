@@ -82,11 +82,15 @@ export function useRevalidarCupomPersistido(base: number) {
       }
 
       // Válido: só regrava se o servidor discordar do que está salvo — assim o
-      // caso comum (cupom intacto) não dispara nenhum re-render.
+      // caso comum (cupom intacto) não dispara nenhum re-render. `desconto` entra
+      // na comparação porque a UI exibe o valor ESCOPADO do servidor: ao mudar a
+      // quantidade, o desconto do cupom de modelo único muda sem que tipo/valor
+      // mudem, e sem isto o resumo ficaria com o desconto antigo.
       const mudou =
         r.cupom.tipo !== cupom.tipo ||
         r.cupom.valor !== cupom.valor ||
-        r.cupom.codigo !== cupom.codigo
+        r.cupom.codigo !== cupom.codigo ||
+        r.cupom.desconto !== cupom.desconto
       if (mudou) {
         setCupom({
           codigo:    r.cupom.codigo,
