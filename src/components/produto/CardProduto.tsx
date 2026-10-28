@@ -13,6 +13,7 @@ import { feedId, feedIdProduto } from '@/lib/feed-id'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import { precoPix as aplicarDescontoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { inferirTipoVariacao } from '@/lib/variacao'
+import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import type { Produto } from '@/types'
 
@@ -50,6 +51,11 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const precoPix = aplicarDescontoPix(precoFinal)
   const esgotado = (produto.estoque ?? 1) <= 0
   const isNovo = !desconto
+
+  // Badge da promo "2ª unidade" — dirigido pela MESMA config da PDP
+  // (lib/promo-segunda-unidade), casando por feedId = sku ?? slug. Some sozinho
+  // quando a janela de vigência fecha; nada de SKU chumbado no card.
+  const promoSegunda = promoVigentePorFeedId(produto.sku ?? produto.slug)
 
   // Produto com variação (voltagem/cor) nunca pode ir pro carrinho sem a escolha
   // feita ativamente: adicionar sem escolher já gerou pedido com voltagem nula
@@ -260,6 +266,16 @@ export default function CardProduto({ produto, priority = false }: Props) {
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package size={42} className="text-gray-200" />
+            </div>
+          )}
+
+          {/* Badge promo "2ª unidade" — canto inferior esquerdo p/ não colidir com
+              desconto/NOVO (sup. esq.) nem favoritar (sup. dir.). Config-driven. */}
+          {promoSegunda && !esgotado && (
+            <div className="absolute bottom-2.5 left-2.5 z-10">
+              <span className="bg-[#0f2e2b] text-white text-[10px] font-black px-2 py-0.5 rounded-md ring-1 ring-[#3cbfb3]/40 shadow-sm">
+                🔥 2ª un. −{promoSegunda.percentual}%
+              </span>
             </div>
           )}
 

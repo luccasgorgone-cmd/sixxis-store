@@ -72,6 +72,11 @@ function vigente(p: PromoSegundaUnidade, agora: Date): boolean {
   return t >= ini && t <= fim
 }
 
+/** Todas as promos vigentes agora. Útil para a vitrine decidir o que destacar. */
+export function promosVigentes(agora: Date = new Date()): PromoSegundaUnidade[] {
+  return PROMOS_SEGUNDA_UNIDADE.filter((p) => vigente(p, agora))
+}
+
 /** Promo vigente para um erpProdutoId (ou null). Útil para badge na vitrine. */
 export function promoVigentePorErp(
   erpProdutoId: string,
