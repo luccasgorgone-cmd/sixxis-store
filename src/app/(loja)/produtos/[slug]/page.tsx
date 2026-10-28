@@ -2,6 +2,7 @@ import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
+import { cuponsAplicaveisAoProduto } from '@/lib/cupom-pdp'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import type { GaleriaItemCB } from '@/components/produto/GaleriaCB'
 import ProdutoGaleriaInfo from '@/components/produto/ProdutoGaleriaInfo'
@@ -145,7 +146,7 @@ export default async function ProdutoPage({
 }) {
   const [{ slug }, query] = await Promise.all([params, searchParams])
 
-  const [produto, taxaConfig, avaliacoesAgg] = await Promise.all([
+  const [produto, taxaConfig, avaliacoesAgg, cuponsAtivos] = await Promise.all([
     getProdutoPorSlug(slug),
     prisma.configuracao.findUnique({ where: { chave: 'juros_cartao_taxa_mensal' } }),
     // Agregação no banco em vez de carregar todas as linhas de avaliacoes só
@@ -155,9 +156,27 @@ export default async function ProdutoPage({
       _avg: { nota: true },
       _count: { _all: true },
     }),
+    // Cupons ATIVOS escopados a algum produto (produtoIds != null), dentro da
+    // validade e não-primeira-compra (esses são perk de login, não cabem na PDP
+    // pública). A tabela Cupom é pequena; filtramos por ESTE produto em JS logo
+    // abaixo porque produtoIds é um CSV de ids.
+    prisma.cupom.findMany({
+      where: {
+        ativo: true,
+        primeiraCompra: false,
+        produtoIds: { not: null },
+        OR: [{ validade: null }, { validade: { gte: new Date() } }],
+      },
+      select: { codigo: true, tipo: true, valor: true, descricao: true, produtoIds: true, usoMaximo: true, totalUsos: true },
+    }),
   ])
 
   if (!produto || !produto.ativo) notFound()
+
+  // Casa os cupons escopados com ESTE produto (membership exata no CSV, esgotado
+  // descartado). Só callout informativo — a autoridade do desconto continua no
+  // /api/pedidos (avaliarCupom recomputa tudo).
+  const cuponsProduto = cuponsAplicaveisAoProduto(cuponsAtivos, produto.id)
 
   const taxaJuros = Number(taxaConfig?.valor || 2.99)
 
@@ -342,6 +361,7 @@ export default async function ProdutoPage({
             totalAvaliacoes={totalAv}
             itensIniciais={itens}
             imagensPorVariacao={imagensPorVariacao}
+            cuponsProduto={cuponsProduto}
             especificacoes={especificacoes.length > 0 ? especificacoes : undefined}
           />
         </div>

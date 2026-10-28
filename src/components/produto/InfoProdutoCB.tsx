@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ShoppingCart, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart, Flame,
+  ShoppingCart, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart, Flame, Ticket,
 } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
@@ -17,6 +17,7 @@ import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { inferirTipoVariacao } from '@/lib/variacao'
 import { estoqueDisponivel } from '@/lib/produto-variacao'
+import { beneficioCupomTexto, type CupomProduto } from '@/lib/cupom-pdp'
 
 interface Variacao {
   id: string
@@ -89,6 +90,7 @@ interface Props {
   mediaAvaliacoes: number
   totalAvaliacoes: number
   imagensPorVariacao?: Record<string, string[]>
+  cuponsProduto?: CupomProduto[]
   onVariacaoChange?: (variacaoNome: string | null) => void
 }
 
@@ -96,7 +98,7 @@ function fmt(v: number) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, onVariacaoChange }: Props) {
+export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, mediaAvaliacoes, totalAvaliacoes, imagensPorVariacao, cuponsProduto, onVariacaoChange }: Props) {
   const router = useRouter()
   const { adicionarItem, setDrawerAberto } = useCarrinho()
   const favIds = useFavoritos((s) => s.ids)
@@ -127,6 +129,17 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
   const [parcelasAberto, setParcelasAberto] = useState(false)
   const [quantidade, setQuantidade] = useState(1)
   const [modalVariacaoAberto, setModalVariacaoAberto] = useState(false)
+  const [cupomCopiado, setCupomCopiado] = useState<string | null>(null)
+
+  // Copia o código do cupom p/ a área de transferência. Fallback silencioso: se
+  // a clipboard API não existir (http/contexto inseguro), só não marca copiado.
+  async function copiarCupom(codigo: string) {
+    try {
+      await navigator.clipboard?.writeText(codigo)
+      setCupomCopiado(codigo)
+      setTimeout(() => setCupomCopiado((c) => (c === codigo ? null : c)), 2000)
+    } catch { /* clipboard indisponível — código fica visível p/ cópia manual */ }
+  }
 
   // On mount, sync the default color selection with the gallery
   useEffect(() => {
@@ -363,6 +376,44 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
           <p className="text-xs text-[#1a4f4a]/70 mt-1">
             Válido até {promoBadge.fim.slice(8, 10)}/{promoBadge.fim.slice(5, 7)} · não acumula com cupom
           </p>
+        </div>
+      )}
+
+      {/* Cupom(s) exclusivo(s) deste produto — callout informativo. O desconto
+          real é recomputado no servidor (/api/pedidos). */}
+      {cuponsProduto && cuponsProduto.length > 0 && (
+        <div className="mb-3 space-y-2">
+          {cuponsProduto.map((c) => (
+            <div key={c.codigo} className="rounded-xl border border-dashed border-[#3cbfb3]/60 bg-[#f0fffe] p-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="inline-flex items-center gap-1.5 bg-[#0f2e2b] text-white text-xs font-black px-2.5 py-1 rounded-lg">
+                  <Ticket size={14} strokeWidth={2.25} className="shrink-0" />
+                  Cupom deste produto
+                </span>
+              </div>
+              <p className="text-sm text-[#1a4f4a] leading-snug">
+                Use o cupom <strong className="text-[#0f2e2b]">{c.codigo}</strong> e ganhe{' '}
+                <strong className="text-[#0f2e2b]">{beneficioCupomTexto(c)}</strong> neste produto.
+                {c.descricao ? <span className="block text-xs text-[#1a4f4a]/70 mt-0.5">{c.descricao}</span> : null}
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <code className="text-sm font-black tracking-wide text-[#0f2e2b] bg-white border border-[#3cbfb3]/40 rounded-lg px-2.5 py-1">
+                  {c.codigo}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => copiarCupom(c.codigo)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0f2e2b] hover:text-[#3cbfb3] transition-colors"
+                  aria-label={`Copiar cupom ${c.codigo}`}
+                >
+                  {cupomCopiado === c.codigo
+                    ? (<><Check size={14} strokeWidth={2.5} /> Copiado</>)
+                    : (<>Copiar código</>)}
+                </button>
+              </div>
+              <p className="text-xs text-[#1a4f4a]/70 mt-1.5">Aplique no checkout. 1 cupom por pedido.</p>
+            </div>
+          ))}
         </div>
       )}
 

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import GaleriaCB from '@/components/produto/GaleriaCB'
 import type { GaleriaItemCB } from '@/components/produto/GaleriaCB'
 import InfoProdutoCB from '@/components/produto/InfoProdutoCB'
+import type { CupomProduto } from '@/lib/cupom-pdp'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 
 interface Variacao {
@@ -35,6 +36,7 @@ interface Props {
   totalAvaliacoes: number
   itensIniciais: GaleriaItemCB[]
   imagensPorVariacao?: Record<string, string[]>
+  cuponsProduto?: CupomProduto[]
   especificacoes?: { label: string; valor: string }[]
 }
 
@@ -47,6 +49,7 @@ export default function ProdutoGaleriaInfo({
   totalAvaliacoes,
   itensIniciais,
   imagensPorVariacao,
+  cuponsProduto,
   especificacoes,
 }: Props) {
   const [itensGaleria, setItensGaleria] = useState<GaleriaItemCB[]>(() => {
@@ -97,6 +100,7 @@ export default function ProdutoGaleriaInfo({
         mediaAvaliacoes={mediaAvaliacoes}
         totalAvaliacoes={totalAvaliacoes}
         imagensPorVariacao={imagensPorVariacao}
+        cuponsProduto={cuponsProduto}
         onVariacaoChange={handleVariacaoChange}
       />
     </>
