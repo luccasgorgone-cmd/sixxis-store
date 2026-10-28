@@ -2,11 +2,13 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import WaLink from './WaLink'
+import {
+  WA_TEXTO_VENDAS as WA_VENDAS_TEXTO,
+  WA_TEXTO_SUPORTE as WA_SUPORTE_TEXTO,
+} from '@/lib/analytics/wa-touchpoints'
 
 // Textos-base dos links WhatsApp (iguais aos do botão flutuante). O gclid, quando
 // disponível, é anexado ao corpo pelo WaLink (lane Google do Offline Import).
-const WA_VENDAS_TEXTO  = 'Olá! Vim pelo site Sixxis e gostaria de mais informações.'
-const WA_SUPORTE_TEXTO = 'Olá! Vim pelo site Sixxis e preciso de suporte técnico.'
 
 // ── Column Title ──────────────────────────────────────────────────────────────
 function ColTitle({ children }: { children: React.ReactNode }) {

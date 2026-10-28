@@ -8,6 +8,7 @@ import {
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
 import WaLink from '@/components/layout/WaLink'
+import { WA_FONE_VENDAS, waTextoDuvidaProduto } from '@/lib/analytics/wa-touchpoints'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos } from '@/hooks/useListas'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
@@ -329,8 +330,8 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
         )}
         <span style={{ color: '#D1D5DB', fontSize: 12, lineHeight: 1, minHeight: 0 }}>|</span>
         <WaLink
-          fone="5518997474701"
-          texto={`Olá! Tenho uma dúvida sobre ${produto.nome}`}
+          fone={WA_FONE_VENDAS}
+          texto={waTextoDuvidaProduto(produto.nome)}
           style={{ fontSize: 12, color: '#3cbfb3', lineHeight: 1, minHeight: 0, height: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}
         >
           <MessageCircle size={12} style={{ flexShrink: 0 }} />

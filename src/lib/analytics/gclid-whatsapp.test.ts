@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   gclidValido,
   montarTagGclid,
   anexarGclidAoTexto,
   montarLinkWhatsApp,
   gclidDeGclAw,
+  lerGclidClient,
 } from './gclid-whatsapp'
 
 const GCLID = 'CjwKCAjw_eLVBhBEEiwAeaYZfPn2pQ49T6n9HL2PTo0Y7J9gSSyWW8sr1cYQ'
@@ -70,5 +71,66 @@ describe('gclidDeGclAw', () => {
     expect(gclidDeGclAw('')).toBeUndefined()
     expect(gclidDeGclAw(null)).toBeUndefined()
     expect(gclidDeGclAw(undefined)).toBeUndefined()
+  })
+})
+
+// ── lerGclidClient: leitura client em 3 fontes, ordem de confiança ──────────
+// Em env node o window/document não existem → stub por teste, limpo no afterEach.
+function stubBrowser(opts: { search?: string; cookie?: string; session?: string | null }) {
+  const { search = '', cookie = '', session = null } = opts
+  vi.stubGlobal('window', {
+    location: { search },
+    sessionStorage: {
+      getItem: (k: string) => (k === 'sixxis_utms' ? session : null),
+    },
+  })
+  vi.stubGlobal('document', { cookie })
+}
+
+describe('lerGclidClient', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('fonte 1: param gclid da URL vence as demais', () => {
+    stubBrowser({
+      search: `?gclid=${GCLID}`,
+      cookie: `_gcl_aw=GCL.1700000000.CjwKoutroCOOKIE`,
+      session: JSON.stringify({ gclid: 'sessaoOUTRO' }),
+    })
+    expect(lerGclidClient()).toBe(GCLID)
+  })
+
+  it('fonte 2: cookie _gcl_aw quando a URL não tem gclid', () => {
+    stubBrowser({ cookie: `foo=bar; _gcl_aw=GCL.1700000000.${GCLID}; baz=1` })
+    expect(lerGclidClient()).toBe(GCLID)
+  })
+
+  it('fonte 3: sessionStorage sixxis_utms quando URL e cookie faltam', () => {
+    stubBrowser({ session: JSON.stringify({ gclid: GCLID }) })
+    expect(lerGclidClient()).toBe(GCLID)
+  })
+
+  it('gclid inválido na URL é ignorado e cai pro cookie', () => {
+    stubBrowser({
+      search: '?gclid=tem%20espaco',
+      cookie: `_gcl_aw=GCL.1700000000.${GCLID}`,
+    })
+    expect(lerGclidClient()).toBe(GCLID)
+  })
+
+  it('sessionStorage corrompido não explode → undefined (fontes vazias)', () => {
+    stubBrowser({ session: '{not json' })
+    expect(lerGclidClient()).toBeUndefined()
+  })
+
+  it('nenhuma fonte válida → undefined', () => {
+    stubBrowser({ search: '', cookie: '', session: null })
+    expect(lerGclidClient()).toBeUndefined()
+  })
+
+  it('fora do browser (sem window) → undefined', () => {
+    // sem stub: env node não tem window
+    expect(lerGclidClient()).toBeUndefined()
   })
 })
