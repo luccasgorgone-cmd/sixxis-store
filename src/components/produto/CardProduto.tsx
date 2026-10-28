@@ -14,6 +14,7 @@ import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import { precoPix as aplicarDescontoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { inferirTipoVariacao } from '@/lib/variacao'
 import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
+import { cupomVitrinePorFeedId } from '@/lib/cupom-vitrine'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import type { Produto } from '@/types'
 
@@ -56,6 +57,11 @@ export default function CardProduto({ produto, priority = false }: Props) {
   // (lib/promo-segunda-unidade), casando por feedId = sku ?? slug. Some sozinho
   // quando a janela de vigência fecha; nada de SKU chumbado no card.
   const promoSegunda = promoVigentePorFeedId(produto.sku ?? produto.slug)
+
+  // Badge de cupom na foto — só EXIBIÇÃO, espelho do Cupom escopado do banco
+  // (lib/cupom-vitrine). Casa pelo mesmo feedId = sku ?? slug. O desconto real e
+  // a validação do cupom são server-side; aqui só pintamos o selo quando vigente.
+  const cupomVitrine = cupomVitrinePorFeedId(produto.sku ?? produto.slug)
 
   // Produto com variação (voltagem/cor) nunca pode ir pro carrinho sem a escolha
   // feita ativamente: adicionar sem escolher já gerou pedido com voltagem nula
@@ -275,6 +281,20 @@ export default function CardProduto({ produto, priority = false }: Props) {
             <div className="absolute bottom-2.5 left-2.5 z-10">
               <span className="bg-[#0f2e2b] text-white text-[10px] font-black px-2 py-0.5 rounded-md ring-1 ring-[#3cbfb3]/40 shadow-sm">
                 🔥 2ª un. −{promoSegunda.percentual}%
+              </span>
+            </div>
+          )}
+
+          {/* Badge de cupom — canto inferior direito (os outros cantos já têm:
+              sup.esq desconto/NOVO, sup.dir favoritar, inf.esq 2ª unidade).
+              Só exibição; espelho do Cupom escopado (lib/cupom-vitrine). */}
+          {cupomVitrine && !esgotado && (
+            <div className="absolute bottom-2.5 right-2.5 z-10">
+              <span className="bg-[#f59e0b] text-[#0f2e2b] text-[10px] font-black px-2 py-0.5 rounded-md ring-1 ring-[#f59e0b]/50 shadow-sm flex items-center gap-0.5">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 5H7a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h2M9 5a2 2 0 0 0 4 0h7a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2h-7a2 2 0 0 0-4 0M9 5v14"/>
+                </svg>
+                Cupom −{cupomVitrine.percentual}%
               </span>
             </div>
           )}
