@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { X, Wind, Fan, Bike, HelpCircle, Info, Phone, User, UserPlus, Zap, Mail, Clock } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import WaLink from './WaLink'
+import { WA_FONE_VENDAS, WA_TEXTO_VENDAS } from '@/lib/analytics/wa-touchpoints'
 
 interface Props {
   isOpen: boolean
@@ -142,8 +143,8 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
         {/* Footer do menu — contato e redes sociais */}
         <div className="px-5 py-5 border-t border-white/10 space-y-3">
           <WaLink
-            fone="5518997474701"
-            texto="Olá! Vim pelo site Sixxis e gostaria de mais informações."
+            fone={WA_FONE_VENDAS}
+            texto={WA_TEXTO_VENDAS}
             className="flex items-center gap-3 w-full bg-[#25D366] text-white text-sm font-semibold px-4 py-3 rounded-xl transition hover:bg-[#128C7E]"
           >
             <WaIcon />
