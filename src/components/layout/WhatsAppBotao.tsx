@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X, Wrench, ShoppingBag } from 'lucide-react'
+import WaLink from './WaLink'
 
 function WaIcon() {
   return (
@@ -34,10 +35,9 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
 
       {aberto && (
         <div className="flex flex-col gap-2">
-          <a
-            href="https://wa.me/5518997474701?text=Ol%C3%A1!%20Vim%20pelo%20site%20Sixxis%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es."
-            target="_blank"
-            rel="noopener noreferrer"
+          <WaLink
+            fone="5518997474701"
+            texto="Olá! Vim pelo site Sixxis e gostaria de mais informações."
             className="flex items-center gap-3 bg-white text-gray-800 text-sm px-4 py-3 rounded-2xl shadow-2xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,.15)] border border-gray-100 min-w-[190px] animate-fade-in-up"
           >
             <div className="w-9 h-9 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
@@ -47,11 +47,10 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Comercial</p>
               <p className="font-bold text-sm text-gray-800">(18) 99747-4701</p>
             </div>
-          </a>
-          <a
-            href="https://wa.me/5511934102621?text=Ol%C3%A1!%20Vim%20pelo%20site%20Sixxis%20e%20preciso%20de%20suporte%20t%C3%A9cnico."
-            target="_blank"
-            rel="noopener noreferrer"
+          </WaLink>
+          <WaLink
+            fone="5511934102621"
+            texto="Olá! Vim pelo site Sixxis e preciso de suporte técnico."
             className="flex items-center gap-3 bg-white text-gray-800 text-sm px-4 py-3 rounded-2xl shadow-2xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,.15)] border border-gray-100 min-w-[190px] animate-fade-in-up"
           >
             <div className="w-9 h-9 rounded-full bg-[#0088cc] flex items-center justify-center shrink-0">
@@ -61,7 +60,7 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Assistência Técnica</p>
               <p className="font-bold text-sm text-gray-800">(11) 93410-2621</p>
             </div>
-          </a>
+          </WaLink>
         </div>
       )}
 
