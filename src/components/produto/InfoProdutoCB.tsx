@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ShoppingCart, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart,
+  ShoppingCart, ChevronDown, Check, Share2, MessageCircle, Minus, Plus, Heart, Flame,
 } from 'lucide-react'
 import EstrelasNota from '@/components/ui/EstrelasNota'
 import CalcFrete from '@/components/produto/CalcFrete'
@@ -349,17 +349,18 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
 
       {/* Promo "2ª unidade" — bloco informativo; desconto automático por quantidade no carrinho */}
       {promoBadge && (
-        <div className="mb-3 rounded-xl border border-[#3cbfb3]/40 bg-[#0f2e2b] p-3">
+        <div className="mb-3 rounded-xl border border-[#3cbfb3]/30 bg-[#f0fffe] p-3">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="bg-[#3cbfb3] text-[#07201d] text-xs font-black px-2.5 py-1 rounded-lg">
-              🔥 {promoBadge.descricao}
+            <span className="inline-flex items-center gap-1.5 bg-[#3cbfb3] text-[#07201d] text-xs font-black px-2.5 py-1 rounded-lg">
+              <Flame size={14} strokeWidth={2.25} color="#ea580c" fill="#fb923c" className="shrink-0" />
+              {promoBadge.descricao}
             </span>
           </div>
-          <p className="text-sm text-white/90 leading-snug">
-            Compre <strong className="text-white">2 unidades</strong> e a <strong className="text-white">2ª sai com {promoBadge.percentual}% OFF</strong>. O
-            desconto é aplicado <strong className="text-white">automaticamente no carrinho</strong>.
+          <p className="text-sm text-[#1a4f4a] leading-snug">
+            Compre <strong className="text-[#0f2e2b]">2 unidades</strong> e a <strong className="text-[#0f2e2b]">2ª sai com {promoBadge.percentual}% OFF</strong>. O
+            desconto é aplicado <strong className="text-[#0f2e2b]">automaticamente no carrinho</strong>.
           </p>
-          <p className="text-xs text-white/70 mt-1">
+          <p className="text-xs text-[#1a4f4a]/70 mt-1">
             Válido até {promoBadge.fim.slice(8, 10)}/{promoBadge.fim.slice(5, 7)} · não acumula com cupom
           </p>
         </div>
@@ -544,17 +545,6 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
               <Plus size={14} />
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Lembrete da promo no ponto de decisão — além do selo do topo, reforça o "leve 2" antes do CTA */}
-      {promoBadge && !esgotado && (
-        <div className="-mt-1 mb-5 flex items-start gap-2 rounded-xl bg-[#e8f8f7] border border-[#3cbfb3]/30 px-3 py-2.5">
-          <span className="text-base leading-none">💡</span>
-          <p className="text-xs font-semibold text-[#1a4f4a] leading-snug">
-            Leve <strong>2 unidades</strong> e a 2ª sai com <strong>{promoBadge.percentual}% OFF</strong> — o
-            desconto entra <strong>automaticamente no carrinho</strong>.
-          </p>
         </div>
       )}
 
