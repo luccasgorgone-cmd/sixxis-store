@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { TRAFEGO_SECRET } from '@/lib/trafego'
+import { getTrafegoSecret } from '@/lib/trafego'
 import { registrarHit } from '@/lib/trafego-writer'
 
 export const runtime = 'nodejs'
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 // porta opcional para ingestão externa autenticada. Mesma lógica/anonimização,
 // via writer compartilhado. Guard por secret. Responde 204 sempre (best-effort).
 export async function POST(req: NextRequest) {
-  if (req.headers.get('x-tb-secret') !== TRAFEGO_SECRET) {
+  if (req.headers.get('x-tb-secret') !== getTrafegoSecret()) {
     return new Response(null, { status: 204 })
   }
   try {

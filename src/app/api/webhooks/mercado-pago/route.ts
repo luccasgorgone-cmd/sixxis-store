@@ -51,16 +51,22 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text()
 
   // Valida assinatura sempre que MERCADOPAGO_WEBHOOK_SECRET estiver definido.
-  // Sem secret → loga warning e segue (apenas pra dev local; em prod o secret
-  // DEVE estar setado no Railway).
+  // PRODUÇÃO = FAIL-CLOSED: sem secret em produção, rejeita (não processa o
+  // webhook sem verificação de assinatura). DEV = degradação graciosa: loga
+  // warning e segue (apenas pra dev local).
   if (MP_WEBHOOK_SECRET) {
     if (!validarAssinatura(req)) {
       console.warn('[mp:webhook] assinatura inválida')
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
     }
+  } else if (process.env.NODE_ENV === 'production') {
+    console.error(
+      '[mp:webhook] MERCADOPAGO_WEBHOOK_SECRET ausente em produção — rejeitando webhook (fail-closed). Configure o secret no Railway.',
+    )
+    return NextResponse.json({ error: 'webhook signature verification not configured' }, { status: 503 })
   } else {
     console.warn(
-      '[mp:webhook] MERCADOPAGO_WEBHOOK_SECRET ausente — validação de assinatura DESLIGADA. Configure o secret no Railway antes do go-live.',
+      '[mp:webhook] MERCADOPAGO_WEBHOOK_SECRET ausente — validação de assinatura DESLIGADA (apenas dev). Configure o secret no Railway antes do go-live.',
     )
   }
 

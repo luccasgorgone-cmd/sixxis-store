@@ -1,10 +1,14 @@
 // Verificação server-side do token do Cloudflare Turnstile.
 //
-// DEGRADAÇÃO GRACIOSA (regra inegociável): se TURNSTILE_SECRET_KEY não estiver
-// definida, NÃO verifica e NÃO bloqueia — retorna true (pula). Assim login/
-// cadastro/checkout continuam funcionando antes das vars serem configuradas.
+// PRODUÇÃO = FAIL-CLOSED: se TURNSTILE_SECRET_KEY não estiver definida em
+// produção, a verificação NÃO é pulada — retorna false (bloqueia), para que um
+// deploy mal configurado nunca rode com a proteção anti-bot silenciosamente
+// desligada.
 //
-// Com o secret definido: token ausente/ inválido → false (bloqueia).
+// DEV = degradação graciosa: fora de produção, sem secret, retorna true (pula)
+// para que login/cadastro/checkout continuem funcionando no ambiente local.
+//
+// Com o secret definido: token ausente/inválido → false (bloqueia).
 
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 
@@ -13,7 +17,14 @@ export async function verifyTurnstile(
   ip?: string,
 ): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY
-  if (!secret) return true // sem secret → pula (degradação graciosa)
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      // Fail-closed: proteção obrigatória ausente em produção → bloqueia.
+      console.error('[turnstile] TURNSTILE_SECRET_KEY ausente em produção — bloqueando (fail-closed).')
+      return false
+    }
+    return true // dev → pula (degradação graciosa)
+  }
   if (!token) return false
 
   try {

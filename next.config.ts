@@ -5,12 +5,17 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   images: {
+    // Allowlist explícita dos hosts que o otimizador de imagem pode buscar.
+    // NÃO usar hostname '**' (open image proxy / SSRF). Hosts permitidos:
+    //  - R2 (imagens de produto/banner enviadas pela loja)
+    //  - api.dicebear.com (avatares gerados)
+    // Thumbnails de vídeo do YouTube são renderizadas via <img> normal (não
+    // passam pelo otimizador), então não precisam entrar aqui.
     remotePatterns: [
       { protocol: 'https', hostname: 'pub-543c49f4581a424aa738beacf3a89e96.r2.dev' },
       { protocol: 'https', hostname: '**.r2.dev' },
       { protocol: 'https', hostname: '**.r2.cloudflarestorage.com' },
       { protocol: 'https', hostname: 'api.dicebear.com', port: '', pathname: '/9.x/**' },
-      { protocol: 'https', hostname: '**' },
     ],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,

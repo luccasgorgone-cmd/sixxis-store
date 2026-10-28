@@ -2,13 +2,39 @@
 // handler Node (/api/trafego/coletar) e pelo read admin — NUNCA pelo proxy
 // (que deve ficar leve e não depender de módulos compartilhados).
 
+import crypto from 'crypto'
+
+// Leitura fail-closed de segredos do Tráfego Bruto. Sem fallback literal
+// commitado (os antigos defaults públicos foram removidos). Em produção, se a
+// env var não estiver definida, lança — nunca roda com um segredo público
+// conhecido. Em dev, gera um valor efêmero por processo só pra não travar o
+// ambiente local (nunca é um literal commitado). Resolvido de forma preguiçosa
+// (em tempo de request), não no topo do módulo, para não quebrar o `next build`.
+const _efemeroDev: Partial<Record<string, string>> = {}
+function lerSegredoTrafego(nome: 'TRAFEGO_INTERNAL_SECRET' | 'TRAFEGO_SALT'): string {
+  const v = process.env[nome]
+  if (v) return v
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(`[trafego] ${nome} é obrigatória em produção (fail-closed).`)
+  }
+  if (!_efemeroDev[nome]) {
+    console.warn(`[trafego] ${nome} não definida — usando valor efêmero de dev (nunca use em produção).`)
+    _efemeroDev[nome] = `dev-ephemeral-${crypto.randomBytes(16).toString('hex')}`
+  }
+  return _efemeroDev[nome]!
+}
+
 // Secret simples compartilhado proxy↔coletor: impede que terceiros inflem a
-// métrica chamando o endpoint direto. Não é credencial sensível.
-export const TRAFEGO_SECRET = process.env.TRAFEGO_INTERNAL_SECRET || 'sixxis-trafego-internal-v1'
+// métrica chamando o endpoint direto.
+export function getTrafegoSecret(): string {
+  return lerSegredoTrafego('TRAFEGO_INTERNAL_SECRET')
+}
 
 // SALT do hash de visitante. Mantém o visitorHash irreversível mesmo conhecendo
-// IP+UA (o espaço é pequeno). Idealmente setado via env em produção.
-export const TRAFEGO_SALT = process.env.TRAFEGO_SALT || 'sixxis-trafego-salt-v1'
+// IP+UA (o espaço é pequeno). Obrigatório via env em produção.
+export function getTrafegoSalt(): string {
+  return lerSegredoTrafego('TRAFEGO_SALT')
+}
 
 // Bots óbvios — descartados antes de gravar. Lista pragmática (não exaustiva).
 const BOT_RE = /bot|crawl|spider|slurp|mediapartners|adsbot|bingpreview|facebookexternalhit|whatsapp|telegram|discord|slackbot|headless|phantom|puppeteer|playwright|lighthouse|gtmetrix|pingdom|uptime|monitor|statuscake|python-requests|python-urllib|go-http|java\/|okhttp|curl|wget|axios|node-fetch|httpclient|semrush|ahrefs|mj12|dotbot|petalbot|bytespider|yandex|baiduspider|duckduckbot|applebot|amazonbot|gptbot|claudebot|ccbot|perplexity/i
