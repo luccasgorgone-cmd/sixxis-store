@@ -233,7 +233,14 @@ export async function POST(request: NextRequest) {
     descontoFinal = Math.min(promo.desconto, subtotal)
   } else if (cupomCodigo) {
     const cupom = await prisma.cupom.findUnique({ where: { codigo: cupomCodigo.toUpperCase().trim() } })
-    const avaliacao = await avaliarCupom(cupom, subtotal, session.user.id)
+    // Itens p/ o escopo por produto do cupom: desconto incide só sobre os
+    // elegíveis (ver avaliarCupom). Sem isso, um cupom de modelo único daria
+    // desconto no carrinho inteiro.
+    const itensCupom = itensPedido.map((i) => ({
+      produtoId: i.produtoId,
+      subtotal:  i.precoUnitario * i.quantidade,
+    }))
+    const avaliacao = await avaliarCupom(cupom, subtotal, session.user.id, itensCupom)
     if (avaliacao.valido && cupom) {
       descontoFinal = avaliacao.desconto ?? 0
       cupomCodigoFinal = cupom.codigo

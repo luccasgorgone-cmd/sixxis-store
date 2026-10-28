@@ -481,6 +481,10 @@ model Cupom {
   ativo          Boolean    @default(true)
   descricao      String?
   primeiraCompra Boolean    @default(false)
+  // Restrição opcional por produto (modelo): CSV de Produto.id. null/vazio = vale
+  // no carrinho inteiro. Quando preenchido, o cupom só vale se o carrinho tiver
+  // algum produto elegível e o desconto incide SÓ sobre o subtotal desses itens.
+  produtoIds     String?
   usos           CupomUso[]
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt

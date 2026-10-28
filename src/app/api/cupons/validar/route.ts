@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { codigo, total } = await request.json()
+  const { codigo, total, itens } = await request.json()
 
   if (!codigo) return NextResponse.json({ valido: false, erro: 'Código obrigatório' })
 
@@ -23,7 +23,18 @@ export async function POST(request: NextRequest) {
   const session = await auth()
   const clienteId = session?.user?.id ?? null
 
-  const r = await avaliarCupom(cupom, Number(total) || 0, clienteId)
+  // Itens do carrinho (opcional) — usados só pelo escopo por produto do cupom.
+  // Autoridade final continua em /api/pedidos; aqui é só UX.
+  const itensCupom = Array.isArray(itens)
+    ? itens
+        .map((i: { produtoId?: unknown; precoUnitario?: unknown; quantidade?: unknown }) => ({
+          produtoId: String(i?.produtoId ?? ''),
+          subtotal:  (Number(i?.precoUnitario) || 0) * (Number(i?.quantidade) || 0),
+        }))
+        .filter((i) => i.produtoId)
+    : undefined
+
+  const r = await avaliarCupom(cupom, Number(total) || 0, clienteId, itensCupom)
   // `motivo` é o código estável que o cliente usa para diferenciar "cupom morto"
   // de "só falta logar". Ver MotivoRecusaCupom em src/lib/cupom.ts.
   if (!r.valido) return NextResponse.json({ valido: false, erro: r.erro, motivo: r.motivo })

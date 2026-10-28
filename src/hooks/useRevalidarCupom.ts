@@ -34,6 +34,7 @@ export function useRevalidarCupomPersistido(base: number) {
   const cupom       = useCarrinho((s) => s.cupomAplicado)
   const setCupom    = useCarrinho((s) => s.setCupom)
   const hasHydrated = useCarrinho((s) => s._hasHydrated)
+  const itens       = useCarrinho((s) => s.itens)
 
   const [aviso, setAviso] = useState('')
   // Última combinação (código × base) já confirmada. Evita refazer a chamada a
@@ -47,9 +48,15 @@ export function useRevalidarCupomPersistido(base: number) {
     const chave = `${cupom.codigo}|${base.toFixed(2)}`
     if (jaChecado.current === chave) return
 
+    const itensCupom = itens.map((i) => ({
+      produtoId:     i.produtoId,
+      precoUnitario: i.preco,
+      quantidade:    i.quantidade,
+    }))
+
     const ctrl = new AbortController()
     const timer = setTimeout(async () => {
-      const r = await validarCupomRemoto(cupom.codigo, base, { signal: ctrl.signal })
+      const r = await validarCupomRemoto(cupom.codigo, base, itensCupom, { signal: ctrl.signal })
       if (ctrl.signal.aborted) return
 
       if (r.estado === 'indeterminado') return // sem veredito: tenta de novo depois
@@ -92,7 +99,7 @@ export function useRevalidarCupomPersistido(base: number) {
     }, DEBOUNCE_MS)
 
     return () => { ctrl.abort(); clearTimeout(timer) }
-  }, [hasHydrated, cupom, base, setCupom])
+  }, [hasHydrated, cupom, base, setCupom, itens])
 
   return { aviso, limparAviso: () => setAviso('') }
 }

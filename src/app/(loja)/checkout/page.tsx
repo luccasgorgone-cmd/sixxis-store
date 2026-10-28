@@ -769,7 +769,12 @@ function CheckoutContent() {
     if (!cupomInput.trim()) { setCupomErro('Digite um código'); return }
     setCupomErro('')
     setCupomLoading(true)
-    const r = await validarCupomRemoto(cupomInput, total)
+    const itensCupom = itens.map(i => ({
+      produtoId:     i.produtoId,
+      precoUnitario: i.preco,
+      quantidade:    i.quantidade,
+    }))
+    const r = await validarCupomRemoto(cupomInput, total, itensCupom)
     if (r.estado === 'valido') {
       limparAvisoCupom()
       setCupom({ codigo: r.cupom.codigo, tipo: r.cupom.tipo, valor: r.cupom.valor, desconto: r.cupom.desconto })

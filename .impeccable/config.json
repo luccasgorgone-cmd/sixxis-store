@@ -1,0 +1,56 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#0d3d3a",
+        "createdAt": "2026-10-07T02:04:49.749Z",
+        "reason": "pre-existing: gradientes intencionais dos tiles de categoria (climatizador/spinning), nao tocados nesta mudanca"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#1a7a74",
+        "createdAt": "2026-10-07T02:04:49.791Z",
+        "reason": "pre-existing: gradientes intencionais dos tiles de categoria (climatizador/spinning), nao tocados nesta mudanca"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#111827",
+        "createdAt": "2026-10-07T02:04:49.831Z",
+        "reason": "pre-existing: gradientes intencionais dos tiles de categoria (climatizador/spinning), nao tocados nesta mudanca"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.55)",
+        "createdAt": "2026-10-08T03:41:37.848Z",
+        "reason": "text-shadow para legibilidade sobre imagens de fundo dos cards; sombra nao e cor de marca"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.5)",
+        "createdAt": "2026-10-08T05:22:58.937Z",
+        "reason": "text-shadow para legibilidade sobre fundos de imagem (boxes produto)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.45)",
+        "createdAt": "2026-10-08T05:22:58.971Z",
+        "reason": "text-shadow para legibilidade sobre fundos de imagem (boxes produto)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#e5e7eb",
+        "createdAt": "2026-10-08T05:22:59.004Z",
+        "reason": "cinza gray-200 de corpo de texto sobre fundo escuro (legivel), uso intencional"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#2aa89c",
+        "createdAt": "2026-10-08T05:38:55.650Z",
+        "reason": "Darker tiffany shade for the EconomiaBloco savings-bar gradient (#3cbfb3 -> #2aa89c). Intentional brand accent depth."
+      }
+    ]
+  }
+}

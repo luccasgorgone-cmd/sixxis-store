@@ -5,6 +5,18 @@ import { auditLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
+// Normaliza a restrição por produto: aceita array ou CSV de Produto.id e devolve
+// CSV limpo, ou null (= cupom vale no carrinho inteiro).
+function normProdutoIds(v: unknown): string | null {
+  const arr = Array.isArray(v)
+    ? v.map(String)
+    : typeof v === 'string'
+      ? v.split(',')
+      : []
+  const ids = arr.map((s) => s.trim()).filter(Boolean)
+  return ids.length ? Array.from(new Set(ids)).join(',') : null
+}
+
 export async function GET(req: NextRequest) {
   const unauthorized = await requireAdmin(req)
   if (unauthorized) return unauthorized
@@ -68,7 +80,7 @@ export async function POST(req: NextRequest) {
   if (unauthorized) return unauthorized
 
   const body = await req.json()
-  const { codigo, tipo, valor, usoMaximo, pedidoMinimo, validade, ativo, descricao, primeiraCompra } = body
+  const { codigo, tipo, valor, usoMaximo, pedidoMinimo, validade, ativo, descricao, primeiraCompra, produtoIds } = body
 
   if (!codigo || !tipo || valor === undefined) {
     return NextResponse.json({ error: 'Campos obrigatórios: codigo, tipo, valor' }, { status: 400 })
@@ -90,6 +102,7 @@ export async function POST(req: NextRequest) {
       ativo:          ativo !== false,
       descricao:      descricao || null,
       primeiraCompra: primeiraCompra || false,
+      produtoIds:     normProdutoIds(produtoIds),
     },
   })
 

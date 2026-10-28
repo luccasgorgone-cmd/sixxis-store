@@ -5,6 +5,17 @@ import { auditLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
+// Restrição por produto: array ou CSV de Produto.id → CSV limpo, ou null (global).
+function normProdutoIds(v: unknown): string | null {
+  const arr = Array.isArray(v)
+    ? v.map(String)
+    : typeof v === 'string'
+      ? v.split(',')
+      : []
+  const ids = arr.map((s) => s.trim()).filter(Boolean)
+  return ids.length ? Array.from(new Set(ids)).join(',') : null
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireAdmin(req)
   if (unauthorized) return unauthorized
@@ -31,7 +42,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params
   const body = await req.json()
-  const { codigo, tipo, valor, usoMaximo, pedidoMinimo, validade, ativo, descricao, primeiraCompra } = body
+  const { codigo, tipo, valor, usoMaximo, pedidoMinimo, validade, ativo, descricao, primeiraCompra, produtoIds } = body
 
   if (codigo) {
     const existe = await prisma.cupom.findFirst({
@@ -52,6 +63,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       ...(ativo          !== undefined && { ativo }),
       ...(descricao      !== undefined && { descricao }),
       ...(primeiraCompra !== undefined && { primeiraCompra }),
+      ...(produtoIds     !== undefined && { produtoIds: normProdutoIds(produtoIds) }),
     },
   })
   await auditLog({ req, action: 'cupom.update', target: id, metadata: { codigo: cupom.codigo } })

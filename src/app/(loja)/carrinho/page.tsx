@@ -187,7 +187,12 @@ export default function CarrinhoPage() {
     setCupomErro('')
     // Falha de rede/429 NÃO concede desconto: só o servidor (avaliarCupom) decide
     // se um cupom é válido, qual o percentual e se a 1ª compra se aplica.
-    const r = await validarCupomRemoto(cupomInput, subtotal)
+    const itensCupom = itens.map(i => ({
+      produtoId:     i.produtoId ?? i.id,
+      precoUnitario: i.preco,
+      quantidade:    i.quantidade,
+    }))
+    const r = await validarCupomRemoto(cupomInput, subtotal, itensCupom)
     if (r.estado === 'valido') {
       limparAvisoCupom()
       setCupomGlobal({

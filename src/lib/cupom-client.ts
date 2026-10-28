@@ -49,9 +49,17 @@ function precisaLogin(motivo: string | undefined, erro: string): boolean {
   return /faça login|faca login/i.test(erro)
 }
 
+/** Item do carrinho enviado ao validador — usado só pelo escopo por produto. */
+export interface ItemCupomRemoto {
+  produtoId:     string
+  precoUnitario: number
+  quantidade:    number
+}
+
 export async function validarCupomRemoto(
   codigo: string,
   total: number,
+  itens?: ItemCupomRemoto[],
   opts?: { signal?: AbortSignal },
 ): Promise<ResultadoValidacao> {
   const cod = codigo.trim().toUpperCase()
@@ -62,7 +70,7 @@ export async function validarCupomRemoto(
     res = await fetch('/api/cupons/validar', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ codigo: cod, total }),
+      body:    JSON.stringify({ codigo: cod, total, ...(itens && itens.length ? { itens } : {}) }),
       signal:  opts?.signal,
     })
   } catch {

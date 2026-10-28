@@ -20,6 +20,14 @@ export type MotivoRecusaCupom =
   | 'LOGIN_NECESSARIO'
   | 'NAO_E_PRIMEIRA_COMPRA'
   | 'JA_USOU_PRIMEIRA_COMPRA'
+  | 'PRODUTO_NAO_ELEGIVEL'
+
+/** Item do carrinho para avaliar o escopo por produto de um cupom. */
+export interface ItemCupom {
+  produtoId: string
+  /** precoUnitario * quantidade, em reais. */
+  subtotal: number
+}
 
 export interface ResultadoCupom {
   valido: boolean
@@ -65,6 +73,7 @@ export async function avaliarCupom(
   cupom: Cupom | null,
   total: number,
   clienteId: string | null,
+  itens?: ItemCupom[],
 ): Promise<ResultadoCupom> {
   if (!cupom || !cupom.ativo) return { valido: false, motivo: 'INEXISTENTE_OU_INATIVO', erro: 'Cupom inválido ou inativo' }
   if (cupom.validade && new Date() > cupom.validade) return { valido: false, motivo: 'EXPIRADO', erro: 'Cupom expirado' }
@@ -87,11 +96,32 @@ export async function avaliarCupom(
     }
   }
 
+  // ── Escopo por produto (modelo) ───────────────────────────────────────────
+  // produtoIds vazio/null = cupom global (comportamento legado). Preenchido =
+  // só vale se o carrinho tiver produto elegível, e o desconto incide APENAS
+  // sobre o subtotal desses itens — não sobre o carrinho inteiro, pra não dar
+  // 10% em tudo só por ter o modelo no carrinho.
+  const escopo = (cupom.produtoIds ?? '').split(',').map((s) => s.trim()).filter(Boolean)
+  let baseDesconto = total
+  if (escopo.length > 0) {
+    const elegiveis = new Set(escopo)
+    baseDesconto = (itens ?? [])
+      .filter((i) => elegiveis.has(i.produtoId))
+      .reduce((acc, i) => acc + i.subtotal, 0)
+    if (baseDesconto <= 0) {
+      return {
+        valido: false,
+        motivo: 'PRODUTO_NAO_ELEGIVEL',
+        erro:   'Este cupom vale apenas para um produto específico. Adicione o produto elegível ao carrinho.',
+      }
+    }
+  }
+
   return {
     valido:   true,
     tipo:     cupom.tipo,
     valor:    Number(cupom.valor),
-    desconto: calcularDesconto(cupom, total),
+    desconto: calcularDesconto(cupom, baseDesconto),
     codigo:   cupom.codigo,
   }
 }
