@@ -8,7 +8,7 @@ import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 import { validarCupomRemoto } from '@/lib/cupom-client'
 import { useRevalidarCupomPersistido } from '@/hooks/useRevalidarCupom'
 import {
-  type TipoCupom, descricaoCupom, calcularDescontoCupom,
+  type TipoCupom, descricaoCupom,
 } from '@/lib/preco-cupom'
 import { calcularPromoCliente } from '@/lib/promo-segunda-unidade'
 import Link from 'next/link'
@@ -502,8 +502,11 @@ function CheckoutContent() {
   const [cupomInput, setCupomInput] = useState('')
   // O cupom é compartilhado com /carrinho via Zustand persist. Convertemos
   // pra forma simples { codigo, desconto } pra preservar contrato local.
+  // Desconto = valor ESCOPADO que o servidor calculou (avaliarCupom), não 10%
+  // recalculado sobre o total inteiro. Para cupom de modelo único (produtoIds)
+  // isso dava desconto no carrinho todo. Clampa ao total por segurança.
   const cupom = cupomGlobal
-    ? { codigo: cupomGlobal.codigo, desconto: calcularDescontoCupom(cupomGlobal.tipo, cupomGlobal.valor, total) }
+    ? { codigo: cupomGlobal.codigo, desconto: Math.min(cupomGlobal.desconto, total) }
     : null
   const setCupom = (c: { codigo: string; tipo?: TipoCupom; valor?: number; desconto: number } | null) => {
     if (!c) { setCupomGlobal(null); return }
