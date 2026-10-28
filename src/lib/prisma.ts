@@ -50,6 +50,9 @@ function createPrisma(): PrismaClient {
 
 export const prisma: PrismaClient = globalForPrisma.prisma ?? createPrisma()
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
+// Singleton em TODOS os ambientes (não só dev). Em dev evita esgotar o pool no
+// hot-reload; em produção garante UM único pool por processo mesmo se este
+// módulo for avaliado em mais de um bundle do Next (o App Router pode separar
+// runtime de rota, server action e instrumentation em chunks distintos — cada
+// `new PrismaClient()` seria um pool mariadb novo de `connectionLimit` conexões).
+globalForPrisma.prisma = prisma
