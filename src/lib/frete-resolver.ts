@@ -31,6 +31,7 @@
 import { prisma } from '@/lib/prisma'
 import { normalizarUF, type UF } from '@/lib/ufs'
 import { cotarComCarriers, algumCarrierHabilitado, type ItemCotacao } from '@/lib/carriers'
+import { calcularFreteCarrinho, type ItemFretePolitica } from '@/lib/frete-politica'
 
 export type StatusFrete = 'ok' | 'a_combinar' | 'bloqueado'
 
@@ -79,10 +80,6 @@ export function formatarPrazo(min?: number | null, max?: number | null): string 
   return `${lo} a ${hi} dias úteis`   // ex.: "1 a 3 dias úteis"
 }
 
-const MSG_BLOQUEADO = 'Ainda não entregamos na sua região.'
-const MSG_A_COMBINAR =
-  'Frete a combinar para a sua região — registramos o pedido como orçamento e entramos em contato para finalizar.'
-
 // Consulta ViaCEP no servidor p/ descobrir a UF a partir do CEP.
 export async function cepParaUF(cep: string): Promise<UF | null> {
   const limpo = String(cep ?? '').replace(/\D/g, '')
@@ -106,6 +103,12 @@ export async function resolverFrete(
   ufInput: string,
   opts: ResolverFreteOpts = {},
 ): Promise<ResultadoFrete> {
+  // ── Política REGIONAL (regra de negócio vigente) ───────────────────────────
+  // Preço ao cliente = regra regional (lib/frete-politica): grátis nas UFs de
+  // UFS_FRETE_GRATIS; 9% do valor do produto nas demais; aspirador isento. É a
+  // FONTE ÚNICA do preço cobrado — substitui a tabela manual FreteRegra, que
+  // deixou de dirigir preço. Os carriers (quando ligados) registram só o CUSTO
+  // interno (custoFreteReal), nunca o preço ao cliente.
   const uf = normalizarUF(ufInput)
   if (!uf) {
     return { status: 'bloqueado', uf: null, opcoes: [], mensagem: 'UF inválida.', freteGratis: false }
@@ -117,223 +120,70 @@ export async function resolverFrete(
   }
 
   const produtoIds = [...new Set(itensValidos.map((i) => i.produtoId))]
-  const regras = await prisma.freteRegra.findMany({
-    where: { uf, produtoId: { in: produtoIds } },
-  })
-  const regraPorProduto = new Map(regras.map((r) => [r.produtoId, r]))
 
-  // Quantidade por produto — frete é por UNIDADE (soma as quantidades de itens
-  // duplicados do mesmo produto). Piso 1: quantidade inválida ou < 1 vira 1.
+  // Quantidade por produto — frete é por UNIDADE. Piso 1 por item.
   const qtdPorProduto = new Map<string, number>()
   for (const item of itensValidos) {
     const q = Math.max(1, Math.floor(Number(item.quantidade)) || 0)
     qtdPorProduto.set(item.produtoId, (qtdPorProduto.get(item.produtoId) ?? 0) + q)
   }
 
-  // Carrier em tempo real só entra na cadeia se houver flag ligada E CEP de
-  // destino. Sem isso, a cadeia é idêntica ao comportamento histórico.
-  const cepDestino = String(opts.cepDestino ?? '').replace(/\D/g, '')
-  const carrierNaCadeia = algumCarrierHabilitado() && cepDestino.length === 8
+  // Preço efetivo (promocional quando houver) + categoria por produto. O 9%
+  // incide sobre o que o cliente realmente paga; a categoria define a isenção
+  // de aspirador.
+  const produtos = await prisma.produto.findMany({
+    where: { id: { in: produtoIds } },
+    select: { id: true, preco: true, precoPromocional: true, categoria: true },
+  })
+  const porId = new Map(produtos.map((p) => [p.id, p]))
 
-  let temNormal = true // todos os itens têm preço normal?
-  let temExpresso = true // todos os itens têm preço expresso?
-  let precoNormal = 0
-  let precoExpresso = 0
-  let prazoNormalMin = 0
-  let prazoNormalMax = 0
-  let prazoExpressoMin = 0
-  let prazoExpressoMax = 0
-
-  // Precedência de status (independe da ordem de iteração):
-  // bloqueado > precisaCotar > a_combinar > ok.
-  let algumBloqueado = false
-  let algumACombinar = false
-  let precisaCotar = false // só é marcado quando carrierNaCadeia
-
-  for (const produtoId of produtoIds) {
-    const regra = regraPorProduto.get(produtoId)
-    const qtd = qtdPorProduto.get(produtoId) ?? 1
-
-    // 1. Sem regra: histórico = bloqueio. Com carrier na cadeia, vira cotação.
-    if (!regra) {
-      if (carrierNaCadeia) precisaCotar = true
-      else algumBloqueado = true
-      continue
-    }
-
-    // Regra com bloqueio explícito → sempre bloqueia (hard block do admin).
-    if (regra.bloqueado) {
-      algumBloqueado = true
-      continue
-    }
-
-    // 2. "A combinar" → cotação (se houver carrier) ou orçamento.
-    if (regra.aCombinar) {
-      if (carrierNaCadeia) precisaCotar = true
-      else algumACombinar = true
-      continue
-    }
-
-    const pn = regra.precoNormal != null ? Number(regra.precoNormal) : null
-    const pe = regra.precoExpresso != null ? Number(regra.precoExpresso) : null
-
-    // 3. Frete grátis (flag explícita OU preço normal = 0). É a opção ÚNICA:
-    //    preço 0, prazo da faixa normal, expresso suprimido. Vem ANTES do teste
-    //    "sem preço" porque uma regra grátis costuma ter os preços em branco.
-    if (regra.freteGratis || pn === 0) {
-      precoNormal += 0
-      prazoNormalMin = Math.max(prazoNormalMin, regra.prazoNormalMin ?? 0)
-      prazoNormalMax = Math.max(prazoNormalMax, regra.prazoNormalMax ?? 0)
-      temExpresso = false // frete grátis é a única modalidade
-      continue
-    }
-
-    // Regra existe mas sem nenhum preço → cotação (se houver carrier) ou orçamento.
-    if (pn == null && pe == null) {
-      if (carrierNaCadeia) precisaCotar = true
-      else algumACombinar = true
-      continue
-    }
-
-    // Frete por unidade: preço × quantidade. Prazo NÃO escala com quantidade.
-    if (pn != null) {
-      precoNormal += pn * qtd
-      prazoNormalMin = Math.max(prazoNormalMin, regra.prazoNormalMin ?? 0)
-      prazoNormalMax = Math.max(prazoNormalMax, regra.prazoNormalMax ?? 0)
-    } else {
-      temNormal = false
-    }
-
-    if (pe != null) {
-      precoExpresso += pe * qtd
-      prazoExpressoMin = Math.max(prazoExpressoMin, regra.prazoExpressoMin ?? 0)
-      prazoExpressoMax = Math.max(prazoExpressoMax, regra.prazoExpressoMax ?? 0)
-    } else {
-      temExpresso = false
-    }
-  }
-
-  // 1a. Bloqueado tem prioridade máxima: NÃO cota carrier. FIM.
-  if (algumBloqueado) {
-    return { status: 'bloqueado', uf, opcoes: [], mensagem: MSG_BLOQUEADO, freteGratis: false }
-  }
-
-  // Produto SEM preço manual (sem regra*/a combinar/sem preço), com carrier na
-  // cadeia → Braspress é a fonte de preço. Precedência mantida do histórico:
-  // esta checagem vem ANTES de grátis/normal. (*sem regra com a flag OFF já virou
-  // bloqueado no laço, então aqui precisaCotar só existe com carrier ligado.)
-  if (precisaCotar) {
-    const cr = await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
-    if (cr) {
-      return {
-        status: 'ok', uf, opcoes: [cr.opcao], mensagem: '', freteGratis: false,
-        custoFreteReal: cr.custoFreteReal, transportadora: cr.transportadora,
-      }
-    }
-    // 2d. Sem cotação e sem preço manual → orçamento.
-    return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR, freteGratis: false }
-  }
-
-  // Caminho da flag OFF: "a combinar" declarado no laço tem precedência sobre
-  // grátis/normal (mesma ordem do histórico).
-  if (algumACombinar) {
-    return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR, freteGratis: false }
-  }
-
-  // Frete grátis ao cliente = todos os itens somam 0 no normal (grátis ou R$ 0).
-  const normalGratis = temNormal && precoNormal === 0
-
-  // 1b. FRETE GRÁTIS: cliente vê "Frete Grátis" (preço 0). Em paralelo cota os
-  // carriers só para registrar o custoFreteReal — mesma regra do caminho normal,
-  // a MAIS BARATA entre as ativas vence. Se falhar, segue null (frete grátis
-  // NUNCA quebra a venda).
-  if (normalGratis) {
-    const bg = carrierNaCadeia
-      ? await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
-      : null
-
-    // Prazo exibido no frete grátis:
-    //  • manual preenchido (ex.: SX200 "2 a 5 dias úteis") → mantém como está.
-    //  • manual vazio (prazoNormalMax = 0, ex.: aspirador em RS/MG) → usa o prazo
-    //    da MESMA cotação Braspress já feita acima (sem chamada extra).
-    //  • Braspress sem prazo (falhou/off/0) → segue vazio (não quebra o grátis).
-    const manualTemPrazo = prazoNormalMax > 0
-    const carrierPrazo = bg?.opcao.prazoDiasMax ?? 0
-    const prazoMin = manualTemPrazo ? prazoNormalMin : carrierPrazo
-    const prazoMax = manualTemPrazo ? prazoNormalMax : carrierPrazo
-    const prazoNormalStr = prazoMax > 0 ? formatarPrazo(prazoMin, prazoMax) : ''
-
+  const itensPolitica: ItemFretePolitica[] = produtoIds.map((id) => {
+    const p = porId.get(id)
     return {
-      status: 'ok',
-      uf,
-      opcoes: [
-        {
-          id: 'normal',
-          nome: 'Frete Grátis',
-          preco: 0,
-          prazoDiasMin: prazoMin,
-          prazoDiasMax: prazoMax,
-          prazo: prazoNormalStr,
-          freteGratis: true,
-        },
-      ],
-      mensagem: '',
-      freteGratis: true,
-      custoFreteReal: bg?.custoFreteReal ?? null,
-      transportadora: bg?.transportadora ?? null,
+      precoEfetivo: p ? Number(p.precoPromocional ?? p.preco) : 0,
+      quantidade: qtdPorProduto.get(id) ?? 1,
+      categoria: p?.categoria ?? null,
     }
-  }
+  })
 
-  // 2a/2b. CASO NORMAL (precificado) — o registry é o MOTOR DE PREÇO.
-  // Cota o carrinho inteiro; se veio cotação, ela VENCE a tabela manual (preço =
-  // custo puro, sem markup). Se não veio, cai no fallback manual abaixo.
-  if (carrierNaCadeia) {
+  const r = calcularFreteCarrinho(uf, itensPolitica)
+
+  // Custo REAL da transportadora (interno, só admin) — gravado inclusive em
+  // frete grátis/9%. Só cota quando um carrier está ligado E há CEP de destino.
+  // NUNCA afeta o preço ao cliente e NUNCA quebra a venda (cotarCarrinho captura
+  // qualquer falha e devolve null).
+  const cepDestino = String(opts.cepDestino ?? '').replace(/\D/g, '')
+  let custoFreteReal: number | null = null
+  let transportadora: string | null = null
+  if (algumCarrierHabilitado() && cepDestino.length === 8) {
     const cr = await cotarCarrinho(produtoIds, qtdPorProduto, cepDestino, opts.documentoDestinatario)
     if (cr) {
-      return {
-        status: 'ok', uf, opcoes: [cr.opcao], mensagem: '', freteGratis: false,
-        custoFreteReal: cr.custoFreteReal, transportadora: cr.transportadora,
-      }
+      custoFreteReal = cr.custoFreteReal
+      transportadora = cr.transportadora
     }
   }
 
-  // 2c. FALLBACK: tabela manual FreteRegra (comportamento histórico).
-  const opcoes: OpcaoFreteResolvida[] = []
-  if (temNormal) {
-    // Frete grátis sem prazo NÃO exibe "a combinar": só "Frete Grátis".
-    const prazoNormalStr =
-      normalGratis && !prazoNormalMax ? '' : formatarPrazo(prazoNormalMin, prazoNormalMax)
-    opcoes.push({
-      id: 'normal',
-      nome: normalGratis ? 'Frete Grátis' : 'Frete Normal',
-      preco: precoNormal,
-      prazoDiasMin: prazoNormalMin,
-      prazoDiasMax: prazoNormalMax,
-      prazo: prazoNormalStr,
-      freteGratis: normalGratis,
-    })
-  }
-  if (temExpresso) {
-    opcoes.push({
-      id: 'expresso',
-      nome: 'Frete Expresso',
-      preco: precoExpresso,
-      prazoDiasMin: prazoExpressoMin,
-      prazoDiasMax: prazoExpressoMax,
-      prazo: formatarPrazo(prazoExpressoMin, prazoExpressoMax),
-      freteGratis: precoExpresso === 0,
-    })
-  }
+  const prazo = r.prazoDiasMax > 0 ? formatarPrazo(r.prazoDiasMin, r.prazoDiasMax) : ''
 
-  // Nenhuma modalidade é comum a todos os itens → orçamento.
-  if (opcoes.length === 0) {
-    return { status: 'a_combinar', uf, opcoes: [], mensagem: MSG_A_COMBINAR, freteGratis: false }
+  return {
+    status: 'ok',
+    uf,
+    opcoes: [
+      {
+        id: 'normal',
+        nome: r.freteGratis ? 'Frete Grátis' : 'Entrega',
+        preco: r.preco,
+        prazoDiasMin: r.prazoDiasMin,
+        prazoDiasMax: r.prazoDiasMax,
+        prazo,
+        freteGratis: r.freteGratis,
+      },
+    ],
+    mensagem: '',
+    freteGratis: r.freteGratis,
+    custoFreteReal,
+    transportadora,
   }
-
-  // Opção grátis primeiro (é a única quando há frete grátis).
-  opcoes.sort((a, b) => Number(b.freteGratis) - Number(a.freteGratis))
-
-  return { status: 'ok', uf, opcoes, mensagem: '', freteGratis: normalGratis, custoFreteReal: null, transportadora: null }
 }
 
 // Resultado da cotação de carrier para o carrinho inteiro.
