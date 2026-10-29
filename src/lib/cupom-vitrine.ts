@@ -28,18 +28,13 @@ export interface CupomVitrine {
   fim?: string
 }
 
-// Config v1 — adicionar outro selo é só mais um item aqui, espelhando o Cupom
-// escopado criado no admin/migration.
-export const CUPONS_VITRINE: readonly CupomVitrine[] = [
-  {
-    // Espelha o Cupom 10OFFTREND (PERCENTUAL 10, ativo, sem validade) escopado
-    // ao Produto slug=sx200-trend — criado na migration
-    // 20261028120000_cupom_escopo_produto. feedId do card = sku ?? slug.
-    codigo:        '10OFFTREND',
-    clientFeedIds: ['CLIM-SX200-TREND', 'sx200-trend'],
-    percentual:    10,
-  },
-]
+// Config — adicionar um selo é só mais um item aqui, espelhando um Cupom
+// escopado ativo no banco. VAZIO de propósito: o 10OFFTREND do SX200 Trend foi
+// REMOVIDO (cupom desativado no banco) e substituído por DESCONTO DIRETO
+// (precoPromocional), que já pinta o badge "Baixou 10%" + preço "de/por" no card
+// e na PDP. Não recrie o selo do SX200 aqui — senão o card anuncia um cupom que
+// o checkout recusa.
+export const CUPONS_VITRINE: readonly CupomVitrine[] = []
 
 function vigente(c: CupomVitrine, agora: Date): boolean {
   if (c.inicio && agora.getTime() < new Date(c.inicio).getTime()) return false
