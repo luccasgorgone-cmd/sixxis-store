@@ -3,7 +3,6 @@ import {
   UFS_FRETE_GRATIS,
   PERCENTUAL_FRETE,
   ufTemFreteGratis,
-  isAspirador,
   prazoPorUF,
   calcularFreteItem,
   calcularFreteCarrinho,
@@ -35,20 +34,6 @@ describe('ufTemFreteGratis', () => {
   })
 })
 
-describe('isAspirador', () => {
-  it('casa categoria de aspirador (case-insensitive)', () => {
-    expect(isAspirador('Aspiradores')).toBe(true)
-    expect(isAspirador('aspirador')).toBe(true)
-    expect(isAspirador('ASPIRADORES')).toBe(true)
-  })
-  it('não casa climatizador/spinning/nulo', () => {
-    expect(isAspirador('Climatizadores')).toBe(false)
-    expect(isAspirador('Spinning')).toBe(false)
-    expect(isAspirador(null)).toBe(false)
-    expect(isAspirador(undefined)).toBe(false)
-  })
-})
-
 describe('prazoPorUF', () => {
   it('retorna faixa conhecida e [0,0] para UF inválida', () => {
     expect(prazoPorUF('SP')).toEqual([1, 3])
@@ -59,36 +44,36 @@ describe('prazoPorUF', () => {
 
 describe('calcularFreteItem', () => {
   it('UF grátis → 0 mesmo para produto caro', () => {
-    expect(calcularFreteItem('SP', { precoEfetivo: 5175, quantidade: 1, categoria: 'Climatizadores' })).toBe(0)
+    expect(calcularFreteItem('SP', { precoEfetivo: 5175, quantidade: 1 })).toBe(0)
   })
 
-  it('aspirador → 0 em UF paga', () => {
-    expect(calcularFreteItem('BA', { precoEfetivo: 500, quantidade: 2, categoria: 'Aspiradores' })).toBe(0)
+  it('aspirador agora PAGA 9% em UF paga (isenção por categoria removida)', () => {
+    expect(calcularFreteItem('BA', { precoEfetivo: 500, quantidade: 2 })).toBe(90)
   })
 
-  it('não-aspirador em UF paga → 9% × preço × qtd', () => {
+  it('em UF paga → 9% × preço × qtd', () => {
     // SX200 com 10% já aplicado (5175) para BA: 9% = 465,75
-    expect(calcularFreteItem('BA', { precoEfetivo: 5175, quantidade: 1, categoria: 'Climatizadores' })).toBe(465.75)
+    expect(calcularFreteItem('BA', { precoEfetivo: 5175, quantidade: 1 })).toBe(465.75)
     // 2 unidades dobra o frete
-    expect(calcularFreteItem('BA', { precoEfetivo: 5175, quantidade: 2, categoria: 'Climatizadores' })).toBe(931.5)
+    expect(calcularFreteItem('BA', { precoEfetivo: 5175, quantidade: 2 })).toBe(931.5)
   })
 
   it('usa o percentual exportado (9%)', () => {
-    expect(calcularFreteItem('AM', { precoEfetivo: 1000, quantidade: 1, categoria: 'Climatizadores' }))
+    expect(calcularFreteItem('AM', { precoEfetivo: 1000, quantidade: 1 }))
       .toBe(Math.round(1000 * PERCENTUAL_FRETE * 100) / 100)
   })
 
   it('quantidade inválida vira 1 (piso)', () => {
-    expect(calcularFreteItem('BA', { precoEfetivo: 100, quantidade: 0, categoria: 'x' })).toBe(9)
-    expect(calcularFreteItem('BA', { precoEfetivo: 100, quantidade: -3, categoria: 'x' })).toBe(9)
+    expect(calcularFreteItem('BA', { precoEfetivo: 100, quantidade: 0 })).toBe(9)
+    expect(calcularFreteItem('BA', { precoEfetivo: 100, quantidade: -3 })).toBe(9)
   })
 })
 
 describe('calcularFreteCarrinho', () => {
   it('carrinho inteiro em UF grátis → grátis', () => {
     const r = calcularFreteCarrinho('SP', [
-      { precoEfetivo: 5175, quantidade: 1, categoria: 'Climatizadores' },
-      { precoEfetivo: 750, quantidade: 1, categoria: 'Spinning' },
+      { precoEfetivo: 5175, quantidade: 1 },
+      { precoEfetivo: 750, quantidade: 1 },
     ])
     expect(r.freteGratis).toBe(true)
     expect(r.preco).toBe(0)
@@ -96,29 +81,29 @@ describe('calcularFreteCarrinho', () => {
     expect(r.prazoDiasMax).toBe(3)
   })
 
-  it('carrinho misto (aspirador + climatizador) em UF paga → 9% só do climatizador', () => {
+  it('carrinho misto em UF paga → 9% de TODOS os itens (aspirador também paga agora)', () => {
     const r = calcularFreteCarrinho('BA', [
-      { precoEfetivo: 500, quantidade: 1, categoria: 'Aspiradores' }, // isento
-      { precoEfetivo: 5175, quantidade: 1, categoria: 'Climatizadores' }, // 465,75
+      { precoEfetivo: 500, quantidade: 1 }, // aspirador: 45
+      { precoEfetivo: 5175, quantidade: 1 }, // climatizador: 465,75
     ])
-    expect(r.preco).toBe(465.75)
+    expect(r.preco).toBe(510.75)
     expect(r.freteGratis).toBe(false)
     expect(r.prazoDiasMin).toBe(5)
     expect(r.prazoDiasMax).toBe(9)
   })
 
-  it('só aspirador em UF paga → grátis', () => {
+  it('aspirador em UF paga → paga 9% (não é mais isento)', () => {
     const r = calcularFreteCarrinho('AM', [
-      { precoEfetivo: 500, quantidade: 3, categoria: 'Aspiradores' },
+      { precoEfetivo: 500, quantidade: 3 },
     ])
-    expect(r.preco).toBe(0)
-    expect(r.freteGratis).toBe(true)
+    expect(r.preco).toBe(135)
+    expect(r.freteGratis).toBe(false)
   })
 
   it('soma itens pagos distintos corretamente', () => {
     const r = calcularFreteCarrinho('PE', [
-      { precoEfetivo: 1000, quantidade: 1, categoria: 'Climatizadores' }, // 90
-      { precoEfetivo: 2000, quantidade: 1, categoria: 'Climatizadores' }, // 180
+      { precoEfetivo: 1000, quantidade: 1 }, // 90
+      { precoEfetivo: 2000, quantidade: 1 }, // 180
     ])
     expect(r.preco).toBe(270)
     expect(r.freteGratis).toBe(false)

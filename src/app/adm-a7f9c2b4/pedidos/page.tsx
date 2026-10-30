@@ -223,11 +223,15 @@ function PedidoModal({
   onClose: () => void
 }) {
   const [transportadora, setTransportadora] = useState(pedido.transportadora ?? '')
+  // NF reflete a transação COM O CLIENTE: o "valor do frete" é o que o cliente
+  // PAGOU (pedido.frete), nunca o custoFreteReal (custo interno da empresa, que
+  // não vai na nota). Quando o frete foi grátis (pedido.frete 0), cai no custo
+  // interno só para a seção de Logística (frete não faturado).
   const [frete, setFrete] = useState(
-    pedido.custoFreteReal != null
-      ? String(pedido.custoFreteReal)
-      : pedido.frete != null
-        ? String(pedido.frete)
+    pedido.frete != null && Number(pedido.frete) > 0
+      ? String(pedido.frete)
+      : pedido.custoFreteReal != null
+        ? String(pedido.custoFreteReal)
         : '',
   )
   const [rastreio, setRastreio] = useState(pedido.codigoRastreio ?? '')
@@ -951,7 +955,7 @@ function PedidoDetalhe({
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1.5">
-                  Custo real da transportadora
+                  Valor total do frete (custo real transportadora)
                   <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">INTERNO — cliente não vê</span>
                 </label>
                 <div className="relative">
@@ -966,13 +970,13 @@ function PedidoDetalhe({
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Margem de frete (interno)</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Frete líquido p/ a empresa (interno)</label>
                 <div className="h-[38px] flex items-center px-3 rounded-xl border border-gray-100 bg-gray-50 text-sm">
-                  <span className="text-gray-400 text-xs mr-2">Cobrado {fmt(freteCobrado)} −</span>
+                  <span className="text-gray-400 text-xs mr-2">Pago pelo cliente {fmt(freteCobrado)} − custo real =</span>
                   {margem === null ? (
                     <span className="text-gray-400">informe o custo</span>
                   ) : (
-                    <span className={`font-bold ${margem >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    <span className={`font-bold ${margem >= 0 ? 'text-emerald-600' : 'text-red-600'}`} title="Positivo = cliente cobriu o frete; negativo = empresa absorveu a diferença">
                       {margem >= 0 ? '+' : ''}{fmt(margem)}
                     </span>
                   )}

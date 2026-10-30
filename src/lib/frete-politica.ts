@@ -5,7 +5,7 @@
 //   • Demais UFs (Centro-Oeste restante incl. DF, Nordeste, Norte) →
 //     frete = PERCENTUAL_FRETE (9%) sobre o VALOR do produto (preço efetivo ×
 //     quantidade), somado por item.
-//   • ASPIRADOR é isento da cobrança: frete grátis em QUALQUER UF.
+//   • Regra UNIFORME para todos os produtos (sem exceção por categoria).
 //
 // Esta política é AUTORITATIVA e substitui, no caminho padrão, a tabela manual
 // FreteRegra como motor de preço. O cálculo incide sobre o preço EFETIVO
@@ -39,11 +39,6 @@ export function ufTemFreteGratis(uf: string | null | undefined): boolean {
   return !!u && SET_FRETE_GRATIS.has(u)
 }
 
-/** O produto é um aspirador (isento de cobrança de frete)? Casa pela categoria. */
-export function isAspirador(categoria: string | null | undefined): boolean {
-  return /aspirador/i.test(categoria ?? '')
-}
-
 /** Prazo [min, max] em dias úteis para a UF. UF desconhecida → [0, 0]. */
 export function prazoPorUF(uf: string | null | undefined): [number, number] {
   const u = normalizarUF(uf)
@@ -60,16 +55,14 @@ export interface ItemFretePolitica {
   /** Preço efetivo unitário em reais (precoPromocional quando houver, senão preco). */
   precoEfetivo: number
   quantidade: number
-  /** Categoria do produto (para isenção de aspirador). */
-  categoria?: string | null
 }
 
 /**
  * Frete de UM item segundo a política regional:
- *   aspirador OU UF grátis → 0; senão 9% × (precoEfetivo × quantidade).
+ *   UF grátis → 0; senão 9% × (precoEfetivo × quantidade). Regra uniforme,
+ *   sem exceção por categoria.
  */
 export function calcularFreteItem(uf: string, item: ItemFretePolitica): number {
-  if (isAspirador(item.categoria)) return 0
   if (ufTemFreteGratis(uf)) return 0
   const preco = Number.isFinite(item.precoEfetivo) ? Math.max(0, item.precoEfetivo) : 0
   const qtd = Math.max(1, Math.floor(Number(item.quantidade)) || 1)

@@ -133,7 +133,7 @@ export async function resolverFrete(
   // de aspirador.
   const produtos = await prisma.produto.findMany({
     where: { id: { in: produtoIds } },
-    select: { id: true, preco: true, precoPromocional: true, categoria: true },
+    select: { id: true, preco: true, precoPromocional: true },
   })
   const porId = new Map(produtos.map((p) => [p.id, p]))
 
@@ -142,7 +142,6 @@ export async function resolverFrete(
     return {
       precoEfetivo: p ? Number(p.precoPromocional ?? p.preco) : 0,
       quantidade: qtdPorProduto.get(id) ?? 1,
-      categoria: p?.categoria ?? null,
     }
   })
 

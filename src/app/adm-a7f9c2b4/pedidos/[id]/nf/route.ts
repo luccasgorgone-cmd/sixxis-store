@@ -115,14 +115,19 @@ export async function GET(
   const subtotal = itens.reduce((s, i) => s + i.precoUnitario * i.quantidade, 0)
   const desconto = Number(pedido.desconto)
 
-  // ── "Valor do frete" vem do modal (fallback: custoFreteReal). ───────────────
+  // ── "Valor do frete" = o que o CLIENTE PAGOU (pedido.frete). Vem do modal; o
+  //    fallback é pedido.frete (não custoFreteReal — custo interno da empresa, que
+  //    NUNCA entra na nota). Só cai no custoFreteReal quando o frete foi grátis
+  //    (pedido.frete 0): aí o valor aparece apenas na Logística, não faturado.
   const freteModal = parseNum(sp.get('frete'))
   const valorFrete =
     freteModal != null
       ? freteModal
-      : pedido.custoFreteReal != null
-        ? Number(pedido.custoFreteReal)
-        : null
+      : Number(pedido.frete) > 0
+        ? Number(pedido.frete)
+        : pedido.custoFreteReal != null
+          ? Number(pedido.custoFreteReal)
+          : null
 
   // ── "Frete por conta do cliente?" (toggle do modal). Default: Sim se o pedido
   //    cobrou frete. ───────────────────────────────────────────────────────────
