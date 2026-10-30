@@ -398,7 +398,7 @@ export async function gerarNfPdf(data: NfData): Promise<Uint8Array> {
   const valorFreteFmt = data.logistica.valorFrete != null ? moeda(data.logistica.valorFrete) : '-'
   resFields.push(
     data.logistica.freteFaturado
-      ? ['Valor do frete', valorFreteFmt]
+      ? ['Frete pago pelo cliente', valorFreteFmt]
       : ['Custo interno do frete', data.logistica.valorFrete != null ? `${valorFreteFmt} — não faturado` : '-'],
   )
   for (let i = 0; i < resFields.length; i += 2) {
