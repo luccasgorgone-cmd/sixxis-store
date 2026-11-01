@@ -10,7 +10,7 @@ import CalcFrete from '@/components/produto/CalcFrete'
 import { useCarrinho } from '@/hooks/useCarrinho'
 import { useFavoritos } from '@/hooks/useListas'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
-import { trackAddToCart } from '@/lib/analytics/events'
+import { trackAddToCart, trackCtaBloqueioVoltagem } from '@/lib/analytics/events'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { feedId } from '@/lib/feed-id'
 import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
@@ -187,6 +187,14 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
 
   function handleAddToCart() {
     if (exigeVariacao && !variacaoSelecionada) {
+      // Diagnóstico: intenção de ATC travada na escolha de voltagem (não-conversão).
+      trackCtaBloqueioVoltagem({
+        item_id: gIdCarrinho(variacaoSelecionada),
+        produto_id: produto.id,
+        cta: 'atc_inline',
+        sku: produto.sku ?? undefined,
+        item_slug: produto.slug,
+      })
       setModalVariacaoAberto(true)
       return
     }
@@ -220,6 +228,14 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
 
   function handleComprar() {
     if (exigeVariacao && !variacaoSelecionada) {
+      // Diagnóstico: intenção de Comprar Agora travada na escolha de voltagem (não-conversão).
+      trackCtaBloqueioVoltagem({
+        item_id: gIdCarrinho(variacaoSelecionada),
+        produto_id: produto.id,
+        cta: 'comprar_agora',
+        sku: produto.sku ?? undefined,
+        item_slug: produto.slug,
+      })
       setModalVariacaoAberto(true)
       return
     }

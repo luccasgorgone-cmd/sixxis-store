@@ -125,6 +125,44 @@ export function trackAddToCart(produto: ProdutoTracking) {
   })
 }
 
+// Evento de DIAGNÓSTICO (não-conversão): o cliente clicou num CTA de compra
+// (Adicionar ao Carrinho / Comprar Agora) mas a variação OBRIGATÓRIA (voltagem)
+// não estava selecionada → abrimos o modal de escolha e nenhum add aconteceu.
+// Mede ONDE a intenção trava na escolha de voltagem (o ralo view_item→ATC).
+//
+// REGRA DE OURO: isto é proxy de diagnóstico, NUNCA conversão/receita. Por isso:
+// sem value, sem bloco `ecommerce`, e JAMAIS vai ao Meta Pixel (sem trackMeta).
+// No GA4 este evento deve ser marcado como NÃO-conversão (lane do GTM/Marketing:
+// trigger em event=cta_bloqueio_voltagem → tag GA4, sem marcar como key event).
+// Consent-gated igual ao resto (mede dentro do consentido = razão já limpa).
+export function trackCtaBloqueioVoltagem(dados: {
+  item_id: string            // g:id do feed → GA4 (NUNCA o CUID)
+  produto_id?: string        // CUID → só pipeline interno (FK). NUNCA GA4/Meta.
+  cta: 'atc_inline' | 'comprar_agora'
+  sku?: string
+  item_slug?: string
+}) {
+  // GA4 (dataLayer): evento custom, sem value e sem `ecommerce` (não usa o
+  // helper push() de e-commerce de propósito). produto_id (CUID) nunca entra.
+  if (typeof window !== 'undefined' && analyticsConsentido()) {
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({
+      event: 'cta_bloqueio_voltagem',
+      item_id: dados.item_id,
+      item_sku: dados.sku,
+      item_slug: dados.item_slug,
+      cta_origem: dados.cta,
+    })
+  }
+  // Pipeline interno (Sistema A): EventoTracking tipo="add_to_cart_bloqueado".
+  // Só interno — pode carregar o produto_id (FK).
+  enviarInterno('add_to_cart_bloqueado', {
+    produtoId: dados.produto_id,
+    produtoSlug: dados.item_slug,
+    dados: { item_id: dados.item_id, sku: dados.sku, cta_origem: dados.cta },
+  })
+}
+
 // eventID (opcional): mesmo id no browser e no servidor → DEDUPLICA o
 // InitiateCheckout com o CAPI (fase 2). Quando ausente, o Pixel dispara sem id
 // (comportamento antigo). Gerado por quem chama (1x por entrada no checkout).
