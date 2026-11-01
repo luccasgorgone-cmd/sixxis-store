@@ -31,8 +31,10 @@ interface Variacao {
 // Color map for known color names
 const COLOR_MAP: Record<string, string> = {
   preto: '#1a1a1a',
+  preta: '#1a1a1a',
   black: '#1a1a1a',
   branco: '#f5f5f5',
+  branca: '#f5f5f5',
   white: '#f5f5f5',
   azul: '#2563eb',
   blue: '#2563eb',
@@ -110,12 +112,16 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
   const tipoVariacao = inferirTipoVariacao(variacoesAtivas.map(v => v.nome))
   const isCor = tipoVariacao === 'Cor'
 
-  // Pré-seleção SOMENTE para cor (prefere Branco). Voltagem NUNCA é
-  // pré-selecionada: 110V x 220V errado queima o aparelho, então a escolha tem
-  // que ser ativa do cliente.
+  // Pré-seleção SOMENTE para cor. Voltagem NUNCA é pré-selecionada: 110V x 220V
+  // errado queima o aparelho, então a escolha tem que ser ativa do cliente.
+  // Cor padrão depende da linha: bicicletas de spinning (Sixxis Life) abrem em
+  // PRETO; os demais produtos continuam preferindo Branco.
+  const coresPreferidas = produto.categoria === 'spinning'
+    ? ['preta', 'preto']
+    : ['branco', 'branca']
   const defaultVariacao = isCor
     ? (variacoesAtivas.find(v => v.id === initialVariacaoId) ??
-      variacoesAtivas.find(v => v.nome.toLowerCase().includes('branco')) ??
+      variacoesAtivas.find(v => coresPreferidas.some(c => v.nome.toLowerCase().includes(c))) ??
       variacoesAtivas[0] ?? null)
     : null
 
