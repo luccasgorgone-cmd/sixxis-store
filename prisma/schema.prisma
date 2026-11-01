@@ -91,6 +91,11 @@ model Produto {
   especificacoes           Json?
   faqs                     Json?
   imagensPorVariacao       Json?
+  // Imagem LIMPA (packshot fundo branco, sem overlay) servida APENAS no feed do
+  // Google Merchant (g:image_link). null = usa imagens[0] (a hero com arte do
+  // PDP). Desacopla a imagem do Shopping da hero da loja sem tocar no visual do
+  // site. Aditivo/nullable; só o merchant-feed.xml consome este campo.
+  imagemFeedGoogle         String?
   vendidos                 Int                 @default(0)
   mediaAvaliacoes          Float               @default(0)
   totalAvaliacoes          Int                 @default(0)

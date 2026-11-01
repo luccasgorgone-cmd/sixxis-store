@@ -168,7 +168,10 @@ export async function GET() {
       title: p.nome,
       description: descricao,
       link,
-      imagem: urlAbsoluta(imagemPrincipal),
+      // Prefere o packshot limpo do feed (imagemFeedGoogle) quando definido; o
+      // Google favorece imagem de produto isolada no Shopping. Fallback = hero
+      // do PDP (imagens[0]). null em todos os produtos = comportamento atual.
+      imagem: urlAbsoluta(p.imagemFeedGoogle ?? imagemPrincipal),
       imagensAdicionais,
       googleCategoria: cat.google,
       productType: cat.tipo,
