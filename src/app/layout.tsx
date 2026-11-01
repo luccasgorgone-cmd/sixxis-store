@@ -228,9 +228,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${allFontVars} h-full antialiased`}
     >
       <head>
-        {/* Google Consent Mode v2 — default DENIED ANTES do GTM. Returning
-            visitor com consentimento salvo (cookie sixxis_consent) recebe o
-            update imediatamente, então GA4/GTM não seta _ga até o aceite. */}
+        {/* Google Consent Mode v2 (modo AVANÇADO) — default DENIED ANTES do GTM.
+            Returning visitor com consentimento salvo (cookie sixxis_consent)
+            recebe o update imediatamente, então GA4/GTM não seta _ga até o
+            aceite. url_passthrough + ads_data_redaction completam o modo
+            avançado: no estado 'denied' (tráfego frio sem cookie) o Google
+            ainda recebe pings SEM cookie/PII p/ modelar conversão, e o gclid
+            passa por URL em vez de cookie. ads_data_redaction REDIGE os
+            identificadores de anúncio enquanto ad_storage=denied — reforça a
+            privacidade (LGPD), não enfraquece. */}
         <Script
           id="consent-default"
           strategy="beforeInteractive"
@@ -238,6 +244,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: `
 window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
 gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});
+gtag('set','url_passthrough',true);
+gtag('set','ads_data_redaction',true);
 try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JSON.parse(decodeURIComponent(m[1]));gtag('consent','update',{analytics_storage:c.a?'granted':'denied',ad_storage:c.m?'granted':'denied',ad_user_data:c.m?'granted':'denied',ad_personalization:c.m?'granted':'denied'});}}catch(e){}
             `,
           }}
