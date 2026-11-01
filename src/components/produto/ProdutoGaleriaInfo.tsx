@@ -55,9 +55,14 @@ export default function ProdutoGaleriaInfo({
   const [itensGaleria, setItensGaleria] = useState<GaleriaItemCB[]>(() => {
     if (!imagensPorVariacao) return itensIniciais
     const ativas = variacoes.filter(v => v.ativo)
+    // Mesma regra do InfoProdutoCB: spinning (Sixxis Life) abre em preto; o
+    // resto em branco. Mantem a foto inicial da galeria igual a cor pre-selecionada.
+    const coresPreferidas = produto.categoria === 'spinning'
+      ? ['preta', 'preto']
+      : ['branco', 'branca']
     const defaultNome =
       ativas.find(v => v.id === initialVariacaoId)?.nome ??
-      ativas.find(v => v.nome.toLowerCase().includes('branco'))?.nome ??
+      ativas.find(v => coresPreferidas.some(c => v.nome.toLowerCase().includes(c)))?.nome ??
       ativas[0]?.nome
     if (!defaultNome) return itensIniciais
     const imgs = imagensPorVariacao[defaultNome]
