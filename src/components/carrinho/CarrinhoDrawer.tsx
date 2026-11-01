@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { X, ShoppingBag, Minus, Plus, Trash2, Package, Zap, Truck, Clock, AlertCircle, Loader2 } from 'lucide-react'
+import { X, ShoppingBag, Minus, Plus, Trash2, Package, Zap, Truck, Clock, AlertCircle, Loader2, Tag } from 'lucide-react'
 import { useCarrinho, useTotalCarrinho } from '@/hooks/useCarrinho'
 import { feedIdProduto } from '@/lib/feed-id'
+import { calcularPromoCliente } from '@/lib/promo-segunda-unidade'
 import { FRETE_COPY } from '@/lib/copy/frete'
 import {
   cepValido, formatarCep, soDigitosCep, montarProdutosFrete,
@@ -32,6 +33,15 @@ export default function CarrinhoDrawer() {
   const { itens, drawerAberto, setDrawerAberto, removerItem, atualizarQuantidade, adicionarItem } = useCarrinho()
   const total = useTotalCarrinho()
   const [upsell, setUpsell] = useState<UpsellItem[]>([])
+
+  // Promo "2ª unidade" — só EXIBIÇÃO (o servidor em /api/pedidos é autoritativo).
+  // Mesmo cálculo da página /carrinho e do /checkout; sem isto o drawer mostrava
+  // o subtotal cheio e o cliente só via o desconto depois de avançar.
+  const promo = calcularPromoCliente(
+    itens.map((i) => ({ feedId: i.feedId, preco: i.preco, quantidade: i.quantidade })),
+  )
+  const descontoPromo = promo.ativo ? Math.min(promo.desconto, total) : 0
+  const totalComDesconto = Math.max(0, total - descontoPromo)
 
   // ── Estimativa de frete (CEP antes do checkout) ──────────────
   const [cepFrete, setCepFrete] = useState('')
@@ -286,11 +296,30 @@ export default function CarrinhoDrawer() {
         {/* Footer */}
         {itens.length > 0 && (
           <div className="border-t border-gray-100 px-5 py-4 space-y-3 shrink-0 bg-white">
-            {/* Total */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Subtotal</span>
-              <span className="text-lg font-black text-gray-900">R$ {fmt(total)}</span>
-            </div>
+            {/* Total (com a promo "2ª unidade" já abatida, para transparência) */}
+            {promo.ativo ? (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Subtotal</span>
+                  <span className="text-sm font-semibold text-gray-400 line-through">R$ {fmt(total)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-emerald-600 flex items-center gap-1">
+                    <Tag size={12} /> {promo.descricao ?? 'Promo'}
+                  </span>
+                  <span className="text-sm font-bold text-emerald-600">-R$ {fmt(descontoPromo)}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-sm font-semibold text-gray-700">Total</span>
+                  <span className="text-lg font-black text-gray-900">R$ {fmt(totalComDesconto)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Subtotal</span>
+                <span className="text-lg font-black text-gray-900">R$ {fmt(total)}</span>
+              </div>
+            )}
             {/* Estimativa de frete — mostra o custo ANTES do checkout */}
             <div className="-mt-1">
               <div className="flex gap-2">
