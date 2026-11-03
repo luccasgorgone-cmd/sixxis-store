@@ -12,6 +12,12 @@ const ASSETS = [
   ['assets/sx120-prime-branco-01-frontal-1600-canonical-v3.jpg', 'image/jpeg'],
   ['assets/sx120-prime-branco-02-controles-1600-canonical-v3.jpg', 'image/jpeg'],
   ['assets/sx120-prime-branco-03-reservatorio-1600-canonical-v3.jpg', 'image/jpeg'],
+  ['assets/01-hero-sx120-prime-branco-1080x1350.png', 'image/png'],
+  ['assets/02-angulo-traseiro-sx120-prime-branco-1080x1350.png', 'image/png'],
+  ['assets/03-reservatorio-abastecimento-frontal-sx120-1080x1350.png', 'image/png'],
+  ['assets/04-painel-touchscreen-controle-sx120-1080x1350.png', 'image/png'],
+  ['assets/05-contexto-apresentador-sixxis-sx120-1080x1350.png', 'image/png'],
+  ['assets/06-fluxo-9-velocidades-sx120-1080x1350.png', 'image/png'],
 ] as const
 
 export async function buildPreviewDocument() {

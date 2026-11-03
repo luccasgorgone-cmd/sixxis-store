@@ -441,6 +441,59 @@ p { text-wrap: pretty; }
 .detail-secondary ul { list-style: none; margin: 0; padding: clamp(2rem, 4vw, 4rem); display: grid; align-content: center; gap: 1.25rem; }
 .detail-secondary li { font-size: var(--step-lead); font-weight: 690; }
 
+.editorial-section {
+  padding: clamp(6rem, 9vw, 9rem) var(--margin);
+  background: var(--field);
+  color: var(--paper);
+}
+.editorial-heading {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gutter);
+  align-items: end;
+  margin-bottom: clamp(2.5rem, 5vw, 5rem);
+}
+.editorial-eyebrow {
+  grid-column: 1 / 5;
+  align-self: start;
+  color: var(--accent);
+  font-size: var(--step-small);
+  font-weight: 780;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.editorial-heading h2 {
+  grid-column: 5 / 10;
+  font-size: var(--step-head);
+  line-height: .9;
+  letter-spacing: -.05em;
+  max-width: 13ch;
+}
+.editorial-heading > p:last-child {
+  grid-column: 10 / 13;
+  color: #d9e0dd;
+}
+.editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+}
+.editorial-card {
+  background: #222b28;
+  overflow: hidden;
+}
+.editorial-card img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.editorial-source {
+  max-width: 62ch;
+  margin-top: 1.5rem;
+  color: #c7d0cc;
+  font-size: var(--step-small);
+}
+
 .economy-section {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -666,6 +719,14 @@ p { text-wrap: pretty; }
   .detail-secondary figure { grid-template-columns: 1fr; }
   .detail-secondary img { min-height: 320px; }
 
+  .editorial-heading { grid-template-columns: 1fr 1fr; }
+  .editorial-eyebrow,
+  .editorial-heading h2,
+  .editorial-heading > p:last-child { grid-column: auto; }
+  .editorial-heading h2 { grid-row: 2; }
+  .editorial-heading > p:last-child { grid-row: 2; align-self: end; }
+  .editorial-grid { grid-template-columns: 1fr 1fr; }
+
   .economy-section { padding: 6rem var(--margin); }
   .comparison { margin-top: 3rem; }
   .specs-heading { position: static; }
@@ -741,6 +802,11 @@ p { text-wrap: pretty; }
   .detail-primary figcaption { min-height: 150px; }
   .detail-secondary { grid-template-columns: 1fr; }
   .detail-secondary img { min-height: auto; aspect-ratio: 1; }
+  .editorial-section { padding: 5rem var(--margin); }
+  .editorial-heading { display: block; }
+  .editorial-heading h2 { margin-top: 1rem; }
+  .editorial-heading > p:last-child { margin-top: 1.25rem; }
+  .editorial-grid { grid-template-columns: 1fr; gap: 1rem; }
   .comparison { overflow: visible; padding: 1rem; }
   .comparison > div { min-width: 0; grid-template-columns: .9fr 1fr 1fr; gap: .5rem; font-size: var(--step-small); }
   .comparison-note { min-width: 0; }
