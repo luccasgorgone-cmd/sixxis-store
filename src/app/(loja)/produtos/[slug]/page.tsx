@@ -16,6 +16,7 @@ import ContadorAnimado from '@/components/ui/ContadorAnimado'
 import ViewItemTracker from '@/components/analytics/ViewItemTracker'
 import { feedId } from '@/lib/feed-id'
 import { encontrarVariacaoPorSku, estoqueDisponivel, VARIANTE_QUERY_PARAM, urlProdutoComVariacao } from '@/lib/produto-variacao'
+import { precoPix as calcularPrecoPix } from '@/lib/preco-pix'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 import Sx120Editorial from '@/components/produto/Sx120Editorial'
 
@@ -352,7 +353,7 @@ export default async function ProdutoPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Galeria + Info */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10 lg:overflow-visible">
+        <div id="produto" className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10 lg:overflow-visible">
           <ProdutoGaleriaInfo
             produto={produtoParaInfo}
             variacoes={variacoes}
@@ -377,23 +378,22 @@ export default async function ProdutoPage({
           </div>
         )}
 
-        {/* ★ Você também pode gostar */}
-        <ProdutosSimilares
-          slugAtual={produto.slug}
-          categoriaAtual={produto.categoria ?? ''}
-        />
+        {produto.slug !== 'sx120-prime' && (
+          <>
+            {/* ★ Você também pode gostar */}
+            <ProdutosSimilares
+              slugAtual={produto.slug}
+              categoriaAtual={produto.categoria ?? ''}
+            />
 
-        {/* Descrição */}
-        <DescricaoRica descricao={produto.descricao} />
+            {/* Descrição */}
+            <DescricaoRica descricao={produto.descricao} />
 
-        {/* Conteúdo editorial aprovado e exclusivo do SX120 Prime Branco. */}
-        {produto.slug === 'sx120-prime' && <Sx120Editorial />}
+            {/* Bloco de economia (Faça as contas) */}
+            <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} coberturaM2={coberturaM2} />
 
-        {/* Bloco de economia (Faça as contas) */}
-        <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} coberturaM2={coberturaM2} />
-
-        {/* Stats — contadores +1M / 12 meses / 100% */}
-        <section className="mt-12 mb-10">
+            {/* Stats — contadores +1M / 12 meses / 100% */}
+            <section className="mt-12 mb-10">
           {/* Mobile: stack vertical com numero+label horizontais (cabe '+1.000.000') */}
           <div className="md:hidden flex flex-col gap-2 reveal">
             <div className="flex items-center justify-between bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15 px-5 py-3">
@@ -438,23 +438,34 @@ export default async function ProdutoPage({
               <p className="text-[11px] lg:text-xs text-gray-500 font-medium mt-1">Qualidade</p>
             </div>
           </div>
-        </section>
+            </section>
 
-        {/* Abas (Perguntas Frequentes + Avaliações) */}
-        <div id="avaliacoes">
-          <AbasProduto
-            descricao={null}
-            produtoId={produto.id}
-            especificacoes={undefined}
-            faqs={faqs ?? undefined}
-            hideDescricao
-          />
-        </div>
+            {/* Abas (Perguntas Frequentes + Avaliações) */}
+            <div id="avaliacoes">
+              <AbasProduto
+                descricao={null}
+                produtoId={produto.id}
+                especificacoes={undefined}
+                faqs={faqs ?? undefined}
+                hideDescricao
+              />
+            </div>
 
-        {/* Por que comprar na Sixxis (ultimo, fechando o pitch) */}
-        <PorQueComprarSixxis />
+            {/* Por que comprar na Sixxis (ultimo, fechando o pitch) */}
+            <PorQueComprarSixxis />
+          </>
+        )}
 
       </div>
+
+      {produto.slug === 'sx120-prime' && (
+        <Sx120Editorial
+          precoCartao={promocional ?? preco}
+          precoPix={calcularPrecoPix(promocional ?? preco)}
+          mediaAvaliacoes={mediaAv}
+          totalAvaliacoes={totalAv}
+        />
+      )}
     </div>
   )
 }
