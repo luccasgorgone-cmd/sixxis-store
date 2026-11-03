@@ -8,10 +8,10 @@ import {
 // erpProdutoId REAL do SX180 Trend em producao (chave do match server-side).
 const ERP = 'ADMIN-1781206602840-9qw3wci'
 const PRECO = 2000
-// Dentro da vigência (27/10 → 04/11/2026, America/Sao_Paulo).
+// Dentro da vigência iniciada em 27/10/2026 (America/Sao_Paulo), sem data final.
 const DENTRO = new Date('2026-10-28T12:00:00-03:00')
-// Depois do fim.
-const FORA = new Date('2026-11-05T00:00:00-03:00')
+// Depois da antiga data final de 04/11.
+const DEPOIS_DA_DATA_ANTIGA = new Date('2026-11-05T00:00:00-03:00')
 // Antes do início.
 const ANTES = new Date('2026-10-26T23:59:00-03:00')
 
@@ -40,14 +40,14 @@ describe('vigência', () => {
     expect(r.ativo).toBe(false)
     expect(r.desconto).toBe(0)
   })
-  it('não aplica depois do fim', () => {
-    const r = calcularPromoServidor([{ erpProdutoId: ERP, precoUnitario: PRECO, quantidade: 4 }], FORA)
-    expect(r.ativo).toBe(false)
-    expect(r.desconto).toBe(0)
+  it('continua aplicando depois da antiga data final', () => {
+    const r = calcularPromoServidor([{ erpProdutoId: ERP, precoUnitario: PRECO, quantidade: 4 }], DEPOIS_DA_DATA_ANTIGA)
+    expect(r.ativo).toBe(true)
+    expect(r.desconto).toBe(PRECO)
   })
-  it('promoVigentePorErp reflete a janela', () => {
+  it('promoVigentePorErp reflete a vigência sem data final', () => {
     expect(promoVigentePorErp(ERP, DENTRO)).not.toBeNull()
-    expect(promoVigentePorErp(ERP, FORA)).toBeNull()
+    expect(promoVigentePorErp(ERP, DEPOIS_DA_DATA_ANTIGA)).not.toBeNull()
     expect(promoVigentePorErp('OUTRO-PRODUTO', DENTRO)).toBeNull()
   })
 })

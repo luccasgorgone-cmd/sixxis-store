@@ -30,8 +30,8 @@ export interface PromoSegundaUnidade {
   percentual: number
   /** Início de vigência (ISO com offset — America/Sao_Paulo = -03:00). */
   inicio: string
-  /** Fim de vigência, inclusivo (ISO com offset). */
-  fim: string
+  /** Fim de vigência, inclusivo (ISO com offset). `null` = por tempo limitado. */
+  fim: string | null
   /** Rótulo amigável exibido ao cliente ("2ª unidade 50% OFF"). */
   descricao: string
 }
@@ -49,7 +49,7 @@ export const PROMOS_SEGUNDA_UNIDADE: readonly PromoSegundaUnidade[] = [
     clientFeedIds: ['CLIM-SX180-TREND', 'sx180-trend'],
     percentual:    50,
     inicio:        '2026-10-27T00:00:00-03:00',
-    fim:           '2026-11-04T23:59:59-03:00',
+    fim:           null,
     descricao:     '2ª unidade 50% OFF',
   },
 ]
@@ -67,9 +67,8 @@ export interface ResultadoPromo {
 
 function vigente(p: PromoSegundaUnidade, agora: Date): boolean {
   const ini = new Date(p.inicio).getTime()
-  const fim = new Date(p.fim).getTime()
   const t = agora.getTime()
-  return t >= ini && t <= fim
+  return t >= ini && (p.fim === null || t <= new Date(p.fim).getTime())
 }
 
 /** Todas as promos vigentes agora. Útil para a vitrine decidir o que destacar. */

@@ -380,7 +380,9 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
             desconto é aplicado <strong className="text-[#0f2e2b]">automaticamente no carrinho</strong>.
           </p>
           <p className="text-xs text-[#1a4f4a]/70 mt-1">
-            Válido até {promoBadge.fim.slice(8, 10)}/{promoBadge.fim.slice(5, 7)} · não acumula com cupom
+            {promoBadge.fim
+              ? `Válido até ${promoBadge.fim.slice(8, 10)}/${promoBadge.fim.slice(5, 7)}`
+              : 'Por tempo limitado'} · não acumula com cupom
           </p>
         </div>
       )}
