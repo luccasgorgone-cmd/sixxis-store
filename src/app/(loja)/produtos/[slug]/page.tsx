@@ -17,6 +17,7 @@ import ViewItemTracker from '@/components/analytics/ViewItemTracker'
 import { feedId } from '@/lib/feed-id'
 import { encontrarVariacaoPorSku, estoqueDisponivel, VARIANTE_QUERY_PARAM, urlProdutoComVariacao } from '@/lib/produto-variacao'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
+import Sx120Editorial from '@/components/produto/Sx120Editorial'
 
 export const dynamic = 'force-dynamic'
 
@@ -384,6 +385,9 @@ export default async function ProdutoPage({
 
         {/* Descrição */}
         <DescricaoRica descricao={produto.descricao} />
+
+        {/* Conteúdo editorial aprovado e exclusivo do SX120 Prime Branco. */}
+        {produto.slug === 'sx120-prime' && <Sx120Editorial />}
 
         {/* Bloco de economia (Faça as contas) */}
         <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} coberturaM2={coberturaM2} />
