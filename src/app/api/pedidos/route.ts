@@ -10,6 +10,7 @@ import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 import {
   guestDadosSchema, guestEnderecoSchema, montarClienteGuestData,
 } from '@/lib/guest-checkout'
+import { gerarPedidoToken } from '@/lib/pedido-token'
 
 const itemSchema = z.object({
   produtoId:    z.string(),
@@ -157,6 +158,7 @@ export async function POST(request: NextRequest) {
       return Response.json(
         {
           pedido: jaCriado,
+          pedidoToken: gerarPedidoToken(jaCriado.id),
           freteStatus: jaCriado.status === 'aguardando_frete' ? 'a_combinar' : 'ok',
           cashbackAplicado: Number(jaCriado.cashbackUsado),
           idempotente: true,
@@ -465,6 +467,7 @@ export async function POST(request: NextRequest) {
   return Response.json(
     {
       pedido: { ...pedidoPublico, cashbackUsado: cashbackAplicado, total: Number(pedido.total) - cashbackAplicado },
+      pedidoToken: gerarPedidoToken(pedido.id),
       freteStatus: resultadoFrete.status,
       cashbackAplicado,
     },

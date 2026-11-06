@@ -530,6 +530,10 @@ function CheckoutContent() {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro]             = useState('')
   const [pedidoId, setPedidoId]     = useState<string | null>(null)
+  // Token de posse devolvido por /api/pedidos — autoriza o pagamento quando o
+  // comprador não está logado (convidado ou sessão expirada). Vai no header
+  // x-pedido-token das chamadas de pagamento/status.
+  const [pedidoToken, setPedidoToken] = useState<string | null>(null)
 
   // Pagamento em 2 métodos (2 cartões, ou Pix+cartão) — atrás de feature flag
   // server-side (CHECKOUT_MULTI_METODO_HABILITADO), oculto até validado em
@@ -977,6 +981,7 @@ function CheckoutContent() {
       }
       const pedidoData = await pr.json()
       setPedidoId(pedidoData.pedido.id)
+      setPedidoToken(pedidoData.pedidoToken ?? null)
       // Frete "a combinar" → pedido vira orçamento: não dispara pagamento.
       if (pedidoData.freteStatus === 'a_combinar') {
         limparCarrinho()
@@ -1106,6 +1111,7 @@ function CheckoutContent() {
                 <>
                   <CheckoutBricks
                     pedidoId={pedidoId}
+                    pedidoToken={pedidoToken ?? undefined}
                     valor={totalFinal}
                     payerEmail={ident.email}
                     payerNome={ident.nome}
@@ -1145,6 +1151,7 @@ function CheckoutContent() {
               {pedidoId && modoPagamento === 'multi' && (
                 <CheckoutMultiMetodo
                   pedidoId={pedidoId}
+                  pedidoToken={pedidoToken ?? undefined}
                   valor={totalFinal}
                   payerEmail={ident.email}
                   payerCpf={ident.cpf}

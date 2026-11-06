@@ -8,6 +8,9 @@ interface Props {
   qrBase64: string
   copiaECola: string
   pgtoId: string
+  // Token de posse do pedido — enviado no header x-pedido-token ao consultar o
+  // status, para o convidado/cliente deslogado poder acompanhar a confirmação.
+  pedidoToken?: string
   expiraEm: string | null
   onPago: () => void
   // Polling customizado, opcional. Ausente → comportamento original (consulta
@@ -27,6 +30,7 @@ export default function PixPainel({
   qrBase64,
   copiaECola,
   pgtoId,
+  pedidoToken,
   expiraEm,
   onPago,
   pollStatus,
@@ -54,6 +58,7 @@ export default function PixPainel({
         } else {
           const r = await fetch(`/api/checkout/status/${pgtoId}`, {
             credentials: 'include',
+            headers: pedidoToken ? { 'x-pedido-token': pedidoToken } : undefined,
           })
           if (!r.ok) return
           const d = (await r.json()) as { status?: string }
@@ -78,7 +83,7 @@ export default function PixPainel({
       cancelled = true
       clearInterval(tick)
     }
-  }, [pgtoId, onPago, pollStatus])
+  }, [pgtoId, onPago, pollStatus, pedidoToken])
 
   useEffect(() => {
     const t = setInterval(() => {
