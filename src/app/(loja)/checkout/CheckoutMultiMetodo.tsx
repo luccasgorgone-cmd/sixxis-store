@@ -17,11 +17,14 @@ function moeda(v: number) {
 const POLL_CONFIRMACAO_MS = 4000
 const POLL_CONFIRMACAO_MAX_TENTATIVAS = 45 // ~3min
 
-async function aguardarConfirmacaoFinal(pedidoId: string): Promise<'pago' | 'falhou'> {
+async function aguardarConfirmacaoFinal(pedidoId: string, pedidoToken?: string): Promise<'pago' | 'falhou'> {
   for (let i = 0; i < POLL_CONFIRMACAO_MAX_TENTATIVAS; i++) {
     await new Promise((r) => setTimeout(r, POLL_CONFIRMACAO_MS))
     try {
-      const r = await fetch(`/api/checkout/multi-metodo/status/${pedidoId}`, { credentials: 'include' })
+      const r = await fetch(`/api/checkout/multi-metodo/status/${pedidoId}`, {
+        credentials: 'include',
+        headers: pedidoToken ? { 'x-pedido-token': pedidoToken } : undefined,
+      })
       if (r.ok) {
         const d = (await r.json()) as { pedidoStatus?: string; multiMetodoStatus?: string | null }
         if (d.pedidoStatus === 'pago') return 'pago'
@@ -36,6 +39,7 @@ async function aguardarConfirmacaoFinal(pedidoId: string): Promise<'pago' | 'fal
 
 interface Props {
   pedidoId: string
+  pedidoToken?: string
   valor: number // BRL, total do pedido
   payerEmail: string
   payerCpf?: string
@@ -48,6 +52,7 @@ type Modo = 'escolha' | 'dois_cartoes' | 'pix_cartao'
 
 export default function CheckoutMultiMetodo({
   pedidoId,
+  pedidoToken,
   valor,
   payerEmail,
   payerCpf,
@@ -147,6 +152,7 @@ export default function CheckoutMultiMetodo({
       {modo === 'dois_cartoes' && (
         <FluxoDoisCartoes
           pedidoId={pedidoId}
+          pedidoToken={pedidoToken}
           publicKey={publicKey}
           valor={valor}
           payerEmail={payerEmail}
@@ -158,6 +164,7 @@ export default function CheckoutMultiMetodo({
       {modo === 'pix_cartao' && (
         <FluxoPixMaisCartao
           pedidoId={pedidoId}
+          pedidoToken={pedidoToken}
           publicKey={publicKey}
           valor={valor}
           payerEmail={payerEmail}
@@ -173,6 +180,7 @@ export default function CheckoutMultiMetodo({
 
 function FluxoDoisCartoes({
   pedidoId,
+  pedidoToken,
   publicKey,
   valor,
   payerEmail,
@@ -180,6 +188,7 @@ function FluxoDoisCartoes({
   onSucesso,
 }: {
   pedidoId: string
+  pedidoToken?: string
   publicKey: string
   valor: number
   payerEmail: string
@@ -205,7 +214,10 @@ function FluxoDoisCartoes({
     try {
       const resp = await fetch('/api/checkout/multi-metodo/dois-cartoes', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(pedidoToken ? { 'x-pedido-token': pedidoToken } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify({
           pedidoId,
@@ -224,7 +236,7 @@ function FluxoDoisCartoes({
       // 202 aguardando_confirmacao — MP ainda avaliando (ex.: revisão
       // antifraude). Não é sucesso nem falha: espera confirmar.
       setSubEtapa('aguardando_confirmacao')
-      const resultado = await aguardarConfirmacaoFinal(pedidoId)
+      const resultado = await aguardarConfirmacaoFinal(pedidoId, pedidoToken)
       if (resultado === 'pago') {
         onSucesso()
         return
@@ -344,6 +356,7 @@ function FluxoDoisCartoes({
 
 function FluxoPixMaisCartao({
   pedidoId,
+  pedidoToken,
   publicKey,
   valor,
   payerEmail,
@@ -351,6 +364,7 @@ function FluxoPixMaisCartao({
   onSucesso,
 }: {
   pedidoId: string
+  pedidoToken?: string
   publicKey: string
   valor: number
   payerEmail: string
@@ -381,7 +395,10 @@ function FluxoPixMaisCartao({
     try {
       const resp = await fetch('/api/checkout/multi-metodo/pix-mais-cartao/iniciar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(pedidoToken ? { 'x-pedido-token': pedidoToken } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify({ pedidoId, payerEmail, valorPixCentavos, deviceId: capturarDeviceIdMp() }),
       })
@@ -398,7 +415,10 @@ function FluxoPixMaisCartao({
   }
 
   async function pollMultiMetodoStatus(): Promise<'approved' | 'rejected' | 'cancelled' | 'pending'> {
-    const r = await fetch(`/api/checkout/multi-metodo/status/${pedidoId}`, { credentials: 'include' })
+    const r = await fetch(`/api/checkout/multi-metodo/status/${pedidoId}`, {
+      credentials: 'include',
+      headers: pedidoToken ? { 'x-pedido-token': pedidoToken } : undefined,
+    })
     if (!r.ok) return 'pending'
     const d = (await r.json()) as { multiMetodoStatus?: string | null }
     if (d.multiMetodoStatus === 'aguardando_pagamento_restante') return 'approved'
@@ -412,7 +432,10 @@ function FluxoPixMaisCartao({
     try {
       const resp = await fetch('/api/checkout/multi-metodo/pix-mais-cartao/completar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(pedidoToken ? { 'x-pedido-token': pedidoToken } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify({
           pedidoId,
@@ -430,7 +453,7 @@ function FluxoPixMaisCartao({
       if (!resp.ok) throw new Error(data.error || 'Pagamento do restante não aprovado')
       // 202 aguardando_confirmacao — mesmo caso do fluxo de 2 cartões.
       setSubEtapa('aguardando_confirmacao')
-      const resultado = await aguardarConfirmacaoFinal(pedidoId)
+      const resultado = await aguardarConfirmacaoFinal(pedidoId, pedidoToken)
       if (resultado === 'pago') {
         onSucesso()
         return
@@ -493,6 +516,7 @@ function FluxoPixMaisCartao({
         qrBase64={pix.qr}
         copiaECola={pix.copy}
         pgtoId={pedidoId}
+        pedidoToken={pedidoToken}
         expiraEm={pix.expiraEm}
         pollStatus={pollMultiMetodoStatus}
         onPago={() => setSubEtapa('cartao_restante')}

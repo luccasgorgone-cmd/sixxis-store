@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { autorizarPedido, podeOperarPedido } from '@/lib/autorizar-pedido'
 import { auditLog } from '@/lib/audit'
 import { rateLimit, getClientIp } from '@/lib/ratelimit'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
@@ -37,23 +37,6 @@ type ProximaAcaoPixMaisCartao = {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
-
-  if (await isClienteBloqueado(session.user.id)) {
-    return NextResponse.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
-  }
-
-  const rl = await rateLimit('checkout-multi-metodo', session.user.id ?? getClientIp(req))
-  if (!rl.success) {
-    return NextResponse.json(
-      { error: 'Muitas tentativas de pagamento. Aguarde alguns minutos.' },
-      { status: 429 },
-    )
-  }
-
   const body = await req.json().catch(() => null)
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
@@ -64,11 +47,30 @@ export async function POST(req: NextRequest) {
   }
   const { pedidoId, cardToken, bandeiraId, parcelas, deviceId } = parsed.data
 
+  // Autoriza: sessão do dono OU token de posse do pedido.
+  const authz = await autorizarPedido(req, pedidoId)
+  if (!authz.autenticado) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
   const pedido = await prisma.pedido.findFirst({
-    where: { id: pedidoId, clienteId: session.user.id },
+    where: { id: pedidoId },
   })
   if (!pedido) {
     return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
+  }
+  if (!podeOperarPedido(authz, pedido.clienteId)) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
+  }
+  if (await isClienteBloqueado(pedido.clienteId)) {
+    return NextResponse.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
+  }
+  const rl = await rateLimit('checkout-multi-metodo', authz.clienteSessaoId ?? getClientIp(req))
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de pagamento. Aguarde alguns minutos.' },
+      { status: 429 },
+    )
   }
   if (pedido.multiMetodoStatus !== 'aguardando_pagamento_restante') {
     return NextResponse.json(
@@ -114,7 +116,7 @@ export async function POST(req: NextRequest) {
 
   await auditLog({
     req,
-    actor: session.user.id,
+    actor: authz.clienteSessaoId ?? pedido.clienteId,
     action: `checkout.multi_metodo.pix_mais_cartao.completar.${final.status}`,
     target: pedido.id,
     metadata: { tentativaId: tentativa.id, erro: final.erro },

@@ -15,6 +15,9 @@ const Payment = dynamic(
 
 interface Props {
   pedidoId: string
+  // Token de posse do pedido (de /api/pedidos). Autoriza o pagamento quando o
+  // comprador não está logado. Enviado no header x-pedido-token.
+  pedidoToken?: string
   valor: number // em BRL (não centavos)
   payerEmail: string
   payerNome?: string
@@ -43,6 +46,7 @@ interface BricksFormData {
 
 export default function CheckoutBricks({
   pedidoId,
+  pedidoToken,
   valor,
   payerEmail,
   payerNome,
@@ -86,6 +90,7 @@ export default function CheckoutBricks({
         qrBase64={pix.qr}
         copiaECola={pix.copy}
         pgtoId={pix.pgtoId}
+        pedidoToken={pedidoToken}
         expiraEm={pix.expiraEm}
         onPago={onSucesso}
         onExpirar={() => setPix(null)}
@@ -240,7 +245,10 @@ export default function CheckoutBricks({
 
                   const resp = await fetch('/api/checkout/criar-pagamento', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(pedidoToken ? { 'x-pedido-token': pedidoToken } : {}),
+                    },
                     body: JSON.stringify(body),
                     credentials: 'include',
                   })

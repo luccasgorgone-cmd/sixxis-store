@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { mpPayment } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { autorizarPedido, podeOperarPedido } from '@/lib/autorizar-pedido'
 import { enviarPurchaseCapi } from '@/lib/analytics/meta-capi'
 import { enviarPurchaseGa4 } from '@/lib/analytics/ga4-measurement-protocol'
 import { gIdItemPedido as gIdItem } from '@/lib/feed-id'
@@ -100,14 +100,9 @@ async function dispararConversoesPurchase(pedidoId: string, valorCentavos: numbe
 }
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ pagamentoId: string }> },
 ) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
-
   const { pagamentoId } = await params
 
   const pagamento = await prisma.pagamento.findUnique({
@@ -121,7 +116,13 @@ export async function GET(
       { status: 404 },
     )
   }
-  if (pagamento.pedido.clienteId !== session.user.id) {
+
+  // Autoriza pelo pedido do pagamento: token de posse OU sessão do dono.
+  const authz = await autorizarPedido(req, pagamento.pedido.id)
+  if (!authz.autenticado) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+  if (!podeOperarPedido(authz, pagamento.pedido.clienteId)) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
   }
 

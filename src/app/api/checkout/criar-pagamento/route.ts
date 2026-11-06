@@ -4,7 +4,7 @@ import { z } from 'zod'
 import type { Prisma } from '@prisma/client'
 import { mpPayment } from '@/lib/mercadopago'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { autorizarPedido, podeOperarPedido } from '@/lib/autorizar-pedido'
 import { isStatusPendente } from '@/lib/pedido-status'
 import { creditarCashback } from '@/lib/cashback'
 import { registrarUsoCupom } from '@/lib/cupom'
@@ -14,7 +14,6 @@ import { precoPix } from '@/lib/preco-pix'
 import { calcularTotalBaseReais } from '@/lib/checkout-total'
 import { isClienteBloqueado, MSG_CONTA_BLOQUEADA } from '@/lib/cliente-bloqueio'
 import { construirSinaisAntifraude } from '@/lib/mercadopago-antifraude'
-import { nomeCompletoSchema } from '@/lib/validacao-nome'
 import { documentoValido } from '@/lib/validacao-documento'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { cutoffLockPagamento } from '@/lib/pagamento-lock'
@@ -23,7 +22,11 @@ const schema = z.object({
   pedidoId: z.string().min(1),
   metodo: z.enum(['pix', 'credit_card', 'debit_card']),
   payerEmail: z.string().email().optional(),
-  payerNome: nomeCompletoSchema,
+  // Best-effort (sincroniza o cadastro / enriquece o antifraude). NUNCA barra o
+  // pagamento: um nome fora do formato "nome e sobrenome" (ex.: nome vindo do
+  // Google como "08GEOVANNI", ou só o primeiro nome) não pode gerar 400 e matar
+  // a venda. A validação forte de nome vive na identificação do checkout.
+  payerNome: z.string().trim().min(1).optional(),
   payerCpf: z.string().optional(),
   cardToken: z.string().optional(),
   // Teto = MAX_PARCELAS_SEM_JUROS (fonte única — ver src/lib/parcelamento.ts).
@@ -50,25 +53,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
-
-  // Gate autoritativo: cliente bloqueado não gera pagamento.
-  if (await isClienteBloqueado(session.user.id)) {
-    return NextResponse.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
-  }
-
-  // Rate-limit por cliente (degrada graciosamente sem Upstash configurado).
-  const rl = await rateLimit('criar-pagamento', session.user.id ?? getClientIp(req))
-  if (!rl.success) {
-    return NextResponse.json(
-      { error: 'Muitas tentativas de pagamento. Aguarde alguns minutos.' },
-      { status: 429 },
-    )
-  }
-
+  // Corpo primeiro: o pedidoId é a chave da autorização (sessão OU token de posse).
   const body = await req.json().catch(() => null)
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
@@ -91,8 +76,16 @@ export async function POST(req: NextRequest) {
     deviceId,
   } = parsed.data
 
+  // Autoriza: cliente logado (dono, conferido contra o pedido abaixo) OU token
+  // de posse emitido na criação do pedido (checkout convidado / cliente
+  // deslogado). Sem NENHUMA credencial → 401 barato, antes de tocar o banco.
+  const authz = await autorizarPedido(req, pedidoId)
+  if (!authz.autenticado) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
   const pedido = await prisma.pedido.findFirst({
-    where: { id: pedidoId, clienteId: session.user.id },
+    where: { id: pedidoId },
     include: {
       // produto.nome + endereco são usados pelo e-mail de confirmação enviado no
       // caminho do cartão aprovado inline (ver bloco 'approved' abaixo). sku/
@@ -115,6 +108,27 @@ export async function POST(req: NextRequest) {
       { status: 404 },
     )
   }
+
+  // Posse: token válido (escopado a ESTE pedido) basta; senão, exige sessão do
+  // dono. Nunca deixa um cliente operar o pedido de outro.
+  if (!podeOperarPedido(authz, pedido.clienteId)) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
+  }
+
+  // Gate autoritativo: conta bloqueada (do DONO do pedido) não gera pagamento.
+  if (await isClienteBloqueado(pedido.clienteId)) {
+    return NextResponse.json({ error: MSG_CONTA_BLOQUEADA, bloqueado: true }, { status: 403 })
+  }
+
+  // Rate-limit por cliente logado; convidado cai pro IP (degrada sem Upstash).
+  const rl = await rateLimit('criar-pagamento', authz.clienteSessaoId ?? getClientIp(req))
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Muitas tentativas de pagamento. Aguarde alguns minutos.' },
+      { status: 429 },
+    )
+  }
+
   if (!isStatusPendente(pedido.status)) {
     return NextResponse.json(
       { error: 'Pedido em status inválido' },
@@ -137,9 +151,9 @@ export async function POST(req: NextRequest) {
   // contas criadas via login Google, onde o nome vem do provedor OAuth sem
   // passar por nomeCompletoSchema (ex.: "08GEOVANNI" — cliente real, nome do
   // Google incompleto/estranho). Best-effort: nunca bloqueia o pagamento.
-  if (payerNome !== pedido.cliente.nome) {
+  if (payerNome && payerNome !== pedido.cliente.nome) {
     await prisma.cliente
-      .update({ where: { id: session.user.id }, data: { nome: payerNome } })
+      .update({ where: { id: pedido.clienteId }, data: { nome: payerNome } })
       .catch(() => {})
   }
 
