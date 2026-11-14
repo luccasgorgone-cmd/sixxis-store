@@ -29,6 +29,16 @@ function createPrisma(): PrismaClient {
     user: decodeURIComponent(u.username),
     password: decodeURIComponent(u.password),
     database: u.pathname.replace(/^\//, ''),
+    // Auth caching_sha2_password (MySQL 8): quando o servidor REINICIA, o cache
+    // de autenticação zera e o próximo handshake exige a chave pública RSA. Sem
+    // permitir a busca da chave (nem SSL), o driver falha com "RSA public key is
+    // not available client side" (SQLState 08S01), o pool nunca enche
+    // (active=0 idle=0) e TODA query estoura em pool timeout — o site inteiro cai
+    // até o banco voltar com cache quente. Incidente real 2026-11-14 (MySQL
+    // reiniciado). Permitir a recuperação da chave torna o handshake resiliente a
+    // restart do banco. A conexão é com o MySQL gerenciado pelo provedor; para
+    // blindar contra MITM na troca da chave, migrar para SSL é o passo seguinte.
+    allowPublicKeyRetrieval: true,
     connectionLimit,
     // Handshake via proxy público do Railway leva ~1.5-2s; 1000ms (default) era
     // curto demais e impedia a recriação do pool após restart do banco.
