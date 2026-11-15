@@ -1,21 +1,25 @@
 #!/usr/bin/env bash
-# Instala o pre-commit local deste repo (tsc --noEmit + eslint nos arquivos
-# staged + build). Não versionamos .git/hooks/ direto (git não versiona essa
-# pasta), então cada clone precisa rodar este script uma vez:
+# Instala o pre-commit local deste repo (Prisma generate + tsc + testes +
+# eslint nos arquivos staged + build). Git não versiona hooks, então cada
+# clone precisa rodar este script uma vez:
 #   bash scripts/install-git-hooks.sh
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-HOOK_PATH="$REPO_ROOT/.git/hooks/pre-commit"
+HOOK_PATH="$(git rev-parse --git-path hooks/pre-commit)"
 
 cat > "$HOOK_PATH" <<'EOF'
 #!/usr/bin/env bash
 # Gate local — roda os scripts REAIS que existem no package.json.
-# Não inventa gate que o projeto não tem (sem suite de testes hoje).
 set -e
+
+echo "[pre-commit] prisma generate..."
+npx prisma generate
 
 echo "[pre-commit] typecheck (tsc --noEmit)..."
 npx tsc --noEmit
+
+echo "[pre-commit] testes (vitest run)..."
+npm test
 
 STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx' || true)
 if [ -n "$STAGED_TS" ]; then
@@ -32,7 +36,7 @@ else
   echo "  DATABASE_URL configurado antes de considerar isso pronto pra produção."
 fi
 
-echo "[pre-commit] OK (typecheck sempre; lint nos staged; build só se DATABASE_URL existir)"
+echo "[pre-commit] OK (Prisma/typecheck/testes sempre; lint nos staged; build só se DATABASE_URL existir)"
 EOF
 
 chmod +x "$HOOK_PATH"
