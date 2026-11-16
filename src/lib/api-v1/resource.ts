@@ -151,10 +151,24 @@ export function buildResourceWhere(def:ResourceDefinition,q:ListQuery):Record<st
   if (q.q) conditions.push({OR:def.searchFields!.map(field=>({[field]:{contains:q.q}}))})
   return {AND:conditions}
 }
-export async function withQueryTimeout<T>(work:()=>Promise<T>,timeoutMs=API_QUERY_TIMEOUT_MS):Promise<T> {
+/** Prisma promises expose no AbortSignal; metadata opts into drain mode explicitly. */
+export async function withQueryTimeout<T>(work:()=>Promise<T>,timeoutMs=API_QUERY_TIMEOUT_MS,options:{drain?:boolean}={}):Promise<T> {
+  if(!options.drain) {
+    let timer:ReturnType<typeof setTimeout>|undefined
+    try {
+      return await Promise.race([Promise.resolve().then(work),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new ApiQueryError(503,'Consulta temporariamente indisponível.')),timeoutMs)})])
+    } finally { if(timer)clearTimeout(timer) }
+  }
+  let expired=false
   let timer:ReturnType<typeof setTimeout>|undefined
   try {
-    return await Promise.race([Promise.resolve().then(work),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new ApiQueryError(503,'Consulta temporariamente indisponível.')),timeoutMs)})])
+    timer=setTimeout(()=>{expired=true},timeoutMs)
+    const result=await Promise.resolve().then(work)
+    if(expired)throw new ApiQueryError(503,'Consulta temporariamente indisponível.')
+    return result
+  } catch(error) {
+    if(expired)throw new ApiQueryError(503,'Consulta temporariamente indisponível.')
+    throw error
   } finally { if(timer)clearTimeout(timer) }
 }
 export async function executeList<T extends Record<string, unknown>>(def:ResourceDefinition<T>,ctx:ApiContext,q:ListQuery,options:CursorOptions={}):Promise<ListEnvelope<Record<string,unknown>>> {

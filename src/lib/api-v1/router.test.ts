@@ -117,6 +117,14 @@ describe('public API v1 routes', () => {
     expect(await json(await routeApiV1(request(), [], current))).toMatchObject({ data: { links: { health: '/api/v1/health', openapi: '/api/v1/openapi.json', docs: '/api/v1/docs' } } })
     expect((await routeApiV1(request('/docs'), ['docs'], current)).headers.get('content-type')).toContain('text/html')
   })
+
+  it('rejects unknown or duplicate query parameters on root and health before database work', async () => {
+    const healthCheck = vi.fn().mockResolvedValue(undefined)
+    expect((await routeApiV1(request('?extra=1'), [], deps({ healthCheck }))).status).toBe(400)
+    expect((await routeApiV1(request('/health?probe=1'), ['health'], deps({ healthCheck }))).status).toBe(400)
+    expect((await routeApiV1(request('/health?probe=1&probe=2'), ['health'], deps({ healthCheck }))).status).toBe(400)
+    expect(healthCheck).not.toHaveBeenCalled()
+  })
 })
 
 describe('authenticated dispatcher', () => {
@@ -132,7 +140,7 @@ describe('authenticated dispatcher', () => {
     expectSafeHeaders(response)
   })
 
-  it('lists only authorized metadata, hides unauthorized fields/expands and caps count concurrency at four', async () => {
+  it('lists only authorized metadata, hides unauthorized fields/expands and caps hook concurrency at two', async () => {
     let active = 0
     let peak = 0
     const catalogIdentity = identity(new Set(['read:catalogo']))
@@ -155,7 +163,7 @@ describe('authenticated dispatcher', () => {
     }))
     expect(response.status).toBe(200)
     const body = await json<{ data: Array<{ fields: Array<{ name: string }>; expands: unknown[] } & Record<string, unknown>> }>(response)
-    expect(peak).toBe(4)
+    expect(peak).toBe(2)
     expect(body.data).toHaveLength(9)
     expect(body.data[0]).toMatchObject({ slug: 'produto-0', model: 'Produto0', scope: 'read:catalogo', count: 0, ultimaAtualizacao: '2026-11-16T12:00:00.000Z' })
     expect(body.data[0].fields.map((field: { name: string }) => field.name)).toEqual(['id', 'nome', 'updatedAt'])
@@ -164,23 +172,43 @@ describe('authenticated dispatcher', () => {
     expect(JSON.stringify(body)).not.toContain('read:analytics')
   })
 
-  it('turns a metadata count timeout into 503 and never exceeds four active tasks', async () => {
-    let active = 0
-    let peak = 0
+  it('drains active metadata operations after the deadline and starts no later hooks', async () => {
+    let activeOps = 0
+    let peakOps = 0
+    let startedHooks = 0
+    const operation = async () => {
+      activeOps += 1
+      peakOps = Math.max(peakOps, activeOps)
+      await new Promise(resolve => setTimeout(resolve, 30))
+      activeOps -= 1
+    }
     const definitions = Array.from({ length: 8 }, (_, index) => rowResource({
       slug: `produto-timeout-${index}`,
       countAndLastUpdate: async () => {
-        active += 1
-        peak = Math.max(peak, active)
-        await new Promise(resolve => setTimeout(resolve, 30))
-        active -= 1
+        startedHooks += 1
+        await Promise.all([operation(), operation()])
         return { count: 1, ultimaAtualizacao: null }
       },
     }))
     const response = await routeApiV1(request('/meta/recursos'), ['meta', 'recursos'], deps({ resources: createResourceRegistry(definitions), metaTimeoutMs: 5 }))
     expect(response.status).toBe(503)
-    expect(peak).toBe(4)
+    expect(peakOps).toBeLessThanOrEqual(4)
+    expect(activeOps).toBe(0)
+    expect(startedHooks).toBe(2)
     expect(response.headers.get('content-type')).toContain('application/problem+json')
+  })
+
+  it('rejects unknown or duplicate query parameters on me, metadata and metrics', async () => {
+    expect((await routeApiV1(request('/me?extra=1'), ['me'], deps())).status).toBe(400)
+    expect((await routeApiV1(request('/meta/recursos?extra=1'), ['meta', 'recursos'], deps())).status).toBe(400)
+
+    const metricQuery = vi.fn().mockResolvedValue({ tracked: true })
+    const current = deps({
+      metrics: createMetricRegistry([{ slug: 'funil', scope: 'read:analytics', schema: { type: 'object' }, query: metricQuery }]),
+    })
+    expect((await routeApiV1(request('/metricas/funil?de=2026-11-16&ate=2026-11-16&agrupar=dia&extra=1'), ['metricas', 'funil'], current)).status).toBe(400)
+    expect((await routeApiV1(request('/metricas/funil?de=2026-11-16&de=2026-11-17&ate=2026-11-17&agrupar=dia'), ['metricas', 'funil'], current)).status).toBe(400)
+    expect(metricQuery).not.toHaveBeenCalled()
   })
 
   it('dispatches list, item and metrics only through explicit registries', async () => {
@@ -267,6 +295,34 @@ describe('HTTP method policy', () => {
 })
 
 describe('store registry and Next route integration', () => {
+  it('keeps actual Prisma metadata operations at four across six registered resources', async () => {
+    let activeOps = 0
+    let peakOps = 0
+    const operation = async <T,>(value: T): Promise<T> => {
+      activeOps += 1
+      peakOps = Math.max(peakOps, activeOps)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      activeOps -= 1
+      return value
+    }
+    const delegate = (field: 'createdAt' | 'updatedAt') => ({
+      count: () => operation(1),
+      findFirst: () => operation({ [field]: new Date('2026-11-16T12:00:00.000Z') }),
+    })
+    const prisma = {
+      cliente: delegate('updatedAt'), endereco: delegate('updatedAt'), historicoPontos: delegate('createdAt'),
+      pontosCliente: delegate('updatedAt'), cashbackTransacao: delegate('updatedAt'), nivelFidelidade: delegate('updatedAt'),
+    }
+    const response = await routeApiV1(request('/meta/recursos'), ['meta', 'recursos'], deps({
+      resources: createStoreResourceRegistry({ prisma: prisma as never }),
+      pipelineDeps: pipelineDeps(identity(new Set(['read:clientes']))),
+    }))
+    expect(response.status).toBe(200)
+    expect((await json<{ data: unknown[] }>(response)).data).toHaveLength(6)
+    expect(peakOps).toBeLessThanOrEqual(4)
+    expect(activeOps).toBe(0)
+  })
+
   it('integrates exactly all 49 business resources and eight metrics without broadening scopes', () => {
     const resources = createStoreResourceRegistry({ prisma: {} as never })
     const metrics = createStoreMetricRegistry({ prisma: {} as never })

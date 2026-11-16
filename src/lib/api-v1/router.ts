@@ -17,7 +17,7 @@ import { createCommerceResources } from './resources/vendas'
 import type { ApiContext, ApiScope, JsonValue, ListQuery } from './types'
 
 const ALLOW = 'GET, HEAD, OPTIONS'
-const DEFAULT_META_CONCURRENCY = 4
+const DEFAULT_META_CONCURRENCY = 2
 
 type Env = Record<string, string | undefined>
 type StatsDelegate = {
@@ -56,7 +56,7 @@ function statsHook(
       ])
       const value = latest?.[field]
       return { count, ultimaAtualizacao: value === null || value === undefined ? null : iso(value as Date) }
-    })
+    }, API_QUERY_TIMEOUT_MS, { drain: true })
   }
 }
 
@@ -200,6 +200,14 @@ function parseItemQuery(request: Request, definition: ResourceDefinition): Pick<
   return query
 }
 
+function assertQueryParams(request: Request, allowed: readonly string[] = []): void {
+  const params = new URL(request.url).searchParams
+  const names = new Set(allowed)
+  for (const key of params.keys()) {
+    if (!names.has(key) || params.getAll(key).length !== 1) throw new ApiQueryError(400, 'Parâmetros de consulta inválidos.')
+  }
+}
+
 function safeSchema(schema: FieldSchema): Record<string, JsonValue> {
   const output: Record<string, JsonValue> = { type: schema.type }
   if (schema.format) output.format = schema.format
@@ -211,33 +219,34 @@ function safeSchema(schema: FieldSchema): Record<string, JsonValue> {
   return output
 }
 
-async function concurrentMap<T, U>(items: readonly T[], concurrency: number, task: (item: T) => Promise<U>): Promise<U[]> {
+async function deadlineMap<T, U>(items: readonly T[], concurrency: number, timeoutMs: number, task: (item: T) => Promise<U>): Promise<U[]> {
   const output = new Array<U>(items.length)
-  let next = 0
-  let stopped = false
-  const worker = async () => {
-    while (!stopped) {
-      const index = next++
-      if (index >= items.length) return
-      try {
-        output[index] = await task(items[index])
-      } catch (error) {
-        stopped = true
-        throw error
-      }
+  let expired = false
+  const timer = setTimeout(() => { expired = true }, timeoutMs)
+  try {
+    for (let offset = 0; offset < items.length; offset += concurrency) {
+      if (expired) throw new ApiQueryError(503, 'Consulta temporariamente indisponível.')
+      const batch = items.slice(offset, offset + concurrency)
+      // No later batch starts after expiry; already-started Prisma work drains
+      // because cancellation is not available on Prisma promises.
+      const settled = await Promise.allSettled(batch.map(item => task(item)))
+      if (expired) throw new ApiQueryError(503, 'Consulta temporariamente indisponível.')
+      const rejected = settled.find(result => result.status === 'rejected')
+      if (rejected?.status === 'rejected') throw rejected.reason
+      settled.forEach((result, index) => {
+        if (result.status === 'fulfilled') output[offset + index] = result.value
+      })
     }
+    return output
+  } finally {
+    clearTimeout(timer)
   }
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker))
-  return output
 }
 
 async function resourceMetadata(registry: ResourceRegistry, context: ApiContext, timeoutMs: number): Promise<Record<string, unknown>[]> {
   const authorized = registry.list(context.identity ?? undefined)
-  return concurrentMap(authorized, DEFAULT_META_CONCURRENCY, async definition => {
-    const stats = await withQueryTimeout(
-      () => definition.countAndLastUpdate!((context)),
-      timeoutMs,
-    )
+  return deadlineMap(authorized, DEFAULT_META_CONCURRENCY, timeoutMs, async definition => {
+    const stats = await definition.countAndLastUpdate!(context)
     const fields = definition.fields
       .filter(field => !field.scope || (context.identity && hasScope(context.identity, field.scope)))
       .map(field => ({
@@ -290,6 +299,12 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
   const exact = (...expected: string[]) => segments.length === expected.length && expected.every((segment, index) => segments[index] === segment)
   if (segments.length === 0) {
     const requestId = randomUUID()
+    try {
+      assertQueryParams(request)
+    } catch (error) {
+      if (error instanceof ApiQueryError) return finalizePublic(queryProblem(error, requestId), requestId)
+      throw error
+    }
     return finalizePublic(jsonResponse(itemEnvelope({
       name: 'Sixxis Store API de Leitura',
       version: API_VERSION,
@@ -306,6 +321,12 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
   }
   if (exact('health')) {
     const requestId = randomUUID()
+    try {
+      assertQueryParams(request)
+    } catch (error) {
+      if (error instanceof ApiQueryError) return finalizePublic(queryProblem(error, requestId), requestId)
+      throw error
+    }
     try {
       await (deps.healthCheck ?? defaultHealthCheck)()
       const env = deps.env ?? process.env
@@ -332,6 +353,7 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
 
   if (exact('me')) {
     return protectedHandler((_request, context) => {
+      assertQueryParams(request)
       const key = context.identity!
       return jsonResponse(itemEnvelope({
         nome: key.nome,
@@ -349,6 +371,7 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
 
   if (exact('meta', 'recursos')) {
     return protectedHandler(async (_request, context) => {
+      assertQueryParams(request)
       const data = await resourceMetadata(resources(deps), context, deps.metaTimeoutMs ?? API_QUERY_TIMEOUT_MS)
       return jsonResponse(listEnvelope(data, { hasMore: false, nextCursor: null }, context.requestId))
     }, { auditRoute: `${API_BASE_PATH}/meta/recursos` }, deps)(request)
@@ -358,6 +381,7 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
     const definition = metrics(deps).get(segments[1])
     if (definition) {
       return protectedHandler(async (_request, context) => {
+        assertQueryParams(request, ['de', 'ate', 'agrupar'])
         const data = await metrics(deps).execute(definition.slug, context, new URL(request.url).searchParams)
         return jsonResponse(itemEnvelope(data, context.requestId))
       }, { scope: definition.scope, auditRoute: `${API_BASE_PATH}/metricas/${definition.slug}` }, deps)(request)

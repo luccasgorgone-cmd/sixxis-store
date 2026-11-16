@@ -1,8 +1,11 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { hasScope } from '../auth'
+import { API_QUERY_TIMEOUT_MS } from '../constants'
 import { ApiQueryError } from '../query'
-import { withQueryTimeout, type ResourceDefinition } from '../resource'
+import { withQueryTimeout as queryTimeout, type ResourceDefinition } from '../resource'
 import { amount, safeRecord, timestamp, type ResourceResolver, type ResourceRow } from './shared'
+
+const withQueryTimeout = <T>(work: () => Promise<T>) => queryTimeout(work, API_QUERY_TIMEOUT_MS, { drain: true })
 
 export type AnalyticsResourceOptions = { prisma?: Pick<PrismaClient, 'cookieConsent' | 'eventoAnalitico' | 'clienteInsight' | 'sessaoVisitante' | 'eventoTracking' | 'relatorioVendaHora' | 'tentativaLogin' | 'bloqueioIp' | 'auditLog' | 'presenca' | 'trafegoBruto' | 'bloqueioFraude'>; resolve?: ResourceResolver }
 
