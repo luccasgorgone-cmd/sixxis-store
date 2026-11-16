@@ -54,6 +54,11 @@ export const maskCnpj = scalarMask(value => {
 })
 
 const messageKeys = new Set(['mensagem', 'mensagens', 'conteudo', 'content', 'copy', 'message', 'messages'])
+export function isPrivateIdentityKey(key: string): boolean {
+  const normalized = normalizedKey(key)
+  return /^(?:sessionid|sessaoid|userid|useragent|gclid|fbclid|gbraid|wbraid|fbc|fbp|clientid|actor|actorid|identity|identidade|user|usuario|usuarioid|idusuario|iduser|customer|customerid|idcustomer|cliente|clienteid|idcliente|target|targetid|subject|subjectid|principalid|visitorid|visitanteid|createdby|updatedby)$/.test(normalized)
+    || /^(?:[a-z]+)?(?:user|usuario|cliente|customer|client|actor|session|sessao|identity|identidade|visitor|visitante)(?:id|identifier)$/.test(normalized)
+}
 const maskRecipient: Mask = value => typeof value === 'string' && value.includes('@') ? maskEmail(value) : maskPhone(value)
 function piiMask(key: string): Mask | null {
   if (/^(?:destinatario|recipient)$/.test(key)) return maskRecipient
@@ -64,7 +69,8 @@ function piiMask(key: string): Mask | null {
   if (/^(?:nome|nomecompleto|nomeautor|nomecliente|nomefantasia|razaosocial|payername|payernome|criadopor)$/.test(key)) return maskName
   if (/^(?:endereco|address|logradouro|complemento|bairro|cep|cidadeuf|inscricaoestadual)$/.test(key)) return maskAddress
   if (/^(?:ip|clientip|ultimoip|ipaddress)$/.test(key)) return maskIp
-  if (/^(?:sessionid|sessaoid|userid|useragent|gclid|fbclid|gbraid|wbraid|fbc|fbp|clientid)$/.test(key)) return maskIdentifier
+  if (isPrivateIdentityKey(key)) return maskIdentifier
+  if (/^(?:url|uri|href|path|pathname|route|rota|page|pagina|paginaorigem|landingpage|referer|referrer|link|linkdestino|[a-z]+url|[a-z]+uri|[a-z]+path)$/.test(key)) return maskIdentifier
   return null
 }
 
@@ -103,7 +109,7 @@ function looksLikePan(digits: string): boolean {
 const isUsageCounter = (value: unknown): value is number | null => value === null || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0)
 
 /** Consume scalar assignments with escaped quotes intact; discard ambiguous structures. */
-function redactAssignments(value: string): string {
+function redactAssignments(value: string, options: RedactionOptions): string {
   const assignments = /(?:\\*["'])?([a-z][a-z0-9_.-]{0,70})(?:\\*["'])?\s*[:=]\s*/gi
   let result = ''
   let consumed = 0
@@ -111,25 +117,33 @@ function redactAssignments(value: string): string {
     const start = match.index!
     if (start < consumed) continue
     const key = match[1]
-    if (!isForbiddenKey(key) && normalizedKey(key) !== 'tokens') continue
+    const normalized = normalizedKey(key), leaf = normalizedKey(key.split('.').at(-1)!)
+    const secret = isForbiddenKey(key) || normalized === 'tokens'
+    const message = !options.allowMessages && (messageKeys.has(normalized) || messageKeys.has(leaf))
+    const mask = !options.allowPii ? piiMask(normalized) ?? piiMask(leaf) : null
+    if (!secret && !message && !mask) continue
     const from = start + match[0].length
     const first = value[from]
     // No partial replacement of object/array payloads or escaped outer JSON: a
     // regex cannot establish their complete value boundary without interpreting it.
     if (match[0].includes('\\') || first === '{' || first === '[' || first === '\\' || first === undefined) return REDACTED
-    let end = from
+    // Unquoted message prose has no unambiguous value boundary (commas/newlines
+    // may belong to the message). Fail closed for this text, not sibling JSON fields.
+    if (message && first !== '"' && first !== "'") return REDACTED
+    let end = from, scalar: string
     if (first === '"' || first === "'") {
       end++
       while (end < value.length && value[end] !== first) end += value[end] === '\\' ? 2 : 1
       if (end >= value.length) return REDACTED
       end++
+      scalar = value.slice(from + 1, end - 1)
     } else {
-      const scalar = /^[^\s,;&}<>\]]+/.exec(value.slice(from))?.[0]
-      if (!scalar) return REDACTED
+      scalar = (mask ? /^(?:\(\d{2}\) \d?\*{4}-\d{4}|[^\s,;&}<>\]]+)/ : /^[^\s,;&}<>\]]+/).exec(value.slice(from))?.[0] ?? ''
+      if (!scalar.trim()) return REDACTED
       end += scalar.length
-      if (normalizedKey(key) === 'tokens' && /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(scalar) && isUsageCounter(Number(scalar))) continue
+      if (normalized === 'tokens' && /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(scalar) && isUsageCounter(Number(scalar))) continue
     }
-    result += value.slice(consumed, start) + REDACTED
+    result += value.slice(consumed, start) + (!secret && !message && mask ? `${key}=${mask(scalar)}` : REDACTED)
     consumed = end
   }
   return result + value.slice(consumed)
@@ -146,7 +160,7 @@ function sanitizeText(value: string, options: RedactionOptions, depth: number): 
   for (const pattern of secretPatterns) result = result.replace(pattern, REDACTED)
 
   // Handles credentials inside malformed JSON, prose, URL query strings and header-like text.
-  result = redactAssignments(result)
+  result = redactAssignments(result, options)
 
   // A bare digit run is a PAN only with an issuer prefix and checksum. Numeric business ids
   // would be erased. Labeled card numbers are always removed by the key/assignment policy.
@@ -205,10 +219,23 @@ export function redactValue(value: unknown, options: RedactionOptions, safeRootK
   return walk(value as JsonValue, options, 0, safeRootKeys)
 }
 
+/** Only declared structural joins may restore opaque IDs at the resource root.
+ * This never propagates into arbitrary JSON or bypasses secret/PAN sanitization. */
+export function restoreStructuralIds(raw: Record<string, unknown>, safe: Record<string, unknown>, fields: readonly string[] = [], options: RedactionOptions): void {
+  for (const field of fields) {
+    if (field !== 'clienteId') throw new TypeError('Invalid structural identifier field')
+    if (!Object.hasOwn(raw, field)) continue
+    const value = raw[field]
+    safe[field] = value === null ? null : options.allowPii || (typeof value === 'string' && /^(?:c[a-z0-9]{24}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i.test(value))
+      ? redactValue(value, { ...options, allowPii: true }) : REDACTED
+  }
+}
+
 /** Definition-owned flat array/object/string leaves only; never a client path expression. */
 export type PublicJsonFields = Readonly<Record<string, readonly string[]>>
 export function restorePublicJsonFields(raw: Record<string, unknown>, safe: Record<string, unknown>, policy: PublicJsonFields = {}, options: RedactionOptions = { allowPii: false, allowMessages: false }): void {
   for (const [root, leaves] of Object.entries(policy)) {
+    if (leaves.some(isPrivateIdentityKey)) throw new TypeError('Invalid public JSON identity policy')
     const source = raw[root], target = safe[root]
     if (source === undefined || source === null) continue
     if (!Array.isArray(source) || !Array.isArray(target) || source.length !== target.length) throw new TypeError('Invalid public JSON value')

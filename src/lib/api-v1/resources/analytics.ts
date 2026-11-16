@@ -404,8 +404,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'data', updated: 'updatedAt' },
       window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 366 },
       filters: {
-        hora: { type: 'number' },
-        diaSemana: { type: 'number' },
+        hora: { type: 'number', integer: true, min: 0, max: 23 },
+        diaSemana: { type: 'number', integer: true, min: 0, max: 6 },
       },
       adapter: {
         findMany: async args => {
@@ -672,7 +672,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
         pais: { type: 'string' },
         path: { type: 'string' },
         referrer: { type: 'string' },
-        hora: { type: 'number' },
+        hora: { type: 'number', integer: true, min: 0, max: 23 },
       },
       adapter: {
         findMany: async args => {

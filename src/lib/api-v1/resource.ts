@@ -4,13 +4,13 @@ import { API_MAX_EXPAND_ITEMS, API_QUERY_TIMEOUT_MS } from './constants'
 import { buildSeekWhere, decodeCursor, encodeCursor, filterHash, resolveCursorSecret, type CursorOptions } from './cursor'
 import { itemEnvelope, listEnvelope } from './format'
 import { ApiQueryError, validateListQuery } from './query'
-import { isForbiddenKey, isSafePreferenceKey, redactValue, restorePublicJsonFields, type PublicJsonFields } from './redact'
+import { isForbiddenKey, isPrivateIdentityKey, isSafePreferenceKey, redactValue, restorePublicJsonFields, restoreStructuralIds, type PublicJsonFields } from './redact'
 import type { ApiContext, ApiScope, ItemEnvelope, ListEnvelope, ListQuery } from './types'
 
 /** JSON-compatible value shape shared by field metadata and the OpenAPI generator. */
 export type FieldSchema = { type: 'string'|'number'|'integer'|'boolean'|'object'|'array'; format?: string; nullable?: boolean; enum?: readonly string[]; items?: FieldSchema; properties?: Record<string,FieldSchema>; required?: readonly string[] }
 export type FieldDefinition = FieldSchema & { name: string; description?: string; scope?: ApiScope; example?: unknown }
-export type FilterDefinition = { field?: string; type: 'string'|'number'|'boolean'; values?: readonly string[]; mode?: 'equals'|'contains'|'arrayContains'; description?: string }
+export type FilterDefinition = { field?: string; type: 'string'|'number'|'boolean'; integer?: boolean; min?: number; max?: number; values?: readonly string[]; mode?: 'equals'|'contains'|'arrayContains'; description?: string }
 export type ExpandDefinition = { name:string; relation?:string; many:boolean; resource:()=>ResourceDefinition; scope?:ApiScope; description?:string }
 export type ResourceQueryArgs = { where:Record<string,unknown>; select:Record<string,unknown>; orderBy:Record<string,'asc'|'desc'>[]; take:number }
 export type ResourceDefinition<T extends Record<string, unknown> = Record<string, unknown>> = {
@@ -24,6 +24,8 @@ export type ResourceDefinition<T extends Record<string, unknown> = Record<string
   publicJsonFields?:PublicJsonFields
   /** Exact root preference-key exception; values still undergo all redaction. */
   safeKeyFields?:readonly string[]
+  /** Nominal opaque FK joins only, restored at the root, never inside free JSON. */
+  structuralIdFields?:readonly string[]
   select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]
   dateFields?:{created?:string;updated?:string}
   window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte';maxDays:number}
@@ -67,11 +69,15 @@ function assertScalarSelector(def:ResourceDefinition):void {
     const field = def.fields.find(item => item.name === name)
     return def.model !== 'ClienteInsight' || def.slug !== 'clientes-insights' || !isSafePreferenceKey(name) || !field || field.type !== 'string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name)
   })) throw new TypeError('Invalid safe preference key policy')
+  if (def.structuralIdFields?.some(name => {
+    const field = def.fields.find(item => item.name === name)
+    return name !== 'clienteId' || !field || field.type !== 'string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name) || !def.expands.some(expansion => (expansion.relation ?? expansion.name) === 'cliente' && !expansion.many)
+  })) throw new TypeError('Invalid structural identifier policy')
   if (def.publicFields?.some(name=>{
     const field=def.fields.find(item=>item.name===name)
-    return !field || field.type!=='string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name) || isForbiddenKey(name)
+    return !field || field.type!=='string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name) || isForbiddenKey(name) || isPrivateIdentityKey(name)
   })) throw new TypeError('Invalid public scalar policy')
-  const validName = (name:string) => /^[a-z][a-zA-Z0-9]*$/.test(name) && !['constructor', 'prototype'].includes(name) && !isForbiddenKey(name)
+  const validName = (name:string) => /^[a-z][a-zA-Z0-9]*$/.test(name) && !['constructor', 'prototype'].includes(name) && !isForbiddenKey(name) && !isPrivateIdentityKey(name)
   for (const [root, leaves] of Object.entries(def.publicJsonFields ?? {})) {
     const field = def.fields.find(item => item.name === root)
     if (!validName(root) || !field || field.scope || !scalars.has(root) || !def.select[root] || relations.has(root) || field.type !== 'array' || field.items?.type !== 'object' || !leaves.length || leaves.some(leaf => {
@@ -101,6 +107,7 @@ function serialize<T extends Record<string, unknown>>(def:ResourceDefinition<T>,
     safe[name]=redactValue(data[name],{...options,allowPii:true})
   }
   restorePublicJsonFields(data, safe, def.publicJsonFields, options)
+  restoreStructuralIds(data, safe, def.structuralIdFields, options)
   // A requested field without its additive scope must remain absent, not restore the raw value.
   return projectFields(safe,fields,def.fields)
 }
@@ -121,6 +128,7 @@ export function assertFilterDefinitions(def:Pick<ResourceDefinition,'filters'>):
   for (const [name, filter] of Object.entries(def.filters ?? {})) {
     const path = (filter.field ?? name).split('.')
     if (!/^[a-z][a-zA-Z0-9]*$/.test(name) || reserved.has(name) || path.length > 3 || path.some((part, i) => !/^[a-z][a-zA-Z0-9]*$/.test(part) || reserved.has(part) || (part === 'some' && (i !== 1 || path.length !== 3))) || (filter.mode && !['equals', 'contains', 'arrayContains'].includes(filter.mode))) throw new TypeError('Invalid nominal filter definition')
+    if ((filter.integer !== undefined && (filter.type !== 'number' || typeof filter.integer !== 'boolean')) || [filter.min, filter.max].some(value => value !== undefined && (filter.type !== 'number' || !Number.isFinite(value))) || (filter.min !== undefined && filter.max !== undefined && filter.min > filter.max)) throw new TypeError('Invalid numeric filter definition')
   }
 }
 export function buildResourceWhere(def:ResourceDefinition,q:ListQuery):Record<string,unknown> {

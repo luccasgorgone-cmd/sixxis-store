@@ -103,6 +103,7 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
     },
     {
       slug: 'enderecos', model: 'Endereco', scope: 'read:clientes',
+      structuralIdFields: ['clienteId'],
       scalarFields: ['id', 'clienteId', 'cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado', 'principal', 'createdAt', 'updatedAt'],
       select: { id: true, clienteId: true, cep: true, logradouro: true, numero: true, complemento: true, bairro: true, cidade: true, estado: true, principal: true, createdAt: true, updatedAt: true } as const satisfies Prisma.EnderecoSelect,
       fields: [
@@ -154,7 +155,7 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
         principal: row.principal,
         createdAt: timestamp(row.createdAt),
         updatedAt: timestamp(row.updatedAt),
-      }, ctx, [], [], ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado']),
+      }, ctx, [], [], ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado'], {}, [], ['clienteId']),
     },
     {
       slug: 'historico-pontos', model: 'HistoricoPontos', scope: 'read:clientes',

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { API_DEFAULT_LIMIT, API_MAX_LIMIT, API_MAX_EXPANDS } from './constants'
 import { decodeCursor, filterHash, type CursorOptions } from './cursor'
-import type { ResourceDefinition } from './resource'
+import type { FilterDefinition, ResourceDefinition } from './resource'
 import type { ListQuery } from './types'
 
 /** Constant safe details; never include raw query input in an HTTP problem. */
@@ -17,6 +17,10 @@ const csv = (value: string, max = 100) => {
 }
 const dates = ['criadoDesde', 'criadoAte', 'atualizadoDesde', 'atualizadoAte'] as const
 const standard = new Set(['limit','cursor','sort','ids','q','fields','expand', ...dates])
+function validNumericFilter(value: string, filter: FilterDefinition): boolean {
+  const number = Number(value)
+  return /^-?\d+(\.\d+)?$/.test(value) && Number.isFinite(number) && (!filter.integer || Number.isSafeInteger(number)) && (filter.min === undefined || number >= filter.min) && (filter.max === undefined || number <= filter.max)
+}
 
 export function parseExpand(value: string | undefined, definition: Pick<ResourceDefinition, 'expands'>): string[] {
   if (value === undefined) return []
@@ -60,7 +64,7 @@ export function parseListQuery(url: URL | string, definition: ResourceDefinition
     if (!params.has(key)) continue
     const values = csv(params.get(key)!)
     if (filter.type === 'boolean' && values.some(value => !['true','false'].includes(value))) fail()
-    if (filter.type === 'number' && values.some(value => !Number.isFinite(Number(value)) || !/^-?\d+(\.\d+)?$/.test(value))) fail()
+    if (filter.type === 'number' && values.some(value => !validNumericFilter(value, filter))) fail()
     if (filter.values && values.some(value => !filter.values!.includes(value))) fail()
     q.filters[key] = values
     if (key === 'status') q.status = values
@@ -80,7 +84,7 @@ export function validateListQuery(q: ListQuery, definition: ResourceDefinition, 
   for (const [key, values] of Object.entries(q.filters)) {
     const filter = definition.filters?.[key]
     if (!Object.hasOwn(definition.filters ?? {}, key) || !filter || !Array.isArray(values) || !values.length || values.length > 100) fail()
-    if (values.some(value => typeof value !== 'string' || !value || value.length > 500 || (filter.type === 'boolean' && !['true','false'].includes(value)) || (filter.type === 'number' && (!Number.isFinite(Number(value)) || !/^-?\d+(\.\d+)?$/.test(value))) || (filter.values && !filter.values.includes(value)))) fail()
+    if (values.some(value => typeof value !== 'string' || !value || value.length > 500 || (filter.type === 'boolean' && !['true','false'].includes(value)) || (filter.type === 'number' && !validNumericFilter(value, filter)) || (filter.values && !filter.values.includes(value)))) fail()
   }
   for (const name of dates) if (q[name] && (!definition.dateFields?.[name.startsWith('criado') ? 'created' : 'updated'] || !(q[name] instanceof Date) || !Number.isFinite(q[name]!.getTime()))) fail()
   for (const [from,to] of [['criadoDesde','criadoAte'],['atualizadoDesde','atualizadoAte']] as const) if (q[from] && q[to] && q[from]! > q[to]!) fail()

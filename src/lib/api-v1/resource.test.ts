@@ -23,6 +23,11 @@ beforeEach(() => { adapter.mockResolvedValue(rows) })
 afterEach(() => { vi.unstubAllEnvs(); vi.useRealTimers(); vi.clearAllMocks() })
 
 describe('list validation before adapter', () => {
+  it('round 1: rejects invalid numeric definition bounds and preserves optional fractional filters', () => {
+    for (const filter of [{ type: 'string', integer: true }, { type: 'number', min: NaN }, { type: 'number', max: Infinity }, { type: 'number', min: 9, max: 1 }]) expect(() => createResourceRegistry([{ ...def, filters: { score: filter as never } }])).toThrow(TypeError)
+    const fraction = { ...def, filters: { score: { type: 'number' as const, min: 0, max: 2 } } }
+    expect(query('score=1.5', fraction).filters).toEqual({ score: ['1.5'] })
+  })
   it('uses 100 default, allows 500 and rejects invalid limits', () => {
     expect(query()).toMatchObject({ limit: 100, sort: 'updatedAt', filters: {} })
     expect(query('limit=500').limit).toBe(500)

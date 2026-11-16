@@ -33,7 +33,7 @@ export function fixture(model: string): Record<string, unknown> {
       field.type === 'Decimal' ? new Prisma.Decimal(`${100 + i}.456`) :
         field.type === 'Int' ? i + 1 : field.type === 'Float' ? 100 + i + 0.456 : field.type === 'Boolean' ? true :
           field.type === 'Json' ? structuredClone(jsonValues[`${model}.${field.name}`] ?? { sentinel: `${model}.${field.name}`, token: 'DO-NOT-LEAK', nested: { email: 'alice@example.test' } }) :
-            field.name === 'chave' ? 'loja_nome' : `${model}.${field.name}.SENTINEL`,
+            field.name === 'chave' ? 'loja_nome' : model === 'Endereco' && field.name === 'clienteId' ? 'cmr1abc123def456ghi789jkl' : `${model}.${field.name}.SENTINEL`,
   ]).concat([['senha', 'PASSWORD-DO-NOT-LEAK'], ['rawResponse', 'RAW-DO-NOT-LEAK'], ['unknown', 'UNKNOWN-DO-NOT-LEAK']]))
 }
 export const fakeDelegate = () => ({ findMany: vi.fn(async (args: ResourceQueryArgs) => { void args; return [] as Record<string, unknown>[] }), findFirst: vi.fn(async (args: Pick<ResourceQueryArgs, 'where' | 'select'>) => { void args; return null as Record<string, unknown> | null }) })

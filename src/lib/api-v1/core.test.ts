@@ -134,6 +134,28 @@ describe('deterministic masks', () => {
 })
 
 describe('absolute secret and payment redaction', () => {
+  it.each(['actor', 'actorId', 'clienteId', 'customerId', 'clientId', 'user', 'usuario', 'customer', 'cliente', 'identity', 'identidade', 'idUsuario', 'idCliente', 'target', 'url', 'landingPage', 'redirectUrl', 'requestUrl', 'path', 'pagina', 'referer', 'referrer'])('round 1: protects nominal identity/URL key recursively: %s', key => {
+    const value = 'PRIVATE-IDENTITY token=DO-NOT-LEAK 4111111111111111'
+    const payload = { sibling: 'operational', nested: [{ [key]: value, count: 3, produtoId: 'public-product' }] }
+    expect(redactValue(payload, restricted)).toEqual({ sibling: 'operational', nested: [{ [key]: '[REDACTED]', count: 3, produtoId: 'public-product' }] })
+    expect(redactValue(payload, full)).toEqual({ sibling: 'operational', nested: [{ [key]: 'PRIVATE-IDENTITY [REDACTED] [REDACTED]', count: 3, produtoId: 'public-product' }] })
+    expect(JSON.parse(String(redactValue(JSON.stringify(payload), restricted)))).toEqual(redactValue(payload, restricted))
+  })
+  it.each([
+    'mensagem=PRIVATE-MESSAGE', 'MESSAGE: "PRIVATE-MESSAGE"; status=ok', "conteudo='PRIVATE-MESSAGE'; status=ok",
+    'copy=PRIVATE-MESSAGE with several words; status=ok', 'payload.messages=PRIVATE-MESSAGE',
+    'debug {"mensagem":"PRIVATE-MESSAGE", malformed', 'debug {"content": {"text":"PRIVATE-MESSAGE"}}',
+    'debug {\\"message\\":\\"PRIVATE-MESSAGE\\"}', 'mensagem="PRIVATE-MESSAGE\\" tail"', 'mensagem="PRIVATE-MESSAGE unterminated',
+    'mensagem=first words, PRIVATE-MESSAGE; status=ok', 'mensagem=first line\nPRIVATE-MESSAGE; status=ok',
+  ])('round 1: protects textual/malformed message assignments without additive scope: %s', input => {
+    expect(String(redactValue(input, { allowPii: true, allowMessages: false }))).not.toContain('PRIVATE-MESSAGE')
+    expect(String(redactValue(input, full))).toContain('PRIVATE-MESSAGE')
+    expect(String(redactValue(`${input}; token=DO-NOT-LEAK 4111111111111111`, full))).not.toMatch(/DO-NOT-LEAK|4111111111111111/)
+  })
+  it('round 1: message redaction does not erase ordinary public product prose', () => {
+    const value = 'Produto Sixxis: descrição pública, copy comercial de verão; status=ativo'
+    expect(redactValue(value, restricted)).toBe(value)
+  })
   it.each(['senha', 'password', 'passwordHash', 'hash', 'salt', 'token', 'tokenAcesso', 'accessToken', 'refresh_token', 'api-key', 'webhookSecret', 'clientSecret', 'authorization', 'cookie', 'privateKey', 'cardNumber', 'numeroCartao', 'pan', 'cvv', 'cvc', 'pixQrCode', 'rawResponse', 'proximaAcao', 'visitorHash', 'idempotencyKey', 'apiUrl', 'instanceId', 'pagamentoEmProcessamentoEm'])('removes prohibited key %s at every depth, even with full permissions', key => {
     expect(isForbiddenKey(key)).toBe(true)
     expect(redactValue({ [key]: 'hidden', nested: [{ [key]: 'hidden', id: 'safe' }] }, full)).toEqual({ nested: [{ id: 'safe' }] })

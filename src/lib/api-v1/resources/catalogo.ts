@@ -41,7 +41,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
     {
       slug: 'produtos', model: 'Produto', scope: 'read:catalogo',
       scalarFields: ['id', 'erpProdutoId', 'nome', 'slug', 'descricao', 'preco', 'precoPromocional', 'custoProduto', 'imagens', 'estoque', 'categoria', 'modelo', 'ativo', 'createdAt', 'sku', 'temVariacoes', 'videoUrl', 'especificacoes', 'faqs', 'imagensPorVariacao', 'vendidos', 'mediaAvaliacoes', 'totalAvaliacoes', 'garantiaFabricaMeses', 'garantiaEstendida12Preco', 'garantiaEstendida24Preco', 'pesoKg', 'alturaCm', 'larguraCm', 'comprimentoCm', 'volumes', 'updatedAt'],
-      publicFields: ['nome', 'descricao'],
+      publicFields: ['nome', 'descricao', 'videoUrl'],
       select: { id: true, erpProdutoId: true, nome: true, slug: true, descricao: true, preco: true, precoPromocional: true, custoProduto: true, imagens: true, estoque: true, categoria: true, modelo: true, ativo: true, createdAt: true, sku: true, temVariacoes: true, videoUrl: true, especificacoes: true, faqs: true, imagensPorVariacao: true, vendidos: true, mediaAvaliacoes: true, totalAvaliacoes: true, garantiaFabricaMeses: true, garantiaEstendida12Preco: true, garantiaEstendida24Preco: true, pesoKg: true, alturaCm: true, larguraCm: true, comprimentoCm: true, volumes: true, updatedAt: true } as const satisfies Prisma.ProdutoSelect,
       fields: [
         { name: 'id', type: 'string' },
@@ -138,7 +138,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
         comprimentoCm: decimal(row.comprimentoCm),
         volumes: row.volumes,
         updatedAt: timestamp(row.updatedAt),
-      }, ctx, ['nome', 'descricao'], ['custoProduto']),
+      }, ctx, ['nome', 'descricao', 'videoUrl'], ['custoProduto']),
     },
     {
       slug: 'avaliacoes', model: 'Avaliacao', scope: 'read:catalogo',
@@ -205,6 +205,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
     },
     {
       slug: 'avaliacoes-fotos', model: 'AvaliacaoFoto', scope: 'read:catalogo',
+      publicFields: ['url'],
       scalarFields: ['id', 'avaliacaoId', 'url', 'createdAt'],
       select: { id: true, avaliacaoId: true, url: true, createdAt: true } as const satisfies Prisma.AvaliacaoFotoSelect,
       fields: [
@@ -236,10 +237,11 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
         avaliacaoId: row.avaliacaoId,
         url: row.url,
         createdAt: timestamp(row.createdAt),
-      }, ctx),
+      }, ctx, ['url']),
     },
     {
       slug: 'banners', model: 'Banner', scope: 'read:catalogo',
+      publicFields: ['link'],
       scalarFields: ['id', 'imagem', 'imagemTablet', 'imagemMobile', 'titulo', 'subtitulo', 'link', 'ordem', 'ativo', 'tempoCads', 'aspectMobile', 'aspectTablet', 'aspectDesktop', 'maxHeightDesktop', 'createdAt', 'updatedAt'],
       select: { id: true, imagem: true, imagemTablet: true, imagemMobile: true, titulo: true, subtitulo: true, link: true, ordem: true, ativo: true, tempoCads: true, aspectMobile: true, aspectTablet: true, aspectDesktop: true, maxHeightDesktop: true, createdAt: true, updatedAt: true } as const satisfies Prisma.BannerSelect,
       fields: [
@@ -294,7 +296,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
         maxHeightDesktop: row.maxHeightDesktop,
         createdAt: timestamp(row.createdAt),
         updatedAt: timestamp(row.updatedAt),
-      }, ctx),
+      }, ctx, ['link']),
     },
     {
       slug: 'configuracoes', model: 'Configuracao', scope: 'read:configuracoes',
@@ -335,7 +337,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
     {
       slug: 'formas-pagamento', model: 'FormaPagamento', scope: 'read:catalogo',
       scalarFields: ['id', 'nome', 'iconeUrl', 'ordem', 'ativo', 'createdAt', 'updatedAt'],
-      publicFields: ['nome'],
+      publicFields: ['nome', 'iconeUrl'],
       select: { id: true, nome: true, iconeUrl: true, ordem: true, ativo: true, createdAt: true, updatedAt: true } as const satisfies Prisma.FormaPagamentoSelect,
       fields: [
         { name: 'id', type: 'string' },
@@ -372,7 +374,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
         ativo: row.ativo,
         createdAt: timestamp(row.createdAt),
         updatedAt: timestamp(row.updatedAt),
-      }, ctx, ['nome']),
+      }, ctx, ['nome', 'iconeUrl']),
     },
     {
       slug: 'produtos-destaques', model: 'ProdutoDestaque', scope: 'read:catalogo',
@@ -627,6 +629,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
     },
     {
       slug: 'popup-inicial', model: 'PopupInicial', scope: 'read:catalogo',
+      publicFields: ['linkDestino'],
       scalarFields: ['id', 'ativado', 'bannerDesktop', 'bannerTablet', 'bannerMobile', 'altText', 'linkDestino', 'abrirNovaAba', 'titulo', 'texto', 'corBotao', 'textoBotao', 'delaySegundos', 'frequencia', 'paginas', 'createdAt', 'updatedAt'],
       select: { id: true, ativado: true, bannerDesktop: true, bannerTablet: true, bannerMobile: true, altText: true, linkDestino: true, abrirNovaAba: true, titulo: true, texto: true, corBotao: true, textoBotao: true, delaySegundos: true, frequencia: true, paginas: true, createdAt: true, updatedAt: true } as const satisfies Prisma.PopupInicialSelect,
       fields: [
@@ -684,7 +687,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
         paginas: row.paginas,
         createdAt: timestamp(row.createdAt),
         updatedAt: timestamp(row.updatedAt),
-      }, ctx),
+      }, ctx, ['linkDestino']),
     },
   ]
   return definitions

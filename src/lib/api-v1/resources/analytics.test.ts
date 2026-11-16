@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
 import { createAnalyticsResources } from './analytics'
 import { createCustomerResources } from './clientes'
+import { createCatalogResources } from './catalogo'
 import { createResourceRegistry } from '../registry'
 import { buildResourceWhere, executeItem, executeList, type ResourceDefinition } from '../resource'
 import { parseListQuery } from '../query'
@@ -123,6 +124,76 @@ describe('bounded analytics and audit resources', () => {
 })
 
 describe('analytics redaction and relations', () => {
+  it('round 1: preserves only an explicitly declared opaque structural join at the root', async () => {
+    const address = createCustomerResources().find(def => def.model === 'Endereco')!
+    const ctx = context(['read:all']), customerId = 'cmr1abc123def456ghi789jkl'
+    for (const value of [customerId, 'alice@example.test', '11912345678', '529.982.247-25', 'session=private', 'session-private-id', 'abc::1']) {
+      const raw = { ...fixture('Endereco'), clienteId: value }
+      const resource = { ...address, adapter: { findMany: async () => [raw], findFirst: async () => raw } }
+      for (const output of [address.serialize(raw, ctx), (await executeItem(resource, ctx, 'id')).data, (await executeList(resource, ctx, parseListQuery('https://test.local/', resource), options)).data[0]]) expect(output.clienteId).toBe(value === customerId ? value : '[REDACTED]')
+    }
+    const { def, delegate } = setup('EventoTracking'), raw = { ...row('EventoTracking'), dados: { clienteId: customerId, sibling: 'safe' } }
+    delegate.findMany.mockResolvedValue([raw])
+    expect((await executeList(def, ctx, query(def), options)).data[0].dados).toEqual({ clienteId: '[REDACTED]', sibling: 'safe' })
+  })
+  it.each(['sessionId', 'email', 'userId', 'clienteId'])('round 1: rejects undeclared/non-relational structural ID policy: %s', field => {
+    const { def, delegate } = setup('EventoTracking')
+    return expect(executeList({ ...def, structuralIdFields: [field] }, context(), query(def), options)).rejects.toThrow(TypeError).then(() => expect(delegate.findMany).not.toHaveBeenCalled())
+  })
+  it.each(['scalar', 'JSON'] as const)('round 1: public-value policy cannot bypass private identities: %s', kind => {
+    const { def, delegate } = setup('EventoTracking')
+    const malicious = kind === 'scalar' ? { ...def, publicFields: ['sessaoId'] } : { ...def, fields: [...def.fields.filter(field => field.name !== 'dados'), { name: 'dados', type: 'array' as const, items: { type: 'object' as const, properties: { clienteId: { type: 'string' as const } } } }], publicJsonFields: { dados: ['clienteId'] } }
+    return expect(executeList(malicious, context(), query(def), options)).rejects.toThrow(TypeError).then(() => expect(delegate.findMany).not.toHaveBeenCalled())
+  })
+  it('round 1: keeps nominally public photo URLs and product copy usable without PII', async () => {
+    const definitions = createCatalogResources(), ctx = context(['read:all'])
+    for (const [model, field, value, expected] of [
+      ['AvaliacaoFoto', 'url', 'https://media.example.test/public.webp?token=DO-NOT-LEAK', 'https://media.example.test/public.webp?[REDACTED]'],
+      ['Produto', 'descricao', 'Copy comercial Sixxis token=DO-NOT-LEAK', 'Copy comercial Sixxis [REDACTED]'],
+      ['Produto', 'videoUrl', 'https://media.example.test/video?token=DO-NOT-LEAK', 'https://media.example.test/video?[REDACTED]'],
+      ['FormaPagamento', 'iconeUrl', 'https://media.example.test/icon.svg', 'https://media.example.test/icon.svg'],
+      ['Banner', 'link', '/produtos/public-product', '/produtos/public-product'],
+      ['PopupInicial', 'linkDestino', '/produtos/public-product', '/produtos/public-product'],
+    ]) {
+      const definition = definitions.find(def => def.model === model)!, raw = { ...fixture(model), [field]: value }
+      const resource = { ...definition, adapter: { findMany: async () => [raw], findFirst: async () => raw } }
+      for (const output of [resource.serialize(raw, ctx), (await executeItem(resource, ctx, 'id')).data, (await executeList(resource, ctx, parseListQuery('https://test.local/', resource), options)).data[0]]) expect(output[field]).toBe(expected)
+    }
+  })
+  it.each(['EventoTracking', 'EventoAnalitico', 'AuditLog'])('round 1: protects free JSON identities, URLs and textual messages through every path: %s', async model => {
+    const { def, delegate } = setup(model), field = model === 'AuditLog' ? 'metadata' : 'dados'
+    const payload = { sibling: 'public-operation', nested: [{ actor: 'PRIVATE-ACTOR', clienteId: 'PRIVATE-CLIENT', identity: { userId: 'PRIVATE-USER' }, landingPage: '/pedidos/PRIVATE-ID?token=DO-NOT-LEAK', url: '/conta/PRIVATE-ID', produtoId: 'public-product', count: 2, details: 'mensagem=PRIVATE-MESSAGE; status=ok; token=DO-NOT-LEAK; 4111111111111111' }] }
+    const raw = { ...row(model), [field]: model === 'EventoAnalitico' ? JSON.stringify(payload) : payload }
+    delegate.findMany.mockResolvedValue([raw]); delegate.findFirst.mockResolvedValue(raw)
+    for (const scopes of [['read:all'], ['read:all', 'read:pii'], ['read:all', 'read:mensagens'], ['read:all', 'read:pii', 'read:mensagens']] as const) {
+      const ctx = context([...scopes])
+      for (const output of [def.serialize(raw, ctx), (await executeItem(def, ctx, 'id')).data, (await executeList(def, ctx, query(def), options)).data[0]]) {
+        const result = typeof output[field] === 'string' ? JSON.parse(output[field] as string) : output[field]
+        const text = JSON.stringify(result)
+        expect(result).toMatchObject({ sibling: 'public-operation', nested: [{ produtoId: 'public-product', count: 2 }] })
+        expect(text).not.toMatch(/DO-NOT-LEAK|4111111111111111/)
+        if (!scopes.includes('read:pii' as never)) expect(text).not.toMatch(/PRIVATE-ACTOR|PRIVATE-CLIENT|PRIVATE-USER|PRIVATE-ID/)
+        else expect(text).toMatch(/PRIVATE-ACTOR/)
+        if (!scopes.includes('read:mensagens' as never)) expect(text).not.toContain('PRIVATE-MESSAGE')
+        else expect(text).toContain('PRIVATE-MESSAGE')
+      }
+    }
+  })
+  it.each([['RelatorioVendaHora', 'hora', 23], ['RelatorioVendaHora', 'diaSemana', 6], ['TrafegoBruto', 'hora', 23]] as const)('round 1: validates integer range before adapter for %s.%s', async (model, field, max) => {
+    const { def, delegate } = setup(model)
+    const base = query(def)
+    for (const value of ['-1', String(max + 1), '1.5', '9007199254740993', `0,${max + 1}`]) {
+      expect(() => query(def, `${field}=${value}`)).toThrow()
+      await expect(executeList(def, context(), { ...base, filters: { [field]: [value] } }, options)).rejects.toMatchObject({ status: 400 })
+    }
+    expect(delegate.findMany).not.toHaveBeenCalled()
+    for (const value of [0, 1, max]) {
+      const parsed = query(def, `${field}=${value}`)
+      expect(buildResourceWhere(def, parsed).AND).toContainEqual({ [field]: value })
+      await executeList(def, context(), parsed, options)
+    }
+    expect(buildResourceWhere(def, query(def, `${field}=0,${max}`)).AND).toContainEqual({ [field]: { in: [0, max] } })
+  })
   it('retains only the nominal consent preference key while sanitizing its value', async () => {
     const { def, delegate } = setup('ClienteInsight')
     const raw = { ...row(def.model), cookieCategs: JSON.stringify({ analytics: true, token: 'DO-NOT-LEAK', email: 'alice@example.test', mensagem: 'PRIVATE-MESSAGE', nested: { cookieCategs: 'DO-NOT-LEAK' } }) }

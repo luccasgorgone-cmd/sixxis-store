@@ -2,7 +2,7 @@ import type { ResourceDefinition } from '../resource'
 import type { ApiContext } from '../types'
 import { hasScope } from '../auth'
 import { iso, money } from '../format'
-import { maskIdentifier, redactValue, restorePublicJsonFields, type PublicJsonFields } from '../redact'
+import { maskIdentifier, redactValue, restorePublicJsonFields, restoreStructuralIds, type PublicJsonFields } from '../redact'
 import { Prisma } from '@prisma/client'
 
 export type ResourceResolver = (slug: string) => ResourceDefinition
@@ -24,7 +24,7 @@ export function decimal(value: unknown): string | null {
   throw new TypeError('Invalid decimal scalar')
 }
 /** Pure resource sanitization also protects callers that do not use the HTTP engine. */
-export function safeRecord(record: ResourceRow, ctx: ApiContext, publicFields: readonly string[] = [], financeFields: readonly string[] = [], extraPii: readonly string[] = [], publicJsonFields: PublicJsonFields = {}, safeKeyFields: readonly string[] = []): ResourceRow {
+export function safeRecord(record: ResourceRow, ctx: ApiContext, publicFields: readonly string[] = [], financeFields: readonly string[] = [], extraPii: readonly string[] = [], publicJsonFields: PublicJsonFields = {}, safeKeyFields: readonly string[] = [], structuralIdFields: readonly string[] = []): ResourceRow {
   const options = { allowPii: !!ctx.identity && hasScope(ctx.identity, 'read:pii'), allowMessages: !!ctx.identity && hasScope(ctx.identity, 'read:mensagens') }
   // Finance is a domain permission, also granted by read:all; PII/messages remain additive.
   for (const field of financeFields) if (!ctx.identity || !hasScope(ctx.identity, 'read:financeiro')) delete record[field]
@@ -35,5 +35,6 @@ export function safeRecord(record: ResourceRow, ctx: ApiContext, publicFields: r
     result[field] = redactValue(record[field], { ...options, allowPii: true })
   }
   restorePublicJsonFields(record, result, publicJsonFields, options)
+  restoreStructuralIds(record, result, structuralIdFields, options)
   return result
 }
