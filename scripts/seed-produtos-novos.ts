@@ -386,7 +386,7 @@ const DESC_BIKE = `<div class="produto-hero">
   <li><strong>Tipo:</strong> Spinning Semi-Profissional</li>
   <li><strong>Peso Máximo Suportado:</strong> 120 kg</li>
   <li><strong>Peso do Volante de Inércia:</strong> 16 kg</li>
-  <li><strong>Tipo de Resistência:</strong> Magnética e Mecânica</li>
+  <li><strong>Tipo de Resistência:</strong> Magnética com 32 níveis ajustáveis</li>
   <li><strong>Peso do Equipamento:</strong> 24,5 kg</li>
   <li><strong>Dimensões:</strong> 74 × 134 × 47 cm (C × A × L)</li>
   <li><strong>Altura Máxima do Usuário:</strong> 190 cm</li>
@@ -575,10 +575,10 @@ const SPECS_ASPIRADOR = [
 const SPECS_BIKE = [
   { label: 'Marca', valor: 'Sixxis' },
   { label: 'Modelo', valor: 'Spinning Sixxis Life' },
+  { label: 'Tipo de Resistência', valor: 'Magnética — 32 níveis ajustáveis' },
   { label: 'Tipo', valor: 'Spinning Semi-Profissional' },
   { label: 'Peso Máximo Suportado', valor: '120 kg' },
   { label: 'Peso do Volante de Inércia', valor: '16 kg' },
-  { label: 'Tipo de Resistência', valor: 'Magnética e Mecânica' },
   { label: 'Painel', valor: 'LED — Velocidade, Distância, FC, Calorias' },
   { label: 'Aplicativos', valor: '3 aplicativos exclusivos' },
   { label: 'Guidão', valor: 'Ajustável' },

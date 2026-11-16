@@ -135,7 +135,7 @@ const HARDCODED_FIX: Fix[] = [
   { slug: 'spinning-sixxis-cardio', nomeAutor: 'Osmar R.', titulo: 'Pedalando todo dia sem enjoar', comentario: 'Já é rotina pedalar nela todo dia de manhã. A resistência mecânica dá pra variar o treino e não enjoa fácil.' },
 
   // --- spinning-sixxis-life (reviews novas de 2026-08-24, texto corrigido) ---
-  { slug: 'spinning-sixxis-life', nomeAutor: 'Marcelo R.', titulo: '10 níveis dão pra variar bastante o treino', comentario: 'Os 10 níveis de resistência dão liberdade pra fazer treino leve de recuperação ou puxado de intervalo no mesmo dia, só ajustando na hora.' },
+  { slug: 'spinning-sixxis-life', nomeAutor: 'Marcelo R.', titulo: '32 níveis dão pra variar bastante o treino', comentario: 'Os 32 níveis de resistência dão liberdade pra fazer treino leve de recuperação ou puxado de intervalo no mesmo dia, só ajustando na hora.' },
   { slug: 'spinning-sixxis-life', nomeAutor: 'Vanuza S.', titulo: 'Sensor cardíaco bateu com meu relógio', comentario: 'Conferi o sensor cardíaco integrado com meu relógio esportivo e os números bateram certinho. Confio no dado que aparece no painel.' },
   { slug: 'spinning-sixxis-life', nomeAutor: 'Célio T.', titulo: 'App reconhece a bike rápido', comentario: 'Testei os 3 aplicativos exclusivos e o reconhecimento foi rápido, sem ficar tentando conectar. Acompanho o treino direto pelo celular.' },
   { slug: 'spinning-sixxis-life', nomeAutor: 'Adélia B.', titulo: 'Emagreci pedalando quase todo dia', comentario: 'Uso ela quase todo dia há uns meses e realmente senti a queima de calorias que prometem, cheguei a perder alguns quilos combinando com a dieta.' },

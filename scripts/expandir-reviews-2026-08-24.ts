@@ -79,7 +79,7 @@ const CARDIO: Nova[] = [
 // ---------------------------------------------------------------------------
 const LIFE: Nova[] = [
   { nomeAutor: 'Patrícia H.', nota: 5, titulo: 'Resistência magnética suave e precisa', comentario: 'A resistência magnética da Sixxis Life é bem mais suave que a mecânica que eu tinha antes, mas ainda sinto a diferença clara entre os níveis. Ajuste preciso.' },
-  { nomeAutor: 'Marcelo R.', nota: 5, titulo: '10 níveis dão pra variar bastante o treino', comentario: 'Os 10 níveis de resistência dão liberdade pra fazer treino leve de recuperação ou puxado de intervalo no mesmo dia, só ajustando na hora.' },
+  { nomeAutor: 'Marcelo R.', nota: 5, titulo: '32 níveis dão pra variar bastante o treino', comentario: 'Os 32 níveis de resistência dão liberdade pra fazer treino leve de recuperação ou puxado de intervalo no mesmo dia, só ajustando na hora.' },
   { nomeAutor: 'Vanuza S.', nota: 5, titulo: 'Sensor cardíaco bateu com meu relógio', comentario: 'Conferi o sensor cardíaco integrado com meu relógio esportivo e os números bateram certinho. Confio no dado que aparece no painel.' },
   { nomeAutor: 'Célio T.', nota: 5, titulo: 'App reconhece a bike rápido', comentario: 'Testei os 3 aplicativos exclusivos e o reconhecimento foi rápido, sem ficar tentando conectar. Acompanho o treino direto pelo celular.' },
   { nomeAutor: 'Adélia B.', nota: 5, titulo: 'Emagreci pedalando quase todo dia', comentario: 'Uso ela quase todo dia há uns meses e realmente senti a queima de calorias que prometem, cheguei a perder alguns quilos combinando com a dieta.' },
