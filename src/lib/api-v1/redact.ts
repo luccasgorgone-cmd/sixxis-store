@@ -12,6 +12,9 @@ export function isForbiddenKey(key: string): boolean {
   return normalized !== 'tokens' && forbidden.test(normalized)
 }
 
+/** Exact schema-owned non-secret preference key, never a generic cookie exemption. */
+export function isSafePreferenceKey(key: string): boolean { return key === 'cookieCategs' }
+
 type Mask = (value: unknown) => string | null
 function scalarMask(format: (value: string) => string): Mask {
   return value => {
@@ -174,7 +177,7 @@ function sanitizeText(value: string, options: RedactionOptions, depth: number): 
   return result
 }
 
-function walk(value: JsonValue, options: RedactionOptions, depth: number): JsonValue {
+function walk(value: JsonValue, options: RedactionOptions, depth: number, safeRootKeys: readonly string[] = []): JsonValue {
   if (depth > 32) throw new TypeError('Redaction nesting is too deep')
   if (typeof value === 'string') return sanitizeText(value, options, depth)
   if (typeof value === 'number' && looksLikePan(String(value))) return REDACTED
@@ -182,7 +185,7 @@ function walk(value: JsonValue, options: RedactionOptions, depth: number): JsonV
   if (Array.isArray(value)) return value.map(child => walk(child, options, depth + 1))
   const result: Record<string, JsonValue> = {}
   for (const [key, child] of Object.entries(value)) {
-    if (isForbiddenKey(key)) continue
+    if (isForbiddenKey(key) && !(depth === 0 && safeRootKeys.includes(key))) continue
     const normalized = normalizedKey(key)
     if (normalized === 'tokens' && !isUsageCounter(child)) continue
     if (!options.allowMessages && messageKeys.has(normalized)) continue
@@ -196,9 +199,10 @@ function walk(value: JsonValue, options: RedactionOptions, depth: number): JsonV
 }
 
 /** Defense in depth, never a replacement for a resource-specific field allowlist. */
-export function redactValue(value: unknown, options: RedactionOptions): unknown {
+export function redactValue(value: unknown, options: RedactionOptions, safeRootKeys: readonly string[] = []): unknown {
+  if (safeRootKeys.some(key => !isSafePreferenceKey(key))) throw new TypeError('Invalid safe preference key')
   assertJsonValue(value)
-  return walk(value as JsonValue, options, 0)
+  return walk(value as JsonValue, options, 0, safeRootKeys)
 }
 
 /** Definition-owned flat array/object/string leaves only; never a client path expression. */

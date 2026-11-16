@@ -24,12 +24,12 @@ export function decimal(value: unknown): string | null {
   throw new TypeError('Invalid decimal scalar')
 }
 /** Pure resource sanitization also protects callers that do not use the HTTP engine. */
-export function safeRecord(record: ResourceRow, ctx: ApiContext, publicFields: readonly string[] = [], financeFields: readonly string[] = [], extraPii: readonly string[] = [], publicJsonFields: PublicJsonFields = {}): ResourceRow {
+export function safeRecord(record: ResourceRow, ctx: ApiContext, publicFields: readonly string[] = [], financeFields: readonly string[] = [], extraPii: readonly string[] = [], publicJsonFields: PublicJsonFields = {}, safeKeyFields: readonly string[] = []): ResourceRow {
   const options = { allowPii: !!ctx.identity && hasScope(ctx.identity, 'read:pii'), allowMessages: !!ctx.identity && hasScope(ctx.identity, 'read:mensagens') }
   // Finance is a domain permission, also granted by read:all; PII/messages remain additive.
   for (const field of financeFields) if (!ctx.identity || !hasScope(ctx.identity, 'read:financeiro')) delete record[field]
   if (!options.allowPii) for (const field of extraPii) record[field] = maskIdentifier(record[field])
-  const result = redactValue(record, options) as ResourceRow
+  const result = redactValue(record, options, safeKeyFields) as ResourceRow
   for (const field of publicFields) if (Object.hasOwn(record, field)) {
     if (record[field] !== null && typeof record[field] !== 'string') throw new TypeError('Invalid public scalar value')
     result[field] = redactValue(record[field], { ...options, allowPii: true })

@@ -4,7 +4,7 @@ import { API_MAX_EXPAND_ITEMS, API_QUERY_TIMEOUT_MS } from './constants'
 import { buildSeekWhere, decodeCursor, encodeCursor, filterHash, resolveCursorSecret, type CursorOptions } from './cursor'
 import { itemEnvelope, listEnvelope } from './format'
 import { ApiQueryError, validateListQuery } from './query'
-import { isForbiddenKey, redactValue, restorePublicJsonFields, type PublicJsonFields } from './redact'
+import { isForbiddenKey, isSafePreferenceKey, redactValue, restorePublicJsonFields, type PublicJsonFields } from './redact'
 import type { ApiContext, ApiScope, ItemEnvelope, ListEnvelope, ListQuery } from './types'
 
 /** JSON-compatible value shape shared by field metadata and the OpenAPI generator. */
@@ -22,6 +22,8 @@ export type ResourceDefinition<T extends Record<string, unknown> = Record<string
   publicFields?:readonly string[]
   /** Nominal public string leaves inside selected JSON arrays; never arbitrary dotted paths. */
   publicJsonFields?:PublicJsonFields
+  /** Exact root preference-key exception; values still undergo all redaction. */
+  safeKeyFields?:readonly string[]
   select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]
   dateFields?:{created?:string;updated?:string}
   window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte';maxDays:number}
@@ -61,6 +63,10 @@ function assertScalarSelector(def:ResourceDefinition):void {
   const relations=new Set(def.expands.flatMap(expand=>[expand.name,expand.relation??expand.name]))
   const keys=Object.keys(def.select)
   if (keys.some(key=>def.select[key]!==true || !scalars.has(key) || relations.has(key)) || !def.select.id || !def.select[def.defaultSort?.replace(/^-/,'')??def.sorts[0]??'id']) throw new TypeError('Invalid resource scalar selector')
+  if (def.safeKeyFields?.some(name => {
+    const field = def.fields.find(item => item.name === name)
+    return def.model !== 'ClienteInsight' || def.slug !== 'clientes-insights' || !isSafePreferenceKey(name) || !field || field.type !== 'string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name)
+  })) throw new TypeError('Invalid safe preference key policy')
   if (def.publicFields?.some(name=>{
     const field=def.fields.find(item=>item.name===name)
     return !field || field.type!=='string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name) || isForbiddenKey(name)
@@ -89,7 +95,7 @@ function serialize<T extends Record<string, unknown>>(def:ResourceDefinition<T>,
   const allowed=def.fields.filter(field=>!field.scope||(ctx.identity&&hasScope(ctx.identity,field.scope)))
   const data=projectFields(def.serialize(row,ctx,fields),undefined,allowed)
   const options={allowPii:!!ctx.identity&&hasScope(ctx.identity,'read:pii'),allowMessages:!!ctx.identity&&hasScope(ctx.identity,'read:mensagens')}
-  const safe=redactValue(data,options) as Record<string,unknown>
+  const safe=redactValue(data,options,def.safeKeyFields) as Record<string,unknown>
   for (const name of def.publicFields??[]) if (Object.hasOwn(data,name)) {
     if (data[name]!==null && typeof data[name]!=='string') throw new TypeError('Invalid public scalar value')
     safe[name]=redactValue(data[name],{...options,allowPii:true})
