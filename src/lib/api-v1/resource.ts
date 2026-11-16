@@ -4,7 +4,7 @@ import { API_MAX_EXPAND_ITEMS, API_QUERY_TIMEOUT_MS } from './constants'
 import { buildSeekWhere, decodeCursor, encodeCursor, filterHash, resolveCursorSecret, type CursorOptions } from './cursor'
 import { itemEnvelope, listEnvelope } from './format'
 import { ApiQueryError, validateListQuery } from './query'
-import { redactValue } from './redact'
+import { isForbiddenKey, redactValue } from './redact'
 import type { ApiContext, ApiScope, ItemEnvelope, ListEnvelope, ListQuery } from './types'
 
 export type FieldDefinition = { name: string; type: 'string'|'number'|'integer'|'boolean'|'object'|'array'; format?: string; description?: string; nullable?: boolean; enum?: readonly string[]; scope?: ApiScope; example?: unknown }
@@ -15,6 +15,9 @@ export type ResourceDefinition<T extends Record<string, unknown> = Record<string
   slug:string; model:string; scope:ApiScope; fields:readonly FieldDefinition[]; expands:readonly ExpandDefinition[]
   /** Explicit Prisma scalar names; omit only when API fields map 1:1 to scalar columns. */
   scalarFields?:readonly string[]
+  /** Nominal public string scalars (e.g. product names), never scoped fields or relations.
+   * Their values skip PII masking only; secret/PAN redaction always remains active. */
+  publicFields?:readonly string[]
   select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]
   dateFields?:{created?:string;updated?:string}
   window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte';maxDays:number}
@@ -54,6 +57,10 @@ function assertScalarSelector(def:ResourceDefinition):void {
   const relations=new Set(def.expands.flatMap(expand=>[expand.name,expand.relation??expand.name]))
   const keys=Object.keys(def.select)
   if (keys.some(key=>def.select[key]!==true || !scalars.has(key) || relations.has(key)) || !def.select.id || !def.select[def.defaultSort?.replace(/^-/,'')??def.sorts[0]??'id']) throw new TypeError('Invalid resource scalar selector')
+  if (def.publicFields?.some(name=>{
+    const field=def.fields.find(item=>item.name===name)
+    return !field || field.type!=='string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name) || isForbiddenKey(name)
+  })) throw new TypeError('Invalid public scalar policy')
 }
 function selection(def:ResourceDefinition,ctx:ApiContext,names:readonly string[]):Record<string,unknown> {
   assertScalarSelector(def)
@@ -68,7 +75,13 @@ function selection(def:ResourceDefinition,ctx:ApiContext,names:readonly string[]
 }
 function serialize<T extends Record<string, unknown>>(def:ResourceDefinition<T>,row:T,ctx:ApiContext,fields?:string[]):Record<string,unknown> {
   const allowed=def.fields.filter(field=>!field.scope||(ctx.identity&&hasScope(ctx.identity,field.scope)))
-  const safe=redactValue(projectFields(def.serialize(row,ctx,fields),undefined,allowed),{allowPii:!!ctx.identity&&hasScope(ctx.identity,'read:pii'),allowMessages:!!ctx.identity&&hasScope(ctx.identity,'read:mensagens')}) as Record<string,unknown>
+  const data=projectFields(def.serialize(row,ctx,fields),undefined,allowed)
+  const options={allowPii:!!ctx.identity&&hasScope(ctx.identity,'read:pii'),allowMessages:!!ctx.identity&&hasScope(ctx.identity,'read:mensagens')}
+  const safe=redactValue(data,options) as Record<string,unknown>
+  for (const name of def.publicFields??[]) if (Object.hasOwn(data,name)) {
+    if (data[name]!==null && typeof data[name]!=='string') throw new TypeError('Invalid public scalar value')
+    safe[name]=redactValue(data[name],{...options,allowPii:true})
+  }
   // A requested field without its additive scope must remain absent, not restore the raw value.
   return projectFields(safe,fields,def.fields)
 }

@@ -208,3 +208,21 @@ describe('allowlisted one-level expansions and deadlines', () => {
     expect(()=>createResourceRegistry([def,def])).toThrow()
   })
 })
+
+describe('nominal public scalar fields', () => {
+  it('preserves explicitly public name/description without bypassing secret or PAN redaction', async () => {
+    const publicDef = { ...def, publicFields: ['nome'], adapter: { findMany: async () => [{ ...rows[0], nome: 'Climatizador Sixxis token=do-not-leak 4111111111111111' }] } }
+    const result = await executeList(publicDef, ctx, query('', publicDef), options)
+    expect(result.data[0].nome).toBe('Climatizador Sixxis [REDACTED] [REDACTED]')
+    const normal = await executeList(def, ctx, query(), options)
+    expect(normal.data[0].nome).toBe('a***')
+  })
+  it('rejects public policy names outside scalar fields, additive-scope fields or relations before querying', async () => {
+    for (const invalid of [
+      { ...def, publicFields: ['notAField'] },
+      { ...def, publicFields: ['nome'], fields: def.fields.map(field => field.name === 'nome' ? { ...field, scope: 'read:pii' as const } : field) },
+      { ...def, publicFields: ['nome'], expands: [{ name: 'nome', many: true, resource: () => def }] },
+    ]) await expect(executeList(invalid, ctx, query('', invalid), options)).rejects.toThrow(TypeError)
+    expect(adapter).not.toHaveBeenCalled()
+  })
+})
