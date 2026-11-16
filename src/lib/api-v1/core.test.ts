@@ -182,4 +182,38 @@ describe('absolute secret and payment redaction', () => {
     const input = 'debug response=' + JSON.stringify(JSON.stringify({ apiKey: 'private-credential' })) + ' end'
     expect(redactValue(input, full)).not.toContain('private-credential')
   })
+
+  it.each([
+    'debug {"accessToken": { "value": "private-credential" }}',
+    'debug {"accessToken": ["private-credential", {"value":"private-credential"}]}',
+    'debug {"password":"prefix\\"suffix"}',
+    'debug {"password":"prefix\\\\suffix"}',
+    'debug {"password":"prefix\\"suffix',
+    'debug {\\"accessToken\\": { \\"value\\": \\"private-credential\\" }}',
+    'debug {\\"password\\":\\"prefix\\\\\\"suffix\\"}',
+  ])('fix round 1: removes complete ambiguous or escaped secret assignment: %s', input => {
+    const result = String(redactValue(input, full))
+    for (const secret of ['private-credential', 'prefix', 'suffix', 'accessToken', 'password']) expect(result).not.toContain(secret)
+  })
+
+  it.each(['private-credential', '128', { value: 'private-credential' }, ['private-credential'], null, -1, 0.5])('fix round 1: excludes non-counter tokens value %s', tokens => {
+    expect(redactValue({ tokens, nested: [{ tokens }], id: 'safe' }, full)).toEqual({ nested: [{}], id: 'safe' })
+    const prose = `debug ${JSON.stringify({ tokens })} end`
+    expect(String(redactValue(prose, full))).not.toContain('tokens')
+  })
+
+  it.each([0, 128, Number.MAX_SAFE_INTEGER])('fix round 1: preserves safe nonnegative integer usage count %s', tokens => {
+    expect(redactValue({ tokens }, full)).toEqual({ tokens })
+  })
+
+  it.each([maskName, maskEmail, maskPhone, maskCpf, maskCnpj, maskAddress, maskIp, maskIdentifier])('fix round 1: mask never coerces a PII object or array', mask => {
+    expect(mask({ toString: 'x', valueOf: 'x' })).toBe('[REDACTED]')
+    expect(mask(['private-credential', '52998224725'])).toBe('[REDACTED]')
+  })
+
+  it('fix round 1: masks malformed PII containers and safely continues sibling recursion', () => {
+    const payload = { nome: { toString: 'x' }, telefone: ['11912345678'], cpf: ['52998224725'], cnpj: ['11222333000181'], email: ['j@gmail.com'],
+      nested: [{ nome: ['João', 'Silva'], senha: 'private-credential', id: 'safe' }] }
+    expect(redactValue(payload, restricted)).toEqual({ nome: '[REDACTED]', telefone: '[REDACTED]', cpf: '[REDACTED]', cnpj: '[REDACTED]', email: '[REDACTED]', nested: [{ nome: '[REDACTED]', id: 'safe' }] })
+  })
 })

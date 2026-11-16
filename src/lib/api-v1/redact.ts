@@ -8,41 +8,43 @@ const normalizedKey = (key: string) => key.normalize('NFKD').replace(/[\u0300-\u
 const forbidden = /(?:senha|password|passwd|secret|token|hash|salt|apikey|privatekey|authorization|cookie|credential|credencial|cvv|cvc|cardnumber|numerocartao|^pan$|pannumber|qrcode|pixcopiaecola|pixcopiacola|rawresponse|proximaacao|idempotencykey|instanceid|apiurl|pagamentoemprocessamentoem)/
 export function isForbiddenKey(key: string): boolean {
   const normalized = normalizedKey(key)
-  // LunaMensagem.tokens is a usage counter, not a credential.
+  // Only the numeric counter is exempt; walk/redactAssignments enforce its value type.
   return normalized !== 'tokens' && forbidden.test(normalized)
 }
 
 type Mask = (value: unknown) => string | null
-const text = (value: unknown) => value === null || value === undefined ? null : String(value)
-export const maskIdentifier: Mask = value => text(value) === null ? null : REDACTED
+function scalarMask(format: (value: string) => string): Mask {
+  return value => {
+    if (value === null || value === undefined) return null
+    if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') return REDACTED
+    return format(String(value))
+  }
+}
+export const maskIdentifier: Mask = value => value === null || value === undefined ? null : REDACTED
 export const maskAddress: Mask = maskIdentifier
 export const maskIp: Mask = maskIdentifier
-export const maskName: Mask = value => {
-  const valueText = text(value)?.trim()
-  return valueText === undefined ? null : valueText ? `${Array.from(valueText)[0]}***` : REDACTED
-}
-export const maskEmail: Mask = value => {
-  const valueText = text(value)
-  if (valueText === null) return null
-  const match = /^([^@\s])[^@\s]*@([a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,})$/i.exec(valueText)
+export const maskName = scalarMask(value => {
+  const trimmed = value.trim()
+  return trimmed ? `${Array.from(trimmed)[0]}***` : REDACTED
+})
+export const maskEmail = scalarMask(value => {
+  const match = /^([^@\s])[^@\s]*@([a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,})$/i.exec(value)
   return match ? `${match[1]}***@${match[2]}` : REDACTED
-}
-export const maskPhone: Mask = value => {
-  const valueText = text(value)
-  if (valueText === null) return null
-  let digits = valueText.replace(/\D/g, '')
+})
+export const maskPhone = scalarMask(value => {
+  let digits = value.replace(/\D/g, '')
   if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) digits = digits.slice(2)
   if (digits.length !== 10 && digits.length !== 11) return REDACTED
   return `(${digits.slice(0, 2)}) ${digits.length === 11 ? `${digits[2]}****` : '****'}-${digits.slice(-4)}`
-}
-export const maskCpf: Mask = value => {
-  const valueText = text(value)
-  return valueText === null ? null : valueText.replace(/\D/g, '').length === 11 ? `***.***.***-${valueText.replace(/\D/g, '').slice(-2)}` : REDACTED
-}
-export const maskCnpj: Mask = value => {
-  const valueText = text(value)
-  return valueText === null ? null : valueText.replace(/\D/g, '').length === 14 ? `**.***.***/****-${valueText.replace(/\D/g, '').slice(-2)}` : REDACTED
-}
+})
+export const maskCpf = scalarMask(value => {
+  const digits = value.replace(/\D/g, '')
+  return digits.length === 11 ? `***.***.***-${digits.slice(-2)}` : REDACTED
+})
+export const maskCnpj = scalarMask(value => {
+  const digits = value.replace(/\D/g, '')
+  return digits.length === 14 ? `**.***.***/****-${digits.slice(-2)}` : REDACTED
+})
 
 const messageKeys = new Set(['mensagem', 'mensagens', 'conteudo', 'content', 'copy', 'message', 'messages'])
 function piiMask(key: string): Mask | null {
@@ -89,6 +91,41 @@ function looksLikePan(digits: string): boolean {
   return /^\d{13,19}$/.test(digits) && /^(?:4|[56]\d|2[2-7]|3(?:0[0-5]|[4-9]))/.test(digits) && luhn(digits)
 }
 
+const isUsageCounter = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
+
+/** Consume scalar assignments with escaped quotes intact; discard ambiguous structures. */
+function redactAssignments(value: string): string {
+  const assignments = /(?:\\*["'])?([a-z][a-z0-9_.-]{0,70})(?:\\*["'])?\s*[:=]\s*/gi
+  let result = ''
+  let consumed = 0
+  for (const match of value.matchAll(assignments)) {
+    const start = match.index!
+    if (start < consumed) continue
+    const key = match[1]
+    if (!isForbiddenKey(key) && normalizedKey(key) !== 'tokens') continue
+    const from = start + match[0].length
+    const first = value[from]
+    // No partial replacement of object/array payloads or escaped outer JSON: a
+    // regex cannot establish their complete value boundary without interpreting it.
+    if (match[0].includes('\\') || first === '{' || first === '[' || first === '\\' || first === undefined) return REDACTED
+    let end = from
+    if (first === '"' || first === "'") {
+      end++
+      while (end < value.length && value[end] !== first) end += value[end] === '\\' ? 2 : 1
+      if (end >= value.length) return REDACTED
+      end++
+    } else {
+      const scalar = /^[^\s,;&}<>\]]+/.exec(value.slice(from))?.[0]
+      if (!scalar) return REDACTED
+      end += scalar.length
+      if (normalizedKey(key) === 'tokens' && /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(scalar) && isUsageCounter(Number(scalar))) continue
+    }
+    result += value.slice(consumed, start) + REDACTED
+    consumed = end
+  }
+  return result + value.slice(consumed)
+}
+
 function sanitizeText(value: string, options: RedactionOptions, depth: number): string {
   // JSON stored as text must follow the same key policy as actual JSON, not a token-only regex.
   if (depth < 32 && /^\s*[\[{\"]/.test(value)) {
@@ -100,10 +137,7 @@ function sanitizeText(value: string, options: RedactionOptions, depth: number): 
   for (const pattern of secretPatterns) result = result.replace(pattern, REDACTED)
 
   // Handles credentials inside malformed JSON, prose, URL query strings and header-like text.
-  result = result.replace(/(["']?)([a-z][a-z0-9_.-]{0,70})\1\s*[:=]\s*(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;&}<>]+)/gi,
-    (whole, _quote: string, key: string) => isForbiddenKey(key) ? REDACTED : whole)
-  result = result.replace(/\\["']([a-z][a-z0-9_.-]{0,70})\\["']\s*[:=]\s*\\["'][^\\\r\n]*\\["']/gi,
-    (whole, key: string) => isForbiddenKey(key) ? REDACTED : whole)
+  result = redactAssignments(result)
 
   // A bare digit run is a PAN only with an issuer prefix and checksum. Numeric business ids
   // would be erased. Labeled card numbers are always removed by the key/assignment policy.
@@ -144,6 +178,7 @@ function walk(value: JsonValue, options: RedactionOptions, depth: number): JsonV
   for (const [key, child] of Object.entries(value)) {
     if (isForbiddenKey(key)) continue
     const normalized = normalizedKey(key)
+    if (normalized === 'tokens' && !isUsageCounter(child)) continue
     if (!options.allowMessages && messageKeys.has(normalized)) continue
     const mask = !options.allowPii ? piiMask(normalized) : null
     // defineProperty also treats untrusted __proto__ keys as inert data.
