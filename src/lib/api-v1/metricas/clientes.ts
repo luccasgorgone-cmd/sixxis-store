@@ -64,7 +64,7 @@ export function createClientesMetric(options: StoreMetricOptions = {}): MetricDe
       const definicoes = {
         clienteComprador: 'Cliente distinto com Pedido.status pago|enviado|entregue e Pedido.createdAt no período BRT.',
         novo: 'Cliente cujo primeiro pedido pago histórico ocorreu no período selecionado.',
-        recorrente: 'Cliente comprador no período cujo primeiro pedido pago histórico é anterior ao período.',
+        recorrente: 'No resumo, comprador cujo primeiro pedido pago histórico é anterior ao período; na série, comprador em bucket posterior ao bucket do primeiro pedido pago histórico.',
         ltvMedio: 'Σ(Pedido.total) de todo o histórico pago dos clientes compradores no período ÷ quantidade desses clientes.',
       }
       return {

@@ -109,13 +109,7 @@ describe('metricas/vendas', () => {
     expect(orderArgs.select).not.toHaveProperty('clientIp')
     expect(orderArgs.select.pagamentos.select).not.toHaveProperty('rawResponse')
     expect(eventoFindMany).toHaveBeenCalledTimes(1)
-    expect(eventoFindMany.mock.calls[0][0].where).toEqual({
-      tipo: 'purchase',
-      OR: [
-        { dados: { path: '$.transaction_id', equals: 'pedido-1' } },
-        { dados: { path: '$.transaction_id', equals: 'pedido-2' } },
-      ],
-    })
+    expect(eventoFindMany.mock.calls[0][0].where).toEqual({ tipo: 'purchase', createdAt: { gte: params.from, lt: new Date('2026-11-24T03:00:00.000Z') } })
     expect(pedidoFindMany).toHaveBeenCalledTimes(1)
   })
 
@@ -129,8 +123,29 @@ describe('metricas/vendas', () => {
     const result = await definition.query(context, params)
 
     expect(result.porAtribuicao).toContainEqual({ origem: 'async', meio: 'event', campanha: 'boundary', canalClickId: 'gclid', pedidos: 1, receitaLiquidaComercial: '100.00' })
-    expect(eventoFindMany.mock.calls[0][0].where).not.toHaveProperty('createdAt')
-    expect(eventoFindMany.mock.calls[0][0].where.OR).toHaveLength(2)
+    expect(eventoFindMany.mock.calls[0][0].where.createdAt).toEqual({ gte: params.from, lt: new Date('2026-11-24T03:00:00.000Z') })
+  })
+
+  it('uses one indexed attribution query even for more than 1000 paid orders', async () => {
+    const template = saleRows()[0]
+    const orders = Array.from({ length: 1001 }, (_, index) => ({ ...template, id: `pedido-${index}`, itens: [], garantias: [], pagamentos: [], total: D('1') }))
+    let active = 0
+    let peak = 0
+    const eventoFindMany = vi.fn(async (args: unknown) => {
+      void args
+      active += 1
+      peak = Math.max(peak, active)
+      await Promise.resolve()
+      active -= 1
+      return []
+    })
+    const definition = createVendasMetric({ prisma: { pedido: { findMany: vi.fn().mockResolvedValue(orders) }, eventoTracking: { findMany: eventoFindMany } } as never })
+
+    await definition.query(context, params)
+
+    expect(eventoFindMany).toHaveBeenCalledTimes(1)
+    expect(peak).toBe(1)
+    expect((eventoFindMany.mock.calls[0][0] as { where: Record<string, unknown> }).where).not.toHaveProperty('OR')
   })
 
   it('includes explicit formulas, timezone and period in the payload', async () => {

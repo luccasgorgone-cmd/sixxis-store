@@ -61,7 +61,7 @@ type SalesAccumulator = {
 }
 
 const zero = () => decimalValue(0)
-const ATTRIBUTION_QUERY_BATCH = 200
+const ATTRIBUTION_LOOKAHEAD_MS = 7 * 24 * 60 * 60 * 1000
 const SUCCESSFUL_PAYMENT_STATUSES = new Set(['approved', 'captured'])
 const salesSchema = {
   type: 'object',
@@ -162,15 +162,11 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
           },
         })
       const orders = rawOrders as unknown as SaleOrder[]
-      const eventQueries = []
-      for (let index = 0; index < orders.length; index += ATTRIBUTION_QUERY_BATCH) {
-        const ids = orders.slice(index, index + ATTRIBUTION_QUERY_BATCH).map(order => order.id)
-        eventQueries.push(client.eventoTracking.findMany({
-          where: { tipo: 'purchase', OR: ids.map(id => ({ dados: { path: '$.transaction_id', equals: id } })) },
+      const rawEvents = orders.length === 0 ? [] : await client.eventoTracking.findMany({
+          where: { tipo: 'purchase', createdAt: { gte: params.from, lt: new Date(params.toExclusive.getTime() + ATTRIBUTION_LOOKAHEAD_MS) } },
           select: { dados: true, sessao: { select: { utmSource: true, utmMedium: true, utmCampaign: true, gclid: true, gbraid: true, wbraid: true } } },
-        }))
-      }
-      const events = (await Promise.all(eventQueries)).flat() as unknown as PurchaseEvent[]
+        })
+      const events = rawEvents as unknown as PurchaseEvent[]
       const eventByOrder = new Map<string, PurchaseEvent>()
       for (const event of events) {
         const id = transactionId(event.dados)
@@ -263,7 +259,7 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
         ticketMedio: 'receitaLiquidaComercial ÷ pedidosPagos.',
         metodoPagamento: 'Somente pernas reais com mpStatus approved|captured; tentativas rejeitadas permanecem apenas na quebra de status.',
         produtoVariacao: 'Garantias compõem o produto por GarantiaEstendida.produtoId; na variação usam pedidoItemId quando disponível e garantia_nao_alocada quando ausente.',
-        atribuicao: 'EventoTracking tipo purchase liga dados.transaction_id ao Pedido e à SessaoVisitante; sem ligação, origem=nao_atribuida. Click ids saem apenas como canal agregado, nunca em valor bruto.',
+        atribuicao: 'Uma consulta indexada por tipo/createdAt lê purchase entre o início BRT e 7 dias após o fim; dados.transaction_id correlaciona em memória aos pedidos pagos. Eventos posteriores ao lookahead ficam nao_atribuida. Click ids saem apenas como canal agregado.',
       }
       return {
         ...metricBase(params, definicoes),

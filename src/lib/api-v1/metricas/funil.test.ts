@@ -27,7 +27,12 @@ describe('metricas/funil', () => {
     const sessaoFindMany = vi.fn().mockResolvedValue(['s1', 's2', 's3', 's4'].map((sessaoId, index) => ({ sessaoId, createdAt: at(`${index + 8}`.padStart(2, '0') + ':00') })))
     const eventoFindMany = vi.fn().mockResolvedValue(events())
     const definition = createFunilMetric({
-      prisma: { sessaoVisitante: { findMany: sessaoFindMany }, eventoTracking: { findMany: eventoFindMany } } as never,
+      prisma: { sessaoVisitante: { findMany: sessaoFindMany }, eventoTracking: { findMany: eventoFindMany, groupBy: vi.fn().mockResolvedValue([
+        { sessaoId: 's1', _max: { createdAt: at('14:10') } },
+        { sessaoId: 's2', _max: { createdAt: at('16:59') } },
+        { sessaoId: 's3', _max: { createdAt: at('17:30') } },
+        { sessaoId: 's4', _max: { createdAt: new Date('2026-11-16T17:00:00.001Z') } },
+      ]) } } as never,
       now: () => new Date('2026-11-16T18:00:00.000Z'),
     })
 
@@ -58,6 +63,9 @@ describe('metricas/funil', () => {
           { sessaoId: 'boundary', tipo: 'begin_checkout', dados: null, createdAt: at('17:00') },
           { sessaoId: 'technical', tipo: 'begin_checkout', dados: null, createdAt: at('16:00') },
           { sessaoId: 'technical', tipo: 'checkout_payment_outcome', dados: { outcome: 'api_error' }, createdAt: at('17:30') },
+        ]), groupBy: vi.fn().mockResolvedValue([
+          { sessaoId: 'boundary', _max: { createdAt: at('17:00') } },
+          { sessaoId: 'technical', _max: { createdAt: at('17:30') } },
         ]) },
       } as never,
       now: () => at('18:00'),
@@ -72,7 +80,7 @@ describe('metricas/funil', () => {
     const definition = createFunilMetric({
       prisma: {
         sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
-        eventoTracking: { findMany: vi.fn().mockResolvedValue([{ sessaoId: 'carried-session', tipo: 'view_item', dados: null, createdAt: at('12:00') }]) },
+        eventoTracking: { findMany: vi.fn().mockResolvedValue([{ sessaoId: 'carried-session', tipo: 'view_item', dados: null, createdAt: at('12:00') }]), groupBy: vi.fn().mockResolvedValue([{ sessaoId: 'carried-session', _max: { createdAt: at('12:00') } }]) },
       } as never,
       now: () => at('18:00'),
     })
@@ -87,7 +95,7 @@ describe('metricas/funil', () => {
     const definition = createFunilMetric({
       prisma: {
         sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
-        eventoTracking: { findMany: vi.fn().mockResolvedValue([{ sessaoId: 'orphan-purchase', tipo: 'purchase', dados: { transaction_id: 'p1' }, createdAt: at('12:00') }]) },
+        eventoTracking: { findMany: vi.fn().mockResolvedValue([{ sessaoId: 'orphan-purchase', tipo: 'purchase', dados: { transaction_id: 'p1' }, createdAt: at('12:00') }]), groupBy: vi.fn().mockResolvedValue([{ sessaoId: 'orphan-purchase', _max: { createdAt: at('12:00') } }]) },
       } as never,
       now: () => at('18:00'),
     })
@@ -106,7 +114,9 @@ describe('metricas/funil', () => {
     const definition = createFunilMetric({
       prisma: {
         sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
-        eventoTracking: { findMany: eventoFindMany },
+        eventoTracking: { findMany: eventoFindMany, groupBy: vi.fn()
+          .mockResolvedValueOnce([{ sessaoId: 'late-conversion', _max: { createdAt: new Date('2026-11-15T20:00:00Z') } }])
+          .mockResolvedValueOnce([{ sessaoId: 'late-conversion', _max: { createdAt: new Date('2026-11-16T10:00:00Z') } }]) },
       } as never,
       now: () => new Date('2026-11-16T18:00:00Z'),
     })
@@ -118,24 +128,69 @@ describe('metricas/funil', () => {
     expect(eventoFindMany.mock.calls[1][0].where).toMatchObject({
       sessaoId: { in: ['late-conversion'] },
     })
-    expect(eventoFindMany.mock.calls[1][0].where).not.toHaveProperty('tipo')
+    expect(eventoFindMany.mock.calls[1][0].where.tipo.in).toEqual(['checkout_payment_outcome', 'purchase'])
   })
 
   it('counts an old session active through page_view and uses later search as its activity clock only', async () => {
     const eventoFindMany = vi.fn().mockResolvedValue([
-        { sessaoId: 'old-active', tipo: 'page_view', dados: null, createdAt: at('12:00') },
         { sessaoId: 'checkout-active', tipo: 'begin_checkout', dados: null, createdAt: at('15:00') },
-        { sessaoId: 'checkout-active', tipo: 'search', dados: null, createdAt: at('17:30') },
       ])
+    const groupBy = vi.fn().mockResolvedValue([
+      { sessaoId: 'old-active', _max: { createdAt: at('12:00') } },
+      { sessaoId: 'checkout-active', _max: { createdAt: at('17:30') } },
+    ])
     const definition = createFunilMetric({ prisma: {
       sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
-      eventoTracking: { findMany: eventoFindMany },
+      eventoTracking: { findMany: eventoFindMany, groupBy },
     } as never, now: () => at('18:00') })
 
     const result = await definition.query(context, params)
 
     expect(result.etapas.map(stage => stage.sessoes)).toEqual([2, 0, 0, 0, 0, 0])
     expect(result.abandonoCheckout).toEqual({ comercial: 0, tecnico: 0, emAndamento: 1 })
-    expect(eventoFindMany.mock.calls[0][0].where).not.toHaveProperty('tipo')
+    expect(eventoFindMany.mock.calls[0][0].where.tipo).toBeDefined()
+    expect(eventoFindMany.mock.calls[0][0].select.dados).toBe(true)
+    expect(groupBy.mock.calls[0][0].where).not.toHaveProperty('tipo')
+  })
+
+  it('batches follow-up session ids by 200 with bounded concurrency and a seven-day horizon', async () => {
+    const historical = parseMetricParams(new URLSearchParams({ de: '2026-11-15', ate: '2026-11-15', agrupar: 'dia' }))
+    const begins = Array.from({ length: 401 }, (_, index) => ({ sessaoId: `s-${index}`, tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-15T12:00:00Z') }))
+    let active = 0
+    let peak = 0
+    let findCall = 0
+    let groupCall = 0
+    const measured = async <T>(value: T) => {
+      active += 1
+      peak = Math.max(peak, active)
+      await Promise.resolve()
+      active -= 1
+      return value
+    }
+    const findMany = vi.fn(async (args: unknown) => {
+      void args
+      return measured(findCall++ === 0 ? begins : [])
+    })
+    const groupBy = vi.fn(async (args: unknown) => {
+      void args
+      return measured(groupCall++ === 0
+        ? begins.map(event => ({ sessaoId: event.sessaoId, _max: { createdAt: event.createdAt } }))
+        : [])
+    })
+    const definition = createFunilMetric({ prisma: {
+      sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
+      eventoTracking: { findMany, groupBy },
+    } as never, now: () => new Date('2026-12-01T00:00:00Z') })
+
+    await definition.query(context, historical)
+
+    expect(findMany).toHaveBeenCalledTimes(4)
+    expect(groupBy).toHaveBeenCalledTimes(4)
+    const followupFindArgs = findMany.mock.calls.slice(1).map(call => call[0] as { where: { sessaoId: { in: string[] }; createdAt: { lt: Date } } })
+    const followupGroupArgs = groupBy.mock.calls.slice(1).map(call => call[0] as { where: { sessaoId: { in: string[] } } })
+    expect(followupFindArgs.map(arg => arg.where.sessaoId.in.length)).toEqual([200, 200, 1])
+    expect(followupGroupArgs.map(arg => arg.where.sessaoId.in.length)).toEqual([200, 200, 1])
+    expect(followupFindArgs[0].where.createdAt.lt).toEqual(new Date('2026-11-23T03:00:00.000Z'))
+    expect(peak).toBeLessThanOrEqual(2)
   })
 })

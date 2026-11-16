@@ -102,3 +102,37 @@ Commit local: `929de24` (`feat(api-v1): add documented store metrics`).
 
 - Verificado por testes: ausência dos valores PII de nome/e-mail/telefone no frete; atividade não-funil sem avançar estágio; pagamento rejeitado fora do método; buyer por bucket; query de atribuição limitada por IDs; somas de produto e variação iguais à receita bruta.
 - Não verificado: cardinalidade/performance em banco real e smoke HTTP permanecem fora desta rodada; expansão detalhada dos schemas/OpenAPI segue para Task 10 e otimização de escala do LTV permanece deferida.
+
+## Fix round 2/5 — minimização e planos limitados
+
+### Correções
+
+- `Pedido.freteTipo` passa pela mesma allowlist conservadora de transportadora/opção; a probe exata `Maria Silva maria@example.com 11988887777` agrega como `outra` e não aparece no payload.
+- Funil/carrinhos separam eventos funcionais de relógios: somente tipos do funil selecionam `dados`; toda atividade é reduzida no banco com `groupBy sessaoId + _max(createdAt)`, sem ler JSON livre.
+- Follow-up é limitado a sete dias após o fim do período e executado serialmente em lotes de no máximo 200 sessões. Dentro de cada lote há no máximo duas consultas concorrentes (outcomes e relógio agregado).
+- A definição de recorrente explicita a diferença entre resumo e série: no bucket do primeiro pedido pago histórico o comprador é novo; em buckets posteriores, recorrente.
+- Atribuição usa uma única consulta `purchase` limitada por `createdAt` indexado, do início do período até sete dias após o fim, e correlaciona `transaction_id` em memória. Isso preserva cross-midnight sem fan-out por quantidade de pedidos; eventos após sete dias ficam honestamente não atribuídos.
+
+### TDD — RED observado
+
+- `npx vitest run src/lib/api-v1/metricas/vendas.test.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.test.ts src/lib/api-v1/metricas/clientes.test.ts`
+  - RED esperado: 4 arquivos falharam; 8 testes falharam e 15 passaram.
+  - Reproduzidos: PII em `freteTipo`; atividade antiga/recente ausente da agregação; follow-up ainda sem filtro/batch; definição de recorrente divergente; atribuição com OR/fan-out (6 consultas para 1.001 pedidos).
+
+### GREEN e gates finais
+
+- `npx vitest run src/lib/api-v1/metricas/vendas.test.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.test.ts src/lib/api-v1/metricas/clientes.test.ts`
+  - PASS: 4 arquivos, 24 testes.
+- `npx vitest run`
+  - PASS: 40 arquivos, 880 testes.
+- `npx tsc --noEmit`
+  - PASS, exit 0, sem saída.
+- `npx eslint src/lib/api-v1/metricas/vendas.ts src/lib/api-v1/metricas/vendas.test.ts src/lib/api-v1/metricas/funil.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.ts src/lib/api-v1/metricas/operacao.test.ts src/lib/api-v1/metricas/clientes.ts src/lib/api-v1/metricas/clientes.test.ts`
+  - PASS, exit 0, sem saída e sem warnings.
+- `git diff --check`
+  - PASS, exit 0, sem saída.
+
+### Verificado / não verificado
+
+- Verificado por probes: PII exato ausente das três dimensões de frete; `groupBy` de atividade não seleciona `dados`; 401 sessões geram lotes 200/200/1 com pico de concorrência 2 e horizonte fixo; 1.001 pedidos geram exatamente uma consulta de atribuição; evento cross-midnight dentro de sete dias é atribuído; repeat buyer conserva classificação por bucket.
+- Não verificado: plano `EXPLAIN`/latência e cardinalidade em MySQL de produção. A janela de atribuição/follow-up deliberadamente não associa eventos posteriores a sete dias; schema/OpenAPI detalhado permanece Task 10 e escala histórica de LTV segue deferida.

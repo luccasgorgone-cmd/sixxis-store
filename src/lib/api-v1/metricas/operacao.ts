@@ -260,7 +260,7 @@ export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefin
         carrier.freight = carrier.freight.plus(charged)
         if (order.fretePrazo !== null) { carrier.prazoSum += order.fretePrazo; carrier.prazoCount += 1 }
         carriers.set(carrierName, carrier)
-        const typeName = aggregateLabel(order.freteTipo, 'nao_informado', true)
+        const typeName = safeShippingLabel(order.freteTipo, 'nao_informado')
         const type = types.get(typeName) ?? { count: 0, freight: decimalValue(0) }
         type.count += 1
         type.freight = type.freight.plus(charged)

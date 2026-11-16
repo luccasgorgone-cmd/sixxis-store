@@ -20,7 +20,7 @@ describe('metricas/carrinhos', () => {
         eventoTracking: { findMany: vi.fn().mockResolvedValue([
           { sessaoId: 'tech', tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-16T15:00:00Z') },
           { sessaoId: 'tech', tipo: 'checkout_payment_outcome', dados: { outcome: 'rejected' }, createdAt: new Date('2026-11-16T15:10:00Z') },
-        ]) },
+        ]), groupBy: vi.fn().mockResolvedValue([{ sessaoId: 'tech', _max: { createdAt: new Date('2026-11-16T15:10:00Z') } }]) },
       } as never,
       now: () => new Date('2026-11-16T18:00:00Z'),
     })
@@ -33,19 +33,19 @@ describe('metricas/carrinhos', () => {
   })
 
   it('uses recent non-funnel activity to avoid false commercial abandonment', async () => {
-    const eventoFindMany = vi.fn().mockResolvedValue([
-      { sessaoId: 'active', tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-16T15:00:00Z') },
-      { sessaoId: 'active', tipo: 'search', dados: null, createdAt: new Date('2026-11-16T17:30:00Z') },
-    ])
+    const eventoFindMany = vi.fn().mockResolvedValue([{ sessaoId: 'active', tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-16T15:00:00Z') }])
+    const groupBy = vi.fn().mockResolvedValue([{ sessaoId: 'active', _max: { createdAt: new Date('2026-11-16T17:30:00Z') } }])
     const definition = createCarrinhosMetric({ prisma: {
       carrinhoCliente: { findMany: vi.fn().mockResolvedValue([]) },
-      eventoTracking: { findMany: eventoFindMany },
+      eventoTracking: { findMany: eventoFindMany, groupBy },
     } as never, now: () => new Date('2026-11-16T18:00:00Z') })
 
     const result = await definition.query(context, params)
 
     expect(result.checkoutTracked.abandono).toEqual({ comercial: 0, tecnico: 0, emAndamento: 1 })
-    expect(eventoFindMany.mock.calls[0][0].where).not.toHaveProperty('tipo')
+    expect(eventoFindMany.mock.calls[0][0].where.tipo.in).toContain('begin_checkout')
+    expect(groupBy.mock.calls[0][0]).toMatchObject({ by: ['sessaoId'], _max: { createdAt: true } })
+    expect(groupBy.mock.calls[0][0]).not.toHaveProperty('select')
     expect(eventoFindMany).toHaveBeenCalledTimes(1)
   })
 })
@@ -108,7 +108,7 @@ describe('metricas/frete', () => {
     const definition = createFreteMetric({ prisma: {
       pedido: { findMany: vi.fn().mockResolvedValue([
         { frete: D('10'), fretePrazo: 2, transportadora: 'Braspress', freteTipo: 'normal', custoFreteReal: D('8'), createdAt: new Date('2026-11-16T12:00:00Z') },
-        { frete: D('20'), fretePrazo: 3, transportadora: 'Luccas Gorgone victim@example.com 11999998888', freteTipo: 'normal', custoFreteReal: D('15'), createdAt: new Date('2026-11-16T13:00:00Z') },
+        { frete: D('20'), fretePrazo: 3, transportadora: 'Luccas Gorgone victim@example.com 11999998888', freteTipo: 'Maria Silva maria@example.com 11988887777', custoFreteReal: D('15'), createdAt: new Date('2026-11-16T13:00:00Z') },
       ]) },
       eventoTracking: { findMany: vi.fn().mockResolvedValue([
         { valor: 100, dados: { shipping_tier: 'Normal' }, createdAt: new Date('2026-11-16T11:00:00Z') },

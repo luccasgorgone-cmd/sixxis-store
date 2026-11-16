@@ -7,6 +7,10 @@ export type FunnelEvent = { sessaoId: string; tipo: string; dados: unknown; crea
 type TrackedSession = { sessaoId: string; createdAt: Date }
 type FunnelStageName = 'view_item' | 'add_to_cart' | 'begin_checkout' | 'pagamento_submit' | 'purchase'
 const TECHNICAL_OUTCOMES = new Set(['rejected', 'api_error', 'brick_error'])
+const FUNNEL_EVENT_TYPES = ['view_item', 'add_to_cart', 'begin_checkout', 'checkout_payment_outcome', 'purchase'] as const
+const FOLLOWUP_EVENT_TYPES = ['checkout_payment_outcome', 'purchase'] as const
+const SESSION_BATCH_SIZE = 200
+const FOLLOWUP_HORIZON_MS = 7 * 24 * 60 * 60 * 1000
 
 async function db(options: StoreMetricOptions): Promise<PrismaClient> {
   return options.prisma ?? (await import('../../prisma')).prisma
@@ -47,21 +51,51 @@ export async function loadPeriodAndFollowupEvents(
   params: MetricParams,
   now: Date,
 ): Promise<{ periodEvents: FunnelEvent[]; classificationEvents: FunnelEvent[] }> {
-  const periodEvents = await client.eventoTracking.findMany({
-    where: { createdAt: { gte: params.from, lt: params.toExclusive } },
-    select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
-    orderBy: { createdAt: 'asc' },
-  }) as unknown as FunnelEvent[]
-  const checkoutSessions = [...new Set(periodEvents.filter(event => event.tipo === 'begin_checkout').map(event => event.sessaoId))]
-  if (checkoutSessions.length === 0 || now.getTime() <= params.toExclusive.getTime()) return { periodEvents, classificationEvents: periodEvents }
-  const followup = await client.eventoTracking.findMany({
-    where: {
-      sessaoId: { in: checkoutSessions },
-      createdAt: { gte: params.toExclusive, lt: now },
-    },
-    select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
-    orderBy: { createdAt: 'asc' },
-  }) as unknown as FunnelEvent[]
+  const [rawStageEvents, rawActivity] = await Promise.all([
+    client.eventoTracking.findMany({
+      where: { createdAt: { gte: params.from, lt: params.toExclusive }, tipo: { in: [...FUNNEL_EVENT_TYPES] } },
+      select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
+      orderBy: { createdAt: 'asc' },
+    }),
+    client.eventoTracking.groupBy({
+      by: ['sessaoId'],
+      where: { createdAt: { gte: params.from, lt: params.toExclusive } },
+      _max: { createdAt: true },
+    }),
+  ])
+  const stageEvents = rawStageEvents as unknown as FunnelEvent[]
+  const activityEvents = (rawActivity as unknown as Array<{ sessaoId: string; _max: { createdAt: Date | null } }>).flatMap(row => row._max.createdAt
+    ? [{ sessaoId: row.sessaoId, tipo: 'activity', dados: null, createdAt: row._max.createdAt }]
+    : [])
+  const periodEvents = [...stageEvents, ...activityEvents]
+  const checkoutSessions = [...new Set(stageEvents.filter(event => event.tipo === 'begin_checkout').map(event => event.sessaoId))]
+  const followupEnd = new Date(Math.min(now.getTime(), params.toExclusive.getTime() + FOLLOWUP_HORIZON_MS))
+  if (checkoutSessions.length === 0 || followupEnd.getTime() <= params.toExclusive.getTime()) return { periodEvents, classificationEvents: periodEvents }
+
+  const followup: FunnelEvent[] = []
+  for (let index = 0; index < checkoutSessions.length; index += SESSION_BATCH_SIZE) {
+    const sessionIds = checkoutSessions.slice(index, index + SESSION_BATCH_SIZE)
+    const [rawOutcomes, rawFollowupActivity] = await Promise.all([
+      client.eventoTracking.findMany({
+        where: {
+          sessaoId: { in: sessionIds },
+          tipo: { in: [...FOLLOWUP_EVENT_TYPES] },
+          createdAt: { gte: params.toExclusive, lt: followupEnd },
+        },
+        select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
+        orderBy: { createdAt: 'asc' },
+      }),
+      client.eventoTracking.groupBy({
+        by: ['sessaoId'],
+        where: { sessaoId: { in: sessionIds }, createdAt: { gte: params.toExclusive, lt: followupEnd } },
+        _max: { createdAt: true },
+      }),
+    ])
+    followup.push(...rawOutcomes as unknown as FunnelEvent[])
+    for (const row of rawFollowupActivity as unknown as Array<{ sessaoId: string; _max: { createdAt: Date | null } }>) {
+      if (row._max.createdAt) followup.push({ sessaoId: row.sessaoId, tipo: 'activity', dados: null, createdAt: row._max.createdAt })
+    }
+  }
   return { periodEvents, classificationEvents: [...periodEvents, ...followup] }
 }
 
@@ -144,7 +178,7 @@ export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefin
       }
       const definicoes = {
         funil: 'Sessões distintas tracked criadas ou ativas no período: sessão → view_item → add_to_cart → begin_checkout → checkout_payment_outcome.outcome=submit → purchase.',
-        abandonoComercial: 'Sessão com begin_checkout, sem purchase e sem outcome técnico, inativa por >= 1h.',
+        abandonoComercial: 'Sessão com begin_checkout, sem purchase e sem outcome técnico, inativa por >= 1h; atividade posterior é observada por até 7 dias após o período, em lotes de 200 sessões.',
         abandonoTecnico: 'Sessão sem purchase com checkout_payment_outcome em rejected|api_error|brick_error; prevalece sobre abandono comercial.',
         cobertura: 'tracked=true: EventoTracking e SessaoVisitante dependem de consentimento analítico; não representam tráfego sem consentimento.',
       }

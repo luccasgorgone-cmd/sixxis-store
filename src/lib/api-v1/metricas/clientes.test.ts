@@ -65,5 +65,7 @@ describe('metricas/clientes', () => {
       { bucket: '2026-11-15', clientesCompradores: 1, novos: 0, recorrentes: 1 },
       { bucket: '2026-11-16', clientesCompradores: 2, novos: 1, recorrentes: 1 },
     ])
+    expect(result.definicoes.recorrente).toContain('bucket')
+    expect(result.definicoes.recorrente).toContain('primeiro pedido pago histórico')
   })
 })
