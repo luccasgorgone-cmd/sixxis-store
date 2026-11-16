@@ -161,7 +161,7 @@ const HTML_SPINNING = `<div class="produto-hero">
   <h3>Por que a Sixxis Life?</h3>
 
   <h4>Queima até 600 calorias por hora</h4>
-  <p>Pedalada com resistência magnética ajustável em 8 níveis. Treino de alta intensidade ou recuperação ativa — você controla.</p>
+  <p>Pedalada com resistência magnética ajustável em 32 níveis. Treino de alta intensidade ou recuperação ativa — você controla.</p>
 
   <h4>Baixo impacto nas articulações</h4>
   <p>Diferente da corrida, o spinning preserva joelhos e tornozelos. Ideal para pessoas com lesões, sobrepeso ou que estão voltando a treinar.</p>
@@ -177,7 +177,7 @@ const HTML_SPINNING = `<div class="produto-hero">
   <h3>Características técnicas</h3>
   <ul>
     <li>Roda de inércia: 18 kg</li>
-    <li>Resistência: magnética com 8 níveis ajustáveis</li>
+    <li>Resistência: magnética com 32 níveis ajustáveis</li>
     <li>Painel digital: tempo, velocidade, distância, calorias, batimentos</li>
     <li>Suporte para celular/tablet integrado</li>
     <li>Assento e guidão com ajuste vertical e horizontal</li>
