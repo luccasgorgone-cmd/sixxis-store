@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 
 // Configurações default (podem ser overrideadas via Configuracao no DB)
@@ -58,16 +59,25 @@ export async function pontosParaDesconto(pontos: number): Promise<number> {
 
 // Gera um cupom de desconto a partir de resgate de pontos
 export async function resgatarPontos(clienteId: string, pontos: number): Promise<string> {
+  if (!Number.isInteger(pontos) || pontos < 1) throw new Error('Pontos inválidos')
   const saldo = await obterSaldo(clienteId)
   if (saldo < pontos) throw new Error('Saldo insuficiente')
 
   const desconto = await pontosParaDesconto(pontos)
   if (desconto < 1) throw new Error('Mínimo de resgate é R$1,00')
 
-  const codigo = `FIDELIDADE-${Date.now().toString(36).toUpperCase()}`
+  const codigo = `FIDELIDADE-${Date.now().toString(36).toUpperCase()}${randomBytes(3).toString('hex').toUpperCase()}`
 
-  await prisma.$transaction([
-    prisma.cupom.create({
+  // Débito CONDICIONAL e atômico: só abate se o saldo ainda cobre o resgate.
+  // A checagem acima é só para a mensagem amigável — requisições simultâneas
+  // passavam todas por ela e geravam vários cupons com o mesmo saldo.
+  await prisma.$transaction(async (tx) => {
+    const debito = await tx.pontosCliente.updateMany({
+      where: { clienteId, pontos: { gte: pontos } },
+      data:  { pontos: { decrement: pontos } },
+    })
+    if (debito.count !== 1) throw new Error('Saldo insuficiente')
+    await tx.cupom.create({
       data: {
         codigo,
         tipo:  'fixo',
@@ -75,20 +85,16 @@ export async function resgatarPontos(clienteId: string, pontos: number): Promise
         usoMaximo: 1,
         ativo: true,
       },
-    }),
-    prisma.pontosCliente.update({
-      where: { clienteId },
-      data: { pontos: { decrement: pontos } },
-    }),
-    prisma.historicoPontos.create({
+    })
+    await tx.historicoPontos.create({
       data: {
         clienteId,
         pontos: -pontos,
         tipo: 'resgate',
         descricao: `Resgate por cupom ${codigo} — R$${desconto.toFixed(2)}`,
       },
-    }),
-  ])
+    })
+  })
 
   return codigo
 }
