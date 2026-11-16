@@ -10,7 +10,14 @@ const TECHNICAL_OUTCOMES = new Set(['rejected', 'api_error', 'brick_error'])
 const FUNNEL_EVENT_TYPES = ['view_item', 'add_to_cart', 'begin_checkout', 'checkout_payment_outcome', 'purchase'] as const
 const FOLLOWUP_EVENT_TYPES = ['checkout_payment_outcome', 'purchase'] as const
 const SESSION_BATCH_SIZE = 200
+const ACTIVITY_PAGE_SIZE = 500
 const FOLLOWUP_HORIZON_MS = 7 * 24 * 60 * 60 * 1000
+type ActivityRow = { id: string; sessaoId: string; createdAt: Date }
+type LoadedFunnelEvents = {
+  periodEvents: FunnelEvent[]
+  classificationEvents: FunnelEvent[]
+  activeSessionsByBucket: Map<string, Set<string>>
+}
 
 async function db(options: StoreMetricOptions): Promise<PrismaClient> {
   return options.prisma ?? (await import('../../prisma')).prisma
@@ -50,27 +57,46 @@ export async function loadPeriodAndFollowupEvents(
   client: PrismaClient,
   params: MetricParams,
   now: Date,
-): Promise<{ periodEvents: FunnelEvent[]; classificationEvents: FunnelEvent[] }> {
-  const [rawStageEvents, rawActivity] = await Promise.all([
+): Promise<LoadedFunnelEvents> {
+  const activeSessionsByBucket = new Map<string, Set<string>>()
+  const latestActivity = new Map<string, Date>()
+  const scanActivity = async () => {
+    let cursorId: string | undefined
+    while (true) {
+      const rawPage = await client.eventoTracking.findMany({
+        where: { createdAt: { gte: params.from, lt: params.toExclusive } },
+        select: { id: true, sessaoId: true, createdAt: true },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        take: ACTIVITY_PAGE_SIZE,
+        ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
+      })
+      const page = rawPage as unknown as ActivityRow[]
+      for (const row of page) {
+        const bucketName = bucketForInstant(row.createdAt, params.agrupar)
+        const sessions = activeSessionsByBucket.get(bucketName) ?? new Set<string>()
+        sessions.add(row.sessaoId)
+        activeSessionsByBucket.set(bucketName, sessions)
+        const latest = latestActivity.get(row.sessaoId)
+        if (!latest || row.createdAt > latest) latestActivity.set(row.sessaoId, row.createdAt)
+      }
+      if (page.length < ACTIVITY_PAGE_SIZE) break
+      cursorId = page[page.length - 1].id
+    }
+  }
+  const [rawStageEvents] = await Promise.all([
     client.eventoTracking.findMany({
       where: { createdAt: { gte: params.from, lt: params.toExclusive }, tipo: { in: [...FUNNEL_EVENT_TYPES] } },
       select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
     }),
-    client.eventoTracking.groupBy({
-      by: ['sessaoId'],
-      where: { createdAt: { gte: params.from, lt: params.toExclusive } },
-      _max: { createdAt: true },
-    }),
+    scanActivity(),
   ])
   const stageEvents = rawStageEvents as unknown as FunnelEvent[]
-  const activityEvents = (rawActivity as unknown as Array<{ sessaoId: string; _max: { createdAt: Date | null } }>).flatMap(row => row._max.createdAt
-    ? [{ sessaoId: row.sessaoId, tipo: 'activity', dados: null, createdAt: row._max.createdAt }]
-    : [])
+  const activityEvents = [...latestActivity].map(([sessaoId, createdAt]) => ({ sessaoId, tipo: 'activity', dados: null, createdAt }))
   const periodEvents = [...stageEvents, ...activityEvents]
   const checkoutSessions = [...new Set(stageEvents.filter(event => event.tipo === 'begin_checkout').map(event => event.sessaoId))]
   const followupEnd = new Date(Math.min(now.getTime(), params.toExclusive.getTime() + FOLLOWUP_HORIZON_MS))
-  if (checkoutSessions.length === 0 || followupEnd.getTime() <= params.toExclusive.getTime()) return { periodEvents, classificationEvents: periodEvents }
+  if (checkoutSessions.length === 0 || followupEnd.getTime() <= params.toExclusive.getTime()) return { periodEvents, classificationEvents: periodEvents, activeSessionsByBucket }
 
   const followup: FunnelEvent[] = []
   for (let index = 0; index < checkoutSessions.length; index += SESSION_BATCH_SIZE) {
@@ -96,7 +122,7 @@ export async function loadPeriodAndFollowupEvents(
       if (row._max.createdAt) followup.push({ sessaoId: row.sessaoId, tipo: 'activity', dados: null, createdAt: row._max.createdAt })
     }
   }
-  return { periodEvents, classificationEvents: [...periodEvents, ...followup] }
+  return { periodEvents, classificationEvents: [...periodEvents, ...followup], activeSessionsByBucket }
 }
 
 function percentage(value: number, denominator: number): number {
@@ -165,6 +191,10 @@ export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefin
         bucket, sessoes: new Set<string>(), viewItem: new Set<string>(), addToCart: new Set<string>(), beginCheckout: new Set<string>(), pagamentoSubmit: new Set<string>(), purchase: new Set<string>(),
       }]))
       for (const session of sessions) series.get(bucketForInstant(session.createdAt, params.agrupar))?.sessoes.add(session.sessaoId)
+      for (const [bucketName, activeSessions] of loadedEvents.activeSessionsByBucket) {
+        const bucket = series.get(bucketName)
+        if (bucket) for (const sessionId of activeSessions) bucket.sessoes.add(sessionId)
+      }
       for (const event of events) {
         const bucket = series.get(bucketForInstant(event.createdAt, params.agrupar))
         if (!bucket) continue
@@ -177,7 +207,7 @@ export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefin
         if (reached === 'pagamento_submit') bucket.pagamentoSubmit.add(event.sessaoId)
       }
       const definicoes = {
-        funil: 'Sessões distintas tracked criadas ou ativas no período: sessão → view_item → add_to_cart → begin_checkout → checkout_payment_outcome.outcome=submit → purchase.',
+        funil: 'Sessões distintas tracked criadas ou ativas em cada bucket: atividade é paginada serialmente por (createdAt,id), sem JSON; sessão → view_item → add_to_cart → begin_checkout → checkout_payment_outcome.outcome=submit → purchase.',
         abandonoComercial: 'Sessão com begin_checkout, sem purchase e sem outcome técnico, inativa por >= 1h; atividade posterior é observada por até 7 dias após o período, em lotes de 200 sessões.',
         abandonoTecnico: 'Sessão sem purchase com checkout_payment_outcome em rejected|api_error|brick_error; prevalece sobre abandono comercial.',
         cobertura: 'tracked=true: EventoTracking e SessaoVisitante dependem de consentimento analítico; não representam tráfego sem consentimento.',

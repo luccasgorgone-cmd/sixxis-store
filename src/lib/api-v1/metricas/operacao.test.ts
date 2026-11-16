@@ -33,8 +33,10 @@ describe('metricas/carrinhos', () => {
   })
 
   it('uses recent non-funnel activity to avoid false commercial abandonment', async () => {
-    const eventoFindMany = vi.fn().mockResolvedValue([{ sessaoId: 'active', tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-16T15:00:00Z') }])
-    const groupBy = vi.fn().mockResolvedValue([{ sessaoId: 'active', _max: { createdAt: new Date('2026-11-16T17:30:00Z') } }])
+    const eventoFindMany = vi.fn(async (args: { where: { tipo?: { in?: string[] } }; select?: Record<string, boolean> }) => args.where.tipo
+      ? [{ sessaoId: 'active', tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-16T15:00:00Z') }]
+      : [{ id: 'activity-1', sessaoId: 'active', createdAt: new Date('2026-11-16T17:30:00Z') }])
+    const groupBy = vi.fn().mockResolvedValue([])
     const definition = createCarrinhosMetric({ prisma: {
       carrinhoCliente: { findMany: vi.fn().mockResolvedValue([]) },
       eventoTracking: { findMany: eventoFindMany, groupBy },
@@ -44,9 +46,9 @@ describe('metricas/carrinhos', () => {
 
     expect(result.checkoutTracked.abandono).toEqual({ comercial: 0, tecnico: 0, emAndamento: 1 })
     expect(eventoFindMany.mock.calls[0][0].where.tipo.in).toContain('begin_checkout')
-    expect(groupBy.mock.calls[0][0]).toMatchObject({ by: ['sessaoId'], _max: { createdAt: true } })
-    expect(groupBy.mock.calls[0][0]).not.toHaveProperty('select')
-    expect(eventoFindMany).toHaveBeenCalledTimes(1)
+    expect(eventoFindMany.mock.calls[1][0].select).toEqual({ id: true, sessaoId: true, createdAt: true })
+    expect(groupBy).not.toHaveBeenCalled()
+    expect(eventoFindMany).toHaveBeenCalledTimes(2)
   })
 })
 

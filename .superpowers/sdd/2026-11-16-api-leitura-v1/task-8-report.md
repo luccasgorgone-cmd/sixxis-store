@@ -136,3 +136,38 @@ Commit local: `929de24` (`feat(api-v1): add documented store metrics`).
 
 - Verificado por probes: PII exato ausente das três dimensões de frete; `groupBy` de atividade não seleciona `dados`; 401 sessões geram lotes 200/200/1 com pico de concorrência 2 e horizonte fixo; 1.001 pedidos geram exatamente uma consulta de atribuição; evento cross-midnight dentro de sete dias é atribuído; repeat buyer conserva classificação por bucket.
 - Não verificado: plano `EXPLAIN`/latência e cardinalidade em MySQL de produção. A janela de atribuição/follow-up deliberadamente não associa eventos posteriores a sete dias; schema/OpenAPI detalhado permanece Task 10 e escala histórica de LTV segue deferida.
+
+## Fix round 3/5 — sessões distintas por bucket
+
+### Correção e plano
+
+- A atividade do período não usa mais `groupBy sessaoId + max`, que apagava buckets anteriores. Ela é lida por paginação keyset determinística em `(createdAt,id)`, serialmente, com `take=500`.
+- Cada página seleciona somente `id`, `sessaoId` e `createdAt`; nunca lê `dados`. As linhas são imediatamente reduzidas em `Set<sessaoId>` por bucket e em um único relógio máximo por sessão, sem acumular todas as atividades em um resultado gigante.
+- O scan de atividade e a consulta limitada de eventos de funil formam um `Promise.all` fixo de duas operações; páginas posteriores são estritamente seriais. O follow-up de sete dias/lotes de 200 da rodada anterior foi preservado.
+- Como o schema tinha apenas `@@index([createdAt])`, foi adicionada a migração aditiva `20261116200500_evento_tracking_activity_cursor_index` com índice `EventoTracking(createdAt,id)`, correspondente ao `orderBy`/cursor testado.
+
+### TDD — RED observado
+
+- `npx vitest run src/lib/api-v1/metricas/funil.test.ts`
+  - RED esperado: 2 falhas e 7 passes.
+  - A mesma sessão teve `sessoes=0` no primeiro de dois dias ativos; o probe de 1.001 eventos observou zero páginas porque o código ainda usava `groupBy` global.
+
+### GREEN e gates finais
+
+- `npx vitest run src/lib/api-v1/metricas/vendas.test.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.test.ts src/lib/api-v1/metricas/clientes.test.ts`
+  - PASS: 4 arquivos, 26 testes.
+- `npx vitest run`
+  - PASS: 40 arquivos, 882 testes.
+- `npx tsc --noEmit`
+  - PASS, exit 0, sem saída.
+- `npx eslint src/lib/api-v1/metricas/funil.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.test.ts`
+  - PASS, exit 0, sem saída e sem warnings.
+- `npx prisma validate`
+  - PASS: `prisma/schema.prisma` válido.
+- `git diff --check`
+  - PASS, exit 0, sem saída.
+
+### Verificado / não verificado
+
+- Verificado: uma sessão ativa em dois dias aparece em ambos; 1.001 atividades geram exatamente páginas 500/500/1, cursores `e-0499`/`e-0999`, `orderBy createdAt,id`, seleção mínima sem JSON e pico de concorrência <=2; denominador e relógio de atividade continuam corretos; follow-up permanece limitado.
+- Não verificado: `EXPLAIN` e tempo de criação do índice em volume real. A migração é somente `CREATE INDEX`, sem alteração ou remoção de dados; não foi aplicada a banco/Railway nesta tarefa.

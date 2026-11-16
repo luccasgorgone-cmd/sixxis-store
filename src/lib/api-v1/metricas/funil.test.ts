@@ -52,7 +52,7 @@ describe('metricas/funil', () => {
     expect(result.definicoes.abandonoTecnico).toContain('rejected|api_error|brick_error')
     expect(result.definicoes.cobertura).toContain('consentimento')
     expect(sessaoFindMany).toHaveBeenCalledTimes(1)
-    expect(eventoFindMany).toHaveBeenCalledTimes(1)
+    expect(eventoFindMany).toHaveBeenCalledTimes(2)
   })
 
   it('treats exactly one hour of inactivity as commercial abandonment and technical outcome as dominant', async () => {
@@ -110,12 +110,12 @@ describe('metricas/funil', () => {
     const historical = parseMetricParams(new URLSearchParams({ de: '2026-11-15', ate: '2026-11-15', agrupar: 'dia' }))
     const eventoFindMany = vi.fn()
       .mockResolvedValueOnce([{ sessaoId: 'late-conversion', tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-15T20:00:00Z') }])
+      .mockResolvedValueOnce([{ id: 'activity-late', sessaoId: 'late-conversion', createdAt: new Date('2026-11-15T20:00:00Z') }])
       .mockResolvedValueOnce([{ sessaoId: 'late-conversion', tipo: 'purchase', dados: { transaction_id: 'p-late' }, createdAt: new Date('2026-11-16T10:00:00Z') }])
     const definition = createFunilMetric({
       prisma: {
         sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
         eventoTracking: { findMany: eventoFindMany, groupBy: vi.fn()
-          .mockResolvedValueOnce([{ sessaoId: 'late-conversion', _max: { createdAt: new Date('2026-11-15T20:00:00Z') } }])
           .mockResolvedValueOnce([{ sessaoId: 'late-conversion', _max: { createdAt: new Date('2026-11-16T10:00:00Z') } }]) },
       } as never,
       now: () => new Date('2026-11-16T18:00:00Z'),
@@ -124,21 +124,21 @@ describe('metricas/funil', () => {
     const result = await definition.query(context, historical)
 
     expect(result.abandonoCheckout).toEqual({ comercial: 0, tecnico: 0, emAndamento: 0 })
-    expect(eventoFindMany).toHaveBeenCalledTimes(2)
-    expect(eventoFindMany.mock.calls[1][0].where).toMatchObject({
+    expect(eventoFindMany).toHaveBeenCalledTimes(3)
+    expect(eventoFindMany.mock.calls[2][0].where).toMatchObject({
       sessaoId: { in: ['late-conversion'] },
     })
-    expect(eventoFindMany.mock.calls[1][0].where.tipo.in).toEqual(['checkout_payment_outcome', 'purchase'])
+    expect(eventoFindMany.mock.calls[2][0].where.tipo.in).toEqual(['checkout_payment_outcome', 'purchase'])
   })
 
   it('counts an old session active through page_view and uses later search as its activity clock only', async () => {
-    const eventoFindMany = vi.fn().mockResolvedValue([
-        { sessaoId: 'checkout-active', tipo: 'begin_checkout', dados: null, createdAt: at('15:00') },
-      ])
-    const groupBy = vi.fn().mockResolvedValue([
-      { sessaoId: 'old-active', _max: { createdAt: at('12:00') } },
-      { sessaoId: 'checkout-active', _max: { createdAt: at('17:30') } },
-    ])
+    const eventoFindMany = vi.fn(async (args: { where: { tipo?: unknown }; select?: Record<string, boolean> }) => args.where.tipo
+      ? [{ sessaoId: 'checkout-active', tipo: 'begin_checkout', dados: null, createdAt: at('15:00') }]
+      : [
+          { id: 'a-1', sessaoId: 'old-active', createdAt: at('12:00') },
+          { id: 'a-2', sessaoId: 'checkout-active', createdAt: at('17:30') },
+        ])
+    const groupBy = vi.fn().mockResolvedValue([])
     const definition = createFunilMetric({ prisma: {
       sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
       eventoTracking: { findMany: eventoFindMany, groupBy },
@@ -150,7 +150,9 @@ describe('metricas/funil', () => {
     expect(result.abandonoCheckout).toEqual({ comercial: 0, tecnico: 0, emAndamento: 1 })
     expect(eventoFindMany.mock.calls[0][0].where.tipo).toBeDefined()
     expect(eventoFindMany.mock.calls[0][0].select.dados).toBe(true)
-    expect(groupBy.mock.calls[0][0].where).not.toHaveProperty('tipo')
+    expect(eventoFindMany.mock.calls[1][0].select).toEqual({ id: true, sessaoId: true, createdAt: true })
+    expect(eventoFindMany.mock.calls[1][0].select).not.toHaveProperty('dados')
+    expect(groupBy).not.toHaveBeenCalled()
   })
 
   it('batches follow-up session ids by 200 with bounded concurrency and a seven-day horizon', async () => {
@@ -184,13 +186,66 @@ describe('metricas/funil', () => {
 
     await definition.query(context, historical)
 
-    expect(findMany).toHaveBeenCalledTimes(4)
-    expect(groupBy).toHaveBeenCalledTimes(4)
-    const followupFindArgs = findMany.mock.calls.slice(1).map(call => call[0] as { where: { sessaoId: { in: string[] }; createdAt: { lt: Date } } })
-    const followupGroupArgs = groupBy.mock.calls.slice(1).map(call => call[0] as { where: { sessaoId: { in: string[] } } })
+    expect(findMany).toHaveBeenCalledTimes(5)
+    expect(groupBy).toHaveBeenCalledTimes(3)
+    const followupFindArgs = findMany.mock.calls.slice(2).map(call => call[0] as { where: { sessaoId: { in: string[] }; createdAt: { lt: Date } } })
+    const followupGroupArgs = groupBy.mock.calls.map(call => call[0] as { where: { sessaoId: { in: string[] } } })
     expect(followupFindArgs.map(arg => arg.where.sessaoId.in.length)).toEqual([200, 200, 1])
     expect(followupGroupArgs.map(arg => arg.where.sessaoId.in.length)).toEqual([200, 200, 1])
     expect(followupFindArgs[0].where.createdAt.lt).toEqual(new Date('2026-11-23T03:00:00.000Z'))
+    expect(peak).toBeLessThanOrEqual(2)
+  })
+
+  it('counts the same active session in every daily bucket where it had activity', async () => {
+    const multiDay = parseMetricParams(new URLSearchParams({ de: '2026-11-15', ate: '2026-11-16', agrupar: 'dia' }))
+    const activity = [
+      { id: 'e-1', sessaoId: 'repeat', createdAt: new Date('2026-11-15T12:00:00Z') },
+      { id: 'e-2', sessaoId: 'repeat', createdAt: new Date('2026-11-16T12:00:00Z') },
+    ]
+    const findMany = vi.fn(async (args: { where: { tipo?: unknown } }) => args.where.tipo ? [] : activity)
+    const definition = createFunilMetric({ prisma: {
+      sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
+      eventoTracking: { findMany, groupBy: vi.fn().mockResolvedValue([{ sessaoId: 'repeat', _max: { createdAt: activity[1].createdAt } }]) },
+    } as never, now: () => at('18:00') })
+
+    const result = await definition.query(context, multiDay)
+
+    expect(result.serie.map(bucket => [bucket.bucket, bucket.sessoes])).toEqual([
+      ['2026-11-15', 1],
+      ['2026-11-16', 1],
+    ])
+  })
+
+  it('paginates large activity scans serially with fixed pages and no JSON selection', async () => {
+    const rows = Array.from({ length: 1001 }, (_, index) => ({ id: `e-${String(index).padStart(4, '0')}`, sessaoId: `s-${index % 10}`, createdAt: at('12:00') }))
+    let active = 0
+    let peak = 0
+    const activityArgs: Array<Record<string, unknown>> = []
+    const findMany = vi.fn(async (args: Record<string, unknown>) => {
+      active += 1
+      peak = Math.max(peak, active)
+      await Promise.resolve()
+      active -= 1
+      const where = args.where as { tipo?: unknown }
+      if (where.tipo) return []
+      activityArgs.push(args)
+      const cursor = args.cursor as { id: string } | undefined
+      if (!cursor) return rows.slice(0, 500)
+      const start = rows.findIndex(row => row.id === cursor.id) + 1
+      return rows.slice(start, start + 500)
+    })
+    const definition = createFunilMetric({ prisma: {
+      sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
+      eventoTracking: { findMany, groupBy: vi.fn().mockResolvedValue([]) },
+    } as never, now: () => at('18:00') })
+
+    await definition.query(context, params)
+
+    expect(activityArgs).toHaveLength(3)
+    expect(activityArgs.every(args => args.take === 500)).toBe(true)
+    expect(activityArgs.every(args => JSON.stringify(args.select) === JSON.stringify({ id: true, sessaoId: true, createdAt: true }))).toBe(true)
+    expect(activityArgs.map(args => args.cursor ?? null)).toEqual([null, { id: 'e-0499' }, { id: 'e-0999' }])
+    expect(activityArgs.every(args => JSON.stringify(args.orderBy) === JSON.stringify([{ createdAt: 'asc' }, { id: 'asc' }]))).toBe(true)
     expect(peak).toBeLessThanOrEqual(2)
   })
 })

@@ -977,6 +977,7 @@ model EventoTracking {
   @@index([tipo])
   @@index([produtoSlug])
   @@index([createdAt])
+  @@index([createdAt, id])
 }
 
 model RelatorioVendaHora {
