@@ -1,0 +1,175 @@
+import type { PrismaClient } from '@prisma/client'
+import type { ApiContext } from '../types'
+import type { MetricDefinition, StoreMetricOptions } from './registry'
+import { bucketForInstant, listMetricBuckets, metricBase, type MetricParams } from './tempo'
+
+export type FunnelEvent = { sessaoId: string; tipo: string; dados: unknown; createdAt: Date }
+type TrackedSession = { sessaoId: string; createdAt: Date }
+type FunnelStageName = 'view_item' | 'add_to_cart' | 'begin_checkout' | 'pagamento_submit' | 'purchase'
+const TECHNICAL_OUTCOMES = new Set(['rejected', 'api_error', 'brick_error'])
+
+async function db(options: StoreMetricOptions): Promise<PrismaClient> {
+  return options.prisma ?? (await import('../../prisma')).prisma
+}
+
+export function checkoutOutcome(dados: unknown): string | null {
+  if (!dados || typeof dados !== 'object' || Array.isArray(dados)) return null
+  const outcome = (dados as Record<string, unknown>).outcome
+  return typeof outcome === 'string' ? outcome : null
+}
+
+export function summarizeCheckoutAbandonment(events: readonly FunnelEvent[], now: Date) {
+  const begin = new Set<string>()
+  const purchased = new Set<string>()
+  const technical = new Set<string>()
+  const latest = new Map<string, number>()
+  for (const event of events) {
+    latest.set(event.sessaoId, Math.max(latest.get(event.sessaoId) ?? Number.NEGATIVE_INFINITY, event.createdAt.getTime()))
+    if (event.tipo === 'begin_checkout') begin.add(event.sessaoId)
+    if (event.tipo === 'purchase') purchased.add(event.sessaoId)
+    if (event.tipo === 'checkout_payment_outcome' && TECHNICAL_OUTCOMES.has(checkoutOutcome(event.dados) ?? '')) technical.add(event.sessaoId)
+  }
+  const cutoff = now.getTime() - 60 * 60 * 1000
+  let comercial = 0
+  let tecnico = 0
+  let emAndamento = 0
+  for (const sessionId of begin) {
+    if (purchased.has(sessionId)) continue
+    if (technical.has(sessionId)) tecnico += 1
+    else if ((latest.get(sessionId) ?? Number.POSITIVE_INFINITY) <= cutoff) comercial += 1
+    else emAndamento += 1
+  }
+  return { comercial, tecnico, emAndamento }
+}
+
+export async function loadPeriodAndFollowupEvents(
+  client: PrismaClient,
+  params: MetricParams,
+  now: Date,
+  periodTypes: readonly string[],
+): Promise<{ periodEvents: FunnelEvent[]; classificationEvents: FunnelEvent[] }> {
+  const periodEvents = await client.eventoTracking.findMany({
+    where: { createdAt: { gte: params.from, lt: params.toExclusive }, tipo: { in: [...periodTypes] } },
+    select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
+    orderBy: { createdAt: 'asc' },
+  }) as unknown as FunnelEvent[]
+  const checkoutSessions = [...new Set(periodEvents.filter(event => event.tipo === 'begin_checkout').map(event => event.sessaoId))]
+  if (checkoutSessions.length === 0 || now.getTime() <= params.toExclusive.getTime()) return { periodEvents, classificationEvents: periodEvents }
+  const followup = await client.eventoTracking.findMany({
+    where: {
+      sessaoId: { in: checkoutSessions },
+      tipo: { in: ['checkout_payment_outcome', 'purchase'] },
+      createdAt: { gte: params.toExclusive, lt: now },
+    },
+    select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
+    orderBy: { createdAt: 'asc' },
+  }) as unknown as FunnelEvent[]
+  return { periodEvents, classificationEvents: [...periodEvents, ...followup] }
+}
+
+function percentage(value: number, denominator: number): number {
+  return denominator === 0 ? 0 : Math.round((value / denominator) * 10_000) / 100
+}
+
+export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefinition<{
+  timezone: string
+  periodo: MetricParams['periodo']
+  definicoes: Record<string, string>
+  tracked: true
+  etapas: Array<{ etapa: string; sessoes: number; taxaDaAnterior: number; taxaDaSessao: number }>
+  abandonoCheckout: { comercial: number; tecnico: number; emAndamento: number }
+  serie: Array<{ bucket: string; sessoes: number; viewItem: number; addToCart: number; beginCheckout: number; pagamentoSubmit: number; purchase: number }>
+}> {
+  return {
+    slug: 'funil',
+    scope: 'read:analytics',
+    schema: { type: 'object', required: ['timezone', 'periodo', 'definicoes', 'tracked', 'etapas', 'abandonoCheckout', 'serie'] },
+    async query(_ctx: ApiContext, params: MetricParams) {
+      const client = await db(options)
+      const now = options.now?.() ?? new Date()
+      const [rawSessions, loadedEvents] = await Promise.all([
+        client.sessaoVisitante.findMany({
+          where: { createdAt: { gte: params.from, lt: params.toExclusive } },
+          select: { sessaoId: true, createdAt: true },
+        }),
+        loadPeriodAndFollowupEvents(client, params, now, ['view_item', 'add_to_cart', 'begin_checkout', 'checkout_payment_outcome', 'purchase']),
+      ])
+      const sessions = rawSessions as unknown as TrackedSession[]
+      const events = loadedEvents.periodEvents
+      const stages = {
+        sessoes: new Set(sessions.map(session => session.sessaoId)),
+        view_item: new Set<string>(),
+        add_to_cart: new Set<string>(),
+        begin_checkout: new Set<string>(),
+        pagamento_submit: new Set<string>(),
+        purchase: new Set<string>(),
+      }
+      const progress = new Map<string, number>()
+      const progression = new Map<FunnelEvent, FunnelStageName>()
+      for (const event of [...events].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())) {
+        stages.sessoes.add(event.sessaoId)
+        const state = progress.get(event.sessaoId) ?? 0
+        let next: FunnelStageName | null = null
+        if (state === 0 && event.tipo === 'view_item') next = 'view_item'
+        else if (state === 1 && event.tipo === 'add_to_cart') next = 'add_to_cart'
+        else if (state === 2 && event.tipo === 'begin_checkout') next = 'begin_checkout'
+        else if (state === 3 && event.tipo === 'checkout_payment_outcome' && checkoutOutcome(event.dados) === 'submit') next = 'pagamento_submit'
+        else if (state === 4 && event.tipo === 'purchase') next = 'purchase'
+        if (next) {
+          progress.set(event.sessaoId, state + 1)
+          stages[next].add(event.sessaoId)
+          progression.set(event, next)
+        }
+      }
+      const ordered = [
+        ['sessoes', stages.sessoes.size],
+        ['view_item', stages.view_item.size],
+        ['add_to_cart', stages.add_to_cart.size],
+        ['begin_checkout', stages.begin_checkout.size],
+        ['pagamento_submit', stages.pagamento_submit.size],
+        ['purchase', stages.purchase.size],
+      ] as const
+      const series = new Map(listMetricBuckets(params).map(bucket => [bucket, {
+        bucket, sessoes: new Set<string>(), viewItem: new Set<string>(), addToCart: new Set<string>(), beginCheckout: new Set<string>(), pagamentoSubmit: new Set<string>(), purchase: new Set<string>(),
+      }]))
+      for (const session of sessions) series.get(bucketForInstant(session.createdAt, params.agrupar))?.sessoes.add(session.sessaoId)
+      for (const event of events) {
+        const bucket = series.get(bucketForInstant(event.createdAt, params.agrupar))
+        if (!bucket) continue
+        bucket.sessoes.add(event.sessaoId)
+        const reached = progression.get(event)
+        if (reached === 'view_item') bucket.viewItem.add(event.sessaoId)
+        if (reached === 'add_to_cart') bucket.addToCart.add(event.sessaoId)
+        if (reached === 'begin_checkout') bucket.beginCheckout.add(event.sessaoId)
+        if (reached === 'purchase') bucket.purchase.add(event.sessaoId)
+        if (reached === 'pagamento_submit') bucket.pagamentoSubmit.add(event.sessaoId)
+      }
+      const definicoes = {
+        funil: 'Sessões distintas tracked criadas ou ativas no período: sessão → view_item → add_to_cart → begin_checkout → checkout_payment_outcome.outcome=submit → purchase.',
+        abandonoComercial: 'Sessão com begin_checkout, sem purchase e sem outcome técnico, inativa por >= 1h.',
+        abandonoTecnico: 'Sessão sem purchase com checkout_payment_outcome em rejected|api_error|brick_error; prevalece sobre abandono comercial.',
+        cobertura: 'tracked=true: EventoTracking e SessaoVisitante dependem de consentimento analítico; não representam tráfego sem consentimento.',
+      }
+      return {
+        ...metricBase(params, definicoes),
+        tracked: true as const,
+        etapas: ordered.map(([etapa, count], index) => ({
+          etapa,
+          sessoes: count,
+          taxaDaAnterior: percentage(count, index === 0 ? count : ordered[index - 1][1]),
+          taxaDaSessao: percentage(count, ordered[0][1]),
+        })),
+        abandonoCheckout: summarizeCheckoutAbandonment(loadedEvents.classificationEvents, now),
+        serie: [...series.values()].map(value => ({
+          bucket: value.bucket,
+          sessoes: value.sessoes.size,
+          viewItem: value.viewItem.size,
+          addToCart: value.addToCart.size,
+          beginCheckout: value.beginCheckout.size,
+          pagamentoSubmit: value.pagamentoSubmit.size,
+          purchase: value.purchase.size,
+        })),
+      }
+    },
+  }
+}
