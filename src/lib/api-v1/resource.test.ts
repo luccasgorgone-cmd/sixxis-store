@@ -57,7 +57,7 @@ describe('list validation before adapter', () => {
   })
 })
 
-describe('signed, bound stable cursors', () => {
+describe('confidential, authenticated, bound stable cursors', () => {
   it('binds canonical filters, sort, fields and expand independent of ordering', () => {
     expect(filterHash(query('ids=b,a&fields=nome,id&categoria=x,y'))).toBe(filterHash(query('categoria=y,x&fields=id,nome&ids=a,b')))
     expect(filterHash(query('categoria=x'))).not.toBe(filterHash(query('categoria=y')))
@@ -66,7 +66,7 @@ describe('signed, bound stable cursors', () => {
     const first = await executeList(def, ctx, query('limit=1'), options)
     const cursor = first.meta.nextCursor!
     expect(decodeCursor(cursor, secret)).toMatchObject({v:1,resource:'things',sort:'updatedAt',id:'a'})
-    for (const value of ['bad', cursor.slice(0,-3)+'xxx', Buffer.from(JSON.stringify({...decodeCursor(cursor,secret),id:'c'})).toString('base64url') + '.' + cursor.split('.')[1]]) expect(() => query(`cursor=${value}`)).toThrow(ApiQueryError)
+    for (const value of ['bad', cursor.slice(0,-3)+'xxx', Buffer.from(JSON.stringify({...decodeCursor(cursor,secret),id:'c'})).toString('base64url')]) expect(() => query(`cursor=${value}`)).toThrow(ApiQueryError)
     expect(() => parseListQuery(new URL(`https://example.test/?cursor=${cursor}`), {...def,slug:'other'}, options)).toThrow(ApiQueryError)
     for (const suffix of ['&categoria=x','&sort=-updatedAt','&fields=nome']) expect(() => query(`cursor=${cursor}${suffix}`)).toThrow(ApiQueryError)
   })
@@ -88,6 +88,36 @@ describe('signed, bound stable cursors', () => {
     } while(cursor)
     expect(found).toEqual(sort.startsWith('-')?['d','c','b','a']:['a','b','c','d'])
   })
+  it('keeps masked nome sort values confidential while paginating with the opaque cursor', async () => {
+    const privateName = 'SentinelaConfidencialPessoaUm'
+    const privateRows = [{...rows[0],nome:privateName},{...rows[1],nome:'SentinelaConfidencialPessoaZ'}]
+    adapter.mockImplementation(async args => {
+      const seek = args.where.AND as Record<string, unknown>[]
+      return (seek.some(part=>part.OR) ? privateRows.slice(1) : privateRows).slice(0,args.take)
+    })
+    const first=await executeList(def,ctx,query('sort=nome&limit=1'),options)
+    expect(first.data[0].nome).toBe('S***')
+    const cursor=first.meta.nextCursor!
+    expect(cursor.includes(privateName)).toBe(false)
+    for (const segment of cursor.split('.')) expect(Buffer.from(segment,'base64url').toString('utf8').includes('SentinelaConfidencial')).toBe(false)
+    expect(Buffer.from(cursor,'base64url').toString('utf8').includes('SentinelaConfidencial')).toBe(false)
+    const second=await executeList(def,ctx,query('sort=nome&limit=1&cursor='+cursor),options)
+    expect(second.data.map(item=>item.id)).toEqual(['b'])
+    expect(second.meta.hasMore).toBe(false)
+    expect(decodeCursor(cursor,secret).value).toBe(privateName)
+  })
+  it('randomizes encrypted cursors and rejects wrong secret, tampered IV/ciphertext/tag and plaintext envelope', () => {
+    const payload={v:1 as const,resource:'things',sort:'id',value:'a',id:'a',filterHash:filterHash(query('sort=id'))}
+    const first=encodeCursor(payload,secret), second=encodeCursor(payload,secret)
+    expect(first).not.toBe(second)
+    expect(()=>decodeCursor(first,'different-test-secret-at-least-32-characters')).toThrow(ApiQueryError)
+    const packed=Buffer.from(first,'base64url')
+    for (const offset of [0,1,13,packed.length-1]) {
+      const mutated=Buffer.from(packed); mutated[offset]^=1
+      expect(()=>decodeCursor(mutated.toString('base64url'),secret)).toThrow(ApiQueryError)
+    }
+    expect(()=>decodeCursor(Buffer.from(JSON.stringify(payload)).toString('base64url'),secret)).toThrow(ApiQueryError)
+  })
   it('uses inclusive updatedSince together with seek; cursor stays valid when limit changes', async () => {
     adapter.mockResolvedValue(rows)
     const search='atualizadoDesde=2026-01-01T00:00:00Z'
@@ -100,7 +130,7 @@ describe('signed, bound stable cursors', () => {
     await expect(executeList(def,ctx,query())).rejects.toMatchObject({status:503})
     expect(adapter).not.toHaveBeenCalled()
   })
-  it('seeks by id directly and rejects field type mismatch in signed cursor', () => {
+  it('seeks by id directly and rejects field type mismatch in authenticated cursor', () => {
     const payload={v:1 as const,resource:'things',sort:'id',value:'a',id:'a',filterHash:filterHash(query('sort=id'))}
     expect(buildSeekWhere(payload,def)).toEqual({id:{gt:'a'}})
     const invalid=encodeCursor({...payload,sort:'updatedAt',value:123,filterHash:filterHash(query())},secret)
@@ -129,6 +159,33 @@ describe('allowlisted one-level expansions and deadlines', () => {
   it('enforces relation scopes separately (read:all does not imply read:mensagens)', async () => {
     const privateExpand={...def,expands:[{name:'children',many:true,resource:()=>({...child,scope:'read:mensagens' as const})}]}
     await expect(executeList(privateExpand,ctx,query('expand=children',privateExpand),options)).rejects.toMatchObject({status:403})
+    expect(adapter).not.toHaveBeenCalled()
+  })
+  it.each([false,true])('rejects a registered message relation in base select even when its field is declared: %s', async declared => {
+    const malformed={...def,select:{...def.select,children:true},fields:[...def.fields,...(declared?[{name:'children',type:'array' as const}]:[])],expands:[{name:'messages',relation:'children',many:true,resource:()=>({...child,scope:'read:mensagens' as const})}]}
+    await expect(executeList(malformed,ctx,query('',malformed),options)).rejects.toThrow(TypeError)
+    expect(adapter).not.toHaveBeenCalled()
+  })
+  it('rejects registered relations even when an explicit scalarFields allowlist erroneously contains them', async () => {
+    const malformed={...def,scalarFields:['id','nome','updatedAt','children'],select:{...def.select,children:true},expands:[{name:'messages',relation:'children',many:true,resource:()=>({...child,scope:'read:mensagens' as const})}]}
+    await expect(executeList(malformed,ctx,query('',malformed),options)).rejects.toThrow(TypeError)
+    expect(adapter).not.toHaveBeenCalled()
+  })
+  it('keeps unrequested registered message relations out of the adapter select', async () => {
+    const guarded={...def,expands:[{name:'messages',relation:'children',many:true,resource:()=>({...child,scope:'read:mensagens' as const})}]}
+    await executeList(guarded,ctx,query('',guarded),options)
+    expect(adapter.mock.lastCall![0].select).toEqual(def.select)
+    expect(adapter.mock.lastCall![0].select.children).toBeUndefined()
+  })
+  it('rejects unknown scalar select keys before query', async () => {
+    const malformed={...def,select:{...def.select,unregisteredRelation:true}}
+    await expect(executeList(malformed,ctx,query('',malformed),options)).rejects.toThrow(TypeError)
+    expect(adapter).not.toHaveBeenCalled()
+  })
+  it('validates child scalar selectors and rejects nested base relations before parent query', async () => {
+    const malformedChild={...child,select:{...child.select,privateMessages:true},expands:[{name:'messages',relation:'privateMessages',many:true,resource:()=>({...child,scope:'read:mensagens' as const})}]}
+    const malformed={...def,expands:[{name:'children',many:true,resource:()=>malformedChild}]}
+    await expect(executeList(malformed,ctx,query('expand=children',malformed),options)).rejects.toThrow(TypeError)
     expect(adapter).not.toHaveBeenCalled()
   })
   it('times out to 503 after 10 seconds and clears its timer', async () => {

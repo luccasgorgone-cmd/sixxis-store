@@ -13,6 +13,8 @@ export type ExpandDefinition = { name:string; relation?:string; many:boolean; re
 export type ResourceQueryArgs = { where:Record<string,unknown>; select:Record<string,unknown>; orderBy:Record<string,'asc'|'desc'>[]; take:number }
 export type ResourceDefinition<T extends Record<string, unknown> = Record<string, unknown>> = {
   slug:string; model:string; scope:ApiScope; fields:readonly FieldDefinition[]; expands:readonly ExpandDefinition[]
+  /** Explicit Prisma scalar names; omit only when API fields map 1:1 to scalar columns. */
+  scalarFields?:readonly string[]
   select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]
   dateFields?:{created?:string;updated?:string}
   window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte';maxDays:number}
@@ -46,12 +48,20 @@ function expandedDefinitions(def:ResourceDefinition,ctx:ApiContext,names:readonl
     return {expansion,child}
   })
 }
+function assertScalarSelector(def:ResourceDefinition):void {
+  const scalars=new Set(def.scalarFields??def.fields.map(field=>field.name))
+  // Relation aliases and DB relation names are forbidden even if mistakenly listed as scalars.
+  const relations=new Set(def.expands.flatMap(expand=>[expand.name,expand.relation??expand.name]))
+  const keys=Object.keys(def.select)
+  if (keys.some(key=>def.select[key]!==true || !scalars.has(key) || relations.has(key)) || !def.select.id || !def.select[def.defaultSort?.replace(/^-/,'')??def.sorts[0]??'id']) throw new TypeError('Invalid resource scalar selector')
+}
 function selection(def:ResourceDefinition,ctx:ApiContext,names:readonly string[]):Record<string,unknown> {
-  // Resource selectors are scalar-only. All relations are built here, depth one.
-  if (Object.values(def.select).some(value=>value!==true) || !def.select.id || !def.select[def.defaultSort?.replace(/^-/,'')??def.sorts[0]??'id']) throw new TypeError('Invalid resource selector')
+  assertScalarSelector(def)
   const select:Record<string,unknown>={...def.select}
   for (const {expansion,child} of expandedDefinitions(def,ctx,names)) {
-    if (Object.values(child.select).some(value=>value!==true)) throw new TypeError('Invalid expansion selector')
+    // Repeat the same scalar/relationship checks at each selected child boundary.
+    // Child expands are never selected: depth remains exactly one.
+    assertScalarSelector(child)
     select[expansion.relation??expansion.name]={select:child.select,...(expansion.many?{take:API_MAX_EXPAND_ITEMS+1,orderBy:{id:'asc'}}:{})}
   }
   return select

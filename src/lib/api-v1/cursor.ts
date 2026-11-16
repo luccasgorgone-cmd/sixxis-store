@@ -1,4 +1,4 @@
-import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
+import { createCipheriv, createDecipheriv, createHash, hkdfSync, randomBytes } from 'node:crypto'
 import { z } from 'zod'
 import { ApiQueryError } from './query'
 import type { ResourceDefinition } from './resource'
@@ -19,24 +19,35 @@ const cursorSchema = z.object({
 export type Cursor = z.infer<typeof cursorSchema>
 const bad = (): never => { throw new ApiQueryError(400, 'Cursor inválido ou incompatível com a consulta.') }
 
+// Independent envelope version and AAD bind the wire format/algorithm to this purpose.
+const envelopeVersion = 1
+const cursorAad = Buffer.from('sixxis-api-v1:cursor:aes-256-gcm:v1')
+const deriveCursorKey = (secret: string) => Buffer.from(hkdfSync('sha256', secret, 'sixxis-api-v1', 'cursor-aes-256-gcm-v1', 32))
+
+/** AEAD protects seek values too: base64url alone must never reveal masked PII. */
 export function encodeCursor(cursor: Cursor, secret?: string): string {
   const parsed=cursorSchema.safeParse(cursor)
   if (!parsed.success) return bad()
-  const payload=Buffer.from(JSON.stringify(parsed.data)).toString('base64url')
-  const signature=createHmac('sha256',resolveCursorSecret(secret)).update(payload).digest('base64url')
-  return `${payload}.${signature}`
+  const key=deriveCursorKey(resolveCursorSecret(secret))
+  const iv=randomBytes(12)
+  const cipher=createCipheriv('aes-256-gcm',key,iv,{authTagLength:16})
+  cipher.setAAD(cursorAad)
+  const ciphertext=Buffer.concat([cipher.update(JSON.stringify(parsed.data),'utf8'),cipher.final()])
+  const encoded=Buffer.concat([Buffer.from([envelopeVersion]),iv,ciphertext,cipher.getAuthTag()]).toString('base64url')
+  if(encoded.length>8192)return bad()
+  return encoded
 }
 export function decodeCursor(encoded: string, secret?: string): Cursor {
-  const key=resolveCursorSecret(secret)
-  if (encoded.length > 8192 || !/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]{43}$/.test(encoded)) return bad()
-  const [payload, signature] = encoded.split('.')
-  const actual=Buffer.from(signature,'base64url')
-  const expected=createHmac('sha256',key).update(payload).digest()
-  if (actual.length !== expected.length || !timingSafeEqual(actual,expected) || actual.toString('base64url') !== signature) return bad()
+  const key=deriveCursorKey(resolveCursorSecret(secret))
+  if (encoded.length>8192 || !/^[a-zA-Z0-9_-]+$/.test(encoded)) return bad()
   try {
-    const decoded=Buffer.from(payload,'base64url')
-    if (decoded.toString('base64url') !== payload) return bad()
-    const parsed=cursorSchema.safeParse(JSON.parse(decoded.toString('utf8')))
+    const packed=Buffer.from(encoded,'base64url')
+    if(packed.toString('base64url')!==encoded || packed.length<30 || packed[0]!==envelopeVersion)return bad()
+    const decipher=createDecipheriv('aes-256-gcm',key,packed.subarray(1,13),{authTagLength:16})
+    decipher.setAAD(cursorAad)
+    decipher.setAuthTag(packed.subarray(-16))
+    const plaintext=Buffer.concat([decipher.update(packed.subarray(13,-16)),decipher.final()])
+    const parsed=cursorSchema.safeParse(JSON.parse(plaintext.toString('utf8')))
     if (!parsed.success) return bad()
     return parsed.data
   } catch { return bad() }
