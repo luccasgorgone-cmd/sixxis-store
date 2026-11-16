@@ -21,7 +21,7 @@ function row(model: string) {
   const value = fixture(model)
   if (model === 'CarrinhoCliente') value.itens = [{ produtoId: 'p', slug: 'produto', nome: 'Produto Público', variacao: '110V', qtd: 2, preco: 100, token: 'DO-NOT-LEAK' }]
   if (model === 'Campanha') { value.canais = ['email', 'whatsapp']; value.publicoAlvo = { segmento: 'clientes', email: 'alice@example.test', token: 'DO-NOT-LEAK' }; value.filtroSegmento = { totalPedidos: { gte: 1 }, token: 'DO-NOT-LEAK' } }
-  if (model === 'GarantiaEstendida') value.acionamentos = [{ data: '2026-01-01', mensagem: 'alice@example.test token=DO-NOT-LEAK' }]
+  if (model === 'GarantiaEstendida') value.acionamentos = [{ data: '2026-01-01T10:00:00-03:00', descricao: 'alice@example.test token=DO-NOT-LEAK', autor: 'Alice Teste' }]
   return value
 }
 function query(def: ResourceDefinition, extra = '') {
@@ -151,4 +151,48 @@ it('rejects foreign-domain expansions before adapter access and validates nomina
 it('does not treat internal coupon descriptions as public copy', () => {
   const def = get('Cupom'), raw = { ...row('Cupom'), descricao: 'Cupom para alice@example.test token=DO-NOT-LEAK' }
   expect(def.serialize(raw, context(['read:all'])).descricao).toBe('Cupom para a***@example.test [REDACTED]')
+})
+
+describe('fix round 1: nominal warranty and persisted-cart JSON', () => {
+  it('masks warranty authors, normalizes dates and drops unknown fields through list/detail without additive scopes', async () => {
+    const def = get('GarantiaEstendida'), raw = { ...row('GarantiaEstendida'), acionamentos: [
+      { data: '2026-01-01T10:00:00-03:00', autor: 'Alice Teste', descricao: 'Contato alice@example.test token=DO-NOT-LEAK cartão 4111111111111111', internal: 'UNKNOWN-MUST-NOT-LEAK' },
+      { data: 'invalid-date', descricao: 'Registro sem autor', internal: 'UNKNOWN-MUST-NOT-LEAK' },
+    ] }
+    const fake = { ...def, adapter: { findMany: async () => [raw], findFirst: async () => raw } }
+    for (const response of [await executeList(fake, context(['read:all']), query(def), options), await executeItem(fake, context(['read:all']), 'id')]) {
+      const output = Array.isArray(response.data) ? response.data[0] : response.data
+      expect(output.acionamentos).toEqual([
+        { data: '2026-01-01T13:00:00.000Z', autor: 'A***', descricao: 'Contato a***@example.test [REDACTED] cartão [REDACTED]' },
+        { data: null, descricao: 'Registro sem autor' },
+      ])
+      expect(JSON.stringify(output)).not.toMatch(/Alice Teste|DO-NOT-LEAK|4111111111111111|UNKNOWN-MUST-NOT-LEAK/)
+    }
+    expect((def.serialize(raw, context()).acionamentos as Record<string, unknown>[])[0].autor).toBe('Alice Teste')
+  })
+  it('masks persisted cart ownership, formats item BRL and preserves only nominal commercial item fields in list/detail', async () => {
+    const def = get('CarrinhoCliente'), raw = { ...row('CarrinhoCliente'), clienteId: 'client-private', itens: [
+      { produtoId: 'p1', slug: 'produto', nome: 'Climatizador Sixxis token=DO-NOT-LEAK cartão 4111111111111111', variacao: '110V', qtd: 2, preco: 123.456, unknown: 'UNKNOWN-MUST-NOT-LEAK' },
+      { produtoId: 'p2', nome: 'Produto sem slug', qtd: 1, preco: 0, variacao: null },
+    ] }
+    const fake = { ...def, adapter: { findMany: async () => [raw], findFirst: async () => raw } }
+    for (const response of [await executeList(fake, context(['read:all']), query(def), options), await executeItem(fake, context(['read:all']), 'id')]) {
+      const output = Array.isArray(response.data) ? response.data[0] : response.data
+      expect(output.clienteId).toBe('[REDACTED]')
+      expect(output.itens).toEqual([
+        { produtoId: 'p1', slug: 'produto', nome: 'Climatizador Sixxis [REDACTED] cartão [REDACTED]', variacao: '110V', qtd: 2, preco: '123.46' },
+        { produtoId: 'p2', nome: 'Produto sem slug', variacao: null, qtd: 1, preco: '0.00' },
+      ])
+      expect(JSON.stringify(output)).not.toMatch(/client-private|DO-NOT-LEAK|4111111111111111|UNKNOWN-MUST-NOT-LEAK/)
+    }
+    expect(def.serialize(raw, context(['read:all', 'read:pii'])).clienteId).toBe('client-private')
+  })
+})
+
+it('rejects malformed cart/warranty shapes instead of forwarding arbitrary JSON', () => {
+  const cart = get('CarrinhoCliente'), warranty = get('GarantiaEstendida')
+  for (const itens of [{ nome: 'not an array' }, [{ produtoId: 'p', nome: 'x', qtd: 'two', preco: 100 }], [{ produtoId: 'p', nome: { email: 'alice@example.test' }, qtd: 1, preco: 100 }]]) {
+    expect(() => cart.serialize({ ...row('CarrinhoCliente'), itens }, context())).toThrow('Invalid persisted cart items JSON')
+  }
+  expect(() => warranty.serialize({ ...row('GarantiaEstendida'), acionamentos: [{ data: '2026-01-01', descricao: 'note', autor: { nome: 'Alice Teste' } }] }, context())).toThrow('Invalid warranty claims JSON')
 })

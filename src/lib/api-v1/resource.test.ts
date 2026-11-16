@@ -226,3 +226,50 @@ describe('nominal public scalar fields', () => {
     expect(adapter).not.toHaveBeenCalled()
   })
 })
+
+describe('nominal public JSON array leaves', () => {
+  const jsonResource = (): ResourceDefinition => ({
+    slug: 'public-json', model: 'PublicJson', scope: 'read:pedidos',
+    scalarFields: ['id', 'itens'], select: { id: true, itens: true }, sorts: ['id'], defaultSort: 'id', expands: [],
+    fields: [{ name: 'id', type: 'string' }, { name: 'itens', type: 'array', items: { type: 'object', properties: { nome: { type: 'string' }, privateName: { type: 'string' }, preco: { type: 'string' } } } }],
+    publicJsonFields: { itens: ['nome'] },
+    adapter: { findMany: vi.fn(async () => [{ id: '1', itens: [{ nome: 'Produto Público token=DO-NOT-LEAK 4111111111111111', privateName: 'Contato alice@example.test', preco: '1.00' }] }]) },
+    serialize: row => ({ id: row.id, itens: row.itens }),
+  })
+  it('restores only declared public string leaves after the secret/PAN sanitizer', async () => {
+    const current = jsonResource()
+    const output = await executeList(current, ctx, parseListQuery('https://test.local/', current), options)
+    expect(output.data[0].itens).toEqual([{ nome: 'Produto Público [REDACTED] [REDACTED]', privateName: 'Contato a***@example.test', preco: '1.00' }])
+    expect(() => parseListQuery('https://test.local/?publicJsonFields=itens.nome', current)).toThrow()
+  })
+  it.each(['__proto__', 'constructor', 'nome.extra', 'token', 'unknown', 'preco.x'])('rejects invalid or malicious leaf %s before the adapter', async leaf => {
+    const current = { ...jsonResource(), publicJsonFields: { itens: [leaf] } }
+    await expect(executeList(current, ctx, parseListQuery('https://test.local/', current), options)).rejects.toThrow('Invalid public JSON policy')
+    expect(current.adapter.findMany).not.toHaveBeenCalled()
+  })
+  it('rejects unknown roots, non-array/non-object fields, scoped parents and non-string leaves', async () => {
+    const original = jsonResource()
+    for (const current of [
+      { ...original, publicJsonFields: { unknown: ['nome'] } },
+      { ...original, publicJsonFields: { id: ['nome'] } },
+      { ...original, fields: original.fields.map(field => field.name === 'itens' ? { ...field, scope: 'read:pii' as const } : field) },
+      { ...original, fields: original.fields.map(field => field.name === 'itens' ? { ...field, items: { type: 'object' as const, properties: { nome: { type: 'object' as const } } } } : field) },
+      { ...original, fields: original.fields.map(field => field.name === 'itens' ? { ...field, items: { type: 'string' as const } } : field) },
+    ]) {
+      await expect(executeList(current, ctx, parseListQuery('https://test.local/', current), options)).rejects.toThrow('Invalid public JSON policy')
+      expect(current.adapter.findMany).not.toHaveBeenCalled()
+    }
+  })
+})
+
+it('public JSON leaves do not grant the independent message scope to encoded JSON strings', async () => {
+  const current: ResourceDefinition = {
+    slug: 'json-leaf', model: 'JsonLeaf', scope: 'read:pedidos', scalarFields: ['id', 'itens'], select: { id: true, itens: true }, sorts: ['id'], expands: [],
+    fields: [{ name: 'id', type: 'string' }, { name: 'itens', type: 'array', items: { type: 'object', properties: { nome: { type: 'string' } } } }],
+    publicJsonFields: { itens: ['nome'] },
+    adapter: { findMany: async () => [{ id: '1', itens: [{ nome: '{"nome":"Produto Público","mensagem":"PRIVATE-MESSAGE","token":"DO-NOT-LEAK"}' }] }] },
+    serialize: row => ({ id: row.id, itens: row.itens }),
+  }
+  const output = await executeList(current, ctx, parseListQuery('https://test.local/', current), options)
+  expect(output.data[0].itens).toEqual([{ nome: '{"nome":"Produto Público"}' }])
+})

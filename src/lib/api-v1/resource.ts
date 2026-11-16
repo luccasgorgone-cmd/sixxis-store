@@ -4,7 +4,7 @@ import { API_MAX_EXPAND_ITEMS, API_QUERY_TIMEOUT_MS } from './constants'
 import { buildSeekWhere, decodeCursor, encodeCursor, filterHash, resolveCursorSecret, type CursorOptions } from './cursor'
 import { itemEnvelope, listEnvelope } from './format'
 import { ApiQueryError, validateListQuery } from './query'
-import { isForbiddenKey, redactValue } from './redact'
+import { isForbiddenKey, redactValue, restorePublicJsonFields, type PublicJsonFields } from './redact'
 import type { ApiContext, ApiScope, ItemEnvelope, ListEnvelope, ListQuery } from './types'
 
 /** JSON-compatible value shape shared by field metadata and the OpenAPI generator. */
@@ -20,6 +20,8 @@ export type ResourceDefinition<T extends Record<string, unknown> = Record<string
   /** Nominal public string scalars (e.g. product names), never scoped fields or relations.
    * Their values skip PII masking only; secret/PAN redaction always remains active. */
   publicFields?:readonly string[]
+  /** Nominal public string leaves inside selected JSON arrays; never arbitrary dotted paths. */
+  publicJsonFields?:PublicJsonFields
   select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]
   dateFields?:{created?:string;updated?:string}
   window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte';maxDays:number}
@@ -63,6 +65,14 @@ function assertScalarSelector(def:ResourceDefinition):void {
     const field=def.fields.find(item=>item.name===name)
     return !field || field.type!=='string' || !!field.scope || !scalars.has(name) || !def.select[name] || relations.has(name) || isForbiddenKey(name)
   })) throw new TypeError('Invalid public scalar policy')
+  const validName = (name:string) => /^[a-z][a-zA-Z0-9]*$/.test(name) && !['constructor', 'prototype'].includes(name) && !isForbiddenKey(name)
+  for (const [root, leaves] of Object.entries(def.publicJsonFields ?? {})) {
+    const field = def.fields.find(item => item.name === root)
+    if (!validName(root) || !field || field.scope || !scalars.has(root) || !def.select[root] || relations.has(root) || field.type !== 'array' || field.items?.type !== 'object' || !leaves.length || leaves.some(leaf => {
+      const schema = field.items?.properties?.[leaf]
+      return !validName(leaf) || !schema || schema.type !== 'string' || !!(schema as FieldDefinition).scope
+    })) throw new TypeError('Invalid public JSON policy')
+  }
 }
 function selection(def:ResourceDefinition,ctx:ApiContext,names:readonly string[]):Record<string,unknown> {
   assertScalarSelector(def)
@@ -84,6 +94,7 @@ function serialize<T extends Record<string, unknown>>(def:ResourceDefinition<T>,
     if (data[name]!==null && typeof data[name]!=='string') throw new TypeError('Invalid public scalar value')
     safe[name]=redactValue(data[name],{...options,allowPii:true})
   }
+  restorePublicJsonFields(data, safe, def.publicJsonFields, options)
   // A requested field without its additive scope must remain absent, not restore the raw value.
   return projectFields(safe,fields,def.fields)
 }

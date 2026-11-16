@@ -13,6 +13,8 @@ const jsonValues: Record<string, unknown> = {
   'Produto.faqs': [{ pergunta: 'Produto.faqs.pergunta.SENTINEL', resposta: 'Produto.faqs.resposta.SENTINEL token=DO-NOT-LEAK' }],
   'Produto.imagensPorVariacao': { Branco: ['https://media.example.test/Produto.imagensPorVariacao.SENTINEL.webp'], token: 'DO-NOT-LEAK' },
   'PopupInicial.paginas': ['home', 'produtos', '*'],
+  'GarantiaEstendida.acionamentos': [{ data: '2026-01-01T10:00:00-03:00', descricao: 'Atendimento em garantia', autor: 'Alice Teste' }],
+  'CarrinhoCliente.itens': [{ produtoId: 'p', slug: 'produto', nome: 'Produto Público', variacao: '110V', qtd: 2, preco: 100 }],
 }
 const expectedJson: Record<string, unknown> = {
   'Produto.imagens': ['https://media.example.test/Produto.imagens.SENTINEL.webp?[REDACTED]'],

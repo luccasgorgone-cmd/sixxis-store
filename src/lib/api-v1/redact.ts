@@ -200,3 +200,22 @@ export function redactValue(value: unknown, options: RedactionOptions): unknown 
   assertJsonValue(value)
   return walk(value as JsonValue, options, 0)
 }
+
+/** Definition-owned flat array/object/string leaves only; never a client path expression. */
+export type PublicJsonFields = Readonly<Record<string, readonly string[]>>
+export function restorePublicJsonFields(raw: Record<string, unknown>, safe: Record<string, unknown>, policy: PublicJsonFields = {}, options: RedactionOptions = { allowPii: false, allowMessages: false }): void {
+  for (const [root, leaves] of Object.entries(policy)) {
+    const source = raw[root], target = safe[root]
+    if (source === undefined || source === null) continue
+    if (!Array.isArray(source) || !Array.isArray(target) || source.length !== target.length) throw new TypeError('Invalid public JSON value')
+    source.forEach((item, index) => {
+      const output = target[index]
+      if (!item || typeof item !== 'object' || Array.isArray(item) || !output || typeof output !== 'object' || Array.isArray(output)) throw new TypeError('Invalid public JSON value')
+      for (const leaf of leaves) if (Object.hasOwn(item, leaf)) {
+        const value = (item as Record<string, unknown>)[leaf]
+        if (value !== null && typeof value !== 'string') throw new TypeError('Invalid public JSON value')
+        Object.defineProperty(output, leaf, { value: redactValue(value, { ...options, allowPii: true }), enumerable: true, configurable: true, writable: true })
+      }
+    })
+  }
+}

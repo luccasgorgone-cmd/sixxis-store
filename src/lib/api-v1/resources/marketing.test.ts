@@ -21,7 +21,7 @@ function row(model: string) {
   const value = fixture(model)
   if (model === 'CarrinhoCliente') value.itens = [{ produtoId: 'p', slug: 'produto', nome: 'Produto Público', variacao: '110V', qtd: 2, preco: 100, token: 'DO-NOT-LEAK' }]
   if (model === 'Campanha') { value.canais = ['email', 'whatsapp']; value.publicoAlvo = { segmento: 'clientes', email: 'alice@example.test', token: 'DO-NOT-LEAK' }; value.filtroSegmento = { totalPedidos: { gte: 1 }, token: 'DO-NOT-LEAK' } }
-  if (model === 'GarantiaEstendida') value.acionamentos = [{ data: '2026-01-01', mensagem: 'alice@example.test token=DO-NOT-LEAK' }]
+  if (model === 'GarantiaEstendida') value.acionamentos = [{ data: '2026-01-01T10:00:00-03:00', descricao: 'alice@example.test token=DO-NOT-LEAK', autor: 'Alice Teste' }]
   return value
 }
 function query(def: ResourceDefinition, extra = '') {

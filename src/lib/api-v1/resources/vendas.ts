@@ -1,10 +1,51 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
+import { z } from 'zod'
 import type { ResourceDefinition } from '../resource'
+import type { ApiContext } from '../types'
+import { hasScope } from '../auth'
+import { maskName } from '../redact'
 import { amount, safeRecord, timestamp, type ResourceResolver, type ResourceRow } from './shared'
 import { money } from '../format'
 import { STATUS_PAGO_TODOS, STATUS_PENDENTE_TODOS, STATUS_CANCELADO_TODOS } from '../../pedido-status'
 
 const orderStatuses = [...STATUS_PAGO_TODOS, ...STATUS_PENDENTE_TODOS, ...STATUS_CANCELADO_TODOS]
+const cartPublicJsonFields = { itens: ['nome'] } as const
+// Contracts mirror the persisted application shapes, not arbitrary JsonValue objects.
+const warrantyClaimSchema = z.array(z.object({ data: z.string(), descricao: z.string(), autor: z.string().optional() }))
+const persistedCartItemsSchema = z.array(z.object({
+  produtoId: z.string(), slug: z.string().optional(), nome: z.string(), variacao: z.string().nullable().optional(),
+  qtd: z.number().int().positive(), preco: z.number().nonnegative(),
+}))
+function warrantyClaims(value: unknown, ctx: ApiContext): ResourceRow[] | null {
+  if (value === null) return null
+  const parsed = warrantyClaimSchema.safeParse(value)
+  if (!parsed.success) throw new TypeError('Invalid warranty claims JSON')
+  return parsed.data.map(claim => {
+    const date = new Date(claim.data)
+    const record: ResourceRow = {
+      data: Number.isFinite(date.getTime()) ? timestamp(date) : null,
+      // Warranty operational notes are not conversations/campaign message content.
+      descricao: claim.descricao,
+    }
+    if (claim.autor !== undefined) record.autor = ctx.identity && hasScope(ctx.identity, 'read:pii') ? claim.autor : maskName(claim.autor)
+    return safeRecord(record, ctx)
+  })
+}
+function persistedCartItems(value: unknown): ResourceRow[] {
+  const parsed = persistedCartItemsSchema.safeParse(value)
+  if (!parsed.success) throw new TypeError('Invalid persisted cart items JSON')
+  return parsed.data.map(item => {
+    const record: ResourceRow = {
+      produtoId: item.produtoId,
+      nome: item.nome,
+      variacao: item.variacao ?? null,
+      qtd: item.qtd,
+      preco: amount(item.preco),
+    }
+    if (item.slug !== undefined) record.slug = item.slug
+    return record
+  })
+}
 
 export type CommerceResourceOptions = { prisma?: Pick<PrismaClient, 'pedido' | 'garantiaEstendida' | 'pagamento' | 'tentativaMultiMetodo' | 'itemPedido' | 'carrinho' | 'itemCarrinho' | 'cupom' | 'cupomUso' | 'carrinhoCliente'>; resolve?: ResourceResolver }
 
@@ -188,7 +229,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
         { name: 'inicioVigencia', type: 'string', format: 'date-time' },
         { name: 'fimVigencia', type: 'string', format: 'date-time' },
         { name: 'status', type: 'string', enum: ['ativa', 'acionada', 'expirada', 'cancelada'], description: 'Valores conhecidos; caixa legada preservada. Valores desconhecidos continuam strings e são auditados no rollout.' },
-        { name: 'acionamentos', type: 'array', nullable: true, items: { type: 'object' } },
+        { name: 'acionamentos', type: 'array', nullable: true, items: { type: 'object', properties: { data: { type: 'string', format: 'date-time', nullable: true }, descricao: { type: 'string' }, autor: { type: 'string' } }, required: ['data', 'descricao'] } },
         { name: 'createdAt', type: 'string', format: 'date-time' },
         { name: 'updatedAt', type: 'string', format: 'date-time' },
       ],
@@ -225,7 +266,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
           inicioVigencia: timestamp(row.inicioVigencia),
           fimVigencia: timestamp(row.fimVigencia),
           status: row.status,
-          acionamentos: row.acionamentos,
+          acionamentos: warrantyClaims(row.acionamentos, ctx),
           createdAt: timestamp(row.createdAt),
           updatedAt: timestamp(row.updatedAt),
         }
@@ -627,11 +668,12 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
     {
       slug: 'carrinhos-clientes', model: 'CarrinhoCliente', scope: 'read:pedidos',
       scalarFields: ['id', 'clienteId', 'itens', 'valorTotal', 'etapaAtual', 'status', 'atualizadoEm', 'criadoEm'],
+      publicJsonFields: cartPublicJsonFields,
       select: { id: true, clienteId: true, itens: true, valorTotal: true, etapaAtual: true, status: true, atualizadoEm: true, criadoEm: true } as const satisfies Prisma.CarrinhoClienteSelect,
       fields: [
         { name: 'id', type: 'string' },
         { name: 'clienteId', type: 'string' },
-        { name: 'itens', type: 'array', items: { type: 'object' } },
+        { name: 'itens', type: 'array', items: { type: 'object', properties: { produtoId: { type: 'string' }, slug: { type: 'string' }, nome: { type: 'string' }, variacao: { type: 'string', nullable: true }, qtd: { type: 'integer' }, preco: { type: 'string', format: 'decimal' } }, required: ['produtoId', 'nome', 'variacao', 'qtd', 'preco'] } },
         { name: 'valorTotal', type: 'string', format: 'decimal', description: 'Valor monetário em BRL.' },
         { name: 'etapaAtual', type: 'integer' },
         { name: 'status', type: 'string', enum: ['ativo', 'convertido', 'abandonado', 'recuperado'], description: 'Valores conhecidos; caixa legada preservada. Valores desconhecidos continuam strings e são auditados no rollout.' },
@@ -663,14 +705,14 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
         const record: ResourceRow = {
           id: row.id,
           clienteId: row.clienteId,
-          itens: row.itens,
+          itens: persistedCartItems(row.itens),
           valorTotal: amount(row.valorTotal),
           etapaAtual: row.etapaAtual,
           status: row.status,
           atualizadoEm: timestamp(row.atualizadoEm),
           criadoEm: timestamp(row.criadoEm),
         }
-        return safeRecord(record, ctx, [], [], [])
+        return safeRecord(record, ctx, [], [], ['clienteId'], cartPublicJsonFields)
       },
     },
   ]
