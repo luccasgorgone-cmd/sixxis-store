@@ -172,6 +172,34 @@ export function trackAddPaymentInfo(
   })
 }
 
+export type CheckoutPaymentOutcome =
+  | 'submit'
+  | 'approved'
+  | 'pix_generated'
+  | 'pending'
+  | 'rejected'
+  | 'api_error'
+  | 'brick_error'
+
+type CheckoutPaymentMetadata = {
+  payment_type?: string
+  http_status?: number
+  stage?: 'config' | 'validation' | 'request' | 'response'
+  payment_status?: string
+}
+
+// Telemetria sanitizada do funil de pagamento. Nunca recebe token do cartão,
+// CPF, e-mail ou payload do Brick. O envio continua sob o mesmo consentimento
+// analítico do pipeline interno; serve para separar abandono de erro técnico.
+export function trackCheckoutPaymentOutcome(
+  outcome: CheckoutPaymentOutcome,
+  metadata: CheckoutPaymentMetadata = {},
+) {
+  enviarInterno('checkout_payment_outcome', {
+    dados: { outcome, ...metadata },
+  })
+}
+
 // Irmão do add_payment_info: mesma forma, com shipping_tier (nome da opção de
 // entrega — "Normal"/"Expresso") no lugar do payment_type. Fecha o funil de
 // e-commerce do GA4/Google Ads, que espera add_shipping_info entre o

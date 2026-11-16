@@ -7,6 +7,7 @@ import { Loader2, AlertCircle } from 'lucide-react'
 import PixPainel from './PixPainel'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { capturarDeviceIdMp } from '@/lib/mp-device-id'
+import { trackCheckoutPaymentOutcome } from '@/lib/analytics/events'
 
 const Payment = dynamic(
   () => import('@mercadopago/sdk-react').then((m) => m.Payment),
@@ -77,7 +78,10 @@ export default function CheckoutBricks({
         setPublicKey(d.publicKey)
       })
       .catch(() => {
-        if (!cancelled) setErro('Falha ao iniciar pagamento')
+        if (!cancelled) {
+          trackCheckoutPaymentOutcome('brick_error', { stage: 'config' })
+          setErro('Falha ao iniciar pagamento')
+        }
       })
     return () => {
       cancelled = true
@@ -199,6 +203,8 @@ export default function CheckoutBricks({
               ;(async () => {
                 setErro(null)
                 setCarregando(true)
+                let paymentType = 'unknown'
+                let outcomeRegistrado = false
                 try {
                   const pmId = formData.payment_method_id ?? ''
                   const isPix = pmId === 'pix'
@@ -240,8 +246,16 @@ export default function CheckoutBricks({
                       : null
 
                   if (!body) {
+                    trackCheckoutPaymentOutcome('brick_error', {
+                      payment_type: pmId || 'unknown',
+                      stage: 'validation',
+                    })
+                    outcomeRegistrado = true
                     throw new Error('Forma de pagamento não suportada')
                   }
+
+                  paymentType = isPix ? 'pix' : metodoCartao
+                  trackCheckoutPaymentOutcome('submit', { payment_type: paymentType })
 
                   const resp = await fetch('/api/checkout/criar-pagamento', {
                     method: 'POST',
@@ -254,10 +268,18 @@ export default function CheckoutBricks({
                   })
                   const data = await resp.json()
                   if (!resp.ok) {
+                    trackCheckoutPaymentOutcome('api_error', {
+                      payment_type: paymentType,
+                      http_status: resp.status,
+                      stage: 'response',
+                    })
+                    outcomeRegistrado = true
                     throw new Error(data.error || 'Erro ao processar pagamento')
                   }
 
                   if (data.qrCodeBase64) {
+                    trackCheckoutPaymentOutcome('pix_generated', { payment_type: 'pix' })
+                    outcomeRegistrado = true
                     setPix({
                       qr: data.qrCodeBase64,
                       copy: data.qrCodeCopiaECola,
@@ -266,24 +288,50 @@ export default function CheckoutBricks({
                     })
                     resolve()
                   } else if (data.status === 'approved') {
+                    trackCheckoutPaymentOutcome('approved', {
+                      payment_type: paymentType,
+                      payment_status: 'approved',
+                    })
+                    outcomeRegistrado = true
                     onSucesso()
                     resolve()
                   } else if (data.status === 'in_process' || data.status === 'pending') {
+                    trackCheckoutPaymentOutcome('pending', {
+                      payment_type: paymentType,
+                      payment_status: data.status,
+                    })
+                    outcomeRegistrado = true
                     setErro(
                       'Pagamento em análise. Você receberá um e-mail assim que for aprovado, ou pode tentar outro método agora.',
                     )
                     reject(new Error(data.status))
                   } else if (data.status === 'rejected') {
+                    trackCheckoutPaymentOutcome('rejected', {
+                      payment_type: paymentType,
+                      payment_status: 'rejected',
+                    })
+                    outcomeRegistrado = true
                     setErro(
                       'Pagamento recusado pela operadora do cartão. Isso costuma ser uma avaliação de segurança do banco/operadora — não é um erro nos dados digitados. Tente novamente em alguns minutos, use outro cartão ou pague com Pix.',
                     )
                     reject(new Error('rejected'))
                   } else {
+                    trackCheckoutPaymentOutcome('pending', {
+                      payment_type: paymentType,
+                      payment_status: typeof data.status === 'string' ? data.status : 'unknown',
+                    })
+                    outcomeRegistrado = true
                     setErro('Pagamento em processamento. Aguarde a confirmação.')
                     reject(new Error(data.status || 'unknown'))
                   }
                 } catch (e) {
                   const err = e as { message?: string }
+                  if (!outcomeRegistrado) {
+                    trackCheckoutPaymentOutcome('api_error', {
+                      payment_type: paymentType,
+                      stage: 'request',
+                    })
+                  }
                   setErro(err.message || 'Falha ao processar pagamento')
                   reject(e)
                 } finally {
@@ -294,6 +342,7 @@ export default function CheckoutBricks({
           }
           onError={(err) => {
             console.error('[bricks:error]', err)
+            trackCheckoutPaymentOutcome('brick_error', { stage: 'validation' })
             setErro('Erro ao validar dados de pagamento')
           }}
         />

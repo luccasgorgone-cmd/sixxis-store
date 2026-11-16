@@ -17,6 +17,7 @@ import ViewItemTracker from '@/components/analytics/ViewItemTracker'
 import { feedId } from '@/lib/feed-id'
 import { encontrarVariacaoPorSku, estoqueDisponivel, VARIANTE_QUERY_PARAM, urlProdutoComVariacao } from '@/lib/produto-variacao'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
+import AvisoMontagem from '@/components/produto/AvisoMontagem'
 
 export const dynamic = 'force-dynamic'
 
@@ -365,6 +366,8 @@ export default async function ProdutoPage({
             especificacoes={especificacoes.length > 0 ? especificacoes : undefined}
           />
         </div>
+
+        <AvisoMontagem categoria={produto.categoria} />
 
         {/* Specs — somente mobile/tablet, pois em lg+ ja aparece na coluna
             esquerda dentro de ProdutoGaleriaInfo. Posicao apos
