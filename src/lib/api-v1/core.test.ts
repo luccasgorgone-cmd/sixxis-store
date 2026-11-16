@@ -134,6 +134,28 @@ describe('deterministic masks', () => {
 })
 
 describe('absolute secret and payment redaction', () => {
+  it.each([
+    'conteúdo=PRIVATE-MESSAGE', 'debug {"conteúdo":"PRIVATE-MESSAGE", malformed',
+    String.raw`debug {"\u006densagem":"PRIVATE-MESSAGE", malformed`,
+    String.raw`debug {"conte\u00fado":"PRIVATE-MESSAGE", malformed`,
+    String.raw`debug {"\u006d\u0065\u006e\u0073\u0061\u0067\u0065\u006d":"PRIVATE-MESSAGE", malformed`,
+    'conteu\u0301do=PRIVATE-MESSAGE', 'ｃｏｎｔｅúｄｏ=PRIVATE-MESSAGE',
+    'debug {"con teúdo":"PRIVATE-MESSAGE", malformed', 'con\u200bteúdo=PRIVATE-MESSAGE',
+  ])('round 2: normalizes Unicode/escaped assignment labels without elevating scopes: %s', input => {
+    for (const allowPii of [false, true]) for (const allowMessages of [false, true]) {
+      const output = String(redactValue(`${input}; token=DO-NOT-LEAK; 4111111111111111`, { allowPii, allowMessages }))
+      expect(output).not.toMatch(/DO-NOT-LEAK|4111111111111111/)
+      expect(output.includes('PRIVATE-MESSAGE')).toBe(allowMessages)
+    }
+  })
+  it.each(['actor=Maria da Silva; status=ok', 'nome=Maria da Silva; status=ok', 'identity=Maria da Silva; status=ok', String.raw`\u0061ctor=Maria da Silva; status=ok`, String.raw`debug {"\u0061ctor":"Maria da Silva", malformed`])('round 2: never leaves trailing words of ambiguous PII assignments: %s', input => {
+    for (const allowPii of [false, true]) for (const allowMessages of [false, true]) {
+      const output = String(redactValue(`${input}; token=DO-NOT-LEAK; 4111111111111111`, { allowPii, allowMessages }))
+      expect(output).not.toMatch(/DO-NOT-LEAK|4111111111111111/)
+      if (allowPii) expect(output).toContain('Maria da Silva')
+      else expect(output).not.toMatch(/Maria|Silva/)
+    }
+  })
   it.each(['actor', 'actorId', 'clienteId', 'customerId', 'clientId', 'user', 'usuario', 'customer', 'cliente', 'identity', 'identidade', 'idUsuario', 'idCliente', 'target', 'url', 'landingPage', 'redirectUrl', 'requestUrl', 'path', 'pagina', 'referer', 'referrer'])('round 1: protects nominal identity/URL key recursively: %s', key => {
     const value = 'PRIVATE-IDENTITY token=DO-NOT-LEAK 4111111111111111'
     const payload = { sibling: 'operational', nested: [{ [key]: value, count: 3, produtoId: 'public-product' }] }

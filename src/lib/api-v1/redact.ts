@@ -110,13 +110,15 @@ const isUsageCounter = (value: unknown): value is number | null => value === nul
 
 /** Consume scalar assignments with escaped quotes intact; discard ambiguous structures. */
 function redactAssignments(value: string, options: RedactionOptions): string {
-  const assignments = /(?:\\*["'])?([a-z][a-z0-9_.-]{0,70})(?:\\*["'])?\s*[:=]\s*/gi
+  // Match the whole label (including combining marks and JSON Unicode escapes)
+  // before normalizing it; an ASCII suffix match can silently miss its policy.
+  const assignments = /(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|(?:\\*["'])?((?:\\u[0-9a-f]{4}|[\p{L}_])(?:\\u[0-9a-f]{4}|[\p{L}\p{M}\p{N}\p{Cf}_.-]){0,200})(?:\\*["'])?)\s*[:=]\s*/giu
   let result = ''
   let consumed = 0
   for (const match of value.matchAll(assignments)) {
     const start = match.index!
     if (start < consumed) continue
-    const key = match[1]
+    const key = (match[1] ?? match[2] ?? match[3]).replace(/\\u([0-9a-f]{4})/gi, (_escape, hex: string) => String.fromCharCode(Number.parseInt(hex, 16)))
     const normalized = normalizedKey(key), leaf = normalizedKey(key.split('.').at(-1)!)
     const secret = isForbiddenKey(key) || normalized === 'tokens'
     const message = !options.allowMessages && (messageKeys.has(normalized) || messageKeys.has(leaf))
@@ -130,6 +132,9 @@ function redactAssignments(value: string, options: RedactionOptions): string {
     // Unquoted message prose has no unambiguous value boundary (commas/newlines
     // may belong to the message). Fail closed for this text, not sibling JSON fields.
     if (message && first !== '"' && first !== "'") return REDACTED
+    // Names, identities and addresses can contain spaces/punctuation. Taking
+    // only the first token would leave the rest of an unquoted identity raw.
+    if ((mask === maskIdentifier || mask === maskName) && first !== '"' && first !== "'") return REDACTED
     let end = from, scalar: string
     if (first === '"' || first === "'") {
       end++

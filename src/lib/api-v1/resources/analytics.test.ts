@@ -124,6 +124,22 @@ describe('bounded analytics and audit resources', () => {
 })
 
 describe('analytics redaction and relations', () => {
+  it.each(['conteúdo=PRIVATE-MESSAGE', 'debug {"conteúdo":"PRIVATE-MESSAGE", malformed', String.raw`debug {"\u006densagem":"PRIVATE-MESSAGE", malformed`, String.raw`debug {"conte\u00fado":"PRIVATE-MESSAGE", malformed`, 'debug {"con teúdo":"PRIVATE-MESSAGE", malformed'])('round 2: normalizes malformed Unicode keys in serialize/list/detail with four scope combinations: %s', async details => {
+    const { def, delegate } = setup('AuditLog')
+    const raw = { ...row('AuditLog'), metadata: { details: `${details}; token=DO-NOT-LEAK; 4111111111111111`, actorDetails: 'actor=Maria da Silva; status=ok; token=DO-NOT-LEAK', sibling: 'public-operation', count: 7 } }
+    delegate.findMany.mockResolvedValue([raw]); delegate.findFirst.mockResolvedValue(raw)
+    for (const scopes of [['read:all'], ['read:all', 'read:pii'], ['read:all', 'read:mensagens'], ['read:all', 'read:pii', 'read:mensagens']] as const) {
+      const ctx = context([...scopes])
+      for (const output of [def.serialize(raw, ctx), (await executeItem(def, ctx, 'id')).data, (await executeList(def, ctx, query(def), options)).data[0]]) {
+        const metadata = output.metadata as Record<string, unknown>
+        expect(metadata).toMatchObject({ sibling: 'public-operation', count: 7 })
+        expect(JSON.stringify(metadata)).not.toMatch(/DO-NOT-LEAK|4111111111111111/)
+        expect(String(metadata.details).includes('PRIVATE-MESSAGE')).toBe(scopes.includes('read:mensagens' as never))
+        if (scopes.includes('read:pii' as never)) expect(metadata.actorDetails).toContain('Maria da Silva')
+        else expect(metadata.actorDetails).not.toMatch(/Maria|Silva/)
+      }
+    }
+  })
   it('round 1: preserves only an explicitly declared opaque structural join at the root', async () => {
     const address = createCustomerResources().find(def => def.model === 'Endereco')!
     const ctx = context(['read:all']), customerId = 'cmr1abc123def456ghi789jkl'
