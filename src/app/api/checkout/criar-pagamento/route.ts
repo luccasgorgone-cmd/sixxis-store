@@ -17,6 +17,7 @@ import { construirSinaisAntifraude } from '@/lib/mercadopago-antifraude'
 import { documentoValido } from '@/lib/validacao-documento'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { cutoffLockPagamento } from '@/lib/pagamento-lock'
+import { deveSincronizarNomeCadastro } from '@/lib/checkout-nome'
 
 const schema = z.object({
   pedidoId: z.string().min(1),
@@ -151,7 +152,15 @@ export async function POST(req: NextRequest) {
   // contas criadas via login Google, onde o nome vem do provedor OAuth sem
   // passar por nomeCompletoSchema (ex.: "08GEOVANNI" — cliente real, nome do
   // Google incompleto/estranho). Best-effort: nunca bloqueia o pagamento.
-  if (payerNome && payerNome !== pedido.cliente.nome) {
+  // Só com sessão do dono — token de posse não basta (ver checkout-nome.ts).
+  if (
+    deveSincronizarNomeCadastro({
+      clienteSessaoId: authz.clienteSessaoId,
+      pedidoClienteId: pedido.clienteId,
+      payerNome,
+      nomeAtual: pedido.cliente.nome,
+    })
+  ) {
     await prisma.cliente
       .update({ where: { id: pedido.clienteId }, data: { nome: payerNome } })
       .catch(() => {})
