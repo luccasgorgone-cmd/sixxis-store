@@ -46,10 +46,9 @@ export async function loadPeriodAndFollowupEvents(
   client: PrismaClient,
   params: MetricParams,
   now: Date,
-  periodTypes: readonly string[],
 ): Promise<{ periodEvents: FunnelEvent[]; classificationEvents: FunnelEvent[] }> {
   const periodEvents = await client.eventoTracking.findMany({
-    where: { createdAt: { gte: params.from, lt: params.toExclusive }, tipo: { in: [...periodTypes] } },
+    where: { createdAt: { gte: params.from, lt: params.toExclusive } },
     select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
     orderBy: { createdAt: 'asc' },
   }) as unknown as FunnelEvent[]
@@ -58,7 +57,6 @@ export async function loadPeriodAndFollowupEvents(
   const followup = await client.eventoTracking.findMany({
     where: {
       sessaoId: { in: checkoutSessions },
-      tipo: { in: ['checkout_payment_outcome', 'purchase'] },
       createdAt: { gte: params.toExclusive, lt: now },
     },
     select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
@@ -92,7 +90,7 @@ export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefin
           where: { createdAt: { gte: params.from, lt: params.toExclusive } },
           select: { sessaoId: true, createdAt: true },
         }),
-        loadPeriodAndFollowupEvents(client, params, now, ['view_item', 'add_to_cart', 'begin_checkout', 'checkout_payment_outcome', 'purchase']),
+        loadPeriodAndFollowupEvents(client, params, now),
       ])
       const sessions = rawSessions as unknown as TrackedSession[]
       const events = loadedEvents.periodEvents

@@ -13,14 +13,17 @@ function saleRows() {
     {
       id: 'pedido-1', clienteId: 'cliente-1', status: 'pago', total: D('100'), createdAt: new Date('2026-11-16T12:00:00Z'),
       mpTaxaReal: D('5'), custoFreteReal: D('10'), gclid: 'pedido-gclid', gbraid: null, wbraid: null, fbc: null,
-      itens: [{ produtoId: 'produto-1', quantidade: 2, precoUnitario: D('40'), custoUnitario: D('20'), variacaoId: 'var-1', variacaoNome: '220V', produto: { nome: 'Climatizador' } }],
-      garantias: [{ valorPago: D('10') }], pagamentos: [{ mpStatus: 'approved', metodo: 'pix', valor: 10000 }],
+      itens: [{ id: 'item-1', produtoId: 'produto-1', quantidade: 2, precoUnitario: D('40'), custoUnitario: D('20'), variacaoId: 'var-1', variacaoNome: '220V', produto: { nome: 'Climatizador' } }],
+      garantias: [
+        { produtoId: 'produto-1', pedidoItemId: 'item-1', valorPago: D('5'), produto: { nome: 'Climatizador' } },
+        { produtoId: 'produto-1', pedidoItemId: null, valorPago: D('5'), produto: { nome: 'Climatizador' } },
+      ], pagamentos: [{ mpStatus: 'rejected', metodo: 'credit_card', valor: 10000 }, { mpStatus: 'approved', metodo: 'pix', valor: 10000 }],
       endereco: { estado: 'SP', cidade: 'Araçatuba' },
     },
     {
       id: 'pedido-2', clienteId: 'cliente-2', status: 'ENVIADO', total: D('200'), createdAt: new Date('2026-11-16T16:00:00Z'),
       mpTaxaReal: null, custoFreteReal: D('20'), gclid: null, gbraid: null, wbraid: null, fbc: 'fb.1.click',
-      itens: [{ produtoId: 'produto-2', quantidade: 1, precoUnitario: D('200'), custoUnitario: D('100'), variacaoId: null, variacaoNome: null, produto: { nome: 'Bike' } }],
+      itens: [{ id: 'item-2', produtoId: 'produto-2', quantidade: 1, precoUnitario: D('200'), custoUnitario: D('100'), variacaoId: null, variacaoNome: null, produto: { nome: 'Bike' } }],
       garantias: [], pagamentos: [{ mpStatus: 'approved', metodo: 'credit_card', valor: 20000 }],
       endereco: { estado: 'RJ', cidade: 'Rio de Janeiro' },
     },
@@ -72,17 +75,19 @@ describe('metricas/vendas', () => {
 
     expect(result.porStatusPagamento).toEqual([
       { status: 'approved', pagamentos: 2, valor: '300.00' },
+      { status: 'rejected', pagamentos: 1, valor: '100.00' },
     ])
     expect(result.porMetodoPagamento).toEqual([
       { metodo: 'credit_card', pagamentos: 1, valor: '200.00' },
       { metodo: 'pix', pagamentos: 1, valor: '100.00' },
     ])
     expect(result.porProduto).toEqual(expect.arrayContaining([
-      { produtoId: 'produto-1', produto: 'Climatizador', quantidade: 2, receitaBruta: '80.00' },
+      { produtoId: 'produto-1', produto: 'Climatizador', quantidade: 2, receitaBruta: '90.00' },
       { produtoId: 'produto-2', produto: 'Bike', quantidade: 1, receitaBruta: '200.00' },
     ]))
     expect(result.porVariacao).toEqual(expect.arrayContaining([
-      { produtoId: 'produto-1', variacaoId: 'var-1', variacao: '220V', quantidade: 2, receitaBruta: '80.00' },
+      { produtoId: 'produto-1', variacaoId: 'var-1', variacao: '220V', quantidade: 2, receitaBruta: '85.00' },
+      { produtoId: 'produto-1', variacaoId: null, variacao: 'garantia_nao_alocada', quantidade: 0, receitaBruta: '5.00' },
       { produtoId: 'produto-2', variacaoId: null, variacao: 'sem_variacao', quantidade: 1, receitaBruta: '200.00' },
     ]))
     expect(result.porUf).toEqual(expect.arrayContaining([{ uf: 'SP', pedidos: 1, receitaLiquidaComercial: '100.00' }]))
@@ -93,6 +98,9 @@ describe('metricas/vendas', () => {
     ]))
     expect(JSON.stringify(result)).not.toContain('session-gclid')
     expect(JSON.stringify(result)).not.toContain('pedido-gclid')
+    expect(result.porMetodoPagamento.reduce((sum, row) => sum + Number(row.valor), 0)).toBe(300)
+    expect(result.porProduto.reduce((sum, row) => sum + Number(row.receitaBruta), 0)).toBe(Number(result.resumo.receitaBruta))
+    expect(result.porVariacao.reduce((sum, row) => sum + Number(row.receitaBruta), 0)).toBe(Number(result.resumo.receitaBruta))
 
     const orderArgs = pedidoFindMany.mock.calls[0][0]
     expect(orderArgs.where.status.in).toContain('pago')
@@ -101,7 +109,28 @@ describe('metricas/vendas', () => {
     expect(orderArgs.select).not.toHaveProperty('clientIp')
     expect(orderArgs.select.pagamentos.select).not.toHaveProperty('rawResponse')
     expect(eventoFindMany).toHaveBeenCalledTimes(1)
+    expect(eventoFindMany.mock.calls[0][0].where).toEqual({
+      tipo: 'purchase',
+      OR: [
+        { dados: { path: '$.transaction_id', equals: 'pedido-1' } },
+        { dados: { path: '$.transaction_id', equals: 'pedido-2' } },
+      ],
+    })
     expect(pedidoFindMany).toHaveBeenCalledTimes(1)
+  })
+
+  it('correlates purchase attribution by selected order ids across the BRT boundary', async () => {
+    const rows = saleRows()
+    const { definition, eventoFindMany } = metric({ orders: rows, events: [{
+      sessaoId: 'late', dados: { transaction_id: 'pedido-1' },
+      sessao: { utmSource: 'async', utmMedium: 'event', utmCampaign: 'boundary', gclid: null, gbraid: null, wbraid: null },
+    }] })
+
+    const result = await definition.query(context, params)
+
+    expect(result.porAtribuicao).toContainEqual({ origem: 'async', meio: 'event', campanha: 'boundary', canalClickId: 'gclid', pedidos: 1, receitaLiquidaComercial: '100.00' })
+    expect(eventoFindMany.mock.calls[0][0].where).not.toHaveProperty('createdAt')
+    expect(eventoFindMany.mock.calls[0][0].where.OR).toHaveLength(2)
   })
 
   it('includes explicit formulas, timezone and period in the payload', async () => {

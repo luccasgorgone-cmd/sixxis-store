@@ -1,0 +1,104 @@
+# Task 8 report — Métricas Site com fórmulas explícitas
+
+## Estado
+
+✅ Implementado e testado no branch `feat/api-leitura-v1`, BASE `1d1c9b194555ce6330825a50225501052d3e920e`.
+
+Commit local: `929de24` (`feat(api-v1): add documented store metrics`).
+
+## Entrega
+
+- 8 famílias registradas: `vendas`, `funil`, `carrinhos`, `cupons-cashback-fidelidade`, `frete`, `avaliacoes`, `estoque-catalogo`, `clientes`.
+- Query obrigatória `de`, `ate`, `agrupar=dia|semana|mes`; intervalo civil BRT inclusivo, máximo 366 dias; semana começa segunda-feira.
+- Vendas: fórmulas exatas de pedidos pagos, receita bruta, receita líquida comercial, lucro conhecido nullable e ticket; séries e quebras por status MP, método real, produto, variação, UF, cidade e atribuição/canal de click-id.
+- Funil `tracked`: progressão cumulativa sessão → view_item → add_to_cart → begin_checkout → submit → purchase; abandono comercial/ técnico; follow-up posterior à janela evita falso abandono.
+- Carrinhos persistentes e checkout tracked; cupons/cashback/fidelidade; frete selecionado/persistido; avaliações; estoque/catálogo; clientes novos/recorrentes e LTV histórico.
+- Dinheiro em strings decimais; seletores Prisma nominais; número constante de queries por família, sem query por linha; nenhum identificador de cliente/sessão/click-id bruto no payload.
+
+## TDD — RED observado
+
+1. `npm test -- src/lib/api-v1/metricas`
+   - RED esperado: 6 suites falharam por imports ausentes; 0 testes carregados.
+2. `npm test -- src/lib/api-v1/metricas/operacao.test.ts`
+   - RED: 3 testes falharam por séries agrupadas ausentes.
+3. `npm test -- src/lib/api-v1/metricas/operacao.test.ts`
+   - RED: 1 teste falhou porque o seletor buscava `resposta` em vez do relógio seguro `respostaEm`.
+4. `npm test -- src/lib/api-v1/metricas/funil.test.ts`
+   - RED: sessão ativa no período, criada antes, não entrava no denominador.
+5. `npm test -- src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/vendas.test.ts`
+   - RED: 3 testes falharam reproduzindo os achados da revisão: estágios não cumulativos, conversão posterior classificada como abandono e PII livre em cidade.
+
+## GREEN e gates finais
+
+- `npm test -- src/lib/api-v1/metricas`
+  - PASS: 6 arquivos, 30 testes.
+- `npm test`
+  - PASS: 40 arquivos, 873 testes.
+- `npx tsc --noEmit`
+  - PASS, exit 0, sem saída.
+- `npx eslint src/lib/api-v1/metricas`
+  - PASS, exit 0, sem saída.
+- `git diff --cached --check`
+  - PASS, exit 0, sem saída.
+- Pre-commit do commit `929de24`
+  - `prisma generate`, `tsc --noEmit`, suíte 40/873 e eslint staged: PASS.
+  - Build pulado pelo hook por ausência de `DATABASE_URL`, reportado explicitamente.
+- `~/.openclaw/workspace/scripts/review-diff.sh "$PWD" barato-codigo`
+  - Sensor inferencial indisponível nos níveis barato/grátis; degradou sem alterar arquivos.
+- Revisão read-only com GitHub Copilot CLI
+  - 3 achados Medium: funil não cumulativo; abandono sem follow-up; cidade livre sem redação PII.
+  - Todos reproduzidos por testes RED e corrigidos no mesmo fix pass; foco e suíte completa voltaram a verde.
+
+## O que verifiquei
+
+- Limites UTC exatos de dias civis BRT, inclusive transição histórica de DST.
+- Máximo inclusivo de 366 dias e rejeição de parâmetros ausentes/invertidos/inválidos antes da query.
+- Semana de segunda a domingo.
+- Fórmulas monetárias, custo ausente → lucro `null`, agrupamentos e todas as quebras pedidas.
+- Sem PII/click-id bruto nas dimensões agregadas testadas; cidade livre passa pelo redator.
+- Seletores controlados não leem `Pagamento.rawResponse`, conteúdo de resposta de avaliação nem campos PII desnecessários.
+- Escopos: cada métrica declara `read:analytics` ou `read:financeiro`; execução pelo registry exige scope e aceita `read:all` conforme contrato.
+- Consultas em lote/constantes, sem N+1 por pedido, item, sessão ou cliente.
+
+## O que NÃO verifiquei
+
+- Não rodei build Next/Railway: Task 8 não altera rota e o build real exige `DATABASE_URL` válido; permanece gate de rollout da Task 10.
+- Não consultei banco/Railway/produção nem validei cardinalidade/performance com volume real.
+- Router HTTP, OpenAPI, docs e smoke de `/api/v1/metricas/*` pertencem às Tasks 9–10 e ainda não existem neste recorte.
+- O warning Node `DEP0205 module.register()` aparece no Vitest e é baseline externo; não houve falha.
+
+## Fix round 1/5 — achados Important da revisão
+
+### Correções
+
+- Frete: `shipping_tier` e transportadora agora aceitam somente rótulos operacionais conhecidos; valores livres caem em `outra`, sem emitir e-mail, telefone ou nome. Rótulos úteis como `Normal` e `Braspress` permanecem.
+- Funil/carrinhos: a consulta do período carrega todos os tipos de atividade para o denominador e relógio de inatividade; estágios continuam restritos à sequência do funil. Follow-up histórico é limitado às sessões com `begin_checkout` e ao intervalo até `now`.
+- Método de pagamento: somente pernas `approved|captured` entram na quebra por método; tentativas rejeitadas permanecem apenas na quebra por status.
+- Clientes: cada comprador aparece em todo bucket em que comprou; primeira compra histórica classifica como novo apenas no bucket inicial e como recorrente nos posteriores.
+- Atribuição: eventos `purchase` são correlacionados fora da fronteira BRT por filtros JSON exatos de `transaction_id`, em lotes de no máximo 200 IDs vindos dos pedidos pagos selecionados; nenhum scan livre é feito.
+- Produto/variação: garantia é alocada ao produto por `GarantiaEstendida.produtoId`; usa `pedidoItemId` para a variação quando possível e o bucket explícito `garantia_nao_alocada` quando não. As duas quebras reconciliam com receita bruta.
+- Seletores não utilizados `Pedido.clienteId` e `Pedido.status` foram removidos da leitura de vendas.
+
+### TDD — RED observado
+
+- `npx vitest run src/lib/api-v1/metricas/vendas.test.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.test.ts src/lib/api-v1/metricas/clientes.test.ts`
+  - RED esperado: 4 arquivos falharam; 7 testes falharam e 15 passaram.
+  - Reproduzidos: comprador ausente no segundo bucket; `tipo` ainda restringindo atividade/follow-up; falso abandono após `search`; PII bruto no frete; rejeição contando como método; atribuição presa à janela; garantias ausentes das quebras.
+
+### GREEN e gates finais do fix
+
+- `npx vitest run src/lib/api-v1/metricas/vendas.test.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.test.ts src/lib/api-v1/metricas/clientes.test.ts`
+  - PASS: 4 arquivos, 22 testes.
+- `npx vitest run`
+  - PASS: 40 arquivos, 878 testes.
+- `npx tsc --noEmit`
+  - PASS, exit 0, sem saída.
+- `npx eslint src/lib/api-v1/metricas/vendas.ts src/lib/api-v1/metricas/vendas.test.ts src/lib/api-v1/metricas/funil.ts src/lib/api-v1/metricas/funil.test.ts src/lib/api-v1/metricas/operacao.ts src/lib/api-v1/metricas/operacao.test.ts src/lib/api-v1/metricas/clientes.ts src/lib/api-v1/metricas/clientes.test.ts`
+  - PASS, exit 0, sem saída.
+- `git diff --check`
+  - PASS, exit 0, sem saída.
+
+### Verificado / não verificado
+
+- Verificado por testes: ausência dos valores PII de nome/e-mail/telefone no frete; atividade não-funil sem avançar estágio; pagamento rejeitado fora do método; buyer por bucket; query de atribuição limitada por IDs; somas de produto e variação iguais à receita bruta.
+- Não verificado: cardinalidade/performance em banco real e smoke HTTP permanecem fora desta rodada; expansão detalhada dos schemas/OpenAPI segue para Task 10 e otimização de escala do LTV permanece deferida.

@@ -42,4 +42,28 @@ describe('metricas/clientes', () => {
     expect(result.resumo.ltvMedio).toBe('0.00')
     expect(findMany).toHaveBeenCalledTimes(1)
   })
+
+  it('counts a buyer in every bucket where they purchased and applies history semantics per bucket', async () => {
+    const multiDay = parseMetricParams(new URLSearchParams({ de: '2026-11-15', ate: '2026-11-16', agrupar: 'dia' }))
+    const findMany = vi.fn()
+      .mockResolvedValueOnce([
+        { clienteId: 'c1', total: D('10'), createdAt: new Date('2026-11-15T12:00:00Z') },
+        { clienteId: 'c1', total: D('20'), createdAt: new Date('2026-11-16T12:00:00Z') },
+        { clienteId: 'c2', total: D('30'), createdAt: new Date('2026-11-16T13:00:00Z') },
+      ])
+      .mockResolvedValueOnce([
+        { clienteId: 'c1', total: D('5'), createdAt: new Date('2026-10-01T12:00:00Z') },
+        { clienteId: 'c1', total: D('10'), createdAt: new Date('2026-11-15T12:00:00Z') },
+        { clienteId: 'c1', total: D('20'), createdAt: new Date('2026-11-16T12:00:00Z') },
+        { clienteId: 'c2', total: D('30'), createdAt: new Date('2026-11-16T13:00:00Z') },
+      ])
+    const definition = createClientesMetric({ prisma: { pedido: { findMany } } as never })
+
+    const result = await definition.query(context, multiDay)
+
+    expect(result.serie).toEqual([
+      { bucket: '2026-11-15', clientesCompradores: 1, novos: 0, recorrentes: 1 },
+      { bucket: '2026-11-16', clientesCompradores: 2, novos: 1, recorrentes: 1 },
+    ])
+  })
 })

@@ -48,7 +48,7 @@ export function createCarrinhosMetric(options: StoreMetricOptions = {}): MetricD
           where: { atualizadoEm: { gte: params.from, lt: params.toExclusive } },
           select: { status: true, etapaAtual: true, valorTotal: true, itens: true, atualizadoEm: true },
         }),
-        loadPeriodAndFollowupEvents(client, params, now, ['begin_checkout', 'checkout_payment_outcome', 'purchase']),
+        loadPeriodAndFollowupEvents(client, params, now),
       ])
       const carts = rawCarts as unknown as CartRow[]
       const cutoff = now.getTime() - 60 * 60 * 1000
@@ -200,7 +200,19 @@ type ShippingEvent = { valor: number | null; dados: unknown; createdAt: Date }
 
 function shippingTier(dados: unknown): string {
   if (!dados || typeof dados !== 'object' || Array.isArray(dados)) return 'nao_informada'
-  return aggregateLabel((dados as Record<string, unknown>).shipping_tier, 'nao_informada', true)
+  return safeShippingLabel((dados as Record<string, unknown>).shipping_tier, 'nao_informada')
+}
+
+const SAFE_SHIPPING_LABELS = new Set([
+  'normal', 'expresso', 'expressa', 'economico', 'econômico', 'retirada', 'frete gratis', 'frete grátis',
+  'correios', 'sedex', 'pac', 'braspress', 'jadlog', 'loggi', 'melhor envio', 'total express',
+  'azul cargo', 'latam cargo', 'j&t express',
+])
+
+function safeShippingLabel(value: unknown, fallback: string): string {
+  if (typeof value !== 'string') return fallback
+  const trimmed = value.trim().slice(0, 200)
+  return SAFE_SHIPPING_LABELS.has(trimmed.toLocaleLowerCase('pt-BR')) ? trimmed : 'outra'
 }
 
 export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefinition<Record<string, unknown> & {
@@ -242,7 +254,7 @@ export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefin
         if (realCost === null) allCostKnown = false
         else cost = cost.plus(realCost)
         if (order.fretePrazo !== null) { prazoSum += order.fretePrazo; prazoCount += 1 }
-        const carrierName = aggregateLabel(order.transportadora, 'nao_informada', true)
+        const carrierName = safeShippingLabel(order.transportadora, 'nao_informada')
         const carrier = carriers.get(carrierName) ?? { count: 0, freight: decimalValue(0), prazoSum: 0, prazoCount: 0 }
         carrier.count += 1
         carrier.freight = carrier.freight.plus(charged)

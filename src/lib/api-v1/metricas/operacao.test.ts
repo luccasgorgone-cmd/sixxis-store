@@ -31,6 +31,23 @@ describe('metricas/carrinhos', () => {
     expect(result.persistentes.porEtapa).toEqual(expect.arrayContaining([{ etapa: 4, carrinhos: 1, valorTotal: '300.00' }]))
     expect(result.checkoutTracked.abandono).toEqual({ comercial: 0, tecnico: 1, emAndamento: 0 })
   })
+
+  it('uses recent non-funnel activity to avoid false commercial abandonment', async () => {
+    const eventoFindMany = vi.fn().mockResolvedValue([
+      { sessaoId: 'active', tipo: 'begin_checkout', dados: null, createdAt: new Date('2026-11-16T15:00:00Z') },
+      { sessaoId: 'active', tipo: 'search', dados: null, createdAt: new Date('2026-11-16T17:30:00Z') },
+    ])
+    const definition = createCarrinhosMetric({ prisma: {
+      carrinhoCliente: { findMany: vi.fn().mockResolvedValue([]) },
+      eventoTracking: { findMany: eventoFindMany },
+    } as never, now: () => new Date('2026-11-16T18:00:00Z') })
+
+    const result = await definition.query(context, params)
+
+    expect(result.checkoutTracked.abandono).toEqual({ comercial: 0, tecnico: 0, emAndamento: 1 })
+    expect(eventoFindMany.mock.calls[0][0].where).not.toHaveProperty('tipo')
+    expect(eventoFindMany).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('metricas/cupons-cashback-fidelidade', () => {
@@ -85,6 +102,30 @@ describe('metricas/frete', () => {
     expect(result.serie).toEqual([{ bucket: '2026-11-16', selecoesTracked: 1, pedidosPagos: 2, freteCobrado: '25.00', custoRealConhecido: null }])
     expect(result.limitacoes).toContain('cotações ofertadas não são persistidas')
     expect(pedidoFindMany.mock.calls[0][0].select).toEqual({ frete: true, fretePrazo: true, transportadora: true, freteTipo: true, custoFreteReal: true, createdAt: true })
+  })
+
+  it('keeps useful known labels but never emits PII from free-form shipping dimensions', async () => {
+    const definition = createFreteMetric({ prisma: {
+      pedido: { findMany: vi.fn().mockResolvedValue([
+        { frete: D('10'), fretePrazo: 2, transportadora: 'Braspress', freteTipo: 'normal', custoFreteReal: D('8'), createdAt: new Date('2026-11-16T12:00:00Z') },
+        { frete: D('20'), fretePrazo: 3, transportadora: 'Luccas Gorgone victim@example.com 11999998888', freteTipo: 'normal', custoFreteReal: D('15'), createdAt: new Date('2026-11-16T13:00:00Z') },
+      ]) },
+      eventoTracking: { findMany: vi.fn().mockResolvedValue([
+        { valor: 100, dados: { shipping_tier: 'Normal' }, createdAt: new Date('2026-11-16T11:00:00Z') },
+        { valor: 200, dados: { shipping_tier: 'Maria Silva maria@example.com 11988887777' }, createdAt: new Date('2026-11-16T11:30:00Z') },
+      ]) },
+    } as never })
+
+    const result = await definition.query(context, params)
+    const serialized = JSON.stringify(result)
+
+    expect(serialized).toContain('Braspress')
+    expect(serialized).toContain('Normal')
+    expect(serialized).not.toContain('Luccas')
+    expect(serialized).not.toContain('Maria')
+    expect(serialized).not.toContain('example.com')
+    expect(serialized).not.toContain('11999998888')
+    expect(serialized).not.toContain('11988887777')
   })
 })
 

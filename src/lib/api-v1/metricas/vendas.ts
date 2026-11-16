@@ -15,6 +15,7 @@ import {
 } from './tempo'
 
 type OrderItem = {
+  id: string
   produtoId: string
   quantidade: number
   precoUnitario: unknown
@@ -25,8 +26,6 @@ type OrderItem = {
 }
 type SaleOrder = {
   id: string
-  clienteId: string
-  status: string
   total: unknown
   createdAt: Date
   mpTaxaReal: unknown
@@ -36,7 +35,7 @@ type SaleOrder = {
   wbraid: string | null
   fbc: string | null
   itens: OrderItem[]
-  garantias: { valorPago: unknown }[]
+  garantias: { produtoId: string; pedidoItemId: string | null; valorPago: unknown; produto: { nome: string } }[]
   pagamentos: { mpStatus: string; metodo: string; valor: number }[]
   endereco: { estado: string; cidade: string }
 }
@@ -62,6 +61,8 @@ type SalesAccumulator = {
 }
 
 const zero = () => decimalValue(0)
+const ATTRIBUTION_QUERY_BATCH = 200
+const SUCCESSFUL_PAYMENT_STATUSES = new Set(['approved', 'captured'])
 const salesSchema = {
   type: 'object',
   required: ['timezone', 'periodo', 'definicoes', 'resumo', 'serie', 'porStatusPagamento', 'porMetodoPagamento', 'porProduto', 'porVariacao', 'porUf', 'porCidade', 'porAtribuicao'],
@@ -149,25 +150,27 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
     schema: salesSchema,
     async query(_ctx: ApiContext, params: MetricParams) {
       const client = await db(options)
-      const [rawOrders, rawEvents] = await Promise.all([
-        client.pedido.findMany({
+      const rawOrders = await client.pedido.findMany({
           where: { createdAt: { gte: params.from, lt: params.toExclusive }, status: { in: STATUS_PAGO_TODOS } },
           select: {
-            id: true, clienteId: true, status: true, total: true, createdAt: true, mpTaxaReal: true, custoFreteReal: true,
+            id: true, total: true, createdAt: true, mpTaxaReal: true, custoFreteReal: true,
             gclid: true, gbraid: true, wbraid: true, fbc: true,
-            itens: { select: { produtoId: true, quantidade: true, precoUnitario: true, custoUnitario: true, variacaoId: true, variacaoNome: true, produto: { select: { nome: true } } } },
-            garantias: { select: { valorPago: true } },
+            itens: { select: { id: true, produtoId: true, quantidade: true, precoUnitario: true, custoUnitario: true, variacaoId: true, variacaoNome: true, produto: { select: { nome: true } } } },
+            garantias: { select: { produtoId: true, pedidoItemId: true, valorPago: true, produto: { select: { nome: true } } } },
             pagamentos: { select: { mpStatus: true, metodo: true, valor: true } },
             endereco: { select: { estado: true, cidade: true } },
           },
-        }),
-        client.eventoTracking.findMany({
-          where: { tipo: 'purchase', createdAt: { gte: params.from, lt: params.toExclusive } },
-          select: { dados: true, sessao: { select: { utmSource: true, utmMedium: true, utmCampaign: true, gclid: true, gbraid: true, wbraid: true } } },
-        }),
-      ])
+        })
       const orders = rawOrders as unknown as SaleOrder[]
-      const events = rawEvents as unknown as PurchaseEvent[]
+      const eventQueries = []
+      for (let index = 0; index < orders.length; index += ATTRIBUTION_QUERY_BATCH) {
+        const ids = orders.slice(index, index + ATTRIBUTION_QUERY_BATCH).map(order => order.id)
+        eventQueries.push(client.eventoTracking.findMany({
+          where: { tipo: 'purchase', OR: ids.map(id => ({ dados: { path: '$.transaction_id', equals: id } })) },
+          select: { dados: true, sessao: { select: { utmSource: true, utmMedium: true, utmCampaign: true, gclid: true, gbraid: true, wbraid: true } } },
+        }))
+      }
+      const events = (await Promise.all(eventQueries)).flat() as unknown as PurchaseEvent[]
       const eventByOrder = new Map<string, PurchaseEvent>()
       for (const event of events) {
         const id = transactionId(event.dados)
@@ -192,11 +195,12 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
         for (const payment of order.pagamentos) {
           const value = decimalValue(payment.valor).div(100)
           addMoneyCount(paymentStatus, aggregateLabel(payment.mpStatus, 'desconhecido'), value)
-          addMoneyCount(paymentMethod, aggregateLabel(payment.metodo, 'desconhecido'), value)
+          if (SUCCESSFUL_PAYMENT_STATUSES.has(payment.mpStatus.toLocaleLowerCase())) {
+            addMoneyCount(paymentMethod, aggregateLabel(payment.metodo, 'desconhecido'), value)
+          }
         }
         if (order.pagamentos.length === 0) {
           addMoneyCount(paymentStatus, 'sem_pagamento_registrado', zero())
-          addMoneyCount(paymentMethod, 'sem_pagamento_registrado', zero())
         }
         for (const item of order.itens) {
           const itemRevenue = decimalValue(item.precoUnitario).mul(item.quantidade)
@@ -208,6 +212,20 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
           const variation = variations.get(variationKey) ?? { produtoId: item.produtoId, variacaoId: item.variacaoId, variacao: aggregateLabel(item.variacaoNome, 'sem_variacao', true), quantidade: 0, receita: zero() }
           variation.quantidade += item.quantidade
           variation.receita = variation.receita.plus(itemRevenue)
+          variations.set(variationKey, variation)
+        }
+        const itemById = new Map(order.itens.map(item => [item.id, item]))
+        for (const warranty of order.garantias) {
+          const warrantyRevenue = decimalValue(warranty.valorPago)
+          const product = products.get(warranty.produtoId) ?? { produtoId: warranty.produtoId, produto: aggregateLabel(warranty.produto.nome, 'produto_sem_nome', true), quantidade: 0, receita: zero() }
+          product.receita = product.receita.plus(warrantyRevenue)
+          products.set(warranty.produtoId, product)
+          const item = warranty.pedidoItemId ? itemById.get(warranty.pedidoItemId) : undefined
+          const variationId = item?.variacaoId ?? null
+          const variationName = item ? aggregateLabel(item.variacaoNome, 'sem_variacao', true) : 'garantia_nao_alocada'
+          const variationKey = item ? `${warranty.produtoId}:${variationId ?? ''}` : `${warranty.produtoId}:garantia_nao_alocada`
+          const variation = variations.get(variationKey) ?? { produtoId: warranty.produtoId, variacaoId: variationId, variacao: variationName, quantidade: 0, receita: zero() }
+          variation.receita = variation.receita.plus(warrantyRevenue)
           variations.set(variationKey, variation)
         }
         const net = decimalValue(order.total)
@@ -243,6 +261,8 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
         receitaLiquidaComercial: 'Σ(Pedido.total) dos pedidos pagos.',
         lucroLiquidoConhecido: 'Σ(Pedido.total − mpTaxaReal − custoFreteReal − Σ(ItemPedido.custoUnitario × quantidade)); null se qualquer entrada de custo conhecida estiver ausente.',
         ticketMedio: 'receitaLiquidaComercial ÷ pedidosPagos.',
+        metodoPagamento: 'Somente pernas reais com mpStatus approved|captured; tentativas rejeitadas permanecem apenas na quebra de status.',
+        produtoVariacao: 'Garantias compõem o produto por GarantiaEstendida.produtoId; na variação usam pedidoItemId quando disponível e garantia_nao_alocada quando ausente.',
         atribuicao: 'EventoTracking tipo purchase liga dados.transaction_id ao Pedido e à SessaoVisitante; sem ligação, origem=nao_atribuida. Click ids saem apenas como canal agregado, nunca em valor bruto.',
       }
       return {

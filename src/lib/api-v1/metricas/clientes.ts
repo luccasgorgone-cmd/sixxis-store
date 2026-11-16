@@ -40,22 +40,26 @@ export function createClientesMetric(options: StoreMetricOptions = {}): MetricDe
         const current = firstPaid.get(order.clienteId)
         if (!current || order.createdAt < current) firstPaid.set(order.clienteId, order.createdAt)
       }
-      const firstInPeriod = new Map<string, Date>()
-      for (const order of periodOrders) {
-        const current = firstInPeriod.get(order.clienteId)
-        if (!current || order.createdAt < current) firstInPeriod.set(order.clienteId, order.createdAt)
-      }
       const isNew = (customerId: string) => {
         const first = firstPaid.get(customerId)
         return !!first && first >= params.from && first < params.toExclusive
       }
       const novos = customerIds.filter(isNew).length
       const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, clientesCompradores: 0, novos: 0, recorrentes: 0 }]))
-      for (const [customerId, firstOrder] of firstInPeriod) {
-        const bucket = series.get(bucketForInstant(firstOrder, params.agrupar))!
-        bucket.clientesCompradores += 1
-        if (isNew(customerId)) bucket.novos += 1
-        else bucket.recorrentes += 1
+      const buyersByBucket = new Map<string, Set<string>>()
+      for (const order of periodOrders) {
+        const bucket = bucketForInstant(order.createdAt, params.agrupar)
+        const buyers = buyersByBucket.get(bucket) ?? new Set<string>()
+        buyers.add(order.clienteId)
+        buyersByBucket.set(bucket, buyers)
+      }
+      for (const [bucketName, buyers] of buyersByBucket) {
+        const bucket = series.get(bucketName)!
+        for (const customerId of buyers) {
+          bucket.clientesCompradores += 1
+          if (isNew(customerId) && bucketForInstant(firstPaid.get(customerId)!, params.agrupar) === bucketName) bucket.novos += 1
+          else bucket.recorrentes += 1
+        }
       }
       const definicoes = {
         clienteComprador: 'Cliente distinto com Pedido.status pago|enviado|entregue e Pedido.createdAt no período BRT.',

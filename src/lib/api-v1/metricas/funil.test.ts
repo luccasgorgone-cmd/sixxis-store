@@ -117,7 +117,25 @@ describe('metricas/funil', () => {
     expect(eventoFindMany).toHaveBeenCalledTimes(2)
     expect(eventoFindMany.mock.calls[1][0].where).toMatchObject({
       sessaoId: { in: ['late-conversion'] },
-      tipo: { in: ['checkout_payment_outcome', 'purchase'] },
     })
+    expect(eventoFindMany.mock.calls[1][0].where).not.toHaveProperty('tipo')
+  })
+
+  it('counts an old session active through page_view and uses later search as its activity clock only', async () => {
+    const eventoFindMany = vi.fn().mockResolvedValue([
+        { sessaoId: 'old-active', tipo: 'page_view', dados: null, createdAt: at('12:00') },
+        { sessaoId: 'checkout-active', tipo: 'begin_checkout', dados: null, createdAt: at('15:00') },
+        { sessaoId: 'checkout-active', tipo: 'search', dados: null, createdAt: at('17:30') },
+      ])
+    const definition = createFunilMetric({ prisma: {
+      sessaoVisitante: { findMany: vi.fn().mockResolvedValue([]) },
+      eventoTracking: { findMany: eventoFindMany },
+    } as never, now: () => at('18:00') })
+
+    const result = await definition.query(context, params)
+
+    expect(result.etapas.map(stage => stage.sessoes)).toEqual([2, 0, 0, 0, 0, 0])
+    expect(result.abandonoCheckout).toEqual({ comercial: 0, tecnico: 0, emAndamento: 1 })
+    expect(eventoFindMany.mock.calls[0][0].where).not.toHaveProperty('tipo')
   })
 })
