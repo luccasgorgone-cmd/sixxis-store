@@ -8,7 +8,7 @@ const normalizedKey = (key: string) => key.normalize('NFKD').replace(/[\u0300-\u
 const forbidden = /(?:senha|password|passwd|secret|token|hash|salt|apikey|privatekey|authorization|cookie|credential|credencial|cvv|cvc|cardnumber|numerocartao|^pan$|pannumber|qrcode|pixcopiaecola|pixcopiacola|rawresponse|proximaacao|idempotencykey|instanceid|apiurl|pagamentoemprocessamentoem)/
 export function isForbiddenKey(key: string): boolean {
   const normalized = normalizedKey(key)
-  // Only the numeric counter is exempt; walk/redactAssignments enforce its value type.
+  // Only the optional numeric usage counter is exempt; walk/redactAssignments enforce its value type.
   return normalized !== 'tokens' && forbidden.test(normalized)
 }
 
@@ -51,8 +51,10 @@ export const maskCnpj = scalarMask(value => {
 })
 
 const messageKeys = new Set(['mensagem', 'mensagens', 'conteudo', 'content', 'copy', 'message', 'messages'])
+const maskRecipient: Mask = value => typeof value === 'string' && value.includes('@') ? maskEmail(value) : maskPhone(value)
 function piiMask(key: string): Mask | null {
-  if (/^(?:email|emailautor|emailcliente|payeremail|destinatario|recipient)$/.test(key)) return maskEmail
+  if (/^(?:destinatario|recipient)$/.test(key)) return maskRecipient
+  if (/^(?:email|emailautor|emailcliente|payeremail)$/.test(key)) return maskEmail
   if (/^(?:telefone|celular|phone|whatsapp|whatsappnumero|payerphone)$/.test(key)) return maskPhone
   if (/^(?:cpf|payercpf)$/.test(key)) return maskCpf
   if (/^(?:cnpj|payercnpj)$/.test(key)) return maskCnpj
@@ -95,7 +97,7 @@ function looksLikePan(digits: string): boolean {
   return /^\d{13,19}$/.test(digits) && /^(?:4|[56]\d|2[2-7]|3(?:0[0-5]|[4-9]))/.test(digits) && luhn(digits)
 }
 
-const isUsageCounter = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
+const isUsageCounter = (value: unknown): value is number | null => value === null || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0)
 
 /** Consume scalar assignments with escaped quotes intact; discard ambiguous structures. */
 function redactAssignments(value: string): string {

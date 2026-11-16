@@ -224,7 +224,7 @@ describe('absolute secret and payment redaction', () => {
     for (const secret of ['private-credential', 'prefix', 'suffix', 'accessToken', 'password']) expect(result).not.toContain(secret)
   })
 
-  it.each(['private-credential', '128', { value: 'private-credential' }, ['private-credential'], null, -1, 0.5])('fix round 1: excludes non-counter tokens value %s', tokens => {
+  it.each(['private-credential', '128', { value: 'private-credential' }, ['private-credential'], -1, 0.5])('fix round 1: excludes non-counter tokens value %s', tokens => {
     expect(redactValue({ tokens, nested: [{ tokens }], id: 'safe' }, full)).toEqual({ nested: [{}], id: 'safe' })
     const prose = `debug ${JSON.stringify({ tokens })} end`
     expect(String(redactValue(prose, full))).not.toContain('tokens')
@@ -232,6 +232,10 @@ describe('absolute secret and payment redaction', () => {
 
   it.each([0, 128, Number.MAX_SAFE_INTEGER])('fix round 1: preserves safe nonnegative integer usage count %s', tokens => {
     expect(redactValue({ tokens }, full)).toEqual({ tokens })
+  })
+
+  it('preserves null for the optional Luna usage counter, never a credential value', () => {
+    expect(redactValue({ tokens: null, nested: { tokens: null, token: 'private-credential' } }, full)).toEqual({ tokens: null, nested: { tokens: null } })
   })
 
   it.each([maskName, maskEmail, maskPhone, maskCpf, maskCnpj, maskAddress, maskIp, maskIdentifier])('fix round 1: mask never coerces a PII object or array', mask => {

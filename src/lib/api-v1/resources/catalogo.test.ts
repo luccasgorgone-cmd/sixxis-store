@@ -79,9 +79,10 @@ describe('catalog resource allowlists', () => {
     const detail = await executeItem({ ...def, adapter: { ...def.adapter, findFirst: async () => structured } }, context(['read:catalogo']), 'id')
     expect(JSON.parse(detail.data.descricao as string)).toEqual({ nome: 'Climatizador Sixxis', detalhe: '[REDACTED]' })
   })
-  it('requires explicit read:financeiro for product costs and uses strings for money/dimensions', () => {
+  it('requires effective read:financeiro for product costs and uses strings for money/dimensions', () => {
     const def = get('Produto'), raw = { ...fixture('Produto'), custoProduto: new Prisma.Decimal('123.456'), preco: new Prisma.Decimal('123.456'), pesoKg: new Prisma.Decimal('123.456'), alturaCm: new Prisma.Decimal('123.456') }
-    for (const scopes of [['read:catalogo'], ['read:all']] as const) expect(def.serialize(raw, context([...scopes]))).not.toHaveProperty('custoProduto')
+    expect(def.serialize(raw, context(['read:catalogo']))).not.toHaveProperty('custoProduto')
+    expect(def.serialize(raw, context(['read:all']))).toHaveProperty('custoProduto', '123.46')
     expect(def.serialize(raw, context())).toMatchObject({ custoProduto: '123.46', preco: '123.46', pesoKg: '123.456', alturaCm: '123.456' })
   })
   it('masks author/partner PII but leaves public category/payment/variant/tier names intact', () => {

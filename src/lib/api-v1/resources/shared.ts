@@ -26,8 +26,8 @@ export function decimal(value: unknown): string | null {
 /** Pure resource sanitization also protects callers that do not use the HTTP engine. */
 export function safeRecord(record: ResourceRow, ctx: ApiContext, publicFields: readonly string[] = [], financeFields: readonly string[] = [], extraPii: readonly string[] = []): ResourceRow {
   const options = { allowPii: !!ctx.identity && hasScope(ctx.identity, 'read:pii'), allowMessages: !!ctx.identity && hasScope(ctx.identity, 'read:mensagens') }
-  // Financial costs require the explicit permission: a domain wildcard is not a cost grant.
-  for (const field of financeFields) if (!ctx.identity?.scopes.has('read:financeiro')) delete record[field]
+  // Finance is a domain permission, also granted by read:all; PII/messages remain additive.
+  for (const field of financeFields) if (!ctx.identity || !hasScope(ctx.identity, 'read:financeiro')) delete record[field]
   if (!options.allowPii) for (const field of extraPii) record[field] = maskIdentifier(record[field])
   const result = redactValue(record, options) as ResourceRow
   for (const field of publicFields) if (Object.hasOwn(record, field)) {

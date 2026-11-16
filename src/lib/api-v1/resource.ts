@@ -10,7 +10,7 @@ import type { ApiContext, ApiScope, ItemEnvelope, ListEnvelope, ListQuery } from
 /** JSON-compatible value shape shared by field metadata and the OpenAPI generator. */
 export type FieldSchema = { type: 'string'|'number'|'integer'|'boolean'|'object'|'array'; format?: string; nullable?: boolean; enum?: readonly string[]; items?: FieldSchema; properties?: Record<string,FieldSchema>; required?: readonly string[] }
 export type FieldDefinition = FieldSchema & { name: string; description?: string; scope?: ApiScope; example?: unknown }
-export type FilterDefinition = { field?: string; type: 'string'|'number'|'boolean'; values?: readonly string[]; mode?: 'equals'|'contains'; description?: string }
+export type FilterDefinition = { field?: string; type: 'string'|'number'|'boolean'; values?: readonly string[]; mode?: 'equals'|'contains'|'arrayContains'; description?: string }
 export type ExpandDefinition = { name:string; relation?:string; many:boolean; resource:()=>ResourceDefinition; scope?:ApiScope; description?:string }
 export type ResourceQueryArgs = { where:Record<string,unknown>; select:Record<string,unknown>; orderBy:Record<string,'asc'|'desc'>[]; take:number }
 export type ResourceDefinition<T extends Record<string, unknown> = Record<string, unknown>> = {
@@ -98,7 +98,16 @@ function serializeExpanded<T extends Record<string, unknown>>(def:ResourceDefini
   }
   return result
 }
+/** Only nominal definition paths enter Prisma, never URL keys or client-supplied objects. */
+export function assertFilterDefinitions(def:Pick<ResourceDefinition,'filters'>):void {
+  const reserved = new Set(['__proto__', 'prototype', 'constructor', 'AND', 'OR', 'NOT', 'every', 'none', 'is', 'isNot'])
+  for (const [name, filter] of Object.entries(def.filters ?? {})) {
+    const path = (filter.field ?? name).split('.')
+    if (!/^[a-z][a-zA-Z0-9]*$/.test(name) || reserved.has(name) || path.length > 3 || path.some((part, i) => !/^[a-z][a-zA-Z0-9]*$/.test(part) || reserved.has(part) || (part === 'some' && (i !== 1 || path.length !== 3))) || (filter.mode && !['equals', 'contains', 'arrayContains'].includes(filter.mode))) throw new TypeError('Invalid nominal filter definition')
+  }
+}
 export function buildResourceWhere(def:ResourceDefinition,q:ListQuery):Record<string,unknown> {
+  assertFilterDefinitions(def)
   const conditions:Record<string,unknown>[]=[]
   if (q.ids) conditions.push({id:{in:q.ids}})
   for (const [kind,from,to] of [['created','criadoDesde','criadoAte'],['updated','atualizadoDesde','atualizadoAte']] as const) {
@@ -106,10 +115,13 @@ export function buildResourceWhere(def:ResourceDefinition,q:ListQuery):Record<st
     if (field&&(q[from]||q[to])) conditions.push({[field]:{...(q[from]?{gte:q[from]}:{}),...(q[to]?{lte:q[to]}:{})}})
   }
   for (const [name,values] of Object.entries(q.filters)) {
+    if (!Object.hasOwn(def.filters ?? {}, name)) throw new ApiQueryError(400)
     const filter=def.filters![name], field=filter.field??name
+    const nested=(value:unknown):Record<string,unknown> => field.split('.').reduceRight<unknown>((child,part)=>({[part]:child}),value) as Record<string,unknown>
     const typed=values.map(value=>filter.type==='boolean'?value==='true':filter.type==='number'?Number(value):value)
-    if (filter.mode==='contains') conditions.push({OR:typed.map(value=>({[field]:{contains:value}}))})
-    else conditions.push({[field]:typed.length===1?typed[0]:{in:typed}})
+    if (filter.mode==='contains') conditions.push({OR:typed.map(value=>nested({contains:value}))})
+    else if (filter.mode==='arrayContains') conditions.push({OR:typed.map(value=>nested({array_contains:value}))})
+    else conditions.push(nested(typed.length===1?typed[0]:{in:typed}))
   }
   if (q.q) conditions.push({OR:def.searchFields!.map(field=>({[field]:{contains:q.q}}))})
   return {AND:conditions}
