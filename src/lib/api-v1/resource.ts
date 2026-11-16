@@ -7,7 +7,9 @@ import { ApiQueryError, validateListQuery } from './query'
 import { isForbiddenKey, redactValue } from './redact'
 import type { ApiContext, ApiScope, ItemEnvelope, ListEnvelope, ListQuery } from './types'
 
-export type FieldDefinition = { name: string; type: 'string'|'number'|'integer'|'boolean'|'object'|'array'; format?: string; description?: string; nullable?: boolean; enum?: readonly string[]; scope?: ApiScope; example?: unknown }
+/** JSON-compatible value shape shared by field metadata and the OpenAPI generator. */
+export type FieldSchema = { type: 'string'|'number'|'integer'|'boolean'|'object'|'array'; format?: string; nullable?: boolean; enum?: readonly string[]; items?: FieldSchema; properties?: Record<string,FieldSchema>; required?: readonly string[] }
+export type FieldDefinition = FieldSchema & { name: string; description?: string; scope?: ApiScope; example?: unknown }
 export type FilterDefinition = { field?: string; type: 'string'|'number'|'boolean'; values?: readonly string[]; mode?: 'equals'|'contains'; description?: string }
 export type ExpandDefinition = { name:string; relation?:string; many:boolean; resource:()=>ResourceDefinition; scope?:ApiScope; description?:string }
 export type ResourceQueryArgs = { where:Record<string,unknown>; select:Record<string,unknown>; orderBy:Record<string,'asc'|'desc'>[]; take:number }

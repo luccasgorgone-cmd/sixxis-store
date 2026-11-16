@@ -6,6 +6,21 @@ import { executeItem, executeList, type ResourceDefinition, type ResourceQueryAr
 import { parseListQuery } from '../query'
 
 export const options = { cursorSecret: 'task-five-test-only-cursor-secret-at-least-32-chars' }
+// JSON columns use their application shapes, not one generic object for every model.
+const jsonValues: Record<string, unknown> = {
+  'Produto.imagens': ['https://media.example.test/Produto.imagens.SENTINEL.webp?token=DO-NOT-LEAK'],
+  'Produto.especificacoes': [{ label: 'Produto.especificacoes.label.SENTINEL', valor: 'Produto.especificacoes.valor.SENTINEL', token: 'DO-NOT-LEAK' }],
+  'Produto.faqs': [{ pergunta: 'Produto.faqs.pergunta.SENTINEL', resposta: 'Produto.faqs.resposta.SENTINEL token=DO-NOT-LEAK' }],
+  'Produto.imagensPorVariacao': { Branco: ['https://media.example.test/Produto.imagensPorVariacao.SENTINEL.webp'], token: 'DO-NOT-LEAK' },
+  'PopupInicial.paginas': ['home', 'produtos', '*'],
+}
+const expectedJson: Record<string, unknown> = {
+  'Produto.imagens': ['https://media.example.test/Produto.imagens.SENTINEL.webp?[REDACTED]'],
+  'Produto.especificacoes': [{ label: 'Produto.especificacoes.label.SENTINEL', valor: 'Produto.especificacoes.valor.SENTINEL' }],
+  'Produto.faqs': [{ pergunta: 'Produto.faqs.pergunta.SENTINEL', resposta: 'Produto.faqs.resposta.SENTINEL [REDACTED]' }],
+  'Produto.imagensPorVariacao': { Branco: ['https://media.example.test/Produto.imagensPorVariacao.SENTINEL.webp'] },
+  'PopupInicial.paginas': ['home', 'produtos', '*'],
+}
 export function context(scopes: ApiScope[] = ['read:all', 'read:pii', 'read:financeiro', 'read:mensagens']): ApiContext {
   return { requestId: 'task-five', identity: { id: 'key', nome: 'test', prefixo: 'test', scopes: new Set(scopes), expiraEm: null }, ip: '', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 1 } }
 }
@@ -15,7 +30,7 @@ export function fixture(model: string): Record<string, unknown> {
     field.type === 'DateTime' ? new Date(Date.UTC(2026, 0, 1, 0, 0, i)) :
       field.type === 'Decimal' ? new Prisma.Decimal(`${100 + i}.456`) :
         field.type === 'Int' ? i + 1 : field.type === 'Float' ? 100 + i + 0.456 : field.type === 'Boolean' ? true :
-          field.type === 'Json' ? { sentinel: `${model}.${field.name}`, token: 'DO-NOT-LEAK', nested: { email: 'alice@example.test' } } :
+          field.type === 'Json' ? structuredClone(jsonValues[`${model}.${field.name}`] ?? { sentinel: `${model}.${field.name}`, token: 'DO-NOT-LEAK', nested: { email: 'alice@example.test' } }) :
             field.name === 'chave' ? 'loja_nome' : `${model}.${field.name}.SENTINEL`,
   ]).concat([['senha', 'PASSWORD-DO-NOT-LEAK'], ['rawResponse', 'RAW-DO-NOT-LEAK'], ['unknown', 'UNKNOWN-DO-NOT-LEAK']]))
 }
@@ -33,7 +48,7 @@ export function assertCoverage(def: ResourceDefinition, expected: string[], mone
     const value = raw[key]
     const wanted = value instanceof Date ? value.toISOString() : moneyFields.includes(key) ? new Prisma.Decimal(String(value)).toFixed(2) : decimals.includes(key) ? String(value) : value
     // JSON is recursively redacted even with PII and message scopes.
-    expect(output[key], `${def.model}.${key}`).toEqual(wanted && typeof wanted === 'object' ? { sentinel: `${def.model}.${key}`, nested: { email: 'alice@example.test' } } : wanted)
+    expect(output[key], `${def.model}.${key}`).toEqual(wanted && typeof wanted === 'object' ? expectedJson[`${def.model}.${key}`] ?? { sentinel: `${def.model}.${key}`, nested: { email: 'alice@example.test' } } : wanted)
   }
   expect(JSON.stringify(output)).not.toMatch(/PASSWORD-DO-NOT-LEAK|RAW-DO-NOT-LEAK|UNKNOWN-DO-NOT-LEAK|DO-NOT-LEAK/)
 }

@@ -54,6 +54,20 @@ describe('customer resource scalar contracts', () => {
     for (const key of ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado']) expect(output[key]).toBe('[REDACTED]')
     expect(output.clienteId).toBe(raw.clienteId)
   })
+  it('keeps useful phone/document masks stable through effective list and item responses', async () => {
+    const def = get('Cliente'), row = { ...fixture('Cliente'), telefone: '11912345678', cpf: '529.982.247-25', cnpj: '11.222.333/0001-81', motivoBloqueio: 'token=DO-NOT-LEAK cartão 4111111111111111' }
+    const adapter = { findMany: async () => [row], findFirst: async () => row }, resource = { ...def, adapter }
+    const expected = { telefone: '(11) 9****-5678', cpf: '***.***.***-25', cnpj: '**.***.***/****-81', motivoBloqueio: '[REDACTED] cartão [REDACTED]' }
+    for (const scopes of [['read:clientes'], ['read:all']] as const) {
+      const ctx = context([...scopes])
+      expect(def.serialize(row, ctx)).toMatchObject(expected)
+      const list = await executeList(resource, ctx, parseListQuery('https://test.local/', def), options)
+      const item = await executeItem(resource, ctx, 'id')
+      expect(list.data[0]).toMatchObject(expected)
+      expect(item.data).toMatchObject(expected)
+      expect(JSON.stringify([list.data, item.data])).not.toMatch(/11912345678|529\.982\.247-25|11\.222\.333\/0001-81|DO-NOT-LEAK|4111111111111111/)
+    }
+  })
   it('uses real bounded adapter arguments, natural typed filters and child serializers', async () => {
     const cliente = fakeDelegate(), endereco = fakeDelegate()
     const defs = createCustomerResources({ prisma: { cliente, endereco } as never })

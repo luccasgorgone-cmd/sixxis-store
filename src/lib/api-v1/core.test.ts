@@ -72,6 +72,34 @@ describe('lossless money and date formatting', () => {
 })
 
 describe('deterministic masks', () => {
+  it.each([
+    [maskPhone, '+55 (11) 91234-5678', '(11) 9****-5678'],
+    [maskPhone, '1134561234', '(11) ****-1234'],
+    [maskCpf, '529.982.247-25', '***.***.***-25'],
+    [maskCnpj, '11.222.333/0001-81', '**.***.***/****-81'],
+  ] as const)('preserves only canonical masks across repeated passes: %s', (mask, raw, masked) => {
+    expect(mask(raw)).toBe(masked)
+    expect(mask(masked)).toBe(masked)
+    for (const tainted of [`${masked} token=secret`, `${masked} 4111111111111111`, `prefix ${masked}`, masked.replace('*', '1')]) expect(mask(tainted)).toBe('[REDACTED]')
+  })
+
+  it('redacts secrets and PAN while preserving useful PII masks on a second recursive pass', () => {
+    const input = { telefone: '+55 (11) 91234-5678', cpf: '529.982.247-25', cnpj: '11.222.333/0001-81', nested: [{ telefone: '(11) 9****-5678', cpf: '***.***.***-25', cnpj: '**.***.***/****-81', token: 'DO-NOT-LEAK', detalhe: 'token=DO-NOT-LEAK 4111111111111111' }] }
+    const expected = { telefone: '(11) 9****-5678', cpf: '***.***.***-25', cnpj: '**.***.***/****-81', nested: [{ telefone: '(11) 9****-5678', cpf: '***.***.***-25', cnpj: '**.***.***/****-81', detalhe: '[REDACTED] [REDACTED]' }] }
+    const once = redactValue(input, restricted)
+    expect(once).toEqual(expected)
+    expect(redactValue(once, restricted)).toEqual(expected)
+  })
+
+  it.each([
+    ['telefone=11912345678', 'telefone=(11) 9****-5678'],
+    ['telefone (11) 91234-5678', 'telefone (11) 9****-5678'],
+  ])('also preserves a complete phone mask in labeled free text: %s', (input, expected) => {
+    const once = redactValue(`${input}; token=DO-NOT-LEAK; 4111111111111111`, restricted)
+    expect(once).toBe(`${expected}; [REDACTED]; [REDACTED]`)
+    expect(redactValue(once, restricted)).toBe(once)
+  })
+
   it('masks email, phone, documents, name, address, IP and correlation identifiers', () => {
     expect(maskEmail('joao@gmail.com')).toBe('j***@gmail.com')
     expect(maskPhone('+55 (11) 91234-5678')).toBe('(11) 9****-5678')

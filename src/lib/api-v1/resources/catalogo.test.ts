@@ -36,6 +36,28 @@ describe('catalog resource allowlists', () => {
     assertNullableFields(get(model))
   })
   it('uses the plan’s singleton popup resource slug', () => expect(get('PopupInicial').slug).toBe('popup-inicial'))
+  it('publishes metadata with real array and item shapes for contract/OpenAPI generation', async () => {
+    const product = get('Produto'), popup = get('PopupInicial')
+    const expected = {
+      imagens: { type: 'array', items: { type: 'string' } },
+      especificacoes: { type: 'array', nullable: true, items: { type: 'object', properties: { label: { type: 'string' }, valor: { type: 'string' } }, required: ['label', 'valor'] } },
+      faqs: { type: 'array', nullable: true, items: { type: 'object', properties: { pergunta: { type: 'string' }, resposta: { type: 'string' } }, required: ['pergunta', 'resposta'] } },
+      paginas: { type: 'array', nullable: true, items: { type: 'string' } },
+    }
+    for (const def of [product, popup]) {
+      const row = fixture(def.model)
+      const result = await executeItem({ ...def, adapter: { ...def.adapter, findFirst: async () => row } }, context(), 'id')
+      // These serialized FieldDefinitions are the source contract for /meta and OpenAPI.
+      const metadata = JSON.parse(JSON.stringify(def.fields))
+      for (const field of def.fields.filter(field => Object.hasOwn(expected, field.name))) {
+        expect(metadata.find(item => item.name === field.name)).toMatchObject(expected[field.name])
+        expect(Array.isArray(row[field.name])).toBe(true)
+        expect(Array.isArray(result.data[field.name])).toBe(true)
+        expect(result.data[field.name]).toEqual(def.serialize(row, context())[field.name])
+      }
+    }
+    expect(product.fields.find(field => field.name === 'imagensPorVariacao')).toMatchObject({ type: 'object' })
+  })
   it.each(Object.keys(expected))('exercises real list/detail adapters: %s', async model => {
     const key = model[0].toLowerCase() + model.slice(1), delegate = fakeDelegate()
     const defs = createCatalogResources({ prisma: { [key]: delegate } as never })

@@ -32,16 +32,20 @@ export const maskEmail = scalarMask(value => {
   return match ? `${match[1]}***@${match[2]}` : REDACTED
 })
 export const maskPhone = scalarMask(value => {
+  // Preserve only our complete canonical mask, never a prefix or arbitrary asterisks.
+  if (/^\(\d{2}\) \d?\*{4}-\d{4}$/.test(value)) return value
   let digits = value.replace(/\D/g, '')
   if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) digits = digits.slice(2)
   if (digits.length !== 10 && digits.length !== 11) return REDACTED
   return `(${digits.slice(0, 2)}) ${digits.length === 11 ? `${digits[2]}****` : '****'}-${digits.slice(-4)}`
 })
 export const maskCpf = scalarMask(value => {
+  if (/^\*{3}\.\*{3}\.\*{3}-\d{2}$/.test(value)) return value
   const digits = value.replace(/\D/g, '')
   return digits.length === 11 ? `***.***.***-${digits.slice(-2)}` : REDACTED
 })
 export const maskCnpj = scalarMask(value => {
+  if (/^\*{2}\.\*{3}\.\*{3}\/\*{4}-\d{2}$/.test(value)) return value
   const digits = value.replace(/\D/g, '')
   return digits.length === 14 ? `**.***.***/****-${digits.slice(-2)}` : REDACTED
 })
@@ -154,12 +158,12 @@ function sanitizeText(value: string, options: RedactionOptions, depth: number): 
       .replace(/(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])/g, value => isIP(value) ? REDACTED : value)
       .replace(/(?<![\w:])(?:[a-f0-9]{0,4}:){2,}[a-f0-9:.]*(?![\w:])/gi, value => isIP(value) ? REDACTED : value)
     // Labeled unformatted PII is identifiable; arbitrary bare numbers/names are not.
-    result = result.replace(/(["']?)([a-z][a-z0-9_.-]{0,70})\1\s*[:=]\s*(?:"([^"\r\n]*)"|'([^'\r\n]*)'|([^\s,;&}<>]+))/gi,
+    result = result.replace(/(["']?)([a-z][a-z0-9_.-]{0,70})\1\s*[:=]\s*(?:"([^"\r\n]*)"|'([^'\r\n]*)'|(\(\d{2}\) \d?\*{4}-\d{4}|[^\s,;&}<>]+))/gi,
       (whole, _quote: string, key: string, double: string, single: string, bare: string) => {
         const mask = piiMask(normalizedKey(key))
         return mask ? `${key}=${mask(double ?? single ?? bare)}` : whole
       })
-    result = result.replace(/\b(cpf|cnpj|telefone|celular|phone|sessaoId|sessionId|gclid|fbclid)\s+(\+?[\w().-]+)/gi,
+    result = result.replace(/\b(cpf|cnpj|telefone|celular|phone|sessaoId|sessionId|gclid|fbclid)\s+(\(\d{2}\) \d?\*{4}-\d{4}|\+?[\w().-]+)/gi,
       (whole, key: string, value: string) => {
         const mask = piiMask(normalizedKey(key))
         return mask ? `${key} ${mask(value)}` : whole
