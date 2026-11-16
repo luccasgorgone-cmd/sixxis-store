@@ -20,6 +20,35 @@ const req = () => new Request('https://example.test/api/v1/produtos?q=private-pe
 const deps = () => ({ authenticate: vi.fn().mockResolvedValue(identity), rateLimit: vi.fn().mockResolvedValue({ success: true, limit: 600, remaining: 599, reset: Date.now() + 60_000 }), audit: vi.fn().mockResolvedValue(undefined), lastUsed: vi.fn().mockResolvedValue(undefined) })
 
 describe('API pipeline', () => {
+  it('audits a dispatcher supplied allowlisted route template, never client segments', async () => {
+    const d = deps()
+    const request = new Request('https://example.test/api/v1/produtos/customer-private-id?q=private-value')
+    await withApiV1(() => Response.json({ ok: true }), { auditRoute: '/api/v1/produtos/:id', deps: d })(request)
+    expect(d.audit.mock.calls[0][0].path).toBe('/api/v1/produtos/:id')
+    expect(JSON.stringify(d.audit.mock.calls).includes('customer-private-id')).toBe(false)
+  })
+  it('audits unknown routes as a fixed marker even for authenticated requests', async () => {
+    const d = deps()
+    await withApiV1(() => new Response(null, { status: 404 }), { deps: d })(new Request('https://example.test/api/v1/unknown-private-segment'))
+    expect(d.audit.mock.calls[0][0].path === '/api/v1/:unknown').toBe(true)
+  })
+  it('uses the unknown marker for 401 even with a dispatcher supplied known template', async () => {
+    const d = deps(); d.authenticate.mockRejectedValue(new ApiAuthError())
+    await withApiV1(vi.fn(), { auditRoute: '/api/v1/produtos/:id', deps: d })(new Request('https://example.test/api/v1/produtos/private-client-id'))
+    expect(d.audit.mock.calls[0][0].path === '/api/v1/:unknown').toBe(true)
+  })
+  it.each(['11987654321', '12345678909', 'CustomerPrivateName', '%2531%2531%2539'])('does not audit unformatted PII or encoding in request paths', async segment => {
+    const d = deps(); d.authenticate.mockRejectedValue(new ApiAuthError())
+    await withApiV1(vi.fn(), { deps: d })(new Request(`https://example.test/api/v1/${segment}`))
+    expect(d.audit.mock.calls[0][0].path === '/api/v1/:unknown').toBe(true)
+  })
+  it('rejects a concatenated credential in both request path and dispatcher template', async () => {
+    const raw = `sxs_live_${randomBytes(32).toString('base64url')}`
+    const d = deps()
+    await withApiV1(() => new Response(null, { status: 404 }), { auditRoute: `/api/v1/prefix${raw}suffix`, deps: d })(new Request(`https://example.test/api/v1/prefix${raw}suffix`))
+    expect(d.audit.mock.calls[0][0].path === '/api/v1/:unknown').toBe(true)
+    expect(JSON.stringify(d.audit.mock.calls).includes(raw)).toBe(false)
+  })
   it('removes every CORS header even when returned by a handler', async () => {
     const res = await withApiV1(() => new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'Access-Control-Expose-Headers': '*' } }), { deps: deps() })(req())
     expect([...res.headers.keys()].some(key => key.startsWith('access-control-'))).toBe(false)
@@ -76,6 +105,16 @@ describe('API pipeline', () => {
 })
 
 describe('audit metadata boundaries', () => {
+  it.each(['/api/v1/produtos/client-private-id', '/api/v1/11987654321', '/api/v1/12345678909', '/api/v1/%2531%2531', '/api/v1/fake-resource/:id'])('rejects arbitrary paths when called directly', async path => {
+    const create = vi.fn().mockResolvedValue({})
+    await auditRequest({ identity, requestId: 'request-id', path, queryKeys: ['q'], status: 200, durationMs: 1, ip: 'unknown' }, { prisma: { apiAuditoriaLeitura: { create } } })
+    expect(create.mock.calls[0][0].data.rota === '/api/v1/:unknown').toBe(true)
+  })
+  it('accepts only a known canonical template in direct audit calls', async () => {
+    const create = vi.fn().mockResolvedValue({})
+    await auditRequest({ identity, requestId: 'request-id', path: '/api/v1/produtos/:id', queryKeys: ['q'], status: 200, durationMs: 1, ip: 'unknown' }, { prisma: { apiAuditoriaLeitura: { create } } })
+    expect(create.mock.calls[0][0].data.rota).toBe('/api/v1/produtos/:id')
+  })
   it('never persists raw/encoded credentials embedded in paths or query key names', async () => {
     const raw = `sxs_live_${randomBytes(32).toString('base64url')}`
     const create = vi.fn().mockResolvedValue({})
@@ -84,7 +123,7 @@ describe('audit metadata boundaries', () => {
     const data = JSON.stringify(create.mock.calls)
     expect(data.includes(raw)).toBe(false)
     expect(data.includes(encoded)).toBe(false)
-    expect(create.mock.calls[0][0].data.rota === '/api/v1/[REDACTED]').toBe(true)
+    expect(create.mock.calls[0][0].data.rota === '/api/v1/:unknown').toBe(true)
     expect(create.mock.calls[0][0].data.queryKeys).toEqual(['q'])
   })
   it('persists explicit query keys only and safe bounded IP', async () => {
@@ -102,6 +141,17 @@ describe('audit metadata boundaries', () => {
 })
 
 describe('API limiter production fail-closed', () => {
+  it('fails closed on the resolved Upstash timeout shape and returns 503 from the pipeline', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', 'https://redis.example.test')
+    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', 'fixture')
+    vi.stubEnv('API_V1_RATE_LIMIT_PER_MINUTE', '600')
+    provider.limit.mockResolvedValue({ success: true, limit: 0, remaining: 0, reset: 0, pending: Promise.resolve(), reason: 'timeout' })
+    const handler = vi.fn(() => Response.json({ ok: true })); const d = deps()
+    const response = await withApiV1(handler, { deps: { ...d, rateLimit: rateLimitApiKey } })(req())
+    expect(response.status).toBe(503)
+    expect(handler).not.toHaveBeenCalled()
+  })
   it('uses the actual shared Upstash adapter and propagates provider failures as 503', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('UPSTASH_REDIS_REST_URL', 'https://redis.example.test')
@@ -110,7 +160,7 @@ describe('API limiter production fail-closed', () => {
     provider.limit.mockResolvedValueOnce({ success: true, remaining: 599, reset: 60_000 })
     expect((await rateLimitApiKey('adapter-key')).limit).toBe(600)
     expect(provider.slidingWindow).toHaveBeenCalledWith(600, '1 m')
-    expect(provider.construct.mock.calls[0][0]).toMatchObject({ prefix: 'rl:api-leitura:600', analytics: false })
+    expect(provider.construct.mock.calls[0][0]).toMatchObject({ prefix: 'rl:api-leitura:600', analytics: false, timeout: 5000 })
     expect(provider.limit).toHaveBeenCalledWith('adapter-key')
     provider.limit.mockRejectedValueOnce(new Error('provider-private-detail'))
     await expect(rateLimitApiKey('adapter-key')).rejects.toMatchObject({ status: 503 })

@@ -1,5 +1,5 @@
 import { isIP } from 'node:net'
-import { isForbiddenKey, redactValue } from './redact'
+import { isForbiddenKey } from './redact'
 import type { ApiIdentity } from './types'
 
 export type AuditInput = { identity: ApiIdentity | null; requestId: string; path: string; queryKeys: string[]; status: number; durationMs: number; ip: string }
@@ -7,6 +7,36 @@ type AuditData = { chaveId: string | null; prefixo: string | null; requestId: st
 type AuditDeps = { prisma?: { apiAuditoriaLeitura: { create(args: { data: AuditData }): Promise<unknown> } } }
 type LastUsedDeps = { prisma?: { apiChaveLeitura: { updateMany(args: { where: { id: string; revogadoEm: null }; data: { ultimoUsoEm: Date; ultimoIp: string | null } }): Promise<unknown> } } }
 const safeIp = (ip: string) => isIP(ip) ? ip : null
+
+// Finite schema-approved names, never a regex accepting arbitrary client segments.
+// Keep in sync with the resource/metric registry when adding an API surface.
+const AUDIT_RESOURCES = [
+  'clientes', 'enderecos', 'produtos', 'pedidos',
+  'garantias-estendidas', 'pagamentos', 'tentativas-multimetodo', 'itens-pedido',
+  'carrinhos', 'itens-carrinho', 'avaliacoes', 'avaliacoes-fotos',
+  'banners', 'configuracoes', 'formas-pagamento', 'cupons',
+  'cupons-usos', 'historico-pontos', 'lista-espera', 'pontos-clientes',
+  'produtos-destaques', 'variacoes-produto', 'frete-regras', 'email-templates',
+  'cookies-consentimentos', 'eventos-analiticos', 'clientes-insights', 'avaliacoes-parceiros',
+  'cashback-transacoes', 'bloqueios-fraude', 'campanhas', 'niveis-fidelidade',
+  'campanhas-destinatarios', 'whatsapp-numeros', 'envios-logs', 'luna-conversas',
+  'luna-mensagens', 'sessoes-visitantes', 'eventos-tracking', 'relatorios-venda-hora',
+  'tentativas-login', 'bloqueios-ip', 'popup-inicial', 'auditoria',
+  'presencas', 'carrinhos-clientes', 'trafego-bruto', 'solicitacoes-parceiros',
+  'mensagens-contato',
+] as const
+const AUDIT_METRICS = ['vendas', 'funil', 'carrinhos', 'cupons-cashback-fidelidade', 'frete', 'avaliacoes', 'estoque-catalogo', 'clientes'] as const
+export const UNKNOWN_AUDIT_ROUTE = '/api/v1/:unknown'
+const AUDIT_ROUTES: ReadonlySet<string> = new Set([
+  '/api/v1', '/api/v1/health', '/api/v1/me', '/api/v1/meta/recursos', '/api/v1/openapi.json', '/api/v1/docs',
+  ...AUDIT_RESOURCES.flatMap(slug => [`/api/v1/${slug}`, `/api/v1/${slug}/:id`]),
+  ...AUDIT_METRICS.map(slug => `/api/v1/metricas/${slug}`),
+])
+
+/** Accept dispatcher-owned templates only. Never derive a route from request.url. */
+export function canonicalAuditRoute(template: unknown): string {
+  return typeof template === 'string' && AUDIT_ROUTES.has(template) ? template : UNKNOWN_AUDIT_ROUTE
+}
 
 /** Proxy headers are metadata only, never an authorization/rate-limit identity. */
 export function safeClientIp(req: Request): string {
@@ -18,14 +48,7 @@ export async function auditRequest(input: AuditInput, deps: AuditDeps = {}): Pro
   try {
     const prisma = deps.prisma ?? (await import('../prisma')).prisma
     const queryKeys = [...new Set(input.queryKeys)].filter(key => /^[a-zA-Z][a-zA-Z0-9_.\[\]-]{0,63}$/.test(key) && !isForbiddenKey(key) && !key.includes('sxs_live_')).sort().slice(0, 100)
-    const path = input.path.split('?')[0]
-    // Decode each segment to catch encoded credentials, then redact before persistence.
-    let decoded = path
-    try {
-      for (let depth = 0; decoded.includes('%') && depth < 5; depth++) decoded = decodeURIComponent(decoded)
-      if (decoded.includes('%')) decoded = '/api/v1/[invalid-path]'
-    } catch { decoded = '/api/v1/[invalid-path]' }
-    const safePath = String(redactValue(decoded, { allowPii: false, allowMessages: false })).slice(0, 2048)
+    const safePath = input.identity && input.status !== 401 ? canonicalAuditRoute(input.path) : UNKNOWN_AUDIT_ROUTE
     await prisma.apiAuditoriaLeitura.create({ data: { chaveId: input.identity?.id ?? null, prefixo: input.identity?.prefixo ?? null, requestId: input.requestId, rota: safePath, queryKeys, status: input.status, duracaoMs: Math.max(0, Math.min(2147483647, Math.round(input.durationMs))), ip: safeIp(input.ip) } })
   } catch { /* Best effort, deliberately no payload/error logging. */ }
 }

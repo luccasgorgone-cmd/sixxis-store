@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { authenticateBearer, ApiAuthError, hasScope } from './auth'
-import { auditRequest, recordLastUsed, safeClientIp } from './audit'
+import { auditRequest, canonicalAuditRoute, recordLastUsed, safeClientIp, UNKNOWN_AUDIT_ROUTE } from './audit'
 import { rateLimitApiKey } from './rate-limit'
 import { problem } from './problem'
 import type { ApiContext, ApiIdentity, ApiScope, RateLimitResult } from './types'
@@ -11,7 +11,7 @@ type PipelineDeps = {
   audit: typeof auditRequest
   lastUsed: typeof recordLastUsed
 }
-export type ApiV1Options = { scope?: ApiScope; scopes?: readonly ApiScope[]; deps?: Partial<PipelineDeps> }
+export type ApiV1Options = { scope?: ApiScope; scopes?: readonly ApiScope[]; auditRoute?: string; deps?: Partial<PipelineDeps> }
 export type ApiV1Handler = (request: Request, context: ApiContext) => Promise<Response> | Response
 
 /** Errors are constant problems; request/DB/provider errors must never reach the body or logs. */
@@ -61,7 +61,7 @@ export function withApiV1(handler: ApiV1Handler, options: ApiV1Options = {}): (r
       const output = new Response(result.body, { status: result.status, statusText: result.statusText, headers })
       const url = new URL(request.url)
       await Promise.allSettled([
-        deps.audit({ identity, requestId, path: url.pathname, queryKeys: [...url.searchParams.keys()], status: output.status, durationMs: Date.now() - startedAt, ip }),
+        deps.audit({ identity, requestId, path: identity && output.status !== 401 ? canonicalAuditRoute(options.auditRoute) : UNKNOWN_AUDIT_ROUTE, queryKeys: [...url.searchParams.keys()], status: output.status, durationMs: Date.now() - startedAt, ip }),
         ...(identity ? [deps.lastUsed(identity, ip)] : []),
       ])
       return output

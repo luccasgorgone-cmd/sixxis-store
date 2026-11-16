@@ -128,9 +128,12 @@ export async function rateLimitApiReading(
   if (!redis) throw new Error('API limiter unavailable')
   let limiter = _apiLimiters.get(tokens)
   if (!limiter) {
-    limiter = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(tokens, window), prefix: `rl:${name}:${tokens}`, analytics: false })
+    limiter = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(tokens, window), prefix: `rl:${name}:${tokens}`, analytics: false, timeout: 5000 })
     _apiLimiters.set(tokens, limiter)
   }
   const result = await limiter.limit(identifier)
+  // Upstash resolves (does not reject) on timeout, with success:true. Never
+  // mistake its availability fallback for a successful distributed check.
+  if (result.reason === 'timeout') throw new Error('API limiter unavailable')
   return { success: result.success, remaining: result.remaining, reset: result.reset }
 }
