@@ -16,7 +16,7 @@ model Cliente {
   cnpj                  String?                @unique
   razaoSocial           String?
   inscricaoEstadual     String?
-  indicadorIE           Int?                   // NF-e: 1=Contribuinte ICMS, 2=Isento de inscrição, 9=Não contribuinte
+  indicadorIE           Int? // NF-e: 1=Contribuinte ICMS, 2=Isento de inscrição, 9=Não contribuinte
   telefone              String?
   erpClienteId          String?                @unique
   createdAt             DateTime               @default(now())
@@ -47,6 +47,10 @@ model Cliente {
   pontos                PontosCliente?
   campanhasDestinatario CampanhaDestinatario[]
   carrinhoCliente       CarrinhoCliente?
+
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([updatedAt])
 }
 
 model Endereco {
@@ -63,7 +67,13 @@ model Endereco {
   cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   pedidos     Pedido[]
 
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([clienteId])
+  @@index([updatedAt])
+  @@index([createdAt])
 }
 
 model Produto {
@@ -114,87 +124,90 @@ model Produto {
   garantias                GarantiaEstendida[]
   freteRegras              FreteRegra[]
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([categoria])
   @@index([slug])
   @@index([ativo])
+  @@index([updatedAt])
 }
 
 model Pedido {
-  id             String              @id @default(cuid())
-  clienteId      String
-  status         String              @default("pendente")
-  total          Decimal             @db.Decimal(10, 2)
-  frete          Decimal             @db.Decimal(10, 2)
-  formaPagamento String
-  mpPaymentId    String?
-  enderecoId     String
-  erpPedidoId    String?             @unique
-  createdAt      DateTime            @default(now())
-  pagoEm         DateTime?
-  codigoRastreio String?
-  cupomCodigo    String?
-  desconto       Decimal             @default(0.00) @db.Decimal(10, 2)
-  cashbackUsado  Decimal             @default(0.00) @db.Decimal(10, 2) // cashback resgatado neste pedido
-  freteTipo      String?             // "normal" | "expresso" | "a_combinar"
-  fretePrazo     Int?                // prazo estimado em dias úteis
-  transportadora String?             // nome da transportadora (lista fixa ou "Outro" digitado)
-  linkRastreio   String?             // URL de rastreio colada manualmente
-  notaFiscal     String?             // número da NF emitida (preenchido no admin)
+  id                         String                 @id @default(cuid())
+  clienteId                  String
+  status                     String                 @default("pendente")
+  total                      Decimal                @db.Decimal(10, 2)
+  frete                      Decimal                @db.Decimal(10, 2)
+  formaPagamento             String
+  mpPaymentId                String?
+  enderecoId                 String
+  erpPedidoId                String?                @unique
+  createdAt                  DateTime               @default(now())
+  pagoEm                     DateTime?
+  codigoRastreio             String?
+  cupomCodigo                String?
+  desconto                   Decimal                @default(0.00) @db.Decimal(10, 2)
+  cashbackUsado              Decimal                @default(0.00) @db.Decimal(10, 2) // cashback resgatado neste pedido
+  freteTipo                  String? // "normal" | "expresso" | "a_combinar"
+  fretePrazo                 Int? // prazo estimado em dias úteis
+  transportadora             String? // nome da transportadora (lista fixa ou "Outro" digitado)
+  linkRastreio               String? // URL de rastreio colada manualmente
+  notaFiscal                 String? // número da NF emitida (preenchido no admin)
   // DATA da NF (data pura, ancorada ao MEIO-DIA UTC — ver src/lib/data-nf.ts). O
   // CRM precisa dela para a garantia contar. Pedidos antigos ficam nulos.
-  dataNotaFiscal DateTime?
+  dataNotaFiscal             DateTime?
   // ── NF-e via Focus NFe (emissão manual pelo admin) ──────────────────────────
   // COEXISTEM com `notaFiscal` (número digitado à mão): pedidos antigos seguem
   // com o número manual, novos ganham os campos abaixo. Nada aqui sobrescreve
   // `notaFiscal` — quem preenche o número manual continua sendo o admin.
-  nfeRef          String?  // referência enviada à Focus (= Pedido.id)
-  nfeChave        String?  // chave de acesso, 44 dígitos
-  nfeStatus       String?  // autorizado | erro | processando | cancelado
-  nfeNumero       Int?
-  nfeSerie        Int?
-  nfeDanfeUrl     String?  // PDF do DANFE hospedado pela Focus
-  nfeXmlUrl       String?
-  nfeMensagemErro String?  @db.Text // rejeição da SEFAZ, legível, quando houver
+  nfeRef                     String? // referência enviada à Focus (= Pedido.id)
+  nfeChave                   String? // chave de acesso, 44 dígitos
+  nfeStatus                  String? // autorizado | erro | processando | cancelado
+  nfeNumero                  Int?
+  nfeSerie                   Int?
+  nfeDanfeUrl                String? // PDF do DANFE hospedado pela Focus
+  nfeXmlUrl                  String?
+  nfeMensagemErro            String?                @db.Text // rejeição da SEFAZ, legível, quando houver
   // Ambiente EM QUE ESTA NOTA foi emitida ("homologacao" | "producao"). Sem ele,
   // uma nota de teste e uma real ficam indistinguíveis no banco quando a env
   // FOCUS_NFE_AMBIENTE muda. Notas anteriores a este campo ficam null e a UI as
   // mostra como "homologação (legado)" — até aqui tudo foi teste.
-  nfeAmbiente     String?
+  nfeAmbiente                String?
   // Marca informativa de sincronização com o CRM (nunca bloqueia; reaplicar é ok).
   // crmLeadId = contato do CRM que recebeu os dados (rastreável em caso de engano).
-  crmSincronizadoEm DateTime?
-  crmLeadId         String?
-  custoFreteReal Decimal?            @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
+  crmSincronizadoEm          DateTime?
+  crmLeadId                  String?
+  custoFreteReal             Decimal?               @db.Decimal(10, 2) // INTERNO — custo pago à transportadora, cliente NUNCA vê
   // INTERNO — tarifa REAL cobrada pelo Mercado Pago neste pedido, em R$ (soma
   // dos fee_details com fee_payer=collector; inclui juros de parcelamento que a
   // loja absorve). null = ainda não sincronizada, NÃO significa zero.
   // O detalhamento cru NÃO é duplicado aqui: vive em Pagamento.rawResponse.fee_details.
-  mpTaxaReal     Decimal?            @db.Decimal(10, 2)
-  enviadoEm      DateTime?           // quando o pedido foi despachado
-  entregueEm     DateTime?           // quando foi marcado como entregue
-  canceladoEm    DateTime?           // quando o pedido foi cancelado (auditoria)
-  canceladoMotivo String?  @db.Text  // motivo do cancelamento (estorno, admin, cliente…)
-  idempotencyKey String?  @unique    // dedup de criação: mesma key = mesmo pedido
+  mpTaxaReal                 Decimal?               @db.Decimal(10, 2)
+  enviadoEm                  DateTime? // quando o pedido foi despachado
+  entregueEm                 DateTime? // quando foi marcado como entregue
+  canceladoEm                DateTime? // quando o pedido foi cancelado (auditoria)
+  canceladoMotivo            String?                @db.Text // motivo do cancelamento (estorno, admin, cliente…)
+  idempotencyKey             String?                @unique // dedup de criação: mesma key = mesmo pedido
   // ── Atribuição/CAPI Meta (Conversions API) ──────────────────────────────────
   // Capturados no checkout (browser) e persistidos p/ o CAPI Purchase do webhook
   // ligar a compra ao clique no anúncio. IP/UA são os do request ORIGINAL do
   // cliente (criação do pedido), não os do webhook (que vem do Mercado Pago).
-  fbp                   String?           // cookie _fbp
-  fbc                   String?           // cookie _fbc (ou montado do fbclid)
-  clientIp              String?           // IP do cliente na criação do pedido
-  clientUserAgent       String?  @db.Text // user-agent do cliente na criação
-  capiPurchaseEnviadoEm DateTime?         // guard de idempotência do CAPI Purchase
+  fbp                        String? // cookie _fbp
+  fbc                        String? // cookie _fbc (ou montado do fbclid)
+  clientIp                   String? // IP do cliente na criação do pedido
+  clientUserAgent            String?                @db.Text // user-agent do cliente na criação
+  capiPurchaseEnviadoEm      DateTime? // guard de idempotência do CAPI Purchase
   // ── Atribuição/GA4 Measurement Protocol ─────────────────────────────────────
   // client_id do GA4 (cookie _ga, sem o prefixo GA1.N.), capturado no checkout
   // (browser) e persistido p/ o Measurement Protocol do webhook atribuir a
   // compra à sessão/campanha de origem. Best-effort: com Consent Mode v2, só
   // existe se o cliente já aceitou cookies analíticos — null é esperado, não erro.
-  gaClientId            String?
-  gaSessionId           String?           // session_id do cookie GA4 (_ga_<stream>) p/ atribuição do Purchase
-  gclid                 String?           // click id do Google Ads p/ futuro Offline Import
-  gbraid                String?           // click id Google Ads iOS (app-to-web), sob consentimento
-  wbraid                String?           // click id Google Ads iOS (web-to-app), sob consentimento
-  ga4PurchaseEnviadoEm  DateTime?         // guard de idempotência do GA4 Measurement Protocol Purchase
+  gaClientId                 String?
+  gaSessionId                String? // session_id do cookie GA4 (_ga_<stream>) p/ atribuição do Purchase
+  gclid                      String? // click id do Google Ads p/ futuro Offline Import
+  gbraid                     String? // click id Google Ads iOS (app-to-web), sob consentimento
+  wbraid                     String? // click id Google Ads iOS (web-to-app), sob consentimento
+  ga4PurchaseEnviadoEm       DateTime? // guard de idempotência do GA4 Measurement Protocol Purchase
   // ── Checkout multi-método (Orders API MP) ───────────────────────────────────
   // ADITIVO, de propósito: NÃO reaproveita `status` pra descrever o sub-estado
   // de um pagamento parcial (2 cartões, ou pix + cartão pro restante) porque
@@ -205,29 +218,32 @@ model Pedido {
   // fluxo aprova de verdade, `status` vira 'pago' pelo caminho já existente
   // (webhook) — este campo nunca chega a valer 'pago', só os estados
   // intermediários/de erro de StatusCheckoutMultiMetodo (ver checkout-multi-metodo.ts).
-  multiMetodoStatus String?  // aguardando_pix | aguardando_pagamento_restante | falhou | cancelado — null = fluxo clássico (não usa checkout multi-método)
+  multiMetodoStatus          String? // aguardando_pix | aguardando_pagamento_restante | falhou | cancelado — null = fluxo clássico (não usa checkout multi-método)
   // Id da ORDER da Orders API (namespace diferente de mpPaymentId, que é da
   // Payment API de pagamento único). Necessário pra retomar a fase 2 do fluxo
   // pix+cartão: o webhook usa este id pra chamar completarCheckoutPixMaisCartao.
-  mpOrderId         String?  @unique
+  mpOrderId                  String?                @unique
   // Lock anti-corrida do POST /api/checkout/criar-pagamento (ver
   // src/lib/pagamento-lock.ts): impede que 2 chamadas concorrentes pro mesmo
   // pedido (duplo clique, 2 abas, retry de rede) gerem 2 cobranças aprovadas
   // de verdade no Mercado Pago. Setado ao entrar na rota, limpo no finally —
   // stale depois de LOCK_PAGAMENTO_STALE_MS pra nunca travar um retry legítimo.
   pagamentoEmProcessamentoEm DateTime?
-  itens          ItemPedido[]
-  cliente        Cliente             @relation(fields: [clienteId], references: [id])
-  endereco       Endereco            @relation(fields: [enderecoId], references: [id])
-  pagamentos     Pagamento[]
-  tentativasMultiMetodo TentativaMultiMetodo[]
-  garantias      GarantiaEstendida[]
+  itens                      ItemPedido[]
+  cliente                    Cliente                @relation(fields: [clienteId], references: [id])
+  endereco                   Endereco               @relation(fields: [enderecoId], references: [id])
+  pagamentos                 Pagamento[]
+  tentativasMultiMetodo      TentativaMultiMetodo[]
+  garantias                  GarantiaEstendida[]
+
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([clienteId])
   @@index([status])
   @@index([notaFiscal])
   @@index([multiMetodoStatus])
   @@index([enderecoId], map: "Pedido_enderecoId_fkey")
+  @@index([updatedAt])
 }
 
 model GarantiaEstendida {
@@ -254,6 +270,7 @@ model GarantiaEstendida {
   @@index([produtoId])
   @@index([status])
   @@index([fimVigencia])
+  @@index([updatedAt])
 }
 
 model Pagamento {
@@ -297,7 +314,7 @@ model Pagamento {
   tentativaMultiMetodoId String?
   tentativaMultiMetodo   TentativaMultiMetodo? @relation(fields: [tentativaMultiMetodoId], references: [id])
   perna                  String? // 'A' | 'B' | 'pix' | 'restante'
-  idempotencyKey         String? @unique
+  idempotencyKey         String?               @unique
   // Estado do estorno/cancelamento desta perna quando a tentativa falha depois
   // dela já ter movido dinheiro. null = nunca precisou reverter.
   // nao_aplicavel = revisado e não havia nada pra reverter (ex.: recusado).
@@ -305,9 +322,9 @@ model Pagamento {
   // estornado = PaymentRefund confirmado. cancelado = Payment.cancel confirmado
   // (perna só autorizada, nunca capturada). falhou_estorno = tentativa(s)
   // falharam — pega retry pela reconciliação, ver checkout-multi-metodo.ts.
-  estornoStatus      String?
-  estornoTentativas  Int     @default(0)
-  estornoErro        String? @db.Text
+  estornoStatus          String?
+  estornoTentativas      Int                   @default(0)
+  estornoErro            String?               @db.Text
 
   @@index([pedidoId])
   @@index([mpPaymentId])
@@ -315,6 +332,7 @@ model Pagamento {
   @@index([createdAt])
   @@index([tentativaMultiMetodoId])
   @@index([estornoStatus])
+  @@index([updatedAt])
 }
 
 // Uma tentativa de checkout multi-método (2 cartões, ou pix + cartão pro
@@ -326,7 +344,7 @@ model TentativaMultiMetodo {
   pedidoId String
   pedido   Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
 
-  tipo String // 'dois_cartoes' | 'pix_mais_cartao'
+  tipo          String // 'dois_cartoes' | 'pix_mais_cartao'
   // em_andamento | aguardando_confirmacao (perna pendente, esperando webhook) |
   // aguardando_pix | aguardando_pagamento_restante | pago | falhou | cancelado
   status        String @default("em_andamento")
@@ -353,14 +371,15 @@ model TentativaMultiMetodo {
 
   @@index([pedidoId])
   @@index([status])
+  @@index([updatedAt])
 }
 
 model ItemPedido {
-  id            String  @id @default(cuid())
+  id            String   @id @default(cuid())
   pedidoId      String
   produtoId     String
   quantidade    Int
-  precoUnitario Decimal @db.Decimal(10, 2)
+  precoUnitario Decimal  @db.Decimal(10, 2)
   // INTERNO — SNAPSHOT do Produto.custoProduto no instante da venda. Congelado:
   // reajustar o custo do produto não altera o lucro de pedidos já feitos.
   // null = custo não informado naquele momento (≠ zero) → o relatório marca a
@@ -368,11 +387,17 @@ model ItemPedido {
   custoUnitario Decimal? @db.Decimal(10, 2)
   variacaoId    String?
   variacaoNome  String?
-  pedido        Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  produto       Produto @relation(fields: [produtoId], references: [id])
+  pedido        Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto       Produto  @relation(fields: [produtoId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([pedidoId])
   @@index([produtoId], map: "ItemPedido_produtoId_fkey")
+  @@index([updatedAt])
+  @@index([createdAt])
 }
 
 model Carrinho {
@@ -384,6 +409,7 @@ model Carrinho {
   itens     ItemCarrinho[]
 
   @@index([sessionId])
+  @@index([createdAt])
 }
 
 model ItemCarrinho {
@@ -394,8 +420,14 @@ model ItemCarrinho {
   carrinho   Carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
   produto    Produto  @relation(fields: [produtoId], references: [id])
 
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@unique([carrinhoId, produtoId])
   @@index([produtoId], map: "ItemCarrinho_produtoId_fkey")
+  @@index([updatedAt])
+  @@index([createdAt])
 }
 
 model Avaliacao {
@@ -420,6 +452,7 @@ model Avaliacao {
 
   @@index([clienteId], map: "Avaliacao_clienteId_fkey")
   @@index([produtoId, aprovada])
+  @@index([updatedAt])
 }
 
 model AvaliacaoFoto {
@@ -430,24 +463,29 @@ model AvaliacaoFoto {
   avaliacao   Avaliacao @relation(fields: [avaliacaoId], references: [id], onDelete: Cascade)
 
   @@index([avaliacaoId])
+  @@index([createdAt])
 }
 
 model Banner {
-  id                String   @id @default(cuid())
-  imagem            String
-  imagemTablet      String?
-  imagemMobile      String?
-  titulo            String?
-  subtitulo         String?
-  link              String?
-  ordem             Int      @default(0)
-  ativo             Boolean  @default(true)
-  tempoCads         Int      @default(5)
-  aspectMobile      String?
-  aspectTablet      String?
-  aspectDesktop     String?
-  maxHeightDesktop  String?
-  createdAt         DateTime @default(now())
+  id               String   @id @default(cuid())
+  imagem           String
+  imagemTablet     String?
+  imagemMobile     String?
+  titulo           String?
+  subtitulo        String?
+  link             String?
+  ordem            Int      @default(0)
+  ativo            Boolean  @default(true)
+  tempoCads        Int      @default(5)
+  aspectMobile     String?
+  aspectTablet     String?
+  aspectDesktop    String?
+  maxHeightDesktop String?
+  createdAt        DateTime @default(now())
+
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([updatedAt])
 }
 
 model Configuracao {
@@ -455,6 +493,8 @@ model Configuracao {
   chave     String   @unique
   valor     String   @db.Text
   updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
 }
 
 model FormaPagamento {
@@ -467,6 +507,7 @@ model FormaPagamento {
   updatedAt DateTime @updatedAt
 
   @@index([ativo, ordem])
+  @@index([updatedAt])
 }
 
 model Cupom {
@@ -488,6 +529,8 @@ model Cupom {
   usos           CupomUso[]
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+
+  @@index([updatedAt])
 }
 
 model CupomUso {
@@ -505,6 +548,7 @@ model CupomUso {
 
   @@index([cupomId])
   @@index([clienteId])
+  @@index([usadoEm])
 }
 
 model HistoricoPontos {
@@ -518,6 +562,7 @@ model HistoricoPontos {
   cliente   Cliente  @relation(fields: [clienteId], references: [id])
 
   @@index([clienteId])
+  @@index([createdAt])
 }
 
 model ListaEspera {
@@ -528,7 +573,10 @@ model ListaEspera {
   createdAt  DateTime @default(now())
   produto    Produto  @relation(fields: [produtoId], references: [id])
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([produtoId, notificado])
+  @@index([updatedAt])
 }
 
 model PontosCliente {
@@ -537,6 +585,8 @@ model PontosCliente {
   pontos    Int      @default(0)
   updatedAt DateTime @updatedAt
   cliente   Cliente  @relation(fields: [clienteId], references: [id])
+
+  @@index([updatedAt])
 }
 
 model ProdutoDestaque {
@@ -549,6 +599,7 @@ model ProdutoDestaque {
 
   @@index([produtoId], map: "ProdutoDestaque_produtoId_fkey")
   @@index([secao])
+  @@index([createdAt])
 }
 
 model VariacaoProduto {
@@ -562,37 +613,41 @@ model VariacaoProduto {
   createdAt DateTime @default(now())
   produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([produtoId])
+  @@index([updatedAt])
 }
 
 // Tabela de frete por produto × estado (UF) — fonte única de verdade do frete.
 // Gerenciada em /adm-a7f9c2b4/frete. Resolução em src/lib/frete-resolver.ts.
 model FreteRegra {
-  id            String   @id @default(cuid())
-  produtoId     String
-  uf            String   @db.Char(2)
+  id               String   @id @default(cuid())
+  produtoId        String
+  uf               String   @db.Char(2)
   // Frete normal
-  precoNormal   Decimal? @db.Decimal(10, 2)
-  prazoNormal   Int? // @deprecated, usar prazoNormalMin/Max
+  precoNormal      Decimal? @db.Decimal(10, 2)
+  prazoNormal      Int? // @deprecated, usar prazoNormalMin/Max
   // Frete expresso
-  precoExpresso Decimal? @db.Decimal(10, 2)
-  prazoExpresso Int? // @deprecated, usar prazoExpressoMin/Max
+  precoExpresso    Decimal? @db.Decimal(10, 2)
+  prazoExpresso    Int? // @deprecated, usar prazoExpressoMin/Max
   // Prazo em faixa (dias úteis)
   prazoNormalMin   Int?
   prazoNormalMax   Int?
   prazoExpressoMin Int?
   prazoExpressoMax Int?
   // Estados especiais
-  aCombinar     Boolean  @default(false) // vira orçamento, cliente não finaliza
-  bloqueado     Boolean  @default(false) // não entrega nesse estado
-  freteGratis   Boolean  @default(false) // entrega grátis; só o prazo normal vale
-  criadoEm      DateTime @default(now())
-  atualizadoEm  DateTime @updatedAt
-  produto       Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  aCombinar        Boolean  @default(false) // vira orçamento, cliente não finaliza
+  bloqueado        Boolean  @default(false) // não entrega nesse estado
+  freteGratis      Boolean  @default(false) // entrega grátis; só o prazo normal vale
+  criadoEm         DateTime @default(now())
+  atualizadoEm     DateTime @updatedAt
+  produto          Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
   @@unique([produtoId, uf])
   @@index([uf])
   @@index([produtoId])
+  @@index([atualizadoEm])
 }
 
 model EmailTemplate {
@@ -604,6 +659,8 @@ model EmailTemplate {
   prazo        Int      @default(0)
   unidadePrazo String   @default("horas")
   updatedAt    DateTime @updatedAt
+
+  @@index([updatedAt])
 }
 
 model CookieConsent {
@@ -671,6 +728,7 @@ model AvaliacaoParceiro {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  @@index([updatedAt])
   @@map("avaliacao_parceiro")
 }
 
@@ -688,8 +746,11 @@ model CashbackTransacao {
   createdAt DateTime @default(now())
   cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([clienteId])
   @@index([createdAt])
+  @@index([updatedAt])
 }
 
 // Log append-only de bloqueios/desbloqueios de cliente (auditoria da tela
@@ -745,6 +806,8 @@ model Campanha {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
 }
 
 model NivelFidelidade {
@@ -758,6 +821,13 @@ model NivelFidelidade {
   gastoMax    Float?
   cashbackPc  Float
   ordem       Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([updatedAt])
+  @@index([createdAt])
 }
 
 model CampanhaDestinatario {
@@ -774,8 +844,11 @@ model CampanhaDestinatario {
   erroMsg    String?
   createdAt  DateTime  @default(now())
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([campanhaId])
   @@index([clienteId])
+  @@index([updatedAt])
 }
 
 model WhatsappNumero {
@@ -793,6 +866,8 @@ model WhatsappNumero {
   campanhas     Campanha[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+
+  @@index([updatedAt])
 }
 
 model EnvioLog {
@@ -805,6 +880,7 @@ model EnvioLog {
   createdAt    DateTime @default(now())
 
   @@index([campanhaId])
+  @@index([createdAt])
 }
 
 model LunaConversa {
@@ -829,6 +905,7 @@ model LunaConversa {
   @@index([clienteId])
   @@index([createdAt])
   @@index([status])
+  @@index([updatedAt])
 }
 
 model LunaMensagem {
@@ -881,6 +958,7 @@ model SessaoVisitante {
   @@index([userId])
   @@index([createdAt])
   @@index([utmSource])
+  @@index([updatedAt])
 }
 
 model EventoTracking {
@@ -913,6 +991,7 @@ model RelatorioVendaHora {
 
   @@unique([data, hora])
   @@index([data])
+  @@index([updatedAt])
 }
 
 // ─── Sprint 1 Infra · segurança admin ────────────────────────────────
@@ -936,7 +1015,10 @@ model BloqueioIp {
   bloqueadoAte DateTime
   createdAt    DateTime @default(now())
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([bloqueadoAte])
+  @@index([updatedAt])
 }
 
 // Pop-up inicial editável — sempre 1 row (id="singleton"), gerenciada pelo
@@ -966,6 +1048,8 @@ model PopupInicial {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
 }
 
 model AuditLog {
@@ -1022,6 +1106,7 @@ model CarrinhoCliente {
   cliente      Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   @@index([status, atualizadoEm])
+  @@index([atualizadoEm])
 }
 
 // Tráfego Bruto (Fase 4C) — medição SERVER-SIDE, COOKIELESS e SEM PII de TODOS os
@@ -1038,14 +1123,14 @@ model CarrinhoCliente {
 // dia/hora em fuso BRT (America/Sao_Paulo), iguais à régua do resto do analytics.
 model TrafegoBruto {
   id          String   @id @default(cuid())
-  dia         String   @db.Char(10)        // YYYY-MM-DD (BRT)
-  hora        Int                          // 0-23 (BRT)
+  dia         String   @db.Char(10) // YYYY-MM-DD (BRT)
+  hora        Int // 0-23 (BRT)
   path        String   @db.VarChar(512)
-  dispositivo String?  @db.VarChar(20)     // mobile | desktop | tablet | outros
+  dispositivo String?  @db.VarChar(20) // mobile | desktop | tablet | outros
   browser     String?  @db.VarChar(40)
   os          String?  @db.VarChar(40)
-  pais        String?  @db.VarChar(2)       // ISO-3166 (geo = TODO; null por ora)
-  referrer    String?  @db.VarChar(255)     // host da origem externa (sem query)
+  pais        String?  @db.VarChar(2) // ISO-3166 (geo = TODO; null por ora)
+  referrer    String?  @db.VarChar(255) // host da origem externa (sem query)
   visitorHash String   @db.Char(64)
   createdAt   DateTime @default(now())
 
@@ -1080,8 +1165,11 @@ model SolicitacaoParceiro {
   status       String   @default("novo")
   createdAt    DateTime @default(now())
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([status])
   @@index([createdAt])
+  @@index([updatedAt])
 }
 
 // Mensagens do formulário /contato. Antes só ia por e-mail para sac@sixxis.com.br;
@@ -1097,6 +1185,51 @@ model MensagemContato {
   status    String   @default("novo")
   createdAt DateTime @default(now())
 
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([status])
   @@index([createdAt])
+  @@index([updatedAt])
+}
+
+// Infraestrutura exclusiva da API de leitura; não são recursos de negócio.
+// O valor original da chave nunca é persistido: somente seu digest SHA-256.
+model ApiChaveLeitura {
+  id          String                @id @default(cuid())
+  nome        String
+  prefixo     String                @db.VarChar(20)
+  hash        String                @unique @db.Char(64)
+  escopos     Json
+  criadoEm    DateTime              @default(now())
+  expiraEm    DateTime?
+  revogadoEm  DateTime?
+  ultimoUsoEm DateTime?
+  ultimoIp    String?               @db.VarChar(45)
+  auditorias  ApiAuditoriaLeitura[]
+
+  @@index([prefixo])
+  @@index([expiraEm])
+  @@index([revogadoEm])
+  @@index([criadoEm])
+}
+
+// Somente nomes de parâmetros em queryKeys; nunca valores de PII ou Bearer.
+// A restrição da FK preserva o histórico: chaves são revogadas, não apagadas.
+model ApiAuditoriaLeitura {
+  id        String           @id @default(cuid())
+  chaveId   String?
+  prefixo   String?          @db.VarChar(20)
+  requestId String
+  rota      String
+  queryKeys Json?
+  status    Int
+  duracaoMs Int
+  ip        String?          @db.VarChar(45)
+  criadoEm  DateTime         @default(now())
+  chave     ApiChaveLeitura? @relation(fields: [chaveId], references: [id], onDelete: Restrict)
+
+  @@index([chaveId])
+  @@index([prefixo])
+  @@index([requestId])
+  @@index([criadoEm])
 }
