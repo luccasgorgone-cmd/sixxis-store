@@ -4,7 +4,8 @@ import type { FieldSchema, ResourceDefinition } from './resource'
 import type { ResourceRegistry } from './registry'
 
 type Schema = Record<string, unknown>
-type Operation = Record<string, any>
+type Parameter = { name: string; in?: string; required?: boolean; example?: unknown; schema?: Schema; description?: string }
+type Operation = { parameters?: Parameter[]; security?: unknown[]; description?: string; summary?: string; [key: string]: unknown }
 export type OpenApiDocument = {
   openapi: '3.1.0'
   info: Record<string, unknown>
@@ -32,7 +33,6 @@ const baseMetric = {
   definicoes: { type: 'object', additionalProperties: { type: 'string' }, description: 'Fórmulas e ressalvas exatas aplicadas ao payload.' },
 }
 const bucket = { type: 'string', description: 'Dia YYYY-MM-DD, segunda-feira da semana ou mês YYYY-MM, conforme agrupar.' }
-const countMoney = (label: string) => row({ [label]: integer(), valor: money() })
 const salesAccumulator = {
   pedidosPagos: integer('Pedidos com status pago, enviado ou entregue.'), receitaBruta: money(), receitaLiquidaComercial: money(), lucroLiquidoConhecido: money(true), ticketMedio: money(),
 }
@@ -115,12 +115,12 @@ function responses(success: Schema, item = false): Record<string, Schema> {
   return output
 }
 
-function queryParameter(name: string, schema: Schema, description: string, example?: unknown): Schema {
+function queryParameter(name: string, schema: Schema, description: string, example?: unknown): Parameter {
   return { name, in: 'query', required: false, description, schema, ...(example === undefined ? {} : { example }) }
 }
 
-function resourceParameters(definition: ResourceDefinition): Schema[] {
-  const parameters: Schema[] = [
+function resourceParameters(definition: ResourceDefinition): Parameter[] {
+  const parameters: Parameter[] = [
     queryParameter('limit', { type: 'integer', minimum: 1, maximum: Math.min(API_MAX_LIMIT, definition.maxLimit ?? API_MAX_LIMIT), default: Math.min(API_DEFAULT_LIMIT, definition.maxLimit ?? API_MAX_LIMIT) }, 'Tamanho da página.'),
     queryParameter('cursor', { type: 'string', minLength: 1 }, 'Cursor opaco criptografado da página anterior.'),
     queryParameter('sort', { type: 'string', enum: definition.sorts.flatMap(name => [name, `-${name}`]), default: definition.defaultSort ?? definition.sorts[0] }, 'Ordenação determinística; id é desempate implícito.'),
@@ -193,9 +193,9 @@ export function buildOpenApi(registry: ResourceRegistry, metrics: MetricRegistry
   return document
 }
 
-export function buildPostmanCollection(document: OpenApiDocument): Record<string, any> {
+export function buildPostmanCollection(document: OpenApiDocument): Record<string, unknown> {
   const items = Object.entries(document.paths).flatMap(([path, pathItem]) => Object.entries(pathItem).filter(([method]) => ['get', 'head', 'options'].includes(method)).map(([method, operation]) => {
-    const parameters = (operation.parameters ?? []) as Array<Record<string, any>>
+    const parameters = operation.parameters ?? []
     const query = parameters.filter(parameter => parameter.in === 'query').map(parameter => ({ key: parameter.name, value: String(parameter.example ?? parameter.schema?.default ?? ''), disabled: parameter.example === undefined && parameter.schema?.default === undefined, description: parameter.description }))
     const rawPath = path.replace('{id}', 'EXEMPLO_ID')
     return { name: `${method.toUpperCase()} ${path}`, request: { method: method.toUpperCase(), header: operation.security?.length ? [{ key: 'Authorization', value: 'Bearer {{token}}', type: 'text' }] : [], url: { raw: `{{baseUrl}}${rawPath}`, host: ['{{baseUrl}}'], path: rawPath.split('/').filter(Boolean), query }, description: operation.description ?? operation.summary } }

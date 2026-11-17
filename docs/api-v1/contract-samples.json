@@ -1,0 +1,314 @@
+{
+  "list:clientes": {
+    "data": [],
+    "meta": {
+      "requestId": "exemplo",
+      "count": 0,
+      "hasMore": false,
+      "nextCursor": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z",
+      "apiVersion": "1.0.0"
+    }
+  },
+  "item:clientes": {
+    "data": {
+      "id": "exemplo"
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "list:produtos": {
+    "data": [],
+    "meta": {
+      "requestId": "exemplo",
+      "count": 0,
+      "hasMore": false,
+      "nextCursor": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z",
+      "apiVersion": "1.0.0"
+    }
+  },
+  "item:produtos": {
+    "data": {
+      "id": "exemplo"
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "list:pedidos": {
+    "data": [],
+    "meta": {
+      "requestId": "exemplo",
+      "count": 0,
+      "hasMore": false,
+      "nextCursor": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z",
+      "apiVersion": "1.0.0"
+    }
+  },
+  "item:pedidos": {
+    "data": {
+      "id": "exemplo"
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "list:eventos-tracking": {
+    "data": [],
+    "meta": {
+      "requestId": "exemplo",
+      "count": 0,
+      "hasMore": false,
+      "nextCursor": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z",
+      "apiVersion": "1.0.0"
+    }
+  },
+  "item:eventos-tracking": {
+    "data": {
+      "id": "exemplo"
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:vendas": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "resumo": {
+        "pedidosPagos": 0,
+        "receitaBruta": "1234.50",
+        "receitaLiquidaComercial": "1234.50",
+        "lucroLiquidoConhecido": "1234.50",
+        "ticketMedio": "1234.50",
+        "pedidosComLucroConhecido": 0,
+        "pedidosComCustoPendente": 0
+      },
+      "serie": [],
+      "porStatusPagamento": [],
+      "porMetodoPagamento": [],
+      "porProduto": [],
+      "porVariacao": [],
+      "porUf": [],
+      "porCidade": [],
+      "porAtribuicao": []
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:funil": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "tracked": true,
+      "etapas": [],
+      "abandonoCheckout": {
+        "comercial": 0,
+        "tecnico": 0,
+        "emAndamento": 0
+      },
+      "serie": []
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:carrinhos": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "persistentes": {
+        "resumo": {
+          "carrinhos": 0,
+          "ativos": 0,
+          "convertidos": 0,
+          "abandonadosComerciais": 0,
+          "valorTotal": "1234.50",
+          "valorAbandonadoComercial": "1234.50"
+        },
+        "porEtapa": [],
+        "porStatus": [],
+        "serie": []
+      },
+      "checkoutTracked": {
+        "tracked": true,
+        "abandono": {
+          "comercial": 0,
+          "tecnico": 0,
+          "emAndamento": 0
+        }
+      }
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:cupons-cashback-fidelidade": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "cupons": {
+        "resumo": {
+          "usos": 0,
+          "desconto": "1234.50",
+          "receita": "1234.50"
+        },
+        "porCupom": []
+      },
+      "cashback": {
+        "creditos": "1234.50",
+        "debitos": "1234.50",
+        "saldoMovimentacao": "1234.50",
+        "saldoDisponivelAtual": "1234.50",
+        "saldoPendenteAtual": "1234.50"
+      },
+      "fidelidade": {
+        "snapshotAtual": true,
+        "porFaixa": []
+      },
+      "serie": []
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:frete": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "selecoesTracked": {
+        "total": 0,
+        "valorCarrinho": "1234.50",
+        "porOpcao": []
+      },
+      "pedidosPagos": {
+        "resumo": {
+          "pedidos": 0,
+          "freteCobrado": "1234.50",
+          "custoRealConhecido": "1234.50",
+          "prazoMedioDiasUteis": 0
+        },
+        "porTransportadora": [],
+        "porTipo": []
+      },
+      "serie": [],
+      "limitacoes": "exemplo"
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:avaliacoes": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "resumo": {
+        "avaliacoes": 0,
+        "aprovadas": 0,
+        "pendentes": 0,
+        "destaques": 0,
+        "respondidas": 0,
+        "mediaNota": 0
+      },
+      "porNota": [],
+      "porProduto": [],
+      "serie": []
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:estoque-catalogo": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "resumo": {
+        "produtos": 0,
+        "ativos": 0,
+        "inativos": 0,
+        "semEstoque": 0,
+        "estoqueCritico": 0,
+        "unidadesDisponiveis": 0,
+        "valorVendaEstoque": "1234.50"
+      },
+      "porCategoria": []
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  },
+  "metric:clientes": {
+    "data": {
+      "timezone": "America/Sao_Paulo",
+      "periodo": {
+        "de": "2026-01-01",
+        "ate": "2026-01-31",
+        "agrupar": "dia"
+      },
+      "definicoes": {},
+      "resumo": {
+        "clientesCompradores": 0,
+        "novos": 0,
+        "recorrentes": 0,
+        "ltvMedio": "1234.50",
+        "receitaHistorica": "1234.50"
+      },
+      "serie": []
+    },
+    "meta": {
+      "requestId": "exemplo",
+      "generatedAt": "2026-01-01T12:00:00.000Z"
+    }
+  }
+}

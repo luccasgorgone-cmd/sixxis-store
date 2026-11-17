@@ -4,6 +4,7 @@ import { executeItem, executeList, type ResourceDefinition, type ResourceQueryAr
 import { fixture, context, options } from './resources/fixtures.test-support'
 import { createStoreMetricRegistry } from './metricas/registry'
 import { createStoreResourceRegistry, routeApiV1 } from './router'
+import type { ListQuery } from './types'
 
 const forbiddenKey = /^(?:senha|password|hash|token|secret|accessToken|refreshToken|apiKey|webhookSecret|rawResponse|qrCode|idempotencyKey)$/i
 const forbiddenValue = /(?:DO-NOT-LEAK|PASSWORD-|RAW-|UNKNOWN-|Bearer\s+[A-Za-z0-9._~-]{12,}|\b4\d{15}\b)/i
@@ -33,6 +34,20 @@ function selectedRow(definition: ResourceDefinition, select: Record<string, unkn
   return row
 }
 
+function completeQuery(definition: ResourceDefinition): ListQuery {
+  const query: ListQuery = {
+    limit: 1,
+    sort: definition.defaultSort ?? definition.sorts[0] ?? 'id',
+    filters: {},
+    expand: [],
+  }
+  if (definition.window) {
+    query[definition.window.from] = new Date('2026-01-01T00:00:00.000Z')
+    query[definition.window.to] = new Date('2026-01-02T00:00:00.000Z')
+  }
+  return query
+}
+
 describe('complete anti-leak sweep', () => {
   it('traverses list, detail and every expand of all 49 resources with total scopes', async () => {
     const registry = createStoreResourceRegistry({ prisma: {} as never })
@@ -43,7 +58,7 @@ describe('complete anti-leak sweep', () => {
         findFirst: vi.fn(async (args: Pick<ResourceQueryArgs, 'where'|'select'>) => selectedRow(definition, args.select)),
       }
       const testDefinition = { ...definition, adapter }
-      const query = { limit: 1, sort: definition.defaultSort ?? definition.sorts[0] ?? 'id', filters: {}, expand: [] as string[] }
+      const query = completeQuery(definition)
       assertLeakFree(await executeList(testDefinition, context(), query, options))
       assertLeakFree(await executeItem(testDefinition, context(), 'fixture'))
       for (const expand of definition.expands) {
