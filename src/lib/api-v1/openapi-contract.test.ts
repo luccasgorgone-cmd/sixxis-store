@@ -10,7 +10,7 @@ import { createStoreResourceRegistry } from './router'
 const resources = createStoreResourceRegistry({ prisma: {} as never })
 const metrics = createStoreMetricRegistry({ prisma: {} as never })
 
-type ContractParameter = { name: string; required?: boolean; example?: unknown }
+type ContractParameter = { name: string; required?: boolean; example?: unknown; description?: string }
 type PostmanQuery = { key: string; value: string; disabled: boolean }
 type PostmanItem = { name: string; request: { auth?: { type: string }; header: Array<{ key: string }>; url: { query: PostmanQuery[] } } }
 
@@ -162,5 +162,34 @@ describe('OpenAPI 3.1 contract', () => {
     expect(existsSync(new URL('sync-exemplo.ts', directory))).toBe(true)
     expect(existsSync(new URL('postman-collection.json', directory))).toBe(false)
     expect(existsSync(new URL('exemplo-sync.ts', directory))).toBe(false)
+  })
+
+  it('documents non-expiring unlimited authenticated keys without quota balances', () => {
+    const document = buildOpenApi(resources, metrics)
+    const me = document.components.schemas.Me as { properties: Record<string, Record<string, unknown>>; required: string[] }
+    const meResponse = document.paths['/api/v1/me'].get.responses['200'].content['application/json'].schema
+
+    expect(meResponse).toEqual({ $ref: 'urn:sixxis:api-v1:me-envelope' })
+    expect(me.properties.expiraEm).toMatchObject({ type: ['string', 'null'], format: 'date-time' })
+    expect(me.properties.expiraEm.description).toContain('até revogação')
+    expect(me.properties.semLimite).toMatchObject({ type: 'boolean', const: true })
+    expect(me.required).toEqual(expect.arrayContaining(['expiraEm', 'semLimite']))
+    expect(Object.keys(document.components.headers)).toEqual(['RequestId'])
+    expect(JSON.stringify(document)).not.toMatch(/X-RateLimit|Saldo na janela|Limite por minuto/)
+  })
+
+  it('documents required windows without a maximum duration', () => {
+    const document = buildOpenApi(resources, metrics)
+    const readme = readFileSync(new URL('../../../docs/api-v1/README.md', import.meta.url), 'utf8')
+
+    for (const resource of resources.list()) {
+      if (resource.window) expect(Object.keys(resource.window).sort(), resource.slug).toEqual(['from', 'to'])
+    }
+    for (const metric of metrics.list()) {
+      const parameters = document.paths[`/api/v1/metricas/${metric.slug}`].get.parameters as ContractParameter[]
+      expect(parameters.map(parameter => parameter.description).join(' '), metric.slug).not.toMatch(/366|máximo/i)
+    }
+    expect(readme).toContain('`maxDays: null`')
+    expect(readme).not.toMatch(/60 requisições\/minuto|10\/minuto|Janela máxima: 366 dias/)
   })
 })

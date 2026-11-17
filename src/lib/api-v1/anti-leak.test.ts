@@ -90,7 +90,7 @@ describe('complete anti-leak sweep', () => {
     }
     const resource = createStoreResourceRegistry({ prisma: {} as never }).list()[0]
     const pipelineDeps = {
-      authenticate: vi.fn(async () => context().identity!), rateLimit: vi.fn(async () => context().rateLimit),
+      authenticate: vi.fn(async () => context().identity!),
       audit: vi.fn(async () => undefined), lastUsed: vi.fn(async () => undefined),
     }
     const safe = { ...resource, countAndLastUpdate: vi.fn(async () => ({ count: 0, ultimaAtualizacao: null })) }

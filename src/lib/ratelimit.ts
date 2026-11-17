@@ -22,9 +22,8 @@ export type LimiterName =
   | 'checkout-multi-metodo'
   | 'validar-cupom'
   | 'interno-frete'
-  | 'api-leitura'
   | 'api-leitura-ingress'
-  | 'api-leitura-metricas'
+  | 'api-leitura-public'
   | 'tracking'
 
 // Limites sensatos por IP/identificador (sliding window). Ajuste conforme tráfego.
@@ -35,9 +34,8 @@ const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ra
   'criar-pagamento':       { tokens: 12, window: '5 m' },   // 12 tentativas / 5 min
   'checkout-multi-metodo': { tokens: 8,  window: '5 m' },   // 8 tentativas / 5 min — orquestra 2 transações reais, mais caro que criar-pagamento
   'validar-cupom':         { tokens: 20, window: '1 m' },   // 20 validações / 1 min
-  'api-leitura':           { tokens: 600, window: '1 m' },
   'api-leitura-ingress':   { tokens: 60,  window: '1 m' },
-  'api-leitura-metricas':  { tokens: 10,  window: '1 m' },
+  'api-leitura-public':    { tokens: 60,  window: '1 m' },
   'tracking':               { tokens: 120, window: '1 m' },
   'interno-frete':         { tokens: 60, window: '1 m' },   // 60 cotações / 1 min (CRM)
 }
@@ -48,9 +46,8 @@ const AUTH_SENSITIVE: ReadonlySet<LimiterName> = new Set<LimiterName>([
   'login',
   'cadastro',
   'esqueci-senha',
-  'api-leitura',
   'api-leitura-ingress',
-  'api-leitura-metricas',
+  'api-leitura-public',
   'tracking',
 ])
 
@@ -131,7 +128,7 @@ export function getClientIp(req: Request): string {
 // from actual quota exhaustion (429). Reuses this module's Redis connection.
 const _apiLimiters = new Map<string, Ratelimit>()
 export async function rateLimitApiReading(
-  name: 'api-leitura' | 'api-leitura-ingress' | 'api-leitura-public' | 'api-leitura-metricas', identifier: string, tokens: number, window: '1 m',
+  name: 'api-leitura-ingress' | 'api-leitura-public', identifier: string, tokens: number, window: '1 m',
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const redis = getRedis()
   if (!redis) throw new Error('API limiter unavailable')

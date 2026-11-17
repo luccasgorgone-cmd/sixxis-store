@@ -24,7 +24,7 @@ const expectedJson: Record<string, unknown> = {
   'PopupInicial.paginas': ['home', 'produtos', '*'],
 }
 export function context(scopes: ApiScope[] = ['read:all', 'read:pii', 'read:financeiro', 'read:mensagens']): ApiContext {
-  return { requestId: 'task-five', identity: { id: 'key', nome: 'test', prefixo: 'test', scopes: new Set(scopes), expiraEm: null }, ip: '', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 1 } }
+  return { requestId: 'task-five', identity: { id: 'key', nome: 'test', prefixo: 'test', scopes: new Set(scopes), expiraEm: null }, ip: '', startedAt: 0 }
 }
 export function fixture(model: string): Record<string, unknown> {
   const schema = Prisma.dmmf.datamodel.models.find(item => item.name === model)!

@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { withApiV1 } from './pipeline'
 import { ApiAuthError } from './auth'
-import { rateLimitApiIngress, rateLimitApiKey, rateLimitApiPublic } from './rate-limit'
+import { rateLimitApiIngress, rateLimitApiPublic } from './rate-limit'
 import { auditRequest, recordLastUsed, safeClientIp } from './audit'
 import type { ApiIdentity } from './types'
 
@@ -17,7 +17,7 @@ afterEach(() => { vi.unstubAllEnvs() })
 
 const identity: ApiIdentity = { id: 'key-id', prefixo: 'safe-prefix', nome: 'Fixture', scopes: new Set(['read:all']), expiraEm: null }
 const req = () => new Request('https://example.test/api/v1/produtos?q=private-person&email=private%40example.test&token=secret', { headers: { 'x-forwarded-for': '192.0.2.3, 192.0.2.4', 'x-request-id': 'untrusted' } })
-const deps = () => ({ preAuthRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 60, remaining: 59, reset: Date.now() + 60_000 }), authenticate: vi.fn().mockResolvedValue(identity), rateLimit: vi.fn().mockResolvedValue({ success: true, limit: 600, remaining: 599, reset: Date.now() + 60_000 }), audit: vi.fn().mockResolvedValue(undefined), lastUsed: vi.fn().mockResolvedValue(undefined) })
+const deps = () => ({ preAuthRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 60, remaining: 59, reset: Date.now() + 60_000 }), authenticate: vi.fn().mockResolvedValue(identity), audit: vi.fn().mockResolvedValue(undefined), lastUsed: vi.fn().mockResolvedValue(undefined) })
 
 describe('API pipeline', () => {
   it('audits a dispatcher supplied allowlisted route template, never client segments', async () => {
@@ -60,20 +60,22 @@ describe('API pipeline', () => {
     expect((await res.text()).includes('private-handler-payload')).toBe(false)
     expect(d.audit).toHaveBeenCalledOnce()
   })
-  it('adds no-store, request id and 600/min rate headers and awaits metadata writes', async () => {
+  it('adds no-store and request id without quota headers and awaits metadata writes', async () => {
     const d = deps()
     const response = await withApiV1(async () => Response.json({ data: [] }), { scope: 'read:catalogo', deps: d })(req())
     expect(response.status).toBe(200)
     expect(response.headers.get('cache-control')).toBe('no-store')
     expect(response.headers.get('x-request-id')).not.toBe('untrusted')
-    expect(response.headers.get('x-ratelimit-limit')).toBe('600')
-    expect(response.headers.get('x-ratelimit-remaining')).toBe('599')
+    expect(response.headers.get('x-ratelimit-limit')).toBeNull()
+    expect(response.headers.get('x-ratelimit-remaining')).toBeNull()
+    expect(response.headers.get('x-ratelimit-reset')).toBeNull()
+    expect(d.preAuthRateLimit).not.toHaveBeenCalled()
     expect(d.audit).toHaveBeenCalledOnce()
     expect(d.lastUsed).toHaveBeenCalledWith(identity, '192.0.2.3')
     expect(JSON.stringify(d.audit.mock.calls).includes('private-person')).toBe(false)
     expect(JSON.stringify(d.audit.mock.calls).includes('private@example.test')).toBe(false)
   })
-  it('runs the ingress limiter before authentication and returns 401 without a database audit write', async () => {
+  it('counts an invalid credential against the IP quota and returns 401 without a database audit write', async () => {
     const d = deps(); d.authenticate.mockRejectedValue(new ApiAuthError())
     const res = await withApiV1(vi.fn(), { deps: d })(req())
     expect(res.status).toBe(401)
@@ -81,32 +83,38 @@ describe('API pipeline', () => {
     expect(d.preAuthRateLimit).toHaveBeenCalledWith('192.0.2.3')
     expect(d.audit).not.toHaveBeenCalled()
   })
-  it('rejects exhausted ingress quota before any API-key lookup', async () => {
-    const d = deps(); d.preAuthRateLimit.mockResolvedValue({ success: false, limit: 60, remaining: 0, reset: Date.now() + 60_000 })
-    const res = await withApiV1(vi.fn(), { deps: d })(req())
-    expect(res.status).toBe(429)
-    expect(d.authenticate).not.toHaveBeenCalled()
+  it('returns 429 on the 61st invalid credential while preserving the IP brute-force quota', async () => {
+    const d = deps()
+    d.authenticate.mockRejectedValue(new ApiAuthError())
+    let attempts = 0
+    d.preAuthRateLimit.mockImplementation(async () => ({ success: ++attempts <= 60, limit: 60, remaining: Math.max(0, 60 - attempts), reset: Date.now() + 60_000 }))
+    const handle = withApiV1(vi.fn(), { deps: d })
+
+    const statuses: number[] = []
+    for (let index = 0; index < 61; index += 1) statuses.push((await handle(req())).status)
+
+    expect(statuses).toEqual([...Array(60).fill(401), 429])
+    expect(d.authenticate).toHaveBeenCalledTimes(61)
+    expect(d.preAuthRateLimit).toHaveBeenCalledTimes(61)
     expect(d.audit).not.toHaveBeenCalled()
   })
   it('returns 403 for independent scope without running the handler', async () => {
     const handler = vi.fn(); const d = deps()
     const res = await withApiV1(handler, { scope: 'read:pii', deps: d })(req())
     expect(res.status).toBe(403); expect(handler).not.toHaveBeenCalled()
-    expect(d.rateLimit).toHaveBeenCalledWith('key-id')
   })
-  it('returns 429 with Retry-After at exhaustion', async () => {
-    const d = deps(); d.rateLimit.mockResolvedValue({ success: false, limit: 600, remaining: 0, reset: Date.now() + 60_000 })
-    const res = await withApiV1(vi.fn(), { deps: d })(req())
-    expect(res.status).toBe(429); expect(Number(res.headers.get('retry-after'))).toBeGreaterThan(0)
-    expect(res.headers.get('x-ratelimit-remaining')).toBe('0')
-    expect(d.audit).not.toHaveBeenCalled()
-    expect(d.lastUsed).not.toHaveBeenCalled()
-  })
-  it('returns generic 503 on limiter infrastructure failure and audits', async () => {
-    const d = deps(); d.rateLimit.mockRejectedValue(new Error('private-error-value'))
-    const res = await withApiV1(vi.fn(), { deps: d })(req())
-    expect(res.status).toBe(503); expect((await res.text()).includes('private-error-value')).toBe(false)
-    expect(d.audit).toHaveBeenCalledOnce()
+  it('never rate-limits an authenticated key after more than 60 valid requests', async () => {
+    const d = deps()
+    let attempts = 0
+    d.preAuthRateLimit.mockImplementation(async () => ({ success: ++attempts <= 60, limit: 60, remaining: Math.max(0, 60 - attempts), reset: Date.now() + 60_000 }))
+    const handle = withApiV1(() => Response.json({ ok: true }), { deps: d })
+
+    const statuses: number[] = []
+    for (let index = 0; index < 61; index += 1) statuses.push((await handle(req())).status)
+
+    expect(statuses).toEqual(Array(61).fill(200))
+    expect(d.authenticate).toHaveBeenCalledTimes(61)
+    expect(d.preAuthRateLimit).not.toHaveBeenCalled()
   })
   it('metadata failure never changes response or logs payload', async () => {
     const d = deps(); d.audit.mockRejectedValue(new Error('private')); d.lastUsed.mockRejectedValue(new Error('private'))
@@ -162,43 +170,37 @@ describe('audit metadata boundaries', () => {
 })
 
 describe('API limiter production fail-closed', () => {
-  it('fails closed on the resolved Upstash timeout shape and returns 503 from the pipeline', async () => {
+  it('fails closed on the resolved Upstash timeout shape for an invalid credential', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('UPSTASH_REDIS_REST_URL', 'https://redis.example.test')
     vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', 'fixture')
-    vi.stubEnv('API_V1_RATE_LIMIT_PER_MINUTE', '600')
     provider.limit.mockResolvedValue({ success: true, limit: 0, remaining: 0, reset: 0, pending: Promise.resolve(), reason: 'timeout' })
     const handler = vi.fn(() => Response.json({ ok: true })); const d = deps()
-    const response = await withApiV1(handler, { deps: { ...d, rateLimit: rateLimitApiKey } })(req())
+    d.authenticate.mockRejectedValue(new ApiAuthError())
+    const response = await withApiV1(handler, { deps: { ...d, preAuthRateLimit: rateLimitApiIngress } })(req())
     expect(response.status).toBe(503)
     expect(handler).not.toHaveBeenCalled()
   })
-  it('uses the actual shared Upstash adapter and propagates provider failures as 503', async () => {
+  it('uses the actual shared Upstash ingress adapter and propagates provider failures as 503', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('UPSTASH_REDIS_REST_URL', 'https://redis.example.test')
     vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', 'fixture')
-    vi.stubEnv('API_V1_RATE_LIMIT_PER_MINUTE', '600')
     provider.limit.mockResolvedValueOnce({ success: true, remaining: 599, reset: 60_000 })
-    expect((await rateLimitApiKey('adapter-key')).limit).toBe(600)
-    expect(provider.slidingWindow).toHaveBeenCalledWith(600, '1 m')
-    expect(provider.construct.mock.calls[0][0]).toMatchObject({ prefix: 'rl:api-leitura:600', analytics: false, timeout: 5000 })
-    expect(provider.limit).toHaveBeenCalledWith('adapter-key')
+    expect((await rateLimitApiIngress('192.0.2.3')).limit).toBe(60)
+    expect(provider.slidingWindow).toHaveBeenCalledWith(60, '1 m')
+    expect(provider.construct.mock.calls[0][0]).toMatchObject({ prefix: 'rl:api-leitura-ingress:60', analytics: false, timeout: 5000 })
+    expect(provider.limit).toHaveBeenCalledWith('192.0.2.3')
     provider.limit.mockRejectedValueOnce(new Error('provider-private-detail'))
-    await expect(rateLimitApiKey('adapter-key')).rejects.toMatchObject({ status: 503 })
+    await expect(rateLimitApiIngress('192.0.2.3')).rejects.toMatchObject({ status: 503 })
   })
   it.each(['0', '-1', '1.5', 'NaN', '0x10', ''])('fails closed for invalid configured limit', async value => {
-    await expect(rateLimitApiKey('id', 600, '1 m', { env: { NODE_ENV: 'production', API_V1_RATE_LIMIT_PER_MINUTE: value } })).rejects.toMatchObject({ status: 503 })
+    await expect(rateLimitApiIngress('192.0.2.3', { env: { NODE_ENV: 'production', API_V1_INGRESS_RATE_LIMIT_PER_MINUTE: value } })).rejects.toMatchObject({ status: 503 })
   })
   it('returns unavailable when Upstash is absent in production', async () => {
-    await expect(rateLimitApiKey('id', 600, '1 m', { env: { NODE_ENV: 'production' } })).rejects.toMatchObject({ status: 503 })
+    await expect(rateLimitApiIngress('192.0.2.3', { env: { NODE_ENV: 'production' } })).rejects.toMatchObject({ status: 503 })
   })
   it('returns unavailable on provider failure in production', async () => {
-    await expect(rateLimitApiKey('id', 600, '1 m', { env: { NODE_ENV: 'production', UPSTASH_REDIS_REST_URL: 'https://redis.example.test', UPSTASH_REDIS_REST_TOKEN: 'fixture' }, limit: vi.fn().mockRejectedValue(new Error('provider')) })).rejects.toMatchObject({ status: 503 })
-  })
-  it('uses configurable per-key limit with shared limiter', async () => {
-    const limit = vi.fn().mockResolvedValue({ success: true, remaining: 9, reset: 60_000 })
-    const res = await rateLimitApiKey('id', 600, '1 m', { env: { NODE_ENV: 'production', API_V1_RATE_LIMIT_PER_MINUTE: '10', UPSTASH_REDIS_REST_URL: 'https://redis.example.test', UPSTASH_REDIS_REST_TOKEN: 'fixture' }, limit })
-    expect(res.limit).toBe(10); expect(limit).toHaveBeenCalledWith('api-leitura', 'id', 10, '1 m')
+    await expect(rateLimitApiIngress('192.0.2.3', { env: { NODE_ENV: 'production', UPSTASH_REDIS_REST_URL: 'https://redis.example.test', UPSTASH_REDIS_REST_TOKEN: 'fixture' }, limit: vi.fn().mockRejectedValue(new Error('provider')) })).rejects.toMatchObject({ status: 503 })
   })
   it('uses a separate strict ingress namespace and bounded IP quota', async () => {
     const limit = vi.fn().mockResolvedValue({ success: true, remaining: 59, reset: 60_000 })

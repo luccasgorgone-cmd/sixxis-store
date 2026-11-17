@@ -8,7 +8,7 @@ import { buildOpenApi } from './openapi'
 import { withApiV1, type ApiV1Options } from './pipeline'
 import { problem } from './problem'
 import { ApiQueryError, parseExpand, parseListQuery } from './query'
-import { rateLimitApiMetric, rateLimitApiPublic } from './rate-limit'
+import { rateLimitApiPublic } from './rate-limit'
 import { createResourceRegistry, type ResourceRegistry } from './registry'
 import { executeItem, executeList, withQueryTimeout, type FieldSchema, type ResourceDefinition } from './resource'
 import { createAnalyticsResources } from './resources/analytics'
@@ -38,7 +38,6 @@ export type RouterDeps = {
   pipelineDeps?: ApiV1Options['deps']
   healthCheck?: () => Promise<unknown>
   publicRateLimit?: (id: string) => Promise<RateLimitResult>
-  metricRateLimit?: (id: string) => Promise<RateLimitResult>
   openApiDocument?: () => Promise<unknown> | unknown
   env?: Env
   now?: () => Date
@@ -319,7 +318,7 @@ function syncContract(definition: ResourceDefinition): Record<string, unknown> {
     watermarkField,
     from: updatedClock ? 'atualizadoDesde' : 'criadoDesde',
     to: updatedClock ? 'atualizadoAte' : 'criadoAte',
-    maxDays: definition.window?.maxDays ?? null,
+    maxDays: null,
     maxLimit: Math.min(API_MAX_LIMIT, definition.maxLimit ?? API_MAX_LIMIT),
   }
 }
@@ -454,11 +453,7 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
         prefixo: key.prefixo,
         escopos: [...key.scopes].sort(),
         expiraEm: key.expiraEm ? iso(key.expiraEm) : null,
-        rateLimit: {
-          limit: context.rateLimit.limit,
-          remaining: context.rateLimit.remaining,
-          reset: Math.ceil(context.rateLimit.reset / 1000),
-        },
+        semLimite: true,
       }, context.requestId))
     }, { auditRoute: `${API_BASE_PATH}/me` }, deps)(request)
   }
@@ -476,17 +471,6 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
     if (definition) {
       return protectedHandler(async (_request, context) => {
         assertQueryParams(request, ['de', 'ate', 'agrupar'])
-        let costLimit: RateLimitResult
-        try { costLimit = await (deps.metricRateLimit ?? rateLimitApiMetric)(context.identity!.id) }
-        catch { return problem(503, 'Serviço indisponível', 'Controle de tráfego temporariamente indisponível.', context.requestId) }
-        if (!costLimit.success) {
-          const response = problem(429, 'Muitas requisições', 'Limite de métricas excedido.', context.requestId)
-          response.headers.set('X-RateLimit-Limit', String(costLimit.limit))
-          response.headers.set('X-RateLimit-Remaining', String(Math.max(0, costLimit.remaining)))
-          response.headers.set('X-RateLimit-Reset', String(Math.ceil(costLimit.reset / 1000)))
-          response.headers.set('Retry-After', String(Math.max(1, Math.ceil((costLimit.reset - Date.now()) / 1000))))
-          return response
-        }
         const data = await metrics(deps).execute(definition.slug, context, new URL(request.url).searchParams)
         return jsonResponse(itemEnvelope(data, context.requestId))
       }, { scope: definition.scope, auditRoute: `${API_BASE_PATH}/metricas/${definition.slug}` }, deps)(request)

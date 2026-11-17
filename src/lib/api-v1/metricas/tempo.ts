@@ -64,8 +64,6 @@ export function parseMetricParams(search: URLSearchParams): MetricParams {
   const ate = assertCivilDay(search.get('ate'))
   const grouping = search.get('agrupar')
   if (!METRIC_GROUPINGS.includes(grouping as MetricGrouping) || de > ate) throw new ApiQueryError(400, 'Parâmetros de período inválidos.')
-  const inclusiveDays = Math.floor((Date.parse(`${ate}T00:00:00.000Z`) - Date.parse(`${de}T00:00:00.000Z`)) / 86_400_000) + 1
-  if (inclusiveDays < 1 || inclusiveDays > 366) throw new ApiQueryError(400, 'O período máximo para métricas é de 366 dias.')
   const agrupar = grouping as MetricGrouping
   return {
     de,

@@ -15,18 +15,44 @@ export type ResourceSyncContract = {
 
 type MetadataEnvelope = { data: Array<{ slug: string; sync: Omit<ResourceSyncContract, 'slug'> }> }
 
+const ISO_DATETIME_WITH_OFFSET = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/
+
+function isIsoDateTimeWithOffset(value: string): boolean {
+  const match = ISO_DATETIME_WITH_OFFSET.exec(value)
+  if (!match) return false
+  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3])
+  const hour = Number(match[4]), minute = Number(match[5]), second = Number(match[6])
+  const offset = match[7]
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
+  const daysInMonth = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1] ?? 0
+  const offsetValid = offset === 'Z' || (Number(offset.slice(1, 3)) <= 23 && Number(offset.slice(4, 6)) <= 59)
+  return day >= 1 && day <= daysInMonth && hour <= 23 && minute <= 59 && second <= 59 && offsetValid && Number.isFinite(new Date(value).getTime())
+}
+
+function pageEnvelope(value: unknown): Envelope<Row> {
+  if (!value || typeof value !== 'object') throw new Error('Envelope de paginação inválido.')
+  const data = (value as { data?: unknown }).data
+  const meta = (value as { meta?: unknown }).meta
+  if (!Array.isArray(data) || !meta || typeof meta !== 'object') throw new Error('Envelope de paginação inválido.')
+  const hasMore = (meta as { hasMore?: unknown }).hasMore
+  const nextCursor = (meta as { nextCursor?: unknown }).nextCursor
+  if (typeof hasMore !== 'boolean' || (hasMore ? typeof nextCursor !== 'string' || !nextCursor : nextCursor !== null)) throw new Error('Envelope de paginação inválido.')
+  return { data: data as Row[], meta: { hasMore, nextCursor: nextCursor as string | null } }
+}
+
 export async function syncResource(
   baseUrl: string,
   token: string,
   contract: ResourceSyncContract,
   window: { from: string; to: string },
 ) {
-  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(contract.slug) || contract.sort !== contract.watermarkField) throw new Error('Contrato de sincronização inválido.')
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(contract.slug) || contract.sort !== contract.watermarkField || contract.maxDays !== null) throw new Error('Contrato de sincronização inválido.')
   if (!Number.isInteger(contract.maxLimit) || contract.maxLimit < 1 || contract.maxLimit > 500) throw new Error('Contrato de sincronização inválido.')
   const from = new Date(window.from)
   const to = new Date(window.to)
-  if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || from > to || (contract.maxDays !== null && to.getTime() - from.getTime() > contract.maxDays * 86_400_000)) throw new Error('Janela de sincronização inválida.')
+  if (!isIsoDateTimeWithOffset(window.from) || !isIsoDateTimeWithOffset(window.to) || from > to) throw new Error('Janela de sincronização inválida.')
   const rows = new Map<string, Row>()
+  const seenCursors = new Set<string>()
   let cursor: string | null = null
   let watermark: string | undefined
   do {
@@ -38,13 +64,17 @@ export async function syncResource(
     if (cursor) url.searchParams.set('cursor', cursor)
     const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
     if (!response.ok) throw new Error(`Sixxis API ${response.status}`)
-    const page = await response.json() as Envelope<Row>
+    const page = pageEnvelope(await response.json())
     for (const row of page.data) {
       rows.set(row.id, row)
       const clock = row[contract.watermarkField]
       if (typeof clock === 'string' && (!watermark || clock > watermark)) watermark = clock
     }
-    cursor = page.meta.hasMore ? page.meta.nextCursor : null
+    if (page.meta.hasMore) {
+      if (seenCursors.has(page.meta.nextCursor!)) throw new Error('Cursor de paginação repetido.')
+      seenCursors.add(page.meta.nextCursor!)
+      cursor = page.meta.nextCursor
+    } else cursor = null
   } while (cursor)
   return { rows: [...rows.values()], watermark }
 }

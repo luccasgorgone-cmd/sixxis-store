@@ -28,7 +28,7 @@ export type ResourceDefinition<T extends Record<string, unknown> = Record<string
   structuralIdFields?:readonly string[]
   select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]; searchScope?:ApiScope
   dateFields?:{created?:string;updated?:string}
-  window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte';maxDays:number}
+  window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte'}
   filters?:Record<string,FilterDefinition>; querySchema?:ZodType; deprecated?:boolean; description?:string
   adapter: { findMany(args:ResourceQueryArgs):Promise<T[]>; findFirst?(args:Pick<ResourceQueryArgs,'where'|'select'>):Promise<T|null> }
   /** Serializers must list fields nominally, never spread a database row. */

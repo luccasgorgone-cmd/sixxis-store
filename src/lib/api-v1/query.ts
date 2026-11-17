@@ -94,9 +94,9 @@ export function validateListQuery(q: ListQuery, definition: ResourceDefinition, 
   for (const name of dates) if (q[name] && (!definition.dateFields?.[name.startsWith('criado') ? 'created' : 'updated'] || !(q[name] instanceof Date) || !Number.isFinite(q[name]!.getTime()))) fail()
   for (const [from,to] of [['criadoDesde','criadoAte'],['atualizadoDesde','atualizadoAte']] as const) if (q[from] && q[to] && q[from]! > q[to]!) fail()
   if (definition.window) {
-    const { from, to, maxDays } = definition.window
+    const { from, to } = definition.window
     const start = q[from], end = q[to]
-    if (!start || !end || end.getTime() < start.getTime() || end.getTime() - start.getTime() > maxDays * 86_400_000) fail()
+    if (!start || !end || end.getTime() < start.getTime()) fail()
   }
   if (q.cursor !== undefined) {
     const cursor = decodeCursor(q.cursor, options.cursorSecret)

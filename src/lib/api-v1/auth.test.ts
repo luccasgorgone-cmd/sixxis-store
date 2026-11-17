@@ -31,6 +31,13 @@ describe('API bearer authentication', () => {
     expect(d.prisma.apiChaveLeitura.findMany.mock.calls[0][0].where).toEqual({ prefixo: raw.slice(0, 20) })
     expect('hash' in identity).toBe(false)
   })
+  it('treats luccas-programa-externo with expiraEm null as valid until explicit revocation', async () => {
+    const permanent = row({ nome: 'luccas-programa-externo', expiraEm: null })
+    const identity = await authenticateBearer(request(`Bearer ${raw}`), { ...deps([permanent]), now: () => new Date('2126-01-01T00:00:00.000Z') })
+
+    expect(identity).toMatchObject({ nome: 'luccas-programa-externo', expiraEm: null })
+    await expect(authenticateBearer(request(`Bearer ${raw}`), deps([{ ...permanent, revogadoEm: new Date('2026-11-17T00:00:00.000Z') }]))).rejects.toMatchObject({ status: 401 })
+  })
   it.each([{ hash: 'not-hex' }, { hash: 'a'.repeat(63) }, { revogadoEm: new Date() }, { expiraEm: new Date(0) }, { escopos: ['read:unknown'] }, { escopos: 'read:all' }])('fails closed for invalid database state', async extra => {
     const compare = vi.fn(timingSafeEqual)
     await expect(authenticateBearer(request(`Bearer ${raw}`), { ...deps([row(extra)]), compare })).rejects.toMatchObject({ status: 401 })

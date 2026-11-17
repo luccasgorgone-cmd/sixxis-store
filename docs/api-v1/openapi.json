@@ -44,15 +44,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -102,15 +93,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -160,15 +142,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -248,21 +221,12 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "urn:sixxis:api-v1:me-envelope"
                 }
               }
             }
@@ -310,15 +274,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -557,15 +512,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -650,15 +596,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -860,15 +797,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -953,15 +881,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1133,15 +1052,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1226,15 +1136,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1388,15 +1289,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1481,15 +1373,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1699,15 +1582,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1792,15 +1666,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1985,15 +1850,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2078,15 +1934,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2329,15 +2176,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2422,15 +2260,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2651,15 +2480,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2744,15 +2564,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2906,15 +2717,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2999,15 +2801,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3180,15 +2973,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3273,15 +3057,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3519,15 +3294,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3612,15 +3378,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3805,15 +3562,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3898,15 +3646,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4071,15 +3810,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4164,15 +3894,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4376,15 +4097,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4469,15 +4181,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4687,15 +4390,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4780,15 +4474,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4948,15 +4633,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5041,15 +4717,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5247,15 +4914,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5340,15 +4998,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5533,15 +5182,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5626,15 +5266,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6060,15 +5691,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6153,15 +5775,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6369,15 +5982,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6462,15 +6066,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6733,15 +6328,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6826,15 +6412,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7042,15 +6619,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7135,15 +6703,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7336,15 +6895,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7429,15 +6979,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7602,15 +7143,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7695,15 +7227,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7887,15 +7410,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7980,15 +7494,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8197,15 +7702,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8290,15 +7786,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8481,15 +7968,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8574,15 +8052,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8782,15 +8251,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8875,15 +8335,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9076,15 +8527,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9169,15 +8611,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9429,15 +8862,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9522,15 +8946,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9757,15 +9172,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9850,15 +9256,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10060,15 +9457,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10153,15 +9541,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10371,15 +9750,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10464,15 +9834,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10700,15 +10061,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10793,15 +10145,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10972,15 +10315,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11065,15 +10399,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11337,15 +10662,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11430,15 +10746,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11646,15 +10953,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11739,15 +11037,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11910,15 +11199,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12003,15 +11283,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12184,15 +11455,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12277,15 +11539,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12487,15 +11740,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12580,15 +11824,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12865,15 +12100,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12958,15 +12184,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13150,15 +12367,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13243,15 +12451,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13433,15 +12632,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13526,15 +12716,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13706,15 +12887,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13799,15 +12971,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13992,15 +13155,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14085,15 +13239,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14277,15 +13422,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14370,15 +13506,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14541,15 +13668,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14634,15 +13752,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14849,15 +13958,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14942,15 +14042,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15130,15 +14221,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15223,15 +14305,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15296,7 +14369,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15325,15 +14398,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15398,7 +14462,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15427,15 +14491,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15500,7 +14555,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15529,15 +14584,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15602,7 +14648,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15631,15 +14677,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15704,7 +14741,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15733,15 +14770,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15806,7 +14834,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15835,15 +14863,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15908,7 +14927,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15937,15 +14956,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -16010,7 +15020,7 @@
             "name": "ate",
             "in": "query",
             "required": true,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -16039,15 +15049,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -25545,6 +24546,68 @@
         ],
         "additionalProperties": false,
         "description": "Objeto estruturado."
+      },
+      "Me": {
+        "$id": "urn:sixxis:api-v1:me",
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome operacional da chave."
+          },
+          "prefixo": {
+            "type": "string",
+            "description": "Prefixo seguro para identificação da chave."
+          },
+          "escopos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Escopo autorizado."
+            },
+            "description": "Coleção ordenada."
+          },
+          "expiraEm": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Data de expiração; null significa válida até revogação explícita."
+          },
+          "semLimite": {
+            "type": "boolean",
+            "const": true,
+            "description": "Chaves válidas autenticadas não têm limite por minuto."
+          }
+        },
+        "required": [
+          "nome",
+          "prefixo",
+          "escopos",
+          "expiraEm",
+          "semLimite"
+        ],
+        "additionalProperties": false,
+        "description": "Objeto estruturado."
+      },
+      "MeEnvelope": {
+        "$id": "urn:sixxis:api-v1:me-envelope",
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "urn:sixxis:api-v1:me"
+          },
+          "meta": {
+            "$ref": "urn:sixxis:api-v1:item-meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": "Objeto estruturado."
       }
     },
     "parameters": {},
@@ -25555,27 +24618,6 @@
         "schema": {
           "type": "string"
         }
-      },
-      "RateLimit": {
-        "$id": "urn:sixxis:api-v1:header:rate-limit",
-        "description": "Limite por minuto.",
-        "schema": {
-          "type": "integer"
-        }
-      },
-      "RateRemaining": {
-        "$id": "urn:sixxis:api-v1:header:rate-remaining",
-        "description": "Saldo na janela.",
-        "schema": {
-          "type": "integer"
-        }
-      },
-      "RateReset": {
-        "$id": "urn:sixxis:api-v1:header:rate-reset",
-        "description": "Reset em Unix seconds.",
-        "schema": {
-          "type": "integer"
-        }
       }
     },
     "responses": {
@@ -25585,15 +24627,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25610,15 +24643,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25635,15 +24659,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25660,15 +24675,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25685,15 +24691,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           },
           "Retry-After": {
             "description": "Segundos até nova tentativa.",
@@ -25716,15 +24713,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25741,15 +24729,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
