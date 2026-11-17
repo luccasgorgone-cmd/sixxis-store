@@ -127,9 +127,9 @@ export function getClientIp(req: Request): string {
 // Dedicated strict entry point: callers distinguish provider unavailability (503)
 // from actual quota exhaustion (429). Reuses this module's Redis connection.
 const _apiLimiters = new Map<string, Ratelimit>()
-export async function rateLimitApiReading(
+function getApiReadingLimiter(
   name: 'api-leitura-ingress' | 'api-leitura-public', identifier: string, tokens: number, window: '1 m',
-): Promise<{ success: boolean; remaining: number; reset: number }> {
+): { limiter: Ratelimit; identifier: string } {
   const redis = getRedis()
   if (!redis) throw new Error('API limiter unavailable')
   const cacheKey = `${name}:${tokens}`
@@ -138,7 +138,14 @@ export async function rateLimitApiReading(
     limiter = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(tokens, window), prefix: `rl:${name}:${tokens}`, analytics: false, timeout: 5000 })
     _apiLimiters.set(cacheKey, limiter)
   }
-  const result = await limiter.limit(identifier)
+  return { limiter, identifier }
+}
+
+export async function rateLimitApiReading(
+  name: 'api-leitura-ingress' | 'api-leitura-public', identifier: string, tokens: number, window: '1 m', rate = 1,
+): Promise<{ success: boolean; remaining: number; reset: number }> {
+  const { limiter } = getApiReadingLimiter(name, identifier, tokens, window)
+  const result = rate === 1 ? await limiter.limit(identifier) : await limiter.limit(identifier, { rate })
   // Upstash resolves (does not reject) on timeout, with success:true. Never
   // mistake its availability fallback for a successful distributed check.
   if (result.reason === 'timeout') throw new Error('API limiter unavailable')

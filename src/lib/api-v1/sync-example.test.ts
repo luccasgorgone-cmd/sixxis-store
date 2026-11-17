@@ -5,6 +5,7 @@ type SyncContract = {
   slug: string
   sort: string
   watermarkField: string
+  watermarkFormat: 'date-time' | 'date'
   from: string
   to: string
   maxDays: number | null
@@ -19,7 +20,7 @@ describe('generated synchronization helper', () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: '1', createdAt: '2026-11-16T10:00:00.000Z' }], meta: { hasMore: true, nextCursor: 'opaque' } })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: '2', createdAt: '2026-11-16T11:00:00.000Z' }], meta: { hasMore: false, nextCursor: null } })))
     vi.stubGlobal('fetch', fetch)
-    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
     const run = syncResource as unknown as (baseUrl: string, token: string, contract: SyncContract, window: { from: string; to: string }) => Promise<{ rows: unknown[]; watermark?: string }>
     const result = await run('https://example.test', 'token', contract, { from: '2026-11-16T00:00:00.000Z', to: '2026-11-16T23:59:59.999Z' })
 
@@ -34,7 +35,7 @@ describe('generated synchronization helper', () => {
   it('accepts a valid ISO window longer than 366 days', async () => {
     const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [], meta: { hasMore: false, nextCursor: null } })))
     vi.stubGlobal('fetch', fetch)
-    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
     const run = syncResource as unknown as (baseUrl: string, token: string, contract: SyncContract, window: { from: string; to: string }) => Promise<unknown>
     await expect(run('https://example.test', 'token', contract, { from: '2024-01-01T00:00:00.000Z', to: '2026-11-17T00:00:00.000Z' })).resolves.toBeDefined()
     expect(fetch).toHaveBeenCalledOnce()
@@ -47,7 +48,7 @@ describe('generated synchronization helper', () => {
   ])('rejects %s before the first authenticated fetch', async (_name, from, to) => {
     const fetch = vi.fn()
     vi.stubGlobal('fetch', fetch)
-    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
 
     await expect(syncResource('https://example.test', 'token', contract as never, { from, to })).rejects.toThrow('Janela de sincronização inválida.')
     expect(fetch).not.toHaveBeenCalled()
@@ -56,7 +57,7 @@ describe('generated synchronization helper', () => {
   it('accepts explicit numeric timezone offsets', async () => {
     const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [], meta: { hasMore: false, nextCursor: null } })))
     vi.stubGlobal('fetch', fetch)
-    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
 
     await expect(syncResource('https://example.test', 'token', contract as never, { from: '2024-01-01T00:00:00.000-03:00', to: '2026-11-17T00:00:00.000+00:00' })).resolves.toBeDefined()
   })
@@ -67,7 +68,7 @@ describe('generated synchronization helper', () => {
     ['meta inválida', { data: [], meta: { hasMore: 'false', nextCursor: null } }],
   ])('rejects an invalid page envelope: %s', async (_name, payload) => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(payload))))
-    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
 
     await expect(syncResource('https://example.test', 'token', contract as never, { from: '2026-11-16T00:00:00.000Z', to: '2026-11-17T00:00:00.000Z' })).rejects.toThrow('Envelope de paginação inválido.')
   })
@@ -75,7 +76,7 @@ describe('generated synchronization helper', () => {
   it('rejects hasMore=true without a non-empty nextCursor', async () => {
     const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [{ id: '1', createdAt: '2026-11-16T10:00:00.000Z' }], meta: { hasMore: true, nextCursor: null } })))
     vi.stubGlobal('fetch', fetch)
-    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
 
     await expect(syncResource('https://example.test', 'token', contract as never, { from: '2026-11-16T00:00:00.000Z', to: '2026-11-17T00:00:00.000Z' })).rejects.toThrow('Envelope de paginação inválido.')
     expect(fetch).toHaveBeenCalledOnce()
@@ -86,15 +87,39 @@ describe('generated synchronization helper', () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ data: [], meta: { hasMore: true, nextCursor: 'same' } })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ data: [], meta: { hasMore: true, nextCursor: 'same' } })))
     vi.stubGlobal('fetch', fetch)
-    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
 
     await expect(syncResource('https://example.test', 'token', contract as never, { from: '2026-11-16T00:00:00.000Z', to: '2026-11-17T00:00:00.000Z' })).rejects.toThrow('Cursor de paginação repetido.')
     expect(fetch).toHaveBeenCalledTimes(2)
   })
 
+  it.each([
+    ['row nula', null],
+    ['row array', []],
+    ['id ausente', { createdAt: '2026-11-16T10:00:00.000Z' }],
+    ['id vazio', { id: '   ', createdAt: '2026-11-16T10:00:00.000Z' }],
+    ['id longo', { id: 'x'.repeat(501), createdAt: '2026-11-16T10:00:00.000Z' }],
+    ['watermark ausente', { id: '1' }],
+    ['watermark sem offset', { id: '1', createdAt: '2026-11-16T10:00:00.000' }],
+    ['watermark impossível', { id: '1', createdAt: '2026-02-30T10:00:00.000Z' }],
+  ])('rejects the whole page before deduplication when %s', async (_name, row) => {
+    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [{ id: 'valid', createdAt: '2026-11-16T09:00:00.000Z' }, row], meta: { hasMore: false, nextCursor: null } })))
+    vi.stubGlobal('fetch', fetch)
+    const contract: SyncContract = { slug: 'eventos-tracking', sort: 'createdAt', watermarkField: 'createdAt', watermarkFormat: 'date-time', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 500 }
+
+    await expect(syncResource('https://example.test', 'token', contract as never, { from: '2026-11-16T00:00:00.000Z', to: '2026-11-17T00:00:00.000Z' })).rejects.toThrow('Linha de sincronização inválida.')
+  })
+
+  it('accepts a strict civil-date watermark only when the contract advertises date', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [{ id: '1', dia: '2026-11-16' }], meta: { hasMore: false, nextCursor: null } }))))
+    const contract: SyncContract = { slug: 'metricas-diarias', sort: 'dia', watermarkField: 'dia', watermarkFormat: 'date', from: 'criadoDesde', to: 'criadoAte', maxDays: null, maxLimit: 200 }
+
+    await expect(syncResource('https://example.test', 'token', contract as never, { from: '2026-11-16T00:00:00.000Z', to: '2026-11-17T00:00:00.000Z' })).resolves.toMatchObject({ watermark: '2026-11-16' })
+  })
+
   it('loads the selected resource contract and prints only count and watermark', async () => {
     const fetch = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ slug: 'produtos', sync: { sort: 'updatedAt', watermarkField: 'updatedAt', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 } }] })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ slug: 'produtos', sync: { sort: 'updatedAt', watermarkField: 'updatedAt', watermarkFormat: 'date-time', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 } }] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: '1', updatedAt: '2026-11-16T10:00:00.000Z' }], meta: { hasMore: false, nextCursor: null } })))
     vi.stubGlobal('fetch', fetch)
     const output: string[] = []
@@ -116,7 +141,7 @@ describe('generated synchronization helper', () => {
 
   it('never sends the token to an environment-controlled origin', async () => {
     const fetch = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ slug: 'produtos', sync: { sort: 'updatedAt', watermarkField: 'updatedAt', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 } }] })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ slug: 'produtos', sync: { sort: 'updatedAt', watermarkField: 'updatedAt', watermarkFormat: 'date-time', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 } }] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ data: [], meta: { hasMore: false, nextCursor: null } })))
     vi.stubGlobal('fetch', fetch)
 

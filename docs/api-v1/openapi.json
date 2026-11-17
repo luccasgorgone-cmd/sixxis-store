@@ -24578,7 +24578,7 @@
           "semLimite": {
             "type": "boolean",
             "const": true,
-            "description": "Chaves válidas autenticadas não têm limite por minuto."
+            "description": "Chaves válidas autenticadas não têm limite de requests nem de período."
           }
         },
         "required": [

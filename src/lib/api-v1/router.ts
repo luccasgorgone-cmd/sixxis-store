@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { PrismaClient } from '@prisma/client'
+import { reconcileActiveApiKeyDigests } from './active-digest-sync'
 import { hasScope } from './auth'
 import { API_BASE_PATH, API_MAX_LIMIT, API_QUERY_TIMEOUT_MS, API_VERSION } from './constants'
 import { iso, itemEnvelope, listEnvelope } from './format'
@@ -312,10 +313,13 @@ function syncContract(definition: ResourceDefinition): Record<string, unknown> {
   const created = definition.dateFields?.created
   const watermarkField = windowFrom?.startsWith('atualizado') ? updated : windowFrom?.startsWith('criado') ? created : updated ?? created
   if (!watermarkField || !definition.sorts.includes(watermarkField)) throw new TypeError(`Missing sortable sync clock for ${definition.slug}`)
+  const watermarkFormat = definition.fields.find(field => field.name === watermarkField)?.format
+  if (watermarkFormat !== 'date' && watermarkFormat !== 'date-time') throw new TypeError(`Missing sync clock format for ${definition.slug}`)
   const updatedClock = watermarkField === updated
   return {
     sort: watermarkField,
     watermarkField,
+    watermarkFormat,
     from: updatedClock ? 'atualizadoDesde' : 'criadoDesde',
     to: updatedClock ? 'atualizadoAte' : 'criadoAte',
     maxDays: null,
@@ -339,7 +343,10 @@ async function cachedResourceMetadata(registry: ResourceRegistry, context: ApiCo
 
 async function defaultHealthCheck(): Promise<void> {
   const { prisma } = await import('../prisma')
-  await withQueryTimeout(() => prisma.$queryRaw`SELECT 1`)
+  await Promise.all([
+    reconcileActiveApiKeyDigests(prisma),
+    withQueryTimeout(() => prisma.$queryRaw`SELECT 1`),
+  ])
 }
 
 const healthCache = new WeakMap<() => Promise<unknown>, CacheEntry<unknown>>()

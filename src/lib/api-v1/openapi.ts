@@ -171,7 +171,7 @@ export function buildOpenApi(registry: ResourceRegistry, metrics: MetricRegistry
     prefixo: text('Prefixo seguro para identificação da chave.'),
     escopos: array(text('Escopo autorizado.')),
     expiraEm: { type: ['string', 'null'], format: 'date-time', description: 'Data de expiração; null significa válida até revogação explícita.' },
-    semLimite: { type: 'boolean', const: true, description: 'Chaves válidas autenticadas não têm limite por minuto.' },
+    semLimite: { type: 'boolean', const: true, description: 'Chaves válidas autenticadas não têm limite de requests nem de período.' },
   }) }
   const meEnvelope = { $id: 'urn:sixxis:api-v1:me-envelope', ...object({ data: { $ref: 'urn:sixxis:api-v1:me' }, meta: { $ref: 'urn:sixxis:api-v1:item-meta' } }) }
   Object.assign(schemas, { ItemMeta: meta, ListMeta: listMeta, Problem: problem, Me: me, MeEnvelope: meEnvelope })

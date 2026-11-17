@@ -190,6 +190,11 @@ describe('OpenAPI 3.1 contract', () => {
       expect(parameters.map(parameter => parameter.description).join(' '), metric.slug).not.toMatch(/366|máximo/i)
     }
     expect(readme).toContain('`maxDays: null`')
+    expect(readme).toContain('não expira')
+    expect(readme).toContain('sem limite de requests ou de período')
+    expect(readme).toContain('10 segundos por consulta SQL')
+    expect(readme).toContain('2 métricas')
+    expect(readme).toContain('brute-force por IP')
     expect(readme).not.toMatch(/60 requisições\/minuto|10\/minuto|Janela máxima: 366 dias/)
   })
 })

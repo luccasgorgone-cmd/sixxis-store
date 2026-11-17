@@ -2,16 +2,17 @@ import { randomBytes } from 'node:crypto'
 import { open, unlink } from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
+import { activeDigestStore, type ActiveDigestStore } from '../src/lib/api-v1/active-digests'
 import { apiScopesSchema, hashApiKey } from '../src/lib/api-v1/auth'
 
 const METADATA_SELECT = { id: true, nome: true, prefixo: true, escopos: true, criadoEm: true, expiraEm: true, revogadoEm: true, ultimoUsoEm: true, ultimoIp: true } as const
 type Metadata = { id: string; nome?: string; prefixo?: string; escopos?: unknown; criadoEm?: Date; expiraEm?: Date | null; revogadoEm?: Date | null; ultimoUsoEm?: Date | null; ultimoIp?: string | null }
 type CliStore = { apiChaveLeitura: {
   create(args: { data: { nome: string; prefixo: string; hash: string; escopos: string[]; expiraEm: Date | null }; select: { id: true } }): Promise<{ id: string }>
-  findMany(args: { where?: { prefixo: string }; select: typeof METADATA_SELECT | { id: true }; orderBy?: { criadoEm: 'desc' } }): Promise<Metadata[]>
+  findMany(args: { where?: { prefixo?: string; id?: string }; select: typeof METADATA_SELECT | { id: true } | { hash: true }; orderBy?: { criadoEm: 'desc' } }): Promise<Array<Metadata & { hash?: string }>>
   updateMany(args: { where: { id: string; revogadoEm: null }; data: { revogadoEm: Date } }): Promise<{ count: number }>
 } }
-export type CliDeps = { prisma?: CliStore; write?: (text: string) => unknown; openOutput?: typeof open }
+export type CliDeps = { prisma?: CliStore; write?: (text: string) => unknown; openOutput?: typeof open; activeDigests?: Pick<ActiveDigestStore, 'add' | 'remove'> }
 
 function parseArgs(args: string[]): { command: string; flags: Record<string, string> } {
   const [command, ...rest] = args
@@ -39,17 +40,40 @@ export async function runApiKeyCli(args: string[], deps: CliDeps = {}): Promise<
     // Reserve a NEW exclusive file before touching the DB; never overwrite/symlink.
     const file = await (deps.openOutput ?? open)(flags.output, 'wx', 0o600)
     const prisma = deps.prisma ?? (await import('../src/lib/prisma')).prisma
-    let persisted = false
+    const digests = deps.activeDigests ?? activeDigestStore
+    let createdId: string | undefined
+    let createdHash: string | undefined
+    let operationFailure: unknown
     try {
       await file.chmod(0o600)
       const raw = `sxs_live_${randomBytes(32).toString('base64url')}`
+      const hash = hashApiKey(raw).toString('hex')
+      createdHash = hash
       await file.writeFile(`${raw}\n`, 'utf8')
       await file.sync()
-      await prisma.apiChaveLeitura.create({ data: { nome, prefixo: raw.slice(0, 20), hash: hashApiKey(raw).toString('hex'), escopos, expiraEm }, select: { id: true } })
-      persisted = true
-    } finally {
+      const created = await prisma.apiChaveLeitura.create({ data: { nome, prefixo: raw.slice(0, 20), hash, escopos, expiraEm }, select: { id: true } })
+      createdId = created.id
+      await digests.add(hash, { id: created.id, nome, prefixo: raw.slice(0, 20), scopes: new Set(escopos), expiraEm })
+    } catch (error) {
+      operationFailure = error
+    }
+    let closeFailure: unknown
+    try {
       await file.close()
-      if (!persisted) await unlink(flags.output).catch(() => undefined)
+    } catch (error) {
+      closeFailure = error
+    }
+    const failure = operationFailure ?? closeFailure
+    if (failure !== undefined) {
+      if (createdId && createdHash) {
+        // A permanent quarantine is published before DB compensation. Snapshots
+        // never replace this denylist, so a late add/stale snapshot stays denied.
+        await digests.remove(createdHash)
+        const compensation = await prisma.apiChaveLeitura.updateMany({ where: { id: createdId, revogadoEm: null }, data: { revogadoEm: new Date() } })
+        if (compensation.count !== 1) throw new Error('Não foi possível compensar a criação da chave.')
+      }
+      await unlink(flags.output).catch(() => undefined)
+      throw failure
     }
     return
   }
@@ -69,6 +93,10 @@ export async function runApiKeyCli(args: string[], deps: CliDeps = {}): Promise<
     if (matches.length !== 1) throw new Error('Prefixo ausente ou ambíguo. Use --id.')
     id = matches[0].id
   }
+  const digestRows = await prisma.apiChaveLeitura.findMany({ where: { id }, select: { hash: true } })
+  if (digestRows.length !== 1 || typeof digestRows[0].hash !== 'string') throw new Error('Chave ausente ou inválida.')
+  const digests = deps.activeDigests ?? activeDigestStore
+  await digests.remove(digestRows[0].hash)
   const result = await prisma.apiChaveLeitura.updateMany({ where: { id, revogadoEm: null }, data: { revogadoEm: new Date() } })
   write(`${JSON.stringify({ revogadas: result.count })}\n`)
 }

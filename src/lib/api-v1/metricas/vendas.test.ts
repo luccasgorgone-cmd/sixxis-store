@@ -157,6 +157,23 @@ describe('metricas/vendas', () => {
     expect(result.definicoes.lucroLiquidoConhecido).toContain('null')
   })
 
+  it('keeps a multi-century daily window proportional to returned rows', async () => {
+    const [order] = saleRows()
+    const centuries = parseMetricParams(new URLSearchParams({ de: '1800-01-01', ate: '2200-12-31', agrupar: 'dia' }))
+    const { definition } = metric({ orders: [order], events: [] })
+
+    const result = await definition.query(context, centuries)
+
+    expect(result.serie).toEqual([{
+      bucket: '2026-11-16',
+      pedidosPagos: 1,
+      receitaBruta: '90.00',
+      receitaLiquidaComercial: '100.00',
+      lucroLiquidoConhecido: '45.00',
+      ticketMedio: '100.00',
+    }])
+  })
+
   it('redacts PII accidentally entered in the free-form city field', async () => {
     const rows = saleRows()
     rows[1].endereco.cidade = 'victim@example.com'

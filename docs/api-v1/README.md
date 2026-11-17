@@ -10,13 +10,13 @@ API server-to-server, autenticada e somente leitura. A fonte executável do cont
 
 ## Autenticação e escopos
 
-Envie `Authorization: Bearer <token>`. Nunca coloque token em URL, log ou repositório. `read:all` concede os domínios; `read:pii` e `read:mensagens` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
+Envie `Authorization: Bearer <token>`. Nunca coloque token em URL, log ou repositório. A chave operacional `luccas-programa-externo` não expira (`expiraEm: null`) e permanece válida até revogação explícita. `read:all` concede os domínios; `read:pii` e `read:mensagens` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
 
 Escopos disponíveis: `read:all`, `read:clientes`, `read:catalogo`, `read:pedidos`, `read:marketing`, `read:analytics`, `read:auditoria`, `read:configuracoes`, `read:financeiro`, `read:pii`, `read:mensagens`.
 
 ## Paginação e sincronização
 
-Use `limit` (máximo global 500; respeite `sync.maxLimit` do recurso) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de `/api/v1/meta/recursos` publica `sync.sort`, `watermarkField`, parâmetros `from`/`to` e `maxDays: null`, indicando que qualquer intervalo cronológico válido é aceito. Congele os dois limites da janela durante todas as páginas, deduplique por `id`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
+Use `limit` (máximo global 500; respeite `sync.maxLimit` do recurso) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de `/api/v1/meta/recursos` publica `sync.sort`, `watermarkField`, `watermarkFormat`, parâmetros `from`/`to` e `maxDays: null`, indicando que qualquer intervalo cronológico válido é aceito. Congele os dois limites da janela durante todas as páginas, deduplique por `id`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
 
 ```bash
 curl -sS -H "Authorization: Bearer $SIXXIS_API_TOKEN" \
@@ -36,7 +36,7 @@ unset SIXXIS_API_TOKEN
 
 ## Erros, limites e cache
 
-Erros usam RFC 9457 (`application/problem+json`) e incluem `requestId`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. Chaves válidas autenticadas não têm limite por minuto, inclusive em métricas. A proteção por IP permanece em endpoints públicos e em tentativas com credencial ausente ou inválida; nesses casos, respeite `Retry-After` ao receber 429. Respostas autenticadas usam `Cache-Control: no-store`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
+Erros usam RFC 9457 (`application/problem+json`) e incluem `requestId`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. Chaves válidas autenticadas operam sem limite de requests ou de período, inclusive em métricas. Os três únicos limites técnicos são: 10 segundos por consulta SQL; no máximo 2 métricas executadas concorrentemente; e proteção de brute-force por IP somente para tentativas de autenticação recusadas. Nesses casos recusados, respeite `Retry-After` ao receber 429. Respostas autenticadas usam `Cache-Control: no-store`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
 
 ## Endpoints transversais
 

@@ -93,15 +93,23 @@ export function bucketForInstant(instant: Date, grouping: MetricGrouping): strin
   return bucketForDay(dayAt(instant.getTime()), grouping)
 }
 
-export function listMetricBuckets(params: MetricParams): string[] {
-  const buckets: string[] = []
-  let cursor = params.de
-  while (cursor <= params.ate) {
-    const bucket = bucketForDay(cursor, params.agrupar)
-    if (buckets.at(-1) !== bucket) buckets.push(bucket)
-    cursor = addCivilDays(cursor, 1)
+export function sparseMetricBuckets<T>(params: MetricParams, create: (bucket: string) => T) {
+  const buckets = new Map<string, T>()
+  const named = (bucket: string): T => {
+    let value = buckets.get(bucket)
+    if (value === undefined) {
+      value = create(bucket)
+      buckets.set(bucket, value)
+    }
+    return value
   }
-  return buckets
+  const entries = () => [...buckets].sort(([left], [right]) => left.localeCompare(right))
+  return {
+    at: (instant: Date) => named(bucketForInstant(instant, params.agrupar)),
+    named,
+    entries,
+    values: () => entries().map(([, value]) => value),
+  }
 }
 
 export function metricBase<T extends Record<string, string>>(params: MetricParams, definicoes: T) {

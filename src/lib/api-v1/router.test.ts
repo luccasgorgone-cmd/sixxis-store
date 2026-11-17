@@ -17,6 +17,16 @@ const identity = (scopes: ApiIdentity['scopes'] = new Set(['read:all'])): ApiIde
 
 function pipelineDeps(currentIdentity = identity()) {
   return {
+    reserveAuthFailure: vi.fn().mockResolvedValue({ success: true, limit: 60, remaining: 59, reset: Date.now() + 60_000 }),
+    refundAuthFailure: vi.fn().mockResolvedValue(undefined),
+    activeDigests: {
+      lookup: vi.fn().mockResolvedValue({ state: 'active', identity: currentIdentity }),
+      add: vi.fn().mockResolvedValue(undefined),
+      reject: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
+      withDigestLock: vi.fn(async (_digest: string, work: () => Promise<unknown>) => work()),
+    },
+    fingerprint: vi.fn().mockReturnValue('trusted'),
     authenticate: vi.fn().mockResolvedValue(currentIdentity),
     audit: vi.fn().mockResolvedValue(undefined),
     lastUsed: vi.fn().mockResolvedValue(undefined),
@@ -206,11 +216,29 @@ describe('authenticated dispatcher', () => {
     expect(peak).toBe(2)
     expect(body.data).toHaveLength(9)
     expect(body.data[0]).toMatchObject({ slug: 'produto-0', model: 'Produto0', scope: 'read:catalogo', count: 0, ultimaAtualizacao: '2026-11-16T12:00:00.000Z' })
-    expect(body.data[0].sync).toEqual({ sort: 'updatedAt', watermarkField: 'updatedAt', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 })
+    expect(body.data[0].sync).toEqual({ sort: 'updatedAt', watermarkField: 'updatedAt', watermarkFormat: 'date-time', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 })
     expect(body.data[0].fields.map((field: { name: string }) => field.name)).toEqual(['id', 'nome', 'updatedAt'])
     expect(body.data[0].expands).toEqual([])
     expect(JSON.stringify(body)).not.toContain('read:financeiro')
     expect(JSON.stringify(body)).not.toContain('read:analytics')
+  })
+
+  it('advertises the strict watermark format from the selected resource clock', async () => {
+    const daily = rowResource({
+      slug: 'metricas-diarias',
+      scalarFields: ['id', 'dia'],
+      fields: [{ name: 'id', type: 'string' }, { name: 'dia', type: 'string', format: 'date' }],
+      select: { id: true, dia: true },
+      sorts: ['id', 'dia'],
+      defaultSort: 'dia',
+      dateFields: { created: 'dia' },
+    })
+    const response = await routeApiV1(request('/meta/recursos'), ['meta', 'recursos'], deps({
+      resources: createResourceRegistry([daily]),
+    }))
+    const body = await json<{ data: Array<{ sync: Record<string, unknown> }> }>(response)
+
+    expect(body.data[0].sync).toMatchObject({ watermarkField: 'dia', watermarkFormat: 'date' })
   })
 
   it('collapses concurrent metadata requests with the same registry and scopes', async () => {
@@ -317,7 +345,8 @@ describe('authenticated dispatcher', () => {
     const resource = rowResource()
     const response = await routeApiV1(request('/constructor/private-id'), ['constructor', 'private-id'], deps({ resources: createResourceRegistry([resource]), pipelineDeps: pipeline }))
     expect(response.status).toBe(404)
-    expect(pipeline.authenticate).toHaveBeenCalledOnce()
+    expect(pipeline.authenticate).not.toHaveBeenCalled()
+    expect(pipeline.activeDigests.lookup).toHaveBeenCalledOnce()
     expect(resource.adapter.findMany).not.toHaveBeenCalled()
     expect(resource.adapter.findFirst).not.toHaveBeenCalled()
   })

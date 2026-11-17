@@ -2,22 +2,39 @@ import { randomBytes } from 'node:crypto'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { withApiV1 } from './pipeline'
 import { ApiAuthError } from './auth'
-import { rateLimitApiIngress, rateLimitApiPublic } from './rate-limit'
+import { rateLimitApiIngress, rateLimitApiPublic, refundApiIngress } from './rate-limit'
 import { auditRequest, recordLastUsed, safeClientIp } from './audit'
 import type { ApiIdentity } from './types'
 
-const provider = vi.hoisted(() => ({ limit: vi.fn(), slidingWindow: vi.fn(), construct: vi.fn() }))
+const provider = vi.hoisted(() => ({ limit: vi.fn(), getRemaining: vi.fn(), slidingWindow: vi.fn(), construct: vi.fn() }))
 vi.mock('@upstash/redis', () => ({ Redis: class {} }))
 vi.mock('@upstash/ratelimit', () => ({ Ratelimit: class {
   static slidingWindow = provider.slidingWindow
   limit = provider.limit
+  getRemaining = provider.getRemaining
   constructor(config: unknown) { provider.construct(config) }
 } }))
 afterEach(() => { vi.unstubAllEnvs() })
 
 const identity: ApiIdentity = { id: 'key-id', prefixo: 'safe-prefix', nome: 'Fixture', scopes: new Set(['read:all']), expiraEm: null }
 const req = () => new Request('https://example.test/api/v1/produtos?q=private-person&email=private%40example.test&token=secret', { headers: { 'x-forwarded-for': '192.0.2.3, 192.0.2.4', 'x-request-id': 'untrusted' } })
-const deps = () => ({ preAuthRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 60, remaining: 59, reset: Date.now() + 60_000 }), authenticate: vi.fn().mockResolvedValue(identity), audit: vi.fn().mockResolvedValue(undefined), lastUsed: vi.fn().mockResolvedValue(undefined) })
+const deps = () => {
+  return {
+    reserveAuthFailure: vi.fn().mockResolvedValue({ success: true, limit: 60, remaining: 59, reset: Date.now() + 60_000 }),
+    refundAuthFailure: vi.fn().mockResolvedValue(undefined),
+    activeDigests: {
+      lookup: vi.fn().mockResolvedValue({ state: 'active', identity }),
+      add: vi.fn().mockResolvedValue(undefined),
+      reject: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
+      withDigestLock: vi.fn(async (_digest: string, work: () => Promise<unknown>) => work()),
+    },
+    fingerprint: vi.fn().mockReturnValue('trusted'),
+    authenticate: vi.fn().mockResolvedValue(identity),
+    audit: vi.fn().mockResolvedValue(undefined),
+    lastUsed: vi.fn().mockResolvedValue(undefined),
+  }
+}
 
 describe('API pipeline', () => {
   it('audits a dispatcher supplied allowlisted route template, never client segments', async () => {
@@ -33,12 +50,12 @@ describe('API pipeline', () => {
     expect(d.audit.mock.calls[0][0].path === '/api/v1/:unknown').toBe(true)
   })
   it('does not persist audit rows for unauthenticated requests', async () => {
-    const d = deps(); d.authenticate.mockRejectedValue(new ApiAuthError())
+    const d = deps(); d.activeDigests.lookup.mockResolvedValue({ state: 'inactive' }); d.authenticate.mockRejectedValue(new ApiAuthError())
     await withApiV1(vi.fn(), { auditRoute: '/api/v1/produtos/:id', deps: d })(new Request('https://example.test/api/v1/produtos/private-client-id'))
     expect(d.audit).not.toHaveBeenCalled()
   })
   it.each(['11987654321', '12345678909', 'CustomerPrivateName', '%2531%2531%2539'])('does not audit unformatted PII or encoding in request paths', async segment => {
-    const d = deps(); d.authenticate.mockRejectedValue(new ApiAuthError())
+    const d = deps(); d.activeDigests.lookup.mockResolvedValue({ state: 'inactive' }); d.authenticate.mockRejectedValue(new ApiAuthError())
     await withApiV1(vi.fn(), { deps: d })(new Request(`https://example.test/api/v1/${segment}`))
     expect(d.audit).not.toHaveBeenCalled()
   })
@@ -69,33 +86,36 @@ describe('API pipeline', () => {
     expect(response.headers.get('x-ratelimit-limit')).toBeNull()
     expect(response.headers.get('x-ratelimit-remaining')).toBeNull()
     expect(response.headers.get('x-ratelimit-reset')).toBeNull()
-    expect(d.preAuthRateLimit).not.toHaveBeenCalled()
+    expect(d.reserveAuthFailure).not.toHaveBeenCalled()
     expect(d.audit).toHaveBeenCalledOnce()
     expect(d.lastUsed).toHaveBeenCalledWith(identity, '192.0.2.3')
     expect(JSON.stringify(d.audit.mock.calls).includes('private-person')).toBe(false)
     expect(JSON.stringify(d.audit.mock.calls).includes('private@example.test')).toBe(false)
   })
   it('counts an invalid credential against the IP quota and returns 401 without a database audit write', async () => {
-    const d = deps(); d.authenticate.mockRejectedValue(new ApiAuthError())
+    const d = deps(); d.activeDigests.lookup.mockResolvedValue({ state: 'inactive' }); d.authenticate.mockRejectedValue(new ApiAuthError())
     const res = await withApiV1(vi.fn(), { deps: d })(req())
     expect(res.status).toBe(401)
     expect(res.headers.get('www-authenticate')).toBe('Bearer')
-    expect(d.preAuthRateLimit).toHaveBeenCalledWith('192.0.2.3')
+    expect(d.reserveAuthFailure).toHaveBeenCalledWith('192.0.2.3')
     expect(d.audit).not.toHaveBeenCalled()
   })
   it('returns 429 on the 61st invalid credential while preserving the IP brute-force quota', async () => {
     const d = deps()
+    let state: 'inactive' | 'quarantined' = 'inactive'
     d.authenticate.mockRejectedValue(new ApiAuthError())
-    let attempts = 0
-    d.preAuthRateLimit.mockImplementation(async () => ({ success: ++attempts <= 60, limit: 60, remaining: Math.max(0, 60 - attempts), reset: Date.now() + 60_000 }))
+    d.activeDigests.lookup.mockImplementation(async () => ({ state }))
+    d.activeDigests.reject.mockImplementation(async () => { state = 'quarantined' })
+    let failures = 0
+    d.reserveAuthFailure.mockImplementation(async () => ({ success: ++failures <= 60, limit: 60, remaining: Math.max(0, 60 - failures), reset: Date.now() + 60_000 }))
     const handle = withApiV1(vi.fn(), { deps: d })
 
     const statuses: number[] = []
     for (let index = 0; index < 61; index += 1) statuses.push((await handle(req())).status)
 
     expect(statuses).toEqual([...Array(60).fill(401), 429])
-    expect(d.authenticate).toHaveBeenCalledTimes(61)
-    expect(d.preAuthRateLimit).toHaveBeenCalledTimes(61)
+    expect(d.authenticate).toHaveBeenCalledOnce()
+    expect(d.reserveAuthFailure).toHaveBeenCalledTimes(61)
     expect(d.audit).not.toHaveBeenCalled()
   })
   it('returns 403 for independent scope without running the handler', async () => {
@@ -105,16 +125,137 @@ describe('API pipeline', () => {
   })
   it('never rate-limits an authenticated key after more than 60 valid requests', async () => {
     const d = deps()
-    let attempts = 0
-    d.preAuthRateLimit.mockImplementation(async () => ({ success: ++attempts <= 60, limit: 60, remaining: Math.max(0, 60 - attempts), reset: Date.now() + 60_000 }))
     const handle = withApiV1(() => Response.json({ ok: true }), { deps: d })
 
     const statuses: number[] = []
     for (let index = 0; index < 61; index += 1) statuses.push((await handle(req())).status)
 
     expect(statuses).toEqual(Array(61).fill(200))
-    expect(d.authenticate).toHaveBeenCalledTimes(61)
-    expect(d.preAuthRateLimit).not.toHaveBeenCalled()
+    expect(d.authenticate).not.toHaveBeenCalled()
+    expect(d.reserveAuthFailure).not.toHaveBeenCalled()
+    expect(d.refundAuthFailure).not.toHaveBeenCalled()
+    expect(d.activeDigests.withDigestLock).not.toHaveBeenCalled()
+  })
+  it('rejects a quarantined digest before database authentication', async () => {
+    const d = deps()
+    d.activeDigests.lookup.mockResolvedValue({ state: 'quarantined' })
+    d.reserveAuthFailure.mockResolvedValue({ success: false, limit: 60, remaining: 0, reset: Date.now() + 60_000 })
+    const handle = withApiV1(() => Response.json({ ok: true }), { deps: d })
+
+    expect((await handle(req())).status).toBe(429)
+    expect(d.authenticate).not.toHaveBeenCalled()
+    expect(d.activeDigests.withDigestLock).not.toHaveBeenCalled()
+  })
+  it('fails closed before authentication when the distributed digest store is unavailable', async () => {
+    const d = deps()
+    d.activeDigests.lookup.mockRejectedValue(new Error('redis unavailable'))
+    const response = await withApiV1(() => Response.json({ ok: true }), { deps: d })(req())
+
+    expect(response.status).toBe(503)
+    expect(d.authenticate).not.toHaveBeenCalled()
+  })
+  it('bounds database authentication while holding an inactive-digest lock', async () => {
+    vi.useFakeTimers()
+    const d = deps()
+    d.activeDigests.lookup.mockResolvedValue({ state: 'inactive' })
+    d.authenticate.mockImplementation(() => new Promise(() => undefined))
+    const result = withApiV1(() => Response.json({ ok: true }), { deps: d })(req())
+
+    await vi.advanceTimersByTimeAsync(10_000)
+
+    await expect(result).resolves.toMatchObject({ status: 503 })
+    expect(d.refundAuthFailure).toHaveBeenCalledWith('192.0.2.3')
+    vi.useRealTimers()
+  })
+  it('atomically reserves only sixty database authentication attempts during a parallel invalid burst', async () => {
+    const d = deps()
+    let fingerprint = 0
+    d.fingerprint.mockImplementation(() => `unknown-${fingerprint++}`)
+    d.activeDigests.lookup.mockResolvedValue({ state: 'inactive' })
+    d.authenticate.mockRejectedValue(new ApiAuthError())
+    let reservations = 0
+    d.reserveAuthFailure.mockImplementation(async () => {
+      const used = ++reservations
+      return { success: used <= 60, limit: 60, remaining: Math.max(0, 60 - used), reset: Date.now() + 60_000 }
+    })
+    const handle = withApiV1(vi.fn(), { deps: d })
+
+    const responses = await Promise.all(Array.from({ length: 80 }, () => handle(req())))
+
+    expect(responses.filter(response => response.status === 401)).toHaveLength(60)
+    expect(responses.filter(response => response.status === 429)).toHaveLength(20)
+    expect(d.authenticate).toHaveBeenCalledTimes(60)
+  })
+  it('refunds the atomic reservation when an authoritative cache miss authenticates successfully', async () => {
+    const d = deps()
+    d.activeDigests.lookup.mockResolvedValue({ state: 'inactive' })
+    const response = await withApiV1(() => Response.json({ ok: true }), { deps: d })(req())
+
+    expect(response.status).toBe(200)
+    expect(d.reserveAuthFailure).toHaveBeenCalledOnce()
+    expect(d.refundAuthFailure).toHaveBeenCalledWith('192.0.2.3')
+    expect(d.activeDigests.add).toHaveBeenCalledWith('trusted', identity)
+  })
+  it('never authenticates more than sixty times for one parallel invalid digest', async () => {
+    const d = deps()
+    let state: 'inactive' | 'quarantined' = 'inactive'
+    let chain = Promise.resolve()
+    d.activeDigests.lookup.mockImplementation(async () => ({ state }))
+    d.activeDigests.reject.mockImplementation(async () => { state = 'quarantined' })
+    d.activeDigests.withDigestLock.mockImplementation(async (_digest: string, work: () => Promise<unknown>) => {
+      const previous = chain
+      let release!: () => void
+      chain = new Promise<void>(resolve => { release = resolve })
+      await previous
+      try { return await work() } finally { release() }
+    })
+    d.authenticate.mockRejectedValue(new ApiAuthError())
+    let reservations = 0
+    d.reserveAuthFailure.mockImplementation(async () => {
+      const used = ++reservations
+      return { success: used <= 60, limit: 60, remaining: Math.max(0, 60 - used), reset: Date.now() + 60_000 }
+    })
+    const handle = withApiV1(vi.fn(), { deps: d })
+
+    const responses = await Promise.all(Array.from({ length: 80 }, () => handle(req())))
+
+    expect(responses.filter(response => response.status === 401)).toHaveLength(60)
+    expect(responses.filter(response => response.status === 429)).toHaveLength(20)
+    expect(d.authenticate).toHaveBeenCalledOnce()
+  })
+  it('serves parallel valid requests without a digest mutex, database authentication or quota reservation', async () => {
+    const d = deps()
+    d.activeDigests.withDigestLock.mockRejectedValue(new Error('must not lock active identity'))
+    const handle = withApiV1(() => Response.json({ ok: true }), { deps: d })
+
+    const responses = await Promise.all(Array.from({ length: 80 }, () => handle(req())))
+
+    expect(responses.every(response => response.status === 200)).toBe(true)
+    expect(d.authenticate).not.toHaveBeenCalled()
+    expect(d.reserveAuthFailure).not.toHaveBeenCalled()
+    expect(d.activeDigests.withDigestLock).not.toHaveBeenCalled()
+  })
+  it('discovers one valid cache miss before reserving quota for parallel followers', async () => {
+    const d = deps()
+    let state: 'inactive' | 'active' = 'inactive'
+    let chain = Promise.resolve()
+    d.activeDigests.lookup.mockImplementation(async () => state === 'active' ? { state, identity } : { state })
+    d.activeDigests.add.mockImplementation(async () => { state = 'active' })
+    d.activeDigests.withDigestLock.mockImplementation(async (_digest: string, work: () => Promise<unknown>) => {
+      const previous = chain
+      let release!: () => void
+      chain = new Promise<void>(resolve => { release = resolve })
+      await previous
+      try { return await work() } finally { release() }
+    })
+    const handle = withApiV1(() => Response.json({ ok: true }), { deps: d })
+
+    const responses = await Promise.all(Array.from({ length: 80 }, () => handle(req())))
+
+    expect(responses.every(response => response.status === 200)).toBe(true)
+    expect(d.authenticate).toHaveBeenCalledOnce()
+    expect(d.reserveAuthFailure).toHaveBeenCalledOnce()
+    expect(d.refundAuthFailure).toHaveBeenCalledOnce()
   })
   it('metadata failure never changes response or logs payload', async () => {
     const d = deps(); d.audit.mockRejectedValue(new Error('private')); d.lastUsed.mockRejectedValue(new Error('private'))
@@ -177,7 +318,8 @@ describe('API limiter production fail-closed', () => {
     provider.limit.mockResolvedValue({ success: true, limit: 0, remaining: 0, reset: 0, pending: Promise.resolve(), reason: 'timeout' })
     const handler = vi.fn(() => Response.json({ ok: true })); const d = deps()
     d.authenticate.mockRejectedValue(new ApiAuthError())
-    const response = await withApiV1(handler, { deps: { ...d, preAuthRateLimit: rateLimitApiIngress } })(req())
+    d.activeDigests.lookup.mockResolvedValue({ state: 'inactive' })
+    const response = await withApiV1(handler, { deps: { ...d, reserveAuthFailure: rateLimitApiIngress } })(req())
     expect(response.status).toBe(503)
     expect(handler).not.toHaveBeenCalled()
   })
@@ -192,6 +334,15 @@ describe('API limiter production fail-closed', () => {
     expect(provider.limit).toHaveBeenCalledWith('192.0.2.3')
     provider.limit.mockRejectedValueOnce(new Error('provider-private-detail'))
     await expect(rateLimitApiIngress('192.0.2.3')).rejects.toMatchObject({ status: 503 })
+  })
+  it('refunds a reserved ingress token with the shared atomic adapter', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', 'https://redis.example.test')
+    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', 'fixture')
+    provider.limit.mockResolvedValueOnce({ success: true, remaining: 60, reset: 60_000 })
+
+    await expect(refundApiIngress('192.0.2.3')).resolves.toBeUndefined()
+    expect(provider.limit).toHaveBeenLastCalledWith('192.0.2.3', { rate: -1 })
   })
   it.each(['0', '-1', '1.5', 'NaN', '0x10', ''])('fails closed for invalid configured limit', async value => {
     await expect(rateLimitApiIngress('192.0.2.3', { env: { NODE_ENV: 'production', API_V1_INGRESS_RATE_LIMIT_PER_MINUTE: value } })).rejects.toMatchObject({ status: 503 })

@@ -7,12 +7,11 @@ import {
   aggregateLabel,
   averageMoney,
   boundedMetricRows,
-  bucketForInstant,
   decimalOrNull,
   decimalValue,
-  listMetricBuckets,
   metricBase,
   metricMoney,
+  sparseMetricBuckets,
   type MetricParams,
 } from './tempo'
 
@@ -157,7 +156,7 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
         }))
       const orders = rawOrders as unknown as SaleOrder[]
       const total = emptySalesAccumulator()
-      const byBucket = new Map(listMetricBuckets(params).map(bucket => [bucket, emptySalesAccumulator()]))
+      const byBucket = sparseMetricBuckets(params, emptySalesAccumulator)
       const paymentStatus = new Map<string, MoneyCount>()
       const paymentMethod = new Map<string, MoneyCount>()
       const products = new Map<string, { produtoId: string; produto: string; quantidade: number; receita: ReturnType<typeof decimalValue> }>()
@@ -169,7 +168,7 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
 
       for (const order of orders) {
         addOrder(total, order)
-        addOrder(byBucket.get(bucketForInstant(order.createdAt, params.agrupar))!, order)
+        addOrder(byBucket.at(order.createdAt), order)
         if (orderValues(order).profit !== null) knownProfit += 1
         for (const payment of order.pagamentos) {
           const value = decimalValue(payment.valor).div(100)
@@ -238,7 +237,7 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
       return {
         ...metricBase(params, definicoes),
         resumo: { ...renderAccumulator(total), pedidosComLucroConhecido: knownProfit, pedidosComCustoPendente: orders.length - knownProfit },
-        serie: [...byBucket].map(([bucket, value]) => ({ bucket, ...renderAccumulator(value) })),
+        serie: byBucket.entries().map(([bucket, value]) => ({ bucket, ...renderAccumulator(value) })),
         porStatusPagamento: [...paymentStatus].map(([status, value]) => ({ status, pagamentos: value.count, valor: metricMoney(value.value) })).sort((a, b) => a.status.localeCompare(b.status)),
         porMetodoPagamento: [...paymentMethod].map(([metodo, value]) => ({ metodo, pagamentos: value.count, valor: metricMoney(value.value) })).sort((a, b) => a.metodo.localeCompare(b.metodo)),
         porProduto: [...products.values()].map(value => ({ produtoId: value.produtoId, produto: value.produto, quantidade: value.quantidade, receitaBruta: metricMoney(value.receita) })).sort((a, b) => a.produtoId.localeCompare(b.produtoId)),

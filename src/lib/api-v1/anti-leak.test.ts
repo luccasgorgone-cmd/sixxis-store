@@ -90,6 +90,16 @@ describe('complete anti-leak sweep', () => {
     }
     const resource = createStoreResourceRegistry({ prisma: {} as never }).list()[0]
     const pipelineDeps = {
+      reserveAuthFailure: vi.fn(async () => ({ success: true, limit: 60, remaining: 59, reset: Date.now() + 60_000 })),
+      refundAuthFailure: vi.fn(async () => undefined),
+      activeDigests: {
+        lookup: vi.fn(async () => ({ state: 'active' as const, identity: context().identity! })),
+        add: vi.fn(async () => undefined),
+        reject: vi.fn(async () => undefined),
+        remove: vi.fn(async () => undefined),
+        withDigestLock: vi.fn(async (_digest: string, work: () => Promise<unknown>) => work()),
+      },
+      fingerprint: vi.fn(() => 'trusted'),
       authenticate: vi.fn(async () => context().identity!),
       audit: vi.fn(async () => undefined), lastUsed: vi.fn(async () => undefined),
     }
