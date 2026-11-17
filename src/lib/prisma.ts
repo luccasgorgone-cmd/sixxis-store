@@ -5,12 +5,7 @@ import { PrismaClient } from '@prisma/client'
 // Singleton pattern prevents exhausting connection pools on hot-reload in dev.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
-function createPrisma(): PrismaClient {
-  const rawUrl = process.env.DATABASE_URL
-  if (!rawUrl) {
-    throw new Error('DATABASE_URL não está definido no ambiente.')
-  }
-
+export function buildPrismaPoolConfig(rawUrl: string) {
   // Passamos um PoolConfig (objeto) em vez da string de conexão de propósito:
   // os params ?connection_limit / ?pool_timeout da URL estão em snake_case
   // (convenção do engine Prisma), mas o driver mariadb só entende camelCase —
@@ -23,7 +18,7 @@ function createPrisma(): PrismaClient {
   const connectionLimit = Number(u.searchParams.get('connection_limit')) || 10
   const poolTimeoutSec = Number(u.searchParams.get('pool_timeout')) || 20
 
-  const adapter = new PrismaMariaDb({
+  return {
     host: u.hostname,
     port: u.port ? Number(u.port) : 3306,
     user: decodeURIComponent(u.username),
@@ -45,12 +40,24 @@ function createPrisma(): PrismaClient {
     connectTimeout: 15000,
     // Precisa ser > connectTimeout, senão o mariadb clampa o connectTimeout.
     acquireTimeout: Math.max(20000, poolTimeoutSec * 1000),
+    // Produção usa MySQL: max_execution_time cancela SELECTs no servidor. O
+    // queryTimeout do MariaDB Connector é incompatível com MySQL e fecha a conexão.
+    sessionVariables: { max_execution_time: 10000 },
     // Em segundos. Default é 1800 (30min): sockets mortos ficavam retidos tempo
     // demais. 120s recicla conexões ociosas/mortas rápido depois de um blip.
     idleTimeout: 120,
     // Valida a conexão ao retirá-la do pool (default) — descarta socket morto.
     minDelayValidation: 500,
-  })
+  }
+}
+
+function createPrisma(): PrismaClient {
+  const rawUrl = process.env.DATABASE_URL
+  if (!rawUrl) {
+    throw new Error('DATABASE_URL não está definido no ambiente.')
+  }
+
+  const adapter = new PrismaMariaDb(buildPrismaPoolConfig(rawUrl))
 
   return new PrismaClient({
     adapter,
