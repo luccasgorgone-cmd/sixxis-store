@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'node:url'
+
 type Envelope<T> = { data: T[]; meta: { hasMore: boolean; nextCursor: string | null } }
 type Row = { id: string; [field: string]: unknown }
 
@@ -10,6 +12,8 @@ export type ResourceSyncContract = {
   maxDays: number | null
   maxLimit: number
 }
+
+type MetadataEnvelope = { data: Array<{ slug: string; sync: Omit<ResourceSyncContract, 'slug'> }> }
 
 export async function syncResource(
   baseUrl: string,
@@ -43,4 +47,31 @@ export async function syncResource(
     cursor = page.meta.hasMore ? page.meta.nextCursor : null
   } while (cursor)
   return { rows: [...rows.values()], watermark }
+}
+
+export async function runCli(
+  args: string[] = process.argv.slice(2),
+  env: Record<string, string | undefined> = process.env,
+  write: (value: string) => void = console.log,
+): Promise<void> {
+  const [slug, from, to] = args
+  const token = env.SIXXIS_API_TOKEN
+  if (!token) throw new Error('Defina SIXXIS_API_TOKEN no ambiente.')
+  if (!slug || !from || !to || args.length !== 3) throw new Error('Uso: sync-exemplo.ts <recurso> <inicio-iso> <fim-iso>')
+  const baseUrl = 'https://www.sixxis.com.br'
+  const response = await fetch(new URL('/api/v1/meta/recursos', baseUrl), { headers: { Authorization: `Bearer ${token}` } })
+  if (!response.ok) throw new Error(`Sixxis API ${response.status}`)
+  const metadata = await response.json() as MetadataEnvelope
+  if (!Array.isArray(metadata.data)) throw new Error('Contrato de recursos inválido.')
+  const selected = metadata.data.find(resource => resource.slug === slug)
+  if (!selected) throw new Error('Recurso não disponível para esta chave.')
+  const result = await syncResource(baseUrl, token, { slug: selected.slug, ...selected.sync }, { from, to })
+  write(JSON.stringify({ count: result.rows.length, watermark: result.watermark ?? null }))
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  void runCli().catch(error => {
+    console.error(error instanceof Error ? error.message : 'Falha ao sincronizar recurso.')
+    process.exitCode = 1
+  })
 }

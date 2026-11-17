@@ -103,8 +103,8 @@ API server-to-server, autenticada e somente leitura. A fonte executável do cont
 ## Entregáveis
 
 - \`openapi.json\` e \`openapi.yaml\`: contrato OpenAPI 3.1.
-- \`postman-collection.json\`: coleção com \`{{baseUrl}}\` e \`{{token}}\`.
-- \`exemplo-sync.ts\`: paginação incremental por contrato de relógio/janela publicado em \`/meta/recursos\`.
+- \`colecao.postman.json\`: coleção com \`{{baseUrl}}\` e \`{{token}}\`.
+- \`sync-exemplo.ts\`: cliente executável que carrega o contrato em \`/api/v1/meta/recursos\` e pagina o recurso selecionado.
 
 ## Autenticação e escopos
 
@@ -114,11 +114,22 @@ Escopos disponíveis: \`read:all\`, \`read:clientes\`, \`read:catalogo\`, \`read
 
 ## Paginação e sincronização
 
-Use \`limit\` (máximo global 500; respeite \`sync.maxLimit\` do recurso) e repita \`nextCursor\` até \`hasMore=false\`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de \`/meta/recursos\` publica \`sync.sort\`, \`watermarkField\`, parâmetros \`from\`/\`to\` e \`maxDays\`. Congele os dois limites da janela durante todas as páginas, deduplique por \`id\`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
+Use \`limit\` (máximo global 500; respeite \`sync.maxLimit\` do recurso) e repita \`nextCursor\` até \`hasMore=false\`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de \`/api/v1/meta/recursos\` publica \`sync.sort\`, \`watermarkField\`, parâmetros \`from\`/\`to\` e \`maxDays\`. Congele os dois limites da janela durante todas as páginas, deduplique por \`id\`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
 
 \`\`\`bash
 curl -sS -H "Authorization: Bearer $SIXXIS_API_TOKEN" \\
-  "https://SEU-DOMINIO.example/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+  "https://www.sixxis.com.br/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+\`\`\`
+
+O exemplo não depende de pacote instalado globalmente. Informe o token somente pela variável de ambiente; os três argumentos são recurso, início inclusivo e fim inclusivo em ISO 8601. A saída contém apenas \`count\` e \`watermark\`.
+
+\`\`\`bash
+read -rsp 'Token da API: ' SIXXIS_API_TOKEN; export SIXXIS_API_TOKEN; echo
+# Carga inicial
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-01T00:00:00.000Z 2026-11-17T23:59:59.999Z
+# Carga incremental: use o watermark confirmado da execução anterior como início
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-17T20:15:30.000Z 2026-11-18T23:59:59.999Z
+unset SIXXIS_API_TOKEN
 \`\`\`
 
 ## Erros, limites e cache
@@ -127,8 +138,8 @@ Erros usam RFC 9457 (\`application/problem+json\`) e incluem \`requestId\`. Stat
 
 ## Endpoints transversais
 
-- Públicos: \`GET /api/v1\`, \`/health\`, \`/openapi.json\`, \`/docs\`.
-- Autenticados: \`GET /api/v1/me\` e \`/meta/recursos\`.
+- Públicos: \`GET /api/v1\`, \`/api/v1/health\`, \`/api/v1/openapi.json\`, \`/api/v1/docs\`.
+- Autenticados: \`GET /api/v1/me\` e \`/api/v1/meta/recursos\`.
 - Recursos: \`GET /api/v1/{recurso}\` e \`GET /api/v1/{recurso}/{id}\`.
 - Métricas: \`GET /api/v1/metricas/{slug}?de=YYYY-MM-DD&ate=YYYY-MM-DD&agrupar=dia|semana|mes\`.
 - Outros métodos retornam 405 sem executar autenticação, auditoria ou mutação.
@@ -148,7 +159,9 @@ Versão inicial \`v1\`: contrato aditivo. Remoções ou mudanças incompatíveis
 }
 
 function syncExample(): string {
-  return `type Envelope<T> = { data: T[]; meta: { hasMore: boolean; nextCursor: string | null } }
+  return `import { pathToFileURL } from 'node:url'
+
+type Envelope<T> = { data: T[]; meta: { hasMore: boolean; nextCursor: string | null } }
 type Row = { id: string; [field: string]: unknown }
 
 export type ResourceSyncContract = {
@@ -160,6 +173,8 @@ export type ResourceSyncContract = {
   maxDays: number | null
   maxLimit: number
 }
+
+type MetadataEnvelope = { data: Array<{ slug: string; sync: Omit<ResourceSyncContract, 'slug'> }> }
 
 export async function syncResource(
   baseUrl: string,
@@ -194,6 +209,33 @@ export async function syncResource(
   } while (cursor)
   return { rows: [...rows.values()], watermark }
 }
+
+export async function runCli(
+  args: string[] = process.argv.slice(2),
+  env: Record<string, string | undefined> = process.env,
+  write: (value: string) => void = console.log,
+): Promise<void> {
+  const [slug, from, to] = args
+  const token = env.SIXXIS_API_TOKEN
+  if (!token) throw new Error('Defina SIXXIS_API_TOKEN no ambiente.')
+  if (!slug || !from || !to || args.length !== 3) throw new Error('Uso: sync-exemplo.ts <recurso> <inicio-iso> <fim-iso>')
+  const baseUrl = 'https://www.sixxis.com.br'
+  const response = await fetch(new URL('/api/v1/meta/recursos', baseUrl), { headers: { Authorization: \`Bearer \${token}\` } })
+  if (!response.ok) throw new Error(\`Sixxis API \${response.status}\`)
+  const metadata = await response.json() as MetadataEnvelope
+  if (!Array.isArray(metadata.data)) throw new Error('Contrato de recursos inválido.')
+  const selected = metadata.data.find(resource => resource.slug === slug)
+  if (!selected) throw new Error('Recurso não disponível para esta chave.')
+  const result = await syncResource(baseUrl, token, { slug: selected.slug, ...selected.sync }, { from, to })
+  write(JSON.stringify({ count: result.rows.length, watermark: result.watermark ?? null }))
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  void runCli().catch(error => {
+    console.error(error instanceof Error ? error.message : 'Falha ao sincronizar recurso.')
+    process.exitCode = 1
+  })
+}
 `
 }
 
@@ -202,10 +244,10 @@ async function main(): Promise<void> {
   await Promise.all([
     writeFile(resolve(outputDirectory, 'openapi.json'), stableJson(openApi)),
     writeFile(resolve(outputDirectory, 'openapi.yaml'), toYaml(openApi, { lineWidth: 0 })),
-    writeFile(resolve(outputDirectory, 'postman-collection.json'), stableJson(buildPostmanCollection(openApi))),
+    writeFile(resolve(outputDirectory, 'colecao.postman.json'), stableJson(buildPostmanCollection(openApi))),
     writeFile(resolve(outputDirectory, 'contract-samples.json'), stableJson(contractSamples(openApi))),
     writeFile(resolve(outputDirectory, 'README.md'), readme()),
-    writeFile(resolve(outputDirectory, 'exemplo-sync.ts'), syncExample()),
+    writeFile(resolve(outputDirectory, 'sync-exemplo.ts'), syncExample()),
   ])
 }
 

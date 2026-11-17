@@ -6,8 +6,8 @@ info:
   license:
     name: Proprietário — uso autorizado Sixxis
 servers:
-  - url: https://SEU-DOMINIO.example
-    description: Substitua pelo domínio autorizado da Loja.
+  - url: https://www.sixxis.com.br
+    description: Produção Sixxis Store.
 tags:
   - name: Sistema
     description: Saúde, contrato e identidade da chave.
@@ -4103,18 +4103,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: pedidoId
           in: query
           required: false
@@ -4335,18 +4337,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: pedidoId
           in: query
           required: false
@@ -5405,18 +5409,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em atualizadoEm.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em atualizadoEm.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: clienteId
           in: query
           required: false
@@ -5997,18 +6003,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: campanhaId
           in: query
           required: false
@@ -6373,18 +6381,20 @@ paths:
             type: string
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: campanhaId
           in: query
           required: false
@@ -6582,18 +6592,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: conversaId
           in: query
           required: false
@@ -6771,18 +6783,20 @@ paths:
               - conversa
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: conversaId
           in: query
           required: false
@@ -7178,18 +7192,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: status
           in: query
           required: false
@@ -7354,18 +7370,20 @@ paths:
             type: string
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: sessionId
           in: query
           required: false
@@ -7512,18 +7530,20 @@ paths:
             type: string
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: sessionId
           in: query
           required: false
@@ -7691,18 +7711,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em ultimaVisita.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em ultimaVisita.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: sessionId
           in: query
           required: false
@@ -7878,18 +7900,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: sessaoId
           in: query
           required: false
@@ -8099,18 +8123,20 @@ paths:
               - sessao
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: sessaoId
           in: query
           required: false
@@ -8283,18 +8309,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: hora
           in: query
           required: false
@@ -8440,18 +8468,20 @@ paths:
             type: string
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: ip
           in: query
           required: false
@@ -8626,18 +8656,20 @@ paths:
             format: date-time
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em updatedAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: ip
           in: query
           required: false
@@ -8786,18 +8818,20 @@ paths:
           x-required-scope: read:pii
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: actor
           in: query
           required: false
@@ -8951,18 +8985,20 @@ paths:
             type: string
         - name: atualizadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em ultimoPing.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: atualizadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em ultimoPing.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: sessaoId
           in: query
           required: false
@@ -9109,18 +9145,20 @@ paths:
             type: string
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em dia.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em dia.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: dispositivo
           in: query
           required: false
@@ -9306,18 +9344,20 @@ paths:
           x-required-scope: read:pii
         - name: criadoDesde
           in: query
-          required: false
+          required: true
           description: Limite inclusivo inicial em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T00:00:00.000Z
         - name: criadoAte
           in: query
-          required: false
+          required: true
           description: Limite inclusivo final em createdAt.
           schema:
             type: string
             format: date-time
+          example: 2026-01-01T23:59:59.999Z
         - name: clienteId
           in: query
           required: false
@@ -9420,7 +9460,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9428,7 +9468,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9436,7 +9476,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string
@@ -9480,7 +9520,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9488,7 +9528,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9496,7 +9536,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string
@@ -9540,7 +9580,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9548,7 +9588,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9556,7 +9596,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string
@@ -9600,7 +9640,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9608,7 +9648,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9616,7 +9656,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string
@@ -9660,7 +9700,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9668,7 +9708,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9676,7 +9716,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string
@@ -9720,7 +9760,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9728,7 +9768,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9736,7 +9776,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string
@@ -9780,7 +9820,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9788,7 +9828,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9796,7 +9836,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string
@@ -9840,7 +9880,7 @@ paths:
       parameters:
         - name: de
           in: query
-          required: false
+          required: true
           description: Primeiro dia civil inclusivo.
           schema:
             type: string
@@ -9848,7 +9888,7 @@ paths:
           example: 2026-01-01
         - name: ate
           in: query
-          required: false
+          required: true
           description: Último dia civil inclusivo; máximo de 366 dias.
           schema:
             type: string
@@ -9856,7 +9896,7 @@ paths:
           example: 2026-01-31
         - name: agrupar
           in: query
-          required: false
+          required: true
           description: Granularidade BRT.
           schema:
             type: string

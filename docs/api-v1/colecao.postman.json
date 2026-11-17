@@ -7,7 +7,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://SEU-DOMINIO.example",
+      "value": "https://www.sixxis.com.br",
       "type": "string"
     },
     {
@@ -32,6 +32,9 @@
       "request": {
         "method": "GET",
         "header": [],
+        "auth": {
+          "type": "noauth"
+        },
         "url": {
           "raw": "{{baseUrl}}/api/v1",
           "host": [
@@ -51,6 +54,9 @@
       "request": {
         "method": "GET",
         "header": [],
+        "auth": {
+          "type": "noauth"
+        },
         "url": {
           "raw": "{{baseUrl}}/api/v1/health",
           "host": [
@@ -71,6 +77,9 @@
       "request": {
         "method": "GET",
         "header": [],
+        "auth": {
+          "type": "noauth"
+        },
         "url": {
           "raw": "{{baseUrl}}/api/v1/openapi.json",
           "host": [
@@ -91,6 +100,9 @@
       "request": {
         "method": "GET",
         "header": [],
+        "auth": {
+          "type": "noauth"
+        },
         "url": {
           "raw": "{{baseUrl}}/api/v1/docs",
           "host": [
@@ -110,13 +122,7 @@
       "name": "GET /api/v1/me",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/me",
           "host": [
@@ -136,13 +142,7 @@
       "name": "GET /api/v1/meta/recursos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/meta/recursos",
           "host": [
@@ -163,13 +163,7 @@
       "name": "GET /api/v1/clientes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/clientes",
           "host": [
@@ -292,13 +286,7 @@
       "name": "GET /api/v1/clientes/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/clientes/EXEMPLO_ID",
           "host": [
@@ -332,13 +320,7 @@
       "name": "GET /api/v1/enderecos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/enderecos",
           "host": [
@@ -443,13 +425,7 @@
       "name": "GET /api/v1/enderecos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/enderecos/EXEMPLO_ID",
           "host": [
@@ -483,13 +459,7 @@
       "name": "GET /api/v1/historico-pontos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/historico-pontos",
           "host": [
@@ -576,13 +546,7 @@
       "name": "GET /api/v1/historico-pontos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/historico-pontos/EXEMPLO_ID",
           "host": [
@@ -616,13 +580,7 @@
       "name": "GET /api/v1/pontos-clientes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/pontos-clientes",
           "host": [
@@ -697,13 +655,7 @@
       "name": "GET /api/v1/pontos-clientes/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/pontos-clientes/EXEMPLO_ID",
           "host": [
@@ -737,13 +689,7 @@
       "name": "GET /api/v1/cashback-transacoes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cashback-transacoes",
           "host": [
@@ -848,13 +794,7 @@
       "name": "GET /api/v1/cashback-transacoes/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cashback-transacoes/EXEMPLO_ID",
           "host": [
@@ -888,13 +828,7 @@
       "name": "GET /api/v1/niveis-fidelidade",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/niveis-fidelidade",
           "host": [
@@ -987,13 +921,7 @@
       "name": "GET /api/v1/niveis-fidelidade/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/niveis-fidelidade/EXEMPLO_ID",
           "host": [
@@ -1027,13 +955,7 @@
       "name": "GET /api/v1/produtos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/produtos",
           "host": [
@@ -1162,13 +1084,7 @@
       "name": "GET /api/v1/produtos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/produtos/EXEMPLO_ID",
           "host": [
@@ -1202,13 +1118,7 @@
       "name": "GET /api/v1/avaliacoes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/avaliacoes",
           "host": [
@@ -1319,13 +1229,7 @@
       "name": "GET /api/v1/avaliacoes/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/avaliacoes/EXEMPLO_ID",
           "host": [
@@ -1359,13 +1263,7 @@
       "name": "GET /api/v1/avaliacoes-fotos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/avaliacoes-fotos",
           "host": [
@@ -1440,13 +1338,7 @@
       "name": "GET /api/v1/avaliacoes-fotos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/avaliacoes-fotos/EXEMPLO_ID",
           "host": [
@@ -1480,13 +1372,7 @@
       "name": "GET /api/v1/banners",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/banners",
           "host": [
@@ -1573,13 +1459,7 @@
       "name": "GET /api/v1/banners/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/banners/EXEMPLO_ID",
           "host": [
@@ -1613,13 +1493,7 @@
       "name": "GET /api/v1/configuracoes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/configuracoes",
           "host": [
@@ -1694,13 +1568,7 @@
       "name": "GET /api/v1/configuracoes/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/configuracoes/EXEMPLO_ID",
           "host": [
@@ -1734,13 +1602,7 @@
       "name": "GET /api/v1/formas-pagamento",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/formas-pagamento",
           "host": [
@@ -1833,13 +1695,7 @@
       "name": "GET /api/v1/formas-pagamento/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/formas-pagamento/EXEMPLO_ID",
           "host": [
@@ -1873,13 +1729,7 @@
       "name": "GET /api/v1/produtos-destaques",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/produtos-destaques",
           "host": [
@@ -1960,13 +1810,7 @@
       "name": "GET /api/v1/produtos-destaques/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/produtos-destaques/EXEMPLO_ID",
           "host": [
@@ -2000,13 +1844,7 @@
       "name": "GET /api/v1/variacoes-produto",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/variacoes-produto",
           "host": [
@@ -2111,13 +1949,7 @@
       "name": "GET /api/v1/variacoes-produto/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/variacoes-produto/EXEMPLO_ID",
           "host": [
@@ -2151,13 +1983,7 @@
       "name": "GET /api/v1/frete-regras",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/frete-regras",
           "host": [
@@ -2268,13 +2094,7 @@
       "name": "GET /api/v1/frete-regras/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/frete-regras/EXEMPLO_ID",
           "host": [
@@ -2308,13 +2128,7 @@
       "name": "GET /api/v1/email-templates",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/email-templates",
           "host": [
@@ -2395,13 +2209,7 @@
       "name": "GET /api/v1/email-templates/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/email-templates/EXEMPLO_ID",
           "host": [
@@ -2435,13 +2243,7 @@
       "name": "GET /api/v1/avaliacoes-parceiros",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/avaliacoes-parceiros",
           "host": [
@@ -2540,13 +2342,7 @@
       "name": "GET /api/v1/avaliacoes-parceiros/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/avaliacoes-parceiros/EXEMPLO_ID",
           "host": [
@@ -2580,13 +2376,7 @@
       "name": "GET /api/v1/popup-inicial",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/popup-inicial",
           "host": [
@@ -2679,13 +2469,7 @@
       "name": "GET /api/v1/popup-inicial/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/popup-inicial/EXEMPLO_ID",
           "host": [
@@ -2719,13 +2503,7 @@
       "name": "GET /api/v1/pedidos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/pedidos",
           "host": [
@@ -2938,13 +2716,7 @@
       "name": "GET /api/v1/pedidos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/pedidos/EXEMPLO_ID",
           "host": [
@@ -2978,13 +2750,7 @@
       "name": "GET /api/v1/garantias-estendidas",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/garantias-estendidas",
           "host": [
@@ -3089,13 +2855,7 @@
       "name": "GET /api/v1/garantias-estendidas/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/garantias-estendidas/EXEMPLO_ID",
           "host": [
@@ -3129,13 +2889,7 @@
       "name": "GET /api/v1/pagamentos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/pagamentos",
           "host": [
@@ -3197,14 +2951,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -3258,13 +3012,7 @@
       "name": "GET /api/v1/pagamentos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/pagamentos/EXEMPLO_ID",
           "host": [
@@ -3298,13 +3046,7 @@
       "name": "GET /api/v1/tentativas-multimetodo",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/tentativas-multimetodo",
           "host": [
@@ -3366,14 +3108,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -3403,13 +3145,7 @@
       "name": "GET /api/v1/tentativas-multimetodo/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/tentativas-multimetodo/EXEMPLO_ID",
           "host": [
@@ -3443,13 +3179,7 @@
       "name": "GET /api/v1/itens-pedido",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/itens-pedido",
           "host": [
@@ -3548,13 +3278,7 @@
       "name": "GET /api/v1/itens-pedido/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/itens-pedido/EXEMPLO_ID",
           "host": [
@@ -3588,13 +3312,7 @@
       "name": "GET /api/v1/carrinhos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/carrinhos",
           "host": [
@@ -3675,13 +3393,7 @@
       "name": "GET /api/v1/carrinhos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/carrinhos/EXEMPLO_ID",
           "host": [
@@ -3715,13 +3427,7 @@
       "name": "GET /api/v1/itens-carrinho",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/itens-carrinho",
           "host": [
@@ -3814,13 +3520,7 @@
       "name": "GET /api/v1/itens-carrinho/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/itens-carrinho/EXEMPLO_ID",
           "host": [
@@ -3854,13 +3554,7 @@
       "name": "GET /api/v1/cupons",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cupons",
           "host": [
@@ -3965,13 +3659,7 @@
       "name": "GET /api/v1/cupons/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cupons/EXEMPLO_ID",
           "host": [
@@ -4005,13 +3693,7 @@
       "name": "GET /api/v1/cupons-usos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cupons-usos",
           "host": [
@@ -4104,13 +3786,7 @@
       "name": "GET /api/v1/cupons-usos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cupons-usos/EXEMPLO_ID",
           "host": [
@@ -4144,13 +3820,7 @@
       "name": "GET /api/v1/carrinhos-clientes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/carrinhos-clientes",
           "host": [
@@ -4212,14 +3882,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em atualizadoEm."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em atualizadoEm."
             },
             {
@@ -4249,13 +3919,7 @@
       "name": "GET /api/v1/carrinhos-clientes/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/carrinhos-clientes/EXEMPLO_ID",
           "host": [
@@ -4289,13 +3953,7 @@
       "name": "GET /api/v1/lista-espera",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/lista-espera",
           "host": [
@@ -4394,13 +4052,7 @@
       "name": "GET /api/v1/lista-espera/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/lista-espera/EXEMPLO_ID",
           "host": [
@@ -4434,13 +4086,7 @@
       "name": "GET /api/v1/campanhas",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/campanhas",
           "host": [
@@ -4557,13 +4203,7 @@
       "name": "GET /api/v1/campanhas/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/campanhas/EXEMPLO_ID",
           "host": [
@@ -4597,13 +4237,7 @@
       "name": "GET /api/v1/campanhas-destinatarios",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/campanhas-destinatarios",
           "host": [
@@ -4665,14 +4299,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -4714,13 +4348,7 @@
       "name": "GET /api/v1/campanhas-destinatarios/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/campanhas-destinatarios/EXEMPLO_ID",
           "host": [
@@ -4754,13 +4382,7 @@
       "name": "GET /api/v1/whatsapp-numeros",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/whatsapp-numeros",
           "host": [
@@ -4859,13 +4481,7 @@
       "name": "GET /api/v1/whatsapp-numeros/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/whatsapp-numeros/EXEMPLO_ID",
           "host": [
@@ -4899,13 +4515,7 @@
       "name": "GET /api/v1/envios-logs",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/envios-logs",
           "host": [
@@ -4955,14 +4565,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -5004,13 +4614,7 @@
       "name": "GET /api/v1/envios-logs/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/envios-logs/EXEMPLO_ID",
           "host": [
@@ -5044,13 +4648,7 @@
       "name": "GET /api/v1/luna-conversas",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/luna-conversas",
           "host": [
@@ -5112,14 +4710,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -5167,13 +4765,7 @@
       "name": "GET /api/v1/luna-conversas/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/luna-conversas/EXEMPLO_ID",
           "host": [
@@ -5207,13 +4799,7 @@
       "name": "GET /api/v1/luna-mensagens",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/luna-mensagens",
           "host": [
@@ -5263,14 +4849,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -5294,13 +4880,7 @@
       "name": "GET /api/v1/luna-mensagens/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/luna-mensagens/EXEMPLO_ID",
           "host": [
@@ -5334,13 +4914,7 @@
       "name": "GET /api/v1/solicitacoes-parceiros",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/solicitacoes-parceiros",
           "host": [
@@ -5475,13 +5049,7 @@
       "name": "GET /api/v1/solicitacoes-parceiros/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/solicitacoes-parceiros/EXEMPLO_ID",
           "host": [
@@ -5515,13 +5083,7 @@
       "name": "GET /api/v1/mensagens-contato",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/mensagens-contato",
           "host": [
@@ -5583,14 +5145,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -5626,13 +5188,7 @@
       "name": "GET /api/v1/mensagens-contato/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/mensagens-contato/EXEMPLO_ID",
           "host": [
@@ -5666,13 +5222,7 @@
       "name": "GET /api/v1/cookies-consentimentos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cookies-consentimentos",
           "host": [
@@ -5722,14 +5272,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -5753,13 +5303,7 @@
       "name": "GET /api/v1/cookies-consentimentos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/cookies-consentimentos/EXEMPLO_ID",
           "host": [
@@ -5793,13 +5337,7 @@
       "name": "GET /api/v1/eventos-analiticos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/eventos-analiticos",
           "host": [
@@ -5849,14 +5387,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -5886,13 +5424,7 @@
       "name": "GET /api/v1/eventos-analiticos/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/eventos-analiticos/EXEMPLO_ID",
           "host": [
@@ -5926,13 +5458,7 @@
       "name": "GET /api/v1/clientes-insights",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/clientes-insights",
           "host": [
@@ -5994,14 +5520,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em ultimaVisita."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em ultimaVisita."
             },
             {
@@ -6037,13 +5563,7 @@
       "name": "GET /api/v1/clientes-insights/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/clientes-insights/EXEMPLO_ID",
           "host": [
@@ -6077,13 +5597,7 @@
       "name": "GET /api/v1/sessoes-visitantes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/sessoes-visitantes",
           "host": [
@@ -6145,14 +5659,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -6236,13 +5750,7 @@
       "name": "GET /api/v1/sessoes-visitantes/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/sessoes-visitantes/EXEMPLO_ID",
           "host": [
@@ -6276,13 +5784,7 @@
       "name": "GET /api/v1/eventos-tracking",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/eventos-tracking",
           "host": [
@@ -6332,14 +5834,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -6375,13 +5877,7 @@
       "name": "GET /api/v1/eventos-tracking/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/eventos-tracking/EXEMPLO_ID",
           "host": [
@@ -6415,13 +5911,7 @@
       "name": "GET /api/v1/relatorios-venda-hora",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/relatorios-venda-hora",
           "host": [
@@ -6483,14 +5973,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -6514,13 +6004,7 @@
       "name": "GET /api/v1/relatorios-venda-hora/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/relatorios-venda-hora/EXEMPLO_ID",
           "host": [
@@ -6554,13 +6038,7 @@
       "name": "GET /api/v1/tentativas-login",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/tentativas-login",
           "host": [
@@ -6610,14 +6088,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -6647,13 +6125,7 @@
       "name": "GET /api/v1/tentativas-login/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/tentativas-login/EXEMPLO_ID",
           "host": [
@@ -6687,13 +6159,7 @@
       "name": "GET /api/v1/bloqueios-ip",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/bloqueios-ip",
           "host": [
@@ -6761,14 +6227,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em updatedAt."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em updatedAt."
             },
             {
@@ -6786,13 +6252,7 @@
       "name": "GET /api/v1/bloqueios-ip/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/bloqueios-ip/EXEMPLO_ID",
           "host": [
@@ -6826,13 +6286,7 @@
       "name": "GET /api/v1/auditoria",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/auditoria",
           "host": [
@@ -6888,14 +6342,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -6925,13 +6379,7 @@
       "name": "GET /api/v1/auditoria/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/auditoria/EXEMPLO_ID",
           "host": [
@@ -6965,13 +6413,7 @@
       "name": "GET /api/v1/presencas",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/presencas",
           "host": [
@@ -7021,14 +6463,14 @@
             },
             {
               "key": "atualizadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em ultimoPing."
             },
             {
               "key": "atualizadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em ultimoPing."
             },
             {
@@ -7052,13 +6494,7 @@
       "name": "GET /api/v1/presencas/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/presencas/EXEMPLO_ID",
           "host": [
@@ -7092,13 +6528,7 @@
       "name": "GET /api/v1/trafego-bruto",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/trafego-bruto",
           "host": [
@@ -7148,14 +6578,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em dia."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em dia."
             },
             {
@@ -7209,13 +6639,7 @@
       "name": "GET /api/v1/trafego-bruto/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/trafego-bruto/EXEMPLO_ID",
           "host": [
@@ -7249,13 +6673,7 @@
       "name": "GET /api/v1/bloqueios-fraude",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/bloqueios-fraude",
           "host": [
@@ -7311,14 +6729,14 @@
             },
             {
               "key": "criadoDesde",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T00:00:00.000Z",
+              "disabled": false,
               "description": "Limite inclusivo inicial em createdAt."
             },
             {
               "key": "criadoAte",
-              "value": "",
-              "disabled": true,
+              "value": "2026-01-01T23:59:59.999Z",
+              "disabled": false,
               "description": "Limite inclusivo final em createdAt."
             },
             {
@@ -7342,13 +6760,7 @@
       "name": "GET /api/v1/bloqueios-fraude/{id}",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/bloqueios-fraude/EXEMPLO_ID",
           "host": [
@@ -7382,13 +6794,7 @@
       "name": "GET /api/v1/metricas/vendas",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/vendas",
           "host": [
@@ -7428,13 +6834,7 @@
       "name": "GET /api/v1/metricas/funil",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/funil",
           "host": [
@@ -7474,13 +6874,7 @@
       "name": "GET /api/v1/metricas/carrinhos",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/carrinhos",
           "host": [
@@ -7520,13 +6914,7 @@
       "name": "GET /api/v1/metricas/cupons-cashback-fidelidade",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/cupons-cashback-fidelidade",
           "host": [
@@ -7566,13 +6954,7 @@
       "name": "GET /api/v1/metricas/frete",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/frete",
           "host": [
@@ -7612,13 +6994,7 @@
       "name": "GET /api/v1/metricas/avaliacoes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/avaliacoes",
           "host": [
@@ -7658,13 +7034,7 @@
       "name": "GET /api/v1/metricas/estoque-catalogo",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/estoque-catalogo",
           "host": [
@@ -7704,13 +7074,7 @@
       "name": "GET /api/v1/metricas/clientes",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
+        "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/v1/metricas/clientes",
           "host": [

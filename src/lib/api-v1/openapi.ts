@@ -130,7 +130,10 @@ function resourceParameters(definition: ResourceDefinition): Parameter[] {
     queryParameter('expand', { type: 'string', enum: definition.expands.length ? definition.expands.map(item => item.name) : undefined }, `Até três relações: ${definition.expands.map(item => item.name).join(', ') || 'nenhuma'}.`),
   ]
   if (definition.searchFields?.length) parameters.push({ ...queryParameter('q', { type: 'string', maxLength: 200 }, `Busca textual em ${definition.searchFields.join(', ')}.`), ...(definition.searchScope ? { 'x-required-scope': definition.searchScope } : {}) })
-  for (const [name, field] of [['criadoDesde', definition.dateFields?.created], ['criadoAte', definition.dateFields?.created], ['atualizadoDesde', definition.dateFields?.updated], ['atualizadoAte', definition.dateFields?.updated]] as const) if (field) parameters.push(queryParameter(name, { type: 'string', format: 'date-time' }, `Limite ${name.endsWith('Desde') ? 'inclusivo inicial' : 'inclusivo final'} em ${field}.`))
+  for (const [name, field] of [['criadoDesde', definition.dateFields?.created], ['criadoAte', definition.dateFields?.created], ['atualizadoDesde', definition.dateFields?.updated], ['atualizadoAte', definition.dateFields?.updated]] as const) if (field) {
+    const required = definition.window?.from === name || definition.window?.to === name
+    parameters.push({ ...queryParameter(name, { type: 'string', format: 'date-time' }, `Limite ${name.endsWith('Desde') ? 'inclusivo inicial' : 'inclusivo final'} em ${field}.`, required ? (name.endsWith('Desde') ? '2026-01-01T00:00:00.000Z' : '2026-01-01T23:59:59.999Z') : undefined), required })
+  }
   for (const [name, filter] of Object.entries(definition.filters ?? {})) parameters.push({ ...queryParameter(name, { type: 'string', ...(filter.values ? { enum: filter.values } : {}) }, filter.description ?? `Filtro natural por ${filter.field ?? name}; múltiplos valores separados por vírgula.`), ...(filter.scope ? { 'x-required-scope': filter.scope } : {}) })
   return parameters
 }
@@ -158,7 +161,7 @@ export function buildOpenApi(registry: ResourceRegistry, metrics: MetricRegistry
     const schema = detailedMetricSchema(metric.slug)
     schemas[`Metric_${metric.slug}`] = { $id: `urn:sixxis:api-v1:metric:${metric.slug}`, ...schema }
     schemas[`MetricEnvelope_${metric.slug}`] = { $id: `urn:sixxis:api-v1:metric-envelope:${metric.slug}`, ...object({ data: { $ref: `urn:sixxis:api-v1:metric:${metric.slug}` }, meta: { $ref: 'urn:sixxis:api-v1:item-meta' } }) }
-    paths[`${API_BASE_PATH}/metricas/${metric.slug}`] = { get: { tags: ['Métricas'], operationId: `metrica_${metric.slug}`, summary: `Métrica ${metric.slug}`, description: 'Agregado sem identificadores individuais; fórmulas completas constam em definicoes.', security: [{ bearerAuth: [] }], 'x-required-scope': metric.scope, parameters: [queryParameter('de', { type: 'string', format: 'date' }, 'Primeiro dia civil inclusivo.', '2026-01-01'), queryParameter('ate', { type: 'string', format: 'date' }, 'Último dia civil inclusivo; máximo de 366 dias.', '2026-01-31'), queryParameter('agrupar', { type: 'string', enum: ['dia', 'semana', 'mes'] }, 'Granularidade BRT.', 'dia')], responses: responses({ $ref: `urn:sixxis:api-v1:metric-envelope:${metric.slug}` }) } }
+    paths[`${API_BASE_PATH}/metricas/${metric.slug}`] = { get: { tags: ['Métricas'], operationId: `metrica_${metric.slug}`, summary: `Métrica ${metric.slug}`, description: 'Agregado sem identificadores individuais; fórmulas completas constam em definicoes.', security: [{ bearerAuth: [] }], 'x-required-scope': metric.scope, parameters: [{ ...queryParameter('de', { type: 'string', format: 'date' }, 'Primeiro dia civil inclusivo.', '2026-01-01'), required: true }, { ...queryParameter('ate', { type: 'string', format: 'date' }, 'Último dia civil inclusivo; máximo de 366 dias.', '2026-01-31'), required: true }, { ...queryParameter('agrupar', { type: 'string', enum: ['dia', 'semana', 'mes'] }, 'Granularidade BRT.', 'dia'), required: true }], responses: responses({ $ref: `urn:sixxis:api-v1:metric-envelope:${metric.slug}` }) } }
   }
   const meta = { $id: 'urn:sixxis:api-v1:item-meta', ...object({ requestId: text('Identificador da requisição.'), generatedAt: { type: 'string', format: 'date-time', description: 'Instante UTC de geração.' } }) }
   const listMeta = { $id: 'urn:sixxis:api-v1:list-meta', ...object({ requestId: text(), count: integer(), hasMore: { type: 'boolean', description: 'Existe página seguinte.' }, nextCursor: { type: ['string', 'null'], description: 'Cursor opaco ou null.' }, generatedAt: { type: 'string', format: 'date-time', description: 'Instante UTC.' }, apiVersion: { type: 'string', const: API_VERSION, description: 'Versão semântica da API.' } }) }
@@ -167,7 +170,7 @@ export function buildOpenApi(registry: ResourceRegistry, metrics: MetricRegistry
   const document: OpenApiDocument = {
     openapi: '3.1.0',
     info: { title: 'Sixxis Store API de Leitura v1', version: API_VERSION, description: 'API server-to-server somente leitura. Datas em UTC, dinheiro em strings BRL, agrupamento de métricas em America/Sao_Paulo. Nenhum exemplo contém dado real.', license: { name: 'Proprietário — uso autorizado Sixxis' } },
-    servers: [{ url: 'https://SEU-DOMINIO.example', description: 'Substitua pelo domínio autorizado da Loja.' }],
+    servers: [{ url: 'https://www.sixxis.com.br', description: 'Produção Sixxis Store.' }],
     tags: [{ name: 'Sistema', description: 'Saúde, contrato e identidade da chave.' }, { name: 'Recursos', description: '49 recursos de negócio com cursor e allowlists.' }, { name: 'Métricas', description: '8 agregados documentados.' }],
     paths,
     components: {
@@ -199,9 +202,9 @@ export function buildPostmanCollection(document: OpenApiDocument): Record<string
     const parameters = operation.parameters ?? []
     const query = parameters.filter(parameter => parameter.in === 'query').map(parameter => ({ key: parameter.name, value: String(parameter.example ?? parameter.schema?.default ?? ''), disabled: parameter.example === undefined && parameter.schema?.default === undefined, description: parameter.description }))
     const rawPath = path.replace('{id}', 'EXEMPLO_ID')
-    return { name: `${method.toUpperCase()} ${path}`, request: { method: method.toUpperCase(), header: operation.security?.length ? [{ key: 'Authorization', value: 'Bearer {{token}}', type: 'text' }] : [], url: { raw: `{{baseUrl}}${rawPath}`, host: ['{{baseUrl}}'], path: rawPath.split('/').filter(Boolean), query }, description: operation.description ?? operation.summary } }
+    return { name: `${method.toUpperCase()} ${path}`, request: { method: method.toUpperCase(), header: [], ...(operation.security?.length ? {} : { auth: { type: 'noauth' } }), url: { raw: `{{baseUrl}}${rawPath}`, host: ['{{baseUrl}}'], path: rawPath.split('/').filter(Boolean), query }, description: operation.description ?? operation.summary } }
   }))
-  return { info: { name: 'Sixxis Store API de Leitura v1', description: 'Coleção gerada; exemplos sintéticos.', schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json' }, variable: [{ key: 'baseUrl', value: 'https://SEU-DOMINIO.example', type: 'string' }, { key: 'token', value: '', type: 'string' }], auth: { type: 'bearer', bearer: [{ key: 'token', value: '{{token}}', type: 'string' }] }, item: items }
+  return { info: { name: 'Sixxis Store API de Leitura v1', description: 'Coleção gerada; exemplos sintéticos.', schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json' }, variable: [{ key: 'baseUrl', value: 'https://www.sixxis.com.br', type: 'string' }, { key: 'token', value: '', type: 'string' }], auth: { type: 'bearer', bearer: [{ key: 'token', value: '{{token}}', type: 'string' }] }, item: items }
 }
 
 export const documentedScopes = [...API_SCOPES]

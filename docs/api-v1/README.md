@@ -5,8 +5,8 @@ API server-to-server, autenticada e somente leitura. A fonte executável do cont
 ## Entregáveis
 
 - `openapi.json` e `openapi.yaml`: contrato OpenAPI 3.1.
-- `postman-collection.json`: coleção com `{{baseUrl}}` e `{{token}}`.
-- `exemplo-sync.ts`: paginação incremental por contrato de relógio/janela publicado em `/meta/recursos`.
+- `colecao.postman.json`: coleção com `{{baseUrl}}` e `{{token}}`.
+- `sync-exemplo.ts`: cliente executável que carrega o contrato em `/api/v1/meta/recursos` e pagina o recurso selecionado.
 
 ## Autenticação e escopos
 
@@ -16,11 +16,22 @@ Escopos disponíveis: `read:all`, `read:clientes`, `read:catalogo`, `read:pedido
 
 ## Paginação e sincronização
 
-Use `limit` (máximo global 500; respeite `sync.maxLimit` do recurso) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de `/meta/recursos` publica `sync.sort`, `watermarkField`, parâmetros `from`/`to` e `maxDays`. Congele os dois limites da janela durante todas as páginas, deduplique por `id`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
+Use `limit` (máximo global 500; respeite `sync.maxLimit` do recurso) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de `/api/v1/meta/recursos` publica `sync.sort`, `watermarkField`, parâmetros `from`/`to` e `maxDays`. Congele os dois limites da janela durante todas as páginas, deduplique por `id`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
 
 ```bash
 curl -sS -H "Authorization: Bearer $SIXXIS_API_TOKEN" \
-  "https://SEU-DOMINIO.example/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+  "https://www.sixxis.com.br/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+```
+
+O exemplo não depende de pacote instalado globalmente. Informe o token somente pela variável de ambiente; os três argumentos são recurso, início inclusivo e fim inclusivo em ISO 8601. A saída contém apenas `count` e `watermark`.
+
+```bash
+read -rsp 'Token da API: ' SIXXIS_API_TOKEN; export SIXXIS_API_TOKEN; echo
+# Carga inicial
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-01T00:00:00.000Z 2026-11-17T23:59:59.999Z
+# Carga incremental: use o watermark confirmado da execução anterior como início
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-17T20:15:30.000Z 2026-11-18T23:59:59.999Z
+unset SIXXIS_API_TOKEN
 ```
 
 ## Erros, limites e cache
@@ -29,8 +40,8 @@ Erros usam RFC 9457 (`application/problem+json`) e incluem `requestId`. Status p
 
 ## Endpoints transversais
 
-- Públicos: `GET /api/v1`, `/health`, `/openapi.json`, `/docs`.
-- Autenticados: `GET /api/v1/me` e `/meta/recursos`.
+- Públicos: `GET /api/v1`, `/api/v1/health`, `/api/v1/openapi.json`, `/api/v1/docs`.
+- Autenticados: `GET /api/v1/me` e `/api/v1/meta/recursos`.
 - Recursos: `GET /api/v1/{recurso}` e `GET /api/v1/{recurso}/{id}`.
 - Métricas: `GET /api/v1/metricas/{slug}?de=YYYY-MM-DD&ate=YYYY-MM-DD&agrupar=dia|semana|mes`.
 - Outros métodos retornam 405 sem executar autenticação, auditoria ou mutação.

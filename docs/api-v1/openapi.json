@@ -10,8 +10,8 @@
   },
   "servers": [
     {
-      "url": "https://SEU-DOMINIO.example",
-      "description": "Substitua pelo domínio autorizado da Loja."
+      "url": "https://www.sixxis.com.br",
+      "description": "Produção Sixxis Store."
     }
   ],
   "tags": [
@@ -6612,22 +6612,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "pedidoId",
@@ -6974,22 +6976,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "pedidoId",
@@ -8719,22 +8723,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em atualizadoEm.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em atualizadoEm.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "clienteId",
@@ -9666,22 +9672,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "campanhaId",
@@ -10271,22 +10279,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "campanhaId",
@@ -10603,22 +10613,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "conversaId",
@@ -10910,22 +10922,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "conversaId",
@@ -11562,22 +11576,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "status",
@@ -11849,22 +11865,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessionId",
@@ -12111,22 +12129,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessionId",
@@ -12403,22 +12423,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em ultimaVisita.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em ultimaVisita.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessionId",
@@ -12707,22 +12729,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessaoId",
@@ -13063,22 +13087,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessaoId",
@@ -13363,22 +13389,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "hora",
@@ -13624,22 +13652,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "ip",
@@ -13926,22 +13956,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "ip",
@@ -14190,22 +14222,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "actor",
@@ -14462,22 +14496,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em ultimoPing.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em ultimoPing.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessaoId",
@@ -14724,22 +14760,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em dia.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em dia.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "dispositivo",
@@ -15044,22 +15082,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "clienteId",
@@ -15244,7 +15284,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15255,7 +15295,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15266,7 +15306,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15346,7 +15386,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15357,7 +15397,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15368,7 +15408,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15448,7 +15488,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15459,7 +15499,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15470,7 +15510,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15550,7 +15590,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15561,7 +15601,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15572,7 +15612,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15652,7 +15692,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15663,7 +15703,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15674,7 +15714,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15754,7 +15794,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15765,7 +15805,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15776,7 +15816,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15856,7 +15896,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15867,7 +15907,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15878,7 +15918,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15958,7 +15998,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15969,7 +16009,7 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Último dia civil inclusivo; máximo de 366 dias.",
             "schema": {
               "type": "string",
@@ -15980,7 +16020,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
