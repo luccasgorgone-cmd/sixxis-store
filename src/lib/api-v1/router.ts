@@ -4,6 +4,7 @@ import { hasScope } from './auth'
 import { API_BASE_PATH, API_QUERY_TIMEOUT_MS, API_VERSION } from './constants'
 import { iso, itemEnvelope, listEnvelope } from './format'
 import { createStoreMetricRegistry, type MetricRegistry } from './metricas/registry'
+import { buildOpenApi } from './openapi'
 import { withApiV1, type ApiV1Options } from './pipeline'
 import { problem } from './problem'
 import { ApiQueryError, parseExpand, parseListQuery } from './query'
@@ -286,11 +287,11 @@ async function defaultHealthCheck(): Promise<void> {
 }
 
 function defaultOpenApiDocument(): Record<string, unknown> {
-  return { openapi: '3.1.0', info: { title: 'Sixxis Store API de Leitura', version: API_VERSION }, paths: {} }
+  return buildOpenApi(resources({}), metrics({})) as unknown as Record<string, unknown>
 }
 
 function docsResponse(): Response {
-  return new Response(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Sixxis Store API v1</title></head><body><main><h1>Sixxis Store API v1</h1><p><a href="${API_BASE_PATH}/openapi.json">OpenAPI 3.1</a></p></main></body></html>`, {
+  return new Response(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sixxis Store API v1</title></head><body><script id="api-reference" data-url="${API_BASE_PATH}/openapi.json"></script><script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script></body></html>`, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
   })
 }
@@ -340,6 +341,7 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
   if (exact('openapi.json')) {
     const requestId = randomUUID()
     try {
+      assertQueryParams(request)
       const document = await (deps.openApiDocument ?? defaultOpenApiDocument)()
       return finalizePublic(jsonResponse(document), requestId)
     } catch {
@@ -348,7 +350,13 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
   }
   if (exact('docs')) {
     const requestId = randomUUID()
-    return finalizePublic(docsResponse(), requestId)
+    try {
+      assertQueryParams(request)
+      return finalizePublic(docsResponse(), requestId)
+    } catch (error) {
+      if (error instanceof ApiQueryError) return finalizePublic(queryProblem(error, requestId), requestId)
+      throw error
+    }
   }
 
   if (exact('me')) {
