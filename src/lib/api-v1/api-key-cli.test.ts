@@ -75,7 +75,7 @@ describe('API key CLI without real database', () => {
       expect(await readFile(path, 'utf8')).toMatch(/^sxs_live_[A-Za-z0-9_-]{43}\n$/)
     } finally { await rm(dir, { recursive: true, force: true }) }
   })
-  it('preserves the active DB row and recoverable output when quarantine cannot be confirmed', async () => {
+  it('revokes the DB row and preserves recoverable output when quarantine cannot be confirmed', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'api-key-test-')); const path = join(dir, 'key')
     try {
       const d = fixture()
@@ -84,7 +84,10 @@ describe('API key CLI without real database', () => {
 
       await expect(runApiKeyCli(['criar', '--nome', 'Fixture', '--escopos', 'read:all', '--output', path], d)).rejects.toThrow()
 
-      expect(d.prisma.apiChaveLeitura.updateMany).not.toHaveBeenCalled()
+      expect(d.prisma.apiChaveLeitura.updateMany).toHaveBeenCalledWith({
+        where: { id: 'key-id', revogadoEm: null },
+        data: { revogadoEm: expect.any(Date) },
+      })
       expect(await readFile(path, 'utf8')).toMatch(/^sxs_live_[A-Za-z0-9_-]{43}\n$/)
     } finally { await rm(dir, { recursive: true, force: true }) }
   })
@@ -148,13 +151,16 @@ describe('API key CLI without real database', () => {
     expect(d.activeDigests.remove).toHaveBeenCalledWith('must-not-list')
     expect(d.activeDigests.remove).toHaveBeenCalledOnce()
   })
-  it('does not revoke the DB row when permanent quarantine cannot be confirmed', async () => {
+  it('revokes the DB row even when permanent quarantine cannot be confirmed', async () => {
     const d = fixture()
     d.activeDigests.remove.mockRejectedValue(new Error('redis unavailable'))
 
     await expect(runApiKeyCli(['revogar', '--id', 'key-id'], d)).rejects.toThrow()
 
-    expect(d.prisma.apiChaveLeitura.updateMany).not.toHaveBeenCalled()
+    expect(d.prisma.apiChaveLeitura.updateMany).toHaveBeenCalledWith({
+      where: { id: 'key-id', revogadoEm: null },
+      data: { revogadoEm: expect.any(Date) },
+    })
   })
   it.each([['read:nope', '2099-01-01T00:00:00Z'], ['read:all', 'not-date'], ['read:all', '2000-01-01T00:00:00Z']])('rejects invalid scope/expiration before persistence', async (scope, expiry) => {
     const d = fixture()

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { reconcileActiveApiKeyDigests } from './active-digest-sync'
+import { createActiveDigestInitializer, reconcileActiveApiKeyDigests } from './active-digest-sync'
 import type { ApiIdentity } from './types'
 
 describe('active API digest reconciliation', () => {
@@ -25,5 +25,34 @@ describe('active API digest reconciliation', () => {
     await vi.advanceTimersByTimeAsync(10_000)
     await rejection
     vi.useRealTimers()
+  })
+
+  it('deduplicates concurrent lazy initialization into one reconciliation', async () => {
+    let release!: () => void
+    const reconcile = vi.fn(() => new Promise<void>(resolve => { release = resolve }))
+    const initialize = createActiveDigestInitializer({ reconcile, now: () => 0 })
+
+    const attempts = [initialize(), initialize(), initialize()]
+    await vi.waitFor(() => expect(reconcile).toHaveBeenCalledOnce())
+    release()
+
+    await expect(Promise.all(attempts)).resolves.toEqual([undefined, undefined, undefined])
+    expect(reconcile).toHaveBeenCalledOnce()
+  })
+
+  it('backs off failed lazy initialization before allowing one retry', async () => {
+    let now = 0
+    const reconcile = vi.fn()
+      .mockRejectedValueOnce(new Error('database unavailable'))
+      .mockResolvedValueOnce(undefined)
+    const initialize = createActiveDigestInitializer({ reconcile, now: () => now, retryMs: 60_000 })
+
+    await expect(initialize()).rejects.toThrow('Active digest initialization unavailable')
+    await expect(initialize()).rejects.toThrow('Active digest initialization unavailable')
+    expect(reconcile).toHaveBeenCalledOnce()
+
+    now = 60_000
+    await expect(initialize()).resolves.toBeUndefined()
+    expect(reconcile).toHaveBeenCalledTimes(2)
   })
 })

@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import type { PrismaClient } from '@prisma/client'
-import { reconcileActiveApiKeyDigests } from './active-digest-sync'
 import { hasScope } from './auth'
 import { API_BASE_PATH, API_MAX_LIMIT, API_QUERY_TIMEOUT_MS, API_VERSION } from './constants'
 import { iso, itemEnvelope, listEnvelope } from './format'
@@ -343,10 +342,7 @@ async function cachedResourceMetadata(registry: ResourceRegistry, context: ApiCo
 
 async function defaultHealthCheck(): Promise<void> {
   const { prisma } = await import('../prisma')
-  await Promise.all([
-    reconcileActiveApiKeyDigests(prisma),
-    withQueryTimeout(() => prisma.$queryRaw`SELECT 1`),
-  ])
+  await withQueryTimeout(() => prisma.$queryRaw`SELECT 1`)
 }
 
 const healthCache = new WeakMap<() => Promise<unknown>, CacheEntry<unknown>>()

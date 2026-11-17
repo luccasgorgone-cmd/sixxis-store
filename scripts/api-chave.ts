@@ -66,11 +66,19 @@ export async function runApiKeyCli(args: string[], deps: CliDeps = {}): Promise<
     const failure = operationFailure ?? closeFailure
     if (failure !== undefined) {
       if (createdId && createdHash) {
-        // A permanent quarantine is published before DB compensation. Snapshots
-        // never replace this denylist, so a late add/stale snapshot stays denied.
-        await digests.remove(createdHash)
-        const compensation = await prisma.apiChaveLeitura.updateMany({ where: { id: createdId, revogadoEm: null }, data: { revogadoEm: new Date() } })
-        if (compensation.count !== 1) throw new Error('Não foi possível compensar a criação da chave.')
+        let cleanupFailure: unknown
+        try {
+          const compensation = await prisma.apiChaveLeitura.updateMany({ where: { id: createdId, revogadoEm: null }, data: { revogadoEm: new Date() } })
+          if (compensation.count !== 1) throw new Error('Não foi possível compensar a criação da chave.')
+        } catch (error) {
+          cleanupFailure = error
+        }
+        try {
+          await digests.remove(createdHash)
+        } catch (error) {
+          cleanupFailure ??= error
+        }
+        if (cleanupFailure !== undefined) throw cleanupFailure
       }
       await unlink(flags.output).catch(() => undefined)
       throw failure
@@ -96,8 +104,8 @@ export async function runApiKeyCli(args: string[], deps: CliDeps = {}): Promise<
   const digestRows = await prisma.apiChaveLeitura.findMany({ where: { id }, select: { hash: true } })
   if (digestRows.length !== 1 || typeof digestRows[0].hash !== 'string') throw new Error('Chave ausente ou inválida.')
   const digests = deps.activeDigests ?? activeDigestStore
-  await digests.remove(digestRows[0].hash)
   const result = await prisma.apiChaveLeitura.updateMany({ where: { id, revogadoEm: null }, data: { revogadoEm: new Date() } })
+  await digests.remove(digestRows[0].hash)
   write(`${JSON.stringify({ revogadas: result.count })}\n`)
 }
 

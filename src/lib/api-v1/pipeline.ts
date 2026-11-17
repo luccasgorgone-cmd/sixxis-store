@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { activeDigestStore, type ActiveDigestStore } from './active-digests'
+import { ensureActiveApiKeyDigests } from './active-digest-sync'
 import { apiKeyFingerprint, authenticateBearer, ApiAuthError, hasScope } from './auth'
 import { auditRequest, canonicalAuditRoute, recordLastUsed, safeClientIp, UNKNOWN_AUDIT_ROUTE } from './audit'
 import { API_QUERY_TIMEOUT_MS } from './constants'
@@ -11,7 +12,8 @@ import type { ApiContext, ApiIdentity, ApiScope, RateLimitResult } from './types
 type PipelineDeps = {
   reserveAuthFailure: (ip: string) => Promise<RateLimitResult>
   refundAuthFailure: (ip: string) => Promise<void>
-  activeDigests: Pick<ActiveDigestStore, 'lookup' | 'add' | 'reject' | 'withDigestLock'>
+  activeDigests: Pick<ActiveDigestStore, 'lookup' | 'add' | 'reject' | 'remove' | 'withDigestLock'>
+  initializeActiveDigests: typeof ensureActiveApiKeyDigests
   fingerprint: typeof apiKeyFingerprint
   authenticate: typeof authenticateBearer
   audit: typeof auditRequest
@@ -26,6 +28,7 @@ export function withApiV1(handler: ApiV1Handler, options: ApiV1Options = {}): (r
     reserveAuthFailure: rateLimitApiIngress,
     refundAuthFailure: refundApiIngress,
     activeDigests: activeDigestStore,
+    initializeActiveDigests: ensureActiveApiKeyDigests,
     fingerprint: apiKeyFingerprint,
     authenticate: authenticateBearer,
     audit: auditRequest,
@@ -56,15 +59,19 @@ export function withApiV1(handler: ApiV1Handler, options: ApiV1Options = {}): (r
     return await finish(response)
 
     async function authenticateFingerprint(digest: string): Promise<ApiIdentity | Response> {
-      const state = await deps.activeDigests.lookup(digest)
+      let state = await deps.activeDigests.lookup(digest)
+      if (state.state === 'uninitialized') {
+        await deps.initializeActiveDigests()
+        state = await deps.activeDigests.lookup(digest)
+      }
       if (state.state === 'uninitialized') return problem(503, 'Serviço indisponível', 'Autenticação temporariamente indisponível.', requestId)
       if (state.state === 'quarantined') return await rejectedCredential()
-      if (state.state === 'active') return state.identity
+      if (state.state === 'active') return await authenticateKnown(digest)
       let reserved = false
       try {
         return await deps.activeDigests.withDigestLock(digest, async () => {
           const fresh = await deps.activeDigests.lookup(digest)
-          if (fresh.state === 'active') return fresh.identity
+          if (fresh.state === 'active') return await authenticateKnown(digest)
           if (fresh.state === 'quarantined') return await rejectedCredential()
           if (fresh.state === 'uninitialized') return problem(503, 'Serviço indisponível', 'Autenticação temporariamente indisponível.', requestId)
           const limited = await reserveFailure()
@@ -101,6 +108,19 @@ export function withApiV1(handler: ApiV1Handler, options: ApiV1Options = {}): (r
         if (error instanceof ApiAuthError) return unauthorized()
         await deps.refundAuthFailure(ip).catch(() => undefined)
         throw error
+      }
+    }
+
+    async function authenticateKnown(digest: string): Promise<ApiIdentity | Response> {
+      try {
+        return await authenticateDatabase()
+      } catch (error) {
+        if (!(error instanceof ApiAuthError)) throw error
+        await Promise.allSettled([
+          deps.activeDigests.remove(digest),
+          deps.activeDigests.reject(digest),
+        ])
+        return await rejectedCredential()
       }
     }
 

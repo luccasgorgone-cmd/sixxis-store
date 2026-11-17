@@ -345,7 +345,7 @@ describe('authenticated dispatcher', () => {
     const resource = rowResource()
     const response = await routeApiV1(request('/constructor/private-id'), ['constructor', 'private-id'], deps({ resources: createResourceRegistry([resource]), pipelineDeps: pipeline }))
     expect(response.status).toBe(404)
-    expect(pipeline.authenticate).not.toHaveBeenCalled()
+    expect(pipeline.authenticate).toHaveBeenCalledOnce()
     expect(pipeline.activeDigests.lookup).toHaveBeenCalledOnce()
     expect(resource.adapter.findMany).not.toHaveBeenCalled()
     expect(resource.adapter.findFirst).not.toHaveBeenCalled()

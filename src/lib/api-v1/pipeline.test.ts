@@ -30,6 +30,7 @@ const deps = () => {
       withDigestLock: vi.fn(async (_digest: string, work: () => Promise<unknown>) => work()),
     },
     fingerprint: vi.fn().mockReturnValue('trusted'),
+    initializeActiveDigests: vi.fn().mockResolvedValue(undefined),
     authenticate: vi.fn().mockResolvedValue(identity),
     audit: vi.fn().mockResolvedValue(undefined),
     lastUsed: vi.fn().mockResolvedValue(undefined),
@@ -131,7 +132,7 @@ describe('API pipeline', () => {
     for (let index = 0; index < 61; index += 1) statuses.push((await handle(req())).status)
 
     expect(statuses).toEqual(Array(61).fill(200))
-    expect(d.authenticate).not.toHaveBeenCalled()
+    expect(d.authenticate).toHaveBeenCalledTimes(61)
     expect(d.reserveAuthFailure).not.toHaveBeenCalled()
     expect(d.refundAuthFailure).not.toHaveBeenCalled()
     expect(d.activeDigests.withDigestLock).not.toHaveBeenCalled()
@@ -146,6 +147,35 @@ describe('API pipeline', () => {
     expect(d.authenticate).not.toHaveBeenCalled()
     expect(d.activeDigests.withDigestLock).not.toHaveBeenCalled()
   })
+  it('rejects a stale active Redis identity when MySQL says the key is revoked', async () => {
+    const handler = vi.fn(() => Response.json({ ok: true }))
+    const d = deps()
+    d.authenticate.mockRejectedValue(new ApiAuthError())
+    d.activeDigests.remove.mockRejectedValue(new Error('redis unavailable'))
+    d.activeDigests.reject.mockRejectedValue(new Error('redis unavailable'))
+
+    const response = await withApiV1(handler, { deps: d })(req())
+
+    expect(response.status).toBe(401)
+    expect(handler).not.toHaveBeenCalled()
+    expect(d.authenticate).toHaveBeenCalledOnce()
+    expect(d.reserveAuthFailure).toHaveBeenCalledOnce()
+  })
+  it('rate-limits a stale active Redis identity after MySQL rejects it', async () => {
+    const handler = vi.fn(() => Response.json({ ok: true }))
+    const d = deps()
+    d.authenticate.mockRejectedValue(new ApiAuthError())
+    d.activeDigests.remove.mockRejectedValue(new Error('redis unavailable'))
+    d.activeDigests.reject.mockRejectedValue(new Error('redis unavailable'))
+    d.reserveAuthFailure.mockResolvedValue({ success: false, limit: 60, remaining: 0, reset: Date.now() + 60_000 })
+
+    const response = await withApiV1(handler, { deps: d })(req())
+
+    expect(response.status).toBe(429)
+    expect(handler).not.toHaveBeenCalled()
+    expect(d.authenticate).toHaveBeenCalledOnce()
+    expect(d.reserveAuthFailure).toHaveBeenCalledOnce()
+  })
   it('fails closed before authentication when the distributed digest store is unavailable', async () => {
     const d = deps()
     d.activeDigests.lookup.mockRejectedValue(new Error('redis unavailable'))
@@ -153,6 +183,19 @@ describe('API pipeline', () => {
 
     expect(response.status).toBe(503)
     expect(d.authenticate).not.toHaveBeenCalled()
+  })
+  it('initializes and rechecks the distributed allowlist before accepting a key', async () => {
+    const d = deps()
+    d.activeDigests.lookup
+      .mockResolvedValueOnce({ state: 'uninitialized' })
+      .mockResolvedValue({ state: 'active', identity })
+
+    const response = await withApiV1(() => Response.json({ ok: true }), { deps: d })(req())
+
+    expect(response.status).toBe(200)
+    expect(d.initializeActiveDigests).toHaveBeenCalledOnce()
+    expect(d.activeDigests.lookup).toHaveBeenCalledTimes(2)
+    expect(d.authenticate).toHaveBeenCalledOnce()
   })
   it('bounds database authentication while holding an inactive-digest lock', async () => {
     vi.useFakeTimers()
@@ -223,7 +266,7 @@ describe('API pipeline', () => {
     expect(responses.filter(response => response.status === 429)).toHaveLength(20)
     expect(d.authenticate).toHaveBeenCalledOnce()
   })
-  it('serves parallel valid requests without a digest mutex, database authentication or quota reservation', async () => {
+  it('serves parallel valid requests without a digest mutex or quota reservation', async () => {
     const d = deps()
     d.activeDigests.withDigestLock.mockRejectedValue(new Error('must not lock active identity'))
     const handle = withApiV1(() => Response.json({ ok: true }), { deps: d })
@@ -231,7 +274,7 @@ describe('API pipeline', () => {
     const responses = await Promise.all(Array.from({ length: 80 }, () => handle(req())))
 
     expect(responses.every(response => response.status === 200)).toBe(true)
-    expect(d.authenticate).not.toHaveBeenCalled()
+    expect(d.authenticate).toHaveBeenCalledTimes(80)
     expect(d.reserveAuthFailure).not.toHaveBeenCalled()
     expect(d.activeDigests.withDigestLock).not.toHaveBeenCalled()
   })
@@ -253,7 +296,7 @@ describe('API pipeline', () => {
     const responses = await Promise.all(Array.from({ length: 80 }, () => handle(req())))
 
     expect(responses.every(response => response.status === 200)).toBe(true)
-    expect(d.authenticate).toHaveBeenCalledOnce()
+    expect(d.authenticate).toHaveBeenCalledTimes(80)
     expect(d.reserveAuthFailure).toHaveBeenCalledOnce()
     expect(d.refundAuthFailure).toHaveBeenCalledOnce()
   })
