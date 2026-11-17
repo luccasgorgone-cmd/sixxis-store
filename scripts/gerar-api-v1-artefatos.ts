@@ -95,7 +95,7 @@ function readme(): string {
     const expands = resource.expands.map(expand => expand.name).join(', ') || 'nenhum'
     return `### \`${resource.slug}\`\n\nEscopo: \`${resource.scope}\`. Filtros: ${filters}. Expansões: ${expands}.\n\n${fields}`
   }).join('\n\n')
-  const metricSections = metrics.list().map(metric => `### \`${metric.slug}\`\n\nEscopo: \`${metric.scope}\`. Janela máxima: 366 dias. Fuso civil: \`America/Sao_Paulo\`.\n\n${(metricNotes[metric.slug] ?? []).map(note => `- ${note}`).join('\n')}`).join('\n\n')
+  const metricSections = metrics.list().map(metric => `### \`${metric.slug}\`\n\nEscopo: \`${metric.scope}\`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: \`America/Sao_Paulo\`.\n\n${(metricNotes[metric.slug] ?? []).map(note => `- ${note}`).join('\n')}`).join('\n\n')
   return `# Sixxis Store API de Leitura v1
 
 API server-to-server, autenticada e somente leitura. A fonte executável do contrato é \`openapi.json\`; exemplos são sintéticos.
@@ -103,32 +103,43 @@ API server-to-server, autenticada e somente leitura. A fonte executável do cont
 ## Entregáveis
 
 - \`openapi.json\` e \`openapi.yaml\`: contrato OpenAPI 3.1.
-- \`postman-collection.json\`: coleção com \`{{baseUrl}}\` e \`{{token}}\`.
-- \`exemplo-sync.ts\`: paginação incremental por contrato de relógio/janela publicado em \`/meta/recursos\`.
+- \`colecao.postman.json\`: coleção com \`{{baseUrl}}\` e \`{{token}}\`.
+- \`sync-exemplo.ts\`: cliente executável que carrega o contrato em \`/api/v1/meta/recursos\` e pagina o recurso selecionado.
 
 ## Autenticação e escopos
 
-Envie \`Authorization: Bearer <token>\`. Nunca coloque token em URL, log ou repositório. \`read:all\` concede os domínios; \`read:pii\` e \`read:mensagens\` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
+Envie \`Authorization: Bearer <token>\`. Nunca coloque token em URL, log ou repositório. A chave operacional \`luccas-programa-externo\` não expira (\`expiraEm: null\`) e permanece válida até revogação explícita. \`read:all\` concede os domínios; \`read:pii\` e \`read:mensagens\` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
 
 Escopos disponíveis: \`read:all\`, \`read:clientes\`, \`read:catalogo\`, \`read:pedidos\`, \`read:marketing\`, \`read:analytics\`, \`read:auditoria\`, \`read:configuracoes\`, \`read:financeiro\`, \`read:pii\`, \`read:mensagens\`.
 
 ## Paginação e sincronização
 
-Use \`limit\` (máximo global 500; respeite \`sync.maxLimit\` do recurso) e repita \`nextCursor\` até \`hasMore=false\`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de \`/meta/recursos\` publica \`sync.sort\`, \`watermarkField\`, parâmetros \`from\`/\`to\` e \`maxDays\`. Congele os dois limites da janela durante todas as páginas, deduplique por \`id\`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
+Use \`limit\` (máximo global 500; respeite \`sync.maxLimit\` do recurso) e repita \`nextCursor\` até \`hasMore=false\`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de \`/api/v1/meta/recursos\` publica \`sync.sort\`, \`watermarkField\`, \`watermarkFormat\`, parâmetros \`from\`/\`to\` e \`maxDays: null\`, indicando que qualquer intervalo cronológico válido é aceito. Congele os dois limites da janela durante todas as páginas, deduplique por \`id\`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
 
 \`\`\`bash
 curl -sS -H "Authorization: Bearer $SIXXIS_API_TOKEN" \\
-  "https://SEU-DOMINIO.example/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+  "https://www.sixxis.com.br/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+\`\`\`
+
+O exemplo não depende de pacote instalado globalmente. Informe o token somente pela variável de ambiente; os três argumentos são recurso, início inclusivo e fim inclusivo em ISO 8601. A saída contém apenas \`count\` e \`watermark\`.
+
+\`\`\`bash
+read -rsp 'Token da API: ' SIXXIS_API_TOKEN; export SIXXIS_API_TOKEN; echo
+# Carga inicial
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-01T00:00:00.000Z 2026-11-17T23:59:59.999Z
+# Carga incremental: use o watermark confirmado da execução anterior como início
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-17T20:15:30.000Z 2026-11-18T23:59:59.999Z
+unset SIXXIS_API_TOKEN
 \`\`\`
 
 ## Erros, limites e cache
 
-Erros usam RFC 9457 (\`application/problem+json\`) e incluem \`requestId\`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. O limite padrão é 60 requisições/minuto por chave e por IP de ingresso; métricas têm orçamento adicional de 10/minuto por chave. Leia \`X-RateLimit-*\` e \`Retry-After\`. Respostas autenticadas usam \`Cache-Control: no-store\`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
+Erros usam RFC 9457 (\`application/problem+json\`) e incluem \`requestId\`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. Chaves válidas autenticadas operam sem limite de requests ou de período, inclusive em métricas. Os três únicos limites técnicos são: 10 segundos por consulta SQL; no máximo 2 métricas executadas concorrentemente; e proteção de brute-force por IP somente para tentativas de autenticação recusadas. Nesses casos recusados, respeite \`Retry-After\` ao receber 429. Respostas autenticadas usam \`Cache-Control: no-store\`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
 
 ## Endpoints transversais
 
-- Públicos: \`GET /api/v1\`, \`/health\`, \`/openapi.json\`, \`/docs\`.
-- Autenticados: \`GET /api/v1/me\` e \`/meta/recursos\`.
+- Públicos: \`GET /api/v1\`, \`/api/v1/health\`, \`/api/v1/openapi.json\`, \`/api/v1/docs\`.
+- Autenticados: \`GET /api/v1/me\` e \`/api/v1/meta/recursos\`.
 - Recursos: \`GET /api/v1/{recurso}\` e \`GET /api/v1/{recurso}/{id}\`.
 - Métricas: \`GET /api/v1/metricas/{slug}?de=YYYY-MM-DD&ate=YYYY-MM-DD&agrupar=dia|semana|mes\`.
 - Outros métodos retornam 405 sem executar autenticação, auditoria ou mutação.
@@ -148,17 +159,69 @@ Versão inicial \`v1\`: contrato aditivo. Remoções ou mudanças incompatíveis
 }
 
 function syncExample(): string {
-  return `type Envelope<T> = { data: T[]; meta: { hasMore: boolean; nextCursor: string | null } }
+  return `import { pathToFileURL } from 'node:url'
+
+type Envelope<T> = { data: T[]; meta: { hasMore: boolean; nextCursor: string | null } }
 type Row = { id: string; [field: string]: unknown }
 
 export type ResourceSyncContract = {
   slug: string
   sort: string
   watermarkField: string
+  watermarkFormat: 'date-time' | 'date'
   from: 'criadoDesde' | 'atualizadoDesde'
   to: 'criadoAte' | 'atualizadoAte'
   maxDays: number | null
   maxLimit: number
+}
+
+type MetadataEnvelope = { data: Array<{ slug: string; sync: Omit<ResourceSyncContract, 'slug'> }> }
+
+const ISO_DATETIME_WITH_OFFSET = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$/
+const CIVIL_DATE = /^(\\d{4})-(\\d{2})-(\\d{2})$/
+
+function validCalendarDate(year: number, month: number, day: number): boolean {
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
+  const daysInMonth = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1] ?? 0
+  return day >= 1 && day <= daysInMonth
+}
+
+function isIsoDateTimeWithOffset(value: string): boolean {
+  const match = ISO_DATETIME_WITH_OFFSET.exec(value)
+  if (!match) return false
+  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3])
+  const hour = Number(match[4]), minute = Number(match[5]), second = Number(match[6])
+  const offset = match[7]
+  const offsetValid = offset === 'Z' || (Number(offset.slice(1, 3)) <= 23 && Number(offset.slice(4, 6)) <= 59)
+  return validCalendarDate(year, month, day) && hour <= 23 && minute <= 59 && second <= 59 && offsetValid && Number.isFinite(new Date(value).getTime())
+}
+
+function isCivilDate(value: string): boolean {
+  const match = CIVIL_DATE.exec(value)
+  return Boolean(match && validCalendarDate(Number(match[1]), Number(match[2]), Number(match[3])))
+}
+
+function pageEnvelope(value: unknown): Envelope<unknown> {
+  if (!value || typeof value !== 'object') throw new Error('Envelope de paginação inválido.')
+  const data = (value as { data?: unknown }).data
+  const meta = (value as { meta?: unknown }).meta
+  if (!Array.isArray(data) || !meta || typeof meta !== 'object') throw new Error('Envelope de paginação inválido.')
+  const hasMore = (meta as { hasMore?: unknown }).hasMore
+  const nextCursor = (meta as { nextCursor?: unknown }).nextCursor
+  if (typeof hasMore !== 'boolean' || (hasMore ? typeof nextCursor !== 'string' || !nextCursor : nextCursor !== null)) throw new Error('Envelope de paginação inválido.')
+  return { data, meta: { hasMore, nextCursor: nextCursor as string | null } }
+}
+
+function validatedRows(values: unknown[], contract: ResourceSyncContract): Row[] {
+  return values.map(value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Linha de sincronização inválida.')
+    const row = value as Record<string, unknown>
+    if (typeof row.id !== 'string' || !row.id.trim() || row.id.length > 500) throw new Error('Linha de sincronização inválida.')
+    const clock = row[contract.watermarkField]
+    const validClock = typeof clock === 'string' && (contract.watermarkFormat === 'date-time' ? isIsoDateTimeWithOffset(clock) : isCivilDate(clock))
+    if (!validClock) throw new Error('Linha de sincronização inválida.')
+    return row as Row
+  })
 }
 
 export async function syncResource(
@@ -167,12 +230,13 @@ export async function syncResource(
   contract: ResourceSyncContract,
   window: { from: string; to: string },
 ) {
-  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(contract.slug) || contract.sort !== contract.watermarkField) throw new Error('Contrato de sincronização inválido.')
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(contract.slug) || contract.sort !== contract.watermarkField || !['date-time', 'date'].includes(contract.watermarkFormat) || contract.maxDays !== null) throw new Error('Contrato de sincronização inválido.')
   if (!Number.isInteger(contract.maxLimit) || contract.maxLimit < 1 || contract.maxLimit > 500) throw new Error('Contrato de sincronização inválido.')
   const from = new Date(window.from)
   const to = new Date(window.to)
-  if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || from > to || (contract.maxDays !== null && to.getTime() - from.getTime() > contract.maxDays * 86_400_000)) throw new Error('Janela de sincronização inválida.')
+  if (!isIsoDateTimeWithOffset(window.from) || !isIsoDateTimeWithOffset(window.to) || from > to) throw new Error('Janela de sincronização inválida.')
   const rows = new Map<string, Row>()
+  const seenCursors = new Set<string>()
   let cursor: string | null = null
   let watermark: string | undefined
   do {
@@ -184,15 +248,47 @@ export async function syncResource(
     if (cursor) url.searchParams.set('cursor', cursor)
     const response = await fetch(url, { headers: { Authorization: \`Bearer \${token}\` } })
     if (!response.ok) throw new Error(\`Sixxis API \${response.status}\`)
-    const page = await response.json() as Envelope<Row>
-    for (const row of page.data) {
+    const page = pageEnvelope(await response.json())
+    const pageRows = validatedRows(page.data, contract)
+    for (const row of pageRows) {
       rows.set(row.id, row)
-      const clock = row[contract.watermarkField]
-      if (typeof clock === 'string' && (!watermark || clock > watermark)) watermark = clock
+      const clock = row[contract.watermarkField] as string
+      if (!watermark || clock > watermark) watermark = clock
     }
-    cursor = page.meta.hasMore ? page.meta.nextCursor : null
+    if (page.meta.hasMore) {
+      if (seenCursors.has(page.meta.nextCursor!)) throw new Error('Cursor de paginação repetido.')
+      seenCursors.add(page.meta.nextCursor!)
+      cursor = page.meta.nextCursor
+    } else cursor = null
   } while (cursor)
   return { rows: [...rows.values()], watermark }
+}
+
+export async function runCli(
+  args: string[] = process.argv.slice(2),
+  env: Record<string, string | undefined> = process.env,
+  write: (value: string) => void = console.log,
+): Promise<void> {
+  const [slug, from, to] = args
+  const token = env.SIXXIS_API_TOKEN
+  if (!token) throw new Error('Defina SIXXIS_API_TOKEN no ambiente.')
+  if (!slug || !from || !to || args.length !== 3) throw new Error('Uso: sync-exemplo.ts <recurso> <inicio-iso> <fim-iso>')
+  const baseUrl = 'https://www.sixxis.com.br'
+  const response = await fetch(new URL('/api/v1/meta/recursos', baseUrl), { headers: { Authorization: \`Bearer \${token}\` } })
+  if (!response.ok) throw new Error(\`Sixxis API \${response.status}\`)
+  const metadata = await response.json() as MetadataEnvelope
+  if (!Array.isArray(metadata.data)) throw new Error('Contrato de recursos inválido.')
+  const selected = metadata.data.find(resource => resource.slug === slug)
+  if (!selected) throw new Error('Recurso não disponível para esta chave.')
+  const result = await syncResource(baseUrl, token, { slug: selected.slug, ...selected.sync }, { from, to })
+  write(JSON.stringify({ count: result.rows.length, watermark: result.watermark ?? null }))
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  void runCli().catch(error => {
+    console.error(error instanceof Error ? error.message : 'Falha ao sincronizar recurso.')
+    process.exitCode = 1
+  })
 }
 `
 }
@@ -202,10 +298,10 @@ async function main(): Promise<void> {
   await Promise.all([
     writeFile(resolve(outputDirectory, 'openapi.json'), stableJson(openApi)),
     writeFile(resolve(outputDirectory, 'openapi.yaml'), toYaml(openApi, { lineWidth: 0 })),
-    writeFile(resolve(outputDirectory, 'postman-collection.json'), stableJson(buildPostmanCollection(openApi))),
+    writeFile(resolve(outputDirectory, 'colecao.postman.json'), stableJson(buildPostmanCollection(openApi))),
     writeFile(resolve(outputDirectory, 'contract-samples.json'), stableJson(contractSamples(openApi))),
     writeFile(resolve(outputDirectory, 'README.md'), readme()),
-    writeFile(resolve(outputDirectory, 'exemplo-sync.ts'), syncExample()),
+    writeFile(resolve(outputDirectory, 'sync-exemplo.ts'), syncExample()),
   ])
 }
 

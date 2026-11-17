@@ -178,7 +178,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       ],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         campanhaId: { type: 'string' },
         clienteId: { type: 'string' },
@@ -281,7 +281,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       ],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt',
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       filters: {
         campanhaId: { type: 'string' },
         tipo: { type: 'string', values: ['EMAIL', 'WHATSAPP', 'email', 'whatsapp'] },
@@ -338,7 +338,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       ],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         conversaId: { type: 'string', field: 'id' },
         sessaoId: { type: 'string', scope: 'read:pii' },
@@ -396,7 +396,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       ],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt',
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       filters: {
         conversaId: { type: 'string' },
         role: { type: 'string', values: ['user', 'assistant', 'system', 'tool'] },
@@ -518,7 +518,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       ],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         status: { type: 'string', values: ['novo', 'lido', 'respondido', 'arquivado'] },
         email: { type: 'string', scope: 'read:pii' },

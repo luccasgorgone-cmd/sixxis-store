@@ -7,7 +7,7 @@ import type { ApiContext } from './types'
 
 const secret = 'test-only-cursor-secret-at-least-32-characters'
 const options = { cursorSecret: secret }
-const ctx: ApiContext = { requestId: 'req-1', identity: { id: 'key', nome: 'test', prefixo: 'test', scopes: new Set(['read:all']), expiraEm: null }, ip: '', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 1 } }
+const ctx: ApiContext = { requestId: 'req-1', identity: { id: 'key', nome: 'test', prefixo: 'test', scopes: new Set(['read:all']), expiraEm: null }, ip: '', startedAt: 0 }
 const at = new Date('2026-01-01T00:00:00Z')
 const rows = ['a', 'b', 'c', 'd'].map(id => ({ id, nome: id, updatedAt: at, secret: 'must-not-leak' }))
 type Row = typeof rows[number] & { children?: unknown[] }
@@ -63,15 +63,15 @@ describe('list validation before adapter', () => {
     expect(adapter).not.toHaveBeenCalled()
     await expect(executeList(protectedDef, { ...restricted, identity: { ...restricted.identity!, scopes: new Set(['read:catalogo', 'read:pii'] as const) } }, query('email=private@example.test', protectedDef), options)).resolves.toBeDefined()
   })
-  it('requires complete finite windows before any adapter call', async () => {
-    const bounded = { ...def, window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays:31 } } as ResourceDefinition<Row>
-    for (const search of ['', 'atualizadoDesde=2026-01-01T00:00:00Z', 'atualizadoDesde=2026-02-01T00:00:00Z&atualizadoAte=2026-01-01T00:00:00Z', 'atualizadoDesde=2026-01-01T00:00:00Z&atualizadoAte=2026-02-02T00:00:00Z']) {
+  it('requires complete finite windows but accepts any chronological interval', async () => {
+    const bounded = { ...def, window: { from: 'atualizadoDesde', to: 'atualizadoAte' } } as ResourceDefinition<Row>
+    for (const search of ['', 'atualizadoDesde=2026-01-01T00:00:00Z', 'atualizadoDesde=2026-02-01T00:00:00Z&atualizadoAte=2026-01-01T00:00:00Z']) {
       const params = new URLSearchParams(search)
       const unsafe = { ...query(), ...(params.has('atualizadoDesde') ? { atualizadoDesde: new Date(params.get('atualizadoDesde')!) } : {}), ...(params.has('atualizadoAte') ? { atualizadoAte: new Date(params.get('atualizadoAte')!) } : {}) }
       await expect(executeList(bounded, ctx, unsafe, options)).rejects.toMatchObject({status:400})
     }
     expect(adapter).not.toHaveBeenCalled()
-    expect(query('atualizadoDesde=2026-01-01T00:00:00Z&atualizadoAte=2026-02-01T00:00:00Z', bounded).limit).toBe(100)
+    expect(query('atualizadoDesde=2024-01-01T00:00:00Z&atualizadoAte=2026-02-01T00:00:00Z', bounded).limit).toBe(100)
   })
 })
 

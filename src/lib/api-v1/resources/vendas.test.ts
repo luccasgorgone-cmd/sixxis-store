@@ -79,8 +79,8 @@ describe('vendas resources', () => {
     await expect(executeItem(def, context(), 'missing')).rejects.toMatchObject({ status: 404 })
     if (def.window) {
       expect(() => parseListQuery('https://test.local/', def)).toThrow()
-      const tooWide = `https://test.local/?${def.window.from}=2026-01-01T00:00:00Z&${def.window.to}=2026-03-01T00:00:00Z`
-      expect(() => parseListQuery(tooWide, def)).toThrow()
+      const longWindow = `https://test.local/?${def.window.from}=2024-01-01T00:00:00Z&${def.window.to}=2026-03-01T00:00:00Z`
+      expect(() => parseListQuery(longWindow, def)).not.toThrow()
     }
   })
   it.each(models)('validates every nominal filter before querying and uses typed Prisma conditions: %s', model => {

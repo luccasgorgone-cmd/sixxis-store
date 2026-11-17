@@ -7,12 +7,11 @@ import {
   API_METRIC_TAKE,
   aggregateLabel,
   boundedMetricRows,
-  bucketForInstant,
   decimalOrNull,
   decimalValue,
-  listMetricBuckets,
   metricBase,
   metricMoney,
+  sparseMetricBuckets,
   type MetricParams,
 } from './tempo'
 
@@ -57,7 +56,7 @@ export function createCarrinhosMetric(options: StoreMetricOptions = {}): MetricD
       const cutoff = now.getTime() - 60 * 60 * 1000
       const byStage = new Map<number, { count: number; value: ReturnType<typeof decimalValue> }>()
       const byStatus = new Map<string, { count: number; value: ReturnType<typeof decimalValue> }>()
-      const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, carrinhos: 0, abandonadosComerciais: 0, value: decimalValue(0) }]))
+      const series = sparseMetricBuckets(params, bucket => ({ bucket, carrinhos: 0, abandonadosComerciais: 0, value: decimalValue(0) }))
       let totalValue = decimalValue(0)
       let abandonedValue = decimalValue(0)
       let active = 0
@@ -81,7 +80,7 @@ export function createCarrinhosMetric(options: StoreMetricOptions = {}): MetricD
         status.count += 1
         status.value = status.value.plus(value)
         byStatus.set(derivedStatus, status)
-        const bucket = series.get(bucketForInstant(cart.atualizadoEm, params.agrupar))!
+        const bucket = series.at(cart.atualizadoEm)
         bucket.carrinhos += 1
         bucket.abandonadosComerciais += isAbandoned ? 1 : 0
         bucket.value = bucket.value.plus(value)
@@ -96,7 +95,7 @@ export function createCarrinhosMetric(options: StoreMetricOptions = {}): MetricD
           resumo: { carrinhos: carts.length, ativos: active, convertidos: converted, abandonadosComerciais: abandoned, valorTotal: metricMoney(totalValue), valorAbandonadoComercial: metricMoney(abandonedValue) },
           porEtapa: [...byStage].map(([etapa, value]) => ({ etapa, carrinhos: value.count, valorTotal: metricMoney(value.value) })).sort((a, b) => a.etapa - b.etapa),
           porStatus: [...byStatus].map(([status, value]) => ({ status, carrinhos: value.count, valorTotal: metricMoney(value.value) })).sort((a, b) => a.status.localeCompare(b.status)),
-          serie: [...series.values()].map(value => ({ bucket: value.bucket, carrinhos: value.carrinhos, abandonadosComerciais: value.abandonadosComerciais, valorTotal: metricMoney(value.value) })),
+          serie: series.values().map(value => ({ bucket: value.bucket, carrinhos: value.carrinhos, abandonadosComerciais: value.abandonadosComerciais, valorTotal: metricMoney(value.value) })),
         },
         checkoutTracked: { tracked: true as const, abandono: summarizeCheckoutAbandonment(loadedEvents.classificationEvents, now) },
       }
@@ -135,7 +134,7 @@ export function createCuponsCashbackFidelidadeMetric(options: StoreMetricOptions
       const levels = boundedMetricRows(rawLevels as unknown as LoyaltyLevel[])
       boundedMetricRows(customerSpend as unknown[])
       const couponMap = new Map<string, { usos: number; desconto: ReturnType<typeof decimalValue>; receita: ReturnType<typeof decimalValue> }>()
-      const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, usosCupom: 0, descontoCupom: decimalValue(0), receitaCupom: decimalValue(0), creditosCashback: decimalValue(0), debitosCashback: decimalValue(0) }]))
+      const series = sparseMetricBuckets(params, bucket => ({ bucket, usosCupom: 0, descontoCupom: decimalValue(0), receitaCupom: decimalValue(0), creditosCashback: decimalValue(0), debitosCashback: decimalValue(0) }))
       let discount = decimalValue(0)
       let couponRevenue = decimalValue(0)
       for (const use of uses) {
@@ -147,7 +146,7 @@ export function createCuponsCashbackFidelidadeMetric(options: StoreMetricOptions
         couponMap.set(code, current)
         discount = discount.plus(decimalValue(use.valorDesconto))
         couponRevenue = couponRevenue.plus(decimalValue(use.valorPedido))
-        const bucket = series.get(bucketForInstant(use.usadoEm, params.agrupar))!
+        const bucket = series.at(use.usadoEm)
         bucket.usosCupom += 1
         bucket.descontoCupom = bucket.descontoCupom.plus(decimalValue(use.valorDesconto))
         bucket.receitaCupom = bucket.receitaCupom.plus(decimalValue(use.valorPedido))
@@ -156,7 +155,7 @@ export function createCuponsCashbackFidelidadeMetric(options: StoreMetricOptions
       let debits = decimalValue(0)
       for (const row of cashback) {
         if (row.status === 'cancelado') continue
-        const bucket = series.get(bucketForInstant(row.createdAt, params.agrupar))!
+        const bucket = series.at(row.createdAt)
         if (row.tipo === 'credito') {
           credits = credits.plus(decimalValue(row.valor))
           bucket.creditosCashback = bucket.creditosCashback.plus(decimalValue(row.valor))
@@ -193,7 +192,7 @@ export function createCuponsCashbackFidelidadeMetric(options: StoreMetricOptions
           saldoPendenteAtual: metricMoney(decimalValue(balanceSums.cashbackPendente ?? 0)),
         },
         fidelidade: { snapshotAtual: true as const, porFaixa: ranges },
-        serie: [...series.values()].map(value => ({ bucket: value.bucket, usosCupom: value.usosCupom, descontoCupom: metricMoney(value.descontoCupom), receitaCupom: metricMoney(value.receitaCupom), creditosCashback: metricMoney(value.creditosCashback), debitosCashback: metricMoney(value.debitosCashback) })),
+        serie: series.values().map(value => ({ bucket: value.bucket, usosCupom: value.usosCupom, descontoCupom: metricMoney(value.descontoCupom), receitaCupom: metricMoney(value.receitaCupom), creditosCashback: metricMoney(value.creditosCashback), debitosCashback: metricMoney(value.debitosCashback) })),
       }
     },
   }
@@ -252,7 +251,7 @@ export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefin
       let prazoCount = 0
       const carriers = new Map<string, { count: number; freight: ReturnType<typeof decimalValue>; prazoSum: number; prazoCount: number }>()
       const types = new Map<string, { count: number; freight: ReturnType<typeof decimalValue> }>()
-      const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, selections: 0, orders: 0, freight: decimalValue(0), cost: decimalValue(0), allCostKnown: true }]))
+      const series = sparseMetricBuckets(params, bucket => ({ bucket, selections: 0, orders: 0, freight: decimalValue(0), cost: decimalValue(0), allCostKnown: true }))
       for (const order of orders) {
         const charged = decimalValue(order.frete)
         freight = freight.plus(charged)
@@ -271,7 +270,7 @@ export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefin
         type.count += 1
         type.freight = type.freight.plus(charged)
         types.set(typeName, type)
-        const bucket = series.get(bucketForInstant(order.createdAt, params.agrupar))!
+        const bucket = series.at(order.createdAt)
         bucket.orders += 1
         bucket.freight = bucket.freight.plus(charged)
         if (realCost === null) bucket.allCostKnown = false
@@ -287,7 +286,7 @@ export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefin
         selected.count += 1
         selected.value = selected.value.plus(value)
         selectionMap.set(option, selected)
-        series.get(bucketForInstant(event.createdAt, params.agrupar))!.selections += 1
+        series.at(event.createdAt).selections += 1
       }
       return {
         ...metricBase(params, {
@@ -305,7 +304,7 @@ export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefin
           porTransportadora: [...carriers].map(([transportadora, value]) => ({ transportadora, pedidos: value.count, freteCobrado: metricMoney(value.freight), prazoMedioDiasUteis: value.prazoCount ? value.prazoSum / value.prazoCount : null })).sort((a, b) => a.transportadora.localeCompare(b.transportadora)),
           porTipo: [...types].map(([tipo, value]) => ({ tipo, pedidos: value.count, freteCobrado: metricMoney(value.freight) })).sort((a, b) => a.tipo.localeCompare(b.tipo)),
         },
-        serie: [...series.values()].map(value => ({ bucket: value.bucket, selecoesTracked: value.selections, pedidosPagos: value.orders, freteCobrado: metricMoney(value.freight), custoRealConhecido: value.allCostKnown ? metricMoney(value.cost) : null })),
+        serie: series.values().map(value => ({ bucket: value.bucket, selecoesTracked: value.selections, pedidosPagos: value.orders, freteCobrado: metricMoney(value.freight), custoRealConhecido: value.allCostKnown ? metricMoney(value.cost) : null })),
         limitacoes: 'As cotações ofertadas não são persistidas; esta métrica mede seleção tracked e o frete consolidado nos pedidos pagos.',
       }
     },
@@ -333,7 +332,7 @@ export function createAvaliacoesMetric(options: StoreMetricOptions = {}): Metric
       }) as unknown as ReviewRow[])
       const ratings = new Map<number, number>()
       const products = new Map<string, { produtoId: string; produto: string; count: number; approved: number; score: number }>()
-      const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, count: 0, approved: 0, score: 0 }]))
+      const series = sparseMetricBuckets(params, bucket => ({ bucket, count: 0, approved: 0, score: 0 }))
       for (const row of rows) {
         ratings.set(row.nota, (ratings.get(row.nota) ?? 0) + 1)
         const product = products.get(row.produtoId) ?? { produtoId: row.produtoId, produto: aggregateLabel(row.produto.nome, 'produto_sem_nome', true), count: 0, approved: 0, score: 0 }
@@ -341,7 +340,7 @@ export function createAvaliacoesMetric(options: StoreMetricOptions = {}): Metric
         product.approved += row.aprovada ? 1 : 0
         product.score += row.nota
         products.set(row.produtoId, product)
-        const bucket = series.get(bucketForInstant(row.createdAt, params.agrupar))!
+        const bucket = series.at(row.createdAt)
         bucket.count += 1
         bucket.approved += row.aprovada ? 1 : 0
         bucket.score += row.nota
@@ -359,7 +358,7 @@ export function createAvaliacoesMetric(options: StoreMetricOptions = {}): Metric
         },
         porNota: [...ratings].map(([nota, avaliacoes]) => ({ nota, avaliacoes })).sort((a, b) => a.nota - b.nota),
         porProduto: [...products.values()].map(product => ({ produtoId: product.produtoId, produto: product.produto, avaliacoes: product.count, aprovadas: product.approved, mediaNota: product.score / product.count })).sort((a, b) => a.produtoId.localeCompare(b.produtoId)),
-        serie: [...series.values()].map(value => ({ bucket: value.bucket, avaliacoes: value.count, aprovadas: value.approved, mediaNota: value.count ? value.score / value.count : 0 })),
+        serie: series.values().map(value => ({ bucket: value.bucket, avaliacoes: value.count, aprovadas: value.approved, mediaNota: value.count ? value.score / value.count : 0 })),
       }
     },
   }

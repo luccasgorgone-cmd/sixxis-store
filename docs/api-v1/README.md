@@ -5,32 +5,43 @@ API server-to-server, autenticada e somente leitura. A fonte executável do cont
 ## Entregáveis
 
 - `openapi.json` e `openapi.yaml`: contrato OpenAPI 3.1.
-- `postman-collection.json`: coleção com `{{baseUrl}}` e `{{token}}`.
-- `exemplo-sync.ts`: paginação incremental por contrato de relógio/janela publicado em `/meta/recursos`.
+- `colecao.postman.json`: coleção com `{{baseUrl}}` e `{{token}}`.
+- `sync-exemplo.ts`: cliente executável que carrega o contrato em `/api/v1/meta/recursos` e pagina o recurso selecionado.
 
 ## Autenticação e escopos
 
-Envie `Authorization: Bearer <token>`. Nunca coloque token em URL, log ou repositório. `read:all` concede os domínios; `read:pii` e `read:mensagens` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
+Envie `Authorization: Bearer <token>`. Nunca coloque token em URL, log ou repositório. A chave operacional `luccas-programa-externo` não expira (`expiraEm: null`) e permanece válida até revogação explícita. `read:all` concede os domínios; `read:pii` e `read:mensagens` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
 
 Escopos disponíveis: `read:all`, `read:clientes`, `read:catalogo`, `read:pedidos`, `read:marketing`, `read:analytics`, `read:auditoria`, `read:configuracoes`, `read:financeiro`, `read:pii`, `read:mensagens`.
 
 ## Paginação e sincronização
 
-Use `limit` (máximo global 500; respeite `sync.maxLimit` do recurso) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de `/meta/recursos` publica `sync.sort`, `watermarkField`, parâmetros `from`/`to` e `maxDays`. Congele os dois limites da janela durante todas as páginas, deduplique por `id`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
+Use `limit` (máximo global 500; respeite `sync.maxLimit` do recurso) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de `/api/v1/meta/recursos` publica `sync.sort`, `watermarkField`, `watermarkFormat`, parâmetros `from`/`to` e `maxDays: null`, indicando que qualquer intervalo cronológico válido é aceito. Congele os dois limites da janela durante todas as páginas, deduplique por `id`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
 
 ```bash
 curl -sS -H "Authorization: Bearer $SIXXIS_API_TOKEN" \
-  "https://SEU-DOMINIO.example/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+  "https://www.sixxis.com.br/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
+```
+
+O exemplo não depende de pacote instalado globalmente. Informe o token somente pela variável de ambiente; os três argumentos são recurso, início inclusivo e fim inclusivo em ISO 8601. A saída contém apenas `count` e `watermark`.
+
+```bash
+read -rsp 'Token da API: ' SIXXIS_API_TOKEN; export SIXXIS_API_TOKEN; echo
+# Carga inicial
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-01T00:00:00.000Z 2026-11-17T23:59:59.999Z
+# Carga incremental: use o watermark confirmado da execução anterior como início
+npx tsx docs/api-v1/sync-exemplo.ts produtos 2026-11-17T20:15:30.000Z 2026-11-18T23:59:59.999Z
+unset SIXXIS_API_TOKEN
 ```
 
 ## Erros, limites e cache
 
-Erros usam RFC 9457 (`application/problem+json`) e incluem `requestId`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. O limite padrão é 60 requisições/minuto por chave e por IP de ingresso; métricas têm orçamento adicional de 10/minuto por chave. Leia `X-RateLimit-*` e `Retry-After`. Respostas autenticadas usam `Cache-Control: no-store`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
+Erros usam RFC 9457 (`application/problem+json`) e incluem `requestId`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. Chaves válidas autenticadas operam sem limite de requests ou de período, inclusive em métricas. Os três únicos limites técnicos são: 10 segundos por consulta SQL; no máximo 2 métricas executadas concorrentemente; e proteção de brute-force por IP somente para tentativas de autenticação recusadas. Nesses casos recusados, respeite `Retry-After` ao receber 429. Respostas autenticadas usam `Cache-Control: no-store`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
 
 ## Endpoints transversais
 
-- Públicos: `GET /api/v1`, `/health`, `/openapi.json`, `/docs`.
-- Autenticados: `GET /api/v1/me` e `/meta/recursos`.
+- Públicos: `GET /api/v1`, `/api/v1/health`, `/api/v1/openapi.json`, `/api/v1/docs`.
+- Autenticados: `GET /api/v1/me` e `/api/v1/meta/recursos`.
 - Recursos: `GET /api/v1/{recurso}` e `GET /api/v1/{recurso}/{id}`.
 - Métricas: `GET /api/v1/metricas/{slug}?de=YYYY-MM-DD&ate=YYYY-MM-DD&agrupar=dia|semana|mes`.
 - Outros métodos retornam 405 sem executar autenticação, auditoria ou mutação.
@@ -879,7 +890,7 @@ Escopo: `read:auditoria`. Filtros: clienteId, acao. Expansões: cliente.
 
 ### `vendas`
 
-Escopo: `read:financeiro`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:financeiro`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Pedidos pagos = status pago, enviado ou entregue no período BRT.
 - Receita bruta = Σ(preço unitário × quantidade) + garantias pagas.
@@ -888,7 +899,7 @@ Escopo: `read:financeiro`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Pa
 
 ### `funil`
 
-Escopo: `read:analytics`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:analytics`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Sessões tracked distintas por bucket: sessão → view_item → add_to_cart → begin_checkout → pagamento_submit → purchase.
 - Abandono comercial: checkout sem compra e sem erro técnico, inativo por pelo menos 1 hora.
@@ -896,40 +907,40 @@ Escopo: `read:analytics`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Pau
 
 ### `carrinhos`
 
-Escopo: `read:analytics`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:analytics`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Carrinhos persistentes atualizados no período; abandono comercial exige carrinho ativo, itens e inatividade de 1 hora.
 - checkoutTracked usa somente eventos consentidos.
 
 ### `cupons-cashback-fidelidade`
 
-Escopo: `read:financeiro`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:financeiro`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Cupons usam CupomUso.usadoEm; cashback ignora movimentos cancelados; fidelidade é snapshot atual por faixa inclusiva.
 
 ### `frete`
 
-Escopo: `read:financeiro`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:financeiro`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Seleções vêm de add_shipping_info consentido e representam valor do carrinho.
 - Pedidos pagos usam frete cobrado; custo real desconhecido permanece null; prazo é média simples em dias úteis.
 
 ### `avaliacoes`
 
-Escopo: `read:analytics`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:analytics`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Período por Avaliacao.createdAt; média = Σ(nota) ÷ quantidade. Conteúdo de comentário/resposta não é selecionado.
 
 ### `estoque-catalogo`
 
-Escopo: `read:analytics`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:analytics`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Snapshot atual sem série histórica; variações ativas substituem estoque do produto.
 - Valor de venda = unidades × preço efetivo; não usa custo interno.
 
 ### `clientes`
 
-Escopo: `read:financeiro`. Janela máxima: 366 dias. Fuso civil: `America/Sao_Paulo`.
+Escopo: `read:financeiro`. Janela cronológica obrigatória, sem duração máxima. Fuso civil: `America/Sao_Paulo`.
 
 - Comprador é cliente distinto com pedido pago/enviado/entregue.
 - Novo tem primeiro pedido pago no período; LTV médio usa todo o histórico pago dos compradores do período.

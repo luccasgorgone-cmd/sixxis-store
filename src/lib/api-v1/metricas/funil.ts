@@ -2,7 +2,7 @@ import type { PrismaClient } from '@prisma/client'
 import { ApiQueryError } from '../query'
 import type { ApiContext } from '../types'
 import type { MetricDefinition, StoreMetricOptions } from './registry'
-import { API_METRIC_MAX_ROWS, API_METRIC_TAKE, boundedMetricRows, bucketForInstant, listMetricBuckets, metricBase, type MetricParams } from './tempo'
+import { API_METRIC_MAX_ROWS, API_METRIC_TAKE, boundedMetricRows, bucketForInstant, metricBase, sparseMetricBuckets, type MetricParams } from './tempo'
 
 export type FunnelEvent = { sessaoId: string; tipo: string; dados: unknown; createdAt: Date }
 type TrackedSession = { sessaoId: string; createdAt: Date }
@@ -195,17 +195,16 @@ export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefin
         ['pagamento_submit', stages.pagamento_submit.size],
         ['purchase', stages.purchase.size],
       ] as const
-      const series = new Map(listMetricBuckets(params).map(bucket => [bucket, {
+      const series = sparseMetricBuckets(params, bucket => ({
         bucket, sessoes: new Set<string>(), viewItem: new Set<string>(), addToCart: new Set<string>(), beginCheckout: new Set<string>(), pagamentoSubmit: new Set<string>(), purchase: new Set<string>(),
-      }]))
-      for (const session of sessions) series.get(bucketForInstant(session.createdAt, params.agrupar))?.sessoes.add(session.sessaoId)
+      }))
+      for (const session of sessions) series.at(session.createdAt).sessoes.add(session.sessaoId)
       for (const [bucketName, activeSessions] of loadedEvents.activeSessionsByBucket) {
-        const bucket = series.get(bucketName)
-        if (bucket) for (const sessionId of activeSessions) bucket.sessoes.add(sessionId)
+        const bucket = series.named(bucketName)
+        for (const sessionId of activeSessions) bucket.sessoes.add(sessionId)
       }
       for (const event of events) {
-        const bucket = series.get(bucketForInstant(event.createdAt, params.agrupar))
-        if (!bucket) continue
+        const bucket = series.at(event.createdAt)
         bucket.sessoes.add(event.sessaoId)
         const reached = progression.get(event)
         if (reached === 'view_item') bucket.viewItem.add(event.sessaoId)
@@ -230,7 +229,7 @@ export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefin
           taxaDaSessao: percentage(count, ordered[0][1]),
         })),
         abandonoCheckout: summarizeCheckoutAbandonment(loadedEvents.classificationEvents, now),
-        serie: [...series.values()].map(value => ({
+        serie: series.values().map(value => ({
           bucket: value.bucket,
           sessoes: value.sessoes.size,
           viewItem: value.viewItem.size,

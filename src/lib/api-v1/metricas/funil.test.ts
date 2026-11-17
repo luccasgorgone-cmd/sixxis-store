@@ -3,7 +3,7 @@ import type { ApiContext } from '../types'
 import { createFunilMetric } from './funil'
 import { parseMetricParams } from './tempo'
 
-const context = { requestId: 'req-funil', identity: null, ip: '127.0.0.1', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 0 } } satisfies ApiContext
+const context = { requestId: 'req-funil', identity: null, ip: '127.0.0.1', startedAt: 0 } satisfies ApiContext
 const params = parseMetricParams(new URLSearchParams({ de: '2026-11-16', ate: '2026-11-16', agrupar: 'dia' }))
 const at = (hour: string) => new Date(`2026-11-16T${hour}:00.000Z`)
 

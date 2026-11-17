@@ -309,7 +309,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
       ],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         pedidoId: { type: 'string' },
         mpPaymentId: { type: 'string' },
@@ -381,7 +381,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
       ],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         pedidoId: { type: 'string' },
         tipo: { type: 'string', values: ['dois_cartoes', 'pix_mais_cartao'] },
@@ -685,7 +685,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
       ],
       sorts: ['id', 'atualizadoEm'], defaultSort: 'atualizadoEm',
       dateFields: { created: 'criadoEm', updated: 'atualizadoEm' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         clienteId: { type: 'string' },
         status: { type: 'string', values: ['ativo', 'convertido', 'abandonado', 'recuperado'] },

@@ -64,7 +64,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt', maxLimit: 200,
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       filters: {
         sessionId: { type: 'string', scope: 'read:pii' },
         aceitou: { type: 'boolean' },
@@ -117,7 +117,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt', maxLimit: 200,
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       filters: {
         sessionId: { type: 'string', scope: 'read:pii' },
         userId: { type: 'string', scope: 'read:pii' },
@@ -181,7 +181,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'ultimaVisita'], defaultSort: 'ultimaVisita', maxLimit: 200,
       dateFields: { created: 'primeiraVisita', updated: 'ultimaVisita' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         sessionId: { type: 'string', scope: 'read:pii' },
         userId: { type: 'string', scope: 'read:pii' },
@@ -264,7 +264,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       ],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt', maxLimit: 200,
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         sessaoId: { type: 'string', scope: 'read:pii' },
         userId: { type: 'string', scope: 'read:pii' },
@@ -348,7 +348,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       ],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt', maxLimit: 200,
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       filters: {
         sessaoId: { type: 'string', scope: 'read:pii' },
         tipo: { type: 'string' },
@@ -405,7 +405,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt', maxLimit: 200,
       dateFields: { created: 'data', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 366 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         hora: { type: 'number', integer: true, min: 0, max: 23 },
         diaSemana: { type: 'number', integer: true, min: 0, max: 6 },
@@ -457,7 +457,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt', maxLimit: 200,
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       filters: {
         ip: { type: 'string', scope: 'read:pii' },
         sucesso: { type: 'boolean' },
@@ -508,7 +508,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt', maxLimit: 200,
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       searchFields: ['motivo'],
       searchScope: 'read:pii',
       filters: {
@@ -561,7 +561,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt', maxLimit: 200,
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       searchFields: ['action', 'target'],
       searchScope: 'read:pii',
       filters: {
@@ -615,7 +615,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'ultimoPing'], defaultSort: 'ultimoPing', maxLimit: 200,
       dateFields: { updated: 'ultimoPing' },
-      window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 1 },
+      window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         sessaoId: { type: 'string', scope: 'read:pii' },
         dispositivo: { type: 'string' },
@@ -669,7 +669,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       expands: [],
       sorts: ['id', 'dia'], defaultSort: 'dia', maxLimit: 200,
       dateFields: { created: 'dia' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       filters: {
         dispositivo: { type: 'string' },
         browser: { type: 'string' },
@@ -730,7 +730,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       ],
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt', maxLimit: 200,
       dateFields: { created: 'createdAt' },
-      window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
+      window: { from: 'criadoDesde', to: 'criadoAte' },
       searchFields: ['motivo'],
       searchScope: 'read:pii',
       filters: {

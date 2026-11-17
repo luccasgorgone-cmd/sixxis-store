@@ -40,7 +40,7 @@ describe('bounded analytics and audit resources', () => {
     for (const def of definitions) {
       expect(def.scope).toBe(auditModels.includes(def.model) ? 'read:auditoria' : 'read:analytics')
       expect(def.maxLimit).toBe(200)
-      expect(def.window!.maxDays).toBe(def.model === 'Presenca' ? 1 : def.model === 'RelatorioVendaHora' ? 366 : 31)
+      expect(def.window).toEqual({ from: def.window!.from, to: def.window!.to })
       expect(def.defaultSort).toBe(dates[def.model] ?? 'createdAt')
     }
   })
@@ -60,12 +60,12 @@ describe('bounded analytics and audit resources', () => {
     expect(JSON.stringify(output)).not.toMatch(/DO-NOT-LEAK|visitorHash|PASSWORD|UNKNOWN/)
     assertNullableFields(def)
   })
-  it.each(models)('blocks missing, incomplete, invalid and oversized windows before adapter: %s', async model => {
+  it.each(models)('blocks missing, incomplete and invalid windows but accepts long chronological windows before adapter: %s', async model => {
     const { def, delegate } = setup(model)
     const base = { limit: 1, sort: def.defaultSort!, filters: {} }
-    const start = new Date('2026-01-01T00:00:00Z'), end = new Date(start.getTime() + def.window!.maxDays * 86_400_000)
+    const start = new Date('2024-01-01T00:00:00Z'), end = new Date('2026-01-02T00:00:00Z')
     const from = def.window!.from, to = def.window!.to
-    for (const bad of [base, { ...base, [from]: start }, { ...base, [to]: end }, { ...base, [from]: end, [to]: start }, { ...base, [from]: start, [to]: new Date(end.getTime() + 1) }, { ...base, [from]: new Date('bad'), [to]: end }, { ...base, [from]: start, [to]: end, limit: 201 }, { ...base, q: 'token=PRIVATE' }, { ...base, [from]: start, [to]: end, filters: { arbitrary: ['x'] } }]) {
+    for (const bad of [base, { ...base, [from]: start }, { ...base, [to]: end }, { ...base, [from]: end, [to]: start }, { ...base, [from]: new Date('bad'), [to]: end }, { ...base, [from]: start, [to]: end, limit: 201 }, { ...base, q: 'token=PRIVATE' }, { ...base, [from]: start, [to]: end, filters: { arbitrary: ['x'] } }]) {
       await expect(executeList(def, context(), bad, options)).rejects.toMatchObject({ status: 400 })
     }
     expect(() => parseListQuery('https://test.local/', def)).toThrow()

@@ -10,7 +10,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     })
-  } catch (error) {
-    return Response.json({ ok: false, error: String(error) }, { status: 500 })
+  } catch {
+    return Response.json({ ok: false, error: 'health check failed' }, { status: 500 })
   }
 }

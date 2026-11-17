@@ -12,7 +12,7 @@ describe('read-only invariant across the entire router', () => {
       select: { id: true }, sorts: ['id'], defaultSort: 'id', adapter: { findMany: mutation, findFirst: mutation }, serialize: row => ({ id: row.id }), countAndLastUpdate: mutation,
     }
     const metric = vi.fn()
-    const pipelineDeps = { authenticate: mutation, rateLimit: mutation, audit: mutation, lastUsed: mutation }
+    const pipelineDeps = { authenticate: mutation, audit: mutation, lastUsed: mutation }
     const cases = [
       ['', []], ['/produtos', ['produtos']], ['/produtos/id', ['produtos', 'id']],
       ['/metricas/vendas', ['metricas', 'vendas']], ['/desconhecida/id', ['desconhecida', 'id']],

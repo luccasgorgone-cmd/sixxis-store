@@ -10,8 +10,8 @@
   },
   "servers": [
     {
-      "url": "https://SEU-DOMINIO.example",
-      "description": "Substitua pelo domínio autorizado da Loja."
+      "url": "https://www.sixxis.com.br",
+      "description": "Produção Sixxis Store."
     }
   ],
   "tags": [
@@ -44,15 +44,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -102,15 +93,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -160,15 +142,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -248,21 +221,12 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "urn:sixxis:api-v1:me-envelope"
                 }
               }
             }
@@ -310,15 +274,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -557,15 +512,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -650,15 +596,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -860,15 +797,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -953,15 +881,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1133,15 +1052,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1226,15 +1136,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1388,15 +1289,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1481,15 +1373,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1699,15 +1582,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1792,15 +1666,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -1985,15 +1850,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2078,15 +1934,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2329,15 +2176,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2422,15 +2260,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2651,15 +2480,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2744,15 +2564,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2906,15 +2717,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -2999,15 +2801,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3180,15 +2973,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3273,15 +3057,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3519,15 +3294,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3612,15 +3378,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3805,15 +3562,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -3898,15 +3646,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4071,15 +3810,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4164,15 +3894,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4376,15 +4097,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4469,15 +4181,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4687,15 +4390,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4780,15 +4474,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -4948,15 +4633,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5041,15 +4717,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5247,15 +4914,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5340,15 +4998,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5533,15 +5182,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -5626,15 +5266,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6060,15 +5691,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6153,15 +5775,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6369,15 +5982,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6462,15 +6066,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6612,22 +6207,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "pedidoId",
@@ -6731,15 +6328,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6824,15 +6412,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -6974,22 +6553,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "pedidoId",
@@ -7038,15 +6619,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7131,15 +6703,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7332,15 +6895,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7425,15 +6979,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7598,15 +7143,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7691,15 +7227,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7883,15 +7410,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -7976,15 +7494,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8193,15 +7702,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8286,15 +7786,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8477,15 +7968,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8570,15 +8052,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8719,22 +8192,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em atualizadoEm.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em atualizadoEm.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "clienteId",
@@ -8776,15 +8251,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -8869,15 +8335,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9070,15 +8527,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9163,15 +8611,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9423,15 +8862,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9516,15 +8946,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9666,22 +9087,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "campanhaId",
@@ -9749,15 +9172,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -9842,15 +9256,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10052,15 +9457,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10145,15 +9541,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10271,22 +9658,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "campanhaId",
@@ -10361,15 +9750,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10454,15 +9834,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10603,22 +9974,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "conversaId",
@@ -10688,15 +10061,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10781,15 +10145,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -10910,22 +10265,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "conversaId",
@@ -10958,15 +10315,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11051,15 +10399,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11323,15 +10662,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11416,15 +10746,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11562,22 +10883,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "status",
@@ -11630,15 +10953,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11723,15 +11037,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11849,22 +11154,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessionId",
@@ -11892,15 +11199,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -11985,15 +11283,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12111,22 +11400,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessionId",
@@ -12164,15 +11455,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12257,15 +11539,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12403,22 +11676,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em ultimaVisita.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em ultimaVisita.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessionId",
@@ -12465,15 +11740,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12558,15 +11824,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12707,22 +11964,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessaoId",
@@ -12841,15 +12100,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -12934,15 +12184,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13063,22 +12304,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessaoId",
@@ -13124,15 +12367,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13217,15 +12451,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13363,22 +12588,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "hora",
@@ -13405,15 +12632,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13498,15 +12716,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13624,22 +12833,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "ip",
@@ -13676,15 +12887,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13769,15 +12971,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -13926,22 +13119,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em updatedAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "ip",
@@ -13960,15 +13155,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14053,15 +13239,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14190,22 +13367,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "actor",
@@ -14243,15 +13422,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14336,15 +13506,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14462,22 +13623,24 @@
           {
             "name": "atualizadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em ultimoPing.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "atualizadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em ultimoPing.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "sessaoId",
@@ -14505,15 +13668,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14598,15 +13752,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14724,22 +13869,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em dia.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em dia.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "dispositivo",
@@ -14811,15 +13958,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -14904,15 +14042,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15044,22 +14173,24 @@
           {
             "name": "criadoDesde",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo inicial em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T00:00:00.000Z"
           },
           {
             "name": "criadoAte",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Limite inclusivo final em createdAt.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2026-01-01T23:59:59.999Z"
           },
           {
             "name": "clienteId",
@@ -15090,15 +14221,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15183,15 +14305,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15244,7 +14357,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15255,8 +14368,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15266,7 +14379,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15285,15 +14398,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15346,7 +14450,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15357,8 +14461,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15368,7 +14472,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15387,15 +14491,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15448,7 +14543,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15459,8 +14554,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15470,7 +14565,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15489,15 +14584,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15550,7 +14636,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15561,8 +14647,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15572,7 +14658,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15591,15 +14677,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15652,7 +14729,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15663,8 +14740,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15674,7 +14751,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15693,15 +14770,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15754,7 +14822,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15765,8 +14833,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15776,7 +14844,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15795,15 +14863,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15856,7 +14915,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15867,8 +14926,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15878,7 +14937,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15897,15 +14956,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -15958,7 +15008,7 @@
           {
             "name": "de",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Primeiro dia civil inclusivo.",
             "schema": {
               "type": "string",
@@ -15969,8 +15019,8 @@
           {
             "name": "ate",
             "in": "query",
-            "required": false,
-            "description": "Último dia civil inclusivo; máximo de 366 dias.",
+            "required": true,
+            "description": "Último dia civil inclusivo.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -15980,7 +15030,7 @@
           {
             "name": "agrupar",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Granularidade BRT.",
             "schema": {
               "type": "string",
@@ -15999,15 +15049,6 @@
             "headers": {
               "X-Request-Id": {
                 "$ref": "urn:sixxis:api-v1:header:request-id"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "urn:sixxis:api-v1:header:rate-limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "urn:sixxis:api-v1:header:rate-reset"
               }
             },
             "content": {
@@ -25505,6 +24546,68 @@
         ],
         "additionalProperties": false,
         "description": "Objeto estruturado."
+      },
+      "Me": {
+        "$id": "urn:sixxis:api-v1:me",
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome operacional da chave."
+          },
+          "prefixo": {
+            "type": "string",
+            "description": "Prefixo seguro para identificação da chave."
+          },
+          "escopos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Escopo autorizado."
+            },
+            "description": "Coleção ordenada."
+          },
+          "expiraEm": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Data de expiração; null significa válida até revogação explícita."
+          },
+          "semLimite": {
+            "type": "boolean",
+            "const": true,
+            "description": "Chaves válidas autenticadas não têm limite de requests nem de período."
+          }
+        },
+        "required": [
+          "nome",
+          "prefixo",
+          "escopos",
+          "expiraEm",
+          "semLimite"
+        ],
+        "additionalProperties": false,
+        "description": "Objeto estruturado."
+      },
+      "MeEnvelope": {
+        "$id": "urn:sixxis:api-v1:me-envelope",
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "urn:sixxis:api-v1:me"
+          },
+          "meta": {
+            "$ref": "urn:sixxis:api-v1:item-meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": "Objeto estruturado."
       }
     },
     "parameters": {},
@@ -25515,27 +24618,6 @@
         "schema": {
           "type": "string"
         }
-      },
-      "RateLimit": {
-        "$id": "urn:sixxis:api-v1:header:rate-limit",
-        "description": "Limite por minuto.",
-        "schema": {
-          "type": "integer"
-        }
-      },
-      "RateRemaining": {
-        "$id": "urn:sixxis:api-v1:header:rate-remaining",
-        "description": "Saldo na janela.",
-        "schema": {
-          "type": "integer"
-        }
-      },
-      "RateReset": {
-        "$id": "urn:sixxis:api-v1:header:rate-reset",
-        "description": "Reset em Unix seconds.",
-        "schema": {
-          "type": "integer"
-        }
       }
     },
     "responses": {
@@ -25545,15 +24627,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25570,15 +24643,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25595,15 +24659,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25620,15 +24675,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25645,15 +24691,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           },
           "Retry-After": {
             "description": "Segundos até nova tentativa.",
@@ -25676,15 +24713,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {
@@ -25701,15 +24729,6 @@
         "headers": {
           "X-Request-Id": {
             "$ref": "urn:sixxis:api-v1:header:request-id"
-          },
-          "X-RateLimit-Limit": {
-            "$ref": "urn:sixxis:api-v1:header:rate-limit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "urn:sixxis:api-v1:header:rate-remaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "urn:sixxis:api-v1:header:rate-reset"
           }
         },
         "content": {

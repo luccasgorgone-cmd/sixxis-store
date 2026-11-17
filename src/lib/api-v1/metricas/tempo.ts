@@ -64,8 +64,6 @@ export function parseMetricParams(search: URLSearchParams): MetricParams {
   const ate = assertCivilDay(search.get('ate'))
   const grouping = search.get('agrupar')
   if (!METRIC_GROUPINGS.includes(grouping as MetricGrouping) || de > ate) throw new ApiQueryError(400, 'Parâmetros de período inválidos.')
-  const inclusiveDays = Math.floor((Date.parse(`${ate}T00:00:00.000Z`) - Date.parse(`${de}T00:00:00.000Z`)) / 86_400_000) + 1
-  if (inclusiveDays < 1 || inclusiveDays > 366) throw new ApiQueryError(400, 'O período máximo para métricas é de 366 dias.')
   const agrupar = grouping as MetricGrouping
   return {
     de,
@@ -95,15 +93,23 @@ export function bucketForInstant(instant: Date, grouping: MetricGrouping): strin
   return bucketForDay(dayAt(instant.getTime()), grouping)
 }
 
-export function listMetricBuckets(params: MetricParams): string[] {
-  const buckets: string[] = []
-  let cursor = params.de
-  while (cursor <= params.ate) {
-    const bucket = bucketForDay(cursor, params.agrupar)
-    if (buckets.at(-1) !== bucket) buckets.push(bucket)
-    cursor = addCivilDays(cursor, 1)
+export function sparseMetricBuckets<T>(params: MetricParams, create: (bucket: string) => T) {
+  const buckets = new Map<string, T>()
+  const named = (bucket: string): T => {
+    let value = buckets.get(bucket)
+    if (value === undefined) {
+      value = create(bucket)
+      buckets.set(bucket, value)
+    }
+    return value
   }
-  return buckets
+  const entries = () => [...buckets].sort(([left], [right]) => left.localeCompare(right))
+  return {
+    at: (instant: Date) => named(bucketForInstant(instant, params.agrupar)),
+    named,
+    entries,
+    values: () => entries().map(([, value]) => value),
+  }
 }
 
 export function metricBase<T extends Record<string, string>>(params: MetricParams, definicoes: T) {
