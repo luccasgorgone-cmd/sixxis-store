@@ -49,6 +49,19 @@ function completeQuery(definition: ResourceDefinition): ListQuery {
 }
 
 describe('complete anti-leak sweep', () => {
+  it('requires read:pii for private session and user identity fields and filters', () => {
+    const privateIdentity = /^(?:sessionId|sessaoId|userId)$/
+    const registry = createStoreResourceRegistry({ prisma: {} as never })
+    for (const definition of registry.list()) {
+      for (const field of definition.fields.filter(item => privateIdentity.test(item.name))) {
+        expect(field.scope, `${definition.slug}.${field.name} field`).toBe('read:pii')
+      }
+      for (const [name, filter] of Object.entries(definition.filters ?? {}).filter(([name]) => privateIdentity.test(name))) {
+        expect(filter.scope, `${definition.slug}.${name} filter`).toBe('read:pii')
+      }
+    }
+  })
+
   it('traverses list, detail and every expand of all 49 resources with total scopes', async () => {
     const registry = createStoreResourceRegistry({ prisma: {} as never })
     expect(registry.size).toBe(49)

@@ -93,8 +93,8 @@ describe('metricas/vendas', () => {
     expect(result.porUf).toEqual(expect.arrayContaining([{ uf: 'SP', pedidos: 1, receitaLiquidaComercial: '100.00' }]))
     expect(result.porCidade).toEqual(expect.arrayContaining([{ uf: 'RJ', cidade: 'Rio de Janeiro', pedidos: 1, receitaLiquidaComercial: '200.00' }]))
     expect(result.porAtribuicao).toEqual(expect.arrayContaining([
-      { origem: 'google', meio: 'cpc', campanha: 'pmax', canalClickId: 'gclid', pedidos: 1, receitaLiquidaComercial: '100.00' },
-      { origem: 'nao_atribuida', meio: 'nao_atribuido', campanha: 'nao_atribuida', canalClickId: 'fbc', pedidos: 1, receitaLiquidaComercial: '200.00' },
+      { origem: 'google', meio: 'paid_click', campanha: 'nao_disponivel', canalClickId: 'gclid', pedidos: 1, receitaLiquidaComercial: '100.00' },
+      { origem: 'meta', meio: 'paid_click', campanha: 'nao_disponivel', canalClickId: 'fbc', pedidos: 1, receitaLiquidaComercial: '200.00' },
     ]))
     expect(JSON.stringify(result)).not.toContain('session-gclid')
     expect(JSON.stringify(result)).not.toContain('pedido-gclid')
@@ -108,12 +108,11 @@ describe('metricas/vendas', () => {
     expect(orderArgs.where.createdAt).toEqual({ gte: params.from, lt: params.toExclusive })
     expect(orderArgs.select).not.toHaveProperty('clientIp')
     expect(orderArgs.select.pagamentos.select).not.toHaveProperty('rawResponse')
-    expect(eventoFindMany).toHaveBeenCalledTimes(1)
-    expect(eventoFindMany.mock.calls[0][0].where).toEqual({ tipo: 'purchase', createdAt: { gte: params.from, lt: new Date('2026-11-24T03:00:00.000Z') } })
+    expect(eventoFindMany).not.toHaveBeenCalled()
     expect(pedidoFindMany).toHaveBeenCalledTimes(1)
   })
 
-  it('correlates purchase attribution by selected order ids across the BRT boundary', async () => {
+  it('ignores client-forgeable purchase events when calculating financial attribution', async () => {
     const rows = saleRows()
     const { definition, eventoFindMany } = metric({ orders: rows, events: [{
       sessaoId: 'late', dados: { transaction_id: 'pedido-1' },
@@ -122,11 +121,11 @@ describe('metricas/vendas', () => {
 
     const result = await definition.query(context, params)
 
-    expect(result.porAtribuicao).toContainEqual({ origem: 'async', meio: 'event', campanha: 'boundary', canalClickId: 'gclid', pedidos: 1, receitaLiquidaComercial: '100.00' })
-    expect(eventoFindMany.mock.calls[0][0].where.createdAt).toEqual({ gte: params.from, lt: new Date('2026-11-24T03:00:00.000Z') })
+    expect(result.porAtribuicao).toContainEqual({ origem: 'google', meio: 'paid_click', campanha: 'nao_disponivel', canalClickId: 'gclid', pedidos: 1, receitaLiquidaComercial: '100.00' })
+    expect(eventoFindMany).not.toHaveBeenCalled()
   })
 
-  it('uses one indexed attribution query even for more than 1000 paid orders', async () => {
+  it('does not add an event query even for more than 1000 paid orders', async () => {
     const template = saleRows()[0]
     const orders = Array.from({ length: 1001 }, (_, index) => ({ ...template, id: `pedido-${index}`, itens: [], garantias: [], pagamentos: [], total: D('1') }))
     let active = 0
@@ -143,9 +142,8 @@ describe('metricas/vendas', () => {
 
     await definition.query(context, params)
 
-    expect(eventoFindMany).toHaveBeenCalledTimes(1)
-    expect(peak).toBe(1)
-    expect((eventoFindMany.mock.calls[0][0] as { where: Record<string, unknown> }).where).not.toHaveProperty('OR')
+    expect(eventoFindMany).not.toHaveBeenCalled()
+    expect(peak).toBe(0)
   })
 
   it('includes explicit formulas, timezone and period in the payload', async () => {

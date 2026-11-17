@@ -38,9 +38,9 @@ export function canonicalAuditRoute(template: unknown): string {
   return typeof template === 'string' && AUDIT_ROUTES.has(template) ? template : UNKNOWN_AUDIT_ROUTE
 }
 
-/** Proxy headers are metadata only, never an authorization/rate-limit identity. */
+/** Railway's edge overwrites X-Forwarded-For; client-supplied alternatives are ignored. */
 export function safeClientIp(req: Request): string {
-  const first = (req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? '').trim()
+  const first = (req.headers.get('x-forwarded-for')?.split(',')[0] ?? '').trim()
   return safeIp(first) ?? 'unknown'
 }
 

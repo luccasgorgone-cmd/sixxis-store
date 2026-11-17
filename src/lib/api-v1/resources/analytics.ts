@@ -54,7 +54,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, sessionId: true, ip: true, userAgent: true, aceitou: true, categorias: true, createdAt: true } as const satisfies Prisma.CookieConsentSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'sessionId', type: 'string' },
+        { name: 'sessionId', type: 'string', scope: 'read:pii' },
         { name: 'ip', type: 'string', nullable: true },
         { name: 'userAgent', type: 'string', nullable: true },
         { name: 'aceitou', type: 'boolean' },
@@ -66,7 +66,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt' },
       window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
       filters: {
-        sessionId: { type: 'string' },
+        sessionId: { type: 'string', scope: 'read:pii' },
         aceitou: { type: 'boolean' },
       },
       adapter: {
@@ -107,8 +107,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, sessionId: true, userId: true, tipo: true, dados: true, pagina: true, createdAt: true } as const satisfies Prisma.EventoAnaliticoSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'sessionId', type: 'string' },
-        { name: 'userId', type: 'string', nullable: true },
+        { name: 'sessionId', type: 'string', scope: 'read:pii' },
+        { name: 'userId', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'tipo', type: 'string' },
         { name: 'dados', type: 'string' },
         { name: 'pagina', type: 'string', nullable: true },
@@ -119,8 +119,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt' },
       window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
       filters: {
-        sessionId: { type: 'string' },
-        userId: { type: 'string' },
+        sessionId: { type: 'string', scope: 'read:pii' },
+        userId: { type: 'string', scope: 'read:pii' },
         tipo: { type: 'string' },
       },
       adapter: {
@@ -162,8 +162,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, sessionId: true, userId: true, primeiraVisita: true, ultimaVisita: true, totalVisitas: true, totalPaginas: true, carrinhosAbertos: true, comprasFeitas: true, totalGasto: true, produtosVistos: true, buscas: true, dispositivo: true, cidade: true, fonte: true, cookieCategs: true } as const satisfies Prisma.ClienteInsightSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'sessionId', type: 'string' },
-        { name: 'userId', type: 'string', nullable: true },
+        { name: 'sessionId', type: 'string', scope: 'read:pii' },
+        { name: 'userId', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'primeiraVisita', type: 'string', format: 'date-time' },
         { name: 'ultimaVisita', type: 'string', format: 'date-time' },
         { name: 'totalVisitas', type: 'integer' },
@@ -183,8 +183,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'primeiraVisita', updated: 'ultimaVisita' },
       window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
       filters: {
-        sessionId: { type: 'string' },
-        userId: { type: 'string' },
+        sessionId: { type: 'string', scope: 'read:pii' },
+        userId: { type: 'string', scope: 'read:pii' },
         dispositivo: { type: 'string' },
         fonte: { type: 'string' },
       },
@@ -234,8 +234,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, sessaoId: true, userId: true, ip: true, pais: true, cidade: true, userAgent: true, dispositivo: true, browser: true, os: true, utmSource: true, utmMedium: true, utmCampaign: true, utmContent: true, utmTerm: true, gclid: true, gbraid: true, wbraid: true, referer: true, landingPage: true, totalPaginas: true, duracaoSegundos: true, converteu: true, createdAt: true, updatedAt: true } as const satisfies Prisma.SessaoVisitanteSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'sessaoId', type: 'string' },
-        { name: 'userId', type: 'string', nullable: true },
+        { name: 'sessaoId', type: 'string', scope: 'read:pii' },
+        { name: 'userId', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'ip', type: 'string', nullable: true },
         { name: 'pais', type: 'string', nullable: true },
         { name: 'cidade', type: 'string', nullable: true },
@@ -266,8 +266,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
       filters: {
-        sessaoId: { type: 'string' },
-        userId: { type: 'string' },
+        sessaoId: { type: 'string', scope: 'read:pii' },
+        userId: { type: 'string', scope: 'read:pii' },
         utmSource: { type: 'string' },
         utmMedium: { type: 'string' },
         utmCampaign: { type: 'string' },
@@ -334,7 +334,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, sessaoId: true, tipo: true, pagina: true, produtoId: true, produtoSlug: true, valor: true, dados: true, createdAt: true } as const satisfies Prisma.EventoTrackingSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'sessaoId', type: 'string' },
+        { name: 'sessaoId', type: 'string', scope: 'read:pii' },
         { name: 'tipo', type: 'string' },
         { name: 'pagina', type: 'string', nullable: true },
         { name: 'produtoId', type: 'string', nullable: true },
@@ -350,7 +350,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt' },
       window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
       filters: {
-        sessaoId: { type: 'string' },
+        sessaoId: { type: 'string', scope: 'read:pii' },
         tipo: { type: 'string' },
         produtoId: { type: 'string' },
         produtoSlug: { type: 'string' },
@@ -448,8 +448,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, ip: true, userAgent: true, sucesso: true, rota: true, createdAt: true } as const satisfies Prisma.TentativaLoginSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'ip', type: 'string' },
-        { name: 'userAgent', type: 'string', nullable: true },
+        { name: 'ip', type: 'string', scope: 'read:pii' },
+        { name: 'userAgent', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'sucesso', type: 'boolean' },
         { name: 'rota', type: 'string' },
         { name: 'createdAt', type: 'string', format: 'date-time' },
@@ -459,7 +459,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt' },
       window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
       filters: {
-        ip: { type: 'string' },
+        ip: { type: 'string', scope: 'read:pii' },
         sucesso: { type: 'boolean' },
         rota: { type: 'string' },
       },
@@ -499,8 +499,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, ip: true, motivo: true, bloqueadoAte: true, createdAt: true, updatedAt: true } as const satisfies Prisma.BloqueioIpSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'ip', type: 'string' },
-        { name: 'motivo', type: 'string' },
+        { name: 'ip', type: 'string', scope: 'read:pii' },
+        { name: 'motivo', type: 'string', scope: 'read:pii' },
         { name: 'bloqueadoAte', type: 'string', format: 'date-time' },
         { name: 'createdAt', type: 'string', format: 'date-time' },
         { name: 'updatedAt', type: 'string', format: 'date-time' },
@@ -510,8 +510,9 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
       searchFields: ['motivo'],
+      searchScope: 'read:pii',
       filters: {
-        ip: { type: 'string' },
+        ip: { type: 'string', scope: 'read:pii' },
       },
       adapter: {
         findMany: async args => {
@@ -549,12 +550,12 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, actor: true, action: true, target: true, metadata: true, ip: true, userAgent: true, createdAt: true } as const satisfies Prisma.AuditLogSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'actor', type: 'string' },
+        { name: 'actor', type: 'string', scope: 'read:pii' },
         { name: 'action', type: 'string' },
-        { name: 'target', type: 'string', nullable: true },
-        { name: 'metadata', type: 'object', nullable: true },
-        { name: 'ip', type: 'string', nullable: true },
-        { name: 'userAgent', type: 'string', nullable: true },
+        { name: 'target', type: 'string', nullable: true, scope: 'read:pii' },
+        { name: 'metadata', type: 'object', nullable: true, scope: 'read:pii' },
+        { name: 'ip', type: 'string', nullable: true, scope: 'read:pii' },
+        { name: 'userAgent', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'createdAt', type: 'string', format: 'date-time' },
       ],
       expands: [],
@@ -562,10 +563,11 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt' },
       window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
       searchFields: ['action', 'target'],
+      searchScope: 'read:pii',
       filters: {
-        actor: { type: 'string' },
+        actor: { type: 'string', scope: 'read:pii' },
         action: { type: 'string' },
-        target: { type: 'string' },
+        target: { type: 'string', scope: 'read:pii' },
       },
       adapter: {
         findMany: async args => {
@@ -605,7 +607,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       select: { id: true, sessaoId: true, path: true, dispositivo: true, ultimoPing: true } as const satisfies Prisma.PresencaSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'sessaoId', type: 'string' },
+        { name: 'sessaoId', type: 'string', scope: 'read:pii' },
         { name: 'path', type: 'string', nullable: true },
         { name: 'dispositivo', type: 'string', nullable: true },
         { name: 'ultimoPing', type: 'string', format: 'date-time' },
@@ -615,7 +617,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { updated: 'ultimoPing' },
       window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 1 },
       filters: {
-        sessaoId: { type: 'string' },
+        sessaoId: { type: 'string', scope: 'read:pii' },
         dispositivo: { type: 'string' },
       },
       adapter: {
@@ -719,8 +721,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
         { name: 'id', type: 'string' },
         { name: 'clienteId', type: 'string' },
         { name: 'acao', type: 'string', enum: ['bloqueio', 'desbloqueio'], description: 'Valores conhecidos; valores desconhecidos permanecem strings e são auditados no rollout.' },
-        { name: 'motivo', type: 'string' },
-        { name: 'criadoPor', type: 'string', nullable: true },
+        { name: 'motivo', type: 'string', scope: 'read:pii' },
+        { name: 'criadoPor', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'createdAt', type: 'string', format: 'date-time' },
       ],
       expands: [
@@ -730,6 +732,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       dateFields: { created: 'createdAt' },
       window: { from: 'criadoDesde', to: 'criadoAte', maxDays: 31 },
       searchFields: ['motivo'],
+      searchScope: 'read:pii',
       filters: {
         clienteId: { type: 'string' },
         acao: { type: 'string', values: ['bloqueio', 'desbloqueio'] },

@@ -50,6 +50,19 @@ describe('list validation before adapter', () => {
     expect(projectFields({ id:'1', nome:'ok', secret:'no' }, undefined, def.fields)).toEqual({id:'1',nome:'ok'})
     expect(() => projectFields({id:'1'}, ['secret'], def.fields)).toThrow(ApiQueryError)
   })
+  it('requires additive scope for sensitive search and filters before adapter execution', async () => {
+    const protectedDef: ResourceDefinition<Row> = {
+      ...def,
+      searchScope: 'read:pii',
+      filters: { email: { type: 'string', scope: 'read:pii' } },
+    }
+    const restricted: ApiContext = { ...ctx, identity: { ...ctx.identity!, scopes: new Set(['read:catalogo'] as const) } }
+    for (const search of ['q=private@example.test', 'email=private@example.test']) {
+      await expect(executeList(protectedDef, restricted, query(search, protectedDef), options)).rejects.toMatchObject({ status: 403 })
+    }
+    expect(adapter).not.toHaveBeenCalled()
+    await expect(executeList(protectedDef, { ...restricted, identity: { ...restricted.identity!, scopes: new Set(['read:catalogo', 'read:pii'] as const) } }, query('email=private@example.test', protectedDef), options)).resolves.toBeDefined()
+  })
   it('requires complete finite windows before any adapter call', async () => {
     const bounded = { ...def, window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays:31 } } as ResourceDefinition<Row>
     for (const search of ['', 'atualizadoDesde=2026-01-01T00:00:00Z', 'atualizadoDesde=2026-02-01T00:00:00Z&atualizadoAte=2026-01-01T00:00:00Z', 'atualizadoDesde=2026-01-01T00:00:00Z&atualizadoAte=2026-02-02T00:00:00Z']) {

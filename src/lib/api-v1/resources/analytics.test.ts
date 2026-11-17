@@ -5,6 +5,7 @@ import { createAnalyticsResources } from './analytics'
 import { createCustomerResources } from './clientes'
 import { createCatalogResources } from './catalogo'
 import { createResourceRegistry } from '../registry'
+import { hasScope } from '../auth'
 import { buildResourceWhere, executeItem, executeList, type ResourceDefinition } from '../resource'
 import { parseListQuery } from '../query'
 import { assertNullableFields, context, fakeDelegate, fixture, options } from './fixtures.test-support'
@@ -121,6 +122,19 @@ describe('bounded analytics and audit resources', () => {
       for (const field of required) expect(get(model).filters).toHaveProperty(field)
     }
   })
+  it('hides and forbids searching free-form fraud reasons without read:pii', async () => {
+    for (const model of ['BloqueioIp', 'BloqueioFraude']) {
+      const { def, delegate } = setup(model)
+      const raw = { ...row(model), motivo: 'Fraude de Maria da Silva' }
+      delegate.findMany.mockResolvedValue([raw])
+      expect(def.fields.find(field => field.name === 'motivo')?.scope).toBe('read:pii')
+      expect(def.searchScope).toBe('read:pii')
+      delegate.findFirst.mockResolvedValue(raw)
+      expect((await executeItem(def, context([def.scope]), 'id')).data).not.toHaveProperty('motivo')
+      await expect(executeList(def, context([def.scope]), query(def, 'q=Maria'), options)).rejects.toMatchObject({ status: 403 })
+      expect(delegate.findMany).not.toHaveBeenCalled()
+    }
+  })
 })
 
 describe('analytics redaction and relations', () => {
@@ -130,8 +144,17 @@ describe('analytics redaction and relations', () => {
     delegate.findMany.mockResolvedValue([raw]); delegate.findFirst.mockResolvedValue(raw)
     for (const scopes of [['read:all'], ['read:all', 'read:pii'], ['read:all', 'read:mensagens'], ['read:all', 'read:pii', 'read:mensagens']] as const) {
       const ctx = context([...scopes])
-      for (const output of [def.serialize(raw, ctx), (await executeItem(def, ctx, 'id')).data, (await executeList(def, ctx, query(def), options)).data[0]]) {
+      const outputs = [
+        { output: def.serialize(raw, ctx), projected: false },
+        { output: (await executeItem(def, ctx, 'id')).data, projected: true },
+        { output: (await executeList(def, ctx, query(def), options)).data[0], projected: true },
+      ]
+      for (const { output, projected } of outputs) {
         const metadata = output.metadata as Record<string, unknown>
+        if (projected && !scopes.includes('read:pii' as never)) {
+          expect(metadata).toBeUndefined()
+          continue
+        }
         expect(metadata).toMatchObject({ sibling: 'public-operation', count: 7 })
         expect(JSON.stringify(metadata)).not.toMatch(/DO-NOT-LEAK|4111111111111111/)
         expect(String(metadata.details).includes('PRIVATE-MESSAGE')).toBe(scopes.includes('read:mensagens' as never))
@@ -183,9 +206,19 @@ describe('analytics redaction and relations', () => {
     delegate.findMany.mockResolvedValue([raw]); delegate.findFirst.mockResolvedValue(raw)
     for (const scopes of [['read:all'], ['read:all', 'read:pii'], ['read:all', 'read:mensagens'], ['read:all', 'read:pii', 'read:mensagens']] as const) {
       const ctx = context([...scopes])
-      for (const output of [def.serialize(raw, ctx), (await executeItem(def, ctx, 'id')).data, (await executeList(def, ctx, query(def), options)).data[0]]) {
+      const outputs = [
+        { output: def.serialize(raw, ctx), projected: false },
+        { output: (await executeItem(def, ctx, 'id')).data, projected: true },
+        { output: (await executeList(def, ctx, query(def), options)).data[0], projected: true },
+      ]
+      for (const { output, projected } of outputs) {
         const result = typeof output[field] === 'string' ? JSON.parse(output[field] as string) : output[field]
         const text = JSON.stringify(result)
+        if (projected && model === 'AuditLog' && !scopes.includes('read:pii' as never)) {
+          expect(result).toBeUndefined()
+          expect(text).toBeUndefined()
+          continue
+        }
         expect(result).toMatchObject({ sibling: 'public-operation', nested: [{ produtoId: 'public-product', count: 2 }] })
         expect(text).not.toMatch(/DO-NOT-LEAK|4111111111111111/)
         if (!scopes.includes('read:pii' as never)) expect(text).not.toMatch(/PRIVATE-ACTOR|PRIVATE-CLIENT|PRIVATE-USER|PRIVATE-ID/)
@@ -273,8 +306,11 @@ describe('analytics redaction and relations', () => {
       for (const grandchild of child.expands) childRow[grandchild.relation ?? grandchild.name] = { token: 'DO-NOT-LEAK' }
       const raw = { ...row(model), [expansion.relation ?? expansion.name]: expansion.many ? [childRow] : childRow }
       delegate.findMany.mockResolvedValue([raw]); delegate.findFirst.mockResolvedValue(raw)
-      const output = (await executeList(def, context(['read:all']), query(def, `expand=${expansion.name}`), options)).data[0]
-      expect(expansion.many ? (output[expansion.name] as { data: unknown[] }).data[0] : output[expansion.name]).toEqual(child.serialize(childRow, context(['read:all'])))
+      const childContext = context(['read:all'])
+      const output = (await executeList(def, childContext, query(def, `expand=${expansion.name}`), options)).data[0]
+      const expectedChild = child.serialize(childRow, childContext)
+      for (const field of child.fields) if (field.scope && !hasScope(childContext.identity!, field.scope)) delete expectedChild[field.name]
+      expect(expansion.many ? (output[expansion.name] as { data: unknown[] }).data[0] : output[expansion.name]).toEqual(expectedChild)
       expect(delegate.findMany).toHaveBeenLastCalledWith(expect.objectContaining({ select: { ...def.select, [expansion.relation ?? expansion.name]: { select: child.select, ...(expansion.many ? { take: 51, orderBy: { id: 'asc' } } : {}) } } }))
       if (child.scope !== def.scope) await expect(executeItem(def, context([def.scope]), 'id', { expand: [expansion.name] })).rejects.toMatchObject({ status: 403 })
     }

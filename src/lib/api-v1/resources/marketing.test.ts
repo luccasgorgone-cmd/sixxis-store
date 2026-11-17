@@ -125,13 +125,24 @@ describe('message scopes, PII and JSON filters', () => {
       const log = get('EnvioLog'), output = log.serialize({ ...row('EnvioLog'), destinatario: recipient }, context(['read:marketing']))
       expect(output.destinatario).toBe(recipient.includes('@') ? 'a***@example.test' : '(11) 9****-5678')
       const fakeLog = { ...log, adapter: { findFirst: async () => ({ ...row('EnvioLog'), destinatario: recipient }), findMany: async () => [] } }
-      expect((await executeItem(fakeLog, context(['read:marketing']), 'id')).data.destinatario).toBe(output.destinatario)
+      expect((await executeItem(fakeLog, context(['read:marketing']), 'id')).data).not.toHaveProperty('destinatario')
+      expect((await executeItem(fakeLog, context(['read:marketing', 'read:pii']), 'id')).data.destinatario).toBe(recipient)
     }
   })
   it('builds a bounded JSON channel filter, never client-provided paths/operators', () => {
     const def = get('Campanha')
     expect(buildResourceWhere(def, query(def, 'canal=email,whatsapp'))).toEqual({ AND: [{ OR: [{ canais: { array_contains: 'email' } }, { canais: { array_contains: 'whatsapp' } }] }] })
     for (const key of ['__proto__', '$', 'OR', 'canais.array_contains', 'where']) expect(() => query(def, `${key}=x`)).toThrow()
+  })
+  it('requires additive PII scope for recipient output and exact recipient filters', async () => {
+    const def = get('EnvioLog')
+    expect(def.fields.find(field => field.name === 'destinatario')?.scope).toBe('read:pii')
+    expect(def.filters?.destinatario?.scope).toBe('read:pii')
+    const restricted = context(['read:marketing'])
+    await expect(executeList(def, restricted, query(def, 'destinatario=victim@example.test'), options)).rejects.toMatchObject({ status: 403 })
+    const raw = { ...row('EnvioLog'), destinatario: 'victim@example.test' }
+    const output = await executeItem({ ...def, adapter: { ...def.adapter, findFirst: async () => raw } }, restricted, 'id')
+    expect(output.data).not.toHaveProperty('destinatario')
   })
 })
 

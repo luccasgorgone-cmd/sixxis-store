@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto'
-import { open } from 'node:fs/promises'
+import { open, unlink } from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
 import { apiScopesSchema, hashApiKey } from '../src/lib/api-v1/auth'
@@ -11,7 +11,7 @@ type CliStore = { apiChaveLeitura: {
   findMany(args: { where?: { prefixo: string }; select: typeof METADATA_SELECT | { id: true }; orderBy?: { criadoEm: 'desc' } }): Promise<Metadata[]>
   updateMany(args: { where: { id: string; revogadoEm: null }; data: { revogadoEm: Date } }): Promise<{ count: number }>
 } }
-export type CliDeps = { prisma?: CliStore; write?: (text: string) => unknown }
+export type CliDeps = { prisma?: CliStore; write?: (text: string) => unknown; openOutput?: typeof open }
 
 function parseArgs(args: string[]): { command: string; flags: Record<string, string> } {
   const [command, ...rest] = args
@@ -31,20 +31,26 @@ export async function runApiKeyCli(args: string[], deps: CliDeps = {}): Promise<
   const { command, flags } = parseArgs(args)
   const write = deps.write ?? ((text: string) => process.stdout.write(text))
   if (command === 'criar') {
+    if (!flags.output) throw new Error('Informe --output para receber a credencial uma única vez.')
     const nome = z.string().trim().min(1).max(120).refine(value => !/[\r\n\x00-\x1f]/.test(value) && !value.includes('sxs_live_')).parse(flags.nome)
     const escopos = [...new Set(apiScopesSchema.parse(flags.escopos?.split(',').map(scope => scope.trim())))]
     const expiraEm = flags['expira-em'] ? new Date(z.iso.datetime({ offset: true }).parse(flags['expira-em'])) : null
     if (expiraEm && expiraEm <= new Date()) throw new Error('Expiração deve estar no futuro.')
     // Reserve a NEW exclusive file before touching the DB; never overwrite/symlink.
-    const file = flags.output ? await open(flags.output, 'wx', 0o600) : null
+    const file = await (deps.openOutput ?? open)(flags.output, 'wx', 0o600)
+    const prisma = deps.prisma ?? (await import('../src/lib/prisma')).prisma
+    let persisted = false
     try {
-      if (file) await file.chmod(0o600)
-      const prisma = deps.prisma ?? (await import('../src/lib/prisma')).prisma
+      await file.chmod(0o600)
       const raw = `sxs_live_${randomBytes(32).toString('base64url')}`
+      await file.writeFile(`${raw}\n`, 'utf8')
+      await file.sync()
       await prisma.apiChaveLeitura.create({ data: { nome, prefixo: raw.slice(0, 20), hash: hashApiKey(raw).toString('hex'), escopos, expiraEm }, select: { id: true } })
-      if (file) { await file.writeFile(`${raw}\n`, 'utf8'); await file.sync() }
-      else write(`${raw}\n`)
-    } finally { await file?.close() }
+      persisted = true
+    } finally {
+      await file.close()
+      if (!persisted) await unlink(flags.output).catch(() => undefined)
+    }
     return
   }
   const prisma = deps.prisma ?? (await import('../src/lib/prisma')).prisma

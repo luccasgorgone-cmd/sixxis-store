@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client'
 import { describe, expect, it, vi } from 'vitest'
 import type { ApiContext } from '../types'
 import { createClientesMetric } from './clientes'
-import { parseMetricParams } from './tempo'
+import { API_METRIC_MAX_ROWS, parseMetricParams } from './tempo'
 
 const D = (value: string) => new Prisma.Decimal(value)
 const context = { requestId: 'req-clientes', identity: null, ip: '127.0.0.1', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 0 } } satisfies ApiContext
@@ -41,6 +41,14 @@ describe('metricas/clientes', () => {
 
     expect(result.resumo.ltvMedio).toBe('0.00')
     expect(findMany).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects metric cardinality above the hard row budget before loading history', async () => {
+    const findMany = vi.fn().mockResolvedValue(Array.from({ length: API_METRIC_MAX_ROWS + 1 }, (_, index) => ({ clienteId: `c${index}`, total: D('1'), createdAt: new Date('2026-11-16T12:00:00Z') })))
+    const definition = createClientesMetric({ prisma: { pedido: { findMany } } as never })
+    await expect(definition.query(context, params)).rejects.toMatchObject({ status: 503 })
+    expect(findMany).toHaveBeenCalledTimes(1)
+    expect(findMany.mock.calls[0][0].take).toBe(API_METRIC_MAX_ROWS + 1)
   })
 
   it('counts a buyer in every bucket where they purchased and applies history semantics per bucket', async () => {

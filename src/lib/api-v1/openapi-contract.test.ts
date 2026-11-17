@@ -29,7 +29,11 @@ describe('OpenAPI 3.1 contract', () => {
       for (const field of resource.fields) {
         expect(schema.properties[field.name].description, `${resource.slug}.${field.name}`).toBeTruthy()
         expect(JSON.stringify(schema.properties[field.name]), `${resource.slug}.${field.name}`).toContain(field.type)
+        expect(schema.properties[field.name]['x-required-scope'] ?? null, `${resource.slug}.${field.name}.scope`).toBe(field.scope ?? null)
       }
+      for (const [name, filter] of Object.entries(resource.filters ?? {})) expect(parameters.get(name)?.['x-required-scope'] ?? null, `${resource.slug}.${name}.filter-scope`).toBe(filter.scope ?? null)
+      const search = parameters.get('q')
+      if (search) expect(search['x-required-scope'] ?? null, `${resource.slug}.q.scope`).toBe(resource.searchScope ?? null)
       for (const expand of resource.expands) expect(schema.properties[expand.name], `${resource.slug}.${expand.name}`).toBeTruthy()
       for (const status of ['400', '401', '403', '404', '429', '500', '503']) expect(list.get.responses[status], `${resource.slug}.${status}`).toBeTruthy()
     }

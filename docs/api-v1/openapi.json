@@ -449,7 +449,8 @@
             "schema": {
               "type": "string",
               "maxLength": 200
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "criadoDesde",
@@ -507,7 +508,8 @@
             "description": "Filtro natural por email; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "cpf",
@@ -516,7 +518,8 @@
             "description": "Filtro natural por cpf; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "cnpj",
@@ -525,7 +528,8 @@
             "description": "Filtro natural por cnpj; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "bloqueado",
@@ -543,7 +547,8 @@
             "description": "Filtro natural por erpClienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -6015,7 +6020,8 @@
             "description": "Filtro natural por gclid; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "gbraid",
@@ -6024,7 +6030,8 @@
             "description": "Filtro natural por gbraid; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "wbraid",
@@ -6033,7 +6040,8 @@
             "description": "Filtro natural por wbraid; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "fbc",
@@ -6042,7 +6050,8 @@
             "description": "Filtro natural por fbc; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -7579,7 +7588,8 @@
             "description": "Filtro natural por sessionId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -8457,7 +8467,8 @@
             "description": "Filtro natural por emailCliente; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -9040,7 +9051,8 @@
             "description": "Filtro natural por email; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "notificado",
@@ -9696,7 +9708,8 @@
             "description": "Filtro natural por email; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "telefone",
@@ -9705,7 +9718,8 @@
             "description": "Filtro natural por telefone; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "status",
@@ -10305,7 +10319,8 @@
             "description": "Filtro natural por destinatario; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "status",
@@ -10621,7 +10636,8 @@
             "description": "Filtro natural por sessaoId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "clienteId",
@@ -11233,7 +11249,8 @@
             "description": "Filtro natural por email; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "telefone",
@@ -11242,7 +11259,8 @@
             "description": "Filtro natural por telefone; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "cpf",
@@ -11251,7 +11269,8 @@
             "description": "Filtro natural por cpf; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "cnpj",
@@ -11260,7 +11279,8 @@
             "description": "Filtro natural por cnpj; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "uf",
@@ -11581,7 +11601,8 @@
             "description": "Filtro natural por email; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "telefone",
@@ -11590,7 +11611,8 @@
             "description": "Filtro natural por telefone; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "assunto",
@@ -11851,7 +11873,8 @@
             "description": "Filtro natural por sessionId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "aceitou",
@@ -12112,7 +12135,8 @@
             "description": "Filtro natural por sessionId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "userId",
@@ -12121,7 +12145,8 @@
             "description": "Filtro natural por userId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "tipo",
@@ -12402,7 +12427,8 @@
             "description": "Filtro natural por sessionId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "userId",
@@ -12411,7 +12437,8 @@
             "description": "Filtro natural por userId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "dispositivo",
@@ -12704,7 +12731,8 @@
             "description": "Filtro natural por sessaoId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "userId",
@@ -12713,7 +12741,8 @@
             "description": "Filtro natural por userId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "utmSource",
@@ -13058,7 +13087,8 @@
             "description": "Filtro natural por sessaoId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "tipo",
@@ -13618,7 +13648,8 @@
             "description": "Filtro natural por ip; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "sucesso",
@@ -13869,7 +13900,8 @@
             "schema": {
               "type": "string",
               "maxLength": 200
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "criadoDesde",
@@ -13918,7 +13950,8 @@
             "description": "Filtro natural por ip; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -14151,7 +14184,8 @@
             "schema": {
               "type": "string",
               "maxLength": 200
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "criadoDesde",
@@ -14180,7 +14214,8 @@
             "description": "Filtro natural por actor; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "action",
@@ -14198,7 +14233,8 @@
             "description": "Filtro natural por target; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -14450,7 +14486,8 @@
             "description": "Filtro natural por sessaoId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "dispositivo",
@@ -15001,7 +15038,8 @@
             "schema": {
               "type": "string",
               "maxLength": 200
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "criadoDesde",
@@ -16094,7 +16132,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "bloqueadoEm": {
             "type": [
@@ -16944,7 +16983,8 @@
               "null"
             ],
             "description": "Valor monetário em BRL.",
-            "pattern": "^-?\\d+(?:\\.\\d+)?$"
+            "pattern": "^-?\\d+(?:\\.\\d+)?$",
+            "x-required-scope": "read:financeiro"
           },
           "imagens": {
             "type": "array",
@@ -18831,7 +18871,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "nfeAmbiente": {
             "type": [
@@ -18866,7 +18907,8 @@
               "null"
             ],
             "description": "Valor monetário em BRL.",
-            "pattern": "^-?\\d+(?:\\.\\d+)?$"
+            "pattern": "^-?\\d+(?:\\.\\d+)?$",
+            "x-required-scope": "read:financeiro"
           },
           "mpTaxaReal": {
             "type": [
@@ -18874,7 +18916,8 @@
               "null"
             ],
             "description": "Valor monetário em BRL.",
-            "pattern": "^-?\\d+(?:\\.\\d+)?$"
+            "pattern": "^-?\\d+(?:\\.\\d+)?$",
+            "x-required-scope": "read:financeiro"
           },
           "enviadoEm": {
             "type": [
@@ -18905,7 +18948,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "fbp": {
             "type": [
@@ -18919,7 +18963,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "clientIp": {
             "type": [
@@ -18969,14 +19014,16 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "wbraid": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "ga4PurchaseEnviadoEm": {
             "type": [
@@ -19531,7 +19578,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "pedido": {
             "anyOf": [
@@ -19654,14 +19702,16 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "detalhe": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "createdAt": {
             "type": "string",
@@ -19796,7 +19846,8 @@
               "null"
             ],
             "description": "Valor monetário em BRL.",
-            "pattern": "^-?\\d+(?:\\.\\d+)?$"
+            "pattern": "^-?\\d+(?:\\.\\d+)?$",
+            "x-required-scope": "read:financeiro"
           },
           "variacaoId": {
             "type": [
@@ -19913,7 +19964,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "createdAt": {
             "type": "string",
@@ -20310,14 +20362,16 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "nomeCliente": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "valorDesconto": {
             "type": "string",
@@ -20672,11 +20726,13 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "mensagem": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "status": {
             "type": "string",
@@ -20758,28 +20814,32 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "corpoCopy": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "ctaTexto": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "ctaUrl": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "produtoDestaqueId": {
             "type": [
@@ -20811,14 +20871,16 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "whatsappTexto": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "dataAgendamento": {
             "type": [
@@ -21008,7 +21070,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "createdAt": {
             "type": "string",
@@ -21251,7 +21314,8 @@
           },
           "destinatario": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "status": {
             "type": "string",
@@ -21270,7 +21334,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "createdAt": {
             "type": "string",
@@ -21336,7 +21401,8 @@
           },
           "sessaoId": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "paginaOrigem": {
             "type": [
@@ -21350,14 +21416,16 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "ip": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "clienteId": {
             "type": [
@@ -21529,7 +21597,8 @@
           },
           "conteudo": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "tokens": {
             "type": [
@@ -21714,7 +21783,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "status": {
             "type": "string",
@@ -21810,11 +21880,13 @@
           },
           "assunto": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "mensagem": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:mensagens"
           },
           "status": {
             "type": "string",
@@ -21895,7 +21967,8 @@
           },
           "sessionId": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "ip": {
             "type": [
@@ -21983,14 +22056,16 @@
           },
           "sessionId": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "userId": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "tipo": {
             "type": "string",
@@ -22071,14 +22146,16 @@
           },
           "sessionId": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "userId": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "primeiraVisita": {
             "type": "string",
@@ -22203,14 +22280,16 @@
           },
           "sessaoId": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "userId": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "ip": {
             "type": [
@@ -22444,7 +22523,8 @@
           },
           "sessaoId": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "tipo": {
             "type": "string",
@@ -22650,14 +22730,16 @@
           },
           "ip": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "userAgent": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "sucesso": {
             "type": "boolean",
@@ -22731,11 +22813,13 @@
           },
           "ip": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "motivo": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "bloqueadoAte": {
             "type": "string",
@@ -22811,7 +22895,8 @@
           },
           "actor": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "action": {
             "type": "string",
@@ -22822,7 +22907,8 @@
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "metadata": {
             "type": [
@@ -22830,21 +22916,24 @@
               "null"
             ],
             "description": "Campo nominal allowlisted do recurso.",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "x-required-scope": "read:pii"
           },
           "ip": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "userAgent": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "createdAt": {
             "type": "string",
@@ -22910,7 +22999,8 @@
           },
           "sessaoId": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "path": {
             "type": [
@@ -23112,14 +23202,16 @@
           },
           "motivo": {
             "type": "string",
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "criadoPor": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Campo nominal allowlisted do recurso."
+            "description": "Campo nominal allowlisted do recurso.",
+            "x-required-scope": "read:pii"
           },
           "createdAt": {
             "type": "string",

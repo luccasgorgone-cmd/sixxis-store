@@ -4,7 +4,7 @@ import type { FieldSchema, ResourceDefinition } from './resource'
 import type { ResourceRegistry } from './registry'
 
 type Schema = Record<string, unknown>
-type Parameter = { name: string; in?: string; required?: boolean; example?: unknown; schema?: Schema; description?: string }
+type Parameter = { name: string; in?: string; required?: boolean; example?: unknown; schema?: Schema; description?: string; 'x-required-scope'?: string }
 type Operation = { parameters?: Parameter[]; security?: unknown[]; description?: string; summary?: string; [key: string]: unknown }
 export type OpenApiDocument = {
   openapi: '3.1.0'
@@ -104,6 +104,7 @@ function fieldSchema(field: FieldSchema, description?: string, example?: unknown
   if (field.required) schema.required = [...field.required]
   if (field.type === 'object' && !field.properties) schema.additionalProperties = true
   if (example !== undefined) schema.example = example
+  if ('scope' in field && typeof field.scope === 'string') schema['x-required-scope'] = field.scope
   return schema
 }
 
@@ -128,9 +129,9 @@ function resourceParameters(definition: ResourceDefinition): Parameter[] {
     queryParameter('fields', { type: 'string' }, `Campos separados por vírgula: ${definition.fields.map(field => field.name).join(', ')}.`),
     queryParameter('expand', { type: 'string', enum: definition.expands.length ? definition.expands.map(item => item.name) : undefined }, `Até três relações: ${definition.expands.map(item => item.name).join(', ') || 'nenhuma'}.`),
   ]
-  if (definition.searchFields?.length) parameters.push(queryParameter('q', { type: 'string', maxLength: 200 }, `Busca textual em ${definition.searchFields.join(', ')}.`))
+  if (definition.searchFields?.length) parameters.push({ ...queryParameter('q', { type: 'string', maxLength: 200 }, `Busca textual em ${definition.searchFields.join(', ')}.`), ...(definition.searchScope ? { 'x-required-scope': definition.searchScope } : {}) })
   for (const [name, field] of [['criadoDesde', definition.dateFields?.created], ['criadoAte', definition.dateFields?.created], ['atualizadoDesde', definition.dateFields?.updated], ['atualizadoAte', definition.dateFields?.updated]] as const) if (field) parameters.push(queryParameter(name, { type: 'string', format: 'date-time' }, `Limite ${name.endsWith('Desde') ? 'inclusivo inicial' : 'inclusivo final'} em ${field}.`))
-  for (const [name, filter] of Object.entries(definition.filters ?? {})) parameters.push(queryParameter(name, { type: 'string', ...(filter.values ? { enum: filter.values } : {}) }, filter.description ?? `Filtro natural por ${filter.field ?? name}; múltiplos valores separados por vírgula.`))
+  for (const [name, filter] of Object.entries(definition.filters ?? {})) parameters.push({ ...queryParameter(name, { type: 'string', ...(filter.values ? { enum: filter.values } : {}) }, filter.description ?? `Filtro natural por ${filter.field ?? name}; múltiplos valores separados por vírgula.`), ...(filter.scope ? { 'x-required-scope': filter.scope } : {}) })
   return parameters
 }
 

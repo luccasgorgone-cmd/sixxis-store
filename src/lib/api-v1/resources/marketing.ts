@@ -32,7 +32,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       filters: {
         produtoId: { type: 'string' },
-        email: { type: 'string' },
+        email: { type: 'string', scope: 'read:pii' },
         notificado: { type: 'boolean' },
       },
       adapter: {
@@ -168,7 +168,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
         { name: 'telefone', type: 'string', nullable: true },
         { name: 'status', type: 'string', enum: ['PENDENTE', 'ENVIADO', 'ERRO', 'ABERTO', 'CLICADO', 'pendente', 'enviado', 'erro', 'aberto', 'clicado'], description: 'Valores conhecidos; caixa legada preservada. Valores desconhecidos continuam strings e são auditados no rollout.' },
         { name: 'enviadoEm', type: 'string', nullable: true, format: 'date-time' },
-        { name: 'erroMsg', type: 'string', nullable: true },
+        { name: 'erroMsg', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'createdAt', type: 'string', format: 'date-time' },
         { name: 'updatedAt', type: 'string', format: 'date-time' },
       ],
@@ -182,8 +182,8 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       filters: {
         campanhaId: { type: 'string' },
         clienteId: { type: 'string' },
-        email: { type: 'string' },
-        telefone: { type: 'string' },
+        email: { type: 'string', scope: 'read:pii' },
+        telefone: { type: 'string', scope: 'read:pii' },
         status: { type: 'string', values: ['PENDENTE', 'ENVIADO', 'ERRO', 'ABERTO', 'CLICADO', 'pendente', 'enviado', 'erro', 'aberto', 'clicado'] },
       },
       adapter: {
@@ -272,9 +272,9 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
         { name: 'id', type: 'string' },
         { name: 'campanhaId', type: 'string', nullable: true },
         { name: 'tipo', type: 'string', enum: ['EMAIL', 'WHATSAPP', 'email', 'whatsapp'], description: 'Valores conhecidos; caixa legada preservada. Valores desconhecidos continuam strings e são auditados no rollout.' },
-        { name: 'destinatario', type: 'string' },
+        { name: 'destinatario', type: 'string', scope: 'read:pii' },
         { name: 'status', type: 'string', enum: ['ENVIADO', 'ERRO', 'enviado', 'erro', 'pendente', 'PENDENTE'], description: 'Valores conhecidos; caixa legada preservada. Valores desconhecidos continuam strings e são auditados no rollout.' },
-        { name: 'erroMsg', type: 'string', nullable: true },
+        { name: 'erroMsg', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'createdAt', type: 'string', format: 'date-time' },
       ],
       expands: [
@@ -285,7 +285,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       filters: {
         campanhaId: { type: 'string' },
         tipo: { type: 'string', values: ['EMAIL', 'WHATSAPP', 'email', 'whatsapp'] },
-        destinatario: { type: 'string' },
+        destinatario: { type: 'string', scope: 'read:pii' },
         status: { type: 'string', values: ['ENVIADO', 'ERRO', 'enviado', 'erro', 'pendente', 'PENDENTE'] },
         canal: { type: 'string', field: 'tipo', values: ['EMAIL', 'WHATSAPP', 'email', 'whatsapp'] },
       },
@@ -318,10 +318,10 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       select: { id: true, sessaoId: true, paginaOrigem: true, userAgent: true, ip: true, clienteId: true, status: true, totalMensagens: true, primeiraMensagem: true, ultimaMensagem: true, duracaoSegundos: true, leadGerado: true, produtoInteresse: true, createdAt: true, updatedAt: true } as const satisfies Prisma.LunaConversaSelect,
       fields: [
         { name: 'id', type: 'string' },
-        { name: 'sessaoId', type: 'string' },
+        { name: 'sessaoId', type: 'string', scope: 'read:pii' },
         { name: 'paginaOrigem', type: 'string', nullable: true },
-        { name: 'userAgent', type: 'string', nullable: true },
-        { name: 'ip', type: 'string', nullable: true },
+        { name: 'userAgent', type: 'string', nullable: true, scope: 'read:pii' },
+        { name: 'ip', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'clienteId', type: 'string', nullable: true },
         { name: 'status', type: 'string', enum: ['ativa', 'encerrada', 'transferida', 'abandonada'], description: 'Valores conhecidos; caixa legada preservada. Valores desconhecidos continuam strings e são auditados no rollout.' },
         { name: 'totalMensagens', type: 'integer' },
@@ -341,7 +341,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
       filters: {
         conversaId: { type: 'string', field: 'id' },
-        sessaoId: { type: 'string' },
+        sessaoId: { type: 'string', scope: 'read:pii' },
         clienteId: { type: 'string' },
         status: { type: 'string', values: ['ativa', 'encerrada', 'transferida', 'abandonada'] },
         leadGerado: { type: 'boolean' },
@@ -456,10 +456,10 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       filters: {
         tipo: { type: 'string', values: ['pj', 'pf'] },
         status: { type: 'string', values: ['novo', 'em_analise', 'aprovado', 'recusado'] },
-        email: { type: 'string' },
-        telefone: { type: 'string' },
-        cpf: { type: 'string' },
-        cnpj: { type: 'string' },
+        email: { type: 'string', scope: 'read:pii' },
+        telefone: { type: 'string', scope: 'read:pii' },
+        cpf: { type: 'string', scope: 'read:pii' },
+        cnpj: { type: 'string', scope: 'read:pii' },
         uf: { type: 'string', field: 'estado' },
         cidade: { type: 'string' },
         segmento: { type: 'string', values: ['Varejo', 'Atacado', 'E-commerce', 'Distribuidor', 'Outro'] },
@@ -521,8 +521,8 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       window: { from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: 31 },
       filters: {
         status: { type: 'string', values: ['novo', 'lido', 'respondido', 'arquivado'] },
-        email: { type: 'string' },
-        telefone: { type: 'string' },
+        email: { type: 'string', scope: 'read:pii' },
+        telefone: { type: 'string', scope: 'read:pii' },
         assunto: { type: 'string' },
       },
       adapter: {

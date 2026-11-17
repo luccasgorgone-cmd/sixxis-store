@@ -7,7 +7,7 @@ export const API_MAX_LIMIT = 500
 export const API_MAX_EXPANDS = 3
 export const API_MAX_EXPAND_ITEMS = 50
 export const API_QUERY_TIMEOUT_MS = 10_000
-export const API_DEFAULT_RATE_LIMIT = 600
+export const API_DEFAULT_RATE_LIMIT = 60
 
 export const API_SCOPES = [
   'read:all', 'read:clientes', 'read:catalogo', 'read:pedidos', 'read:marketing',

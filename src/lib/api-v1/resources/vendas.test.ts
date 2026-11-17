@@ -99,6 +99,18 @@ describe('vendas resources', () => {
 })
 
 describe('commerce authorization, monetary units and relational filters', () => {
+  it('requires additive PII scope for customer email and paid-click identifier filters', async () => {
+    const cases = [
+      [get('CupomUso'), 'emailCliente', 'victim@example.test'],
+      [get('Pedido'), 'gbraid', 'private-gbraid'],
+      [get('Pedido'), 'wbraid', 'private-wbraid'],
+      [get('Pedido'), 'fbc', 'private-fbc'],
+    ] as const
+    for (const [def, name, value] of cases) {
+      expect(def.filters?.[name]?.scope, `${def.slug}.${name}`).toBe('read:pii')
+      await expect(executeList(def, context([def.scope]), query(def, `${name}=${value}`), options)).rejects.toMatchObject({ status: 403 })
+    }
+  })
   it('preserves useful PII masks; effective finance scope includes read:all but not read:pedidos', async () => {
     const def = get('Pagamento'), raw = { ...row('Pagamento'), payerNome: 'Alice Teste', payerCpf: '529.982.247-25', payerEmail: 'alice@example.test', valor: 12345 }
     expect(def.serialize(raw, context()).valor).toBe('123.45')

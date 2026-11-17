@@ -23,6 +23,9 @@ export type LimiterName =
   | 'validar-cupom'
   | 'interno-frete'
   | 'api-leitura'
+  | 'api-leitura-ingress'
+  | 'api-leitura-metricas'
+  | 'tracking'
 
 // Limites sensatos por IP/identificador (sliding window). Ajuste conforme tráfego.
 const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ratelimit.slidingWindow>[1] }> = {
@@ -33,6 +36,9 @@ const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ra
   'checkout-multi-metodo': { tokens: 8,  window: '5 m' },   // 8 tentativas / 5 min — orquestra 2 transações reais, mais caro que criar-pagamento
   'validar-cupom':         { tokens: 20, window: '1 m' },   // 20 validações / 1 min
   'api-leitura':           { tokens: 600, window: '1 m' },
+  'api-leitura-ingress':   { tokens: 60,  window: '1 m' },
+  'api-leitura-metricas':  { tokens: 10,  window: '1 m' },
+  'tracking':               { tokens: 120, window: '1 m' },
   'interno-frete':         { tokens: 60, window: '1 m' },   // 60 cotações / 1 min (CRM)
 }
 
@@ -43,6 +49,9 @@ const AUTH_SENSITIVE: ReadonlySet<LimiterName> = new Set<LimiterName>([
   'cadastro',
   'esqueci-senha',
   'api-leitura',
+  'api-leitura-ingress',
+  'api-leitura-metricas',
+  'tracking',
 ])
 
 const IS_PROD = process.env.NODE_ENV === 'production'
@@ -120,16 +129,17 @@ export function getClientIp(req: Request): string {
 
 // Dedicated strict entry point: callers distinguish provider unavailability (503)
 // from actual quota exhaustion (429). Reuses this module's Redis connection.
-const _apiLimiters = new Map<number, Ratelimit>()
+const _apiLimiters = new Map<string, Ratelimit>()
 export async function rateLimitApiReading(
-  name: 'api-leitura', identifier: string, tokens: number, window: '1 m',
+  name: 'api-leitura' | 'api-leitura-ingress' | 'api-leitura-public' | 'api-leitura-metricas', identifier: string, tokens: number, window: '1 m',
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const redis = getRedis()
   if (!redis) throw new Error('API limiter unavailable')
-  let limiter = _apiLimiters.get(tokens)
+  const cacheKey = `${name}:${tokens}`
+  let limiter = _apiLimiters.get(cacheKey)
   if (!limiter) {
     limiter = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(tokens, window), prefix: `rl:${name}:${tokens}`, analytics: false, timeout: 5000 })
-    _apiLimiters.set(tokens, limiter)
+    _apiLimiters.set(cacheKey, limiter)
   }
   const result = await limiter.limit(identifier)
   // Upstash resolves (does not reject) on timeout, with success:true. Never

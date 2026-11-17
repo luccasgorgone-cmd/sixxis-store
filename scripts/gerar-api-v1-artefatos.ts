@@ -104,26 +104,26 @@ API server-to-server, autenticada e somente leitura. A fonte executável do cont
 
 - \`openapi.json\` e \`openapi.yaml\`: contrato OpenAPI 3.1.
 - \`postman-collection.json\`: coleção com \`{{baseUrl}}\` e \`{{token}}\`.
-- \`exemplo-sync.ts\`: paginação incremental, watermark e deduplicação por id.
+- \`exemplo-sync.ts\`: paginação incremental por contrato de relógio/janela publicado em \`/meta/recursos\`.
 
 ## Autenticação e escopos
 
 Envie \`Authorization: Bearer <token>\`. Nunca coloque token em URL, log ou repositório. \`read:all\` concede os domínios; \`read:pii\` e \`read:mensagens\` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
 
-Escopos disponíveis: \`read:all\`, \`read:clientes\`, \`read:catalogo\`, \`read:vendas\`, \`read:marketing\`, \`read:analytics\`, \`read:financeiro\`, \`read:pii\`, \`read:mensagens\`.
+Escopos disponíveis: \`read:all\`, \`read:clientes\`, \`read:catalogo\`, \`read:pedidos\`, \`read:marketing\`, \`read:analytics\`, \`read:auditoria\`, \`read:configuracoes\`, \`read:financeiro\`, \`read:pii\`, \`read:mensagens\`.
 
 ## Paginação e sincronização
 
-Use \`limit\` (máximo 100) e repita \`nextCursor\` até \`hasMore=false\`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Para sync incremental, persista o maior \`updatedAt\`/campo equivalente confirmado, consulte com \`atualizadoDesde\`, deduplique por \`id\` e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
+Use \`limit\` (máximo global 500; respeite \`sync.maxLimit\` do recurso) e repita \`nextCursor\` até \`hasMore=false\`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de \`/meta/recursos\` publica \`sync.sort\`, \`watermarkField\`, parâmetros \`from\`/\`to\` e \`maxDays\`. Congele os dois limites da janela durante todas as páginas, deduplique por \`id\`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
 
 \`\`\`bash
 curl -sS -H "Authorization: Bearer $SIXXIS_API_TOKEN" \\
-  "https://SEU-DOMINIO.example/api/v1/produtos?limit=100&sort=updatedAt&atualizadoDesde=2026-01-01T00:00:00.000Z"
+  "https://SEU-DOMINIO.example/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
 \`\`\`
 
 ## Erros, limites e cache
 
-Erros usam RFC 9457 (\`application/problem+json\`) e incluem \`requestId\`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. O limite padrão é 600 requisições/minuto por chave; leia \`X-RateLimit-*\` e \`Retry-After\`. Respostas usam \`Cache-Control: no-store\`; CORS não é habilitado para navegador.
+Erros usam RFC 9457 (\`application/problem+json\`) e incluem \`requestId\`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. O limite padrão é 60 requisições/minuto por chave e por IP de ingresso; métricas têm orçamento adicional de 10/minuto por chave. Leia \`X-RateLimit-*\` e \`Retry-After\`. Respostas autenticadas usam \`Cache-Control: no-store\`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
 
 ## Endpoints transversais
 
@@ -149,28 +149,50 @@ Versão inicial \`v1\`: contrato aditivo. Remoções ou mudanças incompatíveis
 
 function syncExample(): string {
   return `type Envelope<T> = { data: T[]; meta: { hasMore: boolean; nextCursor: string | null } }
-type Row = { id: string; updatedAt?: string }
+type Row = { id: string; [field: string]: unknown }
 
-export async function syncResource(baseUrl: string, token: string, resource: string, watermark?: string) {
+export type ResourceSyncContract = {
+  slug: string
+  sort: string
+  watermarkField: string
+  from: 'criadoDesde' | 'atualizadoDesde'
+  to: 'criadoAte' | 'atualizadoAte'
+  maxDays: number | null
+  maxLimit: number
+}
+
+export async function syncResource(
+  baseUrl: string,
+  token: string,
+  contract: ResourceSyncContract,
+  window: { from: string; to: string },
+) {
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(contract.slug) || contract.sort !== contract.watermarkField) throw new Error('Contrato de sincronização inválido.')
+  if (!Number.isInteger(contract.maxLimit) || contract.maxLimit < 1 || contract.maxLimit > 500) throw new Error('Contrato de sincronização inválido.')
+  const from = new Date(window.from)
+  const to = new Date(window.to)
+  if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || from > to || (contract.maxDays !== null && to.getTime() - from.getTime() > contract.maxDays * 86_400_000)) throw new Error('Janela de sincronização inválida.')
   const rows = new Map<string, Row>()
   let cursor: string | null = null
-  let nextWatermark = watermark
+  let watermark: string | undefined
   do {
-    const url = new URL(\`/api/v1/\${resource}\`, baseUrl)
-    url.searchParams.set('limit', '100')
-    url.searchParams.set('sort', 'updatedAt')
-    if (watermark) url.searchParams.set('atualizadoDesde', watermark)
+    const url = new URL(\`/api/v1/\${contract.slug}\`, baseUrl)
+    url.searchParams.set('limit', String(contract.maxLimit))
+    url.searchParams.set('sort', contract.sort)
+    url.searchParams.set(contract.from, window.from)
+    url.searchParams.set(contract.to, window.to)
     if (cursor) url.searchParams.set('cursor', cursor)
     const response = await fetch(url, { headers: { Authorization: \`Bearer \${token}\` } })
     if (!response.ok) throw new Error(\`Sixxis API \${response.status}\`)
     const page = await response.json() as Envelope<Row>
     for (const row of page.data) {
       rows.set(row.id, row)
-      if (row.updatedAt && (!nextWatermark || row.updatedAt > nextWatermark)) nextWatermark = row.updatedAt
+      const clock = row[contract.watermarkField]
+      if (typeof clock === 'string' && (!watermark || clock > watermark)) watermark = clock
     }
     cursor = page.meta.hasMore ? page.meta.nextCursor : null
   } while (cursor)
-  return { rows: [...rows.values()], watermark: nextWatermark }
+  return { rows: [...rows.values()], watermark }
 }
 `
 }

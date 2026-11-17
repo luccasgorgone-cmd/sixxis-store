@@ -4,7 +4,9 @@ import type { ApiContext } from '../types'
 import { loadPeriodAndFollowupEvents, summarizeCheckoutAbandonment } from './funil'
 import type { MetricDefinition, StoreMetricOptions } from './registry'
 import {
+  API_METRIC_TAKE,
   aggregateLabel,
+  boundedMetricRows,
   bucketForInstant,
   decimalOrNull,
   decimalValue,
@@ -47,10 +49,11 @@ export function createCarrinhosMetric(options: StoreMetricOptions = {}): MetricD
         client.carrinhoCliente.findMany({
           where: { atualizadoEm: { gte: params.from, lt: params.toExclusive } },
           select: { status: true, etapaAtual: true, valorTotal: true, itens: true, atualizadoEm: true },
+          take: API_METRIC_TAKE,
         }),
         loadPeriodAndFollowupEvents(client, params, now),
       ])
-      const carts = rawCarts as unknown as CartRow[]
+      const carts = boundedMetricRows(rawCarts as unknown as CartRow[])
       const cutoff = now.getTime() - 60 * 60 * 1000
       const byStage = new Map<number, { count: number; value: ReturnType<typeof decimalValue> }>()
       const byStatus = new Map<string, { count: number; value: ReturnType<typeof decimalValue> }>()
@@ -121,15 +124,16 @@ export function createCuponsCashbackFidelidadeMetric(options: StoreMetricOptions
     async query(_ctx: ApiContext, params: MetricParams) {
       const client = await db(options)
       const [rawUses, rawCashback, balances, rawLevels, customerSpend] = await Promise.all([
-        client.cupomUso.findMany({ where: { usadoEm: { gte: params.from, lt: params.toExclusive } }, select: { valorDesconto: true, valorPedido: true, usadoEm: true, cupom: { select: { codigo: true } } } }),
-        client.cashbackTransacao.findMany({ where: { createdAt: { gte: params.from, lt: params.toExclusive } }, select: { tipo: true, status: true, valor: true, createdAt: true } }),
+        client.cupomUso.findMany({ where: { usadoEm: { gte: params.from, lt: params.toExclusive } }, select: { valorDesconto: true, valorPedido: true, usadoEm: true, cupom: { select: { codigo: true } } }, take: API_METRIC_TAKE }),
+        client.cashbackTransacao.findMany({ where: { createdAt: { gte: params.from, lt: params.toExclusive } }, select: { tipo: true, status: true, valor: true, createdAt: true }, take: API_METRIC_TAKE }),
         client.cliente.aggregate({ _sum: { cashbackSaldo: true, cashbackPendente: true } }),
-        client.nivelFidelidade.findMany({ select: { slug: true, nome: true, gastoMin: true, gastoMax: true }, orderBy: { ordem: 'asc' } }),
-        client.cliente.findMany({ select: { totalGasto: true } }),
+        client.nivelFidelidade.findMany({ select: { slug: true, nome: true, gastoMin: true, gastoMax: true }, orderBy: { ordem: 'asc' }, take: API_METRIC_TAKE }),
+        client.cliente.findMany({ select: { totalGasto: true }, take: API_METRIC_TAKE }),
       ])
-      const uses = rawUses as unknown as CouponUse[]
-      const cashback = rawCashback as unknown as CashbackRow[]
-      const levels = rawLevels as unknown as LoyaltyLevel[]
+      const uses = boundedMetricRows(rawUses as unknown as CouponUse[])
+      const cashback = boundedMetricRows(rawCashback as unknown as CashbackRow[])
+      const levels = boundedMetricRows(rawLevels as unknown as LoyaltyLevel[])
+      boundedMetricRows(customerSpend as unknown[])
       const couponMap = new Map<string, { usos: number; desconto: ReturnType<typeof decimalValue>; receita: ReturnType<typeof decimalValue> }>()
       const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, usosCupom: 0, descontoCupom: decimalValue(0), receitaCupom: decimalValue(0), creditosCashback: decimalValue(0), debitosCashback: decimalValue(0) }]))
       let discount = decimalValue(0)
@@ -231,14 +235,16 @@ export function createFreteMetric(options: StoreMetricOptions = {}): MetricDefin
         client.pedido.findMany({
           where: { createdAt: { gte: params.from, lt: params.toExclusive }, status: { in: STATUS_PAGO_TODOS } },
           select: { frete: true, fretePrazo: true, transportadora: true, freteTipo: true, custoFreteReal: true, createdAt: true },
+          take: API_METRIC_TAKE,
         }),
         client.eventoTracking.findMany({
           where: { tipo: 'add_shipping_info', createdAt: { gte: params.from, lt: params.toExclusive } },
           select: { valor: true, dados: true, createdAt: true },
+          take: API_METRIC_TAKE,
         }),
       ])
-      const orders = rawOrders as unknown as FreightOrder[]
-      const events = rawEvents as unknown as ShippingEvent[]
+      const orders = boundedMetricRows(rawOrders as unknown as FreightOrder[])
+      const events = boundedMetricRows(rawEvents as unknown as ShippingEvent[])
       let freight = decimalValue(0)
       let cost = decimalValue(0)
       let allCostKnown = true
@@ -320,10 +326,11 @@ export function createAvaliacoesMetric(options: StoreMetricOptions = {}): Metric
     schema: { type: 'object', required: ['timezone', 'periodo', 'definicoes', 'resumo', 'porNota', 'porProduto'] },
     async query(_ctx: ApiContext, params: MetricParams) {
       const client = await db(options)
-      const rows = await client.avaliacao.findMany({
+      const rows = boundedMetricRows(await client.avaliacao.findMany({
         where: { createdAt: { gte: params.from, lt: params.toExclusive } },
         select: { nota: true, aprovada: true, destaque: true, respostaEm: true, createdAt: true, produtoId: true, produto: { select: { nome: true } } },
-      }) as unknown as ReviewRow[]
+        take: API_METRIC_TAKE,
+      }) as unknown as ReviewRow[])
       const ratings = new Map<number, number>()
       const products = new Map<string, { produtoId: string; produto: string; count: number; approved: number; score: number }>()
       const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, count: 0, approved: 0, score: 0 }]))
@@ -378,9 +385,10 @@ export function createEstoqueCatalogoMetric(options: StoreMetricOptions = {}): M
     schema: { type: 'object', required: ['timezone', 'periodo', 'definicoes', 'resumo', 'porCategoria'] },
     async query(_ctx: ApiContext, params: MetricParams) {
       const client = await db(options)
-      const products = await client.produto.findMany({
+      const products = boundedMetricRows(await client.produto.findMany({
         select: { ativo: true, categoria: true, estoque: true, temVariacoes: true, preco: true, precoPromocional: true, variacoes: { select: { ativo: true, estoque: true, preco: true } } },
-      }) as unknown as StockProduct[]
+        take: API_METRIC_TAKE,
+      }) as unknown as StockProduct[])
       const categories = new Map<string, { products: number; active: number; units: number; value: ReturnType<typeof decimalValue> }>()
       let active = 0
       let units = 0

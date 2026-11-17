@@ -3,8 +3,10 @@ import { STATUS_PAGO_TODOS } from '../../pedido-status'
 import type { ApiContext } from '../types'
 import type { MetricDefinition, StoreMetricOptions } from './registry'
 import {
+  API_METRIC_TAKE,
   aggregateLabel,
   averageMoney,
+  boundedMetricRows,
   bucketForInstant,
   decimalOrNull,
   decimalValue,
@@ -39,18 +41,6 @@ type SaleOrder = {
   pagamentos: { mpStatus: string; metodo: string; valor: number }[]
   endereco: { estado: string; cidade: string }
 }
-type PurchaseEvent = {
-  dados: unknown
-  sessao: {
-    utmSource: string | null
-    utmMedium: string | null
-    utmCampaign: string | null
-    gclid: string | null
-    gbraid: string | null
-    wbraid: string | null
-  }
-}
-
 type MoneyCount = { count: number; value: ReturnType<typeof decimalValue> }
 type SalesAccumulator = {
   orders: number
@@ -61,7 +51,6 @@ type SalesAccumulator = {
 }
 
 const zero = () => decimalValue(0)
-const ATTRIBUTION_LOOKAHEAD_MS = 7 * 24 * 60 * 60 * 1000
 const SUCCESSFUL_PAYMENT_STATUSES = new Set(['approved', 'captured'])
 const salesSchema = {
   type: 'object',
@@ -72,18 +61,22 @@ async function db(options: StoreMetricOptions): Promise<PrismaClient> {
   return options.prisma ?? (await import('../../prisma')).prisma
 }
 
-function transactionId(dados: unknown): string | null {
-  if (!dados || typeof dados !== 'object' || Array.isArray(dados)) return null
-  const value = (dados as Record<string, unknown>).transaction_id
-  return typeof value === 'string' && value.length > 0 && value.length <= 500 ? value : null
-}
-
 function clickChannel(values: { gclid?: string | null; gbraid?: string | null; wbraid?: string | null; fbc?: string | null }): string {
   if (values.gclid) return 'gclid'
   if (values.gbraid) return 'gbraid'
   if (values.wbraid) return 'wbraid'
   if (values.fbc) return 'fbc'
   return 'sem_click_id'
+}
+
+function authoritativeAttribution(order: SaleOrder) {
+  const canalClickId = clickChannel(order)
+  return {
+    origem: ['gclid', 'gbraid', 'wbraid'].includes(canalClickId) ? 'google' : canalClickId === 'fbc' ? 'meta' : 'nao_atribuida',
+    meio: canalClickId === 'sem_click_id' ? 'nao_atribuido' : 'paid_click',
+    campanha: 'nao_disponivel',
+    canalClickId,
+  }
 }
 
 function addMoneyCount(map: Map<string, MoneyCount>, key: string, value: ReturnType<typeof decimalValue>, count = 1): void {
@@ -150,7 +143,7 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
     schema: salesSchema,
     async query(_ctx: ApiContext, params: MetricParams) {
       const client = await db(options)
-      const rawOrders = await client.pedido.findMany({
+      const rawOrders = boundedMetricRows(await client.pedido.findMany({
           where: { createdAt: { gte: params.from, lt: params.toExclusive }, status: { in: STATUS_PAGO_TODOS } },
           select: {
             id: true, total: true, createdAt: true, mpTaxaReal: true, custoFreteReal: true,
@@ -160,19 +153,9 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
             pagamentos: { select: { mpStatus: true, metodo: true, valor: true } },
             endereco: { select: { estado: true, cidade: true } },
           },
-        })
+          take: API_METRIC_TAKE,
+        }))
       const orders = rawOrders as unknown as SaleOrder[]
-      const rawEvents = orders.length === 0 ? [] : await client.eventoTracking.findMany({
-          where: { tipo: 'purchase', createdAt: { gte: params.from, lt: new Date(params.toExclusive.getTime() + ATTRIBUTION_LOOKAHEAD_MS) } },
-          select: { dados: true, sessao: { select: { utmSource: true, utmMedium: true, utmCampaign: true, gclid: true, gbraid: true, wbraid: true } } },
-        })
-      const events = rawEvents as unknown as PurchaseEvent[]
-      const eventByOrder = new Map<string, PurchaseEvent>()
-      for (const event of events) {
-        const id = transactionId(event.dados)
-        if (id && !eventByOrder.has(id)) eventByOrder.set(id, event)
-      }
-
       const total = emptySalesAccumulator()
       const byBucket = new Map(listMetricBuckets(params).map(bucket => [bucket, emptySalesAccumulator()]))
       const paymentStatus = new Map<string, MoneyCount>()
@@ -234,16 +217,7 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
         cityValue.value = cityValue.value.plus(net)
         cities.set(cityKey, cityValue)
 
-        const event = eventByOrder.get(order.id)
-        const origem = event ? aggregateLabel(event.sessao.utmSource, 'nao_atribuida') : 'nao_atribuida'
-        const meio = event ? aggregateLabel(event.sessao.utmMedium, 'nao_atribuido') : 'nao_atribuido'
-        const campanha = event ? aggregateLabel(event.sessao.utmCampaign, 'nao_atribuida') : 'nao_atribuida'
-        const canalClickId = clickChannel({
-          gclid: event?.sessao.gclid ?? order.gclid,
-          gbraid: event?.sessao.gbraid ?? order.gbraid,
-          wbraid: event?.sessao.wbraid ?? order.wbraid,
-          fbc: order.fbc,
-        })
+        const { origem, meio, campanha, canalClickId } = authoritativeAttribution(order)
         const attributionKey = JSON.stringify([origem, meio, campanha, canalClickId])
         const attributed = attribution.get(attributionKey) ?? { origem, meio, campanha, canalClickId, count: 0, value: zero() }
         attributed.count += 1
@@ -259,7 +233,7 @@ export function createVendasMetric(options: StoreMetricOptions = {}): MetricDefi
         ticketMedio: 'receitaLiquidaComercial ÷ pedidosPagos.',
         metodoPagamento: 'Somente pernas reais com mpStatus approved|captured; tentativas rejeitadas permanecem apenas na quebra de status.',
         produtoVariacao: 'Garantias compõem o produto por GarantiaEstendida.produtoId; na variação usam pedidoItemId quando disponível e garantia_nao_alocada quando ausente.',
-        atribuicao: 'Uma consulta indexada por tipo/createdAt lê purchase entre o início BRT e 7 dias após o fim; dados.transaction_id correlaciona em memória aos pedidos pagos. Eventos posteriores ao lookahead ficam nao_atribuida. Click ids saem apenas como canal agregado.',
+        atribuicao: 'Somente click ids persistidos no Pedido pago entram na atribuição financeira. Eventos client-side não alteram origem, meio ou campanha; click ids saem apenas como canal agregado.',
       }
       return {
         ...metricBase(params, definicoes),

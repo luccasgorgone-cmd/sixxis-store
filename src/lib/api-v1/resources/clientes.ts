@@ -28,7 +28,7 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
         { name: 'erpClienteId', type: 'string', nullable: true },
         { name: 'createdAt', type: 'string', format: 'date-time' },
         { name: 'bloqueado', type: 'boolean' },
-        { name: 'motivoBloqueio', type: 'string', nullable: true },
+        { name: 'motivoBloqueio', type: 'string', nullable: true, scope: 'read:pii' },
         { name: 'bloqueadoEm', type: 'string', format: 'date-time', nullable: true },
         { name: 'cashbackSaldo', type: 'string', format: 'decimal', description: 'Valor monetário em BRL.' },
         { name: 'cashbackPendente', type: 'string', format: 'decimal', description: 'Valor monetário em BRL.' },
@@ -53,13 +53,14 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
       sorts: ['id', 'updatedAt', 'nome'], defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       searchFields: ['nome', 'email', 'razaoSocial', 'erpClienteId'],
+      searchScope: 'read:pii',
       filters: {
         clienteId: { type: 'string', field: 'id' },
-        email: { type: 'string' },
-        cpf: { type: 'string' },
-        cnpj: { type: 'string' },
+        email: { type: 'string', scope: 'read:pii' },
+        cpf: { type: 'string', scope: 'read:pii' },
+        cnpj: { type: 'string', scope: 'read:pii' },
         bloqueado: { type: 'boolean' },
-        erpClienteId: { type: 'string' },
+        erpClienteId: { type: 'string', scope: 'read:pii' },
       },
       adapter: {
         findMany: async args => {

@@ -2,7 +2,7 @@ import type { PrismaClient } from '@prisma/client'
 import { STATUS_PAGO_TODOS } from '../../pedido-status'
 import type { ApiContext } from '../types'
 import type { MetricDefinition, StoreMetricOptions } from './registry'
-import { averageMoney, bucketForInstant, decimalValue, listMetricBuckets, metricBase, metricMoney, type MetricParams } from './tempo'
+import { API_METRIC_TAKE, averageMoney, boundedMetricRows, bucketForInstant, decimalValue, listMetricBuckets, metricBase, metricMoney, type MetricParams } from './tempo'
 
 type PaidOrder = { clienteId: string; total: unknown; createdAt: Date }
 
@@ -23,15 +23,17 @@ export function createClientesMetric(options: StoreMetricOptions = {}): MetricDe
     schema: { type: 'object', required: ['timezone', 'periodo', 'definicoes', 'resumo', 'serie'] },
     async query(_ctx: ApiContext, params: MetricParams) {
       const client = await db(options)
-      const periodOrders = await client.pedido.findMany({
+      const periodOrders = boundedMetricRows(await client.pedido.findMany({
         where: { createdAt: { gte: params.from, lt: params.toExclusive }, status: { in: STATUS_PAGO_TODOS } },
         select: { clienteId: true, total: true, createdAt: true },
-      }) as unknown as PaidOrder[]
+        take: API_METRIC_TAKE,
+      }) as unknown as PaidOrder[])
       const customerIds = [...new Set(periodOrders.map(order => order.clienteId))]
-      const history = customerIds.length === 0 ? [] : await client.pedido.findMany({
+      const history = customerIds.length === 0 ? [] : boundedMetricRows(await client.pedido.findMany({
         where: { clienteId: { in: customerIds }, status: { in: STATUS_PAGO_TODOS } },
         select: { clienteId: true, total: true, createdAt: true },
-      }) as unknown as PaidOrder[]
+        take: API_METRIC_TAKE,
+      }) as unknown as PaidOrder[])
 
       const firstPaid = new Map<string, Date>()
       let historicalRevenue = decimalValue(0)

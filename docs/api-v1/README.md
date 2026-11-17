@@ -6,26 +6,26 @@ API server-to-server, autenticada e somente leitura. A fonte executável do cont
 
 - `openapi.json` e `openapi.yaml`: contrato OpenAPI 3.1.
 - `postman-collection.json`: coleção com `{{baseUrl}}` e `{{token}}`.
-- `exemplo-sync.ts`: paginação incremental, watermark e deduplicação por id.
+- `exemplo-sync.ts`: paginação incremental por contrato de relógio/janela publicado em `/meta/recursos`.
 
 ## Autenticação e escopos
 
 Envie `Authorization: Bearer <token>`. Nunca coloque token em URL, log ou repositório. `read:all` concede os domínios; `read:pii` e `read:mensagens` são aditivos. Segredos, hashes, tokens, payloads de gateway e PAN nunca são retornados, mesmo com todos os escopos.
 
-Escopos disponíveis: `read:all`, `read:clientes`, `read:catalogo`, `read:vendas`, `read:marketing`, `read:analytics`, `read:financeiro`, `read:pii`, `read:mensagens`.
+Escopos disponíveis: `read:all`, `read:clientes`, `read:catalogo`, `read:pedidos`, `read:marketing`, `read:analytics`, `read:auditoria`, `read:configuracoes`, `read:financeiro`, `read:pii`, `read:mensagens`.
 
 ## Paginação e sincronização
 
-Use `limit` (máximo 100) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Para sync incremental, persista o maior `updatedAt`/campo equivalente confirmado, consulte com `atualizadoDesde`, deduplique por `id` e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
+Use `limit` (máximo global 500; respeite `sync.maxLimit` do recurso) e repita `nextCursor` até `hasMore=false`. O cursor é opaco, criptografado e vinculado ao recurso, filtros e ordenação; não o interprete. Cada item de `/meta/recursos` publica `sync.sort`, `watermarkField`, parâmetros `from`/`to` e `maxDays`. Congele os dois limites da janela durante todas as páginas, deduplique por `id`, persista o maior watermark confirmado e faça reconciliação periódica de IDs para detectar exclusões físicas (a v1 não inventa tombstones).
 
 ```bash
 curl -sS -H "Authorization: Bearer $SIXXIS_API_TOKEN" \
-  "https://SEU-DOMINIO.example/api/v1/produtos?limit=100&sort=updatedAt&atualizadoDesde=2026-01-01T00:00:00.000Z"
+  "https://SEU-DOMINIO.example/api/v1/produtos?limit=500&sort=updatedAt&atualizadoDesde=2026-11-01T00:00:00.000Z&atualizadoAte=2026-11-17T00:00:00.000Z"
 ```
 
 ## Erros, limites e cache
 
-Erros usam RFC 9457 (`application/problem+json`) e incluem `requestId`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. O limite padrão é 600 requisições/minuto por chave; leia `X-RateLimit-*` e `Retry-After`. Respostas usam `Cache-Control: no-store`; CORS não é habilitado para navegador.
+Erros usam RFC 9457 (`application/problem+json`) e incluem `requestId`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. O limite padrão é 60 requisições/minuto por chave e por IP de ingresso; métricas têm orçamento adicional de 10/minuto por chave. Leia `X-RateLimit-*` e `Retry-After`. Respostas autenticadas usam `Cache-Control: no-store`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
 
 ## Endpoints transversais
 

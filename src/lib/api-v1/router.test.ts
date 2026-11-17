@@ -65,6 +65,7 @@ function deps(overrides: Partial<RouterDeps> = {}): RouterDeps {
     }]),
     pipelineDeps: pipelineDeps(),
     healthCheck: vi.fn().mockResolvedValue(undefined),
+    publicRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 60, remaining: 59, reset: Date.parse('2026-11-16T20:01:00.000Z') }),
     env: { RAILWAY_GIT_COMMIT_SHA: 'railway-commit' },
     openApiDocument: vi.fn().mockResolvedValue({ openapi: '3.1.0', paths: {} }),
     metaTimeoutMs: 100,
@@ -76,8 +77,8 @@ async function json<T = Record<string, unknown>>(response: Response): Promise<T>
   return JSON.parse(await response.text()) as T
 }
 
-function expectSafeHeaders(response: Response) {
-  expect(response.headers.get('cache-control')).toBe('no-store')
+function expectSafeHeaders(response: Response, cacheControl = 'no-store') {
+  expect(response.headers.get('cache-control')).toBe(cacheControl)
   expect(response.headers.get('x-request-id')).toBeTruthy()
   expect(response.headers.get('x-request-id')).not.toBe('untrusted')
   expect([...response.headers.keys()].some(name => name.startsWith('access-control-'))).toBe(false)
@@ -105,17 +106,51 @@ describe('public API v1 routes', () => {
     expectSafeHeaders(response)
   })
 
+  it('collapses repeated health probes into one short-lived database check', async () => {
+    const healthCheck = vi.fn().mockResolvedValue(undefined)
+    const current = deps({ healthCheck, now: () => new Date('2026-11-16T20:00:00.000Z') })
+    const [first, second] = await Promise.all([
+      routeApiV1(request('/health'), ['health'], current),
+      routeApiV1(request('/health'), ['health'], current),
+    ])
+    expect([first.status, second.status]).toEqual([200, 200])
+    expect(healthCheck).toHaveBeenCalledOnce()
+  })
+
   it('keeps only root links, health, OpenAPI and docs public', async () => {
     const pipeline = pipelineDeps()
     const current = deps({ pipelineDeps: pipeline })
     for (const [segments, path] of [[[], ''], [['health'], '/health'], [['openapi.json'], '/openapi.json'], [['docs'], '/docs']] as const) {
       const response = await routeApiV1(request(path), [...segments], current)
       expect(response.status).toBe(200)
-      expectSafeHeaders(response)
+      expectSafeHeaders(response, path === '/openapi.json' || path === '/docs' ? 'public, max-age=3600, stale-while-revalidate=86400' : 'no-store')
     }
     expect(pipeline.authenticate).not.toHaveBeenCalled()
     expect(await json(await routeApiV1(request(), [], current))).toMatchObject({ data: { links: { health: '/api/v1/health', openapi: '/api/v1/openapi.json', docs: '/api/v1/docs' } } })
     expect((await routeApiV1(request('/docs'), ['docs'], current)).headers.get('content-type')).toContain('text/html')
+  })
+
+  it('serves static docs without third-party scripts or an interactive bearer field', async () => {
+    const response = await routeApiV1(request('/docs'), ['docs'], deps())
+    const body = await response.text()
+    expect(body).toContain('/api/v1/openapi.json')
+    expect(body).not.toMatch(/<script|cdn\.jsdelivr|api-reference/i)
+    expect(response.headers.get('content-security-policy')).toBe("default-src 'none'; base-uri 'none'; frame-ancestors 'none'")
+  })
+
+  it('rate-limits public endpoints before database or OpenAPI work', async () => {
+    const publicRateLimit = vi.fn().mockResolvedValue({ success: false, limit: 60, remaining: 0, reset: Date.now() + 60_000 })
+    const healthCheck = vi.fn()
+    const openApiDocument = vi.fn()
+    const current = deps({ publicRateLimit, healthCheck, openApiDocument })
+
+    for (const [segments, path] of [[['health'], '/health'], [['openapi.json'], '/openapi.json'], [['docs'], '/docs']] as const) {
+      const response = await routeApiV1(request(path), [...segments], current)
+      expect(response.status).toBe(429)
+    }
+    expect(publicRateLimit).toHaveBeenCalledTimes(3)
+    expect(healthCheck).not.toHaveBeenCalled()
+    expect(openApiDocument).not.toHaveBeenCalled()
   })
 
   it('rejects unknown or duplicate query parameters on root and health before database work', async () => {
@@ -124,6 +159,13 @@ describe('public API v1 routes', () => {
     expect((await routeApiV1(request('/health?probe=1'), ['health'], deps({ healthCheck }))).status).toBe(400)
     expect((await routeApiV1(request('/health?probe=1&probe=2'), ['health'], deps({ healthCheck }))).status).toBe(400)
     expect(healthCheck).not.toHaveBeenCalled()
+  })
+
+  it('returns 400 for invalid OpenAPI query parameters before generating the document', async () => {
+    const openApiDocument = vi.fn()
+    const response = await routeApiV1(request('/openapi.json?extra=1'), ['openapi.json'], deps({ openApiDocument }))
+    expect(response.status).toBe(400)
+    expect(openApiDocument).not.toHaveBeenCalled()
   })
 })
 
@@ -166,10 +208,23 @@ describe('authenticated dispatcher', () => {
     expect(peak).toBe(2)
     expect(body.data).toHaveLength(9)
     expect(body.data[0]).toMatchObject({ slug: 'produto-0', model: 'Produto0', scope: 'read:catalogo', count: 0, ultimaAtualizacao: '2026-11-16T12:00:00.000Z' })
+    expect(body.data[0].sync).toEqual({ sort: 'updatedAt', watermarkField: 'updatedAt', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 })
     expect(body.data[0].fields.map((field: { name: string }) => field.name)).toEqual(['id', 'nome', 'updatedAt'])
     expect(body.data[0].expands).toEqual([])
     expect(JSON.stringify(body)).not.toContain('read:financeiro')
     expect(JSON.stringify(body)).not.toContain('read:analytics')
+  })
+
+  it('collapses concurrent metadata requests with the same registry and scopes', async () => {
+    const countAndLastUpdate = vi.fn().mockResolvedValue({ count: 1, ultimaAtualizacao: null })
+    const registry = createResourceRegistry([rowResource({ countAndLastUpdate })])
+    const current = deps({ resources: registry })
+    const [first, second] = await Promise.all([
+      routeApiV1(request('/meta/recursos'), ['meta', 'recursos'], current),
+      routeApiV1(request('/meta/recursos'), ['meta', 'recursos'], current),
+    ])
+    expect([first.status, second.status]).toEqual([200, 200])
+    expect(countAndLastUpdate).toHaveBeenCalledOnce()
   })
 
   it('drains active metadata operations after the deadline and starts no later hooks', async () => {
@@ -230,6 +285,22 @@ describe('authenticated dispatcher', () => {
     expect(metricQuery).toHaveBeenCalledOnce()
     expect(resource.adapter.findMany).toHaveBeenCalledOnce()
     expect(resource.adapter.findFirst).toHaveBeenCalledOnce()
+  })
+
+  it('applies a stricter distributed quota before running an expensive metric', async () => {
+    const metricQuery = vi.fn().mockResolvedValue({ tracked: true })
+    const metricRateLimit = vi.fn().mockResolvedValue({ success: false, limit: 10, remaining: 0, reset: Date.now() + 60_000 })
+    const current = deps({
+      metrics: createMetricRegistry([{ slug: 'funil', scope: 'read:analytics', schema: { type: 'object' }, query: metricQuery }]),
+      metricRateLimit,
+    } as never)
+    const response = await routeApiV1(request('/metricas/funil?de=2026-11-16&ate=2026-11-16&agrupar=dia'), ['metricas', 'funil'], current)
+    expect(response.status).toBe(429)
+    expect(response.headers.get('x-ratelimit-limit')).toBe('10')
+    expect(response.headers.get('x-ratelimit-remaining')).toBe('0')
+    expect(Number(response.headers.get('x-ratelimit-reset'))).toBeGreaterThan(Math.floor(Date.now() / 1000))
+    expect(metricRateLimit).toHaveBeenCalledWith('key-id')
+    expect(metricQuery).not.toHaveBeenCalled()
   })
 
   it('returns RFC 404 for a missing item and 400 for unsupported item query parameters', async () => {

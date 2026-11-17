@@ -52,4 +52,35 @@ describe('metric registry', () => {
     expect(() => createMetricRegistry([{ slug: 'x', ...base }, { slug: 'x', ...base }])).toThrow(TypeError)
     expect(() => createMetricRegistry([{ slug: '../x', ...base }])).toThrow(TypeError)
   })
+
+  it('drains an already-started metric query before returning timeout', async () => {
+    vi.useFakeTimers()
+    let resolveQuery!: (value: { ok: true }) => void
+    const pending = new Promise<{ ok: true }>(resolve => { resolveQuery = resolve })
+    const registry = createMetricRegistry([{ slug: 'teste', scope: 'read:analytics', schema: { type: 'object' }, query: () => pending }])
+    const result = registry.execute('teste', context(new Set(['read:analytics'])), query)
+    let settled = false
+    const observed = result.then(value => { settled = true; return value }, error => { settled = true; throw error })
+    const assertion = expect(observed).rejects.toMatchObject({ status: 503 })
+    await vi.advanceTimersByTimeAsync(10_001)
+    await Promise.resolve()
+    expect(settled).toBe(false)
+    resolveQuery({ ok: true })
+    await assertion
+    vi.useRealTimers()
+  })
+
+  it('rejects excess in-process metric concurrency before starting database work', async () => {
+    const resolvers: Array<(value: { ok: true }) => void> = []
+    const handler = vi.fn(() => new Promise<{ ok: true }>(resolve => { resolvers.push(resolve) }))
+    const registry = createMetricRegistry([{ slug: 'teste', scope: 'read:analytics', schema: { type: 'object' }, query: handler }])
+
+    const first = registry.execute('teste', context(new Set(['read:analytics'])), query)
+    const second = registry.execute('teste', context(new Set(['read:analytics'])), query)
+    await expect(registry.execute('teste', context(new Set(['read:analytics'])), query)).rejects.toMatchObject({ status: 503 })
+    expect(handler).toHaveBeenCalledTimes(2)
+
+    resolvers.forEach(resolve => resolve({ ok: true }))
+    await expect(Promise.all([first, second])).resolves.toEqual([{ ok: true }, { ok: true }])
+  })
 })

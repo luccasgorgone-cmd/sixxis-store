@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import type { PrismaClient } from '@prisma/client'
 import { hasScope } from './auth'
-import { API_BASE_PATH, API_QUERY_TIMEOUT_MS, API_VERSION } from './constants'
+import { API_BASE_PATH, API_MAX_LIMIT, API_QUERY_TIMEOUT_MS, API_VERSION } from './constants'
 import { iso, itemEnvelope, listEnvelope } from './format'
 import { createStoreMetricRegistry, type MetricRegistry } from './metricas/registry'
 import { buildOpenApi } from './openapi'
 import { withApiV1, type ApiV1Options } from './pipeline'
 import { problem } from './problem'
 import { ApiQueryError, parseExpand, parseListQuery } from './query'
+import { rateLimitApiMetric, rateLimitApiPublic } from './rate-limit'
 import { createResourceRegistry, type ResourceRegistry } from './registry'
 import { executeItem, executeList, withQueryTimeout, type FieldSchema, type ResourceDefinition } from './resource'
 import { createAnalyticsResources } from './resources/analytics'
@@ -15,10 +16,14 @@ import { createCatalogResources, SAFE_CONFIGURATION_KEYS } from './resources/cat
 import { createCustomerResources } from './resources/clientes'
 import { createMarketingResources } from './resources/marketing'
 import { createCommerceResources } from './resources/vendas'
-import type { ApiContext, ApiScope, JsonValue, ListQuery } from './types'
+import { safeClientIp } from './audit'
+import type { ApiContext, ApiScope, JsonValue, ListQuery, RateLimitResult } from './types'
 
 const ALLOW = 'GET, HEAD, OPTIONS'
 const DEFAULT_META_CONCURRENCY = 2
+const STATIC_CACHE_CONTROL = 'public, max-age=3600, stale-while-revalidate=86400'
+const HEALTH_CACHE_MS = 5_000
+const META_CACHE_MS = 60_000
 
 type Env = Record<string, string | undefined>
 type StatsDelegate = {
@@ -32,6 +37,8 @@ export type RouterDeps = {
   metrics?: MetricRegistry
   pipelineDeps?: ApiV1Options['deps']
   healthCheck?: () => Promise<unknown>
+  publicRateLimit?: (id: string) => Promise<RateLimitResult>
+  metricRateLimit?: (id: string) => Promise<RateLimitResult>
   openApiDocument?: () => Promise<unknown> | unknown
   env?: Env
   now?: () => Date
@@ -144,12 +151,30 @@ function jsonResponse(value: unknown, status = 200): Response {
   return new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } })
 }
 
-function finalizePublic(response: Response, requestId: string): Response {
+function finalizePublic(response: Response, requestId: string, cacheControl = 'no-store', rateLimit?: RateLimitResult): Response {
   const headers = new Headers(response.headers)
-  headers.set('Cache-Control', 'no-store')
+  headers.set('Cache-Control', cacheControl)
   headers.set('X-Request-Id', requestId)
+  if (rateLimit) {
+    headers.set('X-RateLimit-Limit', String(rateLimit.limit))
+    headers.set('X-RateLimit-Remaining', String(Math.max(0, rateLimit.remaining)))
+    headers.set('X-RateLimit-Reset', String(Math.ceil(rateLimit.reset / 1000)))
+  }
   for (const key of [...headers.keys()]) if (key.startsWith('access-control-')) headers.delete(key)
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers })
+}
+
+async function guardPublic(request: Request, requestId: string, deps: RouterDeps): Promise<RateLimitResult | Response> {
+  let result: RateLimitResult
+  try {
+    result = await (deps.publicRateLimit ?? rateLimitApiPublic)(safeClientIp(request))
+  } catch {
+    return finalizePublic(problem(503, 'Serviço indisponível', 'Controle de tráfego temporariamente indisponível.', requestId), requestId)
+  }
+  if (result.success) return result
+  const response = problem(429, 'Muitas requisições', 'Limite de requisições excedido.', requestId)
+  response.headers.set('Retry-After', String(Math.max(1, Math.ceil((result.reset - Date.now()) / 1000))))
+  return finalizePublic(response, requestId, 'no-store', result)
 }
 
 function noBody(response: Response): Response {
@@ -275,10 +300,42 @@ async function resourceMetadata(registry: ResourceRegistry, context: ApiContext,
       expands,
       count: stats.count,
       ultimaAtualizacao: stats.ultimaAtualizacao,
+      sync: syncContract(definition),
       deprecated: definition.deprecated ?? false,
       ...(definition.description ? { description: definition.description } : {}),
     }
   })
+}
+
+function syncContract(definition: ResourceDefinition): Record<string, unknown> {
+  const windowFrom = definition.window?.from
+  const updated = definition.dateFields?.updated
+  const created = definition.dateFields?.created
+  const watermarkField = windowFrom?.startsWith('atualizado') ? updated : windowFrom?.startsWith('criado') ? created : updated ?? created
+  if (!watermarkField || !definition.sorts.includes(watermarkField)) throw new TypeError(`Missing sortable sync clock for ${definition.slug}`)
+  const updatedClock = watermarkField === updated
+  return {
+    sort: watermarkField,
+    watermarkField,
+    from: updatedClock ? 'atualizadoDesde' : 'criadoDesde',
+    to: updatedClock ? 'atualizadoAte' : 'criadoAte',
+    maxDays: definition.window?.maxDays ?? null,
+    maxLimit: Math.min(API_MAX_LIMIT, definition.maxLimit ?? API_MAX_LIMIT),
+  }
+}
+
+type CacheEntry<T> = { expiresAt: number; promise: Promise<T> }
+const metadataCache = new WeakMap<ResourceRegistry, Map<string, CacheEntry<Record<string, unknown>[]>>>()
+async function cachedResourceMetadata(registry: ResourceRegistry, context: ApiContext, timeoutMs: number): Promise<Record<string, unknown>[]> {
+  const key = `${[...(context.identity?.scopes ?? [])].sort().join(',')}:${timeoutMs}`
+  const entries = metadataCache.get(registry) ?? new Map<string, CacheEntry<Record<string, unknown>[]>>()
+  metadataCache.set(registry, entries)
+  const current = entries.get(key)
+  if (current && current.expiresAt > Date.now()) return current.promise
+  const promise = resourceMetadata(registry, context, timeoutMs)
+  entries.set(key, { expiresAt: Date.now() + META_CACHE_MS, promise })
+  promise.catch(() => { if (entries.get(key)?.promise === promise) entries.delete(key) })
+  return promise
 }
 
 async function defaultHealthCheck(): Promise<void> {
@@ -286,13 +343,35 @@ async function defaultHealthCheck(): Promise<void> {
   await withQueryTimeout(() => prisma.$queryRaw`SELECT 1`)
 }
 
+const healthCache = new WeakMap<() => Promise<unknown>, CacheEntry<unknown>>()
+async function cachedHealthCheck(check: () => Promise<unknown>): Promise<void> {
+  const current = healthCache.get(check)
+  if (current && current.expiresAt > Date.now()) { await current.promise; return }
+  const promise = Promise.resolve().then(check)
+  healthCache.set(check, { expiresAt: Date.now() + HEALTH_CACHE_MS, promise })
+  promise.catch(() => { if (healthCache.get(check)?.promise === promise) healthCache.delete(check) })
+  await promise
+}
+
+let cachedOpenApiDocument: Record<string, unknown> | undefined
+let cachedOpenApiBody: string | undefined
 function defaultOpenApiDocument(): Record<string, unknown> {
-  return buildOpenApi(resources({}), metrics({})) as unknown as Record<string, unknown>
+  return cachedOpenApiDocument ??= buildOpenApi(resources({}), metrics({})) as unknown as Record<string, unknown>
+}
+
+function defaultOpenApiResponse(): Response {
+  cachedOpenApiBody ??= JSON.stringify(defaultOpenApiDocument())
+  return new Response(cachedOpenApiBody, { headers: { 'Content-Type': 'application/json; charset=utf-8' } })
 }
 
 function docsResponse(): Response {
-  return new Response(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sixxis Store API v1</title></head><body><script id="api-reference" data-url="${API_BASE_PATH}/openapi.json"></script><script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script></body></html>`, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  return new Response(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sixxis Store API v1</title></head><body><main><h1>Sixxis Store API v1</h1><p>API somente leitura para integrações autorizadas.</p><p><a href="${API_BASE_PATH}/openapi.json">Baixar especificação OpenAPI 3.1</a></p><p>Envie credenciais Bearer apenas no seu cliente de integração. Esta página não coleta credenciais.</p></main></body></html>`, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Security-Policy': "default-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+      'Referrer-Policy': 'no-referrer',
+      'X-Content-Type-Options': 'nosniff',
+    },
   })
 }
 
@@ -322,6 +401,8 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
   }
   if (exact('health')) {
     const requestId = randomUUID()
+    const publicLimit = await guardPublic(request, requestId, deps)
+    if (publicLimit instanceof Response) return publicLimit
     try {
       assertQueryParams(request)
     } catch (error) {
@@ -329,30 +410,35 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
       throw error
     }
     try {
-      await (deps.healthCheck ?? defaultHealthCheck)()
+      await cachedHealthCheck(deps.healthCheck ?? defaultHealthCheck)
       const env = deps.env ?? process.env
       const commit = env.RAILWAY_GIT_COMMIT_SHA || env.VERCEL_GIT_COMMIT_SHA || 'unknown'
       const time = iso((deps.now ?? (() => new Date()))())
-      return finalizePublic(jsonResponse({ status: 'ok', version: API_VERSION, commit, time }), requestId)
+      return finalizePublic(jsonResponse({ status: 'ok', version: API_VERSION, commit, time }), requestId, 'no-store', publicLimit)
     } catch {
-      return finalizePublic(problem(503, 'Serviço indisponível', 'Banco de dados temporariamente indisponível.', requestId), requestId)
+      return finalizePublic(problem(503, 'Serviço indisponível', 'Banco de dados temporariamente indisponível.', requestId), requestId, 'no-store', publicLimit)
     }
   }
   if (exact('openapi.json')) {
     const requestId = randomUUID()
+    const publicLimit = await guardPublic(request, requestId, deps)
+    if (publicLimit instanceof Response) return publicLimit
     try {
       assertQueryParams(request)
-      const document = await (deps.openApiDocument ?? defaultOpenApiDocument)()
-      return finalizePublic(jsonResponse(document), requestId)
-    } catch {
+      const response = deps.openApiDocument ? jsonResponse(await deps.openApiDocument()) : defaultOpenApiResponse()
+      return finalizePublic(response, requestId, STATIC_CACHE_CONTROL, publicLimit)
+    } catch (error) {
+      if (error instanceof ApiQueryError) return finalizePublic(queryProblem(error, requestId), requestId, 'no-store', publicLimit)
       return finalizePublic(problem(500, 'Erro interno', 'Não foi possível processar a requisição.', requestId), requestId)
     }
   }
   if (exact('docs')) {
     const requestId = randomUUID()
+    const publicLimit = await guardPublic(request, requestId, deps)
+    if (publicLimit instanceof Response) return publicLimit
     try {
       assertQueryParams(request)
-      return finalizePublic(docsResponse(), requestId)
+      return finalizePublic(docsResponse(), requestId, STATIC_CACHE_CONTROL, publicLimit)
     } catch (error) {
       if (error instanceof ApiQueryError) return finalizePublic(queryProblem(error, requestId), requestId)
       throw error
@@ -380,7 +466,7 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
   if (exact('meta', 'recursos')) {
     return protectedHandler(async (_request, context) => {
       assertQueryParams(request)
-      const data = await resourceMetadata(resources(deps), context, deps.metaTimeoutMs ?? API_QUERY_TIMEOUT_MS)
+      const data = await cachedResourceMetadata(resources(deps), context, deps.metaTimeoutMs ?? API_QUERY_TIMEOUT_MS)
       return jsonResponse(listEnvelope(data, { hasMore: false, nextCursor: null }, context.requestId))
     }, { auditRoute: `${API_BASE_PATH}/meta/recursos` }, deps)(request)
   }
@@ -390,6 +476,17 @@ async function dispatchGet(request: Request, segments: readonly string[], deps: 
     if (definition) {
       return protectedHandler(async (_request, context) => {
         assertQueryParams(request, ['de', 'ate', 'agrupar'])
+        let costLimit: RateLimitResult
+        try { costLimit = await (deps.metricRateLimit ?? rateLimitApiMetric)(context.identity!.id) }
+        catch { return problem(503, 'Serviço indisponível', 'Controle de tráfego temporariamente indisponível.', context.requestId) }
+        if (!costLimit.success) {
+          const response = problem(429, 'Muitas requisições', 'Limite de métricas excedido.', context.requestId)
+          response.headers.set('X-RateLimit-Limit', String(costLimit.limit))
+          response.headers.set('X-RateLimit-Remaining', String(Math.max(0, costLimit.remaining)))
+          response.headers.set('X-RateLimit-Reset', String(Math.ceil(costLimit.reset / 1000)))
+          response.headers.set('Retry-After', String(Math.max(1, Math.ceil((costLimit.reset - Date.now()) / 1000))))
+          return response
+        }
         const data = await metrics(deps).execute(definition.slug, context, new URL(request.url).searchParams)
         return jsonResponse(itemEnvelope(data, context.requestId))
       }, { scope: definition.scope, auditRoute: `${API_BASE_PATH}/metricas/${definition.slug}` }, deps)(request)

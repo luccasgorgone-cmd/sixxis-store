@@ -5,12 +5,19 @@ import { ApiQueryError } from '../query'
 import { redactValue } from '../redact'
 
 export const METRIC_GROUPINGS = ['dia', 'semana', 'mes'] as const
+export const API_METRIC_MAX_ROWS = 5_000
+export const API_METRIC_TAKE = API_METRIC_MAX_ROWS + 1
 export type MetricGrouping = typeof METRIC_GROUPINGS[number]
 export type MetricPeriod = { de: string; ate: string; agrupar: MetricGrouping }
 export type MetricParams = MetricPeriod & {
   from: Date
   toExclusive: Date
   periodo: MetricPeriod
+}
+
+export function boundedMetricRows<T>(rows: T[]): T[] {
+  if (rows.length > API_METRIC_MAX_ROWS) throw new ApiQueryError(503, 'Métrica temporariamente indisponível para este volume de dados.')
+  return rows
 }
 
 const dayFormatter = new Intl.DateTimeFormat('en-CA', {

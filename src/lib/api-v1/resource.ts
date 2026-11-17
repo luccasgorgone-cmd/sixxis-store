@@ -10,7 +10,7 @@ import type { ApiContext, ApiScope, ItemEnvelope, ListEnvelope, ListQuery } from
 /** JSON-compatible value shape shared by field metadata and the OpenAPI generator. */
 export type FieldSchema = { type: 'string'|'number'|'integer'|'boolean'|'object'|'array'; format?: string; nullable?: boolean; enum?: readonly string[]; items?: FieldSchema; properties?: Record<string,FieldSchema>; required?: readonly string[] }
 export type FieldDefinition = FieldSchema & { name: string; description?: string; scope?: ApiScope; example?: unknown }
-export type FilterDefinition = { field?: string; type: 'string'|'number'|'boolean'; integer?: boolean; min?: number; max?: number; values?: readonly string[]; mode?: 'equals'|'contains'|'arrayContains'; description?: string }
+export type FilterDefinition = { field?: string; type: 'string'|'number'|'boolean'; integer?: boolean; min?: number; max?: number; values?: readonly string[]; mode?: 'equals'|'contains'|'arrayContains'; scope?: ApiScope; description?: string }
 export type ExpandDefinition = { name:string; relation?:string; many:boolean; resource:()=>ResourceDefinition; scope?:ApiScope; description?:string }
 export type ResourceQueryArgs = { where:Record<string,unknown>; select:Record<string,unknown>; orderBy:Record<string,'asc'|'desc'>[]; take:number }
 export type ResourceDefinition<T extends Record<string, unknown> = Record<string, unknown>> = {
@@ -26,7 +26,7 @@ export type ResourceDefinition<T extends Record<string, unknown> = Record<string
   safeKeyFields?:readonly string[]
   /** Nominal opaque FK joins only, restored at the root, never inside free JSON. */
   structuralIdFields?:readonly string[]
-  select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]
+  select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]; searchScope?:ApiScope
   dateFields?:{created?:string;updated?:string}
   window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte';maxDays:number}
   filters?:Record<string,FilterDefinition>; querySchema?:ZodType; deprecated?:boolean; description?:string
@@ -173,7 +173,7 @@ export async function withQueryTimeout<T>(work:()=>Promise<T>,timeoutMs=API_QUER
 }
 export async function executeList<T extends Record<string, unknown>>(def:ResourceDefinition<T>,ctx:ApiContext,q:ListQuery,options:CursorOptions={}):Promise<ListEnvelope<Record<string,unknown>>> {
   assertAuthorized(def,ctx)
-  validateListQuery(q,def,options)
+  validateListQuery(q,def,{...options,identity:ctx.identity})
   const secret=resolveCursorSecret(options.cursorSecret)
   const sortField=q.sort.replace(/^-/,''), direction=q.sort.startsWith('-')?'desc':'asc'
   if (!def.select[sortField]) throw new TypeError('Sort field must be selected')

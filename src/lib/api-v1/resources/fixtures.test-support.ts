@@ -84,6 +84,7 @@ export function assertNullableFields(def: ResourceDefinition) {
 
 /** Every expansion uses its child's own scalar selector and serializer, never grandchildren. */
 export async function assertExpansions(def: ResourceDefinition) {
+  const fullScopes = ['read:all', 'read:pii', 'read:mensagens'] as const
   for (const expansion of def.expands) {
     const child = expansion.resource(), raw = fixture(child.model)
     for (const grandchild of child.expands) raw[grandchild.name] = { secret: 'GRANDCHILD-MUST-NOT-LEAK' }
@@ -92,10 +93,10 @@ export async function assertExpansions(def: ResourceDefinition) {
     const serialize = vi.spyOn(child, 'serialize')
     const fake = { ...def, adapter: { findMany, findFirst } }
     const query = parseListQuery(`https://test.local/?expand=${expansion.name}`, def)
-    for (const response of [await executeList(fake, context(['read:all']), query, options), await executeItem(fake, context(['read:all']), 'id', { expand: [expansion.name] })]) {
+    for (const response of [await executeList(fake, context([...fullScopes]), query, options), await executeItem(fake, context([...fullScopes]), 'id', { expand: [expansion.name] })]) {
       const output = Array.isArray(response.data) ? response.data[0] : response.data
       const value = expansion.many ? (output[expansion.name] as { data: unknown[] }).data[0] : output[expansion.name]
-      expect(value).toEqual(child.serialize(raw, context(['read:all'])))
+      expect(value).toEqual(child.serialize(raw, context([...fullScopes])))
       expect(JSON.stringify(value)).not.toMatch(/GRANDCHILD-MUST-NOT-LEAK|DO-NOT-LEAK/)
     }
     expect(serialize).toHaveBeenCalled()

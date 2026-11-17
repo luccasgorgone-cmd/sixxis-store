@@ -28,6 +28,16 @@ export type StoreMetricOptions = {
   now?: () => Date
 }
 
+const MAX_CONCURRENT_METRICS = 2
+let activeMetricQueries = 0
+
+async function withMetricSlot<T>(work: () => Promise<T>): Promise<T> {
+  if (activeMetricQueries >= MAX_CONCURRENT_METRICS) throw new ApiQueryError(503, 'Métricas temporariamente ocupadas.')
+  activeMetricQueries += 1
+  try { return await work() }
+  finally { activeMetricQueries -= 1 }
+}
+
 export function createMetricRegistry(definitions: readonly MetricDefinition[]) {
   const metrics = new Map<string, MetricDefinition>()
   for (const definition of definitions) {
@@ -44,7 +54,7 @@ export function createMetricRegistry(definitions: readonly MetricDefinition[]) {
       if (!definition) throw new ApiQueryError(404, 'Métrica não encontrada.')
       if (!ctx.identity || !hasScope(ctx.identity, definition.scope)) throw new ApiQueryError(403, 'Escopo necessário não autorizado.')
       const params = parseMetricParams(search)
-      return withQueryTimeout(() => definition.query(ctx, params))
+      return withMetricSlot(() => withQueryTimeout(() => definition.query(ctx, params), undefined, { drain: true }))
     },
   }
 }

@@ -1,7 +1,8 @@
 import type { PrismaClient } from '@prisma/client'
+import { ApiQueryError } from '../query'
 import type { ApiContext } from '../types'
 import type { MetricDefinition, StoreMetricOptions } from './registry'
-import { bucketForInstant, listMetricBuckets, metricBase, type MetricParams } from './tempo'
+import { API_METRIC_MAX_ROWS, API_METRIC_TAKE, boundedMetricRows, bucketForInstant, listMetricBuckets, metricBase, type MetricParams } from './tempo'
 
 export type FunnelEvent = { sessaoId: string; tipo: string; dados: unknown; createdAt: Date }
 type TrackedSession = { sessaoId: string; createdAt: Date }
@@ -62,6 +63,7 @@ export async function loadPeriodAndFollowupEvents(
   const latestActivity = new Map<string, Date>()
   const scanActivity = async () => {
     let cursorId: string | undefined
+    let scanned = 0
     while (true) {
       const rawPage = await client.eventoTracking.findMany({
         where: { createdAt: { gte: params.from, lt: params.toExclusive } },
@@ -71,6 +73,8 @@ export async function loadPeriodAndFollowupEvents(
         ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
       })
       const page = rawPage as unknown as ActivityRow[]
+      scanned += page.length
+      if (scanned > API_METRIC_MAX_ROWS) throw new ApiQueryError(503, 'Métrica temporariamente indisponível para este volume de dados.')
       for (const row of page) {
         const bucketName = bucketForInstant(row.createdAt, params.agrupar)
         const sessions = activeSessionsByBucket.get(bucketName) ?? new Set<string>()
@@ -88,10 +92,11 @@ export async function loadPeriodAndFollowupEvents(
       where: { createdAt: { gte: params.from, lt: params.toExclusive }, tipo: { in: [...FUNNEL_EVENT_TYPES] } },
       select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
+      take: API_METRIC_TAKE,
     }),
     scanActivity(),
   ])
-  const stageEvents = rawStageEvents as unknown as FunnelEvent[]
+  const stageEvents = boundedMetricRows(rawStageEvents as unknown as FunnelEvent[])
   const activityEvents = [...latestActivity].map(([sessaoId, createdAt]) => ({ sessaoId, tipo: 'activity', dados: null, createdAt }))
   const periodEvents = [...stageEvents, ...activityEvents]
   const checkoutSessions = [...new Set(stageEvents.filter(event => event.tipo === 'begin_checkout').map(event => event.sessaoId))]
@@ -110,6 +115,7 @@ export async function loadPeriodAndFollowupEvents(
         },
         select: { sessaoId: true, tipo: true, dados: true, createdAt: true },
         orderBy: { createdAt: 'asc' },
+        take: API_METRIC_TAKE,
       }),
       client.eventoTracking.groupBy({
         by: ['sessaoId'],
@@ -117,7 +123,8 @@ export async function loadPeriodAndFollowupEvents(
         _max: { createdAt: true },
       }),
     ])
-    followup.push(...rawOutcomes as unknown as FunnelEvent[])
+    followup.push(...boundedMetricRows(rawOutcomes as unknown as FunnelEvent[]))
+    if (followup.length > API_METRIC_MAX_ROWS) throw new ApiQueryError(503, 'Métrica temporariamente indisponível para este volume de dados.')
     for (const row of rawFollowupActivity as unknown as Array<{ sessaoId: string; _max: { createdAt: Date | null } }>) {
       if (row._max.createdAt) followup.push({ sessaoId: row.sessaoId, tipo: 'activity', dados: null, createdAt: row._max.createdAt })
     }
@@ -149,10 +156,11 @@ export function createFunilMetric(options: StoreMetricOptions = {}): MetricDefin
         client.sessaoVisitante.findMany({
           where: { createdAt: { gte: params.from, lt: params.toExclusive } },
           select: { sessaoId: true, createdAt: true },
+          take: API_METRIC_TAKE,
         }),
         loadPeriodAndFollowupEvents(client, params, now),
       ])
-      const sessions = rawSessions as unknown as TrackedSession[]
+      const sessions = boundedMetricRows(rawSessions as unknown as TrackedSession[])
       const events = loadedEvents.periodEvents
       const stages = {
         sessoes: new Set(sessions.map(session => session.sessaoId)),

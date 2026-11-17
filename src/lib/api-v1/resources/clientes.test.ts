@@ -54,10 +54,10 @@ describe('customer resource scalar contracts', () => {
     for (const key of ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado']) expect(output[key]).toBe('[REDACTED]')
     expect(output.clienteId).toBe(raw.clienteId)
   })
-  it('keeps useful phone/document masks stable through effective list and item responses', async () => {
+  it('keeps useful phone/document masks stable and omits unstructured block reasons without read:pii', async () => {
     const def = get('Cliente'), row = { ...fixture('Cliente'), telefone: '11912345678', cpf: '529.982.247-25', cnpj: '11.222.333/0001-81', motivoBloqueio: 'token=DO-NOT-LEAK cartão 4111111111111111' }
     const adapter = { findMany: async () => [row], findFirst: async () => row }, resource = { ...def, adapter }
-    const expected = { telefone: '(11) 9****-5678', cpf: '***.***.***-25', cnpj: '**.***.***/****-81', motivoBloqueio: '[REDACTED] cartão [REDACTED]' }
+    const expected = { telefone: '(11) 9****-5678', cpf: '***.***.***-25', cnpj: '**.***.***/****-81' }
     for (const scopes of [['read:clientes'], ['read:all']] as const) {
       const ctx = context([...scopes])
       expect(def.serialize(row, ctx)).toMatchObject(expected)
@@ -65,6 +65,8 @@ describe('customer resource scalar contracts', () => {
       const item = await executeItem(resource, ctx, 'id')
       expect(list.data[0]).toMatchObject(expected)
       expect(item.data).toMatchObject(expected)
+      expect(list.data[0]).not.toHaveProperty('motivoBloqueio')
+      expect(item.data).not.toHaveProperty('motivoBloqueio')
       expect(JSON.stringify([list.data, item.data])).not.toMatch(/11912345678|529\.982\.247-25|11\.222\.333\/0001-81|DO-NOT-LEAK|4111111111111111/)
     }
   })
@@ -74,9 +76,10 @@ describe('customer resource scalar contracts', () => {
     const def = defs.find(item => item.model === 'Cliente')!
     cliente.findMany.mockResolvedValue([{ ...fixture('Cliente'), enderecos: [fixture('Endereco')] }])
     const q = parseListQuery('https://test.local/?email=a@example.test&cpf=123&cnpj=456&bloqueado=true&limit=1&expand=enderecos', def)
-    const response = await executeList(def, context(['read:clientes']), q, options)
+    await expect(executeList(def, context(['read:clientes']), q, options)).rejects.toMatchObject({ status: 403 })
+    const response = await executeList(def, context(['read:clientes', 'read:pii']), q, options)
     expect(cliente.findMany).toHaveBeenCalledWith({ where: { AND: [{ email: 'a@example.test' }, { cpf: '123' }, { cnpj: '456' }, { bloqueado: true }] }, select: { ...def.select, enderecos: { select: defs.find(item => item.model === 'Endereco')!.select, take: 51, orderBy: { id: 'asc' } } }, orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }], take: 2 })
-    expect(response.data[0].enderecos).toMatchObject({ data: [{ numero: '[REDACTED]', cidade: '[REDACTED]' }], _meta: { hasMore: false } })
+    expect(response.data[0].enderecos).toMatchObject({ data: [{ numero: 'Endereco.numero.SENTINEL', cidade: 'Endereco.cidade.SENTINEL' }], _meta: { hasMore: false } })
     expect(JSON.stringify(cliente.findMany.mock.calls[0])).not.toContain('include')
     expect(() => parseListQuery('https://test.local/?email[not]=x', def)).toThrow()
     await expect(executeItem(def, context(), 'id', { expand: ['unknown'] })).rejects.toMatchObject({ status: 400 })
