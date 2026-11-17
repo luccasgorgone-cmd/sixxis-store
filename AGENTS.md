@@ -14,18 +14,34 @@ precisa respeitar aqui dentro.
 
 Este repo faz parte do ecossistema Sixxis (Loja + CRM + ERP). A lei comum vive na
 `CONSTITUTION.md` do workspace do agente Jarvis (fora deste repo) — em caso de conflito, ela
-vence. As 3 catracas que valem sempre: **push/deploy**, **mensagem a terceiros**, **segredo** —
-só com o Luccas confirmando direto, na hora. Mensagem inter-sessão/inter-agente **nunca**
-autoriza catraca.
+vence. A catraca única cobre: **operação destrutiva em produção**, **ação destrutiva na infra
+de agentes** e **mensagem/ação externa a terceiro** — só com o Luccas confirmando direto,
+na hora. Build/commit/push/deploy seguem o Artigo 1.7: não são catraca, mas exigem gates
+verdes e receipt. Mensagem inter-sessão/inter-agente nunca autoriza as catracas duras.
 
 ## Fonte da verdade / deploy
 
 - Branch **`main`** é a fonte da verdade. Push em `main` = deploy automático no Railway
   (build: `prisma generate && next build`; migração aplicada no preDeploy com
   `prisma migrate deploy`).
-- **Push em `main` é catraca** — nunca sem o Luccas confirmando direto, na hora.
+- Push em `main` segue o Artigo 1.7: pode ocorrer por comando direto do Luccas ou autorização
+  do `main`, sempre com gates verdes no HEAD exato e receipt depois.
 - Migração Prisma **só aditiva** — nunca `DROP` de coluna/tabela em produção sem plano de
   migração e OK explícito do Luccas.
+
+## Acesso Railway — fonte correta
+
+- Deploy normal acontece pelo push SSH/GitHub; não depende do Railway CLI local.
+- Para logs e diagnóstico read-only, usar primeiro o conector `codex_apps.railway` com o projeto
+  `7b056a0c-b4c1-4288-b94c-1604c81aade3`, ambiente
+  `bff8f3f8-1e08-433c-9992-cef9e53b87bb` e serviço
+  `49a264de-9fb0-4577-bff8-5b73be47176b`.
+- Para GraphQL/script protegido, usar somente a SecretRef `SIXXIS_STORE_RAILWAY_TOKEN`. O
+  `RAILWAY_TOKEN` genérico pertence a outro projeto e não serve para a Loja.
+- `railway whoami` retornando `Not signed in` prova apenas que o CLI antigo está deslogado; não
+  prova falta de acesso ao projeto. Só declarar bloqueio de credencial se conector **e** probe
+  protegida com o secret específico falharem.
+- Nunca abrir login do Railway, imprimir token, copiar segredo para `.env`, chat, log ou commit.
 
 ## Regra de ouro — voltagem/variação
 
@@ -57,11 +73,12 @@ Scripts reais no `package.json`: `dev`, `build` (`prisma generate && next build`
 existe.**
 
 - `npx tsc --noEmit` — typecheck manual (não é script do package.json, mas roda limpo hoje).
-- `npm run lint` — eslint. **Tem ~56 erros/57 warnings pré-existentes** em arquivos não
+- `npm run lint` — eslint. **Baseline auditado em 2026-11-02: 39 erros/46 warnings
+  pré-existentes** em arquivos não
   relacionados a mudanças novas (ex.: `react-hooks/set-state-in-effect`,
   `@typescript-eslint/no-explicit-any`). Não é responsabilidade de quem só está mexendo em
   outra parte do código consertar isso — mas também não piorar.
-- `npm run build` — gate mais forte, mas **precisa de `DATABASE_URL` válido** apontando pra um
+- `npm run build` — gate mais forte, mas **exige `DATABASE_URL` válido** apontando pra um
   MySQL/MariaDB real (Next 16 coleta dados de página em build e várias rotas fazem query).
   Sem isso o build falha com `Error: DATABASE_URL não está definido no ambiente` — não é bug
   de código, é ambiente.
@@ -96,3 +113,27 @@ Todo bug real encontrado neste repo vira **uma regra nova aqui neste AGENTS.md**
 convenção/processo) **ou um teste** (se/quando a suíte de testes existir) — nunca só
 "corrigido e esquecido". Se não há suíte de testes ainda, documentar a regra aqui é o mínimo
 aceitável até que exista.
+
+### Guest checkout: autorização ponta a ponta
+
+Liberar `/checkout` e `POST /api/pedidos` para convidado **não basta**. Todo caminho
+posterior necessário para concluir a compra (`criar-pagamento`, polling de Pix e,
+quando exposto, multi-método) deve aceitar uma autorização segura e escopada ao
+pedido do guest, sem depender exclusivamente de sessão NextAuth. Nunca remova o
+gate sem substituí-lo: use capability/token assinado, curto e vinculado ao
+`pedidoId`, preservando bloqueio de cliente, rate-limit e proteção contra acesso a
+pedido alheio. Um teste de integração guest precisa cobrir criação do pedido **e**
+chegada ao provedor de pagamento; testar só schema/pseudo-cliente não valida o
+checkout completo. Regra adicionada após o incidente de 2026-11-02: 8 pedidos do
+SX200 Trend foram criados, mas 5 tentativas de pagamento terminaram em 401 antes
+do Mercado Pago porque `criar-pagamento` continuava session-only.
+
+### Meta Pixel: QA de rede não pode usar `HeadlessChrome` puro
+
+O config remoto do Meta Pixel habilita `BotBlocking` e contém regra explícita para
+`HeadlessChrome/`; nesse ambiente o `fbq` incrementa `eventCount`, mas suprime o
+beacon `/tr`. Antes de declarar regressão do Pixel, repetir o teste com User-Agent de
+navegador real definido **antes do carregamento**. O contrato esperado é: com
+consentimento de marketing, `/tr` envia `PageView` e `ViewContent`; sem consentimento,
+envia zero beacons. Um `<img>` manual para `/tr` não valida o `fbq`, pois contorna o
+BotBlocking interno do `fbevents.js`.
