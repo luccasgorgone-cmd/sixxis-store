@@ -79,7 +79,10 @@ export function parseListQuery(url: URL | string, definition: ResourceDefinition
 /** Re-run at the execution boundary: callers cannot bypass validation by constructing ListQuery. */
 export function validateListQuery(q: ListQuery, definition: ResourceDefinition, options: QueryOptions = {}): void {
   if (!Number.isInteger(q.limit) || q.limit < 1 || q.limit > Math.min(API_MAX_LIMIT, definition.maxLimit ?? API_MAX_LIMIT)) fail()
-  if (!definition.sorts.includes(q.sort.replace(/^-/, ''))) fail()
+  const sortField = q.sort.replace(/^-/, '')
+  if (!definition.sorts.includes(sortField)) fail()
+  const sortScope = definition.sortScopes?.[sortField]
+  if (sortScope && options.identity !== undefined && (!options.identity || !hasScope(options.identity, sortScope))) throw new ApiQueryError(403, 'Escopo necessário não autorizado.')
   if (q.ids && (q.ids.length > 100 || q.ids.some(id => !id || id.length > 500))) fail()
   if (q.q !== undefined && (!q.q.trim() || q.q.length > 200 || !definition.searchFields?.length)) fail()
   if (q.q !== undefined && definition.searchScope && options.identity !== undefined && (!options.identity || !hasScope(options.identity, definition.searchScope))) throw new ApiQueryError(403, 'Escopo necessário não autorizado.')
@@ -101,8 +104,8 @@ export function validateListQuery(q: ListQuery, definition: ResourceDefinition, 
   if (q.cursor !== undefined) {
     const cursor = decodeCursor(q.cursor, options.cursorSecret)
     if (cursor.resource !== definition.slug || cursor.sort !== q.sort || cursor.filterHash !== filterHash(q)) fail()
-    const sortField = definition.fields.find(field => field.name === q.sort.replace(/^-/, ''))
-    if (sortField?.format === 'date-time' && (typeof cursor.value !== 'string' || !z.iso.datetime({ offset:true }).safeParse(cursor.value).success)) fail()
-    if (sortField?.type === 'number' && typeof cursor.value !== 'number') fail()
+    const cursorSortField = definition.fields.find(field => field.name === sortField)
+    if (cursorSortField?.format === 'date-time' && (typeof cursor.value !== 'string' || !z.iso.datetime({ offset:true }).safeParse(cursor.value).success)) fail()
+    if (cursorSortField?.type === 'number' && typeof cursor.value !== 'number') fail()
   }
 }

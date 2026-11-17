@@ -125,7 +125,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       filters: {
         pedidoId: { type: 'string', field: 'id' },
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         enderecoId: { type: 'string' },
         erpPedidoId: { type: 'string' },
         status: { type: 'string', values: orderStatuses },
@@ -136,8 +136,8 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
         nfeAmbiente: { type: 'string', values: ['homologacao', 'producao'] },
         cupom: { type: 'string', field: 'cupomCodigo' },
         cupomCodigo: { type: 'string' },
-        uf: { type: 'string', field: 'endereco.estado' },
-        cidade: { type: 'string', field: 'endereco.cidade' },
+        uf: { type: 'string', field: 'endereco.estado', scope: 'read:pii' },
+        cidade: { type: 'string', field: 'endereco.cidade', scope: 'read:pii' },
         produtoId: { type: 'string', field: 'itens.some.produtoId' },
         variacaoId: { type: 'string', field: 'itens.some.variacaoId' },
         pagamentoStatus: { type: 'string', field: 'pagamentos.some.mpStatus' },
@@ -484,7 +484,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt',
       dateFields: { created: 'createdAt' },
       filters: {
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         sessionId: { type: 'string', scope: 'read:pii' },
       },
       adapter: {
@@ -636,7 +636,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
       dateFields: { created: 'usadoEm' },
       filters: {
         cupomId: { type: 'string' },
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         pedidoId: { type: 'string' },
         emailCliente: { type: 'string', scope: 'read:pii' },
       },
@@ -687,7 +687,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
       dateFields: { created: 'criadoEm', updated: 'atualizadoEm' },
       window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         status: { type: 'string', values: ['ativo', 'convertido', 'abandonado', 'recuperado'] },
         etapaAtual: { type: 'number' },
       },

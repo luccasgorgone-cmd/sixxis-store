@@ -181,7 +181,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       window: { from: 'atualizadoDesde', to: 'atualizadoAte' },
       filters: {
         campanhaId: { type: 'string' },
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         email: { type: 'string', scope: 'read:pii' },
         telefone: { type: 'string', scope: 'read:pii' },
         status: { type: 'string', values: ['PENDENTE', 'ENVIADO', 'ERRO', 'ABERTO', 'CLICADO', 'pendente', 'enviado', 'erro', 'aberto', 'clicado'] },
@@ -342,7 +342,7 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
       filters: {
         conversaId: { type: 'string', field: 'id' },
         sessaoId: { type: 'string', scope: 'read:pii' },
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         status: { type: 'string', values: ['ativa', 'encerrada', 'transferida', 'abandonada'] },
         leadGerado: { type: 'boolean' },
         produtoInteresse: { type: 'string' },
@@ -460,8 +460,8 @@ export function createMarketingResources(deps: MarketingResourceOptions = {}): R
         telefone: { type: 'string', scope: 'read:pii' },
         cpf: { type: 'string', scope: 'read:pii' },
         cnpj: { type: 'string', scope: 'read:pii' },
-        uf: { type: 'string', field: 'estado' },
-        cidade: { type: 'string' },
+        uf: { type: 'string', field: 'estado', scope: 'read:pii' },
+        cidade: { type: 'string', scope: 'read:pii' },
         segmento: { type: 'string', values: ['Varejo', 'Atacado', 'E-commerce', 'Distribuidor', 'Outro'] },
       },
       adapter: {

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { redactValue } from './redact'
 import { executeItem, executeList, type ResourceDefinition, type ResourceQueryArgs } from './resource'
+import { parseListQuery } from './query'
 import { fixture, context, options } from './resources/fixtures.test-support'
 import { createStoreMetricRegistry } from './metricas/registry'
 import { createStoreResourceRegistry, routeApiV1 } from './router'
@@ -60,6 +61,36 @@ describe('complete anti-leak sweep', () => {
         expect(filter.scope, `${definition.slug}.${name} filter`).toBe('read:pii')
       }
     }
+  })
+
+  it('requires read:pii for every filter whose target is masked without that scope', () => {
+    const registry = createStoreResourceRegistry({ prisma: {} as never })
+    const fullContext = context()
+    const maskedContext = context(['read:all', 'read:financeiro', 'read:mensagens'])
+
+    for (const definition of registry.list()) {
+      for (const [name, filter] of Object.entries(definition.filters ?? {})) {
+        const path = (filter.field ?? name).split('.').filter(part => part !== 'some')
+        let target = definition
+        if (path.length > 1) {
+          const expansion = definition.expands.find(item => (item.relation ?? item.name) === path[0])
+          if (expansion) target = expansion.resource()
+        }
+        const field = path.at(-1)!
+        if (target.fields.find(item => item.name === field)?.type !== 'string') continue
+        const full = target.serialize(fixture(target.model), fullContext)[field]
+        const masked = target.serialize(fixture(target.model), maskedContext)[field]
+        if (JSON.stringify(full) !== JSON.stringify(masked)) {
+          expect(filter.scope, `${definition.slug}.${name} filter`).toBe('read:pii')
+        }
+      }
+    }
+  })
+
+  it('requires read:pii before sorting customers by their masked name', () => {
+    const customers = createStoreResourceRegistry({ prisma: {} as never }).get('clientes')!
+    expect(() => parseListQuery('https://example.test/?sort=nome', customers, { identity: context(['read:all']).identity })).toThrow(expect.objectContaining({ status: 403 }))
+    expect(parseListQuery('https://example.test/?sort=nome', customers, { identity: context().identity }).sort).toBe('nome')
   })
 
   it('traverses list, detail and every expand of all 49 resources with total scopes', async () => {

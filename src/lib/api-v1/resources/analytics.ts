@@ -461,7 +461,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       filters: {
         ip: { type: 'string', scope: 'read:pii' },
         sucesso: { type: 'boolean' },
-        rota: { type: 'string' },
+        rota: { type: 'string', scope: 'read:pii' },
       },
       adapter: {
         findMany: async args => {
@@ -675,8 +675,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
         browser: { type: 'string' },
         os: { type: 'string' },
         pais: { type: 'string' },
-        path: { type: 'string' },
-        referrer: { type: 'string' },
+        path: { type: 'string', scope: 'read:pii' },
+        referrer: { type: 'string', scope: 'read:pii' },
         hora: { type: 'number', integer: true, min: 0, max: 23 },
       },
       adapter: {
@@ -734,7 +734,7 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
       searchFields: ['motivo'],
       searchScope: 'read:pii',
       filters: {
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         acao: { type: 'string', values: ['bloqueio', 'desbloqueio'] },
       },
       adapter: {

@@ -361,6 +361,10 @@
                 "-nome"
               ],
               "default": "updatedAt"
+            },
+            "x-required-scopes-by-value": {
+              "nome": "read:pii",
+              "-nome": "read:pii"
             }
           },
           {
@@ -770,7 +774,8 @@
             "description": "Filtro natural por estado; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "cidade",
@@ -779,7 +784,8 @@
             "description": "Filtro natural por cidade; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "principal",
@@ -1025,7 +1031,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "pedidoId",
@@ -1280,7 +1287,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -1537,7 +1545,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "pedidoId",
@@ -2437,7 +2446,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "nota",
@@ -5443,7 +5453,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "enderecoId",
@@ -5597,7 +5608,8 @@
             "description": "Filtro natural por endereco.estado; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "cidade",
@@ -5606,7 +5618,8 @@
             "description": "Filtro natural por endereco.cidade; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "produtoId",
@@ -7124,7 +7137,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "sessionId",
@@ -7940,7 +7954,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "pedidoId",
@@ -8218,7 +8233,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "status",
@@ -9122,7 +9138,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "email",
@@ -10019,7 +10036,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "status",
@@ -10628,7 +10646,8 @@
             "description": "Filtro natural por estado; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "cidade",
@@ -10637,7 +10656,8 @@
             "description": "Filtro natural por cidade; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "segmento",
@@ -12878,7 +12898,8 @@
             "description": "Filtro natural por rota; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           }
         ],
         "responses": {
@@ -13931,7 +13952,8 @@
             "description": "Filtro natural por path; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "referrer",
@@ -13940,7 +13962,8 @@
             "description": "Filtro natural por referrer; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "hora",
@@ -14199,7 +14222,8 @@
             "description": "Filtro natural por clienteId; múltiplos valores separados por vírgula.",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-required-scope": "read:pii"
           },
           {
             "name": "acao",

@@ -4,7 +4,7 @@ import type { FieldSchema, ResourceDefinition } from './resource'
 import type { ResourceRegistry } from './registry'
 
 type Schema = Record<string, unknown>
-type Parameter = { name: string; in?: string; required?: boolean; example?: unknown; schema?: Schema; description?: string; 'x-required-scope'?: string }
+type Parameter = { name: string; in?: string; required?: boolean; example?: unknown; schema?: Schema; description?: string; 'x-required-scope'?: string; 'x-required-scopes-by-value'?: Record<string,string> }
 type Operation = { parameters?: Parameter[]; security?: unknown[]; description?: string; summary?: string; [key: string]: unknown }
 export type OpenApiDocument = {
   openapi: '3.1.0'
@@ -121,10 +121,11 @@ function queryParameter(name: string, schema: Schema, description: string, examp
 }
 
 function resourceParameters(definition: ResourceDefinition): Parameter[] {
+  const sortScopes = Object.fromEntries(Object.entries(definition.sortScopes ?? {}).flatMap(([name, scope]) => [[name, scope], [`-${name}`, scope]]))
   const parameters: Parameter[] = [
     queryParameter('limit', { type: 'integer', minimum: 1, maximum: Math.min(API_MAX_LIMIT, definition.maxLimit ?? API_MAX_LIMIT), default: Math.min(API_DEFAULT_LIMIT, definition.maxLimit ?? API_MAX_LIMIT) }, 'Tamanho da página.'),
     queryParameter('cursor', { type: 'string', minLength: 1 }, 'Cursor opaco criptografado da página anterior.'),
-    queryParameter('sort', { type: 'string', enum: definition.sorts.flatMap(name => [name, `-${name}`]), default: definition.defaultSort ?? definition.sorts[0] }, 'Ordenação determinística; id é desempate implícito.'),
+    { ...queryParameter('sort', { type: 'string', enum: definition.sorts.flatMap(name => [name, `-${name}`]), default: definition.defaultSort ?? definition.sorts[0] }, 'Ordenação determinística; id é desempate implícito.'), ...(Object.keys(sortScopes).length ? { 'x-required-scopes-by-value': sortScopes } : {}) },
     queryParameter('ids', { type: 'string' }, 'Até 100 IDs separados por vírgula.'),
     queryParameter('fields', { type: 'string' }, `Campos separados por vírgula: ${definition.fields.map(field => field.name).join(', ')}.`),
     queryParameter('expand', { type: 'string', enum: definition.expands.length ? definition.expands.map(item => item.name) : undefined }, `Até três relações: ${definition.expands.map(item => item.name).join(', ') || 'nenhuma'}.`),

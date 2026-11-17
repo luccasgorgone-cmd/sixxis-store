@@ -170,7 +170,7 @@ export function createCatalogResources(deps: CatalogResourceOptions = {}): Resou
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       filters: {
         produtoId: { type: 'string' },
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         nota: { type: 'number', values: ['1', '2', '3', '4', '5'] },
         aprovada: { type: 'boolean' },
         destaque: { type: 'boolean' },

@@ -134,7 +134,7 @@ unset SIXXIS_API_TOKEN
 
 ## Erros, limites e cache
 
-Erros usam RFC 9457 (\`application/problem+json\`) e incluem \`requestId\`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. Chaves válidas autenticadas operam sem limite de requests ou de período, inclusive em métricas. Os três únicos limites técnicos são: 10 segundos por consulta SQL; no máximo 2 métricas executadas concorrentemente; e proteção de brute-force por IP somente para tentativas de autenticação recusadas. Nesses casos recusados, respeite \`Retry-After\` ao receber 429. Respostas autenticadas usam \`Cache-Control: no-store\`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
+Erros usam RFC 9457 (\`application/problem+json\`) e incluem \`requestId\`. Status previstos: 400, 401, 403, 404, 405, 429, 500 e 503. Chaves válidas autenticadas operam sem limite de requests ou de período, inclusive em métricas. Cada processo aceita no máximo 1 métrica em execução por chave e 2 no total. A sessão SQL recebe orçamento de 10 segundos; se esse orçamento expirar, a API aguarda a consulta em curso terminar para liberar a conexão e então responde 503. A proteção de brute-force por IP atua somente em tentativas de autenticação recusadas; nesses casos, respeite \`Retry-After\` ao receber 429. Respostas autenticadas usam \`Cache-Control: no-store\`; OpenAPI e docs estáticos usam cache público de uma hora. CORS não é habilitado para navegador.
 
 ## Endpoints transversais
 

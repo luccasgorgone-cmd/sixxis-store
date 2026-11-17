@@ -15,6 +15,12 @@ type PostmanQuery = { key: string; value: string; disabled: boolean }
 type PostmanItem = { name: string; request: { auth?: { type: string }; header: Array<{ key: string }>; url: { query: PostmanQuery[] } } }
 
 describe('OpenAPI 3.1 contract', () => {
+  it('publishes the additive scope required by sensitive sort values', () => {
+    const document = buildOpenApi(resources, metrics)
+    const parameters = document.paths['/api/v1/clientes'].get.parameters as Array<ContractParameter & { 'x-required-scopes-by-value'?: Record<string, string> }>
+    expect(parameters.find(parameter => parameter.name === 'sort')?.['x-required-scopes-by-value']).toEqual({ nome: 'read:pii', '-nome': 'read:pii' })
+  })
+
   it('describes every resource and metric with detailed schemas, filters, scopes and errors', () => {
     const document = buildOpenApi(resources, metrics)
     expect(document.openapi).toBe('3.1.0')
@@ -192,8 +198,8 @@ describe('OpenAPI 3.1 contract', () => {
     expect(readme).toContain('`maxDays: null`')
     expect(readme).toContain('não expira')
     expect(readme).toContain('sem limite de requests ou de período')
-    expect(readme).toContain('10 segundos por consulta SQL')
-    expect(readme).toContain('2 métricas')
+    expect(readme).toContain('no máximo 1 métrica em execução por chave e 2 no total')
+    expect(readme).toContain('aguarda a consulta em curso terminar para liberar a conexão e então responde 503')
     expect(readme).toContain('brute-force por IP')
     expect(readme).not.toMatch(/60 requisições\/minuto|10\/minuto|Janela máxima: 366 dias/)
   })

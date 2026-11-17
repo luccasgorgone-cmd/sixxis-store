@@ -3,10 +3,10 @@ import { ApiQueryError } from '../query'
 import type { ApiContext, ApiIdentity } from '../types'
 import { createMetricRegistry, createStoreMetricRegistry, type MetricDefinition } from './registry'
 
-function context(scopes: ApiIdentity['scopes']): ApiContext {
+function context(scopes: ApiIdentity['scopes'], id = 'key-1'): ApiContext {
   return {
     requestId: 'req-registry',
-    identity: { id: 'key-1', nome: 'test', prefixo: 'sxs_live_test', scopes, expiraEm: null },
+    identity: { id, nome: 'test', prefixo: 'sxs_live_test', scopes, expiraEm: null },
     ip: '127.0.0.1', startedAt: 0,
   }
 }
@@ -75,12 +75,36 @@ describe('metric registry', () => {
     const handler = vi.fn(() => new Promise<{ ok: true }>(resolve => { resolvers.push(resolve) }))
     const registry = createMetricRegistry([{ slug: 'teste', scope: 'read:analytics', schema: { type: 'object' }, query: handler }])
 
-    const first = registry.execute('teste', context(new Set(['read:analytics'])), query)
-    const second = registry.execute('teste', context(new Set(['read:analytics'])), query)
-    await expect(registry.execute('teste', context(new Set(['read:analytics'])), query)).rejects.toMatchObject({ status: 503 })
+    const first = registry.execute('teste', context(new Set(['read:analytics']), 'key-1'), query)
+    const second = registry.execute('teste', context(new Set(['read:analytics']), 'key-2'), query)
+    await expect(registry.execute('teste', context(new Set(['read:analytics']), 'key-3'), query)).rejects.toMatchObject({ status: 503 })
     expect(handler).toHaveBeenCalledTimes(2)
 
     resolvers.forEach(resolve => resolve({ ok: true }))
     await expect(Promise.all([first, second])).resolves.toEqual([{ ok: true }, { ok: true }])
+  })
+
+  it('prevents one API key from occupying every in-process metric slot', async () => {
+    const resolvers: Array<(value: { ok: true }) => void> = []
+    const handler = vi.fn(() => new Promise<{ ok: true }>(resolve => { resolvers.push(resolve) }))
+    const registry = createMetricRegistry([{ slug: 'teste', scope: 'read:analytics', schema: { type: 'object' }, query: handler }])
+
+    const first = registry.execute('teste', context(new Set(['read:analytics']), 'key-a'), query)
+    let sameKeySettled = false
+    const sameKey = registry.execute('teste', context(new Set(['read:analytics']), 'key-a'), query).then(
+      () => ({ status: 200 }),
+      (error: ApiQueryError) => ({ status: error.status }),
+    ).finally(() => { sameKeySettled = true })
+    const otherKey = registry.execute('teste', context(new Set(['read:analytics']), 'key-b'), query)
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    try {
+      expect(sameKeySettled).toBe(true)
+      await expect(sameKey).resolves.toEqual({ status: 503 })
+      expect(handler).toHaveBeenCalledTimes(2)
+    } finally {
+      resolvers.forEach(resolve => resolve({ ok: true }))
+      await Promise.allSettled([first, sameKey, otherKey])
+    }
   })
 })

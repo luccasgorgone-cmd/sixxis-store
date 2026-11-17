@@ -26,7 +26,7 @@ export type ResourceDefinition<T extends Record<string, unknown> = Record<string
   safeKeyFields?:readonly string[]
   /** Nominal opaque FK joins only, restored at the root, never inside free JSON. */
   structuralIdFields?:readonly string[]
-  select:Record<string,boolean>; sorts:readonly string[]; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]; searchScope?:ApiScope
+  select:Record<string,boolean>; sorts:readonly string[]; sortScopes?:Readonly<Record<string,ApiScope>>; defaultSort?:string; maxLimit?:number; searchFields?:readonly string[]; searchScope?:ApiScope
   dateFields?:{created?:string;updated?:string}
   window?:{from:'criadoDesde'|'atualizadoDesde';to:'criadoAte'|'atualizadoAte'}
   filters?:Record<string,FilterDefinition>; querySchema?:ZodType; deprecated?:boolean; description?:string

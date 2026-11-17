@@ -228,6 +228,9 @@ paths:
               - nome
               - -nome
             default: updatedAt
+          x-required-scopes-by-value:
+            nome: read:pii
+            -nome: read:pii
         - name: ids
           in: query
           required: false
@@ -501,12 +504,14 @@ paths:
           description: Filtro natural por estado; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: cidade
           in: query
           required: false
           description: Filtro natural por cidade; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: principal
           in: query
           required: false
@@ -666,6 +671,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: pedidoId
           in: query
           required: false
@@ -831,6 +837,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
       responses:
         "200":
           description: Sucesso.
@@ -998,6 +1005,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: pedidoId
           in: query
           required: false
@@ -1591,6 +1599,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: nota
           in: query
           required: false
@@ -3582,6 +3591,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: enderecoId
           in: query
           required: false
@@ -3698,12 +3708,14 @@ paths:
           description: Filtro natural por endereco.estado; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: cidade
           in: query
           required: false
           description: Filtro natural por endereco.cidade; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: produtoId
           in: query
           required: false
@@ -4708,6 +4720,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: sessionId
           in: query
           required: false
@@ -5241,6 +5254,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: pedidoId
           in: query
           required: false
@@ -5423,6 +5437,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: status
           in: query
           required: false
@@ -6023,6 +6038,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: email
           in: query
           required: false
@@ -6619,6 +6635,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: status
           in: query
           required: false
@@ -7021,12 +7038,14 @@ paths:
           description: Filtro natural por estado; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: cidade
           in: query
           required: false
           description: Filtro natural por cidade; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: segmento
           in: query
           required: false
@@ -8495,6 +8514,7 @@ paths:
           description: Filtro natural por rota; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
       responses:
         "200":
           description: Sucesso.
@@ -9183,12 +9203,14 @@ paths:
           description: Filtro natural por path; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: referrer
           in: query
           required: false
           description: Filtro natural por referrer; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: hora
           in: query
           required: false
@@ -9358,6 +9380,7 @@ paths:
           description: Filtro natural por clienteId; múltiplos valores separados por vírgula.
           schema:
             type: string
+          x-required-scope: read:pii
         - name: acao
           in: query
           required: false

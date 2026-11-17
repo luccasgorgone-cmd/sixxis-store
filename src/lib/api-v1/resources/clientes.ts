@@ -50,7 +50,7 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
         { name: 'pontos', many: false, resource: () => resolve('pontos-clientes') },
         { name: 'cashback', many: true, resource: () => resolve('cashback-transacoes') },
       ],
-      sorts: ['id', 'updatedAt', 'nome'], defaultSort: 'updatedAt',
+      sorts: ['id', 'updatedAt', 'nome'], sortScopes: { nome: 'read:pii' }, defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       searchFields: ['nome', 'email', 'razaoSocial', 'erpClienteId'],
       searchScope: 'read:pii',
@@ -129,8 +129,8 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       filters: {
         clienteId: { type: 'string' },
-        uf: { type: 'string', field: 'estado' },
-        cidade: { type: 'string' },
+        uf: { type: 'string', field: 'estado', scope: 'read:pii' },
+        cidade: { type: 'string', scope: 'read:pii' },
         principal: { type: 'boolean' },
       },
       adapter: {
@@ -177,7 +177,7 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
       sorts: ['id', 'createdAt'], defaultSort: 'createdAt',
       dateFields: { created: 'createdAt' },
       filters: {
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         pedidoId: { type: 'string' },
         tipo: { type: 'string' },
       },
@@ -217,7 +217,7 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt',
       dateFields: { updated: 'updatedAt' },
       filters: {
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
       },
       adapter: {
         findMany: async args => {
@@ -257,7 +257,7 @@ export function createCustomerResources(deps: CustomerResourceOptions = {}): Res
       sorts: ['id', 'updatedAt'], defaultSort: 'updatedAt',
       dateFields: { created: 'createdAt', updated: 'updatedAt' },
       filters: {
-        clienteId: { type: 'string' },
+        clienteId: { type: 'string', scope: 'read:pii' },
         pedidoId: { type: 'string' },
         tipo: { type: 'string', values: ['credito', 'debito'] },
         status: { type: 'string', values: ['pendente', 'disponivel', 'cancelado'] },
