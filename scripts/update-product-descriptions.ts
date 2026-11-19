@@ -167,7 +167,7 @@ const HTML_SPINNING = `<div class="produto-hero">
   <p>Diferente da corrida, o spinning preserva joelhos e tornozelos. Ideal para pessoas com lesões, sobrepeso ou que estão voltando a treinar.</p>
 
   <h4>Painel digital com métricas ao vivo</h4>
-  <p>Tempo, velocidade, distância, calorias e batimentos. Suporte para celular/tablet — treina com vídeo aula, Peloton ou playlist no Spotify.</p>
+  <p>Tempo, velocidade, distância, calorias e batimentos. Suporte para celular/tablet — treina com vídeo aula, app de treino ou playlist no Spotify.</p>
 
   <h4>Roda de inércia de 18 kg</h4>
   <p>Pedalada suave e silenciosa. Toda a vizinhança agradece — você treina até nas primeiras horas da manhã sem incomodar ninguém.</p>
