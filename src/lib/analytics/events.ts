@@ -122,6 +122,18 @@ let viewContentPendente: {
   value: number
 } | null = null
 
+// Mesmo limbo do ViewContent, para o AddToCart (paridade VC+ATC): ATC visto
+// antes do aceite também faz no-op (gate antes do fbq) e não é bufferizado.
+// Slot SEPARADO do VC — quem viu E adicionou ao carrinho antes do consent
+// recupera os dois. Só o ÚLTIMO ATC; carrega num_items pro payload da CAPI.
+let addToCartPendente: {
+  eventID: string
+  content_ids: string[]
+  content_name: string
+  value: number
+  num_items: number
+} | null = null
+
 // Chamado pelo MetaPixelRouter no 1º grant de marketing ao vivo (grant
 // mid-sessão). Re-dispara o ViewContent que ficou no limbo por Pixel E CAPI
 // com o MESMO eventID original → o Events Manager DEDUPLICA. Seguro: o original
@@ -149,6 +161,35 @@ export function recuperarViewContentPendente() {
     content_ids: pendente.content_ids,
     content_name: pendente.content_name,
     value: pendente.value,
+  })
+}
+
+// Irmão do recuperarViewContentPendente para o AddToCart. Re-dispara o ATC que
+// ficou no limbo por Pixel E CAPI com o MESMO eventID original → dedupe limpo
+// (1º e único envio: o original nunca saiu, gate antes do fbq). No-op sem
+// pendência ou sem consentimento. Zera ANTES de disparar (sem re-disparo duplo).
+export function recuperarAddToCartPendente() {
+  if (typeof window === 'undefined') return
+  if (!marketingConsentido()) return
+  const pendente = addToCartPendente
+  if (!pendente) return
+  addToCartPendente = null
+  trackMeta(
+    'AddToCart',
+    {
+      content_type: 'product',
+      content_ids: pendente.content_ids,
+      content_name: pendente.content_name,
+      value: pendente.value,
+      currency: 'BRL',
+    },
+    { eventID: pendente.eventID },
+  )
+  enviarCapi('AddToCart', pendente.eventID, {
+    content_ids: pendente.content_ids,
+    content_name: pendente.content_name,
+    value: pendente.value,
+    num_items: pendente.num_items,
   })
 }
 
@@ -219,6 +260,12 @@ export function trackAddToCart(produto: ProdutoTracking) {
     value: item.price * item.quantity,
     num_items: item.quantity,
   })
+  // Grant mid-sessão: sem consentimento nada saiu (gates no-op; Pixel base não
+  // bufferiza). Guarda ESTE ATC pra re-disparo no 1º grant. Com consentimento,
+  // já saiu → limpa a pendência.
+  addToCartPendente = marketingConsentido()
+    ? null
+    : { eventID, content_ids: [item.item_id], content_name: item.item_name, value: item.price * item.quantity, num_items: item.quantity }
   enviarInterno('add_to_cart', {
     produtoId: item.produto_id,
     produtoSlug: item.item_slug,

@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { marketingConsentido, CONSENT_EVENT } from '@/lib/consent'
 import { META_PIXEL_ID, trackMetaPageView } from '@/lib/analytics/meta-pixel'
-import { recuperarViewContentPendente } from '@/lib/analytics/events'
+import { recuperarViewContentPendente, recuperarAddToCartPendente } from '@/lib/analytics/events'
 
 // Lado client do Meta Pixel:
 //  1. PageView nas TROCAS DE ROTA (App Router não recarrega a página, então o
@@ -36,11 +36,12 @@ export default function MetaPixelRouter() {
           pageViewInicial.current = true
           trackMetaPageView()
         }
-        // Grant mid-sessão: re-dispara o ViewContent visto antes do aceite
-        // (Pixel + CAPI com o event_id original). Seguro — o VC original ficou
-        // preso no gate (antes do fbq) e nunca foi enviado. No-op se não há
-        // pendência (ex.: 1º load já consentido).
+        // Grant mid-sessão: re-dispara o ViewContent E o AddToCart vistos antes
+        // do aceite (Pixel + CAPI com o event_id original de cada um). Seguro —
+        // os eventos ficaram presos no gate (antes do fbq) e nunca foram
+        // enviados. No-op se não há pendência (ex.: 1º load já consentido).
         recuperarViewContentPendente()
+        recuperarAddToCartPendente()
       } else {
         window.fbq('consent', 'revoke')
       }
