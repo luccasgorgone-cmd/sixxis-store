@@ -1,4 +1,4 @@
-import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
@@ -19,7 +19,11 @@ import { encontrarVariacaoPorSku, estoqueDisponivel, VARIANTE_QUERY_PARAM, urlPr
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 import AvisoMontagem from '@/components/produto/AvisoMontagem'
 
-export const dynamic = 'force-dynamic'
+// Observação: a rota segue dinâmica porque lê searchParams (deep-link de
+// variação/voltagem). O ganho de TTFB NÃO vem de servir HTML estático, e sim de
+// cachear as leituras de banco abaixo (unstable_cache) — antes eram 4 idas ao
+// MySQL (Railway) por request, ~1,5s. Invalidação on-demand por tag quando o
+// admin edita o produto/cupom (ver /api/admin/produtos e /api/admin/cupons).
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br'
 
@@ -63,17 +67,57 @@ interface SearchParams { variante?: string | string[] }
 interface EspecificacaoRow { label: string; valor: string }
 interface FaqRow { pergunta: string; resposta: string }
 
-// Dedupe via React cache(): generateMetadata() e a página chamavam CADA UM sua
-// própria prisma.produto.findUnique — 2 idas ao banco pro mesmo produto na
-// MESMA request. cache() garante 1 query só, reaproveitada por quem chamar
-// com o mesmo slug durante o render desta request (não é cache entre requests).
-const getProdutoPorSlug = cache((slug: string) =>
-  prisma.produto.findUnique({
-    where: { slug },
-    include: {
-      variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
-    },
-  }),
+// Cache de dados ENTRE requests via unstable_cache (antes era React cache(),
+// que só dedupe dentro da mesma request). generateMetadata() e a página chamam
+// com o mesmo slug — a 1ª popula, as demais leem do data cache, sem ir ao banco.
+// Invalidado on-demand pela tag `produto:${slug}` quando o admin edita/exclui
+// (ver /api/admin/produtos). TTL de 300s é só rede de segurança.
+const getProdutoPorSlug = (slug: string) =>
+  unstable_cache(
+    () =>
+      prisma.produto.findUnique({
+        where: { slug },
+        include: {
+          variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
+        },
+      }),
+    ['produto-por-slug', slug],
+    { revalidate: 300, tags: [`produto:${slug}`, 'produtos'] },
+  )()
+
+// Taxa de juros do cartão — config global, muda raramente.
+const getTaxaJurosConfig = unstable_cache(
+  () => prisma.configuracao.findUnique({ where: { chave: 'juros_cartao_taxa_mensal' } }),
+  ['config-juros-cartao'],
+  { revalidate: 3600, tags: ['config'] },
+)
+
+// Agregação de avaliações aprovadas por produto.
+const getAvaliacoesAgg = (slug: string) =>
+  unstable_cache(
+    () =>
+      prisma.avaliacao.aggregate({
+        where: { produto: { slug }, aprovada: true },
+        _avg: { nota: true },
+        _count: { _all: true },
+      }),
+    ['avaliacoes-agg', slug],
+    { revalidate: 600, tags: [`produto:${slug}`, 'avaliacoes'] },
+  )()
+
+// Cupons escopados a produto (produtoIds != null), ativos e não-primeira-compra.
+// NÃO filtramos por validade dentro da query: `new Date()` no corpo tornaria o
+// resultado não-determinístico e congelaria o "agora" no instante do cache.
+// Guardamos todos e aplicamos `validade >= agora` em JS a cada render — barato,
+// a tabela Cupom é pequena. TTL curto (120s) limita defasagem de ativo/uso.
+const getCuponsEscopadosAtivos = unstable_cache(
+  () =>
+    prisma.cupom.findMany({
+      where: { ativo: true, primeiraCompra: false, produtoIds: { not: null } },
+      select: { codigo: true, tipo: true, valor: true, descricao: true, produtoIds: true, usoMaximo: true, totalUsos: true, validade: true },
+    }),
+  ['cupons-escopados-ativos'],
+  { revalidate: 120, tags: ['cupons'] },
 )
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
@@ -149,35 +193,22 @@ export default async function ProdutoPage({
 
   const [produto, taxaConfig, avaliacoesAgg, cuponsAtivos] = await Promise.all([
     getProdutoPorSlug(slug),
-    prisma.configuracao.findUnique({ where: { chave: 'juros_cartao_taxa_mensal' } }),
-    // Agregação no banco em vez de carregar todas as linhas de avaliacoes só
-    // para tirar a média em JS — evita over-fetch em produtos com muitas avaliações.
-    prisma.avaliacao.aggregate({
-      where: { produto: { slug }, aprovada: true },
-      _avg: { nota: true },
-      _count: { _all: true },
-    }),
-    // Cupons ATIVOS escopados a algum produto (produtoIds != null), dentro da
-    // validade e não-primeira-compra (esses são perk de login, não cabem na PDP
-    // pública). A tabela Cupom é pequena; filtramos por ESTE produto em JS logo
-    // abaixo porque produtoIds é um CSV de ids.
-    prisma.cupom.findMany({
-      where: {
-        ativo: true,
-        primeiraCompra: false,
-        produtoIds: { not: null },
-        OR: [{ validade: null }, { validade: { gte: new Date() } }],
-      },
-      select: { codigo: true, tipo: true, valor: true, descricao: true, produtoIds: true, usoMaximo: true, totalUsos: true },
-    }),
+    getTaxaJurosConfig(),
+    getAvaliacoesAgg(slug),
+    getCuponsEscopadosAtivos(),
   ])
 
   if (!produto || !produto.ativo) notFound()
 
+  // Validade é aplicada aqui (fora do cache) p/ refletir o "agora" real a cada
+  // render — ver comentário em getCuponsEscopadosAtivos.
+  const agora = new Date()
+  const cuponsVigentes = cuponsAtivos.filter(c => !c.validade || c.validade >= agora)
+
   // Casa os cupons escopados com ESTE produto (membership exata no CSV, esgotado
   // descartado). Só callout informativo — a autoridade do desconto continua no
   // /api/pedidos (avaliarCupom recomputa tudo).
-  const cuponsProduto = cuponsAplicaveisAoProduto(cuponsAtivos, produto.id)
+  const cuponsProduto = cuponsAplicaveisAoProduto(cuponsVigentes, produto.id)
 
   const taxaJuros = Number(taxaConfig?.valor || 2.99)
 

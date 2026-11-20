@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
+import { revalidateTag } from 'next/cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -112,6 +113,8 @@ export async function POST(req: NextRequest) {
     target: cupom.id,
     metadata: { codigo: cupom.codigo, tipo: cupom.tipo, valor: String(cupom.valor) },
   })
+  // Busta o cache de cupons da PDP (unstable_cache 'cupons').
+  revalidateTag('cupons')
 
   return NextResponse.json(cupom, { status: 201 })
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { deleteFromR2 } from '@/lib/r2'
 import { requireAdmin } from '@/lib/adminAuth'
@@ -173,6 +173,9 @@ export async function PUT(
   revalidatePath('/')
   revalidatePath('/produtos')
   revalidatePath('/ofertas')
+  // Busta o cache de dados da PDP (unstable_cache em produtos/[slug]) na hora.
+  if (produto?.slug) revalidateTag(`produto:${produto.slug}`)
+  revalidateTag('produtos')
 
   await auditLog({
     req: request,
@@ -215,6 +218,9 @@ export async function DELETE(
   revalidatePath('/')
   revalidatePath('/produtos')
   revalidatePath('/ofertas')
+  // Busta o cache de dados da PDP (unstable_cache em produtos/[slug]) na hora.
+  revalidateTag(`produto:${produto.slug}`)
+  revalidateTag('produtos')
 
   await auditLog({
     req: request,

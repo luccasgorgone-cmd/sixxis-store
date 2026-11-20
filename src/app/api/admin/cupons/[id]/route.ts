@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 import { auditLog } from '@/lib/audit'
+import { revalidateTag } from 'next/cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,6 +68,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     },
   })
   await auditLog({ req, action: 'cupom.update', target: id, metadata: { codigo: cupom.codigo } })
+  revalidateTag('cupons')
   return NextResponse.json(cupom)
 }
 
@@ -78,5 +80,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const cupom = await prisma.cupom.findUnique({ where: { id } })
   await prisma.cupom.delete({ where: { id } })
   await auditLog({ req, action: 'cupom.delete', target: id, metadata: { codigo: cupom?.codigo } })
+  revalidateTag('cupons')
   return NextResponse.json({ ok: true })
 }
