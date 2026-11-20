@@ -18,6 +18,17 @@ function jaDecidiu(): boolean {
   return /(?:^|;\s*)sixxis_consent=/.test(document.cookie)
 }
 
+// "Decidir depois": fechar o banner NÃO é recusar. Marcamos só p/ a aba atual
+// (sessionStorage) p/ não repetir a cada página, mas NÃO gravamos o cookie de
+// consentimento — então nada é negado de forma permanente e o banner reaparece
+// numa próxima visita. Antes, o X gravava recusa total silenciosa (sinal de
+// Pixel/CAPI perdido por engano); isto corrige esse vazamento sem coagir o opt-in.
+const CHAVE_ADIADO = 'sixxis_consent_adiado'
+function decisaoAdiada(): boolean {
+  if (typeof window === 'undefined') return false
+  try { return window.sessionStorage.getItem(CHAVE_ADIADO) === '1' } catch { return false }
+}
+
 async function salvarConsentimento(consent: ConsentState) {
   // Sessão unificada no cookie sixxis_sid (mesma de TrackingProvider/eventos).
   const sessionId = obterSidClient()
@@ -62,8 +73,9 @@ export default function CookieBanner() {
   })
 
   useEffect(() => {
-    // Mostra o banner só se ainda não houver decisão (cookie sixxis_consent).
-    if (jaDecidiu()) return
+    // Mostra o banner só se ainda não houver decisão (cookie sixxis_consent) e
+    // não tiver sido adiado nesta aba.
+    if (jaDecidiu() || decisaoAdiada()) return
     // Delay para não interferir com LCP
     const t = setTimeout(() => setVisivel(true), 800)
     return () => clearTimeout(t)
@@ -85,6 +97,13 @@ export default function CookieBanner() {
   async function rejeitarOpcionais() {
     const c: ConsentState = { necessarios: true, analiticos: false, marketing: false }
     await salvarConsentimento(c)
+    setVisivel(false)
+  }
+
+  // Fechar no X = adiar, não recusar. Não grava consentimento (nada é negado em
+  // definitivo); só suprime o banner nesta aba p/ não incomodar a cada página.
+  function adiarDecisao() {
+    try { window.sessionStorage.setItem(CHAVE_ADIADO, '1') } catch { /* sessionStorage indisponível: só fecha */ }
     setVisivel(false)
   }
 
@@ -119,9 +138,10 @@ export default function CookieBanner() {
               </div>
             </div>
             <button
-              onClick={rejeitarOpcionais}
+              onClick={adiarDecisao}
               className="w-11 h-11 flex items-center justify-center text-white/30 hover:text-white/60 transition shrink-0"
-              aria-label="Fechar e recusar cookies opcionais"
+              aria-label="Fechar e decidir depois"
+              title="Decidir depois"
             >
               <X size={16} />
             </button>
@@ -131,7 +151,8 @@ export default function CookieBanner() {
           <div className="px-6 pb-4">
             <p className="text-white/60 text-xs leading-relaxed">
               Usamos cookies para garantir a funcionalidade da loja, analisar o tráfego e personalizar sua experiência.
-              Você pode escolher quais categorias aceitar. Os cookies necessários não podem ser desativados.
+              Aceitar ajuda a te mostrar os produtos e as ofertas certas para você. Você pode escolher quais categorias
+              aceitar — os cookies necessários não podem ser desativados.
             </p>
           </div>
 
