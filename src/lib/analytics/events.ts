@@ -109,6 +109,49 @@ function enviarCapi(
   }).catch(() => {})
 }
 
+// ViewContent visto SEM consentimento de marketing fica pendente. Sob revoke,
+// trackMeta e enviarCapi fazem no-op — e o Pixel base NÃO bufferiza esse VC
+// porque o trackMeta retorna ANTES de chamar o fbq. Logo o evento nunca saiu e
+// nunca foi enfileirado: re-disparar no grant é o 1º envio (sem duplicata).
+// Guardamos só o ÚLTIMO VC (o produto atual) + seu eventID — recuperar a vitrine
+// inteira inflaria o ViewContent. Sobrescreve a cada novo VC; zera com consent.
+let viewContentPendente: {
+  eventID: string
+  content_ids: string[]
+  content_name: string
+  value: number
+} | null = null
+
+// Chamado pelo MetaPixelRouter no 1º grant de marketing ao vivo (grant
+// mid-sessão). Re-dispara o ViewContent que ficou no limbo por Pixel E CAPI
+// com o MESMO eventID original → o Events Manager DEDUPLICA. Seguro: o original
+// nunca foi enviado (gate antes do fbq), então este é o primeiro e único envio.
+// No-op sem pendência ou sem consentimento. Zera a pendência ANTES de disparar
+// (evita qualquer re-disparo duplo).
+export function recuperarViewContentPendente() {
+  if (typeof window === 'undefined') return
+  if (!marketingConsentido()) return
+  const pendente = viewContentPendente
+  if (!pendente) return
+  viewContentPendente = null
+  trackMeta(
+    'ViewContent',
+    {
+      content_type: 'product',
+      content_ids: pendente.content_ids,
+      content_name: pendente.content_name,
+      value: pendente.value,
+      currency: 'BRL',
+    },
+    { eventID: pendente.eventID },
+  )
+  enviarCapi('ViewContent', pendente.eventID, {
+    content_ids: pendente.content_ids,
+    content_name: pendente.content_name,
+    value: pendente.value,
+  })
+}
+
 export function trackViewItem(produto: ProdutoTracking) {
   push('view_item', {
     currency: 'BRL',
@@ -135,6 +178,12 @@ export function trackViewItem(produto: ProdutoTracking) {
     content_name: produto.item_name,
     value: produto.price,
   })
+  // Grant mid-sessão: sem consentimento de marketing nada saiu (os dois gates
+  // acima fizeram no-op; o Pixel base não bufferiza). Guarda ESTE VC pra
+  // re-disparo no 1º grant. Com consentimento, já saiu → limpa a pendência.
+  viewContentPendente = marketingConsentido()
+    ? null
+    : { eventID, content_ids: [produto.item_id], content_name: produto.item_name, value: produto.price }
   enviarInterno('view_item', {
     produtoId: produto.produto_id,
     produtoSlug: produto.item_slug,
