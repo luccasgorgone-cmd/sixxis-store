@@ -945,6 +945,13 @@ model SessaoVisitante {
   gclid           String?
   gbraid          String?
   wbraid          String?
+  // Meta click id (fbclid na URL) + cookie _fbc derivado. Sem persistir isso na
+  // sessão, o tráfego Meta-puro não era isolável por corte (só havia gclid), e a
+  // CAPI perdia o fbc no payload (pior Event Match Quality). Captura ADITIVA em
+  // src/app/api/tracking/route.ts: fbc vem do cookie _fbc quando existe, senão é
+  // sintetizado de fbclid (fb.1.<ts>.<fbclid>). Nunca pré-condiciona atribuição.
+  fbclid          String?
+  fbc             String?
   referer         String?          @db.Text
   landingPage     String?          @db.Text
   totalPaginas    Int              @default(0)

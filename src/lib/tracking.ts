@@ -99,6 +99,10 @@ export function extrairUTMs(url: string) {
     const gclid = u.searchParams.get('gclid') || undefined
     const gbraid = u.searchParams.get('gbraid') || undefined
     const wbraid = u.searchParams.get('wbraid') || undefined
+    // Meta click id — captura ADITIVA. NÃO entra na decisão do fallback google
+    // (só gclid/gbraid/wbraid forçam utm_source=google); fbclid sozinho nunca
+    // reclassifica a origem, apenas é persistido para o corte Meta-puro e a CAPI.
+    const fbclid = u.searchParams.get('fbclid') || undefined
     const googleClickId = gclid || gbraid || wbraid
 
     if (!utmSource && googleClickId) {
@@ -111,6 +115,7 @@ export function extrairUTMs(url: string) {
         gclid,
         gbraid,
         wbraid,
+        fbclid,
       }
     }
 
@@ -123,6 +128,7 @@ export function extrairUTMs(url: string) {
       gclid,
       gbraid,
       wbraid,
+      fbclid,
     }
   } catch {
     return {}

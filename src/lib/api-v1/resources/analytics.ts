@@ -230,8 +230,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
     },
     {
       slug: 'sessoes-visitantes', model: 'SessaoVisitante', scope: 'read:analytics',
-      scalarFields: ['id', 'sessaoId', 'userId', 'ip', 'pais', 'cidade', 'userAgent', 'dispositivo', 'browser', 'os', 'utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm', 'gclid', 'gbraid', 'wbraid', 'referer', 'landingPage', 'totalPaginas', 'duracaoSegundos', 'converteu', 'createdAt', 'updatedAt'],
-      select: { id: true, sessaoId: true, userId: true, ip: true, pais: true, cidade: true, userAgent: true, dispositivo: true, browser: true, os: true, utmSource: true, utmMedium: true, utmCampaign: true, utmContent: true, utmTerm: true, gclid: true, gbraid: true, wbraid: true, referer: true, landingPage: true, totalPaginas: true, duracaoSegundos: true, converteu: true, createdAt: true, updatedAt: true } as const satisfies Prisma.SessaoVisitanteSelect,
+      scalarFields: ['id', 'sessaoId', 'userId', 'ip', 'pais', 'cidade', 'userAgent', 'dispositivo', 'browser', 'os', 'utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'fbc', 'referer', 'landingPage', 'totalPaginas', 'duracaoSegundos', 'converteu', 'createdAt', 'updatedAt'],
+      select: { id: true, sessaoId: true, userId: true, ip: true, pais: true, cidade: true, userAgent: true, dispositivo: true, browser: true, os: true, utmSource: true, utmMedium: true, utmCampaign: true, utmContent: true, utmTerm: true, gclid: true, gbraid: true, wbraid: true, fbclid: true, fbc: true, referer: true, landingPage: true, totalPaginas: true, duracaoSegundos: true, converteu: true, createdAt: true, updatedAt: true } as const satisfies Prisma.SessaoVisitanteSelect,
       fields: [
         { name: 'id', type: 'string' },
         { name: 'sessaoId', type: 'string', scope: 'read:pii' },
@@ -251,6 +251,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
         { name: 'gclid', type: 'string', nullable: true },
         { name: 'gbraid', type: 'string', nullable: true },
         { name: 'wbraid', type: 'string', nullable: true },
+        { name: 'fbclid', type: 'string', nullable: true },
+        { name: 'fbc', type: 'string', nullable: true },
         { name: 'referer', type: 'string', nullable: true },
         { name: 'landingPage', type: 'string', nullable: true },
         { name: 'totalPaginas', type: 'integer' },
@@ -309,6 +311,8 @@ export function createAnalyticsResources(deps: AnalyticsResourceOptions = {}): R
           gclid: row.gclid,
           gbraid: row.gbraid,
           wbraid: row.wbraid,
+          fbclid: row.fbclid,
+          fbc: row.fbc,
           referer: row.referer,
           landingPage: row.landingPage,
           totalPaginas: row.totalPaginas,

@@ -75,6 +75,11 @@ export async function POST(req: NextRequest) {
     const utms = extrairUTMs(landingPage)
     const atributo = (value: string | undefined) => value?.substring(0, 191)
     const referer = req.headers.get('referer') || null
+    // fbc: cookie _fbc (setado pelo fbevents.js) é a fonte autoritativa; quando
+    // ainda não existe (primeiro hit antes do Pixel), sintetiza do fbclid no
+    // formato oficial do Meta. Só grava fbc quando há sinal Meta real.
+    const fbcCookie = req.cookies.get('_fbc')?.value
+    const fbc = fbcCookie || (utms.fbclid ? `fb.1.${Date.now()}.${utms.fbclid}` : undefined)
 
     await prisma.sessaoVisitante.upsert({
       where: { sessaoId: body.sessaoId },
@@ -88,6 +93,7 @@ export async function POST(req: NextRequest) {
         landingPage: landingPage || null,
         utmSource: atributo(utms.utmSource), utmMedium: atributo(utms.utmMedium), utmCampaign: atributo(utms.utmCampaign),
         utmContent: atributo(utms.utmContent), utmTerm: atributo(utms.utmTerm), gclid: atributo(utms.gclid), gbraid: atributo(utms.gbraid), wbraid: atributo(utms.wbraid),
+        fbclid: atributo(utms.fbclid), fbc: atributo(fbc),
         referer: referer?.substring(0, 500) || null,
         totalPaginas: body.tipo === 'page_view' ? 1 : 0,
       },
