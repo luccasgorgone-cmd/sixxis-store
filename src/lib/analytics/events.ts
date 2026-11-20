@@ -1,6 +1,6 @@
 'use client'
 
-import { analyticsConsentido } from '@/lib/consent'
+import { analyticsConsentido, marketingConsentido } from '@/lib/consent'
 import { lerLandingPageSessao, obterSidClient } from '@/lib/tracking'
 import { trackMeta } from '@/lib/analytics/meta-pixel'
 
@@ -73,6 +73,42 @@ function enviarInterno(
   }).catch(() => {})
 }
 
+// UUID por disparo (browser). O MESMO id vai ao Pixel (fbq eventID) e ao CAPI
+// (event_id) → o Events Manager DEDUPLICA. Gerar 1x por evento é o que garante
+// a paridade — nunca reaproveitar entre disparos.
+function novoEventId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
+// Espelho SERVER do Pixel (CAPI meio-funil, /api/capi). Recebe o MESMO eventID
+// do disparo do fbq. Gate de marketing (igual ao Pixel). Envia só o g:id do feed
+// (content_ids), NUNCA o CUID. Sem consentimento de marketing, não envia.
+function enviarCapi(
+  eventName: 'ViewContent' | 'AddToCart',
+  eventID: string,
+  payload: { content_ids: string[]; content_name?: string; value: number; num_items?: number },
+) {
+  if (typeof window === 'undefined') return
+  if (!marketingConsentido()) return
+  fetch('/api/capi', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({
+      event_name: eventName,
+      event_id: eventID,
+      event_source_url: window.location.href,
+      currency: 'BRL',
+      ...payload,
+    }),
+  }).catch(() => {})
+}
+
 export function trackViewItem(produto: ProdutoTracking) {
   push('view_item', {
     currency: 'BRL',
@@ -80,13 +116,24 @@ export function trackViewItem(produto: ProdutoTracking) {
     items: [paraGA4(produto)],
   })
   // Meta: ViewContent (gate de marketing dentro do trackMeta). content_ids =
-  // g:id do feed → catálogo corresponde (dedupe/matching).
-  trackMeta('ViewContent', {
-    content_type: 'product',
+  // g:id do feed → catálogo corresponde (dedupe/matching). eventID = UUID único
+  // compartilhado com o CAPI (dedupe browser↔servidor).
+  const eventID = novoEventId()
+  trackMeta(
+    'ViewContent',
+    {
+      content_type: 'product',
+      content_ids: [produto.item_id],
+      content_name: produto.item_name,
+      value: produto.price,
+      currency: 'BRL',
+    },
+    { eventID },
+  )
+  enviarCapi('ViewContent', eventID, {
     content_ids: [produto.item_id],
     content_name: produto.item_name,
     value: produto.price,
-    currency: 'BRL',
   })
   enviarInterno('view_item', {
     produtoId: produto.produto_id,
@@ -103,13 +150,25 @@ export function trackAddToCart(produto: ProdutoTracking) {
     value: item.price * item.quantity,
     items: [paraGA4(item)],
   })
-  // Meta: AddToCart. content_ids = g:id do feed.
-  trackMeta('AddToCart', {
-    content_type: 'product',
+  // Meta: AddToCart. content_ids = g:id do feed. eventID = UUID único
+  // compartilhado com o CAPI (dedupe browser↔servidor).
+  const eventID = novoEventId()
+  trackMeta(
+    'AddToCart',
+    {
+      content_type: 'product',
+      content_ids: [item.item_id],
+      content_name: item.item_name,
+      value: item.price * item.quantity,
+      currency: 'BRL',
+    },
+    { eventID },
+  )
+  enviarCapi('AddToCart', eventID, {
     content_ids: [item.item_id],
     content_name: item.item_name,
     value: item.price * item.quantity,
-    currency: 'BRL',
+    num_items: item.quantity,
   })
   enviarInterno('add_to_cart', {
     produtoId: item.produto_id,

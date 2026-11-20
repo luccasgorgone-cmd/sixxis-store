@@ -26,6 +26,7 @@ export type LimiterName =
   | 'api-leitura-ingress'
   | 'api-leitura-metricas'
   | 'tracking'
+  | 'capi'
 
 // Limites sensatos por IP/identificador (sliding window). Ajuste conforme tráfego.
 const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ratelimit.slidingWindow>[1] }> = {
@@ -39,6 +40,7 @@ const CONFIG: Record<LimiterName, { tokens: number; window: Parameters<typeof Ra
   'api-leitura-ingress':   { tokens: 60,  window: '1 m' },
   'api-leitura-metricas':  { tokens: 10,  window: '1 m' },
   'tracking':               { tokens: 120, window: '1 m' },
+  'capi':                  { tokens: 120, window: '1 m' },  // espelho server do Pixel (ViewContent/AddToCart) — mesmo volume do tracking
   'interno-frete':         { tokens: 60, window: '1 m' },   // 60 cotações / 1 min (CRM)
 }
 
