@@ -266,11 +266,16 @@ export async function POST(request: NextRequest) {
   // Desconto automático por quantidade (floor(qtd/2) a 50%), casado pela chave
   // de negócio Produto.erpProdutoId. Config/regra em lib/promo-segunda-unidade.
   const promo = calcularPromoServidor(
-    itensPedido.map((i) => ({
-      erpProdutoId:  produtoMap.get(i.produtoId)!.erpProdutoId,
-      precoUnitario: i.precoUnitario,
-      quantidade:    i.quantidade,
-    })),
+    itensPedido.map((i) => {
+      const p = produtoMap.get(i.produtoId)!
+      return {
+        erpProdutoId:  p.erpProdutoId,
+        precoUnitario: i.precoUnitario,
+        quantidade:    i.quantidade,
+        sku:           p.sku,
+        slug:          p.slug,
+      }
+    }),
   )
 
   // ── Desconto final: promo OU cupom — NUNCA os dois ─────────────────────────

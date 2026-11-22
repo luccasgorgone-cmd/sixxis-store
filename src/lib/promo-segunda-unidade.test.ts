@@ -1,88 +1,196 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  PROMO_BF,
+  promoAtiva,
+  promoVigentePorFeedId,
+  promoVigentePorErp,
   calcularPromoServidor,
   calcularPromoCliente,
-  promoVigentePorErp,
 } from './promo-segunda-unidade'
 
-// erpProdutoId REAL do SX180 Trend em producao (chave do match server-side).
-const ERP = 'ADMIN-1781206602840-9qw3wci'
-const PRECO = 2000
-// Dentro da vigência iniciada em 27/10/2026 (America/Sao_Paulo), sem data final.
-const DENTRO = new Date('2026-10-28T12:00:00-03:00')
-// Depois da antiga data final de 04/11.
-const DEPOIS_DA_DATA_ANTIGA = new Date('2026-11-05T00:00:00-03:00')
-// Antes do início.
-const ANTES = new Date('2026-10-26T23:59:00-03:00')
+// Snapshot/restore da config (os testes mexem no interruptor e nos hooks).
+const ORIG = { ...PROMO_BF, excluir: [...PROMO_BF.excluir] }
+function reset() {
+  PROMO_BF.ativa = ORIG.ativa
+  PROMO_BF.percentual = ORIG.percentual
+  PROMO_BF.inicio = ORIG.inicio
+  PROMO_BF.fim = ORIG.fim
+  PROMO_BF.descricao = ORIG.descricao
+  PROMO_BF.excluir = [...ORIG.excluir]
+  PROMO_BF.pisoItemDescontado = ORIG.pisoItemDescontado
+}
+beforeEach(() => {
+  reset()
+  PROMO_BF.ativa = true // ativa a promo para os testes de cálculo
+})
+afterEach(reset)
 
-describe('promo 2ª unidade — pareamento floor(qtd/2)', () => {
-  const casos: [number, number][] = [
-    [1, 0],
-    [2, 1],
-    [3, 1],
-    [4, 2],
-    [5, 2],
-    [6, 3],
-  ]
-  for (const [qtd, esperadoUnidades] of casos) {
-    it(`${qtd} unidade(s) → ${esperadoUnidades} com 50%`, () => {
-      const r = calcularPromoServidor([{ erpProdutoId: ERP, precoUnitario: PRECO, quantidade: qtd }], DENTRO)
-      expect(r.unidadesComDesconto).toBe(esperadoUnidades)
-      expect(r.desconto).toBeCloseTo(esperadoUnidades * PRECO * 0.5, 2)
-      expect(r.ativo).toBe(esperadoUnidades > 0)
-    })
-  }
+// Dentro da janela padrão (27→30/11/2026, America/Sao_Paulo).
+const DENTRO = new Date('2026-11-28T12:00:00-03:00')
+const ANTES = new Date('2026-11-20T00:00:00-03:00')
+const DEPOIS = new Date('2026-12-01T00:00:01-03:00')
+
+const ERP = 'ADMIN-xyz'
+const srv = (preco: number, quantidade: number, extra: Partial<{ sku: string; slug: string; erpProdutoId: string }> = {}) => ({
+  erpProdutoId: extra.erpProdutoId ?? ERP, precoUnitario: preco, quantidade, sku: extra.sku ?? null, slug: extra.slug ?? null,
 })
 
-describe('vigência', () => {
-  it('não aplica antes do início', () => {
-    const r = calcularPromoServidor([{ erpProdutoId: ERP, precoUnitario: PRECO, quantidade: 2 }], ANTES)
+describe('interruptor-mestre + janela', () => {
+  it('dormente (ativa=false) → nada aplica mesmo dentro da janela', () => {
+    PROMO_BF.ativa = false
+    expect(promoAtiva(DENTRO)).toBe(false)
+    const r = calcularPromoServidor([srv(2000, 2)], DENTRO)
+    expect(r.ativo).toBe(false)
+    expect(r.desconto).toBe(0)
+    expect(promoVigentePorFeedId('qualquer', DENTRO)).toBeNull()
+  })
+  it('ativa mas ANTES do início → nada', () => {
+    const r = calcularPromoServidor([srv(2000, 2)], ANTES)
+    expect(r.ativo).toBe(false)
+    expect(promoAtiva(ANTES)).toBe(false)
+  })
+  it('ativa mas DEPOIS do fim → nada', () => {
+    const r = calcularPromoServidor([srv(2000, 2)], DEPOIS)
+    expect(r.ativo).toBe(false)
+    expect(promoAtiva(DEPOIS)).toBe(false)
+  })
+  it('ativa e dentro da janela → aplica', () => {
+    expect(promoAtiva(DENTRO)).toBe(true)
+    expect(calcularPromoServidor([srv(2000, 2)], DENTRO).ativo).toBe(true)
+  })
+})
+
+describe('2 do MESMO produto → 50% na 2ª', () => {
+  it('2 un a 2000 → 1 desconto de 1000', () => {
+    const r = calcularPromoServidor([srv(2000, 2)], DENTRO)
+    expect(r.unidadesComDesconto).toBe(1)
+    expect(r.desconto).toBeCloseTo(1000, 2)
+  })
+  it('linhas separadas do mesmo produto somam', () => {
+    const r = calcularPromoServidor([srv(2000, 1), srv(2000, 1)], DENTRO)
+    expect(r.unidadesComDesconto).toBe(1)
+    expect(r.desconto).toBeCloseTo(1000, 2)
+  })
+})
+
+describe('2 produtos DIFERENTES → desconto no MAIS BARATO, nunca no mais caro', () => {
+  it('2000 + 1500 → desconta 1500 (750), nunca 2000', () => {
+    const r = calcularPromoServidor([srv(2000, 1, { sku: 'A' }), srv(1500, 1, { sku: 'B' })], DENTRO)
+    expect(r.unidadesComDesconto).toBe(1)
+    expect(r.desconto).toBeCloseTo(750, 2) // metade do MAIS BARATO
+    expect(r.desconto).not.toBeCloseTo(1000, 2) // NÃO a metade do mais caro
+  })
+  it('ordem dos itens não importa (barato primeiro)', () => {
+    const r = calcularPromoServidor([srv(1500, 1), srv(2000, 1)], DENTRO)
+    expect(r.desconto).toBeCloseTo(750, 2)
+  })
+})
+
+describe('3+ itens / quantidade ímpar → k=floor(N/2), nos k mais baratos', () => {
+  it('3 diferentes [1000,1500,2000] → k=1, desconta 1000 (500)', () => {
+    const r = calcularPromoServidor([srv(1000, 1), srv(1500, 1), srv(2000, 1)], DENTRO)
+    expect(r.unidadesComDesconto).toBe(1)
+    expect(r.desconto).toBeCloseTo(500, 2)
+  })
+  it('4 diferentes [100,200,300,400] → k=2, desconta os 2 mais baratos (100+200)*0.5=150', () => {
+    const r = calcularPromoServidor(
+      [srv(100, 1), srv(200, 1), srv(300, 1), srv(400, 1)], DENTRO,
+    )
+    expect(r.unidadesComDesconto).toBe(2)
+    expect(r.desconto).toBeCloseTo(150, 2)
+  })
+  it('5 un do mesmo (2000) → k=2 → 2000', () => {
+    const r = calcularPromoServidor([srv(2000, 5)], DENTRO)
+    expect(r.unidadesComDesconto).toBe(2)
+    expect(r.desconto).toBeCloseTo(2000, 2)
+  })
+  it('1 unidade → nada', () => {
+    const r = calcularPromoServidor([srv(2000, 1)], DENTRO)
     expect(r.ativo).toBe(false)
     expect(r.desconto).toBe(0)
   })
-  it('continua aplicando depois da antiga data final', () => {
-    const r = calcularPromoServidor([{ erpProdutoId: ERP, precoUnitario: PRECO, quantidade: 4 }], DEPOIS_DA_DATA_ANTIGA)
-    expect(r.ativo).toBe(true)
-    expect(r.desconto).toBe(PRECO)
-  })
-  it('promoVigentePorErp reflete a vigência sem data final', () => {
-    expect(promoVigentePorErp(ERP, DENTRO)).not.toBeNull()
-    expect(promoVigentePorErp(ERP, DEPOIS_DA_DATA_ANTIGA)).not.toBeNull()
-    expect(promoVigentePorErp('OUTRO-PRODUTO', DENTRO)).toBeNull()
+  it('arredonda a 2 casas (1999 → 999.5)', () => {
+    const r = calcularPromoServidor([srv(1999, 2)], DENTRO)
+    expect(r.desconto).toBeCloseTo(999.5, 2)
   })
 })
 
-describe('escopo por produto', () => {
-  it('produto fora da promo não ganha desconto', () => {
-    const r = calcularPromoServidor([{ erpProdutoId: 'CLIM-SX070-TREND', precoUnitario: PRECO, quantidade: 4 }], DENTRO)
+describe('hook de margem — exclusão de SKU', () => {
+  it('2× aspirador excluído (450) → nada (protege margem)', () => {
+    PROMO_BF.excluir = ['aspirador']
+    const r = calcularPromoServidor([srv(450, 2, { sku: 'aspirador' })], DENTRO)
     expect(r.ativo).toBe(false)
+    expect(r.desconto).toBe(0)
   })
-  it('soma linhas do mesmo produto e desconta a unidade mais barata', () => {
-    // 1 un a R$2000 + 1 un a R$1800 (mesmo erp) → 2 un → 1 com 50% da MENOR.
+  it('[aspirador(excl) + 2× clim 2000] → pool só clim → k=1 → 1000', () => {
+    PROMO_BF.excluir = ['aspirador']
     const r = calcularPromoServidor(
-      [
-        { erpProdutoId: ERP, precoUnitario: 2000, quantidade: 1 },
-        { erpProdutoId: ERP, precoUnitario: 1800, quantidade: 1 },
-      ],
-      DENTRO,
+      [srv(450, 1, { sku: 'aspirador' }), srv(2000, 2, { sku: 'clim' })], DENTRO,
     )
     expect(r.unidadesComDesconto).toBe(1)
-    expect(r.desconto).toBeCloseTo(1800 * 0.5, 2)
+    expect(r.desconto).toBeCloseTo(1000, 2)
+  })
+  it('[aspirador(excl) + 1 clim] → sem par elegível → nada (não desconta o caro)', () => {
+    PROMO_BF.excluir = ['aspirador']
+    const r = calcularPromoServidor(
+      [srv(450, 1, { sku: 'aspirador' }), srv(2000, 1, { sku: 'clim' })], DENTRO,
+    )
+    expect(r.ativo).toBe(false)
+  })
+  it('exclusão casa por slug também', () => {
+    PROMO_BF.excluir = ['aspirador-sixxis']
+    const r = calcularPromoServidor([srv(450, 2, { slug: 'aspirador-sixxis' })], DENTRO)
+    expect(r.ativo).toBe(false)
   })
 })
 
-describe('cliente casa por feedId (sku ou slug)', () => {
-  it('casa pelo sku', () => {
-    const r = calcularPromoCliente([{ feedId: 'CLIM-SX180-TREND', preco: PRECO, quantidade: 2 }], DENTRO)
-    expect(r.ativo).toBe(true)
-    expect(r.desconto).toBeCloseTo(PRECO * 0.5, 2)
-  })
-  it('casa pelo slug', () => {
-    const r = calcularPromoCliente([{ feedId: 'sx180-trend', preco: PRECO, quantidade: 2 }], DENTRO)
-    expect(r.ativo).toBe(true)
-  })
-  it('feedId desconhecido não aplica', () => {
-    const r = calcularPromoCliente([{ feedId: 'outro-produto', preco: PRECO, quantidade: 2 }], DENTRO)
+describe('hook de margem — piso de preço', () => {
+  it('piso 600: [450, 2000] → pool só 2000 → sem par → nada', () => {
+    PROMO_BF.pisoItemDescontado = 600
+    const r = calcularPromoServidor([srv(450, 1), srv(2000, 1)], DENTRO)
     expect(r.ativo).toBe(false)
+  })
+  it('piso 600: [2000, 2000] → ambos acima do piso → 1000', () => {
+    PROMO_BF.pisoItemDescontado = 600
+    const r = calcularPromoServidor([srv(2000, 2)], DENTRO)
+    expect(r.desconto).toBeCloseTo(1000, 2)
+  })
+})
+
+describe('cliente (exibição) casa por feedId', () => {
+  it('2 un mesmo feedId → 1000', () => {
+    const r = calcularPromoCliente([{ feedId: 'sx180', preco: 2000, quantidade: 2 }], DENTRO)
+    expect(r.ativo).toBe(true)
+    expect(r.desconto).toBeCloseTo(1000, 2)
+  })
+  it('2 produtos diferentes no cliente → mais barato', () => {
+    const r = calcularPromoCliente(
+      [{ feedId: 'a', preco: 2000, quantidade: 1 }, { feedId: 'b', preco: 1200, quantidade: 1 }], DENTRO,
+    )
+    expect(r.desconto).toBeCloseTo(600, 2)
+  })
+  it('exclusão por feedId no cliente', () => {
+    PROMO_BF.excluir = ['aspirador']
+    const r = calcularPromoCliente([{ feedId: 'aspirador', preco: 450, quantidade: 2 }], DENTRO)
+    expect(r.ativo).toBe(false)
+  })
+})
+
+describe('badges de PDP/vitrine (site inteiro)', () => {
+  it('promoVigentePorFeedId → badge quando ativo e não excluído', () => {
+    const b = promoVigentePorFeedId('qualquer-produto', DENTRO)
+    expect(b).not.toBeNull()
+    expect(b?.descricao).toBe(PROMO_BF.descricao)
+    expect(b?.percentual).toBe(50)
+  })
+  it('produto excluído NÃO mostra badge', () => {
+    PROMO_BF.excluir = ['aspirador']
+    expect(promoVigentePorFeedId('aspirador', DENTRO)).toBeNull()
+  })
+  it('promoVigentePorErp → badge quando ativo (site inteiro)', () => {
+    expect(promoVigentePorErp('qualquer-erp', DENTRO)).not.toBeNull()
+  })
+  it('fora da janela → sem badge', () => {
+    expect(promoVigentePorFeedId('x', ANTES)).toBeNull()
   })
 })

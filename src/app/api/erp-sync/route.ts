@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { aplicarMarkupSite } from '@/lib/preco-markup'
 import { z } from 'zod'
 
 const produtoSyncSchema = z.object({
@@ -37,15 +38,20 @@ export async function POST(request: NextRequest) {
   }
 
   const resultados = await Promise.allSettled(
-    parsed.data.produtos.map((p) =>
-      prisma.produto.upsert({
+    parsed.data.produtos.map((p) => {
+      // O ERP envia o preço BASE; o site vende com +20% (markup). Reaplicamos o
+      // markup no ingest para o sync NÃO reverter o aumento (lib/preco-markup).
+      const preco = aplicarMarkupSite(p.preco)
+      const precoPromocional =
+        p.precoPromocional != null ? aplicarMarkupSite(p.precoPromocional) : undefined
+      return prisma.produto.upsert({
         where: { erpProdutoId: p.erpProdutoId },
         update: {
           nome: p.nome,
           slug: p.slug,
           descricao: p.descricao,
-          preco: p.preco,
-          precoPromocional: p.precoPromocional,
+          preco,
+          precoPromocional,
           imagens: p.imagens,
           estoque: p.estoque,
           categoria: p.categoria,
@@ -57,16 +63,16 @@ export async function POST(request: NextRequest) {
           nome: p.nome,
           slug: p.slug,
           descricao: p.descricao,
-          preco: p.preco,
-          precoPromocional: p.precoPromocional,
+          preco,
+          precoPromocional,
           imagens: p.imagens,
           estoque: p.estoque,
           categoria: p.categoria,
           modelo: p.modelo,
           ativo: p.ativo,
         },
-      }),
-    ),
+      })
+    }),
   )
 
   const sucessos = resultados.filter((r) => r.status === 'fulfilled').length

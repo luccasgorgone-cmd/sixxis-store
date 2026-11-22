@@ -12,7 +12,6 @@ import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import Depoimentos from '@/components/home/Depoimentos'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
-import { promosVigentes } from '@/lib/promo-segunda-unidade'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
 
 export const dynamic    = 'force-dynamic'
@@ -32,13 +31,8 @@ export default async function HomePage() {
   let cfg:   Record<string, string> = {}
   let trust: Record<string, string> = {}
 
-  // Produtos com promo "2ª unidade" vigente — garantimos presença deles em "Mais
-  // Vendidos" enquanto a campanha roda. Dirigido pela config de promo: quando a
-  // janela fecha, promosVigentes() fica vazia e nada é injetado (sem SKU chumbado).
-  const erpComPromo = promosVigentes().map((p) => p.erpProdutoId)
-
   try {
-    const [bannersDb, destaques, produtosGerais, configRows, trustRows, produtosPromo] = await Promise.all([
+    const [bannersDb, destaques, produtosGerais, configRows, trustRows] = await Promise.all([
       prisma.banner.findMany({ where: { ativo: true }, orderBy: { ordem: 'asc' } }),
       prisma.produtoDestaque.findMany({
         where: { secao: 'mais-vendidos' },
@@ -57,9 +51,6 @@ export default async function HomePage() {
           },
         },
       }),
-      erpComPromo.length > 0
-        ? prisma.produto.findMany({ where: { erpProdutoId: { in: erpComPromo }, ativo: true } })
-        : Promise.resolve([]),
     ])
 
     banners = bannersDb
@@ -68,14 +59,6 @@ export default async function HomePage() {
     produtosMostrar = destaques.length > 0
       ? destaques.map((d) => d.produto)
       : produtosGerais
-
-    // Injeta os produtos em promo no topo de "Mais Vendidos", sem duplicar os que
-    // já estão curados/listados. Config-driven: some sozinho quando a promo expira.
-    if (produtosPromo.length > 0) {
-      const jaListados = new Set(produtosMostrar.map((p) => p.id))
-      const novos = produtosPromo.filter((p) => !jaListados.has(p.id))
-      if (novos.length > 0) produtosMostrar = [...novos, ...produtosMostrar]
-    }
   } catch (error) {
     console.error('[HOME DB ERROR]', error)
   }
