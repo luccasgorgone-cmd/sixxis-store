@@ -33,18 +33,18 @@ const depoimentos = [
 
 export default function Depoimentos() {
   return (
-    <section className="bg-white border-b border-gray-100 py-10 min-h-[260px] md:min-h-[340px]">
+    <section className="border-b border-[#2A3937] py-10 min-h-[260px] md:min-h-[340px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mb-6">
-          <h2 className="text-xl font-extrabold text-gray-900">O que nossos clientes dizem</h2>
-          <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
+          <h2 className="text-xl font-extrabold text-[#F4F7F6]">O que nossos clientes dizem</h2>
+          <div className="w-12 h-0.5 bg-[#00cfb5] mt-1 rounded-full" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {depoimentos.map((d, i) => (
             <div
               key={i}
               className="border border-white/10 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-              style={{ backgroundColor: '#0f2e2b' }}
+              style={{ backgroundColor: '#111717' }}
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: d.nota }).map((_, s) => (

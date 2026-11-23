@@ -212,10 +212,10 @@ export default function CardProduto({ produto, priority = false }: Props) {
   return (
     <>
     <Link href={`/produtos/${produto.slug}`} className="block h-full group">
-      <article className="bg-white h-full flex flex-col border border-gray-200/80 rounded-2xl overflow-hidden hover:border-[#3cbfb3]/30 hover:shadow-lg hover:shadow-gray-200/80 hover:-translate-y-0.5 transition-all duration-200">
+      <article className="bg-[#111717] h-full flex flex-col border border-[#2A3937] rounded-2xl overflow-hidden hover:border-[#00cfb5]/40 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all duration-200">
 
-        {/* Imagem */}
-        <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1', minHeight: 'min(220px, 42vw)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+        {/* Imagem — palco claro (red-line: foto não escurece) */}
+        <div className="relative bg-[#f4f5f2] overflow-hidden" style={{ aspectRatio: '1/1', minHeight: 'min(220px, 42vw)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
           {/* Badge desconto */}
           {desconto > 0 && !esgotado && (
             <div className="absolute top-2.5 left-2.5 z-10">
@@ -230,7 +230,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
 
           {/* Badge novo */}
           {isNovo && !esgotado && (
-            <span className="absolute top-2.5 left-2.5 z-10 bg-[#3cbfb3] text-white text-[10px] font-black px-2 py-0.5 rounded-md">
+            <span className="absolute top-2.5 left-2.5 z-10 bg-[#00cfb5] text-[#032E28] text-[10px] font-black px-2 py-0.5 rounded-md">
               NOVO
             </span>
           )}
@@ -314,7 +314,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
 
         {/* Conteúdo */}
         <div className="flex flex-col flex-1 px-3 pt-3 pb-3">
-          <p className="text-xs sm:text-sm text-gray-800 line-clamp-2 leading-snug font-medium mb-2 flex-1">
+          <p className="text-xs sm:text-sm text-[#F4F7F6] line-clamp-2 leading-snug font-medium mb-2 flex-1">
             {produto.nome}
           </p>
 
@@ -322,7 +322,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
           {totalAvaliacoes > 0 && (
             <div className="flex items-center gap-1.5 mb-2.5">
               <EstrelasNota nota={mediaAvaliacoes} size={12} />
-              <span className="text-xs text-gray-500">({totalAvaliacoes})</span>
+              <span className="text-xs text-[#B0BFBC]">({totalAvaliacoes})</span>
             </div>
           )}
 
@@ -330,21 +330,21 @@ export default function CardProduto({ produto, priority = false }: Props) {
           <div>
             {precoOriginal && (
               <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="text-xs text-gray-400 line-through">R$ {fmt(precoOriginal)}</span>
+                <span className="text-xs text-[#B0BFBC]/70 line-through">R$ {fmt(precoOriginal)}</span>
               </div>
             )}
 
-            <p className="text-[17px] font-black text-gray-900 leading-none mb-1">
+            <p className="text-[17px] font-black text-[#F4F7F6] leading-none mb-1">
               R$ {fmt(precoFinal)}
             </p>
 
-            <p className="hidden sm:block text-xs text-gray-500 mb-1">
+            <p className="hidden sm:block text-xs text-[#B0BFBC] mb-1">
               em até {MAX_PARCELAS_SEM_JUROS}x de <span className="font-semibold">R$ {fmt(valorParcela(precoFinal))}</span> sem juros
             </p>
 
-            <p className="text-[11px] sm:text-xs text-[#3cbfb3] font-semibold mb-3 whitespace-nowrap">
+            <p className="text-[11px] sm:text-xs text-[#00cfb5] font-semibold mb-3 whitespace-nowrap">
               R$ {fmt(precoPix)} no Pix
-              <span className="text-gray-400 font-normal whitespace-nowrap"> ({DESCONTO_PIX_PCT}% OFF)</span>
+              <span className="text-[#B0BFBC]/70 font-normal whitespace-nowrap"> ({DESCONTO_PIX_PCT}% OFF)</span>
             </p>
 
             {/* Botões — Comprar Agora primeiro, Adicionar segundo. Sempre os dois,
@@ -354,7 +354,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               {!esgotado && (
                 <button
                   onClick={handleComprarAgora}
-                  className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
+                  className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] shadow-sm transition-all duration-200 active:scale-[0.98]"
                 >
                   Comprar Agora
                 </button>
@@ -365,10 +365,10 @@ export default function CardProduto({ produto, priority = false }: Props) {
                 disabled={esgotado}
                 className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center transition-all duration-200 active:scale-[0.98] ${
                   esgotado
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    ? 'bg-[#1b2423] text-[#6b7a77] cursor-not-allowed'
                     : adicionado
                       ? 'bg-green-500 text-white border-2 border-green-500'
-                      : 'border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7]'
+                      : 'border-2 border-[#00cfb5] text-[#00cfb5] hover:bg-[#00cfb5]/10'
                 }`}
               >
                 <span className="whitespace-nowrap">
@@ -380,7 +380,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCmp(produto.id) }}
                 className={`hidden md:flex text-xs font-medium items-center justify-center gap-1 w-full transition-colors ${
-                  isCmp ? 'text-[#3cbfb3]' : 'text-gray-500 hover:text-[#3cbfb3]'
+                  isCmp ? 'text-[#00cfb5]' : 'text-[#B0BFBC] hover:text-[#00cfb5]'
                 }`}
               >
                 <GitCompare size={12} />

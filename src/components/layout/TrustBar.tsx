@@ -46,7 +46,7 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false, f
           ? 'bg-transparent border-t border-b border-white/15'
           : 'bg-white border-t border-b border-gray-100'
       }`}
-      style={fundoVerde ? { backgroundColor: '#0f2e2b' } : undefined}
+      style={fundoVerde ? { backgroundColor: '#111717' } : undefined}
     >
       {/* Grid responsivo por quantidade: empilha no mobile se ímpar, 2x2 se par;
           uma coluna por item no desktop (divisores verticais). */}
@@ -64,7 +64,7 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false, f
                 <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shrink-0 ${
                   escuro ? 'bg-white/10' : 'bg-[#e8f8f7]'
                 }`}>
-                  <Icon className="w-4 h-4 md:w-[18px] md:h-[18px] text-[#3cbfb3]" strokeWidth={2} />
+                  <Icon className="w-4 h-4 md:w-[18px] md:h-[18px] text-[#00cfb5]" strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
                   <p className={`text-[10px] sm:text-[11px] md:text-xs lg:text-sm font-bold leading-tight ${
