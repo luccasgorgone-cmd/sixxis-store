@@ -143,18 +143,18 @@ export default async function HomePage() {
       })()}
 
       {/* ── 3. Mais Vendidos ─────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 py-8 min-h-[280px] md:min-h-[420px]">
+      <section className="border-b border-[#2A3937] py-8 min-h-[280px] md:min-h-[420px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header da seção */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-xl font-extrabold text-gray-900">Mais Vendidos</h2>
-              <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
+              <h2 className="text-xl font-extrabold text-[#F4F7F6]">Mais Vendidos</h2>
+              <div className="w-12 h-0.5 bg-[#00cfb5] mt-1 rounded-full" />
             </div>
             <Link
               href="/produtos"
-              className="text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-semibold flex items-center gap-1 transition"
+              className="text-sm text-[#00cfb5] hover:text-[#65E5D4] font-semibold flex items-center gap-1 transition"
             >
               Ver todos <ArrowRight size={14} />
             </Link>
@@ -163,17 +163,17 @@ export default async function HomePage() {
           {produtosMostrar.length > 0 ? (
             <MaisVendidosCarrossel produtos={produtosMostrar} />
           ) : (
-            <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
-              <ShoppingCart size={48} className="text-gray-200 mx-auto mb-4" />
-              <p className="text-gray-500 font-medium">Nenhum produto disponível</p>
-              <p className="text-gray-400 text-sm mt-1">Cadastre produtos no admin para exibi-los aqui</p>
+            <div className="text-center py-16 rounded-2xl border border-[#2A3937]" style={{ backgroundColor: '#111717' }}>
+              <ShoppingCart size={48} className="text-[#2A3937] mx-auto mb-4" />
+              <p className="text-[#B0BFBC] font-medium">Nenhum produto disponível</p>
+              <p className="text-[#B0BFBC]/70 text-sm mt-1">Cadastre produtos no admin para exibi-los aqui</p>
             </div>
           )}
         </div>
       </section>
 
       {/* ── 4. Banners duplos ─────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 pb-8 pt-8">
+      <section className="border-b border-[#2A3937] pb-8 pt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -234,11 +234,11 @@ export default async function HomePage() {
       </section>
 
       {/* ── 7. Por que Sixxis? ────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 py-10">
+      <section className="border-b border-[#2A3937] py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="mb-6">
-            <h2 className="text-xl font-extrabold text-gray-900">Por que Sixxis?</h2>
-            <div className="w-12 h-0.5 bg-[#3cbfb3] mt-1 rounded-full" />
+            <h2 className="text-xl font-extrabold text-[#F4F7F6]">Por que Sixxis?</h2>
+            <div className="w-12 h-0.5 bg-[#00cfb5] mt-1 rounded-full" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {PQ_SIXXIS_NUMS.filter((n) => n !== 1).map((n) => {
@@ -257,7 +257,7 @@ export default async function HomePage() {
                 <div
                   key={n}
                   className="relative overflow-hidden border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                  style={{ backgroundColor: '#0f2e2b', borderTop: '4px solid #3cbfb3' }}
+                  style={{ backgroundColor: '#111717', borderTop: '4px solid #00cfb5' }}
                 >
                   {/* Imagem de fundo nítida + scrim leve (mais forte só na base,
                       onde fica o texto) e sombra no texto p/ legibilidade. */}
@@ -273,7 +273,7 @@ export default async function HomePage() {
                   />
                   <div className="relative z-10" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.55)' }}>
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black/30 ring-1 ring-white/20 backdrop-blur-sm flex items-center justify-center mb-3 sm:mb-5 mx-auto">
-                      <Icon size={20} className="text-[#3cbfb3] sm:w-[22px] sm:h-[22px]" />
+                      <Icon size={20} className="text-[#00cfb5] sm:w-[22px] sm:h-[22px]" />
                     </div>
                     <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
                     <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{texto}</p>
@@ -290,16 +290,16 @@ export default async function HomePage() {
 
       {/* ── 7. Newsletter ─────────────────────────────────────────── */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="bg-white border-b border-gray-100 py-10">
+        <section className="border-b border-[#2A3937] py-10">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-1">
+            <h2 className="text-2xl font-extrabold text-[#F4F7F6] mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
             </h2>
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-[#B0BFBC] text-sm mb-6">
               {cfg.newsletter_subtitulo || 'Cadastre-se e ganhe 5% OFF na próxima compra + ofertas exclusivas em primeira mão.'}
             </p>
             <NewsletterForm />
-            <p className="text-xs text-gray-400 mt-2">Sem spam. Cancele quando quiser.</p>
+            <p className="text-xs text-[#B0BFBC]/70 mt-2">Sem spam. Cancele quando quiser.</p>
           </div>
         </section>
       )}

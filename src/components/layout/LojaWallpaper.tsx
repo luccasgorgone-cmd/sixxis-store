@@ -10,9 +10,9 @@ interface Props {
 }
 
 const ROTAS_FUNDO_BRANCO = ['/ofertas']
-// Home ('/') usa branco puro; a cor de texto base fica a cargo das classes
-// de cada seção da home (gray-900/gray-500), por isso não força `color` aqui.
-const ROTAS_FUNDO_BRANCO_PURO = ['/']
+// Home ('/') agora é escura (redesign Essencial Black) — o fundo base #080B0B
+// vem do .sxbf/wallpaper; não força mais branco aqui.
+const ROTAS_FUNDO_BRANCO_PURO: string[] = []
 
 export default function LojaWallpaper({
   children, wallpaperStyle, bgAtivo, bgOverlay,
