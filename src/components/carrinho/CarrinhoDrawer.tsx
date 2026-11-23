@@ -137,25 +137,25 @@ export default function CarrinhoDrawer() {
 
       {/* Drawer — mobile ocupa toda a largura, desktop limita a 420px */}
       <div
-        className="fixed top-0 right-0 z-[61] h-full w-full sm:w-[420px] flex flex-col shadow-2xl transition-transform duration-300 bg-white"
+        className="fixed top-0 right-0 z-[61] h-full w-full sm:w-[420px] flex flex-col shadow-2xl transition-transform duration-300 bg-[#111717]"
         style={{
           transform: drawerAberto ? 'translateX(0)' : 'translateX(100%)',
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#2A3937] shrink-0">
           <div className="flex items-center gap-2">
-            <ShoppingBag size={20} className="text-[#3cbfb3]" />
-            <h2 className="font-extrabold text-gray-900 text-base">Meu Carrinho</h2>
+            <ShoppingBag size={20} className="text-[#00cfb5]" />
+            <h2 className="font-extrabold text-[#F4F7F6] text-base">Meu Carrinho</h2>
             {itens.length > 0 && (
-              <span className="bg-[#3cbfb3] text-white text-xs font-black rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="bg-[#00cfb5] text-white text-xs font-black rounded-full w-5 h-5 flex items-center justify-center">
                 {itens.length}
               </span>
             )}
           </div>
           <button
             onClick={() => setDrawerAberto(false)}
-            className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
+            className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-[#192221] transition text-[#8a9794] hover:text-[#B0BFBC]"
             aria-label="Fechar carrinho"
           >
             <X size={20} />
@@ -166,14 +166,14 @@ export default function CarrinhoDrawer() {
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
           {itens.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-4 py-16 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                <Package size={28} className="text-gray-300" />
+              <div className="w-16 h-16 bg-[#192221] rounded-full flex items-center justify-center">
+                <Package size={28} className="text-[#6b7a77]" />
               </div>
-              <p className="text-gray-500 font-semibold">Seu carrinho está vazio</p>
-              <p className="text-sm text-gray-400">Adicione produtos para começar</p>
+              <p className="text-[#B0BFBC] font-semibold">Seu carrinho está vazio</p>
+              <p className="text-sm text-[#8a9794]">Adicione produtos para começar</p>
               <button
                 onClick={() => setDrawerAberto(false)}
-                className="mt-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-6 py-2.5 rounded-xl transition text-sm"
+                className="mt-2 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold px-6 py-2.5 rounded-xl transition text-sm"
               >
                 Continuar comprando
               </button>
@@ -182,10 +182,10 @@ export default function CarrinhoDrawer() {
             itens.map(item => (
               <div
                 key={`${item.produtoId}-${item.variacaoId ?? ''}`}
-                className="flex gap-3 bg-gray-50 rounded-2xl p-3 border border-gray-100"
+                className="flex gap-3 bg-[#192221] rounded-2xl p-3 border border-[#2A3937]"
               >
                 {/* Imagem */}
-                <div className="w-16 h-16 rounded-xl bg-white border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-xl bg-[#f4f5f2] border border-[#e6e9e4] overflow-hidden shrink-0 flex items-center justify-center">
                   {item.imagem ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.imagem} alt={item.nome} className="w-full h-full object-contain p-1" />
@@ -196,28 +196,28 @@ export default function CarrinhoDrawer() {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug">{item.nome}</p>
+                  <p className="text-sm font-semibold text-[#F4F7F6] line-clamp-2 leading-snug">{item.nome}</p>
                   {item.variacaoNome && (
-                    <p className="text-xs text-gray-400 mt-0.5">{item.variacaoNome}</p>
+                    <p className="text-xs text-[#8a9794] mt-0.5">{item.variacaoNome}</p>
                   )}
-                  <p className="text-sm font-extrabold text-[#3cbfb3] mt-1">
+                  <p className="text-sm font-extrabold text-[#00cfb5] mt-1">
                     R$ {fmt(item.preco * item.quantidade)}
                   </p>
 
                   {/* Quantidade + remover */}
                   <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white">
+                    <div className="flex items-center border border-[#2A3937] rounded-xl overflow-hidden bg-[#192221]">
                       <button
                         onClick={() => atualizarQuantidade(item.produtoId, item.quantidade - 1, item.variacaoId)}
-                        className="w-11 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+                        className="w-11 h-11 flex items-center justify-center text-[#B0BFBC] hover:bg-[#192221] transition"
                         aria-label="Diminuir"
                       >
                         <Minus size={16} />
                       </button>
-                      <span className="w-10 text-center text-sm font-bold text-gray-900">{item.quantidade}</span>
+                      <span className="w-10 text-center text-sm font-bold text-[#F4F7F6]">{item.quantidade}</span>
                       <button
                         onClick={() => atualizarQuantidade(item.produtoId, item.quantidade + 1, item.variacaoId)}
-                        className="w-11 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition"
+                        className="w-11 h-11 flex items-center justify-center text-[#B0BFBC] hover:bg-[#192221] transition"
                         aria-label="Aumentar"
                       >
                         <Plus size={16} />
@@ -225,7 +225,7 @@ export default function CarrinhoDrawer() {
                     </div>
                     <button
                       onClick={() => removerItem(item.produtoId, item.variacaoId)}
-                      className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-red-400 transition"
+                      className="w-11 h-11 flex items-center justify-center text-[#6b7a77] hover:text-red-400 transition"
                       aria-label="Remover item"
                     >
                       <Trash2 size={16} />
@@ -238,13 +238,13 @@ export default function CarrinhoDrawer() {
 
           {/* Upsell — você também pode gostar */}
           {itens.length > 0 && upsell.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Você também pode gostar</p>
+            <div className="mt-4 pt-4 border-t border-[#2A3937]">
+              <p className="text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-3">Você também pode gostar</p>
               <div className="space-y-2.5">
                 {upsell.map(p => (
-                  <div key={p.id} className="flex items-center gap-3 bg-gray-50 rounded-xl p-2.5 border border-gray-100">
+                  <div key={p.id} className="flex items-center gap-3 bg-[#192221] rounded-xl p-2.5 border border-[#2A3937]">
                     <Link href={`/produtos/${p.slug}`} onClick={() => setDrawerAberto(false)} className="shrink-0">
-                      <div className="w-12 h-12 bg-white rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-[#f4f5f2] rounded-lg overflow-hidden border border-[#e6e9e4] flex items-center justify-center">
                         {p.imagem ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={p.imagem} alt={p.nome} className="w-full h-full object-contain p-1" />
@@ -255,17 +255,17 @@ export default function CarrinhoDrawer() {
                     </Link>
                     <div className="flex-1 min-w-0">
                       <Link href={`/produtos/${p.slug}`} onClick={() => setDrawerAberto(false)}>
-                        <p className="text-xs font-semibold text-gray-800 line-clamp-1 hover:text-[#3cbfb3] transition-colors">{p.nome}</p>
+                        <p className="text-xs font-semibold text-[#F4F7F6] line-clamp-1 hover:text-[#00cfb5] transition-colors">{p.nome}</p>
                       </Link>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-sm font-black text-gray-900">R$ {fmt(p.precoFinal)}</span>
+                        <span className="text-sm font-black text-[#F4F7F6]">R$ {fmt(p.precoFinal)}</span>
                         {p.desconto && (
                           <span className="inline-flex items-center gap-0.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                             <Zap size={8} /> -{p.desconto}%
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-[#3cbfb3]">R$ {fmt(Number(p.pixPreco))} no PIX</p>
+                      <p className="text-[10px] text-[#00cfb5]">R$ {fmt(Number(p.pixPreco))} no PIX</p>
                     </div>
                     {/* Produto com variação não entra por aqui: sem seletor no
                         drawer, o "+ Add" criaria item sem voltagem/cor. Vira
@@ -274,14 +274,14 @@ export default function CarrinhoDrawer() {
                       <Link
                         href={`/produtos/${p.slug}`}
                         onClick={() => setDrawerAberto(false)}
-                        className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
+                        className="shrink-0 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
                       >
                         Escolher
                       </Link>
                     ) : (
                       <button
                         onClick={() => adicionarItem({ produtoId: p.id, nome: p.nome, preco: p.precoFinal, quantidade: 1, imagem: p.imagem ?? undefined, feedId: feedIdProduto({ sku: p.sku, slug: p.slug }) })}
-                        className="shrink-0 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
+                        className="shrink-0 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition"
                       >
                         + Add
                       </button>
@@ -295,13 +295,13 @@ export default function CarrinhoDrawer() {
 
         {/* Footer */}
         {itens.length > 0 && (
-          <div className="border-t border-gray-100 px-5 py-4 space-y-3 shrink-0 bg-white">
+          <div className="border-t border-[#2A3937] px-5 py-4 space-y-3 shrink-0 bg-[#111717]">
             {/* Total (com a promo "2ª unidade" já abatida, para transparência) */}
             {promo.ativo ? (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Subtotal</span>
-                  <span className="text-sm font-semibold text-gray-400 line-through">R$ {fmt(total)}</span>
+                  <span className="text-sm text-[#B0BFBC]">Subtotal</span>
+                  <span className="text-sm font-semibold text-[#8a9794] line-through">R$ {fmt(total)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-emerald-600 flex items-center gap-1">
@@ -310,14 +310,14 @@ export default function CarrinhoDrawer() {
                   <span className="text-sm font-bold text-emerald-600">-R$ {fmt(descontoPromo)}</span>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-sm font-semibold text-gray-700">Total</span>
-                  <span className="text-lg font-black text-gray-900">R$ {fmt(totalComDesconto)}</span>
+                  <span className="text-sm font-semibold text-[#D7E0DD]">Total</span>
+                  <span className="text-lg font-black text-[#F4F7F6]">R$ {fmt(totalComDesconto)}</span>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Subtotal</span>
-                <span className="text-lg font-black text-gray-900">R$ {fmt(total)}</span>
+                <span className="text-sm text-[#B0BFBC]">Subtotal</span>
+                <span className="text-lg font-black text-[#F4F7F6]">R$ {fmt(total)}</span>
               </div>
             )}
             {/* Estimativa de frete — mostra o custo ANTES do checkout */}
@@ -330,13 +330,13 @@ export default function CarrinhoDrawer() {
                   onKeyDown={e => e.key === 'Enter' && calcularFrete()}
                   placeholder="CEP para calcular o frete"
                   maxLength={9}
-                  className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-transparent transition"
+                  className="flex-1 min-w-0 px-3 py-2 border border-[#2A3937] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#00cfb5] focus:border-transparent transition"
                   aria-label="CEP para calcular o frete"
                 />
                 <button
                   onClick={calcularFrete}
                   disabled={!cepValido(cepFrete) || calculandoFrete}
-                  className="shrink-0 flex items-center gap-1.5 bg-[#0f2e2b] hover:bg-[#1a4f4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-3.5 py-2 rounded-xl text-sm transition active:scale-95"
+                  className="shrink-0 flex items-center gap-1.5 bg-[#00cfb5] hover:bg-[#65E5D4] disabled:opacity-50 disabled:cursor-not-allowed text-[#032E28] font-bold px-3.5 py-2 rounded-xl text-sm transition active:scale-95"
                 >
                   {calculandoFrete ? <Loader2 size={14} className="animate-spin" /> : <Truck size={14} />}
                   {calculandoFrete ? FRETE_COPY.calculando : FRETE_COPY.calcular}
@@ -353,19 +353,19 @@ export default function CarrinhoDrawer() {
                 <div className="mt-2 space-y-1.5">
                   {freteResult.opcoes.map(op => (
                     <div key={op.id}
-                      className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
+                      className="flex items-center justify-between bg-[#192221] border border-[#2A3937] rounded-xl px-3 py-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <Truck size={13} className="text-[#3cbfb3] shrink-0" />
+                        <Truck size={13} className="text-[#00cfb5] shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-gray-800 truncate">{op.nome}</p>
+                          <p className="text-xs font-bold text-[#F4F7F6] truncate">{op.nome}</p>
                           {op.prazo && (
-                            <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                            <p className="text-[10px] text-[#B0BFBC] flex items-center gap-1">
                               <Clock size={9} /> {op.prazo}
                             </p>
                           )}
                         </div>
                       </div>
-                      <p className={`text-xs font-extrabold shrink-0 ${op.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
+                      <p className={`text-xs font-extrabold shrink-0 ${op.preco === 0 ? 'text-emerald-600' : 'text-[#F4F7F6]'}`}>
                         {op.preco === 0 ? FRETE_COPY.gratisPreco : `R$ ${fmt(op.preco)}`}
                       </p>
                     </div>
@@ -388,29 +388,29 @@ export default function CarrinhoDrawer() {
             </div>
 
             {/* Selos */}
-            <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-xl py-2 px-3 flex-wrap">
+            <div className="flex items-center justify-center gap-3 bg-[#192221] rounded-xl py-2 px-3 flex-wrap">
               <div className="flex items-center gap-1">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   <polyline points="9 12 11 14 15 10"/>
                 </svg>
-                <span className="text-[10px] text-gray-500 font-medium">Compra Segura</span>
+                <span className="text-[10px] text-[#B0BFBC] font-medium">Compra Segura</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-[#2A3937]" />
               <div className="flex items-center gap-1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3cbfb3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00cfb5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
-                <span className="text-[10px] text-gray-500 font-medium">SSL Ativo</span>
+                <span className="text-[10px] text-[#B0BFBC] font-medium">SSL Ativo</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-[#2A3937]" />
               <div className="flex items-center gap-1">
                 <svg width="20" height="13" viewBox="0 0 200 130" fill="none">
                   <rect width="200" height="130" rx="10" fill="#009ee3"/>
                   <text x="100" y="85" textAnchor="middle" fill="white" fontSize="60" fontWeight="bold" fontFamily="Arial, sans-serif">MP</text>
                 </svg>
-                <span className="text-[10px] text-gray-500 font-medium">Mercado Pago</span>
+                <span className="text-[10px] text-[#B0BFBC] font-medium">Mercado Pago</span>
               </div>
             </div>
 
@@ -418,7 +418,7 @@ export default function CarrinhoDrawer() {
             <Link
               href="/checkout"
               onClick={() => setDrawerAberto(false)}
-              className="w-full flex items-center justify-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-extrabold py-4 rounded-2xl transition-all shadow-lg shadow-[#3cbfb3]/25 hover:-translate-y-0.5 active:scale-[0.97] text-base"
+              className="w-full flex items-center justify-center gap-2 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-extrabold py-4 rounded-2xl transition-all shadow-lg shadow-[#00cfb5]/25 hover:-translate-y-0.5 active:scale-[0.97] text-base"
             >
               <ShoppingBag size={18} />
               Finalizar compra
@@ -426,7 +426,7 @@ export default function CarrinhoDrawer() {
             <Link
               href="/carrinho"
               onClick={() => setDrawerAberto(false)}
-              className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 text-gray-600 hover:border-[#3cbfb3] hover:text-[#3cbfb3] font-bold py-3 rounded-2xl transition text-sm"
+              className="w-full flex items-center justify-center gap-2 border-2 border-[#2A3937] text-[#B0BFBC] hover:border-[#00cfb5] hover:text-[#00cfb5] font-bold py-3 rounded-2xl transition text-sm"
             >
               Ver carrinho completo
             </Link>
