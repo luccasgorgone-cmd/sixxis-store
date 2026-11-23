@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Poppins } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import Script from 'next/script'
 import { prisma } from '@/lib/prisma'
@@ -16,10 +16,42 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br'
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
 
-// ── Fontes carregadas (apenas Inter + Poppins; reduzimos de 7 para 2 fontes
-//    para aliviar o payload no mobile 3G/4G).
-const inter   = Inter   ({ subsets: ['latin'], variable: '--font-inter',   display: 'swap' })
-const poppins = Poppins ({ subsets: ['latin'], variable: '--font-poppins', display: 'swap', weight: ['400','500','600','700','800'] })
+// ── Fontes AUTO-HOSPEDADAS (Black Friday 2026 — Manrope, a fonte da campanha
+//    Essencial do pacote). Self-host via next/font/local remove a dependência do
+//    Google Fonts (que falhava sem egress no build) e carrega local, display swap.
+//    Mantemos os nomes de variável (--font-inter/--font-poppins) p/ não mexer no
+//    resto do app; ambas apontam para Manrope.
+const inter = localFont({
+  src: [
+    { path: '../fonts/manrope-400.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/manrope-500.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/manrope-600.woff2', weight: '600', style: 'normal' },
+    { path: '../fonts/manrope-700.woff2', weight: '700', style: 'normal' },
+    { path: '../fonts/manrope-800.woff2', weight: '800', style: 'normal' },
+  ],
+  variable: '--font-inter',
+  display: 'swap',
+})
+const poppins = localFont({
+  src: [
+    { path: '../fonts/manrope-400.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/manrope-500.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/manrope-600.woff2', weight: '600', style: 'normal' },
+    { path: '../fonts/manrope-700.woff2', weight: '700', style: 'normal' },
+    { path: '../fonts/manrope-800.woff2', weight: '800', style: 'normal' },
+  ],
+  variable: '--font-poppins',
+  display: 'swap',
+})
+// Barlow Condensed (itálico 700/800) — voz de campanha Black Friday (títulos).
+const barlow = localFont({
+  src: [
+    { path: '../fonts/barlow-condensed-italic-700.woff2', weight: '700', style: 'italic' },
+    { path: '../fonts/barlow-condensed-italic-800.woff2', weight: '800', style: 'italic' },
+  ],
+  variable: '--font-barlow',
+  display: 'swap',
+})
 
 const FONT_MAP: Record<string, { variable: string; className: string }> = {
   Inter:   inter,
@@ -163,7 +195,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   // Fonte selecionada (fallback: Inter)
   const fontObj    = FONT_MAP[fontePrincipal] ?? inter
-  const allFontVars = [inter.variable, poppins.variable].join(' ')
+  const allFontVars = [inter.variable, poppins.variable, barlow.variable].join(' ')
 
   const cssVars = {
     '--tiffany':             cfg.cor_principal      || '#3cbfb3',
