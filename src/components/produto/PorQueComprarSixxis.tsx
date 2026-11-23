@@ -74,11 +74,11 @@ export function PorQueComprarSixxis() {
   return (
     <section className="mt-12 mb-8">
       <div className="flex items-center gap-3 mb-8">
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-        <h2 className="text-xl font-black whitespace-nowrap px-2" style={{ color: '#0f2e2b' }}>
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#2A3937] to-transparent" />
+        <h2 className="text-xl font-black whitespace-nowrap px-2" style={{ color: '#F4F7F6' }}>
           Por que comprar na Sixxis?
         </h2>
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#2A3937] to-transparent" />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -91,7 +91,7 @@ export function PorQueComprarSixxis() {
               ref={(el) => { refs.current[i] = el }}
               className="relative overflow-hidden p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[20px] border transition-all duration-200 hover:-translate-y-0.5"
               style={{
-                backgroundColor: '#0f2e2b',
+                backgroundColor: '#111717',
                 borderColor: 'transparent',
                 borderWidth: '1px',
                 opacity: visivel ? 1 : 0,
@@ -99,7 +99,7 @@ export function PorQueComprarSixxis() {
                 transitionProperty: 'opacity, transform, border-color',
                 transitionDuration: '300ms',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3cbfb3' }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#00cfb5' }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent' }}
             >
               {/* Fundo premium da marca + scrim p/ manter contraste do texto branco */}
@@ -118,7 +118,7 @@ export function PorQueComprarSixxis() {
                   className="flex items-center justify-center rounded-full mb-3 sm:mb-5 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto"
                   style={{ backgroundColor: 'rgba(60, 191, 179, 0.12)' }}
                 >
-                  <Icone className="w-6 h-6 sm:w-9 sm:h-9 lg:w-12 lg:h-12" color="#3cbfb3" strokeWidth={1.75} />
+                  <Icone className="w-6 h-6 sm:w-9 sm:h-9 lg:w-12 lg:h-12" color="#00cfb5" strokeWidth={1.75} />
                 </div>
                 <h3 className="font-bold mb-1.5 sm:mb-2 text-sm sm:text-lg lg:text-xl text-center" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>
                   {r.titulo}
