@@ -49,10 +49,10 @@ export interface ConfigPromoBF {
 // Config única — editar aqui para go-live (flipar `ativa`, travar datas, e, se o
 // Luccas decidir, listar SKUs de margem baixa em `excluir`).
 export const PROMO_BF: ConfigPromoBF = {
-  ativa:              false, // ← GO do Luccas flipa para true
+  ativa:              true,  // ← GO do Luccas (23/11/2026): "vai começar hoje a Black Friday"
   percentual:         50,
-  inicio:             '2026-11-27T00:00:00-03:00', // ← confirmar data/hora com Luccas
-  fim:                '2026-11-30T23:59:59-03:00',  // ← confirmar (Cyber Monday)
+  inicio:             '2026-11-23T00:00:00-03:00', // começa hoje (GO do Luccas 23/11)
+  fim:                '2026-11-30T23:59:59-03:00',  // Cyber Monday (default — confirmar fim com Luccas)
   descricao:          '2ª unidade com 50% OFF — Black Friday',
   excluir:            [], // ← ex.: ['aspirador-sixxis', 'CLIM-...'] se Luccas pedir
   pisoItemDescontado: 0,

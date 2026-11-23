@@ -11,6 +11,7 @@ import TrustBar from '@/components/layout/TrustBar'
 import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import Depoimentos from '@/components/home/Depoimentos'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
+import HeroBlackFriday from '@/components/home/HeroBlackFriday'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
 
@@ -65,6 +66,9 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-transparent">
+
+      {/* ── 0. Banner Black Friday 2026 (campanha) ───────────── */}
+      <HeroBlackFriday />
 
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
       <div>

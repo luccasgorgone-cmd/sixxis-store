@@ -15,7 +15,7 @@ const links = [
   { href: '/produtos?categoria=climatizadores', label: 'Climatizadores', icon: Wind,       destaque: false },
   { href: '/produtos?categoria=aspiradores',    label: 'Aspiradores',    icon: Fan,        destaque: false },
   { href: '/produtos?categoria=spinning',       label: 'Spinning',       icon: Bike,       destaque: false },
-  { href: '/ofertas',                           label: 'Ofertas Relâmpago', icon: Zap,      destaque: true  },
+  { href: '/produtos',                          label: 'Black Friday',   icon: Zap,        destaque: true  },
   { href: '/sobre',                             label: 'Sobre',           icon: Info,       destaque: false },
   { href: '/contato',                           label: 'Contato',         icon: Phone,      destaque: false },
   { href: '/faq',                               label: 'FAQ',             icon: HelpCircle, destaque: false },

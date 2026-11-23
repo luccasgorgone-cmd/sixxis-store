@@ -237,7 +237,7 @@ const NAV_LINKS = [
   { href: '/produtos?categoria=climatizadores', label: 'CLIMATIZADORES', icon: Wind  },
   { href: '/produtos?categoria=aspiradores',    label: 'ASPIRADORES',    icon: Fan   },
   { href: '/produtos?categoria=spinning',       label: 'SPINNING',       icon: Bike  },
-  { href: '/ofertas',                           label: 'OFERTAS',        icon: Tag,   hot: true },
+  { href: '/produtos',                          label: 'BLACK FRIDAY',   icon: Tag,   hot: true },
   { href: '/seja-revendedor',                   label: 'PARCEIROS',      icon: Handshake },
   { href: '/sobre',                             label: 'SOBRE',          icon: Info  },
   { href: '/contato',                           label: 'CONTATO',        icon: Phone },
