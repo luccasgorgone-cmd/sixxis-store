@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
 import { signAdminToken } from '@/lib/adminToken'
+import { autenticarAdmin } from '@/lib/admin-usuarios'
 import {
   verificarBloqueio,
   registrarTentativaFalha,
   registrarTentativaSucesso,
 } from '@/lib/bruteforce'
 import { auditLog } from '@/lib/audit'
-
-async function loadPasswordHash(): Promise<string | null> {
-  const dbConfig = await prisma.configuracao
-    .findUnique({ where: { chave: 'admin_password_hash' } })
-    .catch(() => null)
-  return dbConfig?.valor ?? process.env.ADMIN_PASSWORD_HASH ?? null
-}
 
 export async function POST(request: NextRequest) {
   if (!process.env.JWT_SECRET) {
@@ -31,14 +23,6 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const hash = await loadPasswordHash()
-  if (!hash) {
-    return NextResponse.json(
-      { error: 'Servidor mal configurado: ADMIN_PASSWORD_HASH ausente' },
-      { status: 500 },
-    )
-  }
-
   let body: Record<string, unknown> = {}
   try {
     body = await request.json()
@@ -47,21 +31,23 @@ export async function POST(request: NextRequest) {
   }
 
   const raw = body.senha ?? body.password
+  const usuario = typeof body.usuario === 'string' ? body.usuario
+    : typeof body.login === 'string' ? body.login : undefined
   if (typeof raw !== 'string' || raw.length === 0 || raw.length > 200) {
     await registrarTentativaFalha(request)
     return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 })
   }
 
-  const ok = await bcrypt.compare(raw, hash)
-  if (!ok) {
+  const auth = await autenticarAdmin(usuario, raw)
+  if (!auth.ok || !auth.role) {
     await registrarTentativaFalha(request)
     return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 })
   }
 
   await registrarTentativaSucesso(request)
-  await auditLog({ req: request, action: 'admin.login' })
+  await auditLog({ req: request, action: 'admin.login', metadata: { role: auth.role } })
 
-  const token = signAdminToken()
+  const token = signAdminToken(auth.role)
   const isProduction = process.env.NODE_ENV === 'production'
   const response = NextResponse.json({ ok: true })
   response.cookies.set('admin_token', token, {
