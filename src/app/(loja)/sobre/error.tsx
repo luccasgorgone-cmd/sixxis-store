@@ -11,9 +11,9 @@ export default function SobreError({
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-8">
       <div className="max-w-md text-center">
-        <h2 className="text-2xl font-black text-[#0f2e2b] mb-2">Erro ao carregar</h2>
-        <p className="text-sm text-gray-500 mb-1">Tivemos um problema ao renderizar esta página.</p>
-        {error.digest && <p className="text-[11px] font-mono text-gray-400 mb-4">digest: {error.digest}</p>}
+        <h2 className="text-2xl font-black text-[#F4F7F6] mb-2">Erro ao carregar</h2>
+        <p className="text-sm text-[#B0BFBC] mb-1">Tivemos um problema ao renderizar esta página.</p>
+        {error.digest && <p className="text-[11px] font-mono text-[#8A9A96] mb-4">digest: {error.digest}</p>}
         <button
           onClick={reset}
           className="px-5 py-2 rounded-xl font-bold text-sm"

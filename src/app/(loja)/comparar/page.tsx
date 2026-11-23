@@ -100,20 +100,20 @@ export default async function CompararPage({
           Comparar produtos
         </h1>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-[#111717] rounded-2xl shadow-sm border border-[#2A3937] overflow-hidden">
           {/* Cabeçalho — 1 coluna para labels + 1 por produto */}
           <div
-            className="grid border-b border-gray-200"
+            className="grid border-b border-[#2A3937]"
             style={{ gridTemplateColumns: `160px repeat(${produtos.length}, minmax(0, 1fr))` }}
           >
-            <div className="p-4 bg-gray-50" />
+            <div className="p-4 bg-[#0E1413]" />
             {produtos.map((p) => {
               const imagens = Array.isArray(p.imagens) ? (p.imagens as string[]) : []
               const preco = Number(p.precoPromocional ?? p.preco)
               return (
-                <div key={p.id} className="p-4 text-center border-l border-gray-100">
+                <div key={p.id} className="p-4 text-center border-l border-[#2A3937]">
                   <Link href={`/produtos/${p.slug}`} className="block">
-                    <div className="relative w-full aspect-square max-w-[160px] mx-auto mb-3 bg-gray-50 rounded-xl overflow-hidden">
+                    <div className="relative w-full aspect-square max-w-[160px] mx-auto mb-3 bg-[#f4f5f2] rounded-xl overflow-hidden">
                       {imagens[0] ? (
                         <Image
                           src={imagens[0]}
@@ -125,10 +125,10 @@ export default async function CompararPage({
                         />
                       ) : null}
                     </div>
-                    <p className="text-sm font-bold text-gray-800 line-clamp-2 leading-snug min-h-[2.5rem]">
+                    <p className="text-sm font-bold text-[#F4F7F6] line-clamp-2 leading-snug min-h-[2.5rem]">
                       {p.nome}
                     </p>
-                    <p className="text-lg font-black text-gray-900 mt-2">R$ {fmt(preco)}</p>
+                    <p className="text-lg font-black text-[#F4F7F6] mt-2">R$ {fmt(preco)}</p>
                   </Link>
                   <Link
                     href={`/produtos/${p.slug}`}
@@ -145,10 +145,10 @@ export default async function CompararPage({
           {linhas.map((linha, i) => (
             <div
               key={linha.label}
-              className={`grid ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+              className={`grid ${i % 2 === 0 ? 'bg-[#111717]' : 'bg-[#0E1413]'}`}
               style={{ gridTemplateColumns: `160px repeat(${produtos.length}, minmax(0, 1fr))` }}
             >
-              <div className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wide bg-gray-50 border-r border-gray-100">
+              <div className="p-4 text-xs font-bold text-[#B0BFBC] uppercase tracking-wide bg-[#0E1413] border-r border-[#2A3937]">
                 {linha.label}
               </div>
               {linha.valores.map((valor, j) => {
@@ -157,8 +157,8 @@ export default async function CompararPage({
                 return (
                   <div
                     key={j}
-                    className={`p-4 text-sm border-l border-gray-100 ${
-                      isMelhorPreco ? 'text-[#3cbfb3] font-extrabold' : 'text-gray-700'
+                    className={`p-4 text-sm border-l border-[#2A3937] ${
+                      isMelhorPreco ? 'text-[#3cbfb3] font-extrabold' : 'text-[#B0BFBC]'
                     }`}
                   >
                     {valor}

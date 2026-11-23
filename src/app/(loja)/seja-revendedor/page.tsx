@@ -330,14 +330,14 @@ export default function SejaRevendedorPage() {
       </section>
 
       {/* ── POR QUE SER PARCEIRO ── */}
-      <section className="py-20 bg-white">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <SectionKicker texto="Vantagens reais" />
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
+            <SectionKicker texto="Vantagens reais" dark />
+            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
               Por que ser parceiro Sixxis?
             </h2>
-            <p className="text-gray-500 text-lg mt-3 max-w-2xl mx-auto">
+            <p className="text-[#B0BFBC] text-lg mt-3 max-w-2xl mx-auto">
               Não é uma parceria de prateleira. É um relacionamento construído para durar e crescer junto.
             </p>
             <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
@@ -348,7 +348,7 @@ export default function SejaRevendedorPage() {
               <AnimSection
                 key={i}
                 delay={i * 80}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-7"
+                className="group bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-7"
               >
                 <div className="flex items-start gap-4">
                   <div
@@ -358,8 +358,8 @@ export default function SejaRevendedorPage() {
                     <v.icone size={22} style={{ color: '#3cbfb3' }} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-2">{v.titulo}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed mb-3">{v.texto}</p>
+                    <h3 className="text-base font-bold text-[#F4F7F6] mb-2">{v.titulo}</h3>
+                    <p className="text-sm text-[#B0BFBC] leading-relaxed mb-3">{v.texto}</p>
                     <span
                       className="inline-block text-xs font-bold px-3 py-1 rounded-full"
                       style={{ backgroundColor: '#e8f8f7', color: '#3cbfb3' }}
@@ -436,14 +436,14 @@ export default function SejaRevendedorPage() {
       </section>
 
       {/* ── DEPOIMENTOS ── */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <SectionKicker texto="Resultados comprovados" />
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
+            <SectionKicker texto="Resultados comprovados" dark />
+            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
               Quem já é parceiro, recomenda
             </h2>
-            <p className="text-gray-500 text-lg mt-3 max-w-2xl mx-auto">
+            <p className="text-[#B0BFBC] text-lg mt-3 max-w-2xl mx-auto">
               Histórias reais de parceiros que construíram negócios sólidos com a Sixxis
             </p>
             <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
@@ -501,12 +501,12 @@ export default function SejaRevendedorPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {depoimentos.filter(d => !d.destaque).map((d, i) => (
               <AnimSection key={i} delay={i * 80}>
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 h-full flex flex-col">
+                <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-6 h-full flex flex-col">
                   <Quote size={20} className="mb-3" style={{ color: '#3cbfb3', opacity: 0.5 } as React.CSSProperties} />
-                  <p className="text-gray-600 text-sm leading-relaxed mb-5 flex-1 italic">
+                  <p className="text-[#B0BFBC] text-sm leading-relaxed mb-5 flex-1 italic">
                     &ldquo;{d.texto.substring(0, 180)}...&rdquo;
                   </p>
-                  <div className="pt-4 border-t border-gray-50">
+                  <div className="pt-4 border-t border-[#2A3937]">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
@@ -515,9 +515,9 @@ export default function SejaRevendedorPage() {
                         {d.avatarInicial}
                       </div>
                       <div>
-                        <p className="text-gray-900 font-bold text-xs">{d.nome}</p>
-                        <p className="text-gray-400 text-xs">{d.empresa}</p>
-                        <p className="text-gray-300 text-xs">{d.cidade}</p>
+                        <p className="text-[#F4F7F6] font-bold text-xs">{d.nome}</p>
+                        <p className="text-[#B0BFBC] text-xs">{d.empresa}</p>
+                        <p className="text-[#8A9A96] text-xs">{d.cidade}</p>
                       </div>
                     </div>
                     <div
@@ -535,14 +535,14 @@ export default function SejaRevendedorPage() {
       </section>
 
       {/* ── PROCESSO ── */}
-      <section id="processo" className="py-20 bg-white">
+      <section id="processo" className="py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-16">
-            <SectionKicker texto="Simples e rápido" />
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
+            <SectionKicker texto="Simples e rápido" dark />
+            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
               Comece a faturar em 4 passos
             </h2>
-            <p className="text-gray-500 text-lg mt-3 max-w-xl mx-auto">
+            <p className="text-[#B0BFBC] text-lg mt-3 max-w-xl mx-auto">
               Da inscrição à primeira venda em menos de 48 horas
             </p>
             <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
@@ -570,8 +570,8 @@ export default function SejaRevendedorPage() {
                       {p.numero}
                     </div>
                   </div>
-                  <h3 className="text-lg font-extrabold text-gray-900 mb-2">{p.titulo}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed mb-4">{p.descricao}</p>
+                  <h3 className="text-lg font-extrabold text-[#F4F7F6] mb-2">{p.titulo}</h3>
+                  <p className="text-sm text-[#B0BFBC] leading-relaxed mb-4">{p.descricao}</p>
                   <span
                     className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
                     style={{ backgroundColor: '#e8f8f7', color: '#3cbfb3' }}
@@ -587,14 +587,14 @@ export default function SejaRevendedorPage() {
       </section>
 
       {/* ── FORMULÁRIO ── */}
-      <section id="cadastro" className="py-20" style={{ background: 'linear-gradient(180deg, #f8fafc, #fff)' }}>
+      <section id="cadastro" className="py-20" style={{ background: '#080B0B' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-12">
-            <SectionKicker texto="Sem taxa de adesão" />
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-2">
+            <SectionKicker texto="Sem taxa de adesão" dark />
+            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
               Quero ser parceiro Sixxis
             </h2>
-            <p className="text-gray-500 text-lg mt-3 max-w-xl mx-auto">
+            <p className="text-[#B0BFBC] text-lg mt-3 max-w-xl mx-auto">
               Nossa equipe comercial entra em contato em até 24 horas
             </p>
             <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
@@ -624,25 +624,25 @@ export default function SejaRevendedorPage() {
                   ))}
                 </div>
 
-                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-3">
+                <div className="bg-[#111717] rounded-2xl p-5 border border-[#2A3937]">
+                  <p className="text-xs text-[#B0BFBC] font-semibold uppercase tracking-wide mb-3">
                     Fale com a gente
                   </p>
                   <a
                     href="https://wa.me/5518997474701"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2.5 text-sm font-medium text-gray-700 hover:text-[#3cbfb3] transition-colors mb-2"
+                    className="flex items-center gap-2.5 text-sm font-medium text-[#F4F7F6] hover:text-[#3cbfb3] transition-colors mb-2"
                   >
                     <Phone size={15} style={{ color: '#3cbfb3' }} /> (18) 99747-4701
                   </a>
                   <a
                     href="mailto:sac@sixxis.com.br"
-                    className="flex items-center gap-2.5 text-sm font-medium text-gray-700 hover:text-[#3cbfb3] transition-colors mb-2"
+                    className="flex items-center gap-2.5 text-sm font-medium text-[#F4F7F6] hover:text-[#3cbfb3] transition-colors mb-2"
                   >
                     <Mail size={15} style={{ color: '#3cbfb3' }} /> sac@sixxis.com.br
                   </a>
-                  <div className="flex items-center gap-2.5 text-sm text-gray-500">
+                  <div className="flex items-center gap-2.5 text-sm text-[#B0BFBC]">
                     <MapPin size={15} style={{ color: '#3cbfb3' }} /> Araçatuba, SP
                   </div>
                 </div>
@@ -653,11 +653,11 @@ export default function SejaRevendedorPage() {
                 {enviado ? (
                   <div
                     className="rounded-2xl p-12 text-center border"
-                    style={{ backgroundColor: '#f0fffe', borderColor: '#3cbfb3' }}
+                    style={{ backgroundColor: '#111717', borderColor: '#3cbfb3' }}
                   >
                     <CheckCircle size={56} className="mx-auto mb-4" style={{ color: '#3cbfb3' }} />
-                    <h3 className="text-2xl font-black text-gray-900 mb-2">Solicitação recebida!</h3>
-                    <p className="text-gray-500 text-base">
+                    <h3 className="text-2xl font-black text-[#F4F7F6] mb-2">Solicitação recebida!</h3>
+                    <p className="text-[#B0BFBC] text-base">
                       Recebemos sua solicitação de parceria! Nossa equipe vai analisar e entrar
                       em contato em breve pelo e-mail ou WhatsApp informado.
                     </p>
@@ -665,11 +665,11 @@ export default function SejaRevendedorPage() {
                 ) : (
                   <form
                     onSubmit={handleSubmit}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-5"
+                    className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-8 space-y-5"
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
                           Nome completo *
                         </label>
                         <input
@@ -677,19 +677,19 @@ export default function SejaRevendedorPage() {
                           type="text"
                           value={formData.nome}
                           onChange={e => setFormData({ ...formData, nome: e.target.value })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
                           placeholder="Seu nome completo"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
                           Empresa
                         </label>
                         <input
                           type="text"
                           value={formData.empresa}
                           onChange={e => setFormData({ ...formData, empresa: e.target.value })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
                           placeholder="Nome da empresa (opcional)"
                         />
                       </div>
@@ -697,7 +697,7 @@ export default function SejaRevendedorPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
                           E-mail *
                         </label>
                         <input
@@ -705,12 +705,12 @@ export default function SejaRevendedorPage() {
                           type="email"
                           value={formData.email}
                           onChange={e => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
                           placeholder="seu@email.com"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
                           WhatsApp *
                         </label>
                         <input
@@ -718,7 +718,7 @@ export default function SejaRevendedorPage() {
                           type="tel"
                           value={formData.whatsapp}
                           onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
                           placeholder="(00) 00000-0000"
                         />
                       </div>
@@ -726,25 +726,25 @@ export default function SejaRevendedorPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
                           Cidade / Estado
                         </label>
                         <input
                           type="text"
                           value={formData.cidade}
                           onChange={e => setFormData({ ...formData, cidade: e.target.value })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
                           placeholder="São Paulo, SP"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
                           Segmento de atuação
                         </label>
                         <select
                           value={formData.segmento}
                           onChange={e => setFormData({ ...formData, segmento: e.target.value })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition bg-white"
+                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition bg-[#111717]"
                         >
                           <option value="">Selecione</option>
                           {segmentos.map(s => <option key={s} value={s}>{s}</option>)}
@@ -753,14 +753,14 @@ export default function SejaRevendedorPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                      <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
                         Mensagem (opcional)
                       </label>
                       <textarea
                         rows={3}
                         value={formData.mensagem}
                         onChange={e => setFormData({ ...formData, mensagem: e.target.value })}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition resize-none"
+                        className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition resize-none"
                         placeholder="Conte um pouco sobre seu negócio ou dúvida..."
                       />
                     </div>
@@ -790,7 +790,7 @@ export default function SejaRevendedorPage() {
                       )}
                     </button>
 
-                    <p className="text-center text-xs text-gray-400">
+                    <p className="text-center text-xs text-[#B0BFBC]">
                       Sem taxa de adesão · Aprovação em até 24h · Dados protegidos pela LGPD
                     </p>
                   </form>

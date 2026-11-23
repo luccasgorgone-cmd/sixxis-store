@@ -53,7 +53,7 @@ const TIMELINE = [
 
 export default function SobrePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Sobre Nós' }]} />
 
       {/* ─── HERO ─── */}
@@ -119,14 +119,14 @@ export default function SobrePage() {
       </section>
 
       {/* ─── TIMELINE ─── */}
-      <section className="py-20 bg-white">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <SectionKicker texto="Nossa trajetória" />
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-4">
+            <SectionKicker texto="Nossa trajetória" dark />
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F4F7F6] mt-2 mb-4">
               30 anos de história e crescimento
             </h2>
-            <p className="text-gray-500 text-base max-w-2xl mx-auto leading-relaxed">
+            <p className="text-[#B0BFBC] text-base max-w-2xl mx-auto leading-relaxed">
               Cada marco desta linha do tempo representa anos de trabalho, inovação
               e o compromisso inabalável de entregar o melhor para os nossos clientes e parceiros.
               Uma trajetória construída com dedicação, superando desafios e conquistando mercados.
@@ -139,7 +139,7 @@ export default function SobrePage() {
               const Icon = item.icon
               return (
                 <AnimSection key={item.ano} delay={i * 50}>
-                  <div className="h-full bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+                  <div className="h-full bg-[#111717] border border-[#2A3937] rounded-2xl p-3 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                         style={{ backgroundColor: item.cor + '15' }}>
@@ -147,8 +147,8 @@ export default function SobrePage() {
                       </div>
                       <span className="text-sm font-black text-[#3cbfb3]">{item.ano}</span>
                     </div>
-                    <h3 className="text-[12px] font-extrabold text-gray-900 mb-1 leading-snug">{item.titulo}</h3>
-                    <p className="text-[11px] text-gray-500 leading-snug line-clamp-4">{item.texto}</p>
+                    <h3 className="text-[12px] font-extrabold text-[#F4F7F6] mb-1 leading-snug">{item.titulo}</h3>
+                    <p className="text-[11px] text-[#B0BFBC] leading-snug line-clamp-4">{item.texto}</p>
                   </div>
                 </AnimSection>
               )
@@ -168,7 +168,7 @@ export default function SobrePage() {
                   <AnimSection key={item.ano} delay={i * 60}>
                     <div className={`flex gap-4 sm:gap-8 ${esq ? 'sm:flex-row' : 'sm:flex-row-reverse'}`}>
                       <div className="flex-1">
-                        <div className={`bg-white border border-gray-100 rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${esq ? 'sm:text-right' : 'sm:text-left'}`}>
+                        <div className={`bg-[#111717] border border-[#2A3937] rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${esq ? 'sm:text-right' : 'sm:text-left'}`}>
                           <div className={`flex items-center gap-3 mb-3 ${esq ? 'sm:flex-row-reverse' : ''}`}>
                             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                               style={{ backgroundColor: item.cor + '15' }}>
@@ -176,8 +176,8 @@ export default function SobrePage() {
                             </div>
                             <span className="text-lg font-black text-[#3cbfb3]">{item.ano}</span>
                           </div>
-                          <h3 className="text-sm font-extrabold text-gray-900 mb-2">{item.titulo}</h3>
-                          <p className="text-xs text-gray-500 leading-relaxed">{item.texto}</p>
+                          <h3 className="text-sm font-extrabold text-[#F4F7F6] mb-2">{item.titulo}</h3>
+                          <p className="text-xs text-[#B0BFBC] leading-relaxed">{item.texto}</p>
                         </div>
                       </div>
                       <div className="flex w-10 h-10 rounded-full border-4 border-white shadow-lg items-center justify-center shrink-0 z-10 self-start mt-4"
@@ -244,12 +244,12 @@ export default function SobrePage() {
       </section>
 
       {/* ─── DIFERENCIAIS ─── */}
-      <section className="py-20 bg-white">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <SectionKicker texto="Por que Sixxis" />
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-3">O que nos diferencia no mercado</h2>
-            <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
+            <SectionKicker texto="Por que Sixxis" dark />
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F4F7F6] mt-2 mb-3">O que nos diferencia no mercado</h2>
+            <p className="text-[#B0BFBC] text-sm max-w-xl mx-auto leading-relaxed">
               Mais de 30 anos construindo relacionamentos baseados em confiança, qualidade e resultados reais para os nossos clientes.
             </p>
           </AnimSection>
@@ -307,7 +307,7 @@ export default function SobrePage() {
               const Icon = item.icone
               return (
                 <AnimSection key={i} delay={i * 80}>
-                  <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-4 sm:p-5 lg:p-8 h-full flex flex-col relative overflow-hidden">
+                  <div className="group bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-4 sm:p-5 lg:p-8 h-full flex flex-col relative overflow-hidden">
                     {/* Decoração de fundo */}
                     <div
                       className="absolute top-0 right-0 w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-bl-full opacity-5 transition-opacity group-hover:opacity-10"
@@ -328,7 +328,7 @@ export default function SobrePage() {
                       {item.destaque}
                     </span>
                     {/* Título */}
-                    <h3 className="text-sm sm:text-base lg:text-lg font-extrabold text-gray-900 mb-1 leading-snug">
+                    <h3 className="text-sm sm:text-base lg:text-lg font-extrabold text-[#F4F7F6] mb-1 leading-snug">
                       {item.titulo}
                     </h3>
                     {/* Subtítulo */}
@@ -338,7 +338,7 @@ export default function SobrePage() {
                     {/* Linha divisória */}
                     <div className="w-6 sm:w-8 h-0.5 rounded-full mb-3 lg:mb-4" style={{ backgroundColor: item.corIcone }} />
                     {/* Descrição */}
-                    <p className="text-[11px] sm:text-xs lg:text-sm text-gray-500 leading-relaxed flex-1">
+                    <p className="text-[11px] sm:text-xs lg:text-sm text-[#B0BFBC] leading-relaxed flex-1">
                       {item.texto}
                     </p>
                   </div>
@@ -418,12 +418,12 @@ export default function SobrePage() {
       </section>
 
       {/* ─── MAPA ─── */}
-      <section className="py-12 bg-white border-t border-gray-100">
+      <section className="py-12 border-t border-[#2A3937]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-1">Nossa localização</h2>
-            <p className="text-sm text-gray-500 mb-5">R. Anhanguera, 1711 — Icaray, Araçatuba - SP, 16020-355</p>
-            <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+            <h2 className="text-lg font-extrabold text-[#F4F7F6] mb-1">Nossa localização</h2>
+            <p className="text-sm text-[#B0BFBC] mb-5">R. Anhanguera, 1711 — Icaray, Araçatuba - SP, 16020-355</p>
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-[#2A3937]">
               <iframe
                 src="https://maps.google.com/maps?q=R.+Anhanguera+1711+Ara%C3%A7atuba+SP&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
