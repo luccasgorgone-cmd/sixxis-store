@@ -61,10 +61,10 @@ export default async function Footer() {
   } catch {}
 
   return (
-    <footer style={{ backgroundColor: '#0f2e2b' }} className="text-white/60">
+    <footer style={{ backgroundColor: '#080B0B' }} className="text-white/60">
 
       {/* ── Linha tiffany topo ─────────────────────────────────────────────── */}
-      <div className="h-1 bg-[#3cbfb3]" />
+      <div className="h-1 bg-[#00cfb5]" />
 
       {/* ── Bloco principal ────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -257,11 +257,11 @@ export default async function Footer() {
       </div>
 
       {/* ── Formas de pagamento (faixa branca) ─────────────────────────────── */}
-      <div className="bg-white border-t border-gray-200">
+      <div style={{ backgroundColor: '#111717' }} className="border-t border-[#2A3937]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
-              <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide shrink-0">
+              <span className="text-[#B0BFBC] text-xs font-semibold uppercase tracking-wide shrink-0">
                 Formas de Pagamento:
               </span>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
@@ -277,21 +277,21 @@ export default async function Footer() {
                     />
                   ))
                 ) : (
-                  <span className="text-gray-500 text-xs">
+                  <span className="text-[#B0BFBC] text-xs">
                     PIX • Cartão de Crédito
                   </span>
                 )}
               </div>
             </div>
-            <span className="text-gray-600 text-xs font-semibold shrink-0">
-              Parcele em até <strong className="text-gray-900">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
+            <span className="text-[#B0BFBC] text-xs font-semibold shrink-0">
+              Parcele em até <strong className="text-white">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
             </span>
           </div>
         </div>
       </div>
 
       {/* ── Copyright ─────────────────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#0f2e2b' }}>
+      <div className="border-t border-white/10" style={{ backgroundColor: '#080B0B' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
             <div className="space-y-0.5">
