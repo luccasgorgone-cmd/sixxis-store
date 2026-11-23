@@ -17,14 +17,14 @@ export default function SpecsExpandiveis({ especificacoes, initialCount = 5 }: P
   const resto = especificacoes.length - initialCount
 
   return (
-    <div className="mt-5 rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+    <div className="mt-5 rounded-2xl overflow-hidden border border-[#2A3937] bg-[#111717] shadow-sm">
       {/* Header escuro */}
       <div
         className="flex items-center gap-2.5 px-4 py-3"
         style={{ background: 'linear-gradient(to right, #0f2e2b, #1a4f4a)' }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="#3cbfb3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          stroke="#00cfb5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="8" y1="6" x2="21" y2="6"/>
           <line x1="8" y1="12" x2="21" y2="12"/>
           <line x1="8" y1="18" x2="21" y2="18"/>
@@ -43,15 +43,15 @@ export default function SpecsExpandiveis({ especificacoes, initialCount = 5 }: P
           <div
             key={label}
             className={`flex flex-col sm:flex-row sm:items-start gap-0.5 sm:gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-blue-50/20 transition ${
-              i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'
+              i % 2 === 0 ? 'bg-[#111717]' : 'bg-[#192221]/40'
             }`}
           >
             <dt
-              className="text-[11px] text-gray-500 font-medium uppercase tracking-wide leading-snug sm:shrink-0 sm:basis-[48%]"
+              className="text-[11px] text-[#B0BFBC] font-medium uppercase tracking-wide leading-snug sm:shrink-0 sm:basis-[48%]"
             >
               {label}
             </dt>
-            <dd className="text-sm sm:text-[11px] text-gray-900 font-semibold leading-snug sm:flex-1">
+            <dd className="text-sm sm:text-[11px] text-[#F4F7F6] font-semibold leading-snug sm:flex-1">
               {valor}
             </dd>
           </div>
@@ -60,10 +60,10 @@ export default function SpecsExpandiveis({ especificacoes, initialCount = 5 }: P
 
       {/* Botão expand/collapse */}
       {especificacoes.length > initialCount && (
-        <div className="border-t border-gray-100">
+        <div className="border-t border-[#2A3937]">
           <button
             onClick={() => setExpandido(v => !v)}
-            className="w-full py-2.5 flex items-center justify-center gap-1.5 text-xs font-bold text-[#3cbfb3] hover:bg-gray-50 transition"
+            className="w-full py-2.5 flex items-center justify-center gap-1.5 text-xs font-bold text-[#00cfb5] hover:bg-[#192221] transition"
           >
             {expandido ? (
               <>
