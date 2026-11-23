@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function CheckoutSucessoPage() {
   return (
-    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-[#f9fafb]">
+    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-[#080B0B]">
       <div className="w-full max-w-md bg-[#111717] rounded-2xl shadow-sm border border-[#2A3937] p-8 sm:p-10 text-center">
         <div className="w-20 h-20 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-6">
           <CheckCircle size={40} className="text-[#00cfb5]" />
@@ -25,7 +25,7 @@ export default function CheckoutSucessoPage() {
           Você receberá um e-mail com todos os detalhes do pedido e atualizações de entrega.
         </p>
 
-        <div className="bg-[#f9fafb] rounded-xl p-4 mb-8 text-left">
+        <div className="bg-[#080B0B] rounded-xl p-4 mb-8 text-left">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-[#e8f8f7] flex items-center justify-center shrink-0">
               <Package size={18} className="text-[#00cfb5]" />

@@ -188,7 +188,7 @@ export default function CalcFrete({ produtoId }: Props) {
                 <div key={op.id}
                   className="flex items-center justify-between bg-[#111717] border border-[#2A3937] rounded-xl px-3.5 py-3 hover:border-[#00cfb5]/30 transition">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-[#f8f9fa] rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-[#192221] rounded-lg flex items-center justify-center">
                       <Truck size={14} className="text-[#00cfb5]" />
                     </div>
                     <div>

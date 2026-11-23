@@ -142,7 +142,7 @@ export default function AbasProduto({ descricao, produtoId, especificacoes, faqs
                   </div>
                 </button>
                 {faqAberto === i && (
-                  <div className="px-6 py-4 bg-[#f8fffe] border-t border-[#00cfb5]/15">
+                  <div className="px-6 py-4 bg-[#192221] border-t border-[#00cfb5]/15">
                     <p className="text-[#B0BFBC] text-sm leading-relaxed">{faq.resposta}</p>
                   </div>
                 )}

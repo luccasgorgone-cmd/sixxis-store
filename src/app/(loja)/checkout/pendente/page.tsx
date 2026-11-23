@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function CheckoutPendentePage() {
   return (
-    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-[#f9fafb]">
+    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-[#080B0B]">
       <div className="w-full max-w-md bg-[#111717] rounded-2xl shadow-sm border border-[#2A3937] p-8 sm:p-10 text-center">
         <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-6">
           <Clock size={40} className="text-amber-500" />
@@ -25,7 +25,7 @@ export default function CheckoutPendentePage() {
           Isso pode levar alguns minutos. Assim que confirmado, você receberá um e-mail com os detalhes.
         </p>
 
-        <div className="bg-[#f9fafb] rounded-xl p-4 mb-8 text-left space-y-3">
+        <div className="bg-[#080B0B] rounded-xl p-4 mb-8 text-left space-y-3">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center shrink-0 mt-0.5">
               <Clock size={16} className="text-amber-500" />

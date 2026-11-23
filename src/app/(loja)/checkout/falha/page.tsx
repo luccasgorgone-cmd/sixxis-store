@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function CheckoutFalhaPage() {
   return (
-    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-[#f9fafb]">
+    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-[#080B0B]">
       <div className="w-full max-w-md bg-[#111717] rounded-2xl shadow-sm border border-[#2A3937] p-8 sm:p-10 text-center">
         <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-6">
           <XCircle size={40} className="text-red-500" />
