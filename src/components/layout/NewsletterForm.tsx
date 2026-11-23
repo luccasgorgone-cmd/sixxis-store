@@ -25,7 +25,7 @@ export default function NewsletterForm() {
 
   if (status === 'ok') {
     return (
-      <p className="text-[#3cbfb3] font-semibold text-sm">
+      <p className="text-[#00cfb5] font-semibold text-sm">
         ✓ Cadastrado com sucesso! Fique de olho no seu e-mail para nossas novidades.
       </p>
     )
@@ -39,13 +39,13 @@ export default function NewsletterForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Seu melhor e-mail"
-        className="flex-1 text-white placeholder-white/60 border border-white/15 px-5 py-3.5 rounded-xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#3cbfb3]"
-        style={{ backgroundColor: '#0f2e2b' }}
+        className="flex-1 text-white placeholder-white/60 border border-white/15 px-5 py-3.5 rounded-xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#00cfb5]"
+        style={{ backgroundColor: '#111717' }}
       />
       <button
         type="submit"
-        className="text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors shrink-0 hover:opacity-90 border border-white/15"
-        style={{ backgroundColor: '#0f2e2b' }}
+        className="text-[#032E28] font-bold px-5 py-2.5 rounded-xl text-sm transition-colors shrink-0 hover:opacity-90"
+        style={{ backgroundColor: '#00cfb5' }}
       >
         Cadastrar
       </button>

@@ -46,7 +46,7 @@ export default function AnnouncementBar({ items, intervalMs = 3500 }: Props) {
   return (
     <div
       className="w-full border-t border-b border-white/10 overflow-hidden"
-      style={{ backgroundColor: '#0f2e2b' }}
+      style={{ backgroundColor: '#111717' }}
       aria-live="polite"
     >
       <div className="max-w-3xl mx-auto px-4 py-2.5">
@@ -55,7 +55,7 @@ export default function AnnouncementBar({ items, intervalMs = 3500 }: Props) {
           style={{ opacity: fade ? 1 : 0 }}
         >
           <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-            <Icon className="w-3.5 h-3.5 text-[#3cbfb3]" strokeWidth={2} />
+            <Icon className="w-3.5 h-3.5 text-[#00cfb5]" strokeWidth={2} />
           </span>
           <p className="text-[12px] font-bold text-white leading-tight">
             {atual.titulo}
