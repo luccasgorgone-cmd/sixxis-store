@@ -25,7 +25,7 @@ export default function FiltrosProduto() {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5">
+    <div className="bg-[#111717] border border-[#2A3937] rounded-xl p-5">
       <p className="font-bold text-sm text-[#0a0a0a] mb-4 uppercase tracking-wide">Categoria</p>
       <ul className="space-y-1">
         {categorias.map(({ label, value }) => (
@@ -34,8 +34,8 @@ export default function FiltrosProduto() {
               onClick={() => filtrar(value)}
               className={`text-sm w-full text-left px-3 py-2 rounded-lg transition ${
                 categoriaAtual === value
-                  ? 'bg-[#3cbfb3] text-white font-semibold'
-                  : 'hover:bg-[#e8f8f7] text-gray-700 hover:text-[#3cbfb3]'
+                  ? 'bg-[#00cfb5] text-white font-semibold'
+                  : 'hover:bg-[#00cfb5]/10 text-[#D7E0DD] hover:text-[#00cfb5]'
               }`}
             >
               {label}
