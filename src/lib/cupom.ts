@@ -21,6 +21,7 @@ export type MotivoRecusaCupom =
   | 'NAO_E_PRIMEIRA_COMPRA'
   | 'JA_USOU_PRIMEIRA_COMPRA'
   | 'PRODUTO_NAO_ELEGIVEL'
+  | 'CUPOM_UNIDADE_UNICA'
 
 /** Item do carrinho para avaliar o escopo por produto de um cupom. */
 export interface ItemCupom {
@@ -74,6 +75,9 @@ export async function avaliarCupom(
   total: number,
   clienteId: string | null,
   itens?: ItemCupom[],
+  /** Total de unidades no carrinho (soma das quantidades). Usado pela regra
+   *  `unidadeUnica`. A barreira autoritativa (/api/pedidos) SEMPRE passa. */
+  totalUnidades?: number,
 ): Promise<ResultadoCupom> {
   if (!cupom || !cupom.ativo) return { valido: false, motivo: 'INEXISTENTE_OU_INATIVO', erro: 'Cupom inválido ou inativo' }
   if (cupom.validade && new Date() > cupom.validade) return { valido: false, motivo: 'EXPIRADO', erro: 'Cupom expirado' }
@@ -82,6 +86,18 @@ export async function avaliarCupom(
   }
   if (cupom.pedidoMinimo > 0 && total < cupom.pedidoMinimo) {
     return { valido: false, motivo: 'PEDIDO_MINIMO', erro: `Pedido mínimo de R$${Number(cupom.pedidoMinimo).toFixed(2)} para usar este cupom` }
+  }
+
+  // Cupom de unidade única (ex.: BLACKFRIDAY10): só vale com EXATAMENTE 1 unidade
+  // no carrinho. Isso o torna mutuamente exclusivo com a promo da 2ª unidade
+  // (que exige 2+). Quando totalUnidades não é informado (chamador legado), a
+  // regra é omitida — a barreira autoritativa (/api/pedidos) sempre informa.
+  if (cupom.unidadeUnica && totalUnidades != null && totalUnidades !== 1) {
+    return {
+      valido: false,
+      motivo: 'CUPOM_UNIDADE_UNICA',
+      erro:   'Este cupom vale apenas na compra de 1 unidade e não acumula com a promoção da 2ª unidade.',
+    }
   }
 
   if (cupom.primeiraCompra) {

@@ -24,6 +24,13 @@ const SET_FRETE_GRATIS = new Set<string>(UFS_FRETE_GRATIS)
 /** Percentual do valor do produto cobrado como frete nas UFs fora do grátis. */
 export const PERCENTUAL_FRETE = 0.09 // 9%
 
+// ─── Ajuste Black Friday 2026 no frete cobrado (pedido do Luccas 23/11) ──────
+// Os preços do catálogo voltaram ao valor BASE (o +20% foi revertido). Para
+// manter um acréscimo de +15% APENAS no frete das UFs cobradas, aplica-se este
+// fator dedicado sobre o percentual base. 1.15 = +15%. 1 = sem acréscimo.
+// Reverter: voltar FATOR_FRETE_BF = 1.
+export const FATOR_FRETE_BF = 1.15
+
 /** Prazo (dias úteis) por UF [min, max] — tabela conferida (Sixxis). */
 const PRAZO_UF: Record<UF, [number, number]> = {
   SP: [1, 3], MG: [2, 5], RJ: [3, 5], ES: [3, 6], PR: [2, 4], SC: [3, 5],
@@ -66,7 +73,7 @@ export function calcularFreteItem(uf: string, item: ItemFretePolitica): number {
   if (ufTemFreteGratis(uf)) return 0
   const preco = Number.isFinite(item.precoEfetivo) ? Math.max(0, item.precoEfetivo) : 0
   const qtd = Math.max(1, Math.floor(Number(item.quantidade)) || 1)
-  return arredondar2(preco * qtd * PERCENTUAL_FRETE)
+  return arredondar2(preco * qtd * PERCENTUAL_FRETE * FATOR_FRETE_BF)
 }
 
 export interface ResultadoFretePolitica {

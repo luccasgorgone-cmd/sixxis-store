@@ -13,8 +13,11 @@
 //
 // Reversão do +20%: rodar scripts/rollback-precos-bf2026.sql E voltar FATOR=1.
 
-/** Fator de aumento do site sobre o preço base. 1.20 = +20%. 1 = desligado. */
-export const FATOR_MARKUP_SITE = 1.20
+/** Fator de aumento do site sobre o preço base. 1.20 = +20%. 1 = desligado.
+ *  23/11/2026 (pedido do Luccas): +20% REVERTIDO — preços voltam ao base. Fator
+ *  em 1 para o sync do ERP não reaplicar markup; a reversão dos preços já gravados
+ *  é feita pela migration 20261123_revert_precos_bf2026 (restaura do backup). */
+export const FATOR_MARKUP_SITE = 1
 
 /** Aplica o markup do site e arredonda a 2 casas. null/undefined passam direto. */
 export function aplicarMarkupSite(preco: number): number
