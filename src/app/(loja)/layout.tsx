@@ -1,3 +1,4 @@
+import '@/styles/essencial-bf.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import FloatingButtons from '@/components/layout/FloatingButtons'
@@ -55,12 +56,12 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
     backgroundAttachment: bgAttachment,
     backgroundRepeat:     bgRepeat,
     backgroundPosition:   bgPosition,
-    backgroundColor:      '#0f1f1d',
-  } : { backgroundColor: '#0f1f1d' }
+    backgroundColor:      '#080B0B',
+  } : { backgroundColor: '#080B0B' }
 
   return (
     <LojaWallpaper wallpaperStyle={wallpaperStyle} bgAtivo={bgAtivo} bgOverlay={bgOverlay}>
-      <div className="relative flex flex-col min-h-screen" style={{ zIndex: 1 }}>
+      <div className="sxbf relative flex flex-col min-h-screen" style={{ zIndex: 1 }}>
         {lojaFechada && (
           <div className="bg-amber-500 text-[#0f2e2b] text-center text-xs sm:text-sm font-bold px-4 py-2 relative" style={{ zIndex: 50 }}>
             Loja temporariamente fechada para novos pedidos.
