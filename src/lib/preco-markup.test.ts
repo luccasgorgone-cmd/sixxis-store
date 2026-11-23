@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { FATOR_MARKUP_SITE, aplicarMarkupSite } from './preco-markup'
 
-describe('markup do site (+20%)', () => {
-  it('fator é 1.20', () => {
-    expect(FATOR_MARKUP_SITE).toBe(1.20)
+describe('markup do site (+20% REVERTIDO — fator 1)', () => {
+  it('fator é 1 (markup desligado, preços no base)', () => {
+    expect(FATOR_MARKUP_SITE).toBe(1)
   })
-  it('aplica +20% e arredonda a 2 casas', () => {
-    expect(aplicarMarkupSite(2000)).toBe(2400)
-    expect(aplicarMarkupSite(1999)).toBe(2398.8)
-    expect(aplicarMarkupSite(450)).toBe(540)
-    expect(aplicarMarkupSite(99.99)).toBe(119.99) // 119.988 → 119.99
+  it('fator 1 = identidade (não altera o preço base)', () => {
+    expect(aplicarMarkupSite(2000)).toBe(2000)
+    expect(aplicarMarkupSite(1999)).toBe(1999)
+    expect(aplicarMarkupSite(450)).toBe(450)
+    expect(aplicarMarkupSite(99.99)).toBe(99.99)
   })
   it('null/undefined passam direto (não inventa preço)', () => {
     expect(aplicarMarkupSite(null)).toBeNull()

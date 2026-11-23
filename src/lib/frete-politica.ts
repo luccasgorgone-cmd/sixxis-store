@@ -15,14 +15,40 @@
 import { normalizarUF, type UF } from './ufs'
 
 /** UFs com frete grátis: Sul (PR, SC, RS) + Sudeste (SP, RJ, MG, ES) + MS, GO, MT. */
+// Frete GRÁTIS: Sul (PR,SC,RS) + Sudeste (SP,RJ,MG,ES). O Centro-Oeste SAIU do
+// grátis em 23/11 (pedido do Luccas) — ver UFS_CENTRO_OESTE abaixo.
 export const UFS_FRETE_GRATIS: readonly UF[] = [
-  'PR', 'SC', 'RS', 'SP', 'RJ', 'MG', 'ES', 'MS', 'GO', 'MT',
+  'PR', 'SC', 'RS', 'SP', 'RJ', 'MG', 'ES',
 ] as const
 
 const SET_FRETE_GRATIS = new Set<string>(UFS_FRETE_GRATIS)
 
+// Centro-Oeste (MS, GO, MT, DF): deixou de ser grátis (pedido do Luccas 23/11).
+// Passa a cobrar PERCENTUAL_FRETE_CO (7% do valor do produto, flat, sem o uplift
+// BF), exceto para a categoria isenta (aspirador).
+export const UFS_CENTRO_OESTE: readonly UF[] = ['MS', 'GO', 'MT', 'DF'] as const
+const SET_CENTRO_OESTE = new Set<string>(UFS_CENTRO_OESTE)
+export const PERCENTUAL_FRETE_CO = 0.07 // 7% (Centro-Oeste)
+
+// Categoria ISENTA de frete em qualquer UF (frete grátis). Pedido do Luccas
+// 23/11: aspirador não paga frete em lugar nenhum.
+export const CATEGORIA_ISENTA_FRETE = 'aspiradores'
+
+/** Uma UF é do Centro-Oeste cobrado? UF inválida → false. */
+export function ufEhCentroOeste(uf: string | null | undefined): boolean {
+  const u = normalizarUF(uf)
+  return !!u && SET_CENTRO_OESTE.has(u)
+}
+
 /** Percentual do valor do produto cobrado como frete nas UFs fora do grátis. */
 export const PERCENTUAL_FRETE = 0.09 // 9%
+
+// ─── Ajuste Black Friday 2026 no frete cobrado (pedido do Luccas 23/11) ──────
+// Os preços do catálogo voltaram ao valor BASE (o +20% foi revertido). Para
+// manter um acréscimo de +15% APENAS no frete das UFs cobradas, aplica-se este
+// fator dedicado sobre o percentual base. 1.15 = +15%. 1 = sem acréscimo.
+// Reverter: voltar FATOR_FRETE_BF = 1.
+export const FATOR_FRETE_BF = 1.15
 
 /** Prazo (dias úteis) por UF [min, max] — tabela conferida (Sixxis). */
 const PRAZO_UF: Record<UF, [number, number]> = {
@@ -55,6 +81,8 @@ export interface ItemFretePolitica {
   /** Preço efetivo unitário em reais (precoPromocional quando houver, senão preco). */
   precoEfetivo: number
   quantidade: number
+  /** Categoria do produto — usada para a isenção de frete (aspirador). */
+  categoria?: string | null
 }
 
 /**
@@ -63,10 +91,14 @@ export interface ItemFretePolitica {
  *   sem exceção por categoria.
  */
 export function calcularFreteItem(uf: string, item: ItemFretePolitica): number {
+  // Aspirador (categoria isenta) → frete grátis em qualquer UF.
+  if (item.categoria && item.categoria === CATEGORIA_ISENTA_FRETE) return 0
   if (ufTemFreteGratis(uf)) return 0
   const preco = Number.isFinite(item.precoEfetivo) ? Math.max(0, item.precoEfetivo) : 0
   const qtd = Math.max(1, Math.floor(Number(item.quantidade)) || 1)
-  return arredondar2(preco * qtd * PERCENTUAL_FRETE)
+  // Centro-Oeste: 7% flat. Demais UFs cobradas (Nordeste/Norte): 9% × uplift BF.
+  if (ufEhCentroOeste(uf)) return arredondar2(preco * qtd * PERCENTUAL_FRETE_CO)
+  return arredondar2(preco * qtd * PERCENTUAL_FRETE * FATOR_FRETE_BF)
 }
 
 export interface ResultadoFretePolitica {

@@ -35,6 +35,22 @@ function adminLegacyRedirect(pathname: string): boolean {
   return false
 }
 
+// Decodifica o role do admin_token SEM verificar o HMAC (base64url do payload).
+// APENAS para UX (esconder/redirecionar abas); a barreira de segurança real é o
+// requireAdmin (HMAC) nas rotas /api/admin/*. Qualquer erro → false.
+function rolePedidosSemVerificar(token: string | undefined): boolean {
+  if (!token) return false
+  try {
+    const payloadB64 = token.split('.')[0]
+    let p = payloadB64.replace(/-/g, '+').replace(/_/g, '/')
+    while (p.length % 4) p += '='
+    const json = JSON.parse(Buffer.from(p, 'base64').toString('utf8'))
+    return json?.role === 'pedidos'
+  } catch {
+    return false
+  }
+}
+
 // ── CLIENTE ──────────────────────────────────────────────────────────────────
 // Login continua exigido em minha-conta/pedidos. O /checkout foi LIBERADO para
 // convidados (guest checkout): visitante abre /checkout sem redirect p/ login e
@@ -179,6 +195,16 @@ export function proxy(request: NextRequest, event?: NextFetchEvent) {
       // Editores legacy → consolidado em /editor-visual
       if (adminLegacyRedirect(pathname)) {
         return NextResponse.redirect(new URL(`${ADMIN_BASE}/editor-visual`, request.url))
+      }
+      // UX: colaborador restrito (role 'pedidos') só enxerga a aba Pedidos no
+      // painel (páginas UI). Segurança real é o requireAdmin nas APIs; aqui só
+      // evita abrir telas vazias. Decodifica o role SEM verificar HMAC (barato,
+      // edge-safe) — não é barreira de segurança.
+      if (pathname.startsWith(ADMIN_BASE) && rolePedidosSemVerificar(token)) {
+        const basePedidos = `${ADMIN_BASE}/pedidos`
+        if (pathname !== basePedidos && !pathname.startsWith(basePedidos + '/')) {
+          return NextResponse.redirect(new URL(basePedidos, request.url))
+        }
       }
     }
     // Rewrite público → interno (no-op quando não há rotação). /api/admin fica

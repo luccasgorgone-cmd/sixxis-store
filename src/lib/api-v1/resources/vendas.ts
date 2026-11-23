@@ -553,9 +553,9 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
     },
     {
       slug: 'cupons', model: 'Cupom', scope: 'read:pedidos',
-      scalarFields: ['id', 'codigo', 'tipo', 'valor', 'usoMaximo', 'totalUsos', 'pedidoMinimo', 'validade', 'ativo', 'descricao', 'primeiraCompra', 'produtoIds', 'createdAt', 'updatedAt'],
+      scalarFields: ['id', 'codigo', 'tipo', 'valor', 'usoMaximo', 'totalUsos', 'pedidoMinimo', 'validade', 'ativo', 'descricao', 'primeiraCompra', 'produtoIds', 'unidadeUnica', 'createdAt', 'updatedAt'],
       publicFields: ['codigo'],
-      select: { id: true, codigo: true, tipo: true, valor: true, usoMaximo: true, totalUsos: true, pedidoMinimo: true, validade: true, ativo: true, descricao: true, primeiraCompra: true, produtoIds: true, createdAt: true, updatedAt: true } as const satisfies Prisma.CupomSelect,
+      select: { id: true, codigo: true, tipo: true, valor: true, usoMaximo: true, totalUsos: true, pedidoMinimo: true, validade: true, ativo: true, descricao: true, primeiraCompra: true, produtoIds: true, unidadeUnica: true, createdAt: true, updatedAt: true } as const satisfies Prisma.CupomSelect,
       fields: [
         { name: 'id', type: 'string' },
         { name: 'codigo', type: 'string' },
@@ -569,6 +569,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
         { name: 'descricao', type: 'string', nullable: true },
         { name: 'primeiraCompra', type: 'boolean' },
         { name: 'produtoIds', type: 'string', nullable: true },
+        { name: 'unidadeUnica', type: 'boolean', description: 'Quando true, o cupom só vale com 1 unidade no carrinho (mutuamente exclusivo com a promo da 2ª unidade).' },
         { name: 'createdAt', type: 'string', format: 'date-time' },
         { name: 'updatedAt', type: 'string', format: 'date-time' },
       ],
@@ -607,6 +608,7 @@ export function createCommerceResources(deps: CommerceResourceOptions = {}): Res
           descricao: row.descricao,
           primeiraCompra: row.primeiraCompra,
           produtoIds: row.produtoIds,
+          unidadeUnica: row.unidadeUnica,
           createdAt: timestamp(row.createdAt),
           updatedAt: timestamp(row.updatedAt),
         }

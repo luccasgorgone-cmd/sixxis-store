@@ -54,7 +54,10 @@ export const PROMO_BF: ConfigPromoBF = {
   inicio:             '2026-11-23T00:00:00-03:00', // começa hoje (GO do Luccas 23/11)
   fim:                '2026-11-30T23:59:59-03:00',  // Cyber Monday (default — confirmar fim com Luccas)
   descricao:          '2ª unidade com 50% OFF — Black Friday',
-  excluir:            [], // ← ex.: ['aspirador-sixxis', 'CLIM-...'] se Luccas pedir
+  // 23/11/2026 (pedido do Luccas): SX200 Prime fora da promo da 2ª unidade
+  // (único produto excluído). Lista sku E slug para cobrir desconto E badge
+  // (feedId = sku ?? slug).
+  excluir:            ['CLIM-SX200-PRIME', 'sx200-prime'],
   pisoItemDescontado: 0,
 }
 

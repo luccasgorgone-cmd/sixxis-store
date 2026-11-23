@@ -34,6 +34,7 @@ function destinoPosLogin(): string {
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const [usuario, setUsuario] = useState('')
   const [senha, setSenha] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [erro, setErro] = useState('')
@@ -48,7 +49,7 @@ export default function AdminLoginPage() {
       const res = await fetch('/api/admin/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senha }),
+        body: JSON.stringify({ usuario, senha }),
       })
 
       if (res.ok) {
@@ -101,6 +102,18 @@ export default function AdminLoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-white/70 text-sm font-medium mb-2">Usuário</label>
+              <input
+                type="text"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                placeholder="Ex.: Gerenciamento"
+                autoCapitalize="none"
+                autoComplete="username"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#3cbfb3] focus:ring-1 focus:ring-[#3cbfb3] transition"
+              />
+            </div>
             <div>
               <label className="block text-white/70 text-sm font-medium mb-2">Senha</label>
               <div className="relative">

@@ -2,8 +2,13 @@ import crypto from 'crypto'
 
 const ALGO = 'sha256'
 
+// Papéis do painel: 'admin' = acesso total; 'pedidos' = colaborador restrito à
+// aba Pedidos (cotação de frete). Tokens antigos sem role são tratados como
+// 'admin' (compatibilidade).
+export type AdminRole = 'admin' | 'pedidos'
+
 export interface AdminTokenPayload {
-  role: 'admin'
+  role: AdminRole
   iat: number
   exp: number
 }
@@ -25,11 +30,11 @@ function getSecret(): string {
   return s
 }
 
-export function signAdminToken(expiresInSeconds = 8 * 3600): string {
+export function signAdminToken(role: AdminRole = 'admin', expiresInSeconds = 8 * 3600): string {
   const secret = getSecret()
   const now = Math.floor(Date.now() / 1000)
   const payload: AdminTokenPayload = {
-    role: 'admin',
+    role,
     iat: now,
     exp: now + expiresInSeconds,
   }
@@ -54,7 +59,9 @@ export function verifyAdminToken(token: string | undefined | null): AdminTokenPa
 
   let payload: AdminTokenPayload
   try { payload = JSON.parse(b64urlDecode(payloadB64).toString('utf8')) } catch { return null }
-  if (payload.role !== 'admin') return null
+  // Compat: tokens antigos podem não ter role explícito → assume 'admin'.
+  if (payload.role == null) payload.role = 'admin'
+  if (payload.role !== 'admin' && payload.role !== 'pedidos') return null
   if (typeof payload.exp !== 'number' || payload.exp < Math.floor(Date.now() / 1000)) return null
 
   return payload

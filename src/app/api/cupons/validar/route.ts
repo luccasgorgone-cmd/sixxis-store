@@ -34,7 +34,12 @@ export async function POST(request: NextRequest) {
         .filter((i) => i.produtoId)
     : undefined
 
-  const r = await avaliarCupom(cupom, Number(total) || 0, clienteId, itensCupom)
+  // Total de unidades (soma das quantidades) p/ a regra `unidadeUnica` (UX).
+  // Autoridade final é /api/pedidos, mas aqui já damos a mensagem correta.
+  const totalUnidades = Array.isArray(itens)
+    ? itens.reduce((acc: number, i: { quantidade?: unknown }) => acc + (Number(i?.quantidade) || 0), 0)
+    : undefined
+  const r = await avaliarCupom(cupom, Number(total) || 0, clienteId, itensCupom, totalUnidades)
   // `motivo` é o código estável que o cliente usa para diferenciar "cupom morto"
   // de "só falta logar". Ver MotivoRecusaCupom em src/lib/cupom.ts.
   if (!r.valido) return NextResponse.json({ valido: false, erro: r.erro, motivo: r.motivo })

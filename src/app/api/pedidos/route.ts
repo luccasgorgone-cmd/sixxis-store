@@ -297,9 +297,12 @@ export async function POST(request: NextRequest) {
       produtoId: i.produtoId,
       subtotal:  i.precoUnitario * i.quantidade,
     }))
+    // Total de unidades no carrinho — autoridade para a regra `unidadeUnica`
+    // (ex.: BLACKFRIDAY10 só vale com 1 unidade; não acumula com a promo da 2ª).
+    const totalUnidadesCupom = itensPedido.reduce((acc, i) => acc + i.quantidade, 0)
     // Convidado avalia o cupom como SEM login (clienteId null): preserva a regra
     // de que cupom de 1ª compra exige conta (cupom.ts). Logado usa seu clienteId.
-    const avaliacao = await avaliarCupom(cupom, subtotal, isGuest ? null : clienteId, itensCupom)
+    const avaliacao = await avaliarCupom(cupom, subtotal, isGuest ? null : clienteId, itensCupom, totalUnidadesCupom)
     if (avaliacao.valido && cupom) {
       descontoFinal = avaliacao.desconto ?? 0
       cupomCodigoFinal = cupom.codigo
