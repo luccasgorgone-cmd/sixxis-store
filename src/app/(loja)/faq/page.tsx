@@ -72,7 +72,7 @@ const faqSchema = {
 
 export default function FaqPage() {
   return (
-    <main className="bg-white">
+    <main className="bg-[#111717]">
       <Script
         id="schema-faq"
         type="application/ld+json"
@@ -104,7 +104,7 @@ export default function FaqPage() {
         <FaqAccordion items={faqs} />
 
         {/* CTA */}
-        <div className="mt-12 bg-[#1a4f4a] rounded-2xl p-8 text-center border border-[#3cbfb3]/20 shadow-lg">
+        <div className="mt-12 bg-[#1a4f4a] rounded-2xl p-8 text-center border border-[#00cfb5]/20 shadow-lg">
           <h2 className="text-xl font-bold text-white mb-2">Não encontrou sua resposta?</h2>
           <p className="text-gray-100 text-sm mb-6">
             Nossa equipe está pronta para te ajudar via WhatsApp ou pelo formulário de contato.
@@ -120,7 +120,7 @@ export default function FaqPage() {
             </a>
             <a
               href="/contato"
-              className="bg-white text-[#1a4f4a] hover:bg-gray-100 px-6 py-3 rounded-xl font-bold transition border-2 border-white"
+              className="bg-[#111717] text-[#1a4f4a] hover:bg-[#192221] px-6 py-3 rounded-xl font-bold transition border-2 border-white"
             >
               Formulário de Contato
             </a>
