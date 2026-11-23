@@ -313,7 +313,7 @@ export default async function ProdutoPage({
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <meta property="og:type" content="product" />
       <ViewItemTracker
         produto={{
@@ -395,46 +395,46 @@ export default async function ProdutoPage({
         <section className="mt-12 mb-10">
           {/* Mobile: stack vertical com numero+label horizontais (cabe '+1.000.000') */}
           <div className="md:hidden flex flex-col gap-2 reveal">
-            <div className="flex items-center justify-between bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15 px-5 py-3">
-              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="flex items-center justify-between bg-[#111717] rounded-2xl border border-[#00cfb5]/20 px-5 py-3">
+              <p className="text-2xl font-black text-[#00cfb5] whitespace-nowrap">
                 +<ContadorAnimado alvo={1000000} sufixo="" />
               </p>
-              <p className="text-sm text-gray-600 font-medium">Produtos Vendidos</p>
+              <p className="text-sm text-[#B0BFBC] font-medium">Produtos Vendidos</p>
             </div>
-            <div className="flex items-center justify-between bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15 px-5 py-3">
-              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="flex items-center justify-between bg-[#111717] rounded-2xl border border-[#00cfb5]/20 px-5 py-3">
+              <p className="text-2xl font-black text-[#00cfb5] whitespace-nowrap">
                 <ContadorAnimado alvo={12} sufixo=" meses" />
               </p>
-              <p className="text-sm text-gray-600 font-medium">Garantia Sixxis</p>
+              <p className="text-sm text-[#B0BFBC] font-medium">Garantia Sixxis</p>
             </div>
-            <div className="flex items-center justify-between bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15 px-5 py-3">
-              <p className="text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="flex items-center justify-between bg-[#111717] rounded-2xl border border-[#00cfb5]/20 px-5 py-3">
+              <p className="text-2xl font-black text-[#00cfb5] whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
-              <p className="text-sm text-gray-600 font-medium">Qualidade</p>
+              <p className="text-sm text-[#B0BFBC] font-medium">Qualidade</p>
             </div>
           </div>
 
           {/* Tablet + Desktop: grid 3 colunas centralizada (max-w-3xl em tablet pra
               não esticar; lg+ pode usar todo o container para acompanhar o resto). */}
           <div className="hidden md:grid grid-cols-3 gap-3 lg:gap-4 max-w-3xl lg:max-w-none mx-auto reveal">
-            <div className="text-center py-4 lg:py-5 px-3 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-xl lg:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-[#111717] rounded-2xl border border-[#00cfb5]/20">
+              <p className="text-xl lg:text-2xl font-black text-[#00cfb5] whitespace-nowrap">
                 +<ContadorAnimado alvo={1000000} sufixo="" />
               </p>
-              <p className="text-[11px] lg:text-xs text-gray-500 font-medium mt-1">Produtos Vendidos</p>
+              <p className="text-[11px] lg:text-xs text-[#B0BFBC] font-medium mt-1">Produtos Vendidos</p>
             </div>
-            <div className="text-center py-4 lg:py-5 px-3 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-xl lg:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-[#111717] rounded-2xl border border-[#00cfb5]/20">
+              <p className="text-xl lg:text-2xl font-black text-[#00cfb5] whitespace-nowrap">
                 <ContadorAnimado alvo={12} sufixo=" meses" />
               </p>
-              <p className="text-[11px] lg:text-xs text-gray-500 font-medium mt-1">Garantia Sixxis</p>
+              <p className="text-[11px] lg:text-xs text-[#B0BFBC] font-medium mt-1">Garantia Sixxis</p>
             </div>
-            <div className="text-center py-4 lg:py-5 px-3 bg-[#f0fffe] rounded-2xl border border-[#3cbfb3]/15">
-              <p className="text-xl lg:text-2xl font-black text-[#1a4f4a] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-[#111717] rounded-2xl border border-[#00cfb5]/20">
+              <p className="text-xl lg:text-2xl font-black text-[#00cfb5] whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
-              <p className="text-[11px] lg:text-xs text-gray-500 font-medium mt-1">Qualidade</p>
+              <p className="text-[11px] lg:text-xs text-[#B0BFBC] font-medium mt-1">Qualidade</p>
             </div>
           </div>
         </section>
