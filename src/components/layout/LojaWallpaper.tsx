@@ -9,7 +9,7 @@ interface Props {
   bgOverlay: number
 }
 
-const ROTAS_FUNDO_BRANCO = ['/ofertas']
+const ROTAS_FUNDO_BRANCO: string[] = []
 // Home ('/') agora é escura (redesign Essencial Black) — o fundo base #080B0B
 // vem do .sxbf/wallpaper; não força mais branco aqui.
 const ROTAS_FUNDO_BRANCO_PURO: string[] = []
