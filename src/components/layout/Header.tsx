@@ -470,9 +470,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
       {/* ═══════════════════════════════════════════════════════
           CAMADA 2 — HEADER PRINCIPAL
       ═══════════════════════════════════════════════════════ */}
-      <div className="bg-white">
+      <div style={{ backgroundColor: '#111717' }}>
 
-        <div style={{ backgroundColor: '#ffffff' }}>
+        <div style={{ backgroundColor: '#111717' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
             {/* ── Desktop ────────────────────────────────────── */}
@@ -485,17 +485,17 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                   lateral que e usado em mobile. */}
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="lg:hidden shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-gray-100 transition"
+                className="lg:hidden shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/10 transition"
                 aria-label="Abrir menu"
               >
-                <Menu size={22} className="text-gray-800" />
+                <Menu size={22} className="text-[#F4F7F6]" />
               </button>
 
               {/* Logo — width/height explícitos previnem CLS */}
               <Link href="/" className="shrink-0 flex items-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/logo-sixxis-dark.png"
+                  src="/logo-sixxis.png"
                   alt="Sixxis"
                   width={170}
                   height={36}
@@ -521,7 +521,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                 {/* CEP */}
                 <button
                   onClick={() => { setCepResultado(null); setCepErro(''); setCepModalOpen(true) }}
-                  className="hidden lg:flex flex-col items-center gap-0.5 px-3 py-2 text-gray-700 hover:text-[#2a9d8f] hover:bg-gray-100 rounded-xl transition min-w-[70px]"
+                  className="hidden lg:flex flex-col items-center gap-0.5 px-3 py-2 text-[#F4F7F6] hover:text-[#00cfb5] hover:bg-white/10 rounded-xl transition min-w-[70px]"
                 >
                   <MapPin size={21} strokeWidth={1.5} />
                   <span className="text-[11px] font-medium leading-none whitespace-nowrap">
@@ -529,17 +529,17 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                   </span>
                 </button>
 
-                <div className="w-px h-8 bg-gray-200 hidden lg:block mx-1" />
+                <div className="w-px h-8 bg-[#2A3937] hidden lg:block mx-1" />
 
                 {/* Entrar / Conta — logado vira dropdown com Sair (acessível) */}
                 <AccountMenu logado={logado} nome={session?.user?.name?.split(' ')[0] || ''} />
 
-                <div className="w-px h-8 bg-gray-200 mx-1" />
+                <div className="w-px h-8 bg-[#2A3937] mx-1" />
 
                 {/* Carrinho */}
                 <button
                   onClick={() => setDrawerAberto(true)}
-                  className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-gray-700 hover:text-[#2a9d8f] hover:bg-gray-100 rounded-xl transition min-w-[60px]"
+                  className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-[#F4F7F6] hover:text-[#00cfb5] hover:bg-white/10 rounded-xl transition min-w-[60px]"
                   aria-label="Abrir carrinho"
                 >
                   <ShoppingCart size={21} strokeWidth={1.5} />
@@ -559,20 +559,20 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
             }`}>
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/20 transition"
+                className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/10 transition"
                 aria-label="Abrir menu"
               >
-                <Menu size={22} className="text-gray-800" />
+                <Menu size={22} className="text-[#F4F7F6]" />
               </button>
 
               <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-                <Image src="/logo-sixxis-dark.png" alt="Sixxis" width={100} height={32} className="object-contain" priority />
+                <Image src="/logo-sixxis.png" alt="Sixxis" width={100} height={32} className="object-contain" priority />
               </Link>
 
               {/* Conta — empurra os 2 icones (Conta + Carrinho) pra direita */}
               <Link
                 href={logado ? '/minha-conta' : '/login'}
-                className="ml-auto w-11 h-11 flex items-center justify-center text-gray-700"
+                className="ml-auto w-11 h-11 flex items-center justify-center text-[#F4F7F6]"
                 aria-label="Minha conta"
               >
                 <User size={22} />
@@ -580,7 +580,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
 
               <button
                 onClick={() => setDrawerAberto(true)}
-                className="relative w-11 h-11 flex items-center justify-center text-gray-700"
+                className="relative w-11 h-11 flex items-center justify-center text-[#F4F7F6]"
                 aria-label="Abrir carrinho"
               >
                 <ShoppingCart size={22} />
@@ -609,10 +609,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
         </div>
 
         {/* ── Separador ───────────────────────────────────────── */}
-        <div className="w-full border-t border-gray-200" />
+        <div className="w-full border-t border-[#2A3937]" />
 
         {/* ── NAV CATEGORIAS ──────────────────────────────────── */}
-        <nav className="hidden lg:block" style={{ backgroundColor: '#0f2e2b' }}>
+        <nav className="hidden lg:block" style={{ backgroundColor: '#111717' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className={`flex items-center justify-center gap-0 transition-all duration-300 ${
               isCompact ? 'py-1' : 'py-2'
@@ -624,7 +624,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                   )}
                   <Link
                     href={link.href}
-                    className="flex items-center gap-1 px-4 py-1.5 text-[13px] font-bold text-white hover:text-[#3cbfb3] tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
+                    className="flex items-center gap-1 px-4 py-1.5 text-[13px] font-bold text-white hover:text-[#00cfb5] tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
                   >
                     {link.label}
                   </Link>
