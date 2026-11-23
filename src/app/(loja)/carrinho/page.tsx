@@ -289,9 +289,9 @@ export default function CarrinhoPage() {
   // ── LOADING ───────────────────────────────────────────────
   if (carregando) {
     return (
-      <div style={{ backgroundColor: '#f8fafc' }} className="min-h-[70vh] flex items-center justify-center">
+      <div style={{ backgroundColor: '#080B0B' }} className="min-h-[70vh] flex items-center justify-center">
         <div className="w-8 h-8 rounded-full animate-spin"
-          style={{ border: '3px solid #e5e7eb', borderTopColor: '#3cbfb3' }} />
+          style={{ border: '3px solid #e5e7eb', borderTopColor: '#00cfb5' }} />
       </div>
     )
   }
@@ -299,18 +299,18 @@ export default function CarrinhoPage() {
   // ── EMPTY STATE ───────────────────────────────────────────
   if (itens.length === 0) {
     return (
-      <div style={{ backgroundColor: '#f8fafc' }} className="min-h-[70vh] flex items-center justify-center px-4 py-20">
+      <div style={{ backgroundColor: '#080B0B' }} className="min-h-[70vh] flex items-center justify-center px-4 py-20">
         <div className="text-center max-w-sm w-full">
           <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
             style={{ backgroundColor: '#e8f8f7' }}>
-            <ShoppingCart size={40} style={{ color: '#3cbfb3' }} />
+            <ShoppingCart size={40} style={{ color: '#00cfb5' }} />
           </div>
-          <h1 className="text-2xl font-black text-gray-900 mb-2">Seu carrinho está vazio</h1>
-          <p className="text-gray-400 text-sm mb-8">
+          <h1 className="text-2xl font-black text-[#F4F7F6] mb-2">Seu carrinho está vazio</h1>
+          <p className="text-[#8a9794] text-sm mb-8">
             Adicione produtos para continuar com a compra
           </p>
           <Link href="/produtos"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-black text-base transition-all hover:shadow-lg hover:-translate-y-0.5 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-black text-base transition-all hover:shadow-lg hover:-translate-y-0.5 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28]">
             <Zap size={18} /> Explorar produtos
           </Link>
         </div>
@@ -320,21 +320,21 @@ export default function CarrinhoPage() {
 
   // ── RENDER PRINCIPAL ──────────────────────────────────────
   return (
-    <div style={{ backgroundColor: '#f8fafc' }} className="min-h-screen pb-20 lg:pb-0">
+    <div style={{ backgroundColor: '#080B0B' }} className="min-h-screen pb-20 lg:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* BREADCRUMB */}
-        <nav className="flex items-center gap-2 text-sm text-gray-400 mb-6">
-          <Link href="/" className="hover:text-[#3cbfb3] transition-colors">Início</Link>
+        <nav className="flex items-center gap-2 text-sm text-[#8a9794] mb-6">
+          <Link href="/" className="hover:text-[#00cfb5] transition-colors">Início</Link>
           <ChevronRight size={13} />
-          <span className="text-gray-700 font-semibold">Carrinho</span>
+          <span className="text-[#D7E0DD] font-semibold">Carrinho</span>
         </nav>
 
         {/* TÍTULO */}
         <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-2xl font-black text-gray-900">Meu Carrinho</h1>
+          <h1 className="text-2xl font-black text-[#F4F7F6]">Meu Carrinho</h1>
           <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white"
-            style={{ backgroundColor: '#3cbfb3' }}>
+            style={{ backgroundColor: '#00cfb5' }}>
             {totalItens} {totalItens === 1 ? 'item' : 'itens'}
           </span>
         </div>
@@ -346,7 +346,7 @@ export default function CarrinhoPage() {
           <div className="flex-1 min-w-0 space-y-4">
 
             {/* LISTA DE ITENS */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm overflow-hidden">
               <div className="divide-y divide-gray-50">
                 {itens.map(item => {
                   const precoUnit = item.precoPromocional ?? item.preco
@@ -357,12 +357,12 @@ export default function CarrinhoPage() {
                     : 0
 
                   return (
-                    <div key={item.id} className="flex gap-4 p-5 hover:bg-gray-50/50 transition-colors">
+                    <div key={item.id} className="flex gap-4 p-5 hover:bg-[#192221]/50 transition-colors">
 
                       {/* IMAGEM */}
                       <Link href={item.slug ? `/produtos/${item.slug}` : '#'}
                         className="shrink-0 w-[88px] h-[88px] sm:w-24 sm:h-24 rounded-xl overflow-hidden
-                                   bg-gray-50 border border-gray-100 hover:border-[#3cbfb3]/40 transition-colors">
+                                   bg-[#f4f5f2] border border-[#e6e9e4] hover:border-[#00cfb5]/40 transition-colors">
                         {item.imagem ? (
                           <img src={item.imagem} alt={item.nome}
                             className="w-full h-full object-contain p-2"
@@ -370,7 +370,7 @@ export default function CarrinhoPage() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Package size={24} className="text-gray-300" />
+                            <Package size={24} className="text-[#6b7a77]" />
                           </div>
                         )}
                       </Link>
@@ -380,18 +380,18 @@ export default function CarrinhoPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <Link href={item.slug ? `/produtos/${item.slug}` : '#'}
-                              className="text-sm font-bold text-gray-900 hover:text-[#3cbfb3] transition-colors line-clamp-2 leading-snug">
+                              className="text-sm font-bold text-[#F4F7F6] hover:text-[#00cfb5] transition-colors line-clamp-2 leading-snug">
                               {item.nome}
                             </Link>
                             {item.variacao && (
-                              <span className="inline-block mt-1.5 text-xs text-gray-500
-                                               bg-gray-100 px-2 py-0.5 rounded-full">
+                              <span className="inline-block mt-1.5 text-xs text-[#B0BFBC]
+                                               bg-[#192221] px-2 py-0.5 rounded-full">
                                 Voltagem: {item.variacao}
                               </span>
                             )}
                           </div>
                           <button onClick={() => removerItem(item.id)}
-                            className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-gray-300
+                            className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-[#6b7a77]
                                        hover:text-red-500 hover:bg-red-50 transition-all"
                             aria-label="Remover item">
                             <X size={18} />
@@ -402,12 +402,12 @@ export default function CarrinhoPage() {
                           {/* PREÇO */}
                           <div>
                             {temDesconto && (
-                              <p className="text-xs text-gray-400 line-through leading-none mb-0.5">
+                              <p className="text-xs text-[#8a9794] line-through leading-none mb-0.5">
                                 {fmtBRL(item.preco * item.quantidade)}
                               </p>
                             )}
                             <div className="flex items-baseline gap-1.5">
-                              <p className="text-lg font-black text-gray-900">
+                              <p className="text-lg font-black text-[#F4F7F6]">
                                 {fmtBRL(precoTotal)}
                               </p>
                               {temDesconto && (
@@ -417,26 +417,26 @@ export default function CarrinhoPage() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] text-gray-400 mt-0.5">
+                            <p className="text-[10px] text-[#8a9794] mt-0.5">
                               {fmtBRL(precoUnit)} / unidade
                             </p>
                           </div>
 
                           {/* CONTROLE DE QUANTIDADE */}
-                          <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+                          <div className="flex items-center gap-1 bg-[#192221] rounded-xl p-1">
                             <button onClick={() => alterarQtd(item.id, -1)}
                               disabled={item.quantidade <= 1}
-                              className="w-11 h-11 rounded-lg flex items-center justify-center text-gray-500
-                                         hover:text-gray-900 hover:bg-white disabled:opacity-30 transition-all">
+                              className="w-11 h-11 rounded-lg flex items-center justify-center text-[#B0BFBC]
+                                         hover:text-[#F4F7F6] hover:bg-white/10 disabled:opacity-30 transition-all">
                               <Minus size={16} />
                             </button>
-                            <span className="w-9 text-center text-sm font-black text-gray-900">
+                            <span className="w-9 text-center text-sm font-black text-[#F4F7F6]">
                               {item.quantidade}
                             </span>
                             <button onClick={() => alterarQtd(item.id, 1)}
                               disabled={item.quantidade >= 99}
-                              className="w-11 h-11 rounded-lg flex items-center justify-center text-gray-500
-                                         hover:text-gray-900 hover:bg-white disabled:opacity-30 transition-all">
+                              className="w-11 h-11 rounded-lg flex items-center justify-center text-[#B0BFBC]
+                                         hover:text-[#F4F7F6] hover:bg-white/10 disabled:opacity-30 transition-all">
                               <Plus size={16} />
                             </button>
                           </div>
@@ -449,9 +449,9 @@ export default function CarrinhoPage() {
             </div>
 
             {/* CUPOM */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <h3 className="text-sm font-black text-gray-900 flex items-center gap-2 mb-4">
-                <Tag size={14} style={{ color: '#3cbfb3' }} />
+            <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-5">
+              <h3 className="text-sm font-black text-[#F4F7F6] flex items-center gap-2 mb-4">
+                <Tag size={14} style={{ color: '#00cfb5' }} />
                 Cupom de desconto
               </h3>
 
@@ -462,7 +462,7 @@ export default function CarrinhoPage() {
               )}
 
               {cupomBloqueado ? (
-                <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                <p className="text-xs text-[#B0BFBC] bg-[#192221] border border-[#2A3937] rounded-xl px-4 py-3">
                   {promo.descricao ?? 'Promo'} aplicada — não acumula com cupom.
                 </p>
               ) : cupomAplicado ? (
@@ -484,23 +484,23 @@ export default function CarrinhoPage() {
                 <>
                   <div className="flex gap-2">
                     <div className="relative flex-1 min-w-0">
-                      <Tag size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <Tag size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a9794]" />
                       <input
                         value={cupomInput}
                         onChange={e => setCupomInput(e.target.value.toUpperCase())}
                         onKeyDown={e => e.key === 'Enter' && aplicarCupom()}
                         placeholder="CÓDIGO DO CUPOM"
-                        className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-xl text-sm
+                        className="w-full pl-9 pr-3 py-3 border border-[#2A3937] rounded-xl text-sm
                                    font-mono font-bold tracking-widest uppercase
-                                   focus:outline-none focus:border-[#3cbfb3] focus:ring-2
-                                   focus:ring-[#3cbfb3]/20 transition-all"
+                                   focus:outline-none focus:border-[#00cfb5] focus:ring-2
+                                   focus:ring-[#00cfb5]/20 transition-all"
                       />
                     </div>
                     <button onClick={aplicarCupom}
                       disabled={!cupomInput.trim() || aplicandoCupom}
                       className="shrink-0 whitespace-nowrap px-4 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all
                                  hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed
-                                 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
+                                 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28]">
                       {aplicandoCupom ? '...' : 'Aplicar'}
                     </button>
                   </div>
@@ -514,9 +514,9 @@ export default function CarrinhoPage() {
             </div>
 
             {/* FRETE */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <h3 className="text-sm font-black text-gray-900 flex items-center gap-2 mb-4">
-                <Truck size={14} style={{ color: '#3cbfb3' }} />
+            <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-5">
+              <h3 className="text-sm font-black text-[#F4F7F6] flex items-center gap-2 mb-4">
+                <Truck size={14} style={{ color: '#00cfb5' }} />
                 {FRETE_COPY.calcular}
               </h3>
 
@@ -527,15 +527,15 @@ export default function CarrinhoPage() {
                   onKeyDown={e => e.key === 'Enter' && calcularFrete()}
                   placeholder="00000-000"
                   maxLength={9}
-                  className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm
-                             font-mono focus:outline-none focus:border-[#3cbfb3]
-                             focus:ring-2 focus:ring-[#3cbfb3]/20 transition-all"
+                  className="flex-1 min-w-0 px-4 py-3 border border-[#2A3937] rounded-xl text-sm
+                             font-mono focus:outline-none focus:border-[#00cfb5]
+                             focus:ring-2 focus:ring-[#00cfb5]/20 transition-all"
                 />
                 <button onClick={calcularFrete}
                   disabled={cepInput.replace(/\D/g, '').length < 8 || calculandoFrete}
                   className="shrink-0 whitespace-nowrap px-4 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all
                              hover:shadow-md disabled:opacity-50
-                             bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
+                             bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28]">
                   {calculandoFrete ? FRETE_COPY.calculando : FRETE_COPY.calcular}
                 </button>
               </div>
@@ -547,23 +547,23 @@ export default function CarrinhoPage() {
                       className={`flex items-center justify-between p-3 rounded-xl border-2
                                   cursor-pointer transition-all ${
                         freteSelecionado?.id === op.id
-                          ? 'border-[#3cbfb3] bg-[#3cbfb3]/5'
-                          : 'border-gray-100 hover:border-gray-200'
+                          ? 'border-[#00cfb5] bg-[#00cfb5]/5'
+                          : 'border-[#2A3937] hover:border-[#2A3937]'
                       }`}>
                       <div className="flex items-center gap-3">
-                        <input type="radio" name="frete" className="accent-[#3cbfb3]"
+                        <input type="radio" name="frete" className="accent-[#00cfb5]"
                           checked={freteSelecionado?.id === op.id}
                           onChange={() => setFreteSelecionado(op)} />
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">{op.nome}</p>
+                          <p className="text-sm font-semibold text-[#F4F7F6]">{op.nome}</p>
                           {op.prazo && (
-                            <p className="text-xs text-gray-400 flex items-center gap-1">
+                            <p className="text-xs text-[#8a9794] flex items-center gap-1">
                               <Clock size={10} /> {op.prazo}
                             </p>
                           )}
                         </div>
                       </div>
-                      <p className={`text-sm font-black ${op.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
+                      <p className={`text-sm font-black ${op.preco === 0 ? 'text-emerald-600' : 'text-[#F4F7F6]'}`}>
                         {op.preco === 0 ? FRETE_COPY.gratisPreco : fmtBRL(op.preco)}
                       </p>
                     </label>
@@ -592,32 +592,32 @@ export default function CarrinhoPage() {
 
             {/* VOCÊ TAMBÉM PODE GOSTAR */}
             {recomendados.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h3 className="text-sm font-black text-gray-900 mb-4 flex items-center gap-2">
-                  <Star size={14} style={{ color: '#3cbfb3' }} />
+              <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-5">
+                <h3 className="text-sm font-black text-[#F4F7F6] mb-4 flex items-center gap-2">
+                  <Star size={14} style={{ color: '#00cfb5' }} />
                   Você também pode gostar
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {recomendados.map((p: any) => (
                     <Link key={p.id} href={`/produtos/${p.slug}`}
-                      className="group flex flex-col rounded-xl border border-gray-100
-                                 hover:border-[#3cbfb3]/40 hover:shadow-md transition-all overflow-hidden bg-gray-50">
-                      <div className="aspect-square bg-white p-2 overflow-hidden">
+                      className="group flex flex-col rounded-xl border border-[#2A3937]
+                                 hover:border-[#00cfb5]/40 hover:shadow-md transition-all overflow-hidden bg-[#192221]">
+                      <div className="aspect-square bg-[#f4f5f2] p-2 overflow-hidden">
                         {p.imagens?.[0] ? (
                           <img src={p.imagens[0]} alt={p.nome}
                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Package size={24} className="text-gray-300" />
+                            <Package size={24} className="text-[#6b7a77]" />
                           </div>
                         )}
                       </div>
                       <div className="p-2.5 flex-1">
-                        <p className="text-xs font-semibold text-gray-700 line-clamp-2 leading-snug mb-1">
+                        <p className="text-xs font-semibold text-[#D7E0DD] line-clamp-2 leading-snug mb-1">
                           {p.nome}
                         </p>
-                        <p className="text-sm font-black" style={{ color: '#3cbfb3' }}>
+                        <p className="text-sm font-black" style={{ color: '#00cfb5' }}>
                           {fmtBRL(Number(p.precoPromocional || p.preco))}
                         </p>
                       </div>
@@ -632,15 +632,15 @@ export default function CarrinhoPage() {
           <div className="w-full lg:w-[360px] shrink-0 space-y-4">
 
             {/* RESUMO DO PEDIDO */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 lg:sticky lg:top-24">
-              <h3 className="text-sm font-black text-gray-900 mb-5">Resumo do pedido</h3>
+            <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-5 lg:sticky lg:top-24">
+              <h3 className="text-sm font-black text-[#F4F7F6] mb-5">Resumo do pedido</h3>
 
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">
+                  <span className="text-[#B0BFBC]">
                     Subtotal ({totalItens} {totalItens === 1 ? 'item' : 'itens'})
                   </span>
-                  <span className="font-semibold text-gray-900">{fmtBRL(subtotal)}</span>
+                  <span className="font-semibold text-[#F4F7F6]">{fmtBRL(subtotal)}</span>
                 </div>
                 {promo.ativo ? (
                   <div className="flex justify-between text-sm">
@@ -673,33 +673,33 @@ export default function CarrinhoPage() {
                 )}
                 {freteSelecionado ? (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Frete</span>
-                    <span className={`font-semibold ${freteSelecionado.preco === 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
+                    <span className="text-[#B0BFBC]">Frete</span>
+                    <span className={`font-semibold ${freteSelecionado.preco === 0 ? 'text-emerald-600' : 'text-[#F4F7F6]'}`}>
                       {freteSelecionado.preco === 0 ? FRETE_COPY.gratis : fmtBRL(freteSelecionado.preco)}
                     </span>
                   </div>
                 ) : freteStatus === 'a_combinar' ? (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Frete</span>
+                    <span className="text-[#B0BFBC]">Frete</span>
                     <span className="font-semibold text-amber-600">{FRETE_COPY.aCombinar}</span>
                   </div>
                 ) : (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Frete</span>
-                    <span className="text-xs text-gray-400">{FRETE_COPY.calculeAcima}</span>
+                    <span className="text-[#8a9794]">Frete</span>
+                    <span className="text-xs text-[#8a9794]">{FRETE_COPY.calculeAcima}</span>
                   </div>
                 )}
               </div>
 
-              <div className="border-t border-gray-100 pt-4 mb-4">
+              <div className="border-t border-[#2A3937] pt-4 mb-4">
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-black text-gray-900 text-base">Total</span>
-                  <span className="text-2xl font-black text-gray-900">{fmtBRL(totalFinal)}</span>
+                  <span className="font-black text-[#F4F7F6] text-base">Total</span>
+                  <span className="text-2xl font-black text-[#F4F7F6]">{fmtBRL(totalFinal)}</span>
                 </div>
-                <p className="text-xs font-semibold text-right" style={{ color: '#3cbfb3' }}>
+                <p className="text-xs font-semibold text-right" style={{ color: '#00cfb5' }}>
                   {fmtBRL(totalPix)} no PIX ({DESCONTO_PIX_PCT}% OFF)
                 </p>
-                <p className="text-xs text-gray-400 text-center mt-2">
+                <p className="text-xs text-[#8a9794] text-center mt-2">
                   ou {MAX_PARCELAS_SEM_JUROS}× de {fmtBRL(valorParcela(totalFinal))} sem juros
                 </p>
               </div>
@@ -710,34 +710,34 @@ export default function CarrinhoPage() {
                 className="w-full py-4 rounded-xl font-black text-base flex items-center
                            justify-center gap-2 transition-all hover:shadow-lg
                            hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] mb-3
-                           bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white">
+                           bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28]">
                 <CreditCard size={18} /> Finalizar compra
               </button>
 
               <Link href="/produtos"
-                className="block text-center text-sm text-gray-400 hover:text-gray-600 transition-colors">
+                className="block text-center text-sm text-[#8a9794] hover:text-[#B0BFBC] transition-colors">
                 ← Continuar comprando
               </Link>
 
               {/* TRUST BADGES — 6 selos definitivos (componente compartilhado) */}
-              <SelosConfianca className="mt-5 pt-4 border-t border-gray-50" />
+              <SelosConfianca className="mt-5 pt-4 border-t border-[#2A3937]" />
             </div>
 
             {/* CASHBACK — usar ou não (opt-in, sincronizado com o checkout) */}
             <UsarCashback subtotalProdutos={subtotal} onValor={setCashbackCart} compact />
 
             {/* PARCELAMENTO INFO */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                   style={{ backgroundColor: '#e8f8f7' }}>
-                  <CreditCard size={18} style={{ color: '#3cbfb3' }} />
+                  <CreditCard size={18} style={{ color: '#00cfb5' }} />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-gray-900">
+                  <p className="text-xs font-black text-[#F4F7F6]">
                     Parcele sem juros
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-[#8a9794] mt-0.5">
                     Em até {MAX_PARCELAS_SEM_JUROS}× no cartão de crédito · Débito e PIX aceitos
                   </p>
                 </div>
