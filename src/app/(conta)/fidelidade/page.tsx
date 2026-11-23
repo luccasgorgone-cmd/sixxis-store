@@ -65,7 +65,7 @@ export default function FidelidadePage() {
   if (loading) {
     return (
       <main className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 text-[#3cbfb3] animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#00cfb5] animate-spin" />
       </main>
     )
   }
@@ -82,7 +82,7 @@ export default function FidelidadePage() {
       {/* Saldo */}
       <div
         className="rounded-2xl p-8 mb-6 text-white text-center"
-        style={{ background: 'linear-gradient(135deg, #0f1f1e 0%, #3cbfb3 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #0f1f1e 0%, #00cfb5 100%)' }}
       >
         <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
           <Gift className="w-7 h-7 text-white" />
@@ -95,21 +95,21 @@ export default function FidelidadePage() {
       </div>
 
       {/* Como funciona */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+      <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-5 mb-6">
+        <h2 className="text-sm font-semibold text-[#D7E0DD] uppercase tracking-wider mb-4 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" /> Como funciona
         </h2>
-        <ul className="space-y-2 text-sm text-gray-600">
+        <ul className="space-y-2 text-sm text-[#B0BFBC]">
           <li className="flex items-start gap-2">
-            <span className="text-[#3cbfb3] font-bold mt-0.5">✓</span>
+            <span className="text-[#00cfb5] font-bold mt-0.5">✓</span>
             Ganhe <strong>1 ponto</strong> para cada R$1,00 em compras
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#3cbfb3] font-bold mt-0.5">✓</span>
+            <span className="text-[#00cfb5] font-bold mt-0.5">✓</span>
             Resgate <strong>100 pontos</strong> por R$1,00 de desconto
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#3cbfb3] font-bold mt-0.5">✓</span>
+            <span className="text-[#00cfb5] font-bold mt-0.5">✓</span>
             Pontos creditados automaticamente após confirmação do pagamento
           </li>
         </ul>
@@ -117,19 +117,19 @@ export default function FidelidadePage() {
 
       {/* Resgatar */}
       {saldo >= 100 && (
-        <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">Resgatar Pontos</h2>
+        <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-5 mb-6">
+          <h2 className="text-sm font-semibold text-[#D7E0DD] uppercase tracking-wider mb-4">Resgatar Pontos</h2>
 
           {cupomGerado ? (
-            <div className="bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl p-4 text-center">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Cupom gerado com sucesso!</p>
+            <div className="bg-[#e8f8f7] border border-[#00cfb5]/30 rounded-xl p-4 text-center">
+              <p className="text-sm font-semibold text-[#D7E0DD] mb-2">Cupom gerado com sucesso!</p>
               <div className="flex items-center justify-center gap-2">
-                <span className="font-mono font-bold text-[#3cbfb3] text-xl tracking-widest">{cupomGerado}</span>
-                <button onClick={() => copiar(cupomGerado)} className="text-gray-400 hover:text-[#3cbfb3] transition">
+                <span className="font-mono font-bold text-[#00cfb5] text-xl tracking-widest">{cupomGerado}</span>
+                <button onClick={() => copiar(cupomGerado)} className="text-[#8a9794] hover:text-[#00cfb5] transition">
                   {copiado ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">Use no checkout para aplicar o desconto</p>
+              <p className="text-xs text-[#B0BFBC] mt-2">Use no checkout para aplicar o desconto</p>
             </div>
           ) : (
             <form onSubmit={handleResgatar} className="flex gap-2">
@@ -142,14 +142,14 @@ export default function FidelidadePage() {
                   value={pontosResgatar}
                   onChange={(e) => setPontosResgatar(e.target.value)}
                   placeholder={`Mín. 100 pts (saldo: ${saldo})`}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+                  className="w-full border border-[#2A3937] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00cfb5] focus:border-[#00cfb5]"
                 />
                 {erro && <p className="text-xs text-red-500 mt-1">{erro}</p>}
               </div>
               <button
                 type="submit"
                 disabled={resgatando}
-                className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-xl px-4 py-2.5 text-sm transition"
+                className="bg-[#00cfb5] hover:bg-[#65E5D4] disabled:opacity-50 text-[#032E28] font-semibold rounded-xl px-4 py-2.5 text-sm transition"
               >
                 {resgatando ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Resgatar'}
               </button>
@@ -160,18 +160,18 @@ export default function FidelidadePage() {
 
       {/* Histórico */}
       {(data?.historico?.length ?? 0) > 0 && (
-        <div className="bg-white border border-gray-100 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">Histórico</h2>
+        <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-[#D7E0DD] uppercase tracking-wider mb-4">Histórico</h2>
           <div className="space-y-2">
             {data!.historico.map((h) => (
-              <div key={h.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+              <div key={h.id} className="flex items-center justify-between py-2 border-b border-[#2A3937] last:border-0">
                 <div>
-                  <p className="text-sm text-gray-700">{h.descricao ?? h.tipo}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm text-[#D7E0DD]">{h.descricao ?? h.tipo}</p>
+                  <p className="text-xs text-[#8a9794]">
                     {new Date(h.createdAt).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
-                <span className={`font-bold text-sm ${h.pontos > 0 ? 'text-[#3cbfb3]' : 'text-red-500'}`}>
+                <span className={`font-bold text-sm ${h.pontos > 0 ? 'text-[#00cfb5]' : 'text-red-500'}`}>
                   {h.pontos > 0 ? '+' : ''}{h.pontos.toLocaleString('pt-BR')} pts
                 </span>
               </div>

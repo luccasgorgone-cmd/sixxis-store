@@ -45,15 +45,15 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
   return (
     <LayoutConta>
       <div className="space-y-5">
-        <Link href="/minha-conta/pedidos" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition">
+        <Link href="/minha-conta/pedidos" className="inline-flex items-center gap-2 text-sm text-[#B0BFBC] hover:text-[#F4F7F6] transition">
           <ArrowLeft size={14} /> Meus Pedidos
         </Link>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+        <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="font-extrabold text-gray-900 text-lg">Pedido #{pedido.id.slice(-8).toUpperCase()}</h1>
-              <p className="text-xs text-gray-400 mt-0.5">{new Date(pedido.createdAt).toLocaleString('pt-BR')}</p>
+              <h1 className="font-extrabold text-[#F4F7F6] text-lg">Pedido #{pedido.id.slice(-8).toUpperCase()}</h1>
+              <p className="text-xs text-[#8a9794] mt-0.5">{new Date(pedido.createdAt).toLocaleString('pt-BR')}</p>
             </div>
             <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${statusInfo.bg} ${statusInfo.color}`}>
               {statusInfo.label}
@@ -78,9 +78,9 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
 
         {/* Acompanhamento da entrega (Pago → Enviado → Entregue) */}
         {statusInfo.step >= 1 && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 space-y-4">
-            <h2 className="font-bold text-gray-900 text-sm flex items-center gap-2">
-              <Truck size={14} className="text-[#3cbfb3]" /> Acompanhe sua entrega
+          <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm px-5 py-4 space-y-4">
+            <h2 className="font-bold text-[#F4F7F6] text-sm flex items-center gap-2">
+              <Truck size={14} className="text-[#00cfb5]" /> Acompanhe sua entrega
             </h2>
 
             {/* Timeline */}
@@ -94,13 +94,13 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
                 return (
                   <div key={s.label} className="flex items-center flex-1 last:flex-none">
                     <div className="flex flex-col items-center">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${done ? 'bg-[#3cbfb3] border-[#3cbfb3]' : 'bg-white border-gray-200'}`}>
-                        {done ? <CheckCircle className="w-4 h-4 text-white" /> : <Clock className="w-3 h-3 text-gray-300" />}
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${done ? 'bg-[#00cfb5] border-[#00cfb5]' : 'bg-[#111717] border-[#2A3937]'}`}>
+                        {done ? <CheckCircle className="w-4 h-4 text-white" /> : <Clock className="w-3 h-3 text-[#6b7a77]" />}
                       </div>
-                      <span className={`text-[10px] mt-1 ${done ? 'text-[#3cbfb3] font-semibold' : 'text-gray-300'}`}>{s.label}</span>
+                      <span className={`text-[10px] mt-1 ${done ? 'text-[#00cfb5] font-semibold' : 'text-[#6b7a77]'}`}>{s.label}</span>
                     </div>
                     {i < arr.length - 1 && (
-                      <div className={`flex-1 h-0.5 mb-4 mx-1 ${statusInfo.step > s.step ? 'bg-[#3cbfb3]' : 'bg-gray-200'}`} />
+                      <div className={`flex-1 h-0.5 mb-4 mx-1 ${statusInfo.step > s.step ? 'bg-[#00cfb5]' : 'bg-[#2A3937]'}`} />
                     )}
                   </div>
                 )
@@ -109,16 +109,16 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
 
             {/* Dados de rastreio (quando despachado) */}
             {pedido.codigoRastreio && (
-              <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1.5">
+              <div className="rounded-xl bg-[#192221] border border-[#2A3937] px-4 py-3 space-y-1.5">
                 {/* A transportadora NÃO é exposta ao cliente (só serviço/prazo/código).
                     O nome da transportadora permanece visível apenas no admin. */}
-                <p className="text-sm text-gray-700"><span className="text-gray-400">Código de rastreio:</span> <strong className="font-mono">{pedido.codigoRastreio}</strong></p>
+                <p className="text-sm text-[#D7E0DD]"><span className="text-[#8a9794]">Código de rastreio:</span> <strong className="font-mono">{pedido.codigoRastreio}</strong></p>
                 {pedido.linkRastreio && (
                   <a
                     href={pedido.linkRastreio}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-1 text-sm font-semibold text-[#3cbfb3] hover:text-[#2a9d8f] transition"
+                    className="inline-flex items-center gap-1.5 mt-1 text-sm font-semibold text-[#00cfb5] hover:text-[#65E5D4] transition"
                   >
                     <ExternalLink size={13} /> Acompanhar entrega
                   </a>
@@ -130,67 +130,67 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<Pa
 
         {/* Nota fiscal — só aparece depois que o admin informa o número. */}
         {pedido.notaFiscal && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-            <h2 className="font-bold text-gray-900 text-sm flex items-center gap-2 mb-2">
-              <FileText size={14} className="text-[#3cbfb3]" /> Nota fiscal
+          <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm px-5 py-4">
+            <h2 className="font-bold text-[#F4F7F6] text-sm flex items-center gap-2 mb-2">
+              <FileText size={14} className="text-[#00cfb5]" /> Nota fiscal
             </h2>
-            <p className="text-sm text-gray-700">
-              <span className="text-gray-400">Número:</span>{' '}
+            <p className="text-sm text-[#D7E0DD]">
+              <span className="text-[#8a9794]">Número:</span>{' '}
               <strong className="font-mono">{pedido.notaFiscal}</strong>
             </p>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-50">
-            <h2 className="font-bold text-gray-900 text-sm">Itens</h2>
+        <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-[#2A3937]">
+            <h2 className="font-bold text-[#F4F7F6] text-sm">Itens</h2>
           </div>
           <div className="divide-y divide-gray-50">
             {pedido.itens.map(item => (
               <div key={item.id} className="flex items-center gap-4 px-5 py-3">
-                <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-[#192221] border border-[#2A3937] overflow-hidden shrink-0 flex items-center justify-center">
                   {(() => {
                     const img = (item.produto?.imagens as string[])?.[0]
                     // eslint-disable-next-line @next/next/no-img-element
-                    return img ? <img src={img} alt="" className="w-full h-full object-contain p-1" /> : <Package size={18} className="text-gray-200" />
+                    return img ? <img src={img} alt="" className="w-full h-full object-contain p-1" /> : <Package size={18} className="text-[#8a9794]" />
                   })()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 line-clamp-1">{item.produto?.nome ?? '—'}</p>
-                  {item.variacaoNome && <p className="text-xs text-gray-400">{item.variacaoNome}</p>}
-                  <p className="text-xs text-gray-500 mt-0.5">Qtd: {item.quantidade}</p>
+                  <p className="text-sm font-semibold text-[#F4F7F6] line-clamp-1">{item.produto?.nome ?? '—'}</p>
+                  {item.variacaoNome && <p className="text-xs text-[#8a9794]">{item.variacaoNome}</p>}
+                  <p className="text-xs text-[#B0BFBC] mt-0.5">Qtd: {item.quantidade}</p>
                 </div>
-                <p className="text-sm font-bold text-gray-900 shrink-0">R$ {fmt(Number(item.precoUnitario) * item.quantidade)}</p>
+                <p className="text-sm font-bold text-[#F4F7F6] shrink-0">R$ {fmt(Number(item.precoUnitario) * item.quantidade)}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 space-y-2">
-          <div className="flex justify-between text-sm text-gray-600">
+        <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm px-5 py-4 space-y-2">
+          <div className="flex justify-between text-sm text-[#B0BFBC]">
             <span>Subtotal</span>
             <span>R$ {fmt(Number(pedido.total) - Number(pedido.frete) + Number(pedido.desconto))}</span>
           </div>
           {Number(pedido.desconto) > 0 && (
             <div className="flex justify-between text-sm text-green-600"><span>Desconto</span><span>-R$ {fmt(Number(pedido.desconto))}</span></div>
           )}
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex justify-between text-sm text-[#B0BFBC]">
             <span>Frete</span>
             <span>{Number(pedido.frete) === 0 ? 'Grátis' : `R$ ${fmt(Number(pedido.frete))}`}</span>
           </div>
-          <div className="flex justify-between text-base font-extrabold text-gray-900 border-t border-gray-100 pt-2">
+          <div className="flex justify-between text-base font-extrabold text-[#F4F7F6] border-t border-[#2A3937] pt-2">
             <span>Total</span><span>R$ {fmt(Number(pedido.total))}</span>
           </div>
-          <p className="text-xs text-gray-400 capitalize">{pedido.formaPagamento}</p>
+          <p className="text-xs text-[#8a9794] capitalize">{pedido.formaPagamento}</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-          <h2 className="font-bold text-gray-900 text-sm mb-3 flex items-center gap-2">
-            <MapPin size={14} className="text-[#3cbfb3]" /> Endereço de entrega
+        <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm px-5 py-4">
+          <h2 className="font-bold text-[#F4F7F6] text-sm mb-3 flex items-center gap-2">
+            <MapPin size={14} className="text-[#00cfb5]" /> Endereço de entrega
           </h2>
-          <p className="text-sm text-gray-700">{pedido.endereco.logradouro}, {pedido.endereco.numero}{pedido.endereco.complemento ? `, ${pedido.endereco.complemento}` : ''}</p>
-          <p className="text-sm text-gray-700">{pedido.endereco.bairro}, {pedido.endereco.cidade} — {pedido.endereco.estado}</p>
-          <p className="text-sm text-gray-500">CEP {pedido.endereco.cep}</p>
+          <p className="text-sm text-[#D7E0DD]">{pedido.endereco.logradouro}, {pedido.endereco.numero}{pedido.endereco.complemento ? `, ${pedido.endereco.complemento}` : ''}</p>
+          <p className="text-sm text-[#D7E0DD]">{pedido.endereco.bairro}, {pedido.endereco.cidade} — {pedido.endereco.estado}</p>
+          <p className="text-sm text-[#B0BFBC]">CEP {pedido.endereco.cep}</p>
         </div>
       </div>
     </LayoutConta>

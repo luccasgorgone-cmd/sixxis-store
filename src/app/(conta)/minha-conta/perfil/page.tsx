@@ -36,6 +36,7 @@ export default function PerfilPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- pre-existente, fora do escopo do redesign de cor
       if (params.get('aba') === 'avatar') setAbaAtiva('avatar')
     }
   }, [])
@@ -98,14 +99,14 @@ export default function PerfilPage() {
   if (loading) return (
     <LayoutConta>
       <div className="flex items-center justify-center py-24">
-        <Loader2 size={28} className="animate-spin text-[#3cbfb3]" />
+        <Loader2 size={28} className="animate-spin text-[#00cfb5]" />
       </div>
     </LayoutConta>
   )
 
   return (
     <LayoutConta>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm overflow-hidden">
 
         {/* Header */}
         <div
@@ -134,7 +135,7 @@ export default function PerfilPage() {
               <button
                 type="button"
                 onClick={() => setAbaAtiva('avatar')}
-                className="mt-1.5 text-[10px] text-[#3cbfb3] font-semibold hover:text-[#5dd6cb] transition"
+                className="mt-1.5 text-[10px] text-[#00cfb5] font-semibold hover:text-[#5dd6cb] transition"
               >
                 ✏️ Alterar avatar
               </button>
@@ -143,7 +144,7 @@ export default function PerfilPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-100 px-4 pt-2">
+        <div className="flex border-b border-[#2A3937] px-4 pt-2">
           {ABAS.map(aba => (
             <button
               key={aba.id}
@@ -152,8 +153,8 @@ export default function PerfilPage() {
               className={[
                 'flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 -mb-px transition-all',
                 abaAtiva === aba.id
-                  ? 'border-[#3cbfb3] text-[#3cbfb3]'
-                  : 'border-transparent text-gray-400 hover:text-gray-600',
+                  ? 'border-[#00cfb5] text-[#00cfb5]'
+                  : 'border-transparent text-[#8a9794] hover:text-[#B0BFBC]',
               ].join(' ')}
             >
               {aba.icon}{aba.label}
@@ -168,40 +169,40 @@ export default function PerfilPage() {
           {abaAtiva === 'dados' && (
             <>
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nome completo</label>
+                <label className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wide">Nome completo</label>
                 <input
                   value={nome} onChange={e => setNome(e.target.value)}
-                  className="mt-1.5 w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/30 focus:border-[#3cbfb3]"
+                  className="mt-1.5 w-full text-sm border border-[#2A3937] rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/30 focus:border-[#00cfb5]"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">E-mail</label>
+                <label className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wide">E-mail</label>
                 <input
                   value={email} disabled
-                  className="mt-1.5 w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 bg-gray-50 text-gray-400 cursor-not-allowed"
+                  className="mt-1.5 w-full text-sm border border-[#2A3937] rounded-xl px-3 py-2.5 bg-[#192221] text-[#8a9794] cursor-not-allowed"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Telefone / WhatsApp</label>
+                <label className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wide">Telefone / WhatsApp</label>
                 <input
                   value={telefone} onChange={e => setTelefone(e.target.value)} type="tel"
                   placeholder="(11) 99999-9999"
-                  className="mt-1.5 w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/30 focus:border-[#3cbfb3]"
+                  className="mt-1.5 w-full text-sm border border-[#2A3937] rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/30 focus:border-[#00cfb5]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Data de nascimento</label>
+                  <label className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wide">Data de nascimento</label>
                   <input
                     type="date" value={dataNasc} onChange={e => setDataNasc(e.target.value)}
-                    className="mt-1.5 w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/30 focus:border-[#3cbfb3]"
+                    className="mt-1.5 w-full text-sm border border-[#2A3937] rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/30 focus:border-[#00cfb5]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Gênero</label>
+                  <label className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wide">Gênero</label>
                   <select
                     value={genero} onChange={e => setGenero(e.target.value)}
-                    className="mt-1.5 w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#3cbfb3]/30 focus:border-[#3cbfb3] bg-white"
+                    className="mt-1.5 w-full text-sm border border-[#2A3937] rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/30 focus:border-[#00cfb5] bg-[#111717]"
                   >
                     <option value="">Prefiro não informar</option>
                     <option value="masculino">Masculino</option>
@@ -217,7 +218,7 @@ export default function PerfilPage() {
           {abaAtiva === 'avatar' && (
             <>
               {/* Preview grande com arco real */}
-              <div className="flex items-center gap-5 p-5 bg-gray-50 rounded-2xl border border-gray-100">
+              <div className="flex items-center gap-5 p-5 bg-[#192221] rounded-2xl border border-[#2A3937]">
                 <AvatarComArco
                   nome={nome || session?.user?.name || '?'}
                   avatarId={avatarId}
@@ -228,15 +229,15 @@ export default function PerfilPage() {
                   mostrarTooltip={false}
                 />
                 <div>
-                  <p className="font-black text-gray-900">{nome || session?.user?.name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{email}</p>
+                  <p className="font-black text-[#F4F7F6]">{nome || session?.user?.name}</p>
+                  <p className="text-xs text-[#8a9794] mt-0.5">{email}</p>
                   <div className="flex items-center gap-1.5 mt-2">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: NIVEIS_CONFIG[nivelAtual]?.cor }} />
                     <p className="text-xs font-bold" style={{ color: NIVEIS_CONFIG[nivelAtual]?.cor }}>
                       Nível {nivelAtual}
                     </p>
-                    <span className="text-gray-300">·</span>
-                    <p className="text-xs text-gray-400">
+                    <span className="text-[#6b7a77]">·</span>
+                    <p className="text-xs text-[#8a9794]">
                       {TODOS_AVATARES.find(a => a.id === avatarId)?.label || 'Inicial do Nome'}
                     </p>
                   </div>
@@ -245,7 +246,7 @@ export default function PerfilPage() {
 
               {/* Grid de seleção */}
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Escolha seu avatar</p>
+                <p className="text-xs font-bold text-[#8a9794] uppercase tracking-widest mb-3">Escolha seu avatar</p>
 
                 {/* Opção especial: Inicial do nome */}
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-3">
@@ -254,10 +255,10 @@ export default function PerfilPage() {
                     onClick={() => setAvatarId('inicial')}
                     className={[
                       'flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all',
-                      'hover:border-[#3cbfb3]/40 hover:bg-[#3cbfb3]/5',
+                      'hover:border-[#00cfb5]/40 hover:bg-[#00cfb5]/5',
                       avatarId === 'inicial'
-                        ? 'border-[#3cbfb3] bg-[#3cbfb3]/10 shadow-sm'
-                        : 'border-gray-100',
+                        ? 'border-[#00cfb5] bg-[#00cfb5]/10 shadow-sm'
+                        : 'border-[#2A3937]',
                     ].join(' ')}
                   >
                     <AvatarComArco
@@ -267,7 +268,7 @@ export default function PerfilPage() {
                       size={44}
                       mostrarBadge={false}
                     />
-                    <p className={`text-[10px] font-semibold ${avatarId === 'inicial' ? 'text-[#3cbfb3]' : 'text-gray-400'}`}>
+                    <p className={`text-[10px] font-semibold ${avatarId === 'inicial' ? 'text-[#00cfb5]' : 'text-[#8a9794]'}`}>
                       Inicial
                     </p>
                   </button>
@@ -275,11 +276,11 @@ export default function PerfilPage() {
 
                 {/* Separador */}
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex-1 h-px bg-gray-100" />
-                  <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-widest">
+                  <div className="flex-1 h-px bg-[#192221]" />
+                  <p className="text-[10px] text-[#6b7a77] font-semibold uppercase tracking-widest">
                     ou escolha um personagem
                   </p>
-                  <div className="flex-1 h-px bg-gray-100" />
+                  <div className="flex-1 h-px bg-[#192221]" />
                 </div>
 
                 {/* Grid 5×mobile 8×desktop — avatares DiceBear sem label */}
@@ -296,8 +297,8 @@ export default function PerfilPage() {
                           'p-1.5 rounded-2xl border-2 transition-all',
                           'hover:scale-105 active:scale-95',
                           ativo
-                            ? 'border-[#3cbfb3] bg-[#3cbfb3]/10 scale-105'
-                            : 'border-gray-100 hover:border-gray-200',
+                            ? 'border-[#00cfb5] bg-[#00cfb5]/10 scale-105'
+                            : 'border-[#2A3937] hover:border-[#2A3937]',
                         ].join(' ')}
                       >
                         <div
@@ -321,7 +322,7 @@ export default function PerfilPage() {
                 </div>
               </div>
 
-              <p className="text-[9px] text-gray-300 text-center">
+              <p className="text-[9px] text-[#6b7a77] text-center">
                 Avatares gerados por DiceBear
               </p>
             </>
@@ -346,21 +347,21 @@ export default function PerfilPage() {
                   set: setNotifWpp,
                 },
               ].map(item => (
-                <div key={item.key} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                <div key={item.key} className="flex items-start gap-4 p-4 bg-[#192221] rounded-xl">
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-gray-800">{item.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                    <p className="text-sm font-bold text-[#F4F7F6]">{item.label}</p>
+                    <p className="text-xs text-[#B0BFBC] mt-0.5">{item.desc}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => item.set(!item.valor)}
                     className={[
                       'relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus:outline-none',
-                      item.valor ? 'bg-[#3cbfb3]' : 'bg-gray-300',
+                      item.valor ? 'bg-[#00cfb5]' : 'bg-[#2A3937]',
                     ].join(' ')}
                   >
                     <span className={[
-                      'inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 mt-0.5',
+                      'inline-block h-5 w-5 rounded-full bg-[#111717] shadow transform transition-transform duration-200 mt-0.5',
                       item.valor ? 'translate-x-5' : 'translate-x-0.5',
                     ].join(' ')} />
                   </button>
@@ -377,7 +378,7 @@ export default function PerfilPage() {
             type="button"
             onClick={salvar}
             disabled={saving}
-            className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-60"
+            className="flex items-center gap-2 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-60"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
             Salvar alterações

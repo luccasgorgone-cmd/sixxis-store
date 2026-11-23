@@ -29,7 +29,7 @@ export default function CashbackPage() {
       <LayoutConta>
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl h-32 animate-pulse border border-gray-100" />
+            <div key={i} className="bg-[#111717] rounded-2xl h-32 animate-pulse border border-[#2A3937]" />
           ))}
         </div>
       </LayoutConta>
@@ -93,14 +93,14 @@ export default function CashbackPage() {
         </div>
 
         {/* ── COMO FUNCIONA ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Info size={16} className="text-[#3cbfb3]" />
-            <h2 className="text-sm font-black text-gray-900">Como funciona o cashback?</h2>
+            <Info size={16} className="text-[#00cfb5]" />
+            <h2 className="text-sm font-black text-[#F4F7F6]">Como funciona o cashback?</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { num: '01', titulo: 'Compre na Sixxis', desc: 'A cada compra aprovada, você recebe cashback automático na sua conta', cor: '#3cbfb3' },
+              { num: '01', titulo: 'Compre na Sixxis', desc: 'A cada compra aprovada, você recebe cashback automático na sua conta', cor: '#00cfb5' },
               { num: '02', titulo: 'Acumule saldo', desc: `Você tem ${((nivel.cashbackPct || 0.02) * 100).toFixed(0)}% de cashback no nível ${nivel.atual}. Suba de nível para ganhar mais!`, cor: nivel.cor },
               { num: '03', titulo: 'Use no checkout', desc: 'Na finalização, aplique seu saldo como desconto (até 20% do valor do pedido)', cor: '#16a34a' },
             ].map((s, i) => (
@@ -108,8 +108,8 @@ export default function CashbackPage() {
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black"
                   style={{ backgroundColor: `${s.cor}20`, color: s.cor }}>{s.num}</div>
                 <div>
-                  <p className="text-xs font-bold text-gray-900">{s.titulo}</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5 leading-snug">{s.desc}</p>
+                  <p className="text-xs font-bold text-[#F4F7F6]">{s.titulo}</p>
+                  <p className="text-[10px] text-[#B0BFBC] mt-0.5 leading-snug">{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -117,10 +117,10 @@ export default function CashbackPage() {
         </div>
 
         {/* ── EXTRATO ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-black text-gray-900">Extrato</h2>
-            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+            <h2 className="text-sm font-black text-[#F4F7F6]">Extrato</h2>
+            <div className="flex items-center gap-1 bg-[#192221] rounded-xl p-1">
               {[
                 { id: 'todos', label: 'Todos' },
                 { id: 'credito', label: 'Entradas' },
@@ -130,7 +130,7 @@ export default function CashbackPage() {
                   onClick={() => setFiltro(f.id as 'todos' | 'credito' | 'debito')}
                   className={[
                     'px-2.5 py-1 rounded-lg text-xs font-semibold transition-all',
-                    filtro === f.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700',
+                    filtro === f.id ? 'bg-[#111717] text-[#F4F7F6] shadow-sm' : 'text-[#B0BFBC] hover:text-[#D7E0DD]',
                   ].join(' ')}>
                   {f.label}
                 </button>
@@ -140,12 +140,13 @@ export default function CashbackPage() {
 
           {extrato.length === 0 ? (
             <div className="py-12 text-center">
-              <Gift size={36} className="text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-400 text-sm">Nenhuma transação ainda</p>
-              <p className="text-gray-300 text-xs mt-1">Faça sua primeira compra para começar a ganhar cashback!</p>
+              <Gift size={36} className="text-[#8a9794] mx-auto mb-3" />
+              <p className="text-[#8a9794] text-sm">Nenhuma transação ainda</p>
+              <p className="text-[#6b7a77] text-xs mt-1">Faça sua primeira compra para começar a ganhar cashback!</p>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- pre-existente, fora do escopo do redesign de cor */}
               <a href="/produtos"
                 className="mt-4 inline-flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl"
-                style={{ background: 'linear-gradient(135deg, #3cbfb3, #2a9d8f)', color: '#0f2e2b' }}>
+                style={{ background: 'linear-gradient(135deg, #00cfb5, #65E5D4)', color: '#0f2e2b' }}>
                 <Zap size={14} /> Ver produtos
               </a>
             </div>
@@ -153,7 +154,7 @@ export default function CashbackPage() {
             <div className="divide-y divide-gray-50">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {extrato.map((t: any, i: number) => (
-                <div key={i} className="flex items-center gap-3 py-3 hover:bg-gray-50/50 px-2 rounded-xl transition-colors">
+                <div key={i} className="flex items-center gap-3 py-3 hover:bg-[#192221]/50 px-2 rounded-xl transition-colors">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${t.tipo === 'credito' ? 'bg-emerald-50' : 'bg-red-50'}`}>
                     {t.tipo === 'credito'
                       ? <ArrowDownLeft size={16} className="text-emerald-600" />
@@ -161,10 +162,10 @@ export default function CashbackPage() {
                     }
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-gray-900 truncate">
+                    <p className="text-xs font-semibold text-[#F4F7F6] truncate">
                       {t.descricao || (t.tipo === 'credito' ? 'Cashback recebido' : 'Cashback usado')}
                     </p>
-                    <p className="text-[10px] text-gray-400">{formatData(t.createdAt)}</p>
+                    <p className="text-[10px] text-[#8a9794]">{formatData(t.createdAt)}</p>
                   </div>
                   <p className={`text-sm font-black shrink-0 ${t.tipo === 'credito' ? 'text-emerald-600' : 'text-red-500'}`}>
                     {t.tipo === 'credito' ? '+' : '-'}{formatValor(t.valor)}
