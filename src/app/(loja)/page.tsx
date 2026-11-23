@@ -11,7 +11,6 @@ import TrustBar from '@/components/layout/TrustBar'
 import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import Depoimentos from '@/components/home/Depoimentos'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
-import HeroBlackFriday from '@/components/home/HeroBlackFriday'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
 
@@ -64,16 +63,35 @@ export default async function HomePage() {
     console.error('[HOME DB ERROR]', error)
   }
 
+  // Slide Black Friday como PRIMEIRO banner do carrossel principal (imagem com
+  // texto/oferta embutidos, nos formatos do carrossel: desktop 3/1, mobile 16/9).
+  const bfSlide: (typeof banners)[number] = {
+    id: 'black-friday-2026',
+    imagem: '/black-friday/slide-bf-desktop.webp',
+    imagemTablet: '/black-friday/slide-bf-desktop.webp',
+    imagemMobile: '/black-friday/slide-bf-mobile.webp',
+    titulo: 'Black Friday Sixxis — 2ª unidade com 50% OFF',
+    subtitulo: null,
+    link: '/produtos',
+    ordem: -1,
+    ativo: true,
+    tempoCads: 6,
+    aspectMobile: '16 / 9',
+    aspectTablet: '3 / 1',
+    aspectDesktop: '3 / 1',
+    maxHeightDesktop: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+  const bannersComBF = [bfSlide, ...banners]
+
   return (
     <main className="min-h-screen bg-transparent">
 
-      {/* ── 0. Banner Black Friday 2026 (campanha) ───────────── */}
-      <HeroBlackFriday />
-
       {/* ── 1. Banner ─────────────────────────────────────────────── */}
       <div>
-      {banners.length > 0 ? (
-        <BannerCarousel banners={banners} />
+      {bannersComBF.length > 0 ? (
+        <BannerCarousel banners={bannersComBF} />
       ) : (
         <section className="relative bg-gradient-to-br from-[#0f2e2b] via-[#1a4f4a] to-[#0f2e2b] min-h-[400px] flex items-center">
           <div className="max-w-7xl mx-auto px-6 py-16">
