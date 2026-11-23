@@ -96,7 +96,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
   }
 
   if (!itens.length) return (
-    <div className="aspect-square bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300 border border-gray-200">
+    <div className="aspect-square bg-[#f4f5f2] rounded-2xl flex items-center justify-center text-gray-400 border border-[#e6e9e4]">
       <ImageIcon size={48} strokeWidth={1.5} />
     </div>
   )
@@ -109,7 +109,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
         <div className="relative">
           <div
             ref={containerRef}
-            className="relative bg-white rounded-2xl border-2 border-gray-100 overflow-hidden cursor-crosshair group select-none"
+            className="relative bg-[#f4f5f2] rounded-2xl border-2 border-[#e6e9e4] overflow-hidden cursor-crosshair group select-none"
             style={{ aspectRatio: '1/1' }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setZoom(false)}
@@ -133,7 +133,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
                              hover:bg-white hover:scale-110 z-10"
                   title="Ver em tela cheia"
                 >
-                  <ZoomIn size={15} className="text-gray-600" />
+                  <ZoomIn size={15} className="text-[#B0BFBC]" />
                 </button>
               </>
             )}
@@ -176,8 +176,8 @@ export default function GaleriaCB({ itens, nome }: Props) {
                     onClick={() => setAtivo(i)}
                     className={`rounded-full transition-all duration-200 ${
                       i === ativo
-                        ? 'w-5 h-2 bg-white shadow'
-                        : 'w-2 h-2 bg-white/50 hover:bg-white/80'
+                        ? 'w-5 h-2 bg-[#0f2e2b] shadow'
+                        : 'w-2 h-2 bg-[#0f2e2b]/40 hover:bg-[#0f2e2b]/70'
                     }`}
                     aria-label={`Ir para ${i + 1}`}
                     aria-current={i === ativo}
@@ -214,10 +214,10 @@ export default function GaleriaCB({ itens, nome }: Props) {
             <button
               onClick={() => setAtivo(i => Math.max(0, i - 1))}
               disabled={ativo === 0}
-              className="shrink-0 w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center
-                         hover:bg-gray-200 disabled:opacity-30 transition-all"
+              className="shrink-0 w-8 h-8 rounded-xl bg-[#192221] flex items-center justify-center
+                         hover:bg-[#2A3937] disabled:opacity-30 transition-all"
             >
-              <ChevronLeft size={14} className="text-gray-600" />
+              <ChevronLeft size={14} className="text-[#B0BFBC]" />
             </button>
 
             <div className="flex gap-2 flex-1 overflow-x-auto scrollbar-hide pb-0.5">
@@ -230,10 +230,10 @@ export default function GaleriaCB({ itens, nome }: Props) {
                     key={i}
                     onClick={() => setAtivo(i)}
                     className={`relative shrink-0 w-[68px] h-[68px] rounded-xl border-2 overflow-hidden
-                                flex items-center justify-center bg-white transition-all duration-150 ${
+                                flex items-center justify-center bg-[#f4f5f2] transition-all duration-150 ${
                       isAtivo
-                        ? 'border-[#3cbfb3] shadow-md shadow-[#3cbfb3]/20 scale-105'
-                        : 'border-gray-100 hover:border-gray-300 hover:scale-105'
+                        ? 'border-[#00cfb5] shadow-md shadow-[#00cfb5]/20 scale-105'
+                        : 'border-[#2A3937] hover:border-[#3a4b48] hover:scale-105'
                     }`}
                     aria-label={item.tipo === 'video' ? 'Ver vídeo' : `Imagem ${i + 1}`}
                   >
@@ -264,7 +264,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
                       />
                     )}
                     {isAtivo && (
-                      <div className="absolute inset-0 ring-2 ring-[#3cbfb3] ring-inset rounded-xl pointer-events-none" />
+                      <div className="absolute inset-0 ring-2 ring-[#00cfb5] ring-inset rounded-xl pointer-events-none" />
                     )}
                   </button>
                 )
@@ -274,10 +274,10 @@ export default function GaleriaCB({ itens, nome }: Props) {
             <button
               onClick={() => setAtivo(i => Math.min(itens.length - 1, i + 1))}
               disabled={ativo === itens.length - 1}
-              className="shrink-0 w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center
-                         hover:bg-gray-200 disabled:opacity-30 transition-all"
+              className="shrink-0 w-8 h-8 rounded-xl bg-[#192221] flex items-center justify-center
+                         hover:bg-[#2A3937] disabled:opacity-30 transition-all"
             >
-              <ChevronRight size={14} className="text-gray-600" />
+              <ChevronRight size={14} className="text-[#B0BFBC]" />
             </button>
           </div>
         )}
@@ -287,14 +287,14 @@ export default function GaleriaCB({ itens, nome }: Props) {
           <button
             onClick={() => abrirLightbox(0)}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
-                       border border-gray-200 bg-gray-50 text-sm font-semibold text-gray-600
-                       hover:border-[#3cbfb3]/50 hover:bg-[#3cbfb3]/5 hover:text-[#3cbfb3]
+                       border border-[#2A3937] bg-[#192221] text-sm font-semibold text-[#B0BFBC]
+                       hover:border-[#00cfb5]/50 hover:bg-[#00cfb5]/5 hover:text-[#00cfb5]
                        transition-all duration-200 group"
           >
             <Grid3X3 size={15} />
             Ver todas as {itens.filter(m => m.tipo === 'imagem').length} fotos
             {itens.some(m => m.tipo === 'video') && (
-              <span className="text-gray-400">+ vídeo</span>
+              <span className="text-[#8a9794]">+ vídeo</span>
             )}
             <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
           </button>
@@ -314,7 +314,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
                 style={{ backgroundColor: 'rgba(60,191,179,0.18)' }}>
                 {itemLb?.tipo === 'video'
                   ? <Play size={13} fill="white" className="text-white ml-0.5" />
-                  : <ImageIcon size={13} className="text-[#3cbfb3]" />}
+                  : <ImageIcon size={13} className="text-[#00cfb5]" />}
               </div>
               <div>
                 <p className="text-white text-sm font-bold leading-none">{nome}</p>
@@ -416,7 +416,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
                       className={`shrink-0 relative w-[56px] h-[56px] rounded-lg overflow-hidden
                                   border-2 transition-all duration-200 ${
                         isAtivo
-                          ? 'border-[#3cbfb3] scale-105 opacity-100'
+                          ? 'border-[#00cfb5] scale-105 opacity-100'
                           : 'border-white/20 opacity-50 hover:opacity-80 hover:border-white/50'
                       }`}
                     >
