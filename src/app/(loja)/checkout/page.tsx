@@ -1002,7 +1002,7 @@ function CheckoutContent() {
   // tratamento de carregando do /carrinho. Não afeta o fluxo compra_direta.
   if (!hasHydrated && !compraDireta) {
     return (
-      <div style={{ backgroundColor: '#f8fafc' }} className="min-h-[70vh] flex items-center justify-center">
+      <div style={{ backgroundColor: '#080B0B' }} className="min-h-[70vh] flex items-center justify-center">
         <div className="w-8 h-8 rounded-full animate-spin" style={{ border: '3px solid #e5e7eb', borderTopColor: '#00cfb5' }} />
       </div>
     )
@@ -1554,7 +1554,7 @@ function MobileResumo(props: ResumoProps) {
 
 export default function CheckoutPage() {
   return (
-    <div className="min-h-screen bg-[#f9fafb]">
+    <div className="min-h-screen bg-[#080B0B]">
       <Suspense fallback={
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <div className="animate-pulse space-y-4">
