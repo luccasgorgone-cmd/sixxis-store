@@ -96,4 +96,29 @@ describe('POST /api/tracking trust boundary', () => {
     expect(mocks.hourlyUpsert).not.toHaveBeenCalled()
     expect(mocks.sessionUpdate).not.toHaveBeenCalled()
   })
+
+  it('grava o evento quando outra requisição cria a mesma sessão ao mesmo tempo', async () => {
+    mocks.sessionUpsert.mockRejectedValueOnce(Object.assign(new Error('duplicate'), { code: 'P2002' }))
+    mocks.sessionUpdate.mockResolvedValue({})
+    const response = await POST(request({ tipo: 'view_item', sessaoId: sid, pagina: '/produtos/sx070-trend', valor: 2100 }))
+    expect(response.status).toBe(200)
+    expect(mocks.sessionUpdate).not.toHaveBeenCalled()
+    expect(mocks.eventCreate).toHaveBeenCalledWith({ data: expect.objectContaining({ sessaoId: sid, tipo: 'view_item' }) })
+  })
+
+  it('mantém a contagem de páginas quando o page_view perde a corrida de criação', async () => {
+    mocks.sessionUpsert.mockRejectedValueOnce(Object.assign(new Error('duplicate'), { code: 'P2002' }))
+    mocks.sessionUpdate.mockResolvedValue({})
+    const response = await POST(request({ tipo: 'page_view', sessaoId: sid, pagina: '/produtos/sx070-trend' }))
+    expect(response.status).toBe(200)
+    expect(mocks.sessionUpdate).toHaveBeenCalledWith({ where: { sessaoId: sid }, data: { totalPaginas: { increment: 1 } } })
+    expect(mocks.eventCreate).toHaveBeenCalledOnce()
+  })
+
+  it('não mascara outros erros de banco', async () => {
+    mocks.sessionUpsert.mockRejectedValueOnce(Object.assign(new Error('down'), { code: 'P1001' }))
+    const response = await POST(request({ tipo: 'view_item', sessaoId: sid, pagina: '/produtos/sx070-trend' }))
+    expect(response.status).toBe(500)
+    expect(mocks.eventCreate).not.toHaveBeenCalled()
+  })
 })
