@@ -140,6 +140,29 @@ main {
 /* ── Utilitários ──────────────────────────────────────────────────────────── */
 @layer utilities {
 
+  /* ── Grade de cards de produto com subgrid ──
+     O pai `.grade-cards` (display:grid) recebe o card (`.card-produto`) e o
+     <article> como subgrids de 5 linhas: imagem, título, estrelas, preço e botões.
+     Cada fileira dimensiona o título pelo mais longo dela: fileira só com títulos
+     de 1 linha não fica com linha vazia, e os cards continuam alinhados. Fora de
+     uma `.grade-cards` (carrossel do tablet) nada disto se aplica e o card segue
+     em coluna flex, com o título reservando 2 linhas. */
+  .grade-cards > .card-produto {
+    grid-row: span 5;
+    display: grid;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+  .grade-cards > .card-produto > article {
+    grid-row: span 5;
+    display: grid;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+  .grade-cards > .card-produto .card-titulo {
+    min-height: 0;
+  }
+
   /* ── Botão primário ── */
   .btn-primary {
     background-color: var(--color-botoes, #3cbfb3);

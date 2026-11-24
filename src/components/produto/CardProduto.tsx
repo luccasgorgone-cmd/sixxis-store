@@ -212,7 +212,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
 
   return (
     <>
-    <Link href={`/produtos/${produto.slug}`} className="block h-full group">
+    <Link href={`/produtos/${produto.slug}`} className="card-produto block h-full group">
       <article className="bg-sx-surface h-full flex flex-col border border-sx-line rounded-xl overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-sx-accent/60 hover:shadow-[0_12px_30px_rgba(17,32,28,0.09)]">
 
         {/* Imagem — palco claro (red-line: foto não escurece) */}
@@ -313,13 +313,18 @@ export default function CardProduto({ produto, priority = false }: Props) {
           )}
         </div>
 
-        {/* Conteúdo: cada linha reserva altura para alinhar os cards da mesma fileira */}
-        <div className="flex flex-1 flex-col px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
-          <h3 className="min-h-[2.6em] text-[13px] font-semibold leading-[1.3] tracking-normal text-sx-text line-clamp-2 sm:text-sm">
+        {/* Conteúdo em 4 blocos irmãos (título, estrelas, preço, botões). Numa grade
+            `.grade-cards` eles viram linhas de subgrid (globals.css): cada fileira
+            dimensiona o título pelo mais longo DELA, então título, estrelas e preço
+            ficam juntos e alinhados entre os cards. Fora da grade (carrossel do
+            tablet) o título reserva 2 linhas, como antes. O preço riscado vai na
+            linha do preço: antes uma linha vazia reservada deixava ~30 px entre
+            as estrelas e o preço. */}
+          <h3 className="card-titulo mt-3 min-h-[2.6em] px-3 text-[13px] font-semibold leading-[1.3] tracking-normal text-sx-text line-clamp-2 sm:px-4 sm:text-sm">
             {produto.nome}
           </h3>
 
-          <div className="mt-1.5 flex h-4 items-center gap-1.5">
+          <div className="mt-1 flex h-4 items-center gap-1.5 px-3 sm:px-4">
             {totalAvaliacoes > 0 ? (
               <>
                 <EstrelasNota nota={mediaAvaliacoes} size={13} />
@@ -331,12 +336,14 @@ export default function CardProduto({ produto, priority = false }: Props) {
             )}
           </div>
 
-          <div className="mt-3">
-            <p className="h-4 text-xs leading-4 text-sx-subtle tabular-nums">
-              {precoOriginal ? <span className="line-through">R$ {fmt(precoOriginal)}</span> : null}
-            </p>
-            <p className="mt-0.5 text-lg font-extrabold leading-tight text-sx-text tabular-nums sm:text-xl">
-              R$ {fmt(precoFinal)}
+          <div className="mt-2 px-3 sm:px-4">
+            <p className="flex flex-wrap items-baseline gap-x-1.5 leading-tight tabular-nums">
+              <span className="text-lg font-extrabold text-sx-text sm:text-xl">R$ {fmt(precoFinal)}</span>
+              {precoOriginal ? (
+                <span className="text-[11px] text-sx-subtle line-through sm:text-xs">
+                  <span className="sr-only">Preço anterior: </span>R$ {fmt(precoOriginal)}
+                </span>
+              ) : null}
             </p>
             <p className="mt-1 truncate text-[11px] leading-4 text-sx-muted tabular-nums sm:text-xs">
               {MAX_PARCELAS_SEM_JUROS}x de <span className="font-semibold">R$ {fmt(valorParcela(precoFinal))}</span>
@@ -349,7 +356,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
           </div>
 
           {/* Comprar Agora primeiro. Com variação, o clique abre o modal de escolha. */}
-          <div className="mt-auto space-y-2 pt-3">
+          <div className="mt-auto space-y-2 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
             {!esgotado && (
               <button
                 onClick={handleComprarAgora}
@@ -385,7 +392,6 @@ export default function CardProduto({ produto, priority = false }: Props) {
               {isCmp ? 'Remover da comparação' : 'Comparar'}
             </button>
           </div>
-        </div>
       </article>
     </Link>
 

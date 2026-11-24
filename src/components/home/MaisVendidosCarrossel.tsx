@@ -30,7 +30,7 @@ export default function MaisVendidosCarrossel({ produtos }: Props) {
   return (
     <>
       {/* Mobile: grid 2 cols (sem carrossel) */}
-      <div className="grid grid-cols-2 gap-3 md:hidden">
+      <div className="grade-cards grid grid-cols-2 gap-3 md:hidden">
         {produtos.slice(0, 4).map((produto, i) => (
           <CardProduto key={produto.id} produto={produto} priority={i < 3} />
         ))}
@@ -75,7 +75,7 @@ export default function MaisVendidosCarrossel({ produtos }: Props) {
       </div>
 
       {/* Desktop lg+: grid 4 cols */}
-      <div className="hidden lg:grid grid-cols-4 gap-4">
+      <div className="grade-cards hidden lg:grid grid-cols-4 gap-4">
         {produtos.slice(0, 4).map((produto, i) => (
           <CardProduto key={produto.id} produto={produto} priority={i < 3} />
         ))}
