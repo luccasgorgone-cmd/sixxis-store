@@ -121,7 +121,12 @@ export function trackMeta(
   if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
   // LGPD: mesmo gate que concede/revoga o consentimento do Pixel.
   // (Plugue/remova este gate junto com o do GA4 se a política mudar.)
-  if (!marketingConsentido()) return
+  // Sem consentimento também trava o fbq: se a recusa veio de outra aba sem aviso,
+  // esta aba ainda estava destravada e eventos automáticos do fbevents passariam.
+  if (!marketingConsentido()) {
+    revogarConsentimentoPixel()
+    return
+  }
   // O CONSENT_EVENT não cruza abas: garante o Pixel liberado se o aceite veio de outra.
   concederConsentimentoPixel()
 
@@ -133,6 +138,12 @@ export function trackMeta(
   } else {
     window.fbq('track', evento, limpo)
   }
+}
+
+// Regra do PageView de rota do <MetaPixelRouter/>: a 1ª URL vista é a do load
+// (não conta) e só uma URL diferente da última conta.
+export function deveEnviarPageViewDeRota(ultima: string | null, atual: string): boolean {
+  return ultima !== null && ultima !== atual
 }
 
 // PageView avulso (trocas de rota client-side). Mesmo gate do trackMeta.

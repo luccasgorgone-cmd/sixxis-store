@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
@@ -304,7 +305,10 @@ try{var m=document.cookie.match(/(?:^|; )sixxis_consent=([^;]+)/);if(m){var c=JS
         <GtmNoScript />
         <MetaPixelNoScript />
         <Providers>
-          <MetaPixelRouter />
+          {/* useSearchParams no router: Suspense evita tirar o layout do pré-render. */}
+          <Suspense fallback={null}>
+            <MetaPixelRouter />
+          </Suspense>
           <MetaAdvancedMatching />
           {children}
         </Providers>
