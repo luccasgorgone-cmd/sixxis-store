@@ -1,5 +1,10 @@
 import { Resend } from 'resend'
 import { prisma } from '@/lib/prisma'
+import {
+  JANELA_CONFIRMACAO_MS,
+  escaparHtml,
+  normalizarSolicitacao,
+} from '@/lib/revendedor-solicitacao'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,24 +20,30 @@ function labelMap(k: string): string {
 }
 
 export async function POST(req: Request) {
-  let dados: Record<string, string>
+  let bruto: unknown
   try {
-    dados = await req.json()
+    bruto = await req.json()
   } catch {
     return Response.json({ erro: 'Corpo inválido' }, { status: 400 })
   }
 
-  const { nome, email, telefone } = dados
-  const faltando = (['nome', 'email', 'telefone'] as const).filter((k) => !dados[k]?.trim())
-  if (faltando.length) {
-    // Loga o motivo exato do 400 (qual campo faltou + payload recebido) para
-    // diagnosticar desalinhamentos entre o form e o schema desta rota.
-    console.error('[REVENDEDOR API] 400 — campos obrigatórios faltando:', faltando, '| payload:', dados)
-    return Response.json(
-      { erro: `Campos obrigatórios faltando: ${faltando.join(', ')}` },
-      { status: 400 },
-    )
+  // Só campos conhecidos, tamanho limitado e e-mail válido (ver
+  // revendedor-solicitacao.ts). Não loga o payload: tem PII.
+  const normalizado = normalizarSolicitacao(bruto)
+  if (!normalizado.ok || !normalizado.dados) {
+    console.error('[REVENDEDOR API] 400 —', normalizado.erro)
+    return Response.json({ erro: normalizado.erro }, { status: 400 })
   }
+  const dados = normalizado.dados
+  const { nome, email, telefone } = dados
+
+  // Confirmação automática no máximo 1x por e-mail a cada 24h: a rota é
+  // anônima e o destinatário é digitado — sem isso, dava para usar a loja para
+  // disparar e-mail em massa para a caixa de terceiros.
+  const jaConfirmadoRecente = await prisma.solicitacaoParceiro
+    .count({ where: { email, createdAt: { gte: new Date(Date.now() - JANELA_CONFIRMACAO_MS) } } })
+    .then((n) => n > 0)
+    .catch(() => false)
 
   // Persiste a solicitação (lead). Best-effort: se o banco falhar, ainda
   // enviamos o e-mail de notificação abaixo para não perder o lead.
@@ -69,8 +80,8 @@ export async function POST(req: Request) {
     .filter(([, v]) => v && String(v).trim())
     .map(([k, v]) => `
       <tr style="border-bottom:1px solid #e5e7eb;">
-        <td style="padding:10px 12px;font-weight:bold;color:#4b5563;width:40%;background:#f9fafb;">${labelMap(k)}</td>
-        <td style="padding:10px 12px;color:#1f2937;">${String(v)}</td>
+        <td style="padding:10px 12px;font-weight:bold;color:#4b5563;width:40%;background:#f9fafb;">${escaparHtml(labelMap(k))}</td>
+        <td style="padding:10px 12px;color:#1f2937;">${escaparHtml(String(v))}</td>
       </tr>
     `)
     .join('')
@@ -87,7 +98,7 @@ export async function POST(req: Request) {
       from: process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br',
       to: process.env.EMAIL_CONTATO ?? 'sac@sixxis.com.br',
       replyTo: 'sac@sixxis.com.br',
-      subject: `Nova Solicitação de Revendedor — ${nome}`,
+      subject: `Nova Solicitação de Revendedor — ${nome.replace(/[\r\n]+/g, ' ')}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
           <div style="background:#1a4f4a;padding:28px 32px;text-align:center;">
@@ -107,7 +118,7 @@ export async function POST(req: Request) {
       `,
     })
 
-    await resend.emails.send({
+    if (!jaConfirmadoRecente) await resend.emails.send({
       from: process.env.EMAIL_FROM ?? 'noreply@sixxis.com.br',
       to: email,
       subject: 'Sixxis — Recebemos sua solicitação de parceria! 🎉',
@@ -118,7 +129,7 @@ export async function POST(req: Request) {
             <p style="color:rgba(255,255,255,.75);margin:6px 0 0;">Qualidade e Inovação</p>
           </div>
           <div style="padding:32px;">
-            <h2 style="color:#1f2937;margin:0 0 12px;">Olá, ${nome}!</h2>
+            <h2 style="color:#1f2937;margin:0 0 12px;">Olá, ${escaparHtml(nome)}!</h2>
             <p style="color:#4b5563;line-height:1.7;">
               Agradecemos o seu interesse em se tornar um parceiro Sixxis! 🎉
             </p>

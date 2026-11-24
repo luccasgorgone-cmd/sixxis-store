@@ -13,6 +13,7 @@
 
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
+import { ipDoCliente } from './client-ip'
 
 export type LimiterName =
   | 'login'
@@ -122,9 +123,7 @@ export async function rateLimit(
 
 // Extrai o IP do cliente de trás do proxy (Railway/Cloudflare).
 export function getClientIp(req: Request): string {
-  const xff = req.headers.get('x-forwarded-for')
-  if (xff) return xff.split(',')[0].trim()
-  return req.headers.get('x-real-ip') ?? 'unknown'
+  return ipDoCliente(req.headers)
 }
 
 // Dedicated strict entry point: callers distinguish provider unavailability (503)

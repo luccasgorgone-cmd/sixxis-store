@@ -1,14 +1,10 @@
 import { prisma } from '@/lib/prisma'
+import { ipDoCliente } from '@/lib/client-ip'
 import type { Prisma } from '@prisma/client'
 
 function extractIp(req: Request): string | null {
-  const cf = req.headers.get('cf-connecting-ip')
-  if (cf) return cf
-  const xff = req.headers.get('x-forwarded-for')
-  if (xff) return xff.split(',')[0].trim()
-  const xri = req.headers.get('x-real-ip')
-  if (xri) return xri
-  return null
+  const ip = ipDoCliente(req.headers)
+  return ip === 'unknown' ? null : ip
 }
 
 export async function auditLog(params: {

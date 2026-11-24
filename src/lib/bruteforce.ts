@@ -1,17 +1,13 @@
 import { prisma } from '@/lib/prisma'
+import { ipDoCliente } from '@/lib/client-ip'
 
 const LIMITE_TENTATIVAS = 5
 const JANELA_MIN = 10
 const BLOQUEIO_MIN = 30
 
+// cf-connecting-ip NÃO é confiável aqui (sem Cloudflare na frente): ver client-ip.ts.
 function extractIp(req: Request): string {
-  const cf = req.headers.get('cf-connecting-ip')
-  if (cf) return cf
-  const xff = req.headers.get('x-forwarded-for')
-  if (xff) return xff.split(',')[0].trim()
-  const xri = req.headers.get('x-real-ip')
-  if (xri) return xri
-  return 'unknown'
+  return ipDoCliente(req.headers)
 }
 
 export async function registrarTentativaFalha(req: Request) {

@@ -6,6 +6,8 @@ import { precoPix } from '@/lib/preco-pix'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+const MAX_CHARS_MENSAGEM = 2000
+
 // ── CEP detector ──────────────────────────────────────────────────────────────
 function extrairCEP(texto: string): string | null {
   const match = texto.match(/\b\d{5}[-\s]?\d{3}\b/)
@@ -223,11 +225,19 @@ DATA/HORA ATUAL — ${agora}`
 
     const anthropic = new Anthropic({ apiKey })
 
+    // Rota pública: limita o que vai para o modelo (custo por token). Só papéis
+    // válidos e no máximo MAX_CHARS_MENSAGEM por mensagem — sem isso, um POST
+    // com mensagens gigantes virava custo de API arbitrário para a loja.
     const historico = mensagens
       .slice(-10)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((m: any) => ({ role: m.role as 'user' | 'assistant', content: String(m.content) }))
-      .filter((m) => m.content.trim() !== '')
+      .filter((m: any) => m?.role === 'user' || m?.role === 'assistant')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((m: any) => ({
+        role: m.role as 'user' | 'assistant',
+        content: String(m.content ?? '').slice(0, MAX_CHARS_MENSAGEM),
+      }))
+      .filter((m: { content: string }) => m.content.trim() !== '')
 
     const response = await anthropic.messages.create({
       model:       cfg.agente_modelo    || 'claude-haiku-4-5-20251001',

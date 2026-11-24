@@ -171,8 +171,17 @@ export async function resgatarCashback(
   const aplicar = round2(Math.max(0, Math.min(valorSolicitado, disponivel, teto)))
   if (aplicar <= 0) return 0
 
-  await prisma.$transaction([
-    prisma.cashbackTransacao.create({
+  // Débito CONDICIONAL e atômico: o UPDATE só afeta a linha se o saldo ainda
+  // cobre o valor. Antes era ler-saldo → decrementar em passos separados; dois
+  // pedidos simultâneos liam o mesmo saldo e ambos abatiam (saldo negativo,
+  // cashback usado em dobro).
+  return prisma.$transaction(async (tx) => {
+    const debito = await tx.cliente.updateMany({
+      where: { id: clienteId, cashbackSaldo: { gte: aplicar } },
+      data:  { cashbackSaldo: { decrement: aplicar } },
+    })
+    if (debito.count !== 1) return 0
+    await tx.cashbackTransacao.create({
       data: {
         clienteId,
         tipo:      'debito',
@@ -181,13 +190,9 @@ export async function resgatarCashback(
         descricao: `Cashback usado no pedido #${pedidoId.slice(-8).toUpperCase()}`,
         pedidoId,
       },
-    }),
-    prisma.cliente.update({
-      where: { id: clienteId },
-      data:  { cashbackSaldo: { decrement: aplicar } },
-    }),
-  ])
-  return aplicar
+    })
+    return aplicar
+  })
 }
 
 /** Retorna extrato do cliente */
