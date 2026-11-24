@@ -5,7 +5,7 @@ import { createAvaliacoesMetric, createCarrinhosMetric, createCuponsCashbackFide
 import { parseMetricParams } from './tempo'
 
 const D = (value: string) => new Prisma.Decimal(value)
-const context = { requestId: 'req-operacao', identity: null, ip: '127.0.0.1', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 0 } } satisfies ApiContext
+const context = { requestId: 'req-operacao', identity: null, ip: '127.0.0.1', startedAt: 0 } satisfies ApiContext
 const params = parseMetricParams(new URLSearchParams({ de: '2026-11-16', ate: '2026-11-16', agrupar: 'dia' }))
 
 describe('metricas/carrinhos', () => {

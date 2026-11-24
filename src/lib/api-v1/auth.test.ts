@@ -1,6 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { describe, expect, it, vi } from 'vitest'
-import { authenticateBearer, hasScope, hashApiKey } from './auth'
+import { apiKeyFingerprint, authenticateBearer, hasScope, hashApiKey, loadActiveApiKeyDigests } from './auth'
 
 const raw = `sxs_live_${randomBytes(32).toString('base64url')}`
 const digest = createHash('sha256').update(raw).digest('hex')
@@ -16,6 +16,25 @@ describe('API bearer authentication', () => {
     expect(hashApiKey(raw).length).toBe(32)
     expect(hashApiKey(raw).equals(Buffer.from(digest, 'hex'))).toBe(true)
   })
+  it('derives a full digest hint only from a syntactically valid bearer', () => {
+    expect(apiKeyFingerprint(request(`Bearer ${raw}`))).toBe(digest)
+    expect(apiKeyFingerprint(request('Bearer invalid'))).toBeNull()
+    expect(apiKeyFingerprint(request())).toBeNull()
+  })
+  it('loads only valid active digests through one bounded database projection', async () => {
+    const expires = new Date('2026-12-01T00:00:00.000Z')
+    const findMany = vi.fn().mockResolvedValue([
+      { id: 'key-id', nome: 'Fixture', prefixo: 'safe-prefix', hash: digest, escopos: ['read:all'], expiraEm: expires },
+      { id: 'invalid', nome: 'Invalid', prefixo: 'invalid', hash: 'invalid', escopos: ['read:all'], expiraEm: null },
+    ])
+    const result = await loadActiveApiKeyDigests({ prisma: { apiChaveLeitura: { findMany } }, now: () => new Date('2026-11-17T12:00:00.000Z') })
+
+    expect(result).toEqual(new Map([[digest, { id: 'key-id', nome: 'Fixture', prefixo: 'safe-prefix', scopes: new Set(['read:all']), expiraEm: expires }]]))
+    expect(findMany).toHaveBeenCalledWith({
+      where: { revogadoEm: null, OR: [{ expiraEm: null }, { expiraEm: { gt: new Date('2026-11-17T12:00:00.000Z') } }] },
+      select: { id: true, nome: true, prefixo: true, hash: true, escopos: true, expiraEm: true },
+    })
+  })
   it('uses dummy fixed-length timing-safe comparison on prefix miss', async () => {
     const compare = vi.fn(timingSafeEqual)
     await expect(authenticateBearer(request(`Bearer ${raw}`), { ...deps([]), compare })).rejects.toMatchObject({ status: 401 })
@@ -30,6 +49,13 @@ describe('API bearer authentication', () => {
     expect(compare).toHaveBeenCalledTimes(2)
     expect(d.prisma.apiChaveLeitura.findMany.mock.calls[0][0].where).toEqual({ prefixo: raw.slice(0, 20) })
     expect('hash' in identity).toBe(false)
+  })
+  it('treats luccas-programa-externo with expiraEm null as valid until explicit revocation', async () => {
+    const permanent = row({ nome: 'luccas-programa-externo', expiraEm: null })
+    const identity = await authenticateBearer(request(`Bearer ${raw}`), { ...deps([permanent]), now: () => new Date('2126-01-01T00:00:00.000Z') })
+
+    expect(identity).toMatchObject({ nome: 'luccas-programa-externo', expiraEm: null })
+    await expect(authenticateBearer(request(`Bearer ${raw}`), deps([{ ...permanent, revogadoEm: new Date('2026-11-17T00:00:00.000Z') }]))).rejects.toMatchObject({ status: 401 })
   })
   it.each([{ hash: 'not-hex' }, { hash: 'a'.repeat(63) }, { revogadoEm: new Date() }, { expiraEm: new Date(0) }, { escopos: ['read:unknown'] }, { escopos: 'read:all' }])('fails closed for invalid database state', async extra => {
     const compare = vi.fn(timingSafeEqual)

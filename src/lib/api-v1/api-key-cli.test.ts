@@ -7,7 +7,8 @@ import { runApiKeyCli } from '../../../scripts/api-chave'
 const fixture = () => {
   const write = vi.fn(); const create = vi.fn().mockResolvedValue({ id: 'key-id' })
   const prisma = { apiChaveLeitura: { create, findMany: vi.fn().mockResolvedValue([{ id: 'key-id', nome: 'Test', prefixo: 'safe-prefix', hash: 'must-not-list', raw: 'must-not-list', escopos: ['read:all'], criadoEm: new Date(0), expiraEm: null, revogadoEm: null, ultimoUsoEm: null, ultimoIp: null }]), updateMany: vi.fn().mockResolvedValue({ count: 1 }) } }
-  return { write, prisma }
+  const activeDigests = { add: vi.fn().mockResolvedValue(undefined), remove: vi.fn().mockResolvedValue(undefined) }
+  return { write, prisma, activeDigests }
 }
 
 describe('API key CLI without real database', () => {
@@ -26,6 +27,7 @@ describe('API key CLI without real database', () => {
       expect(/^sxs_live_[A-Za-z0-9_-]{43}\n$/.test(raw)).toBe(true)
       const data = d.prisma.apiChaveLeitura.create.mock.calls[0][0].data
       expect(data.hash.length).toBe(64)
+      expect(d.activeDigests.add).toHaveBeenCalledWith(data.hash, expect.objectContaining({ id: 'key-id', nome: 'Fixture', expiraEm: null, scopes: new Set(['read:all']) }))
       expect(JSON.stringify(data).includes(raw.trim())).toBe(false)
       expect(d.write.mock.calls.some(args => String(args[0]).includes('sxs_live_'))).toBe(false)
       await expect(runApiKeyCli(['criar', '--nome', 'Fixture', '--escopos', 'read:all', '--output', path], d)).rejects.toThrow()
@@ -48,6 +50,89 @@ describe('API key CLI without real database', () => {
     expect(d.prisma.apiChaveLeitura.updateMany).not.toHaveBeenCalled()
     expect(output.close).toHaveBeenCalledOnce()
   })
+  it('revokes a just-created key and removes its output when distributed registration fails', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'api-key-test-')); const path = join(dir, 'key')
+    try {
+      const d = fixture()
+      d.activeDigests.add.mockRejectedValue(new Error('redis unavailable'))
+
+      await expect(runApiKeyCli(['criar', '--nome', 'Fixture', '--escopos', 'read:all', '--output', path], d)).rejects.toThrow()
+
+      expect(d.prisma.apiChaveLeitura.create).toHaveBeenCalledOnce()
+      expect(d.prisma.apiChaveLeitura.updateMany).toHaveBeenCalledWith({ where: { id: 'key-id', revogadoEm: null }, data: { revogadoEm: expect.any(Date) } })
+      await expect(stat(path)).rejects.toThrow()
+    } finally { await rm(dir, { recursive: true, force: true }) }
+  })
+  it('preserves the recoverable output when distributed registration and DB compensation both fail', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'api-key-test-')); const path = join(dir, 'key')
+    try {
+      const d = fixture()
+      d.activeDigests.add.mockRejectedValue(new Error('redis unavailable'))
+      d.prisma.apiChaveLeitura.updateMany.mockRejectedValue(new Error('database unavailable'))
+
+      await expect(runApiKeyCli(['criar', '--nome', 'Fixture', '--escopos', 'read:all', '--output', path], d)).rejects.toThrow()
+
+      expect(await readFile(path, 'utf8')).toMatch(/^sxs_live_[A-Za-z0-9_-]{43}\n$/)
+    } finally { await rm(dir, { recursive: true, force: true }) }
+  })
+  it('revokes the DB row and preserves recoverable output when quarantine cannot be confirmed', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'api-key-test-')); const path = join(dir, 'key')
+    try {
+      const d = fixture()
+      d.activeDigests.add.mockRejectedValue(new Error('redis unavailable'))
+      d.activeDigests.remove.mockRejectedValue(new Error('redis unavailable'))
+
+      await expect(runApiKeyCli(['criar', '--nome', 'Fixture', '--escopos', 'read:all', '--output', path], d)).rejects.toThrow()
+
+      expect(d.prisma.apiChaveLeitura.updateMany).toHaveBeenCalledWith({
+        where: { id: 'key-id', revogadoEm: null },
+        data: { revogadoEm: expect.any(Date) },
+      })
+      expect(await readFile(path, 'utf8')).toMatch(/^sxs_live_[A-Za-z0-9_-]{43}\n$/)
+    } finally { await rm(dir, { recursive: true, force: true }) }
+  })
+  it('always compensates a created key when registration and output close both fail', async () => {
+    const d = fixture()
+    const output = {
+      chmod: vi.fn().mockResolvedValue(undefined),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+      sync: vi.fn().mockResolvedValue(undefined),
+      close: vi.fn().mockRejectedValue(new Error('close failed')),
+    }
+    d.activeDigests.add.mockRejectedValue(new Error('redis unavailable'))
+
+    await expect(runApiKeyCli(
+      ['criar', '--nome', 'Fixture', '--escopos', 'read:all', '--output', '/unused/key'],
+      { ...d, openOutput: vi.fn().mockResolvedValue(output) } as never,
+    )).rejects.toThrow()
+
+    expect(output.close).toHaveBeenCalledOnce()
+    expect(d.prisma.apiChaveLeitura.updateMany).toHaveBeenCalledWith({
+      where: { id: 'key-id', revogadoEm: null },
+      data: { revogadoEm: expect.any(Date) },
+    })
+  })
+  it('quarantines and compensates a successfully registered key when close fails', async () => {
+    const d = fixture()
+    const output = {
+      chmod: vi.fn().mockResolvedValue(undefined),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+      sync: vi.fn().mockResolvedValue(undefined),
+      close: vi.fn().mockRejectedValue(new Error('close failed')),
+    }
+
+    await expect(runApiKeyCli(
+      ['criar', '--nome', 'Fixture', '--escopos', 'read:all', '--output', '/unused/key'],
+      { ...d, openOutput: vi.fn().mockResolvedValue(output) } as never,
+    )).rejects.toThrow()
+
+    expect(d.activeDigests.add).toHaveBeenCalledOnce()
+    expect(d.activeDigests.remove).toHaveBeenCalledOnce()
+    expect(d.prisma.apiChaveLeitura.updateMany).toHaveBeenCalledWith({
+      where: { id: 'key-id', revogadoEm: null },
+      data: { revogadoEm: expect.any(Date) },
+    })
+  })
   it('lists only explicit metadata and never raw/hash', async () => {
     const d = fixture(); await runApiKeyCli(['listar'], d)
     const output = d.write.mock.calls.map(args => args[0]).join('')
@@ -63,6 +148,19 @@ describe('API key CLI without real database', () => {
   it('revokes id without deleting history', async () => {
     const d = fixture(); await runApiKeyCli(['revogar', '--id', 'key-id'], d)
     expect(d.prisma.apiChaveLeitura.updateMany.mock.calls[0][0]).toMatchObject({ where: { id: 'key-id', revogadoEm: null }, data: { revogadoEm: expect.any(Date) } })
+    expect(d.activeDigests.remove).toHaveBeenCalledWith('must-not-list')
+    expect(d.activeDigests.remove).toHaveBeenCalledOnce()
+  })
+  it('revokes the DB row even when permanent quarantine cannot be confirmed', async () => {
+    const d = fixture()
+    d.activeDigests.remove.mockRejectedValue(new Error('redis unavailable'))
+
+    await expect(runApiKeyCli(['revogar', '--id', 'key-id'], d)).rejects.toThrow()
+
+    expect(d.prisma.apiChaveLeitura.updateMany).toHaveBeenCalledWith({
+      where: { id: 'key-id', revogadoEm: null },
+      data: { revogadoEm: expect.any(Date) },
+    })
   })
   it.each([['read:nope', '2099-01-01T00:00:00Z'], ['read:all', 'not-date'], ['read:all', '2000-01-01T00:00:00Z']])('rejects invalid scope/expiration before persistence', async (scope, expiry) => {
     const d = fixture()

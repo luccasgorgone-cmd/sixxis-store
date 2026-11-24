@@ -108,7 +108,7 @@ function fieldSchema(field: FieldSchema, description?: string, example?: unknown
   return schema
 }
 
-const responseHeaders = { 'X-Request-Id': { $ref: 'urn:sixxis:api-v1:header:request-id' }, 'X-RateLimit-Limit': { $ref: 'urn:sixxis:api-v1:header:rate-limit' }, 'X-RateLimit-Remaining': { $ref: 'urn:sixxis:api-v1:header:rate-remaining' }, 'X-RateLimit-Reset': { $ref: 'urn:sixxis:api-v1:header:rate-reset' } }
+const responseHeaders = { 'X-Request-Id': { $ref: 'urn:sixxis:api-v1:header:request-id' } }
 function responses(success: Schema, item = false): Record<string, Schema> {
   const output: Record<string, Schema> = { '200': { description: 'Sucesso.', headers: responseHeaders, content: { 'application/json': { schema: success } } } }
   for (const status of ['400', '401', '403', ...(item ? ['404'] : []), '429', '500', '503']) output[status] = { $ref: `urn:sixxis:api-v1:response:${status}` }
@@ -130,7 +130,10 @@ function resourceParameters(definition: ResourceDefinition): Parameter[] {
     queryParameter('expand', { type: 'string', enum: definition.expands.length ? definition.expands.map(item => item.name) : undefined }, `Até três relações: ${definition.expands.map(item => item.name).join(', ') || 'nenhuma'}.`),
   ]
   if (definition.searchFields?.length) parameters.push({ ...queryParameter('q', { type: 'string', maxLength: 200 }, `Busca textual em ${definition.searchFields.join(', ')}.`), ...(definition.searchScope ? { 'x-required-scope': definition.searchScope } : {}) })
-  for (const [name, field] of [['criadoDesde', definition.dateFields?.created], ['criadoAte', definition.dateFields?.created], ['atualizadoDesde', definition.dateFields?.updated], ['atualizadoAte', definition.dateFields?.updated]] as const) if (field) parameters.push(queryParameter(name, { type: 'string', format: 'date-time' }, `Limite ${name.endsWith('Desde') ? 'inclusivo inicial' : 'inclusivo final'} em ${field}.`))
+  for (const [name, field] of [['criadoDesde', definition.dateFields?.created], ['criadoAte', definition.dateFields?.created], ['atualizadoDesde', definition.dateFields?.updated], ['atualizadoAte', definition.dateFields?.updated]] as const) if (field) {
+    const required = definition.window?.from === name || definition.window?.to === name
+    parameters.push({ ...queryParameter(name, { type: 'string', format: 'date-time' }, `Limite ${name.endsWith('Desde') ? 'inclusivo inicial' : 'inclusivo final'} em ${field}.`, required ? (name.endsWith('Desde') ? '2026-01-01T00:00:00.000Z' : '2026-01-01T23:59:59.999Z') : undefined), required })
+  }
   for (const [name, filter] of Object.entries(definition.filters ?? {})) parameters.push({ ...queryParameter(name, { type: 'string', ...(filter.values ? { enum: filter.values } : {}) }, filter.description ?? `Filtro natural por ${filter.field ?? name}; múltiplos valores separados por vírgula.`), ...(filter.scope ? { 'x-required-scope': filter.scope } : {}) })
   return parameters
 }
@@ -158,16 +161,24 @@ export function buildOpenApi(registry: ResourceRegistry, metrics: MetricRegistry
     const schema = detailedMetricSchema(metric.slug)
     schemas[`Metric_${metric.slug}`] = { $id: `urn:sixxis:api-v1:metric:${metric.slug}`, ...schema }
     schemas[`MetricEnvelope_${metric.slug}`] = { $id: `urn:sixxis:api-v1:metric-envelope:${metric.slug}`, ...object({ data: { $ref: `urn:sixxis:api-v1:metric:${metric.slug}` }, meta: { $ref: 'urn:sixxis:api-v1:item-meta' } }) }
-    paths[`${API_BASE_PATH}/metricas/${metric.slug}`] = { get: { tags: ['Métricas'], operationId: `metrica_${metric.slug}`, summary: `Métrica ${metric.slug}`, description: 'Agregado sem identificadores individuais; fórmulas completas constam em definicoes.', security: [{ bearerAuth: [] }], 'x-required-scope': metric.scope, parameters: [queryParameter('de', { type: 'string', format: 'date' }, 'Primeiro dia civil inclusivo.', '2026-01-01'), queryParameter('ate', { type: 'string', format: 'date' }, 'Último dia civil inclusivo; máximo de 366 dias.', '2026-01-31'), queryParameter('agrupar', { type: 'string', enum: ['dia', 'semana', 'mes'] }, 'Granularidade BRT.', 'dia')], responses: responses({ $ref: `urn:sixxis:api-v1:metric-envelope:${metric.slug}` }) } }
+    paths[`${API_BASE_PATH}/metricas/${metric.slug}`] = { get: { tags: ['Métricas'], operationId: `metrica_${metric.slug}`, summary: `Métrica ${metric.slug}`, description: 'Agregado sem identificadores individuais; fórmulas completas constam em definicoes.', security: [{ bearerAuth: [] }], 'x-required-scope': metric.scope, parameters: [{ ...queryParameter('de', { type: 'string', format: 'date' }, 'Primeiro dia civil inclusivo.', '2026-01-01'), required: true }, { ...queryParameter('ate', { type: 'string', format: 'date' }, 'Último dia civil inclusivo.', '2026-01-31'), required: true }, { ...queryParameter('agrupar', { type: 'string', enum: ['dia', 'semana', 'mes'] }, 'Granularidade BRT.', 'dia'), required: true }], responses: responses({ $ref: `urn:sixxis:api-v1:metric-envelope:${metric.slug}` }) } }
   }
   const meta = { $id: 'urn:sixxis:api-v1:item-meta', ...object({ requestId: text('Identificador da requisição.'), generatedAt: { type: 'string', format: 'date-time', description: 'Instante UTC de geração.' } }) }
   const listMeta = { $id: 'urn:sixxis:api-v1:list-meta', ...object({ requestId: text(), count: integer(), hasMore: { type: 'boolean', description: 'Existe página seguinte.' }, nextCursor: { type: ['string', 'null'], description: 'Cursor opaco ou null.' }, generatedAt: { type: 'string', format: 'date-time', description: 'Instante UTC.' }, apiVersion: { type: 'string', const: API_VERSION, description: 'Versão semântica da API.' } }) }
   const problem = { $id: 'urn:sixxis:api-v1:problem', ...object({ type: { type: 'string', format: 'uri', description: 'URI do tipo do problema.' }, title: text(), status: integer(), detail: text(), requestId: text() }) }
-  Object.assign(schemas, { ItemMeta: meta, ListMeta: listMeta, Problem: problem })
+  const me = { $id: 'urn:sixxis:api-v1:me', ...object({
+    nome: text('Nome operacional da chave.'),
+    prefixo: text('Prefixo seguro para identificação da chave.'),
+    escopos: array(text('Escopo autorizado.')),
+    expiraEm: { type: ['string', 'null'], format: 'date-time', description: 'Data de expiração; null significa válida até revogação explícita.' },
+    semLimite: { type: 'boolean', const: true, description: 'Chaves válidas autenticadas não têm limite de requests nem de período.' },
+  }) }
+  const meEnvelope = { $id: 'urn:sixxis:api-v1:me-envelope', ...object({ data: { $ref: 'urn:sixxis:api-v1:me' }, meta: { $ref: 'urn:sixxis:api-v1:item-meta' } }) }
+  Object.assign(schemas, { ItemMeta: meta, ListMeta: listMeta, Problem: problem, Me: me, MeEnvelope: meEnvelope })
   const document: OpenApiDocument = {
     openapi: '3.1.0',
     info: { title: 'Sixxis Store API de Leitura v1', version: API_VERSION, description: 'API server-to-server somente leitura. Datas em UTC, dinheiro em strings BRL, agrupamento de métricas em America/Sao_Paulo. Nenhum exemplo contém dado real.', license: { name: 'Proprietário — uso autorizado Sixxis' } },
-    servers: [{ url: 'https://SEU-DOMINIO.example', description: 'Substitua pelo domínio autorizado da Loja.' }],
+    servers: [{ url: 'https://www.sixxis.com.br', description: 'Produção Sixxis Store.' }],
     tags: [{ name: 'Sistema', description: 'Saúde, contrato e identidade da chave.' }, { name: 'Recursos', description: '49 recursos de negócio com cursor e allowlists.' }, { name: 'Métricas', description: '8 agregados documentados.' }],
     paths,
     components: {
@@ -175,9 +186,6 @@ export function buildOpenApi(registry: ResourceRegistry, metrics: MetricRegistry
       parameters: {},
       headers: {
         RequestId: { $id: 'urn:sixxis:api-v1:header:request-id', description: 'Identificador único da requisição.', schema: { type: 'string' } },
-        RateLimit: { $id: 'urn:sixxis:api-v1:header:rate-limit', description: 'Limite por minuto.', schema: { type: 'integer' } },
-        RateRemaining: { $id: 'urn:sixxis:api-v1:header:rate-remaining', description: 'Saldo na janela.', schema: { type: 'integer' } },
-        RateReset: { $id: 'urn:sixxis:api-v1:header:rate-reset', description: 'Reset em Unix seconds.', schema: { type: 'integer' } },
       },
       responses: Object.fromEntries(['400', '401', '403', '404', '429', '500', '503'].map(status => [status, { $id: `urn:sixxis:api-v1:response:${status}`, description: `Erro HTTP ${status}.`, headers: responseHeaders, content: { 'application/problem+json': { schema: { $ref: 'urn:sixxis:api-v1:problem' } } }, ...(status === '429' ? { headers: { ...responseHeaders, 'Retry-After': { description: 'Segundos até nova tentativa.', schema: { type: 'integer' } } } } : {}) }])),
     },
@@ -187,7 +195,7 @@ export function buildOpenApi(registry: ResourceRegistry, metrics: MetricRegistry
     [`${API_BASE_PATH}/health`]: { get: { tags: ['Sistema'], operationId: 'health', summary: 'Saúde e versão', security: [], parameters: [], responses: responses({ type: 'object' }) } },
     [`${API_BASE_PATH}/openapi.json`]: { get: { tags: ['Sistema'], operationId: 'openapi', summary: 'Contrato OpenAPI 3.1', security: [], parameters: [], responses: responses({ type: 'object' }) } },
     [`${API_BASE_PATH}/docs`]: { get: { tags: ['Sistema'], operationId: 'docs', summary: 'Scalar UI', security: [], parameters: [], responses: { '200': { description: 'HTML Scalar.', content: { 'text/html': { schema: { type: 'string' } } } }, '400': { $ref: 'urn:sixxis:api-v1:response:400' } } } },
-    [`${API_BASE_PATH}/me`]: { get: { tags: ['Sistema'], operationId: 'me', summary: 'Metadados seguros da chave', security: [{ bearerAuth: [] }], parameters: [], responses: responses({ type: 'object' }) } },
+    [`${API_BASE_PATH}/me`]: { get: { tags: ['Sistema'], operationId: 'me', summary: 'Metadados seguros da chave', security: [{ bearerAuth: [] }], parameters: [], responses: responses({ $ref: 'urn:sixxis:api-v1:me-envelope' }) } },
     [`${API_BASE_PATH}/meta/recursos`]: { get: { tags: ['Sistema'], operationId: 'meta_recursos', summary: 'Dicionário e cardinalidade autorizados', security: [{ bearerAuth: [] }], parameters: [], responses: responses({ type: 'object' }) } },
   }
   document.paths = { ...systemPaths, ...document.paths }
@@ -199,9 +207,9 @@ export function buildPostmanCollection(document: OpenApiDocument): Record<string
     const parameters = operation.parameters ?? []
     const query = parameters.filter(parameter => parameter.in === 'query').map(parameter => ({ key: parameter.name, value: String(parameter.example ?? parameter.schema?.default ?? ''), disabled: parameter.example === undefined && parameter.schema?.default === undefined, description: parameter.description }))
     const rawPath = path.replace('{id}', 'EXEMPLO_ID')
-    return { name: `${method.toUpperCase()} ${path}`, request: { method: method.toUpperCase(), header: operation.security?.length ? [{ key: 'Authorization', value: 'Bearer {{token}}', type: 'text' }] : [], url: { raw: `{{baseUrl}}${rawPath}`, host: ['{{baseUrl}}'], path: rawPath.split('/').filter(Boolean), query }, description: operation.description ?? operation.summary } }
+    return { name: `${method.toUpperCase()} ${path}`, request: { method: method.toUpperCase(), header: [], ...(operation.security?.length ? {} : { auth: { type: 'noauth' } }), url: { raw: `{{baseUrl}}${rawPath}`, host: ['{{baseUrl}}'], path: rawPath.split('/').filter(Boolean), query }, description: operation.description ?? operation.summary } }
   }))
-  return { info: { name: 'Sixxis Store API de Leitura v1', description: 'Coleção gerada; exemplos sintéticos.', schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json' }, variable: [{ key: 'baseUrl', value: 'https://SEU-DOMINIO.example', type: 'string' }, { key: 'token', value: '', type: 'string' }], auth: { type: 'bearer', bearer: [{ key: 'token', value: '{{token}}', type: 'string' }] }, item: items }
+  return { info: { name: 'Sixxis Store API de Leitura v1', description: 'Coleção gerada; exemplos sintéticos.', schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json' }, variable: [{ key: 'baseUrl', value: 'https://www.sixxis.com.br', type: 'string' }, { key: 'token', value: '', type: 'string' }], auth: { type: 'bearer', bearer: [{ key: 'token', value: '{{token}}', type: 'string' }] }, item: items }
 }
 
 export const documentedScopes = [...API_SCOPES]

@@ -7,7 +7,7 @@ function context(scopes: ApiIdentity['scopes']): ApiContext {
   return {
     requestId: 'req-registry',
     identity: { id: 'key-1', nome: 'test', prefixo: 'sxs_live_test', scopes, expiraEm: null },
-    ip: '127.0.0.1', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 0 },
+    ip: '127.0.0.1', startedAt: 0,
   }
 }
 

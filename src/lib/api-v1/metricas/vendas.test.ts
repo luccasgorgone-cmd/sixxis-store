@@ -5,7 +5,7 @@ import { parseMetricParams } from './tempo'
 import { createVendasMetric } from './vendas'
 
 const D = (value: string) => new Prisma.Decimal(value)
-const context = { requestId: 'req-metricas', identity: null, ip: '127.0.0.1', startedAt: 0, rateLimit: { success: true, limit: 600, remaining: 599, reset: 0 } } satisfies ApiContext
+const context = { requestId: 'req-metricas', identity: null, ip: '127.0.0.1', startedAt: 0 } satisfies ApiContext
 const params = parseMetricParams(new URLSearchParams({ de: '2026-11-16', ate: '2026-11-16', agrupar: 'dia' }))
 
 function saleRows() {
@@ -155,6 +155,23 @@ describe('metricas/vendas', () => {
     expect(result.periodo).toEqual({ de: '2026-11-16', ate: '2026-11-16', agrupar: 'dia' })
     expect(result.definicoes.receitaBruta).toContain('precoUnitario')
     expect(result.definicoes.lucroLiquidoConhecido).toContain('null')
+  })
+
+  it('keeps a multi-century daily window proportional to returned rows', async () => {
+    const [order] = saleRows()
+    const centuries = parseMetricParams(new URLSearchParams({ de: '1800-01-01', ate: '2200-12-31', agrupar: 'dia' }))
+    const { definition } = metric({ orders: [order], events: [] })
+
+    const result = await definition.query(context, centuries)
+
+    expect(result.serie).toEqual([{
+      bucket: '2026-11-16',
+      pedidosPagos: 1,
+      receitaBruta: '90.00',
+      receitaLiquidaComercial: '100.00',
+      lucroLiquidoConhecido: '45.00',
+      ticketMedio: '100.00',
+    }])
   })
 
   it('redacts PII accidentally entered in the free-form city field', async () => {

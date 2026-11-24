@@ -25,7 +25,6 @@ export type ApiContext = {
   identity: ApiIdentity | null
   ip: string
   startedAt: number
-  rateLimit: RateLimitResult
 }
 
 export type ListQuery = {

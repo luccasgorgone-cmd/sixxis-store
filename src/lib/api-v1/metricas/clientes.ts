@@ -2,7 +2,7 @@ import type { PrismaClient } from '@prisma/client'
 import { STATUS_PAGO_TODOS } from '../../pedido-status'
 import type { ApiContext } from '../types'
 import type { MetricDefinition, StoreMetricOptions } from './registry'
-import { API_METRIC_TAKE, averageMoney, boundedMetricRows, bucketForInstant, decimalValue, listMetricBuckets, metricBase, metricMoney, type MetricParams } from './tempo'
+import { API_METRIC_TAKE, averageMoney, boundedMetricRows, bucketForInstant, decimalValue, metricBase, metricMoney, sparseMetricBuckets, type MetricParams } from './tempo'
 
 type PaidOrder = { clienteId: string; total: unknown; createdAt: Date }
 
@@ -47,7 +47,7 @@ export function createClientesMetric(options: StoreMetricOptions = {}): MetricDe
         return !!first && first >= params.from && first < params.toExclusive
       }
       const novos = customerIds.filter(isNew).length
-      const series = new Map(listMetricBuckets(params).map(bucket => [bucket, { bucket, clientesCompradores: 0, novos: 0, recorrentes: 0 }]))
+      const series = sparseMetricBuckets(params, bucket => ({ bucket, clientesCompradores: 0, novos: 0, recorrentes: 0 }))
       const buyersByBucket = new Map<string, Set<string>>()
       for (const order of periodOrders) {
         const bucket = bucketForInstant(order.createdAt, params.agrupar)
@@ -56,7 +56,7 @@ export function createClientesMetric(options: StoreMetricOptions = {}): MetricDe
         buyersByBucket.set(bucket, buyers)
       }
       for (const [bucketName, buyers] of buyersByBucket) {
-        const bucket = series.get(bucketName)!
+        const bucket = series.named(bucketName)
         for (const customerId of buyers) {
           bucket.clientesCompradores += 1
           if (isNew(customerId) && bucketForInstant(firstPaid.get(customerId)!, params.agrupar) === bucketName) bucket.novos += 1
@@ -78,7 +78,7 @@ export function createClientesMetric(options: StoreMetricOptions = {}): MetricDe
           ltvMedio: averageMoney(historicalRevenue, customerIds.length),
           receitaHistorica: metricMoney(historicalRevenue),
         },
-        serie: [...series.values()],
+        serie: series.values(),
       }
     },
   }

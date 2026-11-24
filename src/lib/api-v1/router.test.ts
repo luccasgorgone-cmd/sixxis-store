@@ -12,13 +12,22 @@ const identity = (scopes: ApiIdentity['scopes'] = new Set(['read:all'])): ApiIde
   nome: 'Programa externo',
   prefixo: 'sxs_live_safe_pref',
   scopes,
-  expiraEm: new Date('2027-01-01T00:00:00.000Z'),
+  expiraEm: null,
 })
 
 function pipelineDeps(currentIdentity = identity()) {
   return {
+    reserveAuthFailure: vi.fn().mockResolvedValue({ success: true, limit: 60, remaining: 59, reset: Date.now() + 60_000 }),
+    refundAuthFailure: vi.fn().mockResolvedValue(undefined),
+    activeDigests: {
+      lookup: vi.fn().mockResolvedValue({ state: 'active', identity: currentIdentity }),
+      add: vi.fn().mockResolvedValue(undefined),
+      reject: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
+      withDigestLock: vi.fn(async (_digest: string, work: () => Promise<unknown>) => work()),
+    },
+    fingerprint: vi.fn().mockReturnValue('trusted'),
     authenticate: vi.fn().mockResolvedValue(currentIdentity),
-    rateLimit: vi.fn().mockResolvedValue({ success: true, limit: 600, remaining: 599, reset: Date.parse('2026-11-16T20:01:00.000Z') }),
     audit: vi.fn().mockResolvedValue(undefined),
     lastUsed: vi.fn().mockResolvedValue(undefined),
   }
@@ -170,13 +179,12 @@ describe('public API v1 routes', () => {
 })
 
 describe('authenticated dispatcher', () => {
-  it('returns /me without id, hash or IP and includes scopes, expiry and rate limit', async () => {
+  it('returns /me with a non-expiring contract and no quota balance', async () => {
     const response = await routeApiV1(request('/me'), ['me'], deps())
     expect(response.status).toBe(200)
     const body = await json<{ data: Record<string, unknown> }>(response)
     expect(body.data).toEqual({
-      nome: 'Programa externo', prefixo: 'sxs_live_safe_pref', escopos: ['read:all'], expiraEm: '2027-01-01T00:00:00.000Z',
-      rateLimit: { limit: 600, remaining: 599, reset: 1794859260 },
+      nome: 'Programa externo', prefixo: 'sxs_live_safe_pref', escopos: ['read:all'], expiraEm: null, semLimite: true,
     })
     expect(JSON.stringify(body)).not.toMatch(/hash|ultimoIp|\"ip\"|key-id/i)
     expectSafeHeaders(response)
@@ -208,11 +216,29 @@ describe('authenticated dispatcher', () => {
     expect(peak).toBe(2)
     expect(body.data).toHaveLength(9)
     expect(body.data[0]).toMatchObject({ slug: 'produto-0', model: 'Produto0', scope: 'read:catalogo', count: 0, ultimaAtualizacao: '2026-11-16T12:00:00.000Z' })
-    expect(body.data[0].sync).toEqual({ sort: 'updatedAt', watermarkField: 'updatedAt', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 })
+    expect(body.data[0].sync).toEqual({ sort: 'updatedAt', watermarkField: 'updatedAt', watermarkFormat: 'date-time', from: 'atualizadoDesde', to: 'atualizadoAte', maxDays: null, maxLimit: 500 })
     expect(body.data[0].fields.map((field: { name: string }) => field.name)).toEqual(['id', 'nome', 'updatedAt'])
     expect(body.data[0].expands).toEqual([])
     expect(JSON.stringify(body)).not.toContain('read:financeiro')
     expect(JSON.stringify(body)).not.toContain('read:analytics')
+  })
+
+  it('advertises the strict watermark format from the selected resource clock', async () => {
+    const daily = rowResource({
+      slug: 'metricas-diarias',
+      scalarFields: ['id', 'dia'],
+      fields: [{ name: 'id', type: 'string' }, { name: 'dia', type: 'string', format: 'date' }],
+      select: { id: true, dia: true },
+      sorts: ['id', 'dia'],
+      defaultSort: 'dia',
+      dateFields: { created: 'dia' },
+    })
+    const response = await routeApiV1(request('/meta/recursos'), ['meta', 'recursos'], deps({
+      resources: createResourceRegistry([daily]),
+    }))
+    const body = await json<{ data: Array<{ sync: Record<string, unknown> }> }>(response)
+
+    expect(body.data[0].sync).toMatchObject({ watermarkField: 'dia', watermarkFormat: 'date' })
   })
 
   it('collapses concurrent metadata requests with the same registry and scopes', async () => {
@@ -287,20 +313,20 @@ describe('authenticated dispatcher', () => {
     expect(resource.adapter.findFirst).toHaveBeenCalledOnce()
   })
 
-  it('applies a stricter distributed quota before running an expensive metric', async () => {
+  it('never rate-limits a valid key after more than 10 metric requests', async () => {
     const metricQuery = vi.fn().mockResolvedValue({ tracked: true })
-    const metricRateLimit = vi.fn().mockResolvedValue({ success: false, limit: 10, remaining: 0, reset: Date.now() + 60_000 })
+    let attempts = 0
+    const metricRateLimit = vi.fn().mockImplementation(async () => ({ success: ++attempts <= 10, limit: 10, remaining: Math.max(0, 10 - attempts), reset: Date.now() + 60_000 }))
     const current = deps({
       metrics: createMetricRegistry([{ slug: 'funil', scope: 'read:analytics', schema: { type: 'object' }, query: metricQuery }]),
       metricRateLimit,
     } as never)
-    const response = await routeApiV1(request('/metricas/funil?de=2026-11-16&ate=2026-11-16&agrupar=dia'), ['metricas', 'funil'], current)
-    expect(response.status).toBe(429)
-    expect(response.headers.get('x-ratelimit-limit')).toBe('10')
-    expect(response.headers.get('x-ratelimit-remaining')).toBe('0')
-    expect(Number(response.headers.get('x-ratelimit-reset'))).toBeGreaterThan(Math.floor(Date.now() / 1000))
-    expect(metricRateLimit).toHaveBeenCalledWith('key-id')
-    expect(metricQuery).not.toHaveBeenCalled()
+    const statuses: number[] = []
+    for (let index = 0; index < 11; index += 1) statuses.push((await routeApiV1(request('/metricas/funil?de=2026-11-16&ate=2026-11-16&agrupar=dia'), ['metricas', 'funil'], current)).status)
+
+    expect(statuses).toEqual(Array(11).fill(200))
+    expect(metricRateLimit).not.toHaveBeenCalled()
+    expect(metricQuery).toHaveBeenCalledTimes(11)
   })
 
   it('returns RFC 404 for a missing item and 400 for unsupported item query parameters', async () => {
@@ -320,6 +346,7 @@ describe('authenticated dispatcher', () => {
     const response = await routeApiV1(request('/constructor/private-id'), ['constructor', 'private-id'], deps({ resources: createResourceRegistry([resource]), pipelineDeps: pipeline }))
     expect(response.status).toBe(404)
     expect(pipeline.authenticate).toHaveBeenCalledOnce()
+    expect(pipeline.activeDigests.lookup).toHaveBeenCalledOnce()
     expect(resource.adapter.findMany).not.toHaveBeenCalled()
     expect(resource.adapter.findFirst).not.toHaveBeenCalled()
   })
@@ -426,7 +453,6 @@ describe('store registry and Next route integration', () => {
     const definition = resources.get('configuracoes')!
     const result = await definition.countAndLastUpdate!({
       requestId: 'request-id', identity: identity(new Set(['read:configuracoes'])), ip: 'unknown', startedAt: 0,
-      rateLimit: { success: true, limit: 600, remaining: 599, reset: 0 },
     })
     expect(result).toEqual({ count: 2, ultimaAtualizacao: '2026-11-16T12:00:00.000Z' })
     expect(count.mock.calls[0][0].where.chave.in).toContain('loja_nome')

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ApiQueryError } from '../query'
-import { bucketForInstant, listMetricBuckets, parseMetricParams } from './tempo'
+import { bucketForInstant, parseMetricParams } from './tempo'
 
 describe('metric time contract', () => {
   it('turns inclusive BRT civil dates into exact UTC query boundaries', () => {
@@ -26,11 +26,10 @@ describe('metric time contract', () => {
     expect(sunday).toBe('2026-11-16')
   })
 
-  it('allows exactly 366 inclusive civil days and rejects the 367th before queries', () => {
-    const max = parseMetricParams(new URLSearchParams({ de: '2024-01-01', ate: '2024-12-31', agrupar: 'mes' }))
+  it('accepts chronological metric windows longer than 366 civil days', () => {
+    const long = parseMetricParams(new URLSearchParams({ de: '2024-01-01', ate: '2025-01-01', agrupar: 'mes' }))
 
-    expect(listMetricBuckets(max)).toHaveLength(12)
-    expect(() => parseMetricParams(new URLSearchParams({ de: '2024-01-01', ate: '2025-01-01', agrupar: 'dia' }))).toThrow(ApiQueryError)
+    expect(long.periodo).toEqual({ de: '2024-01-01', ate: '2025-01-01', agrupar: 'mes' })
   })
 
   it.each([
