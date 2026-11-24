@@ -42,6 +42,15 @@ export function gravarConsentClient(c: ConsentCategorias) {
   if (typeof document === 'undefined') return
   const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
   document.cookie = `${CONSENT_COOKIE}=${serializeConsent(c)}; path=/; max-age=${UM_ANO}; SameSite=Lax${secure}`
+  // Avisa as outras abas na hora, inclusive as em segundo plano (o CONSENT_EVENT
+  // só vale para esta aba).
+  try {
+    const canal = new BroadcastChannel(CONSENT_CHANNEL)
+    canal.postMessage('mudou')
+    canal.close()
+  } catch {
+    // navegador sem BroadcastChannel: as outras abas ressincronizam ao voltar
+  }
 }
 
 export function analyticsConsentido(): boolean {
@@ -57,3 +66,5 @@ export function marketingConsentido(): boolean {
 
 // Evento p/ avisar componentes (ex.: TrackingProvider) que o consentimento mudou.
 export const CONSENT_EVENT = 'sixxis-consent-changed'
+// Canal entre abas do mesmo site, publicado a cada gravação do cookie.
+export const CONSENT_CHANNEL = 'sixxis-consent'
