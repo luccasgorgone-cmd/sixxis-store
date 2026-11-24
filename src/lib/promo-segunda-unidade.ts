@@ -40,6 +40,11 @@ export interface ConfigPromoBF {
   /**
    * SKUs e/ou slugs que NÃO participam da promo (nem descontam nem contam no
    * pareamento). Hook de margem — vazio por padrão (regra pura "site inteiro").
+   * Um SKU de produto aqui exclui TAMBÉM as variações dele cujo SKU segue o
+   * padrão `<SKU do produto>-<sufixo>` (ex.: CLIM-SX200-PRIME → -Branco/-Preto),
+   * porque o item do carrinho guarda o SKU da variação, não o do produto.
+   * Variação com SKU fora desse padrão (ex.: SPN-LIFEBRA-SX) precisa ser listada
+   * explicitamente.
    */
   excluir: readonly string[]
   /** Piso de preço: unidades abaixo deste valor não participam (0 = sem piso). */
@@ -56,7 +61,8 @@ export const PROMO_BF: ConfigPromoBF = {
   descricao:          '2ª unidade com 50% OFF — Black Friday',
   // 23/11/2026 (pedido do Luccas): SX200 Prime fora da promo da 2ª unidade
   // (único produto excluído). Lista sku E slug para cobrir desconto E badge
-  // (feedId = sku ?? slug).
+  // (feedId = sku ?? slug). As variações CLIM-SX200-PRIME-Branco/-Preto (que é o
+  // que o carrinho guarda) caem pela regra do SKU-base — ver `excluido()`.
   excluir:            ['CLIM-SX200-PRIME', 'sx200-prime'],
   pisoItemDescontado: 0,
 }
@@ -81,11 +87,25 @@ export function promoAtiva(agora: Date = new Date()): boolean {
   return true
 }
 
-/** Um identificador (sku/slug/feedId) está excluído da promo? */
+/**
+ * Um identificador (sku/slug/feedId/SKU de variação) está excluído da promo?
+ * FONTE ÚNICA da exclusão para carrinho, drawer, checkout, selo e /api/pedidos.
+ * Casa o id exato OU uma variação do excluído (`<excluído>-<sufixo>`): o cliente
+ * só conhece o `feedId` do item, que para variação precificada é o SKU da
+ * variação (CLIM-SX200-PRIME-Branco). Sem isto o carrinho mostrava o desconto
+ * que o servidor não dá (24/11/2026). O hífen evita falso positivo de prefixo
+ * (CLIM-SX200-PRIME não casa CLIM-SX200-PRIMEX).
+ */
+export function idExcluidoDaPromo(id: string | null | undefined): boolean {
+  if (id == null) return false
+  const alvo = id.trim()
+  if (!alvo) return false
+  return PROMO_BF.excluir.some((e) => alvo === e || alvo.startsWith(e + '-'))
+}
+
 function excluido(identificadores: Array<string | null | undefined>): boolean {
   if (PROMO_BF.excluir.length === 0) return false
-  const set = new Set(PROMO_BF.excluir)
-  return identificadores.some((id) => id != null && set.has(id))
+  return identificadores.some(idExcluidoDaPromo)
 }
 
 /** Badge amigável para a PDP/vitrine quando a promo está ativa (ou null). */
@@ -165,7 +185,8 @@ function expandir<T extends { preco: number; quantidade: number; ids: Array<stri
 
 /**
  * SERVIDOR (autoritativo). Itens já resolvidos: `precoUnitario` é o preço efetivo
- * (precoPromocional/variação). `sku`/`slug` opcionais para a exclusão de margem.
+ * (precoPromocional/variação). `sku`/`slug` (do produto) e `skuVariacao` (da
+ * variação escolhida) são os ids usados na exclusão de margem.
  */
 export function calcularPromoServidor(
   itens: Array<{
@@ -174,12 +195,15 @@ export function calcularPromoServidor(
     quantidade: number
     sku?: string | null
     slug?: string | null
+    skuVariacao?: string | null
   }>,
   agora: Date = new Date(),
 ): ResultadoPromo {
   if (!promoAtiva(agora)) return { ativo: false, desconto: 0, unidadesComDesconto: 0, descricao: null }
   return aplicarGlobal(
-    expandir(itens.map((i) => ({ preco: i.precoUnitario, quantidade: i.quantidade, ids: [i.sku, i.slug] }))),
+    expandir(
+      itens.map((i) => ({ preco: i.precoUnitario, quantidade: i.quantidade, ids: [i.sku, i.slug, i.skuVariacao] })),
+    ),
   )
 }
 

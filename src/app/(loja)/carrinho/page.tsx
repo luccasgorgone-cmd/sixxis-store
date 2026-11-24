@@ -13,6 +13,7 @@ import {
 } from '@/lib/preco-cupom'
 import { calcularPromoCliente } from '@/lib/promo-segunda-unidade'
 import { useCarrinho } from '@/hooks/useCarrinho'
+import { type CarrinhoItem, normalizeZustandItem, toZustandItem } from '@/lib/carrinho-pagina'
 import { validarCupomRemoto } from '@/lib/cupom-client'
 import { useRevalidarCupomPersistido } from '@/hooks/useRevalidarCupom'
 import UsarCashback from '@/components/checkout/UsarCashback'
@@ -24,60 +25,9 @@ import {
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import { precoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 
-// ─── TIPOS ───────────────────────────────────────────────────
-interface CarrinhoItem {
-  id: string
-  produtoId?: string
-  nome: string
-  slug: string
-  // g:id do feed (sku ?? slug) — usado p/ casar a promo "2ª unidade" na exibição.
-  feedId?: string
-  preco: number
-  precoPromocional?: number
-  imagem?: string
-  variacao?: string
-  quantidade: number
-}
-
 // ─── HELPER ──────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 })
-
-// Normaliza item do formato Zustand persist → CarrinhoItem
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeZustandItem(i: any): CarrinhoItem {
-  const idBase = String(i.produtoId || i.id || '')
-  const varSuffix = i.variacaoId ? `-${i.variacaoId}` : ''
-  return {
-    id: (i.id && !i.produtoId) ? i.id : idBase + varSuffix,
-    produtoId: i.produtoId || i.id,
-    nome: i.nome || '',
-    slug: i.slug || i.produtoId || i.id || '',
-    feedId: i.feedId,
-    preco: i.precoOriginal ?? i.preco ?? 0,
-    precoPromocional: i.precoOriginal ? (i.preco ?? undefined) : i.precoPromocional,
-    imagem: i.imagem,
-    variacao: i.variacaoNome || i.variacaoId || i.variacao,
-    quantidade: i.quantidade ?? 1,
-  }
-}
-
-// Converte CarrinhoItem → formato Zustand persist (para drawer funcionar)
-function toZustandItem(i: CarrinhoItem) {
-  return {
-    id: i.id,
-    produtoId: i.produtoId || i.id,
-    nome: i.nome,
-    slug: i.slug,
-    preco: i.precoPromocional ?? i.preco,
-    precoOriginal: i.precoPromocional ? i.preco : undefined,
-    precoPromocional: i.precoPromocional,
-    quantidade: i.quantidade,
-    imagem: i.imagem,
-    variacaoNome: i.variacao,
-    variacaoId: undefined as string | undefined,
-  }
-}
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────
 export default function CarrinhoPage() {
@@ -157,14 +107,12 @@ export default function CarrinhoPage() {
   }, [])
 
   // ── SALVAR CARRINHO ───────────────────────────────────────
-  // Escreve em formato Zustand persist para manter o drawer em sincronia
+  // Grava pelo PRÓPRIO store (o persist escreve o localStorage preservando cupom
+  // e cashback). Escrever o localStorage à mão deixava o drawer/checkout com a
+  // quantidade antiga em memória e apagava variacaoId/feedId/cupom do item.
   const salvarCarrinho = useCallback((novosItens: CarrinhoItem[]) => {
     setItens(novosItens)
-    const zustandData = {
-      state: { itens: novosItens.map(toZustandItem) },
-      version: 0,
-    }
-    localStorage.setItem('sixxis-carrinho', JSON.stringify(zustandData))
+    useCarrinho.setState({ itens: novosItens.map(toZustandItem) })
     window.dispatchEvent(new Event('carrinho-atualizado'))
   }, [])
 

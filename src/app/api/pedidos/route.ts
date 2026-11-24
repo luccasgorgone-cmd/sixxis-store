@@ -274,6 +274,7 @@ export async function POST(request: NextRequest) {
         quantidade:    i.quantidade,
         sku:           p.sku,
         slug:          p.slug,
+        skuVariacao:   i.variacaoId ? (p.variacoes.find((v) => v.id === i.variacaoId)?.sku ?? null) : null,
       }
     }),
   )
