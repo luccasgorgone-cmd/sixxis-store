@@ -35,7 +35,7 @@ interface Climatizador {
 
 const CLIMATIZADORES: Climatizador[] = [
   { slug: 'm45-trend',   nome: 'Climatizador M45 Trend',   modelo: 'M45 Trend',   w: 180,  area: 45,  vazao: 5500,  tanque: 45,  ruido: 'abaixo de 60 dB', contexto: 'quarto, escritório home-office ou sala pequena' },
-  { slug: 'sx040',       nome: 'Climatizador SX040',       modelo: 'SX040',       w: 180,  area: 50,  vazao: 5500,  tanque: 45,  ruido: 'abaixo de 60 dB', contexto: 'quarto, escritório home-office ou sala pequena' },
+  { slug: 'sx040',       nome: 'Climatizador SX040',       modelo: 'SX040',       w: 180,  area: 45,  vazao: 5500,  tanque: 45,  ruido: 'abaixo de 60 dB', contexto: 'quarto, escritório home-office ou sala pequena' },
   { slug: 'sx060-prime', nome: 'Climatizador SX060 Prime', modelo: 'SX060 Prime', w: 125,  area: 60,  vazao: 6000,  tanque: 60,  ruido: 'abaixo de 60 dB', contexto: 'sala + cozinha integradas ou quarto master' },
   { slug: 'sx070-trend', nome: 'Climatizador SX070 Trend', modelo: 'SX070 Trend', w: 280,  area: 70,  vazao: 8000,  tanque: 70,  ruido: '60 dB', contexto: 'sala + cozinha integradas ou quarto master' },
   { slug: 'sx100-trend', nome: 'Climatizador SX100 Trend', modelo: 'SX100 Trend', w: 400,  area: 120, vazao: 12000, tanque: 100, ruido: '60 dB', contexto: 'salão comercial, oficina ou área gourmet' },

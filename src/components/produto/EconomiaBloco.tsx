@@ -11,7 +11,7 @@ import { TrendingDown, AirVent, Wind, Zap, BadgeCheck } from 'lucide-react'
 //   descricaoAC: rótulo curto do AC nos cards/tabela
 const AC_POR_MODELO: Record<string, { area: number; wattsAC: number; setup: string; descricaoAC: string }> = {
   'm45-trend':   { area: 45,  wattsAC: 2900,  setup: '1× ar-condicionado 30.000 BTU',                 descricaoAC: '1× 30.000 BTU' },
-  'sx040':       { area: 50,  wattsAC: 2900,  setup: '1× ar-condicionado 30.000 BTU',                 descricaoAC: '1× 30.000 BTU' },
+  'sx040':       { area: 45,  wattsAC: 2900,  setup: '1× ar-condicionado 30.000 BTU',                 descricaoAC: '1× 30.000 BTU' },
   'sx060-prime': { area: 60,  wattsAC: 3770,  setup: '1× ar-condicionado 30.000 BTU + 1× 9.000 BTU',  descricaoAC: '30.000 + 9.000 BTU' },
   'sx070-trend': { area: 70,  wattsAC: 4050,  setup: '1× ar-condicionado 30.000 BTU + 1× 12.000 BTU', descricaoAC: '30.000 + 12.000 BTU' },
   'sx100-trend': { area: 120, wattsAC: 6950,  setup: '2× ar-condicionado 30.000 BTU + 1× 12.000 BTU', descricaoAC: '2× 30.000 + 12.000 BTU' },
