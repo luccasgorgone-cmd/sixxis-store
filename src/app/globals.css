@@ -147,16 +147,23 @@ main {
      de 1 linha não fica com linha vazia, e os cards continuam alinhados. Fora de
      uma `.grade-cards` (carrossel do tablet) nada disto se aplica e o card segue
      em coluna flex, com o título reservando 2 linhas. */
+  /* A coluna precisa de minmax(0, 1fr): uma coluna implícita `auto` cresce até o
+     maior conteúdo que não quebra (preço, linhas com truncate) e passava da borda
+     do card em 640-740 px e ~800 px, cortando favoritar e botões. */
   .grade-cards > .card-produto {
     grid-row: span 5;
     display: grid;
     grid-template-rows: subgrid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
     row-gap: 0;
   }
   .grade-cards > .card-produto > article {
     grid-row: span 5;
     display: grid;
     grid-template-rows: subgrid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
     row-gap: 0;
   }
   .grade-cards > .card-produto .card-titulo {
