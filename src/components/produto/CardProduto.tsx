@@ -356,7 +356,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
           </div>
 
           {/* Comprar Agora primeiro. Com variação, o clique abre o modal de escolha. */}
-          <div className="mt-auto space-y-2 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+          <div className="@container mt-auto space-y-2 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
             {!esgotado && (
               <button
                 onClick={handleComprarAgora}
@@ -378,7 +378,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               }`}
             >
               <span className="whitespace-nowrap">
-                {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : (<>Adicionar<span className="hidden min-[420px]:inline"> ao Carrinho</span></>)}
+                {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : (<>Adicionar<span className="hidden @[11rem]:inline"> ao Carrinho</span></>)}
               </span>
             </button>
 
