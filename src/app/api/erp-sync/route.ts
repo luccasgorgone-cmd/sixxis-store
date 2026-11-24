@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { aplicarMarkupSite } from '@/lib/preco-markup'
+import { precoCongeladoNoSync } from '@/lib/preco-freeze'
 import { z } from 'zod'
 
 const produtoSyncSchema = z.object({
@@ -37,6 +38,12 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Payload inválido', details: parsed.error.flatten() }, { status: 400 })
   }
 
+  // Freeze de preço na janela de BF: o preço da loja é autoritativo (base
+  // revertido, −15% aspirador gravado por migration, promos manuais). Com o
+  // freeze ligado o import atualiza tudo em produtos JÁ EXISTENTES menos o preço;
+  // produtos novos (create) ainda recebem preço. Ver lib/preco-freeze.
+  const congelarPreco = precoCongeladoNoSync()
+
   const resultados = await Promise.allSettled(
     parsed.data.produtos.map((p) => {
       // O ERP envia o preço BASE; o site vende com +20% (markup). Reaplicamos o
@@ -50,8 +57,8 @@ export async function POST(request: NextRequest) {
           nome: p.nome,
           slug: p.slug,
           descricao: p.descricao,
-          preco,
-          precoPromocional,
+          // preço só é sobrescrito fora do freeze de BF (ver congelarPreco).
+          ...(congelarPreco ? {} : { preco, precoPromocional }),
           imagens: p.imagens,
           estoque: p.estoque,
           categoria: p.categoria,
@@ -78,5 +85,5 @@ export async function POST(request: NextRequest) {
   const sucessos = resultados.filter((r) => r.status === 'fulfilled').length
   const falhas = resultados.filter((r) => r.status === 'rejected').length
 
-  return Response.json({ sincronizados: sucessos, falhas })
+  return Response.json({ sincronizados: sucessos, falhas, precoCongelado: congelarPreco })
 }
