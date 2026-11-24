@@ -268,7 +268,7 @@ export default async function HomePage() {
                   <div
                     aria-hidden
                     className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to bottom, rgba(15,46,43,0.28) 0%, rgba(15,46,43,0.45) 55%, rgba(15,46,43,0.68) 100%)' }}
+                    style={{ background: 'linear-gradient(to bottom, rgba(8,20,18,0.5) 0%, rgba(8,20,18,0.68) 55%, rgba(8,20,18,0.82) 100%)' }}
                   />
                   <div className="relative z-10" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.55)' }}>
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black/30 ring-1 ring-white/20 backdrop-blur-sm flex items-center justify-center mb-3 sm:mb-5 mx-auto">

@@ -39,12 +39,12 @@ export default function NewsletterForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Seu melhor e-mail"
-        className="flex-1 text-white placeholder-white/60 border border-white/15 px-5 py-3.5 rounded-xl outline-none text-sm font-medium focus:ring-2 focus:ring-sx-accent"
+        className="min-w-0 flex-1 rounded-lg border border-sx-line px-4 py-3 text-sm font-medium text-sx-text outline-none placeholder:text-sx-subtle focus:border-sx-accent-text focus:ring-2 focus:ring-sx-accent/30"
         style={{ backgroundColor: 'var(--sx-surface)' }}
       />
       <button
         type="submit"
-        className="text-[#032E28] font-bold px-5 py-2.5 rounded-xl text-sm transition-colors shrink-0 hover:opacity-90"
+        className="h-12 shrink-0 rounded-lg px-6 text-sm font-bold text-sx-ink transition-colors hover:opacity-90"
         style={{ backgroundColor: 'var(--sx-accent)' }}
       >
         Cadastrar
