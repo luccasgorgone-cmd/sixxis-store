@@ -25,7 +25,8 @@ const LINHAS_COMPARACAO: Record<string, { rotulo: string; termos: string[] }[]> 
   climatizadores: [
     { rotulo: 'Reservatório', termos: ['capacidade'] },
     { rotulo: 'Vazão de ar', termos: ['vazão'] },
-    { rotulo: 'Cobertura', termos: ['cobertura'] },
+    // 'área' cobre fichas antigas com o rótulo "Área Recomendada" (SX040).
+    { rotulo: 'Cobertura', termos: ['cobertura', 'área'] },
     { rotulo: 'Potência', termos: ['potência'] },
     { rotulo: 'Velocidades', termos: ['velocidades'] },
   ],

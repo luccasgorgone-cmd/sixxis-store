@@ -29,19 +29,19 @@ interface Climatizador {
   area: number
   vazao: number
   tanque: number
-  dB: number
+  ruido: string // igual à ficha técnica do produto
   contexto: string
 }
 
 const CLIMATIZADORES: Climatizador[] = [
-  { slug: 'm45-trend',   nome: 'Climatizador M45 Trend',   modelo: 'M45 Trend',   w: 180,  area: 45,  vazao: 5500,  tanque: 45,  dB: 55, contexto: 'quarto, escritório home-office ou sala pequena' },
-  { slug: 'sx040',       nome: 'Climatizador SX040',       modelo: 'SX040',       w: 180,  area: 45,  vazao: 5500,  tanque: 45,  dB: 55, contexto: 'quarto, escritório home-office ou sala pequena' },
-  { slug: 'sx060-prime', nome: 'Climatizador SX060 Prime', modelo: 'SX060 Prime', w: 350,  area: 60,  vazao: 8500,  tanque: 60,  dB: 58, contexto: 'sala + cozinha integradas ou quarto master' },
-  { slug: 'sx070-trend', nome: 'Climatizador SX070 Trend', modelo: 'SX070 Trend', w: 280,  area: 70,  vazao: 9500,  tanque: 70,  dB: 58, contexto: 'sala + cozinha integradas ou quarto master' },
-  { slug: 'sx100-trend', nome: 'Climatizador SX100 Trend', modelo: 'SX100 Trend', w: 400,  area: 120, vazao: 12000, tanque: 100, dB: 62, contexto: 'salão comercial, oficina ou área gourmet' },
-  { slug: 'sx120-prime', nome: 'Climatizador SX120 Prime', modelo: 'SX120 Prime', w: 500,  area: 120, vazao: 14000, tanque: 120, dB: 62, contexto: 'salão comercial, oficina ou área gourmet' },
-  { slug: 'sx200-trend', nome: 'Climatizador SX200 Trend', modelo: 'SX200 Trend', w: 750,  area: 200, vazao: 20000, tanque: 175, dB: 65, contexto: 'galpão, indústria, academia ou espaço amplo com pé-direito alto' },
-  { slug: 'sx200-prime', nome: 'Climatizador SX200 Prime', modelo: 'SX200 Prime', w: 1100, area: 200, vazao: 24000, tanque: 200, dB: 65, contexto: 'galpão, indústria, academia ou espaço amplo com pé-direito alto' },
+  { slug: 'm45-trend',   nome: 'Climatizador M45 Trend',   modelo: 'M45 Trend',   w: 180,  area: 45,  vazao: 5500,  tanque: 45,  ruido: 'abaixo de 60 dB', contexto: 'quarto, escritório home-office ou sala pequena' },
+  { slug: 'sx040',       nome: 'Climatizador SX040',       modelo: 'SX040',       w: 180,  area: 50,  vazao: 5500,  tanque: 45,  ruido: 'abaixo de 60 dB', contexto: 'quarto, escritório home-office ou sala pequena' },
+  { slug: 'sx060-prime', nome: 'Climatizador SX060 Prime', modelo: 'SX060 Prime', w: 125,  area: 60,  vazao: 6000,  tanque: 60,  ruido: 'abaixo de 60 dB', contexto: 'sala + cozinha integradas ou quarto master' },
+  { slug: 'sx070-trend', nome: 'Climatizador SX070 Trend', modelo: 'SX070 Trend', w: 280,  area: 70,  vazao: 8000,  tanque: 70,  ruido: '60 dB', contexto: 'sala + cozinha integradas ou quarto master' },
+  { slug: 'sx100-trend', nome: 'Climatizador SX100 Trend', modelo: 'SX100 Trend', w: 400,  area: 120, vazao: 12000, tanque: 100, ruido: '60 dB', contexto: 'salão comercial, oficina ou área gourmet' },
+  { slug: 'sx120-prime', nome: 'Climatizador SX120 Prime', modelo: 'SX120 Prime', w: 450,  area: 140, vazao: 14000, tanque: 120, ruido: '60 dB', contexto: 'salão comercial, oficina ou área gourmet' },
+  { slug: 'sx200-trend', nome: 'Climatizador SX200 Trend', modelo: 'SX200 Trend', w: 750,  area: 200, vazao: 20000, tanque: 175, ruido: '60 dB', contexto: 'galpão, indústria, academia ou espaço amplo com pé-direito alto' },
+  { slug: 'sx200-prime', nome: 'Climatizador SX200 Prime', modelo: 'SX200 Prime', w: 1100, area: 250, vazao: 25000, tanque: 200, ruido: '60 dB', contexto: 'galpão, indústria, academia ou espaço amplo com pé-direito alto' },
 ]
 
 function htmlClimatizador(c: Climatizador): string {
@@ -69,16 +69,16 @@ function htmlClimatizador(c: Climatizador): string {
   <p>Zero obra. Zero instalação profissional. Ligue na tomada e pronto — você já está refrescando o ambiente. Rodízios nas quatro rodas para mover de cômodo em cômodo.</p>
 
   <h4>Até ${c.area} m² de cobertura</h4>
-  <p>Tecnologia de vazão de ar de ${c.vazao} m³/h e reservatório de ${c.tanque} litros para horas de uso contínuo. Perfeito para ${c.contexto}.</p>
+  <p>Tecnologia de vazão de ar de ${c.vazao.toLocaleString('pt-BR')} m³/h e reservatório de ${c.tanque} litros para horas de uso contínuo. Perfeito para ${c.contexto}.</p>
 </section>
 
 <section>
   <h3>Características técnicas</h3>
   <ul>
     <li>Potência: ${c.w} W</li>
-    <li>Vazão de ar: ${c.vazao} m³/h</li>
+    <li>Vazão de ar: ${c.vazao.toLocaleString('pt-BR')} m³/h</li>
     <li>Capacidade do tanque: ${c.tanque} L</li>
-    <li>Nível de ruído: abaixo de ${c.dB} dB (mais silencioso que uma geladeira)</li>
+    <li>Nível de ruído: ${c.ruido}</li>
     <li>3 velocidades + oscilação vertical automática</li>
     <li>Controle remoto incluso</li>
     <li>Voltagem: 110V ou 220V</li>
