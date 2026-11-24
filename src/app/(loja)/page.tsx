@@ -9,7 +9,6 @@ import NewsletterForm from '@/components/layout/NewsletterForm'
 import BannerCarousel from '@/components/layout/BannerCarousel'
 import TrustBar from '@/components/layout/TrustBar'
 import AnnouncementBar from '@/components/layout/AnnouncementBar'
-import Depoimentos from '@/components/home/Depoimentos'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
@@ -283,9 +282,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── 6. Depoimentos (O que nossos clientes dizem) ──────────── */}
-      <Depoimentos />
 
       <SuporteSixxis
         whatsappVendas={cfg.social_whatsapp || '5518997474701'}
