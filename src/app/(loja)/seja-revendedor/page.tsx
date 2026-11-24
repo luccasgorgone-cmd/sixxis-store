@@ -207,7 +207,7 @@ export default function SejaRevendedorPage() {
       texto: 'Adicionamos as bikes spinning Sixxis ao catálogo e o resultado foi imediato. Qualidade de equipamento profissional a um preço acessível — os clientes percebem o valor. Em menos de 6 meses, as bikes já representam 20% das vendas de fitness.',
       crescimento: '20% das vendas',
       avatarInicial: 'L',
-      avatarCor: 'var(--sx-accent)',
+      avatarCor: 'var(--sx-accent-text)',
       destaque: false
     },
   ]

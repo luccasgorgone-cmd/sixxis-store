@@ -110,7 +110,7 @@ export default function PerfilPage() {
 
         {/* Header */}
         <div
-          className="px-6 pt-6 pb-8 relative overflow-hidden"
+          className="sx-escuro px-6 pt-6 pb-8 relative overflow-hidden"
           style={{
             background:
               NIVEIS_CONFIG[nivelAtual]?.corBanner ||

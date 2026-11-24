@@ -174,7 +174,7 @@ export default function GaleriaCB({ itens, nome }: Props) {
                   <button
                     key={i}
                     onClick={() => setAtivo(i)}
-                    className={`rounded-full transition-all duration-200 ${
+                    className={`!min-h-0 rounded-full transition-all duration-200 ${
                       i === ativo
                         ? 'w-5 h-2 bg-[#0f2e2b] shadow'
                         : 'w-2 h-2 bg-[#0f2e2b]/40 hover:bg-[#0f2e2b]/70'

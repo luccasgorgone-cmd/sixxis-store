@@ -88,12 +88,12 @@ function SearchBar({ className = '' }: { className?: string }) {
         />
         <button
           type="submit"
-          className="bg-sx-accent hover:bg-sx-accent-hover px-3 md:px-5 flex items-center justify-center transition shrink-0"
+          className="!min-h-0 h-full w-11 md:w-auto bg-sx-accent hover:bg-sx-accent-hover md:px-5 flex items-center justify-center transition shrink-0"
           aria-label="Buscar"
         >
           {carregando
-            ? <span className="w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            : <Search size={16} className="text-white" />
+            ? <span className="w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-sx-ink/30 border-t-sx-ink rounded-full animate-spin" />
+            : <Search size={16} className="text-sx-ink" />
           }
         </button>
       </form>

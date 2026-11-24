@@ -165,7 +165,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
-                  className={`transition-all duration-300 rounded-full ${
+                  className={`!min-h-0 transition-all duration-300 rounded-full ${
                     i === current
                       ? 'w-6 h-2.5 bg-white'
                       : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'

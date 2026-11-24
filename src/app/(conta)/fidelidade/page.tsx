@@ -81,8 +81,8 @@ export default function FidelidadePage() {
 
       {/* Saldo */}
       <div
-        className="rounded-2xl p-8 mb-6 text-sx-ink text-center"
-        style={{ background: 'linear-gradient(135deg, #0f1f1e 0%, var(--sx-accent) 100%)' }}
+        className="sx-escuro rounded-2xl p-8 mb-6 text-white text-center"
+        style={{ background: 'linear-gradient(135deg, #0f1f1e 0%, #0c6b5f 100%)' }}
       >
         <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
           <Gift className="w-7 h-7 text-white" />

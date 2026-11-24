@@ -108,7 +108,7 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
       >
         {/* ── HERO escuro: título + destaque da economia ──────────────── */}
         <div
-          className="relative px-5 sm:px-7 pt-5 pb-6 sm:pt-6 sm:pb-7 overflow-hidden"
+          className="sx-escuro relative px-5 sm:px-7 pt-5 pb-6 sm:pt-6 sm:pb-7 overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #103330 0%, #17433d 100%)' }}
         >
           {/* glow decorativo tiffany */}

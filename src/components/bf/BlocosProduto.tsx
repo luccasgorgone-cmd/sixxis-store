@@ -139,7 +139,7 @@ export function ComparativoProduto({ atual, opcoes, categoria }: { atual: Produt
               </div>
               <dl className="mt-4 flex-1 border-t border-sx-line">
                 {linhas.map((linha) => (
-                  <div key={linha.rotulo} className="flex min-h-11 items-center justify-between gap-3 border-b border-sx-line py-2 text-[13px] last:border-b-0">
+                  <div key={linha.rotulo} className="flex min-h-11 items-center justify-between gap-3 border-b border-sx-line py-2 text-[13px] last:border-b-0 md:h-[58px]">
                     <dt className="shrink-0 text-sx-muted">{linha.rotulo}</dt>
                     <dd className="text-right font-semibold leading-snug text-sx-text">{valorSpec(produto.especificacoes, linha.termos)}</dd>
                   </div>

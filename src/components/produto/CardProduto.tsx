@@ -281,7 +281,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
           {promoSegunda && !esgotado && (
             <div className="absolute bottom-2.5 left-2.5 z-10">
               <span className="bg-[#0f2e2b] text-white text-[10px] font-black px-2 py-0.5 rounded-md ring-1 ring-sx-accent/40 shadow-sm">
-                🔥 2ª un. −{promoSegunda.percentual}%
+                2ª un. −{promoSegunda.percentual}%
               </span>
             </div>
           )}
@@ -344,7 +344,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
             </p>
             <p className="mt-0.5 truncate text-[11px] font-semibold leading-4 text-sx-accent-text tabular-nums sm:text-xs">
               R$ {fmt(precoPix)} no Pix
-              <span className="font-normal text-sx-subtle"> ({DESCONTO_PIX_PCT}% OFF)</span>
+              <span className="hidden font-normal text-sx-subtle sm:inline"> ({DESCONTO_PIX_PCT}% OFF)</span>
             </p>
           </div>
 
@@ -371,7 +371,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               }`}
             >
               <span className="whitespace-nowrap">
-                {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+                {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : (<>Adicionar<span className="hidden min-[420px]:inline"> ao Carrinho</span></>)}
               </span>
             </button>
 

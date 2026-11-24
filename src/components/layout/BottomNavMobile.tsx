@@ -30,6 +30,8 @@ export default function BottomNavMobile() {
   const setDrawerAberto = useCarrinho((s) => s.setDrawerAberto)
 
   if (pathname.startsWith('/checkout')) return null
+  // A página de produto já tem a barra fixa de compra no mesmo lugar.
+  if (/^\/produtos\/[^/]+/.test(pathname)) return null
   if (pathname.startsWith(ADMIN_BASE)) return null
 
   return (
