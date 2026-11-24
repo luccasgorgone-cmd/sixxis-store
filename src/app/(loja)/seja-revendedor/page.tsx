@@ -6,7 +6,7 @@ import {
   TrendingUp, Shield, Users, Package, Star, CheckCircle,
   ArrowRight, Phone, Mail, MapPin, Award,
   BarChart3, Zap, Clock, HeartHandshake, Globe,
-  Building2, Quote, BadgeCheck, Flame, AlertCircle
+  Building2, BadgeCheck, Flame, AlertCircle
 } from 'lucide-react'
 import SectionKicker from '@/components/ui/SectionKicker'
 
@@ -136,79 +136,6 @@ export default function SejaRevendedorPage() {
       titulo: 'Segmento em Crescimento',
       texto: 'O mercado de climatização cresceu 34% nos últimos 3 anos no Brasil. Com o aumento das temperaturas e o custo do ar-condicionado, a demanda por climatizadores só cresce.',
       destaque: '+34% em 3 anos',
-    },
-  ]
-
-  const depoimentos = [
-    {
-      nome: 'Roberto Mendonça',
-      cargo: 'Diretor Comercial',
-      empresa: 'Climatech Soluções',
-      cidade: 'São Paulo, SP',
-      anos: '8 anos parceiro',
-      texto: 'Tornamo-nos parceiros da Sixxis há 8 anos e foi a melhor decisão estratégica que tomamos. A qualidade dos climatizadores é incomparável — clientes voltam e indicam. O suporte pós-venda é ágil e eficiente, o que nos dá confiança total para revender. O faturamento cresceu 40% desde o início da parceria.',
-      crescimento: '+40%',
-      avatarInicial: 'R',
-      destaque: true
-    },
-    {
-      nome: 'Fernanda Castellano',
-      cargo: 'Proprietária',
-      empresa: 'Casa & Conforto LTDA',
-      cidade: 'Campinas, SP',
-      anos: '5 anos parceira',
-      texto: 'Trabalho com varejo há 15 anos e raramente vejo um produto gerar tanta recomendação espontânea. Nossos clientes compram um climatizador Sixxis e indicam para toda a família. Margem excelente, entrega pontual e suporte técnico rápido. Parceria sólida e de longo prazo.',
-      crescimento: '+35%',
-      avatarInicial: 'F',
-      destaque: true
-    },
-    {
-      nome: 'Mariana Oliveira Santos',
-      cargo: 'CEO',
-      empresa: 'Bem Estar Eletros',
-      cidade: 'Belo Horizonte, MG',
-      anos: '6 anos parceira',
-      texto: 'Incluímos a linha Sixxis em 2019 e hoje ela representa 35% do faturamento total. Climatizadores com zero índice de devolução por defeito — simplesmente funcionam. Clientes satisfeitos geram mais negócio.',
-      crescimento: '35% do faturamento',
-      avatarInicial: 'M',
-      avatarCor: 'var(--sx-accent-text)',
-      destaque: false
-    },
-    {
-      nome: 'Carlos Eduardo Teixeira',
-      cargo: 'Gerente de Vendas',
-      empresa: 'TechFrio Distribuidora',
-      cidade: 'Ribeirão Preto, SP',
-      anos: '4 anos parceiro',
-      texto: 'O que me surpreendeu foi a dedicação da Sixxis ao nos ajudar a treinar a equipe de vendas. Disponibilizaram materiais, fizeram treinamentos online e sempre estiveram presentes. Hoje somos o principal distribuidor da região.',
-      crescimento: '#1 da região',
-      avatarInicial: 'C',
-      avatarCor: '#0f2e2b',
-      destaque: false
-    },
-    {
-      nome: 'Paulo Henrique Vieira',
-      cargo: 'Sócio-Fundador',
-      empresa: 'Clima Norte Comércio',
-      cidade: 'Fortaleza, CE',
-      anos: '7 anos parceiro',
-      texto: 'No Nordeste, um bom climatizador não é luxo — é necessidade. A Sixxis entende isso e criou produtos que realmente funcionam no nosso clima. Demanda altíssima, abastecimento pontual. Nunca faltou produto em estoque.',
-      crescimento: '+60% pico',
-      avatarInicial: 'P',
-      avatarCor: '#1a4f4a',
-      destaque: false
-    },
-    {
-      nome: 'Luciana Ferreira Campos',
-      cargo: 'Diretora de Compras',
-      empresa: 'Fitness Pro Equipamentos',
-      cidade: 'Curitiba, PR',
-      anos: '3 anos parceira',
-      texto: 'Adicionamos as bikes spinning Sixxis ao catálogo e o resultado foi imediato. Qualidade de equipamento profissional a um preço acessível — os clientes percebem o valor. Em menos de 6 meses, as bikes já representam 20% das vendas de fitness.',
-      crescimento: '20% das vendas',
-      avatarInicial: 'L',
-      avatarCor: 'var(--sx-accent-text)',
-      destaque: false
     },
   ]
 
@@ -432,105 +359,6 @@ export default function SejaRevendedorPage() {
               <strong className="text-sx-accent-text">Isso significa oportunidade real para o seu negócio agora.</strong>
             </p>
           </AnimSection>
-        </div>
-      </section>
-
-      {/* ── DEPOIMENTOS ── */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <AnimSection className="text-center mb-14">
-            <SectionKicker texto="Resultados comprovados" dark />
-            <h2 className="text-3xl sm:text-4xl font-black text-sx-text mt-2">
-              Quem já é parceiro, recomenda
-            </h2>
-            <p className="text-sx-muted text-lg mt-3 max-w-2xl mx-auto">
-              Histórias reais de parceiros que construíram negócios sólidos com a Sixxis
-            </p>
-            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
-          </AnimSection>
-
-          {/* Cards de destaque (top 2) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {depoimentos.filter(d => d.destaque).map((d, i) => (
-              <AnimSection key={i} delay={i * 150}>
-                <div
-                  className="sx-escuro relative rounded-2xl p-8 h-full flex flex-col"
-                  style={{
-                    background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)',
-                    border: '1px solid rgba(60,191,179,0.2)'
-                  }}
-                >
-                  <div
-                    className="absolute top-6 right-6 text-[10px] font-bold px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
-                  >
-                    DESTAQUE
-                  </div>
-
-                  <Quote size={32} className="mb-4 opacity-40" style={{ color: 'var(--sx-accent-text)' }} />
-
-                  <p className="text-white/85 text-base leading-relaxed mb-6 flex-1 italic">
-                    &ldquo;{d.texto}&rdquo;
-                  </p>
-
-                  <div className="flex items-center justify-between pt-5 border-t border-white/10">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg shrink-0"
-                        style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
-                      >
-                        {d.avatarInicial}
-                      </div>
-                      <div>
-                        <p className="text-white font-bold text-sm">{d.nome}</p>
-                        <p className="text-white/50 text-xs">{d.cargo} · {d.empresa}</p>
-                        <p className="text-white/40 text-xs">{d.cidade}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-black" style={{ color: 'var(--sx-accent-text)' }}>{d.crescimento}</p>
-                      <p className="text-white/40 text-xs">{d.anos}</p>
-                    </div>
-                  </div>
-                </div>
-              </AnimSection>
-            ))}
-          </div>
-
-          {/* Cards menores (demais) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {depoimentos.filter(d => !d.destaque).map((d, i) => (
-              <AnimSection key={i} delay={i * 80}>
-                <div className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm p-6 h-full flex flex-col">
-                  <Quote size={20} className="mb-3" style={{ color: 'var(--sx-accent-text)', opacity: 0.5 } as React.CSSProperties} />
-                  <p className="text-sx-muted text-sm leading-relaxed mb-5 flex-1 italic">
-                    &ldquo;{d.texto.substring(0, 180)}...&rdquo;
-                  </p>
-                  <div className="pt-4 border-t border-sx-line">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                        style={{ backgroundColor: d.avatarCor || 'var(--sx-accent-text)' }}
-                      >
-                        {d.avatarInicial}
-                      </div>
-                      <div>
-                        <p className="text-sx-text font-bold text-xs">{d.nome}</p>
-                        <p className="text-sx-muted text-xs">{d.empresa}</p>
-                        <p className="text-sx-subtle text-xs">{d.cidade}</p>
-                      </div>
-                    </div>
-                    <div
-                      className="mt-3 text-center py-1.5 rounded-xl text-xs font-bold"
-                      style={{ backgroundColor: '#e8f8f7', color: 'var(--sx-accent-text)' }}
-                    >
-                      {d.crescimento}
-                    </div>
-                  </div>
-                </div>
-              </AnimSection>
-            ))}
-          </div>
         </div>
       </section>
 
