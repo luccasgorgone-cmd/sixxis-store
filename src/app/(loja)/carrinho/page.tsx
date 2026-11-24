@@ -288,7 +288,10 @@ export default function CarrinhoPage() {
         </div>
 
         {/* LAYOUT 2 COLUNAS */}
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Em coluna (abaixo de lg) os filhos precisam esticar: com items-start a
+            coluna da esquerda ficava com a largura do próprio conteúdo (~434 px) e
+            passava da tela no celular, cortando o "+" da quantidade e o frete. */}
+        <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
 
           {/* ════ COLUNA ESQUERDA ════ */}
           <div className="flex-1 min-w-0 space-y-4">
