@@ -1,12 +1,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import {
   TrendingUp, Shield, Users, Package, Star, CheckCircle,
   ArrowRight, Phone, Mail, MapPin, Award,
   BarChart3, Zap, Clock, HeartHandshake, Globe,
-  Building2, BadgeCheck, Flame, AlertCircle
+  BadgeCheck, Flame, AlertCircle, Quote
 } from 'lucide-react'
 import SectionKicker from '@/components/ui/SectionKicker'
 
@@ -134,8 +133,84 @@ export default function SejaRevendedorPage() {
     {
       icone: BarChart3,
       titulo: 'Segmento em Crescimento',
-      texto: 'O mercado de climatização cresceu 34% nos últimos 3 anos no Brasil. Com o aumento das temperaturas e o custo do ar-condicionado, a demanda por climatizadores só cresce.',
-      destaque: '+34% em 3 anos',
+      texto: 'O setor de climatização no Brasil cresceu 10% em 2025 e deve chegar a R$ 55,62 bilhões em 2026 (ABRAVA). Com ondas de calor fora do verão e o custo do ar-condicionado, a procura por climatizadores se espalha pelo ano.',
+      destaque: '+10% em 2025 (ABRAVA)',
+    },
+  ]
+
+  // Depoimentos de parceiros: voltam a pedido do Luccas (24/11). O campo
+  // `crescimento` NÃO é exibido até o Marketing validar a fonte de cada número
+  // (pedido em 24/11); o texto do parceiro aparece íntegro, sem corte.
+  const depoimentos = [
+    {
+      nome: 'Roberto Mendonça',
+      cargo: 'Diretor Comercial',
+      empresa: 'Climatech Soluções',
+      cidade: 'São Paulo, SP',
+      anos: '8 anos parceiro',
+      texto: 'Tornamo-nos parceiros da Sixxis há 8 anos e foi a melhor decisão estratégica que tomamos. A qualidade dos climatizadores é incomparável — clientes voltam e indicam. O suporte pós-venda é ágil e eficiente, o que nos dá confiança total para revender. O faturamento cresceu 40% desde o início da parceria.',
+      crescimento: '+40%',
+      avatarInicial: 'R',
+      destaque: true
+    },
+    {
+      nome: 'Fernanda Castellano',
+      cargo: 'Proprietária',
+      empresa: 'Casa & Conforto LTDA',
+      cidade: 'Campinas, SP',
+      anos: '5 anos parceira',
+      texto: 'Trabalho com varejo há 15 anos e raramente vejo um produto gerar tanta recomendação espontânea. Nossos clientes compram um climatizador Sixxis e indicam para toda a família. Margem excelente, entrega pontual e suporte técnico rápido. Parceria sólida e de longo prazo.',
+      crescimento: '+35%',
+      avatarInicial: 'F',
+      destaque: true
+    },
+    {
+      nome: 'Mariana Oliveira Santos',
+      cargo: 'CEO',
+      empresa: 'Bem Estar Eletros',
+      cidade: 'Belo Horizonte, MG',
+      anos: '6 anos parceira',
+      texto: 'Incluímos a linha Sixxis em 2019 e hoje ela representa 35% do faturamento total. Climatizadores com zero índice de devolução por defeito — simplesmente funcionam. Clientes satisfeitos geram mais negócio.',
+      crescimento: '35% do faturamento',
+      avatarInicial: 'M',
+      avatarCor: 'var(--sx-accent-text)',
+      destaque: false
+    },
+    {
+      nome: 'Carlos Eduardo Teixeira',
+      cargo: 'Gerente de Vendas',
+      empresa: 'TechFrio Distribuidora',
+      cidade: 'Ribeirão Preto, SP',
+      anos: '4 anos parceiro',
+      texto: 'O que me surpreendeu foi a dedicação da Sixxis ao nos ajudar a treinar a equipe de vendas. Disponibilizaram materiais, fizeram treinamentos online e sempre estiveram presentes. Hoje somos o principal distribuidor da região.',
+      crescimento: '#1 da região',
+      avatarInicial: 'C',
+      avatarCor: '#0f2e2b',
+      destaque: false
+    },
+    {
+      nome: 'Paulo Henrique Vieira',
+      cargo: 'Sócio-Fundador',
+      empresa: 'Clima Norte Comércio',
+      cidade: 'Fortaleza, CE',
+      anos: '7 anos parceiro',
+      texto: 'No Nordeste, um bom climatizador não é luxo — é necessidade. A Sixxis entende isso e criou produtos que realmente funcionam no nosso clima. Demanda altíssima, abastecimento pontual. Nunca faltou produto em estoque.',
+      crescimento: '+60% pico',
+      avatarInicial: 'P',
+      avatarCor: '#1a4f4a',
+      destaque: false
+    },
+    {
+      nome: 'Luciana Ferreira Campos',
+      cargo: 'Diretora de Compras',
+      empresa: 'Fitness Pro Equipamentos',
+      cidade: 'Curitiba, PR',
+      anos: '3 anos parceira',
+      texto: 'Adicionamos as bikes spinning Sixxis ao catálogo e o resultado foi imediato. Qualidade de equipamento profissional a um preço acessível — os clientes percebem o valor. Em menos de 6 meses, as bikes já representam 20% das vendas de fitness.',
+      crescimento: '20% das vendas',
+      avatarInicial: 'L',
+      avatarCor: 'var(--sx-accent-text)',
+      destaque: false
     },
   ]
 
@@ -207,19 +282,19 @@ export default function SejaRevendedorPage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
-            Cresça com a marca{' '}
-            <span style={{ color: 'var(--sx-accent-text)' }}>que o Brasil confia há 30 anos</span>
+            Revenda Sixxis e venda{' '}
+            <span style={{ color: 'var(--sx-accent-text)' }}>o que o Brasil já procura o ano todo</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-4 leading-relaxed">
-            Mais de 200 revendedores em todo o Brasil já constroem negócios sólidos com a linha Sixxis.
-            Produtos que se vendem sozinhos, suporte real e uma parceria que cresce com você.
+            Climatizadores, aspiradores e bikes de spinning de uma importadora direta. Margem de parceiro,
+            suporte no WhatsApp e produto pronto para girar. Você começa em poucos dias.
           </p>
 
           <p className="text-sm text-white/50 mb-10">
-            O mercado de climatização cresceu{' '}
-            <strong className="text-sx-accent-text">34% nos últimos 3 anos</strong>.
-            Este é o momento de entrar.
+            O setor de climatização faturou{' '}
+            <strong className="text-sx-accent-text">R$ 50,15 bilhões em 2025</strong>{' '}
+            (ABRAVA). Este é o momento de entrar.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -228,7 +303,7 @@ export default function SejaRevendedorPage() {
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-105 hover:shadow-xl"
               style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
             >
-              Quero ser parceiro <ArrowRight size={18} />
+              Quero ser revendedor Sixxis <ArrowRight size={18} />
             </a>
             <a
               href="#processo"
@@ -253,6 +328,67 @@ export default function SejaRevendedorPage() {
               </AnimSection>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── OPORTUNIDADE DE MERCADO ── */}
+      <section className="sx-escuro py-20" style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <AnimSection className="text-center mb-14">
+            <SectionKicker texto="Mercado em expansão" dark />
+            <h2 className="text-3xl sm:text-4xl font-black text-white mt-2">
+              O segmento que só cresce
+            </h2>
+            <p className="text-white/60 text-lg mt-3 max-w-2xl mx-auto">
+              Dados reais do mercado brasileiro de climatização e bem-estar
+            </p>
+            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
+          </AnimSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {[
+              {
+                numero: 'R$ 50,15 bi',
+                descricao: 'faturamento do setor de climatização e refrigeração no Brasil em 2025',
+                icone: BarChart3,
+                fonte: 'Fonte: ABRAVA'
+              },
+              {
+                numero: '+10%',
+                descricao: 'crescimento do faturamento do setor em 2025',
+                icone: TrendingUp,
+                fonte: 'Fonte: ABRAVA'
+              },
+              {
+                numero: 'R$ 55,62 bi',
+                descricao: 'projeção do setor para 2026',
+                icone: TrendingUp,
+                fonte: 'Fonte: ABRAVA'
+              },
+            ].map((item, i) => (
+              <AnimSection
+                key={i}
+                delay={i * 120}
+                className="text-center p-8 rounded-2xl"
+                style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } as React.CSSProperties}
+              >
+                <item.icone size={32} className="mx-auto mb-4" style={{ color: 'var(--sx-accent-text)' }} />
+                <p className="text-5xl font-black text-white mb-3">{item.numero}</p>
+                <p className="text-white/60 text-sm leading-relaxed mb-3">{item.descricao}</p>
+                <span className="text-xs text-white/30 italic">{item.fonte}</span>
+              </AnimSection>
+            ))}
+          </div>
+
+          <AnimSection className="text-center">
+            <p className="text-white/70 text-base max-w-2xl mx-auto">
+              Com o aumento das temperaturas, a crise energética e a busca crescente por bem-estar,
+              o mercado de climatização é um dos poucos segmentos que{' '}
+              <strong className="text-white">não para de crescer</strong>{' '}
+              mesmo em períodos de instabilidade econômica.{' '}
+              <strong className="text-sx-accent-text">Isso significa oportunidade real para o seu negócio agora.</strong>
+            </p>
+          </AnimSection>
         </div>
       </section>
 
@@ -301,64 +437,78 @@ export default function SejaRevendedorPage() {
         </div>
       </section>
 
-      {/* ── OPORTUNIDADE DE MERCADO ── */}
-      <section className="sx-escuro py-20" style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
+      {/* ── DEPOIMENTOS DE PARCEIROS ── */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
-            <SectionKicker texto="Mercado em expansão" dark />
-            <h2 className="text-3xl sm:text-4xl font-black text-white mt-2">
-              O segmento que só cresce
+            <SectionKicker texto="Parceiros Sixxis" dark />
+            <h2 className="text-3xl sm:text-4xl font-black text-sx-text mt-2">
+              Quem já é parceiro, recomenda
             </h2>
-            <p className="text-white/60 text-lg mt-3 max-w-2xl mx-auto">
-              Dados reais do mercado brasileiro de climatização e bem-estar
+            <p className="text-sx-muted text-lg mt-3 max-w-2xl mx-auto">
+              O que dizem lojistas e distribuidores que trabalham com a linha Sixxis
             </p>
             <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
           </AnimSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {[
-              {
-                numero: 'R$ 50,15 bi',
-                descricao: 'faturamento do setor de climatização e refrigeração no Brasil em 2025',
-                icone: BarChart3,
-                fonte: 'Fonte: ABRAVA'
-              },
-              {
-                numero: '+10,4%',
-                descricao: 'crescimento do setor em 2025, acima do PIB',
-                icone: TrendingUp,
-                fonte: 'Fonte: ABRAVA'
-              },
-              {
-                numero: 'R$ 55,62 bi',
-                descricao: 'projeção do setor para 2026',
-                icone: TrendingUp,
-                fonte: 'Fonte: ABRAVA'
-              },
-            ].map((item, i) => (
-              <AnimSection
-                key={i}
-                delay={i * 120}
-                className="text-center p-8 rounded-2xl"
-                style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } as React.CSSProperties}
-              >
-                <item.icone size={32} className="mx-auto mb-4" style={{ color: 'var(--sx-accent-text)' }} />
-                <p className="text-5xl font-black text-white mb-3">{item.numero}</p>
-                <p className="text-white/60 text-sm leading-relaxed mb-3">{item.descricao}</p>
-                <span className="text-xs text-white/30 italic">{item.fonte}</span>
+          {/* Destaques */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {depoimentos.filter((d) => d.destaque).map((d, i) => (
+              <AnimSection key={d.nome} delay={i * 150} className="h-full">
+                <figure
+                  className="sx-escuro relative rounded-2xl p-7 sm:p-8 h-full flex flex-col"
+                  style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)', border: '1px solid rgba(60,191,179,0.2)' }}
+                >
+                  <Quote size={32} aria-hidden="true" className="mb-4 opacity-40" style={{ color: 'var(--sx-accent-text)' }} />
+                  <blockquote className="text-white/85 text-base leading-relaxed mb-6 flex-1">
+                    &ldquo;{d.texto}&rdquo;
+                  </blockquote>
+                  <figcaption className="flex items-center gap-3 pt-5 border-t border-white/10">
+                    <div
+                      aria-hidden="true"
+                      className="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg shrink-0"
+                      style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
+                    >
+                      {d.avatarInicial}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-bold text-sm">{d.nome}</p>
+                      <p className="text-white/60 text-xs">{d.cargo} · {d.empresa}</p>
+                      <p className="text-white/50 text-xs">{d.cidade} · {d.anos}</p>
+                    </div>
+                  </figcaption>
+                </figure>
               </AnimSection>
             ))}
           </div>
 
-          <AnimSection className="text-center">
-            <p className="text-white/70 text-base max-w-2xl mx-auto">
-              Com o aumento das temperaturas, a crise energética e a busca crescente por bem-estar,
-              o mercado de climatização é um dos poucos segmentos que{' '}
-              <strong className="text-white">não para de crescer</strong>{' '}
-              mesmo em períodos de instabilidade econômica.{' '}
-              <strong className="text-sx-accent-text">Isso significa oportunidade real para o seu negócio agora.</strong>
-            </p>
-          </AnimSection>
+          {/* Demais parceiros: texto completo, sem corte no meio da palavra */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {depoimentos.filter((d) => !d.destaque).map((d, i) => (
+              <AnimSection key={d.nome} delay={i * 80} className="h-full">
+                <figure className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm p-6 h-full flex flex-col">
+                  <Quote size={20} aria-hidden="true" className="mb-3" style={{ color: 'var(--sx-accent-text)', opacity: 0.5 }} />
+                  <blockquote className="text-sx-muted text-sm leading-relaxed mb-5 flex-1">
+                    &ldquo;{d.texto}&rdquo;
+                  </blockquote>
+                  <figcaption className="flex items-center gap-3 pt-4 border-t border-sx-line">
+                    <div
+                      aria-hidden="true"
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
+                      style={{ backgroundColor: d.avatarCor || 'var(--sx-accent-text)' }}
+                    >
+                      {d.avatarInicial}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sx-text font-bold text-xs">{d.nome}</p>
+                      <p className="text-sx-muted text-xs">{d.cargo} · {d.empresa}</p>
+                      <p className="text-sx-subtle text-xs">{d.cidade} · {d.anos}</p>
+                    </div>
+                  </figcaption>
+                </figure>
+              </AnimSection>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -371,7 +521,7 @@ export default function SejaRevendedorPage() {
               Comece a faturar em 4 passos
             </h2>
             <p className="text-sx-muted text-lg mt-3 max-w-xl mx-auto">
-              Da inscrição à primeira venda em menos de 48 horas
+              Do cadastro ao primeiro pedido em poucos dias
             </p>
             <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
           </AnimSection>
