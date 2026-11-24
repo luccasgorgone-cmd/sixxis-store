@@ -84,7 +84,7 @@ function SearchBar({ className = '' }: { className?: string }) {
           onFocus={() => sugestoes.length > 0 && setAberto(true)}
           placeholder="O que você está buscando?"
           autoComplete="off"
-          className="flex-1 px-3 md:px-4 text-gray-700 text-xs md:text-sm outline-none bg-transparent"
+          className="min-w-0 flex-1 px-3 md:px-4 text-gray-700 text-xs md:text-sm outline-none bg-transparent"
         />
         <button
           type="submit"

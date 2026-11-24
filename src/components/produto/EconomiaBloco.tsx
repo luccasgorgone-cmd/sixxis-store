@@ -144,7 +144,7 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
 
           {/* pills de reforço */}
           <div className="relative mt-4 flex items-center justify-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black" style={{ backgroundColor: 'var(--sx-accent)', color: 'var(--sx-text)' }}>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black" style={{ backgroundColor: 'var(--sx-accent)', color: 'var(--sx-ink)' }}>
               {percentual}% menos energia
             </span>
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold text-white/85" style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>

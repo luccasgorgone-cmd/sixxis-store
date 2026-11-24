@@ -248,7 +248,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
           {/* Favoritar — canto superior direito */}
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFav(produto.id) }}
-            className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white shadow-sm transition-all"
+            className="absolute right-2 top-2 z-10 flex h-8 w-8 !min-h-0 items-center justify-center rounded-full border border-sx-line bg-white transition-colors hover:border-sx-accent-text"
             title={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
             aria-label={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           >
