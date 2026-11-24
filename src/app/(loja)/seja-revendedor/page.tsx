@@ -337,7 +337,7 @@ export default function SejaRevendedorPage() {
           <AnimSection className="text-center mb-14">
             <SectionKicker texto="Mercado em expansão" dark />
             <h2 className="text-3xl sm:text-4xl font-black text-white mt-2">
-              O segmento que só cresce
+              A demanda deixou de ser só de verão
             </h2>
             <p className="text-white/60 text-lg mt-3 max-w-2xl mx-auto">
               Dados reais do mercado brasileiro de climatização e bem-estar
@@ -382,11 +382,10 @@ export default function SejaRevendedorPage() {
 
           <AnimSection className="text-center">
             <p className="text-white/70 text-base max-w-2xl mx-auto">
-              Com o aumento das temperaturas, a crise energética e a busca crescente por bem-estar,
-              o mercado de climatização é um dos poucos segmentos que{' '}
-              <strong className="text-white">não para de crescer</strong>{' '}
-              mesmo em períodos de instabilidade econômica.{' '}
-              <strong className="text-sx-accent-text">Isso significa oportunidade real para o seu negócio agora.</strong>
+              Ondas de calor que já não ficam restritas ao verão mantêm a procura por climatização
+              ao longo do ano. Segundo a ABRAVA, o setor cresceu 10% em 2025 e o comércio deve crescer
+              cerca de 16% em 2026.{' '}
+              <strong className="text-sx-accent-text">Quem revende climatização pega uma demanda que se repete o ano inteiro.</strong>
             </p>
           </AnimSection>
         </div>
