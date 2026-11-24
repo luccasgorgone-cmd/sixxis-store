@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import vm from 'node:vm'
 import { scriptBasePixel } from './meta-pixel-snippet'
-import { criarSincronizadorPixel, trackMetaPageView } from './meta-pixel'
+import { criarSincronizadorPixel, deveEnviarPageViewDeRota, trackMeta, trackMetaPageView } from './meta-pixel'
 import { serializeConsent } from '../consent'
 
 vi.mock('@/lib/consent', () => import('../consent'))
@@ -121,5 +121,31 @@ describe('PageView de rota (fbevents real tem gancho em pushState)', () => {
     expect(s.indexOf('fbq.disablePushState=true')).toBeLessThan(init)
     expect(s.indexOf('fbq.allowDuplicatePageViews=true')).toBeGreaterThan(-1)
     expect(s.indexOf('fbq.allowDuplicatePageViews=true')).toBeLessThan(init)
+  })
+})
+
+describe('regra do PageView de rota do <MetaPixelRouter/>', () => {
+  it('1ª URL (load) não conta; mesma URL não conta (efeito duplo do StrictMode)', () => {
+    expect(deveEnviarPageViewDeRota(null, '/produtos')).toBe(false)
+    expect(deveEnviarPageViewDeRota('/produtos', '/produtos')).toBe(false)
+  })
+  it('mudança só de querystring conta (filtro/categoria em /produtos)', () => {
+    expect(deveEnviarPageViewDeRota('/produtos', '/produtos?categoria=aspiradores')).toBe(true)
+    expect(deveEnviarPageViewDeRota('/produtos?categoria=aspiradores', '/produtos?categoria=spinning')).toBe(true)
+  })
+  it('mudança de pathname conta', () => {
+    expect(deveEnviarPageViewDeRota('/produtos', '/carrinho')).toBe(true)
+  })
+})
+
+describe('defesa extra: evento sem consentimento trava o fbq desta aba', () => {
+  it('recusa em outra aba sem aviso: o 1º trackMeta revoga e o clique automático seguinte não sai', () => {
+    const p = montarPagina(true)
+    criarSincronizadorPixel()
+    p.gravarConsentimento(false)
+    trackMeta('ViewContent', { value: 2750 })
+    // evento automático do fbevents (ex.: SubscribedButtonClick) depois disso
+    ;(globalThis.window as unknown as { fbq: (...a: unknown[]) => void }).fbq('trackCustom', 'SubscribedButtonClick')
+    expect(p.enviados.map((e) => e.evento)).toEqual(['PageView'])
   })
 })
