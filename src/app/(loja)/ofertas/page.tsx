@@ -80,7 +80,7 @@ export default async function OfertasPage() {
             <p className="text-sm mb-6 font-semibold text-sx-text">
               {ofertas.length} produto{ofertas.length !== 1 ? 's' : ''} em oferta
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grade-cards grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {ofertas.map((produto) => (
                 <CardProduto key={produto.id} produto={produto} />
               ))}
