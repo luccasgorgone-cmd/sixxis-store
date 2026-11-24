@@ -12,6 +12,7 @@ export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
 type Fbq = ((...args: unknown[]) => void) & {
   queue?: unknown[]
+  callMethod?: (...args: unknown[]) => void
   loaded?: boolean
   version?: string
 }
@@ -41,6 +42,22 @@ export function concederConsentimentoPixel() {
     }
   }
   window.fbq('consent', 'grant')
+}
+
+// Antes de o fbevents carregar a fila roda em ordem: um 'revoke' no fim deixaria
+// passar o que foi enfileirado enquanto havia consentimento. Ele entra logo depois
+// do 'init' (antes dele o fbevents trava a fila de vez) e segura todo o resto.
+export function revogarConsentimentoPixel() {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+  const fila = window.fbq.queue as ArrayLike<unknown>[] | undefined
+  if (!window.fbq.callMethod && Array.isArray(fila)) {
+    const init = fila.findIndex((comando) => comando[0] === 'init')
+    if (init >= 0) {
+      fila.splice(init + 1, 0, ['consent', 'revoke'])
+      return
+    }
+  }
+  window.fbq('consent', 'revoke')
 }
 
 /**

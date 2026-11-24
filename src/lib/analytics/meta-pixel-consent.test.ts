@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { concederConsentimentoPixel, trackMeta } from './meta-pixel'
+import { concederConsentimentoPixel, revogarConsentimentoPixel, trackMeta } from './meta-pixel'
 import { serializeConsent } from '../consent'
 
 vi.mock('@/lib/consent', () => import('../consent'))
@@ -108,5 +108,63 @@ describe('concederConsentimentoPixel', () => {
   it('não quebra sem fbq', () => {
     vi.stubGlobal('window', {})
     expect(() => concederConsentimentoPixel()).not.toThrow()
+  })
+})
+
+describe('revogarConsentimentoPixel', () => {
+  const aceitarEEnviar = () => {
+    consentir(true)
+    concederConsentimentoPixel()
+    trackMeta('PageView')
+    trackMeta('ViewContent', { value: 2100 })
+  }
+
+  it('recusa logo depois de aceitar, antes do fbevents carregar: nada vai ao Meta', () => {
+    pixel.fbq('init', '1')
+    pixel.fbq('consent', 'revoke')
+    aceitarEEnviar()
+    consentir(false)
+    revogarConsentimentoPixel()
+    pixel.carregar()
+
+    expect(pixel.travado()).toBe(true)
+    expect(pixel.enviados.filter((a) => a[0] === 'track')).toHaveLength(0)
+  })
+
+  it('novo aceite depois da recusa entrega cada evento uma vez', () => {
+    pixel.fbq('init', '1')
+    pixel.fbq('consent', 'revoke')
+    aceitarEEnviar()
+    consentir(false)
+    revogarConsentimentoPixel()
+    pixel.carregar()
+
+    consentir(true)
+    concederConsentimentoPixel()
+
+    expect(pixel.travado()).toBe(false)
+    expect(eventos(pixel.enviados)).toEqual(['PageView', 'ViewContent'])
+    expect(pixel.fbq.queue).toHaveLength(0)
+  })
+
+  it('o revoke nunca entra antes do init', () => {
+    pixel.fbq('init', '1')
+    pixel.fbq('track', 'Antigo')
+    revogarConsentimentoPixel()
+    expect(pixel.fbq.queue.map((a) => a[0])).toEqual(['init', 'consent', 'track'])
+  })
+
+  it('com o fbevents carregado trava na hora', () => {
+    pixel.fbq('init', '1')
+    pixel.carregar()
+    revogarConsentimentoPixel()
+    pixel.fbq('track', 'Depois')
+    expect(pixel.travado()).toBe(true)
+    expect(eventos(pixel.enviados)).toEqual([])
+  })
+
+  it('não quebra sem fbq', () => {
+    vi.stubGlobal('window', {})
+    expect(() => revogarConsentimentoPixel()).not.toThrow()
   })
 })
