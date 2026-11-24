@@ -6,7 +6,7 @@
 // <MetaPixelScript/>. Este módulo só DISPARA eventos padrão da Meta nos mesmos
 // pontos onde o GA4 já dispara — chamado de dentro de events.ts.
 
-import { marketingConsentido } from '@/lib/consent'
+import { marketingConsentido, CONSENT_CHANNEL, CONSENT_EVENT } from '@/lib/consent'
 
 export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
@@ -58,6 +58,54 @@ export function revogarConsentimentoPixel() {
     }
   }
   window.fbq('consent', 'revoke')
+}
+
+// Sincroniza o fbq com o cookie de consentimento. O PageView inicial sai aqui,
+// uma única vez, quando o aceite chega depois do load (se já havia consentimento
+// no load, o snippet base já o disparou).
+export function criarSincronizadorPixel(): () => void {
+  let pageViewInicial = marketingConsentido()
+  return () => {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+    if (marketingConsentido()) {
+      concederConsentimentoPixel()
+      if (!pageViewInicial) {
+        pageViewInicial = true
+        trackMetaPageView()
+      }
+    } else {
+      revogarConsentimentoPixel()
+    }
+  }
+}
+
+// O CONSENT_EVENT não cruza abas. Se a recusa vier de outra aba, esta continua
+// destravada, e o fbevents manda sozinho o PageView da próxima navegação SPA, sem
+// passar pelo gate do trackMeta. Por isso o cookie é relido quando outra aba avisa
+// pelo BroadcastChannel (cobre a aba em segundo plano que navega sozinha, como o
+// Pix aprovado) e quando esta aba volta a ficar visível ou ganha foco.
+export function observarConsentimentoPixel(sync: () => void): () => void {
+  const aoVoltar = () => {
+    if (document.visibilityState !== 'hidden') sync()
+  }
+  let canal: BroadcastChannel | null = null
+  try {
+    canal = new BroadcastChannel(CONSENT_CHANNEL)
+    canal.addEventListener('message', sync)
+  } catch {
+    canal = null
+  }
+  window.addEventListener(CONSENT_EVENT, sync)
+  window.addEventListener('focus', sync)
+  window.addEventListener('pageshow', sync)
+  document.addEventListener('visibilitychange', aoVoltar)
+  return () => {
+    canal?.close()
+    window.removeEventListener(CONSENT_EVENT, sync)
+    window.removeEventListener('focus', sync)
+    window.removeEventListener('pageshow', sync)
+    document.removeEventListener('visibilitychange', aoVoltar)
+  }
 }
 
 /**
