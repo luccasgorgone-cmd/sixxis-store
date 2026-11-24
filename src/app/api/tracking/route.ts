@@ -76,23 +76,35 @@ export async function POST(req: NextRequest) {
     const atributo = (value: string | undefined) => value?.substring(0, 191)
     const referer = req.headers.get('referer') || null
 
-    await prisma.sessaoVisitante.upsert({
-      where: { sessaoId: body.sessaoId },
-      create: {
-        sessaoId: body.sessaoId,
-        ip: anonIp,
-        userAgent: userAgent.substring(0, 500),
-        dispositivo: detectDispositivo(userAgent),
-        browser: detectBrowser(userAgent),
-        os: detectOS(userAgent),
-        landingPage: landingPage || null,
-        utmSource: atributo(utms.utmSource), utmMedium: atributo(utms.utmMedium), utmCampaign: atributo(utms.utmCampaign),
-        utmContent: atributo(utms.utmContent), utmTerm: atributo(utms.utmTerm), gclid: atributo(utms.gclid), gbraid: atributo(utms.gbraid), wbraid: atributo(utms.wbraid),
-        referer: referer?.substring(0, 500) || null,
-        totalPaginas: body.tipo === 'page_view' ? 1 : 0,
-      },
-      update: body.tipo === 'page_view' ? { totalPaginas: { increment: 1 } } : {},
-    })
+    // Ao aceitar o banner, page_view e view_item chegam juntos para uma sessão nova:
+    // o upsert perdedor recebe P2002, mas a sessão já existe e o evento deve ser gravado.
+    try {
+      await prisma.sessaoVisitante.upsert({
+        where: { sessaoId: body.sessaoId },
+        create: {
+          sessaoId: body.sessaoId,
+          ip: anonIp,
+          userAgent: userAgent.substring(0, 500),
+          dispositivo: detectDispositivo(userAgent),
+          browser: detectBrowser(userAgent),
+          os: detectOS(userAgent),
+          landingPage: landingPage || null,
+          utmSource: atributo(utms.utmSource), utmMedium: atributo(utms.utmMedium), utmCampaign: atributo(utms.utmCampaign),
+          utmContent: atributo(utms.utmContent), utmTerm: atributo(utms.utmTerm), gclid: atributo(utms.gclid), gbraid: atributo(utms.gbraid), wbraid: atributo(utms.wbraid),
+          referer: referer?.substring(0, 500) || null,
+          totalPaginas: body.tipo === 'page_view' ? 1 : 0,
+        },
+        update: body.tipo === 'page_view' ? { totalPaginas: { increment: 1 } } : {},
+      })
+    } catch (error) {
+      if ((error as { code?: string }).code !== 'P2002') throw error
+      if (body.tipo === 'page_view') {
+        await prisma.sessaoVisitante.update({
+          where: { sessaoId: body.sessaoId },
+          data: { totalPaginas: { increment: 1 } },
+        })
+      }
+    }
 
     const data: Prisma.EventoTrackingUncheckedCreateInput = { sessaoId: body.sessaoId, tipo: body.tipo, pagina: body.pagina || null, produtoId: body.produtoId || null, produtoSlug: body.produtoSlug || null, valor: body.valor ?? null, dados: eventData.data as Prisma.InputJsonValue }
     if (body.tipo === 'purchase') {

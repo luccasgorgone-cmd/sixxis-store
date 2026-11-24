@@ -12,6 +12,7 @@ export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
 type Fbq = ((...args: unknown[]) => void) & {
   queue?: unknown[]
+  callMethod?: (...args: unknown[]) => void
   loaded?: boolean
   version?: string
 }
@@ -29,6 +30,36 @@ function num(v: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
+// O fbevents para de drenar a fila ao encontrar um 'revoke'. Se um 'revoke' ainda
+// estiver na fila, ele trava o Pixel de novo logo depois do 'grant' e retém todos
+// os eventos da página. Por isso ele sai da fila antes de conceder.
+export function concederConsentimentoPixel() {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+  const fila = window.fbq.queue as ArrayLike<unknown>[] | undefined
+  if (Array.isArray(fila)) {
+    for (let i = fila.length - 1; i >= 0; i--) {
+      if (fila[i][0] === 'consent' && fila[i][1] === 'revoke') fila.splice(i, 1)
+    }
+  }
+  window.fbq('consent', 'grant')
+}
+
+// Antes de o fbevents carregar a fila roda em ordem: um 'revoke' no fim deixaria
+// passar o que foi enfileirado enquanto havia consentimento. Ele entra logo depois
+// do 'init' (antes dele o fbevents trava a fila de vez) e segura todo o resto.
+export function revogarConsentimentoPixel() {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+  const fila = window.fbq.queue as ArrayLike<unknown>[] | undefined
+  if (!window.fbq.callMethod && Array.isArray(fila)) {
+    const init = fila.findIndex((comando) => comando[0] === 'init')
+    if (init >= 0) {
+      fila.splice(init + 1, 0, ['consent', 'revoke'])
+      return
+    }
+  }
+  window.fbq('consent', 'revoke')
+}
+
 /**
  * Dispara um evento padrão da Meta. No-op sem fbq (script ainda não montou) ou
  * sem consentimento de marketing. `options.eventID` vai como 4º arg do fbq —
@@ -43,6 +74,8 @@ export function trackMeta(
   // LGPD: mesmo gate que concede/revoga o consentimento do Pixel.
   // (Plugue/remova este gate junto com o do GA4 se a política mudar.)
   if (!marketingConsentido()) return
+  // O CONSENT_EVENT não cruza abas: garante o Pixel liberado se o aceite veio de outra.
+  concederConsentimentoPixel()
 
   const limpo: Record<string, unknown> = { ...params }
   if ('value' in limpo) limpo.value = num(limpo.value)
