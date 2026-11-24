@@ -81,7 +81,7 @@ describe('acompanharViewItem', () => {
 
   it('o ViewContent sai depois dos listeners sincronos de consentimento', () => {
     const ordem: string[] = []
-    fbq.mockImplementation((_m: string, ev: string) => ordem.push(ev))
+    fbq.mockImplementation((m: string, ev: string) => { if (m === 'track') ordem.push(ev) })
     acompanharViewItem(produto)
     janela.addEventListener(CONSENT_EVENT, () => ordem.push('grant'))
     consentir(true, true)

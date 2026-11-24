@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { marketingConsentido, CONSENT_EVENT } from '@/lib/consent'
-import { META_PIXEL_ID, trackMetaPageView } from '@/lib/analytics/meta-pixel'
+import { META_PIXEL_ID, concederConsentimentoPixel, trackMetaPageView } from '@/lib/analytics/meta-pixel'
 
 // Lado client do Meta Pixel:
 //  1. PageView nas TROCAS DE ROTA (App Router não recarrega a página, então o
@@ -28,7 +28,7 @@ export default function MetaPixelRouter() {
     const sync = () => {
       if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
       if (marketingConsentido()) {
-        window.fbq('consent', 'grant')
+        concederConsentimentoPixel()
         // 1ª concessão ao vivo (estava 'revoke' no load): dispara o PageView
         // explicitamente, uma única vez. Não dependemos do replay do buffer.
         if (!pageViewInicial.current) {

@@ -29,6 +29,20 @@ function num(v: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
+// O fbevents para de drenar a fila ao encontrar um 'revoke'. Se um 'revoke' ainda
+// estiver na fila, ele trava o Pixel de novo logo depois do 'grant' e retém todos
+// os eventos da página. Por isso ele sai da fila antes de conceder.
+export function concederConsentimentoPixel() {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+  const fila = window.fbq.queue as ArrayLike<unknown>[] | undefined
+  if (Array.isArray(fila)) {
+    for (let i = fila.length - 1; i >= 0; i--) {
+      if (fila[i][0] === 'consent' && fila[i][1] === 'revoke') fila.splice(i, 1)
+    }
+  }
+  window.fbq('consent', 'grant')
+}
+
 /**
  * Dispara um evento padrão da Meta. No-op sem fbq (script ainda não montou) ou
  * sem consentimento de marketing. `options.eventID` vai como 4º arg do fbq —
@@ -43,6 +57,8 @@ export function trackMeta(
   // LGPD: mesmo gate que concede/revoga o consentimento do Pixel.
   // (Plugue/remova este gate junto com o do GA4 se a política mudar.)
   if (!marketingConsentido()) return
+  // O CONSENT_EVENT não cruza abas: garante o Pixel liberado se o aceite veio de outra.
+  concederConsentimentoPixel()
 
   const limpo: Record<string, unknown> = { ...params }
   if ('value' in limpo) limpo.value = num(limpo.value)
