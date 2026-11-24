@@ -175,3 +175,13 @@ describe('paridade cliente == servidor (matriz de carrinhos)', () => {
     })
   }
 })
+
+describe('ressalva visível da promo', () => {
+  it('com produto excluído, a ressalva existe e cita o produto (promessa em destaque não pode omitir a exceção)', () => {
+    expect(PROMO_BF.excluir.length).toBeGreaterThan(0)
+    expect(PROMO_BF.ressalva).toMatch(/SX200 Prime/)
+  })
+  it('o selo de PDP/vitrine carrega a ressalva', () => {
+    expect(promoVigentePorFeedId('CLIM-SX100-TREND', DENTRO)?.ressalva).toBe(PROMO_BF.ressalva)
+  })
+})

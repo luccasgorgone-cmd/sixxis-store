@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Zap } from 'lucide-react'
+import { PROMO_BF } from '@/lib/promo-segunda-unidade'
 
 function TimerBloco({ valor, label }: { valor: number; label: string }) {
   const str = String(valor).padStart(2, '0')
@@ -99,7 +100,7 @@ export default function OfertasHero({
           <Zap size={28} className="text-sx-accent-text hidden md:block" strokeWidth={2.5} />
         </div>
         <p className="text-sm md:text-base text-white/50 mb-6">
-          {bf ? '2ª unidade com 50% OFF no site inteiro — ofertas até 30/11' : 'Preços imperdíveis por tempo limitado'}
+          {bf ? `2ª unidade com 50% OFF no site inteiro${PROMO_BF.ressalva ? ` (${PROMO_BF.ressalva})` : ''} — ofertas até 30/11` : 'Preços imperdíveis por tempo limitado'}
         </p>
 
         {/* Timer */}

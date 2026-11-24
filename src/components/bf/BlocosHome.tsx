@@ -5,7 +5,10 @@ import { DESCONTO_PIX_PCT } from '@/lib/preco-pix'
 import { PROMO_BF, promoAtiva } from '@/lib/promo-segunda-unidade'
 
 const PASSOS = [
-  { titulo: 'Escolha dois produtos', texto: 'Podem ser iguais ou diferentes.' },
+  {
+    titulo: 'Escolha dois produtos',
+    texto: PROMO_BF.ressalva ? `Podem ser iguais ou diferentes, ${PROMO_BF.ressalva}.` : 'Podem ser iguais ou diferentes.',
+  },
   { titulo: 'Ganhe 50% no de menor valor', texto: 'O desconto entra sozinho no carrinho.' },
   { titulo: `Pague no Pix com mais ${DESCONTO_PIX_PCT}%`, texto: 'Aplicado sobre o total já promocional.' },
 ]
@@ -58,7 +61,8 @@ export function OfertaDupla() {
               Uma escolha é boa.<br />Duas, melhor ainda.
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-sx-muted sm:text-base">
-              Leve dois produtos e a 2ª unidade sai com {PROMO_BF.percentual}% OFF. Válido até 30/11.
+              Leve dois produtos e a 2ª unidade sai com {PROMO_BF.percentual}% OFF
+              {PROMO_BF.ressalva ? <> ({PROMO_BF.ressalva})</> : null}. Válido até 30/11.
             </p>
             <Link
               href="/produtos"

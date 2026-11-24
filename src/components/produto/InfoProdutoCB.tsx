@@ -379,7 +379,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
           </div>
           <p className="text-sm text-sx-muted leading-snug">
             Leve <strong className="text-sx-text">2 produtos</strong> e a <strong className="text-sx-text">2ª unidade sai com {promoBadge.percentual}% OFF</strong> — válido em
-            <strong className="text-sx-text"> todo o site</strong>. Levando produtos diferentes, o desconto cai na unidade de
+            <strong className="text-sx-text"> todo o site</strong>{promoBadge.ressalva ? <>, <strong className="text-sx-text">{promoBadge.ressalva}</strong></> : null}. Levando produtos diferentes, o desconto cai na unidade de
             <strong className="text-sx-text"> menor valor</strong>, <strong className="text-sx-text">automaticamente no carrinho</strong>.
           </p>
           <p className="text-xs text-sx-subtle mt-1">

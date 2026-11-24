@@ -12,7 +12,7 @@ export async function generateMetadata() {
     return {
       title: 'Black Friday Sixxis',
       description:
-        'Black Friday Sixxis: 2ª unidade com 50% OFF no site inteiro — climatizadores, aspiradores e spinning. Ofertas até 30/11, enquanto durarem os estoques.',
+        `Black Friday Sixxis: 2ª unidade com 50% OFF no site inteiro${PROMO_BF.ressalva ? ` (${PROMO_BF.ressalva})` : ''} — climatizadores, aspiradores e spinning. Ofertas até 30/11, enquanto durarem os estoques.`,
       alternates: { canonical: '/ofertas' },
     }
   }

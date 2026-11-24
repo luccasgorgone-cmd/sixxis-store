@@ -4,7 +4,7 @@ import { ArrowRight, Package } from 'lucide-react'
 import { capaVitrine } from '@/lib/capa-vitrine'
 import { simularDupla } from '@/lib/dupla-bf'
 import { DESCONTO_PIX_PCT, precoPix } from '@/lib/preco-pix'
-import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
+import { PROMO_BF, promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
 
 export interface Especificacao {
   label: string
@@ -93,7 +93,7 @@ export function CombinacaoProduto({ produto }: { produto: ProdutoComparavel }) {
             Seu próximo produto<br />por metade do preço.
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-sx-muted">
-            Leve outra unidade ou combine com um produto diferente. O desconto entra na unidade de menor valor, direto no carrinho.
+            Leve outra unidade ou combine com um produto diferente{PROMO_BF.ressalva ? ` (${PROMO_BF.ressalva})` : ''}. O desconto entra na unidade de menor valor, direto no carrinho.
           </p>
         </div>
         <dl className="rounded-xl border border-sx-line bg-sx-surface p-5 text-sm">

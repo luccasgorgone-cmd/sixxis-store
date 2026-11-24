@@ -38,6 +38,12 @@ export interface ConfigPromoBF {
   /** Rótulo amigável exibido ao cliente. */
   descricao: string
   /**
+   * Ressalva curta exibida JUNTO de toda promessa em destaque da promo (home,
+   * PDP, /ofertas). Precisa refletir `excluir`: promessa sem a exceção visível é
+   * risco de oferta enganosa (CDC art. 30/37). null = sem exceção.
+   */
+  ressalva: string | null
+  /**
    * SKUs e/ou slugs que NÃO participam da promo (nem descontam nem contam no
    * pareamento). Hook de margem — vazio por padrão (regra pura "site inteiro").
    * Um SKU de produto aqui exclui TAMBÉM as variações dele cujo SKU segue o
@@ -59,6 +65,7 @@ export const PROMO_BF: ConfigPromoBF = {
   inicio:             '2026-11-23T00:00:00-03:00', // começa hoje (GO do Luccas 23/11)
   fim:                '2026-11-30T23:59:59-03:00',  // Cyber Monday (default — confirmar fim com Luccas)
   descricao:          '2ª unidade com 50% OFF — Black Friday',
+  ressalva:           'exceto SX200 Prime',
   // 23/11/2026 (pedido do Luccas): SX200 Prime fora da promo da 2ª unidade
   // (único produto excluído). Lista sku E slug para cobrir desconto E badge
   // (feedId = sku ?? slug). As variações CLIM-SX200-PRIME-Branco/-Preto (que é o
@@ -113,10 +120,11 @@ export interface PromoBadge {
   descricao: string
   percentual: number
   fim: string | null
+  ressalva: string | null
 }
 
 function badge(): PromoBadge {
-  return { descricao: PROMO_BF.descricao, percentual: PROMO_BF.percentual, fim: PROMO_BF.fim }
+  return { descricao: PROMO_BF.descricao, percentual: PROMO_BF.percentual, fim: PROMO_BF.fim, ressalva: PROMO_BF.ressalva }
 }
 
 /**

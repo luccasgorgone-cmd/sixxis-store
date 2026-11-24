@@ -13,6 +13,7 @@ import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
 import { DuvidasBlackFriday, OfertaDupla, SuporteSixxis } from '@/components/bf/BlocosHome'
+import { PROMO_BF } from '@/lib/promo-segunda-unidade'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -70,7 +71,7 @@ export default async function HomePage() {
     imagem: '/black-friday/slide-bf-desktop.webp',
     imagemTablet: '/black-friday/slide-bf-desktop.webp',
     imagemMobile: '/black-friday/slide-bf-mobile.webp',
-    titulo: 'Black Friday Sixxis — 2ª unidade com 50% OFF',
+    titulo: `Black Friday Sixxis — 2ª unidade com 50% OFF${PROMO_BF.ressalva ? `, ${PROMO_BF.ressalva}` : ''}`,
     subtitulo: null,
     link: '/produtos',
     ordem: -1,
