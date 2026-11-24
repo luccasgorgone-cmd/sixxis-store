@@ -6,12 +6,12 @@ export default function AvisoMontagem({ categoria }: { categoria?: string | null
   if (!texto) return null
 
   return (
-    <aside className="mb-8 rounded-2xl border border-[#00cfb5]/25 bg-[#111717] px-5 py-4" aria-label="Informação de montagem">
+    <aside className="mb-8 rounded-2xl border border-sx-accent/25 bg-sx-surface px-5 py-4" aria-label="Informação de montagem">
       <div className="flex items-start gap-3">
-        <PackageCheck className="mt-0.5 shrink-0 text-[#00cfb5]" size={22} aria-hidden="true" />
+        <PackageCheck className="mt-0.5 shrink-0 text-sx-accent-text" size={22} aria-hidden="true" />
         <div>
-          <p className="font-bold text-[#F4F7F6]">Montagem do produto</p>
-          <p className="mt-1 text-sm leading-relaxed text-[#D7E0DD]">{texto}</p>
+          <p className="font-bold text-sx-text">Montagem do produto</p>
+          <p className="mt-1 text-sm leading-relaxed text-sx-text-2">{texto}</p>
         </div>
       </div>
     </aside>

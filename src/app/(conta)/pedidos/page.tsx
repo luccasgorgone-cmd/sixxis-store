@@ -19,7 +19,7 @@ const statusLabel: Record<string, string> = {
 
 const statusColor: Record<string, string> = {
   pendente:  'bg-yellow-100 text-yellow-700',
-  pago:      'bg-[#e8f8f7] text-[#00cfb5]',
+  pago:      'bg-sx-tint text-sx-accent-text',
   enviado:   'bg-purple-100 text-purple-700',
   entregue:  'bg-green-100 text-green-700',
   cancelado: 'bg-red-100 text-red-700',
@@ -46,11 +46,11 @@ export default async function PedidosPage() {
       <h1 className="text-3xl font-extrabold text-[#0a0a0a] tracking-tight mb-8">Meus Pedidos</h1>
 
       {pedidos.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-[#2A3937] rounded-2xl">
-          <div className="w-14 h-14 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-4">
-            <ShoppingBag size={24} className="text-[#00cfb5]" />
+        <div className="text-center py-20 border border-dashed border-sx-line rounded-2xl">
+          <div className="w-14 h-14 rounded-full bg-sx-tint flex items-center justify-center mx-auto mb-4">
+            <ShoppingBag size={24} className="text-sx-accent-text" />
           </div>
-          <p className="text-[#B0BFBC] font-medium mb-2">Você ainda não fez nenhum pedido.</p>
+          <p className="text-sx-muted font-medium mb-2">Você ainda não fez nenhum pedido.</p>
           <Link href="/produtos" className="btn-primary mt-4 inline-flex">
             Ver Produtos
           </Link>
@@ -58,13 +58,13 @@ export default async function PedidosPage() {
       ) : (
         <div className="space-y-4">
           {pedidos.map((pedido) => (
-            <div key={pedido.id} className="bg-[#111717] border border-[#2A3937] rounded-xl p-6 hover:border-[#00cfb5] transition">
+            <div key={pedido.id} className="bg-sx-surface border border-sx-line rounded-xl p-6 hover:border-sx-accent transition">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <p className="font-bold text-sm text-[#0a0a0a]">
                     Pedido #{pedido.id.slice(-8).toUpperCase()}
                   </p>
-                  <p className="text-xs text-[#8a9794] mt-0.5">
+                  <p className="text-xs text-sx-subtle mt-0.5">
                     {new Date(pedido.createdAt).toLocaleDateString('pt-BR', {
                       day: '2-digit', month: 'long', year: 'numeric'
                     })}
@@ -72,31 +72,31 @@ export default async function PedidosPage() {
                 </div>
                 <span
                   className={`text-xs px-3 py-1 rounded-full font-semibold ${
-                    statusColor[pedido.status] ?? 'bg-[#192221] text-[#B0BFBC]'
+                    statusColor[pedido.status] ?? 'bg-sx-raised text-sx-muted'
                   }`}
                 >
                   {statusLabel[pedido.status] ?? pedido.status}
                 </span>
               </div>
 
-              <ul className="text-sm text-[#B0BFBC] space-y-1 mb-4">
+              <ul className="text-sm text-sx-muted space-y-1 mb-4">
                 {pedido.itens.map((item) => (
                   <li key={item.id} className="flex items-center gap-1.5">
-                    <span className="text-[#00cfb5]">•</span>
+                    <span className="text-sx-accent-text">•</span>
                     {item.quantidade}x {item.produto.nome}
                   </li>
                 ))}
               </ul>
 
-              <div className="flex justify-between items-center border-t border-[#2A3937] pt-3">
-                <p className="text-sm text-[#B0BFBC]">Total do pedido</p>
+              <div className="flex justify-between items-center border-t border-sx-line pt-3">
+                <p className="text-sm text-sx-muted">Total do pedido</p>
                 <div className="flex items-center gap-4">
-                  <p className="font-bold text-[#00cfb5]">
+                  <p className="font-bold text-sx-accent-text">
                     R$ {Number(pedido.total).toFixed(2)}
                   </p>
                   <Link
                     href={`/pedidos/${pedido.id}`}
-                    className="text-xs font-semibold text-[#00cfb5] hover:text-[#65E5D4] border border-[#00cfb5]/30 hover:border-[#00cfb5] rounded-lg px-3 py-1.5 transition"
+                    className="text-xs font-semibold text-sx-accent-text hover:text-sx-accent-text border border-sx-accent/30 hover:border-sx-accent rounded-lg px-3 py-1.5 transition"
                   >
                     Ver detalhes →
                   </Link>

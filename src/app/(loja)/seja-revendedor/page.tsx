@@ -171,7 +171,7 @@ export default function SejaRevendedorPage() {
       texto: 'Incluímos a linha Sixxis em 2019 e hoje ela representa 35% do faturamento total. Climatizadores com zero índice de devolução por defeito — simplesmente funcionam. Clientes satisfeitos geram mais negócio.',
       crescimento: '35% do faturamento',
       avatarInicial: 'M',
-      avatarCor: '#3cbfb3',
+      avatarCor: 'var(--sx-accent-text)',
       destaque: false
     },
     {
@@ -207,7 +207,7 @@ export default function SejaRevendedorPage() {
       texto: 'Adicionamos as bikes spinning Sixxis ao catálogo e o resultado foi imediato. Qualidade de equipamento profissional a um preço acessível — os clientes percebem o valor. Em menos de 6 meses, as bikes já representam 20% das vendas de fitness.',
       crescimento: '20% das vendas',
       avatarInicial: 'L',
-      avatarCor: '#3cbfb3',
+      avatarCor: 'var(--sx-accent)',
       destaque: false
     },
   ]
@@ -219,7 +219,7 @@ export default function SejaRevendedorPage() {
       descricao: 'Preencha o formulário abaixo com seus dados. Leva menos de 2 minutos. Sem taxa de adesão, sem burocracia.',
       icone: CheckCircle,
       tempo: 'Menos de 2 min',
-      cor: '#3cbfb3'
+      cor: 'var(--sx-accent-text)'
     },
     {
       numero: '02',
@@ -243,7 +243,7 @@ export default function SejaRevendedorPage() {
       descricao: 'Faça seu primeiro pedido, receba com rapidez e comece a atender clientes com produto de qualidade comprovada. Suporte completo em todas as etapas.',
       icone: TrendingUp,
       tempo: 'Imediato',
-      cor: '#3cbfb3'
+      cor: 'var(--sx-accent-text)'
     },
   ]
 
@@ -258,22 +258,22 @@ export default function SejaRevendedorPage() {
       <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Seja um Parceiro' }]} />
       {/* ── HERO ── */}
       <section
-        className="relative min-h-[85vh] flex items-center justify-center overflow-hidden"
+        className="sx-escuro relative min-h-[85vh] flex items-center justify-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 50%, #1a4f4a 100%)' }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-10"
-            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)' }} />
+            style={{ background: 'radial-gradient(circle, var(--sx-accent), transparent)' }} />
           <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full opacity-[0.08]"
-            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)' }} />
+            style={{ background: 'radial-gradient(circle, var(--sx-accent), transparent)' }} />
           <div className="absolute inset-0 opacity-5"
-            style={{ backgroundImage: 'linear-gradient(#3cbfb3 1px, transparent 1px), linear-gradient(90deg, #3cbfb3 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+            style={{ backgroundImage: 'linear-gradient(var(--sx-accent) 1px, transparent 1px), linear-gradient(90deg, var(--sx-accent) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
         </div>
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center py-24">
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase mb-8"
-            style={{ backgroundColor: 'rgba(60,191,179,0.15)', border: '1px solid rgba(60,191,179,0.3)', color: '#3cbfb3' }}
+            style={{ backgroundColor: 'rgba(60,191,179,0.15)', border: '1px solid rgba(60,191,179,0.3)', color: 'var(--sx-accent-text)' }}
           >
             <Flame size={12} />
             Programa de Parceiros — Sixxis
@@ -281,7 +281,7 @@ export default function SejaRevendedorPage() {
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
             Cresça com a marca{' '}
-            <span style={{ color: '#3cbfb3' }}>que o Brasil confia há 30 anos</span>
+            <span style={{ color: 'var(--sx-accent-text)' }}>que o Brasil confia há 30 anos</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-4 leading-relaxed">
@@ -291,7 +291,7 @@ export default function SejaRevendedorPage() {
 
           <p className="text-sm text-white/50 mb-10">
             O mercado de climatização cresceu{' '}
-            <strong className="text-[#3cbfb3]">34% nos últimos 3 anos</strong>.
+            <strong className="text-sx-accent-text">34% nos últimos 3 anos</strong>.
             Este é o momento de entrar.
           </p>
 
@@ -299,7 +299,7 @@ export default function SejaRevendedorPage() {
             <a
               href="#cadastro"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-105 hover:shadow-xl"
-              style={{ backgroundColor: '#3cbfb3', color: '#0f2e2b' }}
+              style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
             >
               Quero ser parceiro <ArrowRight size={18} />
             </a>
@@ -315,13 +315,13 @@ export default function SejaRevendedorPage() {
       </section>
 
       {/* ── STATS ── */}
-      <section style={{ backgroundColor: '#0f2e2b' }} className="py-8 border-t border-white/10">
+      <section style={{ backgroundColor: '#0f2e2b' }} className="sx-escuro py-8 border-t border-white/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((s, i) => (
               <AnimSection key={i} delay={i * 100} className="text-center">
-                <s.icone size={28} className="mx-auto mb-2" style={{ color: '#3cbfb3' }} />
-                <p className="text-3xl sm:text-4xl font-black" style={{ color: '#3cbfb3' }}>{s.valor}</p>
+                <s.icone size={28} className="mx-auto mb-2" style={{ color: 'var(--sx-accent-text)' }} />
+                <p className="text-3xl sm:text-4xl font-black" style={{ color: 'var(--sx-accent-text)' }}>{s.valor}</p>
                 <p className="text-sm text-white/60 mt-1">{s.label}</p>
               </AnimSection>
             ))}
@@ -334,13 +334,13 @@ export default function SejaRevendedorPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
             <SectionKicker texto="Vantagens reais" dark />
-            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-sx-text mt-2">
               Por que ser parceiro Sixxis?
             </h2>
-            <p className="text-[#B0BFBC] text-lg mt-3 max-w-2xl mx-auto">
+            <p className="text-sx-muted text-lg mt-3 max-w-2xl mx-auto">
               Não é uma parceria de prateleira. É um relacionamento construído para durar e crescer junto.
             </p>
-            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
+            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
           </AnimSection>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -348,21 +348,21 @@ export default function SejaRevendedorPage() {
               <AnimSection
                 key={i}
                 delay={i * 80}
-                className="group bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-7"
+                className="group bg-sx-surface rounded-2xl border border-sx-line shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-7"
               >
                 <div className="flex items-start gap-4">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                     style={{ backgroundColor: '#e8f8f7' }}
                   >
-                    <v.icone size={22} style={{ color: '#3cbfb3' }} />
+                    <v.icone size={22} style={{ color: 'var(--sx-accent-text)' }} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base font-bold text-[#F4F7F6] mb-2">{v.titulo}</h3>
-                    <p className="text-sm text-[#B0BFBC] leading-relaxed mb-3">{v.texto}</p>
+                    <h3 className="text-base font-bold text-sx-text mb-2">{v.titulo}</h3>
+                    <p className="text-sm text-sx-muted leading-relaxed mb-3">{v.texto}</p>
                     <span
                       className="inline-block text-xs font-bold px-3 py-1 rounded-full"
-                      style={{ backgroundColor: '#e8f8f7', color: '#3cbfb3' }}
+                      style={{ backgroundColor: '#e8f8f7', color: 'var(--sx-accent-text)' }}
                     >
                       {v.destaque}
                     </span>
@@ -375,7 +375,7 @@ export default function SejaRevendedorPage() {
       </section>
 
       {/* ── OPORTUNIDADE DE MERCADO ── */}
-      <section className="py-20" style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
+      <section className="sx-escuro py-20" style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
             <SectionKicker texto="Mercado em expansão" dark />
@@ -385,7 +385,7 @@ export default function SejaRevendedorPage() {
             <p className="text-white/60 text-lg mt-3 max-w-2xl mx-auto">
               Dados reais do mercado brasileiro de climatização e bem-estar
             </p>
-            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
+            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
           </AnimSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -415,7 +415,7 @@ export default function SejaRevendedorPage() {
                 className="text-center p-8 rounded-2xl"
                 style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } as React.CSSProperties}
               >
-                <item.icone size={32} className="mx-auto mb-4" style={{ color: '#3cbfb3' }} />
+                <item.icone size={32} className="mx-auto mb-4" style={{ color: 'var(--sx-accent-text)' }} />
                 <p className="text-5xl font-black text-white mb-3">{item.numero}</p>
                 <p className="text-white/60 text-sm leading-relaxed mb-3">{item.descricao}</p>
                 <span className="text-xs text-white/30 italic">{item.fonte}</span>
@@ -429,7 +429,7 @@ export default function SejaRevendedorPage() {
               o mercado de climatização é um dos poucos segmentos que{' '}
               <strong className="text-white">não para de crescer</strong>{' '}
               mesmo em períodos de instabilidade econômica.{' '}
-              <strong className="text-[#3cbfb3]">Isso significa oportunidade real para o seu negócio agora.</strong>
+              <strong className="text-sx-accent-text">Isso significa oportunidade real para o seu negócio agora.</strong>
             </p>
           </AnimSection>
         </div>
@@ -440,13 +440,13 @@ export default function SejaRevendedorPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
             <SectionKicker texto="Resultados comprovados" dark />
-            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-sx-text mt-2">
               Quem já é parceiro, recomenda
             </h2>
-            <p className="text-[#B0BFBC] text-lg mt-3 max-w-2xl mx-auto">
+            <p className="text-sx-muted text-lg mt-3 max-w-2xl mx-auto">
               Histórias reais de parceiros que construíram negócios sólidos com a Sixxis
             </p>
-            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
+            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
           </AnimSection>
 
           {/* Cards de destaque (top 2) */}
@@ -454,7 +454,7 @@ export default function SejaRevendedorPage() {
             {depoimentos.filter(d => d.destaque).map((d, i) => (
               <AnimSection key={i} delay={i * 150}>
                 <div
-                  className="relative rounded-2xl p-8 h-full flex flex-col"
+                  className="sx-escuro relative rounded-2xl p-8 h-full flex flex-col"
                   style={{
                     background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)',
                     border: '1px solid rgba(60,191,179,0.2)'
@@ -462,12 +462,12 @@ export default function SejaRevendedorPage() {
                 >
                   <div
                     className="absolute top-6 right-6 text-[10px] font-bold px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: '#3cbfb3', color: '#0f2e2b' }}
+                    style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
                   >
                     DESTAQUE
                   </div>
 
-                  <Quote size={32} className="mb-4 opacity-40" style={{ color: '#3cbfb3' }} />
+                  <Quote size={32} className="mb-4 opacity-40" style={{ color: 'var(--sx-accent-text)' }} />
 
                   <p className="text-white/85 text-base leading-relaxed mb-6 flex-1 italic">
                     &ldquo;{d.texto}&rdquo;
@@ -477,7 +477,7 @@ export default function SejaRevendedorPage() {
                     <div className="flex items-center gap-3">
                       <div
                         className="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg shrink-0"
-                        style={{ backgroundColor: '#3cbfb3', color: '#0f2e2b' }}
+                        style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
                       >
                         {d.avatarInicial}
                       </div>
@@ -488,7 +488,7 @@ export default function SejaRevendedorPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-black" style={{ color: '#3cbfb3' }}>{d.crescimento}</p>
+                      <p className="text-2xl font-black" style={{ color: 'var(--sx-accent-text)' }}>{d.crescimento}</p>
                       <p className="text-white/40 text-xs">{d.anos}</p>
                     </div>
                   </div>
@@ -501,28 +501,28 @@ export default function SejaRevendedorPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {depoimentos.filter(d => !d.destaque).map((d, i) => (
               <AnimSection key={i} delay={i * 80}>
-                <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-6 h-full flex flex-col">
-                  <Quote size={20} className="mb-3" style={{ color: '#3cbfb3', opacity: 0.5 } as React.CSSProperties} />
-                  <p className="text-[#B0BFBC] text-sm leading-relaxed mb-5 flex-1 italic">
+                <div className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm p-6 h-full flex flex-col">
+                  <Quote size={20} className="mb-3" style={{ color: 'var(--sx-accent-text)', opacity: 0.5 } as React.CSSProperties} />
+                  <p className="text-sx-muted text-sm leading-relaxed mb-5 flex-1 italic">
                     &ldquo;{d.texto.substring(0, 180)}...&rdquo;
                   </p>
-                  <div className="pt-4 border-t border-[#2A3937]">
+                  <div className="pt-4 border-t border-sx-line">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                        style={{ backgroundColor: d.avatarCor || '#3cbfb3' }}
+                        style={{ backgroundColor: d.avatarCor || 'var(--sx-accent-text)' }}
                       >
                         {d.avatarInicial}
                       </div>
                       <div>
-                        <p className="text-[#F4F7F6] font-bold text-xs">{d.nome}</p>
-                        <p className="text-[#B0BFBC] text-xs">{d.empresa}</p>
-                        <p className="text-[#8A9A96] text-xs">{d.cidade}</p>
+                        <p className="text-sx-text font-bold text-xs">{d.nome}</p>
+                        <p className="text-sx-muted text-xs">{d.empresa}</p>
+                        <p className="text-sx-subtle text-xs">{d.cidade}</p>
                       </div>
                     </div>
                     <div
                       className="mt-3 text-center py-1.5 rounded-xl text-xs font-bold"
-                      style={{ backgroundColor: '#e8f8f7', color: '#3cbfb3' }}
+                      style={{ backgroundColor: '#e8f8f7', color: 'var(--sx-accent-text)' }}
                     >
                       {d.crescimento}
                     </div>
@@ -539,13 +539,13 @@ export default function SejaRevendedorPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-16">
             <SectionKicker texto="Simples e rápido" dark />
-            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-sx-text mt-2">
               Comece a faturar em 4 passos
             </h2>
-            <p className="text-[#B0BFBC] text-lg mt-3 max-w-xl mx-auto">
+            <p className="text-sx-muted text-lg mt-3 max-w-xl mx-auto">
               Da inscrição à primeira venda em menos de 48 horas
             </p>
-            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
+            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
           </AnimSection>
 
           <div className="relative">
@@ -564,17 +564,17 @@ export default function SejaRevendedorPage() {
                       <p.icone size={32} color="white" />
                     </div>
                     <div
-                      className="absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
-                      style={{ backgroundColor: '#0f2e2b', color: '#3cbfb3', border: '2px solid white' }}
+                      className="sx-escuro absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
+                      style={{ backgroundColor: '#0f2e2b', color: 'var(--sx-accent-text)', border: '2px solid white' }}
                     >
                       {p.numero}
                     </div>
                   </div>
-                  <h3 className="text-lg font-extrabold text-[#F4F7F6] mb-2">{p.titulo}</h3>
-                  <p className="text-sm text-[#B0BFBC] leading-relaxed mb-4">{p.descricao}</p>
+                  <h3 className="text-lg font-extrabold text-sx-text mb-2">{p.titulo}</h3>
+                  <p className="text-sm text-sx-muted leading-relaxed mb-4">{p.descricao}</p>
                   <span
                     className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                    style={{ backgroundColor: '#e8f8f7', color: '#3cbfb3' }}
+                    style={{ backgroundColor: '#e8f8f7', color: 'var(--sx-accent-text)' }}
                   >
                     <Clock size={11} />
                     {p.tempo}
@@ -587,17 +587,17 @@ export default function SejaRevendedorPage() {
       </section>
 
       {/* ── FORMULÁRIO ── */}
-      <section id="cadastro" className="py-20" style={{ background: '#080B0B' }}>
+      <section id="cadastro" className="py-20" style={{ background: 'var(--sx-bg)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-12">
             <SectionKicker texto="Sem taxa de adesão" dark />
-            <h2 className="text-3xl sm:text-4xl font-black text-[#F4F7F6] mt-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-sx-text mt-2">
               Quero ser parceiro Sixxis
             </h2>
-            <p className="text-[#B0BFBC] text-lg mt-3 max-w-xl mx-auto">
+            <p className="text-sx-muted text-lg mt-3 max-w-xl mx-auto">
               Nossa equipe comercial entra em contato em até 24 horas
             </p>
-            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: '#3cbfb3' }} />
+            <div className="w-16 h-1 rounded-full mx-auto mt-5" style={{ backgroundColor: 'var(--sx-accent)' }} />
           </AnimSection>
 
           <AnimSection>
@@ -605,7 +605,7 @@ export default function SejaRevendedorPage() {
               {/* Coluna esquerda — Benefícios */}
               <div className="lg:col-span-1 space-y-6">
                 <div
-                  className="rounded-2xl p-6"
+                  className="sx-escuro rounded-2xl p-6"
                   style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}
                 >
                   <h3 className="text-white font-bold text-base mb-4">O que você recebe</h3>
@@ -618,32 +618,32 @@ export default function SejaRevendedorPage() {
                     'Programa de metas e recompensas',
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2.5 mb-3">
-                      <CheckCircle size={14} style={{ color: '#3cbfb3', flexShrink: 0 }} />
+                      <CheckCircle size={14} style={{ color: 'var(--sx-accent-text)', flexShrink: 0 }} />
                       <span className="text-white/75 text-sm">{item}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-[#111717] rounded-2xl p-5 border border-[#2A3937]">
-                  <p className="text-xs text-[#B0BFBC] font-semibold uppercase tracking-wide mb-3">
+                <div className="bg-sx-surface rounded-2xl p-5 border border-sx-line">
+                  <p className="text-xs text-sx-muted font-semibold uppercase tracking-wide mb-3">
                     Fale com a gente
                   </p>
                   <a
                     href="https://wa.me/5518997474701"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2.5 text-sm font-medium text-[#F4F7F6] hover:text-[#3cbfb3] transition-colors mb-2"
+                    className="flex items-center gap-2.5 text-sm font-medium text-sx-text hover:text-sx-accent-text transition-colors mb-2"
                   >
-                    <Phone size={15} style={{ color: '#3cbfb3' }} /> (18) 99747-4701
+                    <Phone size={15} style={{ color: 'var(--sx-accent-text)' }} /> (18) 99747-4701
                   </a>
                   <a
                     href="mailto:sac@sixxis.com.br"
-                    className="flex items-center gap-2.5 text-sm font-medium text-[#F4F7F6] hover:text-[#3cbfb3] transition-colors mb-2"
+                    className="flex items-center gap-2.5 text-sm font-medium text-sx-text hover:text-sx-accent-text transition-colors mb-2"
                   >
-                    <Mail size={15} style={{ color: '#3cbfb3' }} /> sac@sixxis.com.br
+                    <Mail size={15} style={{ color: 'var(--sx-accent-text)' }} /> sac@sixxis.com.br
                   </a>
-                  <div className="flex items-center gap-2.5 text-sm text-[#B0BFBC]">
-                    <MapPin size={15} style={{ color: '#3cbfb3' }} /> Araçatuba, SP
+                  <div className="flex items-center gap-2.5 text-sm text-sx-muted">
+                    <MapPin size={15} style={{ color: 'var(--sx-accent-text)' }} /> Araçatuba, SP
                   </div>
                 </div>
               </div>
@@ -653,11 +653,11 @@ export default function SejaRevendedorPage() {
                 {enviado ? (
                   <div
                     className="rounded-2xl p-12 text-center border"
-                    style={{ backgroundColor: '#111717', borderColor: '#3cbfb3' }}
+                    style={{ backgroundColor: 'var(--sx-surface)', borderColor: 'var(--sx-accent)' }}
                   >
-                    <CheckCircle size={56} className="mx-auto mb-4" style={{ color: '#3cbfb3' }} />
-                    <h3 className="text-2xl font-black text-[#F4F7F6] mb-2">Solicitação recebida!</h3>
-                    <p className="text-[#B0BFBC] text-base">
+                    <CheckCircle size={56} className="mx-auto mb-4" style={{ color: 'var(--sx-accent-text)' }} />
+                    <h3 className="text-2xl font-black text-sx-text mb-2">Solicitação recebida!</h3>
+                    <p className="text-sx-muted text-base">
                       Recebemos sua solicitação de parceria! Nossa equipe vai analisar e entrar
                       em contato em breve pelo e-mail ou WhatsApp informado.
                     </p>
@@ -665,11 +665,11 @@ export default function SejaRevendedorPage() {
                 ) : (
                   <form
                     onSubmit={handleSubmit}
-                    className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-8 space-y-5"
+                    className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm p-8 space-y-5"
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-sx-muted uppercase tracking-wide mb-2">
                           Nome completo *
                         </label>
                         <input
@@ -677,19 +677,19 @@ export default function SejaRevendedorPage() {
                           type="text"
                           value={formData.nome}
                           onChange={e => setFormData({ ...formData, nome: e.target.value })}
-                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm text-sx-text placeholder-sx-subtle focus:outline-none focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 transition"
                           placeholder="Seu nome completo"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-sx-muted uppercase tracking-wide mb-2">
                           Empresa
                         </label>
                         <input
                           type="text"
                           value={formData.empresa}
                           onChange={e => setFormData({ ...formData, empresa: e.target.value })}
-                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm text-sx-text placeholder-sx-subtle focus:outline-none focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 transition"
                           placeholder="Nome da empresa (opcional)"
                         />
                       </div>
@@ -697,7 +697,7 @@ export default function SejaRevendedorPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-sx-muted uppercase tracking-wide mb-2">
                           E-mail *
                         </label>
                         <input
@@ -705,12 +705,12 @@ export default function SejaRevendedorPage() {
                           type="email"
                           value={formData.email}
                           onChange={e => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm text-sx-text placeholder-sx-subtle focus:outline-none focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 transition"
                           placeholder="seu@email.com"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-sx-muted uppercase tracking-wide mb-2">
                           WhatsApp *
                         </label>
                         <input
@@ -718,7 +718,7 @@ export default function SejaRevendedorPage() {
                           type="tel"
                           value={formData.whatsapp}
                           onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
-                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm text-sx-text placeholder-sx-subtle focus:outline-none focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 transition"
                           placeholder="(00) 00000-0000"
                         />
                       </div>
@@ -726,25 +726,25 @@ export default function SejaRevendedorPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-sx-muted uppercase tracking-wide mb-2">
                           Cidade / Estado
                         </label>
                         <input
                           type="text"
                           value={formData.cidade}
                           onChange={e => setFormData({ ...formData, cidade: e.target.value })}
-                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition"
+                          className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm text-sx-text placeholder-sx-subtle focus:outline-none focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 transition"
                           placeholder="São Paulo, SP"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
+                        <label className="block text-xs font-bold text-sx-muted uppercase tracking-wide mb-2">
                           Segmento de atuação
                         </label>
                         <select
                           value={formData.segmento}
                           onChange={e => setFormData({ ...formData, segmento: e.target.value })}
-                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition bg-[#111717]"
+                          className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm text-sx-text placeholder-sx-subtle focus:outline-none focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 transition bg-sx-surface"
                         >
                           <option value="">Selecione</option>
                           {segmentos.map(s => <option key={s} value={s}>{s}</option>)}
@@ -753,14 +753,14 @@ export default function SejaRevendedorPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-[#B0BFBC] uppercase tracking-wide mb-2">
+                      <label className="block text-xs font-bold text-sx-muted uppercase tracking-wide mb-2">
                         Mensagem (opcional)
                       </label>
                       <textarea
                         rows={3}
                         value={formData.mensagem}
                         onChange={e => setFormData({ ...formData, mensagem: e.target.value })}
-                        className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm text-[#F4F7F6] placeholder-[#B8C8C3] focus:outline-none focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 transition resize-none"
+                        className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm text-sx-text placeholder-sx-subtle focus:outline-none focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 transition resize-none"
                         placeholder="Conte um pouco sobre seu negócio ou dúvida..."
                       />
                     </div>
@@ -776,7 +776,7 @@ export default function SejaRevendedorPage() {
                       type="submit"
                       disabled={enviando}
                       className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
-                      style={{ backgroundColor: '#3cbfb3', color: '#0f2e2b' }}
+                      style={{ backgroundColor: 'var(--sx-accent)', color: '#0f2e2b' }}
                     >
                       {enviando ? (
                         <>
@@ -790,7 +790,7 @@ export default function SejaRevendedorPage() {
                       )}
                     </button>
 
-                    <p className="text-center text-xs text-[#B0BFBC]">
+                    <p className="text-center text-xs text-sx-muted">
                       Sem taxa de adesão · Aprovação em até 24h · Dados protegidos pela LGPD
                     </p>
                   </form>

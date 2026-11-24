@@ -34,17 +34,17 @@ export default function StickyBarMobile({ produtoId, nome, precoFinal, esgotado,
   if (esgotado) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#111717] border-t border-[#2A3937] p-4 flex items-center gap-3 md:hidden z-30 safe-area-bottom">
+    <div className="fixed bottom-0 left-0 right-0 bg-sx-surface border-t border-sx-line p-4 flex items-center gap-3 md:hidden z-30 safe-area-bottom">
       <div className="shrink-0">
-        <p className="text-xs text-[#B0BFBC] leading-none mb-0.5">Preço</p>
-        <p className="text-xl font-black text-[#00cfb5] leading-tight">
+        <p className="text-xs text-sx-muted leading-none mb-0.5">Preço</p>
+        <p className="text-xl font-black text-sx-accent-text leading-tight">
           R$&nbsp;{formatBRL(precoFinal)}
         </p>
       </div>
       {temVariacoes ? (
         <button
           onClick={scrollToSelector}
-          className="flex-1 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold py-4 rounded-xl transition-all active:scale-[0.97]"
+          className="flex-1 bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-bold py-4 rounded-xl transition-all active:scale-[0.97]"
         >
           Escolher Opção
         </button>
@@ -53,8 +53,8 @@ export default function StickyBarMobile({ produtoId, nome, precoFinal, esgotado,
           onClick={handleAdicionar}
           className={`flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-xl transition-all active:scale-[0.97] ${
             adicionado
-              ? 'bg-green-500 text-white'
-              : 'bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28]'
+              ? 'bg-green-500 text-sx-ink'
+              : 'bg-sx-accent hover:bg-sx-accent-hover text-[#032E28]'
           }`}
         >
           {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}

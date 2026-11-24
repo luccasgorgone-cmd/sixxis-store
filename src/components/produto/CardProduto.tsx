@@ -15,6 +15,7 @@ import { precoPix as aplicarDescontoPix, DESCONTO_PIX_PCT } from '@/lib/preco-pi
 import { inferirTipoVariacao } from '@/lib/variacao'
 import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
 import { cupomVitrinePorFeedId } from '@/lib/cupom-vitrine'
+import { capaVitrine } from '@/lib/capa-vitrine'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import type { Produto } from '@/types'
 
@@ -40,8 +41,8 @@ export default function CardProduto({ produto, priority = false }: Props) {
   const [imgError, setImgError] = useState(false)
   const [modalVariacaoAberto, setModalVariacaoAberto] = useState(false)
 
-  const imagens = produto.imagens as string[]
-  const imagemCapa = !imgError && imagens?.[0] ? imagens[0] : null
+  const capa = capaVitrine(produto.slug, produto.imagens)
+  const imagemCapa = !imgError ? capa : null
   const preco = Number(produto.preco)
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
   const precoFinal = promocional ?? preco
@@ -212,10 +213,10 @@ export default function CardProduto({ produto, priority = false }: Props) {
   return (
     <>
     <Link href={`/produtos/${produto.slug}`} className="block h-full group">
-      <article className="bg-[#111717] h-full flex flex-col border border-[#2A3937] rounded-2xl overflow-hidden hover:border-[#00cfb5]/40 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all duration-200">
+      <article className="bg-sx-surface h-full flex flex-col border border-sx-line rounded-xl overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-sx-accent/60 hover:shadow-[0_12px_30px_rgba(17,32,28,0.09)]">
 
         {/* Imagem — palco claro (red-line: foto não escurece) */}
-        <div className="relative bg-[#f4f5f2] overflow-hidden" style={{ aspectRatio: '1/1', minHeight: 'min(220px, 42vw)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+        <div className="relative aspect-square overflow-hidden border-b border-sx-line bg-sx-stage">
           {/* Badge desconto */}
           {desconto > 0 && !esgotado && (
             <div className="absolute top-2.5 left-2.5 z-10">
@@ -230,7 +231,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
 
           {/* Badge novo */}
           {isNovo && !esgotado && (
-            <span className="absolute top-2.5 left-2.5 z-10 bg-[#00cfb5] text-[#032E28] text-[10px] font-black px-2 py-0.5 rounded-md">
+            <span className="absolute top-2.5 left-2.5 z-10 bg-sx-accent text-[#032E28] text-[10px] font-black px-2 py-0.5 rounded-md">
               NOVO
             </span>
           )}
@@ -253,7 +254,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
           >
             <Heart
               size={15}
-              className={isFav ? 'text-red-500 fill-red-500' : 'text-gray-400'}
+              className={isFav ? 'text-red-500 fill-red-500' : 'text-gray-500'}
             />
           </button>
 
@@ -262,7 +263,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               src={imagemCapa}
               alt={produto.nome}
               fill
-              className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+              className="object-contain p-3 sm:p-4 transition-transform duration-500 group-hover:scale-[1.03]"
               sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
               unoptimized
               priority={priority}
@@ -279,7 +280,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
               desconto/NOVO (sup. esq.) nem favoritar (sup. dir.). Config-driven. */}
           {promoSegunda && !esgotado && (
             <div className="absolute bottom-2.5 left-2.5 z-10">
-              <span className="bg-[#0f2e2b] text-white text-[10px] font-black px-2 py-0.5 rounded-md ring-1 ring-[#3cbfb3]/40 shadow-sm">
+              <span className="bg-[#0f2e2b] text-white text-[10px] font-black px-2 py-0.5 rounded-md ring-1 ring-sx-accent/40 shadow-sm">
                 🔥 2ª un. −{promoSegunda.percentual}%
               </span>
             </div>
@@ -312,81 +313,77 @@ export default function CardProduto({ produto, priority = false }: Props) {
           )}
         </div>
 
-        {/* Conteúdo */}
-        <div className="flex flex-col flex-1 px-3 pt-3 pb-3">
-          <p className="text-xs sm:text-sm text-[#F4F7F6] line-clamp-2 leading-snug font-medium mb-2 flex-1">
+        {/* Conteúdo: cada linha reserva altura para alinhar os cards da mesma fileira */}
+        <div className="flex flex-1 flex-col px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+          <h3 className="min-h-[2.6em] text-[13px] font-semibold leading-[1.3] tracking-normal text-sx-text line-clamp-2 sm:text-sm">
             {produto.nome}
-          </p>
+          </h3>
 
-          {/* Avaliações */}
-          {totalAvaliacoes > 0 && (
-            <div className="flex items-center gap-1.5 mb-2.5">
-              <EstrelasNota nota={mediaAvaliacoes} size={12} />
-              <span className="text-xs text-[#B0BFBC]">({totalAvaliacoes})</span>
-            </div>
-          )}
-
-          {/* Preços */}
-          <div>
-            {precoOriginal && (
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="text-xs text-[#B0BFBC]/70 line-through">R$ {fmt(precoOriginal)}</span>
-              </div>
+          <div className="mt-1.5 flex h-4 items-center gap-1.5">
+            {totalAvaliacoes > 0 ? (
+              <>
+                <EstrelasNota nota={mediaAvaliacoes} size={13} />
+                <span className="text-[11px] font-semibold leading-none text-sx-text-2 tabular-nums">{mediaAvaliacoes.toFixed(1)}</span>
+                <span className="text-[11px] leading-none text-sx-subtle tabular-nums">({totalAvaliacoes})</span>
+              </>
+            ) : (
+              <span className="text-[11px] leading-none text-sx-subtle">Sem avaliações</span>
             )}
+          </div>
 
-            <p className="text-[17px] font-black text-[#F4F7F6] leading-none mb-1">
+          <div className="mt-3">
+            <p className="h-4 text-xs leading-4 text-sx-subtle tabular-nums">
+              {precoOriginal ? <span className="line-through">R$ {fmt(precoOriginal)}</span> : null}
+            </p>
+            <p className="mt-0.5 text-lg font-extrabold leading-tight text-sx-text tabular-nums sm:text-xl">
               R$ {fmt(precoFinal)}
             </p>
-
-            <p className="hidden sm:block text-xs text-[#B0BFBC] mb-1">
-              em até {MAX_PARCELAS_SEM_JUROS}x de <span className="font-semibold">R$ {fmt(valorParcela(precoFinal))}</span> sem juros
+            <p className="mt-1 truncate text-[11px] leading-4 text-sx-muted tabular-nums sm:text-xs">
+              {MAX_PARCELAS_SEM_JUROS}x de <span className="font-semibold">R$ {fmt(valorParcela(precoFinal))}</span>
+              <span className="hidden sm:inline"> sem juros</span>
             </p>
-
-            <p className="text-[11px] sm:text-xs text-[#00cfb5] font-semibold mb-3 whitespace-nowrap">
+            <p className="mt-0.5 truncate text-[11px] font-semibold leading-4 text-sx-accent-text tabular-nums sm:text-xs">
               R$ {fmt(precoPix)} no Pix
-              <span className="text-[#B0BFBC]/70 font-normal whitespace-nowrap"> ({DESCONTO_PIX_PCT}% OFF)</span>
+              <span className="font-normal text-sx-subtle"> ({DESCONTO_PIX_PCT}% OFF)</span>
             </p>
+          </div>
 
-            {/* Botões — Comprar Agora primeiro, Adicionar segundo. Sempre os dois,
-                pra todo produto (com ou sem variação): quando exige escolha, o
-                clique abre o modal de seleção em vez de agir direto. */}
-            <div className="space-y-2">
-              {!esgotado && (
-                <button
-                  onClick={handleComprarAgora}
-                  className="w-full font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] shadow-sm transition-all duration-200 active:scale-[0.98]"
-                >
-                  Comprar Agora
-                </button>
-              )}
-
+          {/* Comprar Agora primeiro. Com variação, o clique abre o modal de escolha. */}
+          <div className="mt-auto space-y-2 pt-3">
+            {!esgotado && (
               <button
-                onClick={handleAddToCart}
-                disabled={esgotado}
-                className={`w-full font-bold py-2 md:py-2.5 px-2 rounded-xl text-xs md:text-sm flex items-center justify-center transition-all duration-200 active:scale-[0.98] ${
-                  esgotado
-                    ? 'bg-[#1b2423] text-[#6b7a77] cursor-not-allowed'
-                    : adicionado
-                      ? 'bg-green-500 text-white border-2 border-green-500'
-                      : 'border-2 border-[#00cfb5] text-[#00cfb5] hover:bg-[#00cfb5]/10'
-                }`}
+                onClick={handleComprarAgora}
+                className="flex h-10 w-full items-center justify-center rounded-lg bg-sx-accent text-[13px] font-bold text-sx-ink transition-colors duration-200 hover:bg-sx-accent-hover active:scale-[0.98] sm:h-11 sm:text-sm"
               >
-                <span className="whitespace-nowrap">
-                  {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
-                </span>
+                Comprar Agora
               </button>
+            )}
 
-              {/* Comparar — oculto em mobile */}
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCmp(produto.id) }}
-                className={`hidden md:flex text-xs font-medium items-center justify-center gap-1 w-full transition-colors ${
-                  isCmp ? 'text-[#00cfb5]' : 'text-[#B0BFBC] hover:text-[#00cfb5]'
-                }`}
-              >
-                <GitCompare size={12} />
-                {isCmp ? 'Remover da comparação' : 'Comparar'}
-              </button>
-            </div>
+            <button
+              onClick={handleAddToCart}
+              disabled={esgotado}
+              className={`flex h-10 w-full items-center justify-center rounded-lg border px-2 text-xs font-bold transition-colors duration-200 active:scale-[0.98] sm:h-11 sm:text-[13px] ${
+                esgotado
+                  ? 'cursor-not-allowed border-sx-line bg-sx-raised text-sx-subtle'
+                  : adicionado
+                    ? 'border-green-600 bg-green-600 text-white'
+                    : 'border-sx-accent-text/45 text-sx-accent-text hover:border-sx-accent-text hover:bg-sx-tint'
+              }`}
+            >
+              <span className="whitespace-nowrap">
+                {esgotado ? 'Esgotado' : adicionado ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+              </span>
+            </button>
+
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCmp(produto.id) }}
+              className={`hidden h-6 w-full items-center justify-center gap-1 text-xs font-medium transition-colors md:flex ${
+                isCmp ? 'text-sx-accent-text' : 'text-sx-subtle hover:text-sx-accent-text'
+              }`}
+            >
+              <GitCompare size={12} />
+              {isCmp ? 'Remover da comparação' : 'Comparar'}
+            </button>
           </div>
         </div>
       </article>

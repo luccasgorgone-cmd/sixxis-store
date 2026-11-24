@@ -11,17 +11,17 @@ export default function Nav() {
 
   return (
     <nav className="flex items-center gap-6 text-sm font-medium">
-      <Link href="/produtos?categoria=climatizadores" className="hover:text-[#3cbfb3] transition">Climatizadores</Link>
-      <Link href="/produtos?categoria=aspiradores" className="hover:text-[#3cbfb3] transition">Aspiradores</Link>
-      <Link href="/produtos?categoria=spinning" className="hover:text-[#3cbfb3] transition">Spinning</Link>
-<Link href="/sobre" className="hover:text-[#3cbfb3] transition">Sobre</Link>
-      <Link href="/contato" className="hover:text-[#3cbfb3] transition">Contato</Link>
-      <Link href="/faq" className="hover:text-[#3cbfb3] transition">FAQ</Link>
+      <Link href="/produtos?categoria=climatizadores" className="hover:text-sx-accent-text transition">Climatizadores</Link>
+      <Link href="/produtos?categoria=aspiradores" className="hover:text-sx-accent-text transition">Aspiradores</Link>
+      <Link href="/produtos?categoria=spinning" className="hover:text-sx-accent-text transition">Spinning</Link>
+<Link href="/sobre" className="hover:text-sx-accent-text transition">Sobre</Link>
+      <Link href="/contato" className="hover:text-sx-accent-text transition">Contato</Link>
+      <Link href="/faq" className="hover:text-sx-accent-text transition">FAQ</Link>
 
-      <Link href="/carrinho" className="relative hover:text-[#3cbfb3] transition" aria-label="Carrinho">
+      <Link href="/carrinho" className="relative hover:text-sx-accent-text transition" aria-label="Carrinho">
         <ShoppingCart size={20} />
         {totalItens > 0 && (
-          <span className="absolute -top-2 -right-2 bg-[#3cbfb3] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+          <span className="absolute -top-2 -right-2 bg-sx-accent text-sx-ink text-xs rounded-full w-4 h-4 flex items-center justify-center">
             {totalItens}
           </span>
         )}
@@ -29,7 +29,7 @@ export default function Nav() {
 
       {session ? (
         <div className="flex items-center gap-3">
-          <Link href="/minha-conta" className="hover:text-[#3cbfb3] transition">
+          <Link href="/minha-conta" className="hover:text-sx-accent-text transition">
             <User size={20} />
           </Link>
           <button onClick={() => signOut({ callbackUrl: '/' })} className="text-gray-500 hover:text-red-500 transition">

@@ -54,7 +54,7 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
               <ShoppingBag size={15} className="text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Comercial</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none mb-0.5">Comercial</p>
               <p className="font-bold text-sm text-gray-800">(18) 99747-4701</p>
             </div>
           </a>
@@ -68,7 +68,7 @@ export default function WhatsAppBotao({ onOcultar }: Props) {
               <Wrench size={15} className="text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Assistência Técnica</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none mb-0.5">Assistência Técnica</p>
               <p className="font-bold text-sm text-gray-800">(11) 93410-2621</p>
             </div>
           </a>

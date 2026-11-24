@@ -9,8 +9,8 @@ export default function DescricaoRica({ descricao }: Props) {
 
   return (
     <div className="mb-12">
-      <h2 className="text-xl font-extrabold text-[#F4F7F6] mb-6 flex items-center gap-2 border-b border-[#2A3937] pb-4">
-        <FileText size={18} className="text-[#00cfb5]" />
+      <h2 className="text-xl font-extrabold text-sx-text mb-6 flex items-center gap-2 border-b border-sx-line pb-4">
+        <FileText size={18} className="text-sx-accent-text" />
         Descrição do produto
       </h2>
       <div

@@ -54,7 +54,7 @@ export default async function PedidoDetalheContaPage({
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
       <div className="flex items-center gap-3 mb-8">
-        <Link href="/pedidos" className="flex items-center gap-1.5 text-sm text-[#B0BFBC] hover:text-[#00cfb5] transition">
+        <Link href="/pedidos" className="flex items-center gap-1.5 text-sm text-sx-muted hover:text-sx-accent-text transition">
           <ArrowLeft size={16} /> Meus Pedidos
         </Link>
       </div>
@@ -64,7 +64,7 @@ export default async function PedidoDetalheContaPage({
           <h1 className="text-2xl font-extrabold text-[#0a0a0a]">
             Pedido #{pedido.id.slice(-8).toUpperCase()}
           </h1>
-          <p className="text-sm text-[#8a9794] mt-1">
+          <p className="text-sm text-sx-subtle mt-1">
             {new Date(pedido.createdAt).toLocaleDateString('pt-BR', {
               day: '2-digit', month: 'long', year: 'numeric',
             })}
@@ -73,7 +73,7 @@ export default async function PedidoDetalheContaPage({
         <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
           pedido.status === 'entregue' ? 'bg-green-100 text-green-700' :
           pedido.status === 'enviado'  ? 'bg-purple-100 text-purple-700' :
-          pedido.status === 'pago'     ? 'bg-[#e8f8f7] text-[#B0BFBC]' :
+          pedido.status === 'pago'     ? 'bg-sx-tint text-sx-muted' :
           pedido.status === 'cancelado' ? 'bg-red-100 text-red-500' :
           'bg-amber-100 text-amber-700'
         }`}>
@@ -94,8 +94,8 @@ export default async function PedidoDetalheContaPage({
 
       {/* Timeline */}
       {pedido.status !== 'cancelado' && (
-        <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-6 mb-6">
-          <h2 className="text-sm font-semibold text-[#B0BFBC] uppercase tracking-wider mb-6">Progresso</h2>
+        <div className="bg-sx-surface border border-sx-line rounded-2xl p-6 mb-6">
+          <h2 className="text-sm font-semibold text-sx-muted uppercase tracking-wider mb-6">Progresso</h2>
           <div className="flex items-start justify-between">
             {STATUS_STEPS.map((step, i) => {
               const done = i <= stepIdx
@@ -105,17 +105,17 @@ export default async function PedidoDetalheContaPage({
                 <div key={step.key} className="flex-1 flex flex-col items-center relative">
                   {/* Linha conectora */}
                   {i < STATUS_STEPS.length - 1 && (
-                    <div className={`absolute top-5 left-1/2 w-full h-0.5 ${done && stepIdx > i ? 'bg-[#00cfb5]' : 'bg-[#2A3937]'}`} />
+                    <div className={`absolute top-5 left-1/2 w-full h-0.5 ${done && stepIdx > i ? 'bg-sx-accent' : 'bg-sx-line'}`} />
                   )}
                   <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                     done
-                      ? 'bg-[#00cfb5] border-[#00cfb5]'
-                      : 'bg-[#111717] border-[#2A3937]'
+                      ? 'bg-sx-accent border-sx-accent'
+                      : 'bg-sx-surface border-sx-line'
                   }`}>
-                    <Icon className={`w-5 h-5 ${done ? 'text-white' : 'text-[#6b7a77]'}`} />
+                    <Icon className={`w-5 h-5 ${done ? 'text-white' : 'text-sx-subtle'}`} />
                   </div>
                   <p className={`text-xs mt-2 text-center leading-tight font-medium ${
-                    active ? 'text-[#00cfb5]' : done ? 'text-[#D7E0DD]' : 'text-[#6b7a77]'
+                    active ? 'text-sx-accent-text' : done ? 'text-sx-text-2' : 'text-sx-subtle'
                   }`}>
                     {step.label}
                   </p>
@@ -128,12 +128,12 @@ export default async function PedidoDetalheContaPage({
 
       {/* Código de rastreio */}
       {pedido.codigoRastreio && (
-        <div className="bg-[#e8f8f7] border border-[#00cfb5]/30 rounded-2xl p-5 mb-6">
+        <div className="bg-sx-tint border border-sx-accent/30 rounded-2xl p-5 mb-6">
           <div className="flex items-center gap-3">
-            <Truck className="w-5 h-5 text-[#00cfb5]" />
+            <Truck className="w-5 h-5 text-sx-accent-text" />
             <div>
-              <p className="text-sm font-semibold text-[#D7E0DD]">Código de Rastreio</p>
-              <p className="font-mono font-bold text-[#00cfb5] text-lg tracking-widest mt-0.5">
+              <p className="text-sm font-semibold text-sx-text-2">Código de Rastreio</p>
+              <p className="font-mono font-bold text-sx-accent-text text-lg tracking-widest mt-0.5">
                 {pedido.codigoRastreio}
               </p>
             </div>
@@ -141,7 +141,7 @@ export default async function PedidoDetalheContaPage({
               href="https://www.correios.com.br/rastreamento"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-auto text-xs font-semibold text-[#00cfb5] hover:underline"
+              className="ml-auto text-xs font-semibold text-sx-accent-text hover:underline"
             >
               Rastrear →
             </a>
@@ -150,8 +150,8 @@ export default async function PedidoDetalheContaPage({
       )}
 
       {/* Itens */}
-      <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-6 mb-6">
-        <h2 className="text-sm font-semibold text-[#B0BFBC] uppercase tracking-wider mb-4">
+      <div className="bg-sx-surface border border-sx-line rounded-2xl p-6 mb-6">
+        <h2 className="text-sm font-semibold text-sx-muted uppercase tracking-wider mb-4">
           <Package className="w-4 h-4 inline-block mr-1.5" />
           Itens do Pedido
         </h2>
@@ -160,27 +160,27 @@ export default async function PedidoDetalheContaPage({
             const thumb = (item.produto.imagens as string[])?.[0]
             return (
               <div key={item.id} className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-[#192221] overflow-hidden shrink-0 relative">
+                <div className="w-12 h-12 rounded-xl bg-sx-raised overflow-hidden shrink-0 relative">
                   {thumb ? (
                     <Image src={thumb} alt={item.produto.nome} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Package className="w-5 h-5 text-[#6b7a77]" />
+                      <Package className="w-5 h-5 text-sx-subtle" />
                     </div>
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-[#F4F7F6]">
+                  <p className="text-sm font-semibold text-sx-text">
                     {item.produto.nome}
                     {item.variacaoNome && (
-                      <span className="ml-2 text-xs font-semibold text-[#00cfb5] bg-[#e8f8f7] px-1.5 py-0.5 rounded">
+                      <span className="ml-2 text-xs font-semibold text-sx-accent-text bg-sx-tint px-1.5 py-0.5 rounded">
                         {item.variacaoNome}
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-[#8a9794]">{item.quantidade}x {fmt(Number(item.precoUnitario))}</p>
+                  <p className="text-xs text-sx-subtle">{item.quantidade}x {fmt(Number(item.precoUnitario))}</p>
                 </div>
-                <p className="text-sm font-bold text-[#F4F7F6]">
+                <p className="text-sm font-bold text-sx-text">
                   {fmt(item.quantidade * Number(item.precoUnitario))}
                 </p>
               </div>
@@ -188,8 +188,8 @@ export default async function PedidoDetalheContaPage({
           })}
         </div>
 
-        <div className="border-t border-[#2A3937] mt-4 pt-4 space-y-1.5 text-sm">
-          <div className="flex justify-between text-[#B0BFBC]">
+        <div className="border-t border-sx-line mt-4 pt-4 space-y-1.5 text-sm">
+          <div className="flex justify-between text-sx-muted">
             <span>Frete</span>
             {pedido.freteTipo === 'a_combinar' ? (
               <span className="text-amber-600 font-semibold">A combinar</span>
@@ -205,25 +205,25 @@ export default async function PedidoDetalheContaPage({
               <span>-{fmt(Number(pedido.desconto))}</span>
             </div>
           )}
-          <div className="flex justify-between font-bold text-base pt-1 border-t border-[#2A3937]">
+          <div className="flex justify-between font-bold text-base pt-1 border-t border-sx-line">
             <span>Total</span>
-            <span className="text-[#00cfb5]">{fmt(Number(pedido.total))}</span>
+            <span className="text-sx-accent-text">{fmt(Number(pedido.total))}</span>
           </div>
         </div>
       </div>
 
       {/* Endereço */}
-      <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-6 mb-6">
-        <h2 className="text-sm font-semibold text-[#B0BFBC] uppercase tracking-wider mb-3">Endereço de Entrega</h2>
-        <p className="text-sm text-[#D7E0DD]">
+      <div className="bg-sx-surface border border-sx-line rounded-2xl p-6 mb-6">
+        <h2 className="text-sm font-semibold text-sx-muted uppercase tracking-wider mb-3">Endereço de Entrega</h2>
+        <p className="text-sm text-sx-text-2">
           {pedido.endereco.logradouro}, {pedido.endereco.numero}
           {pedido.endereco.complemento ? `, ${pedido.endereco.complemento}` : ''}
         </p>
-        <p className="text-sm text-[#D7E0DD]">
+        <p className="text-sm text-sx-text-2">
           {pedido.endereco.bairro} — {pedido.endereco.cidade}/{pedido.endereco.estado}
         </p>
-        <p className="text-sm text-[#B0BFBC] mt-0.5">CEP {pedido.endereco.cep}</p>
-        <p className="text-xs text-[#8a9794] mt-2 capitalize">Pagamento: {pedido.formaPagamento}</p>
+        <p className="text-sm text-sx-muted mt-0.5">CEP {pedido.endereco.cep}</p>
+        <p className="text-xs text-sx-subtle mt-2 capitalize">Pagamento: {pedido.formaPagamento}</p>
       </div>
 
       {/* Ajuda */}

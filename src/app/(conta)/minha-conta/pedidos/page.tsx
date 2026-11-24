@@ -28,35 +28,35 @@ export default async function PedidosPage() {
 
   return (
     <LayoutConta>
-      <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#2A3937]">
-          <h1 className="font-extrabold text-[#F4F7F6] flex items-center gap-2">
-            <ShoppingBag size={18} className="text-[#00cfb5]" /> Meus Pedidos
+      <div className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-sx-line">
+          <h1 className="font-extrabold text-sx-text flex items-center gap-2">
+            <ShoppingBag size={18} className="text-sx-accent-text" /> Meus Pedidos
           </h1>
         </div>
         {pedidos.length === 0 ? (
           <div className="text-center py-16">
-            <ShoppingBag size={36} className="text-[#8a9794] mx-auto mb-3" />
-            <p className="text-[#B0BFBC] font-semibold">Nenhum pedido ainda.</p>
-            <Link href="/produtos" className="inline-block mt-4 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] text-sm font-bold px-6 py-2.5 rounded-xl transition">
+            <ShoppingBag size={36} className="text-sx-subtle mx-auto mb-3" />
+            <p className="text-sx-muted font-semibold">Nenhum pedido ainda.</p>
+            <Link href="/produtos" className="inline-block mt-4 bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] text-sm font-bold px-6 py-2.5 rounded-xl transition">
               Ver produtos
             </Link>
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
             {pedidos.map(p => (
-              <Link key={p.id} href={`/minha-conta/pedidos/${p.id}`} className="flex items-center justify-between px-5 py-4 hover:bg-[#192221] transition group">
+              <Link key={p.id} href={`/minha-conta/pedidos/${p.id}`} className="flex items-center justify-between px-5 py-4 hover:bg-sx-raised transition group">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#192221] border border-[#2A3937] overflow-hidden shrink-0 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-sx-raised border border-sx-line overflow-hidden shrink-0 flex items-center justify-center">
                     {(() => {
                       const img = (p.itens[0]?.produto?.imagens as string[])?.[0]
                       // eslint-disable-next-line @next/next/no-img-element
-                      return img ? <img src={img} alt="" className="w-full h-full object-contain p-1" /> : <ShoppingBag size={18} className="text-[#8a9794]" />
+                      return img ? <img src={img} alt="" className="w-full h-full object-contain p-1" /> : <ShoppingBag size={18} className="text-sx-subtle" />
                     })()}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[#F4F7F6] group-hover:text-[#00cfb5] transition-colors">#{p.id.slice(-8).toUpperCase()}</p>
-                    <p className="text-xs text-[#8a9794]">{new Date(p.createdAt).toLocaleDateString('pt-BR')} · {p.itens.length} {p.itens.length === 1 ? 'item' : 'itens'}</p>
+                    <p className="text-sm font-bold text-sx-text group-hover:text-sx-accent-text transition-colors">#{p.id.slice(-8).toUpperCase()}</p>
+                    <p className="text-xs text-sx-subtle">{new Date(p.createdAt).toLocaleDateString('pt-BR')} · {p.itens.length} {p.itens.length === 1 ? 'item' : 'itens'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -68,7 +68,7 @@ export default async function PedidosPage() {
                       </span>
                     )
                   })()}
-                  <span className="text-sm font-extrabold text-[#F4F7F6]">R$ {fmt(Number(p.total))}</span>
+                  <span className="text-sm font-extrabold text-sx-text">R$ {fmt(Number(p.total))}</span>
                 </div>
               </Link>
             ))}

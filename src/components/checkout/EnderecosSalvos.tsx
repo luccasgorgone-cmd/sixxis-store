@@ -52,7 +52,7 @@ export default function EnderecosSalvos({
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
+      <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
         <Loader2 size={14} className="animate-spin" /> Carregando endereços salvos…
       </div>
     )
@@ -75,8 +75,8 @@ export default function EnderecosSalvos({
             onClick={() => onSelecionar(e)}
             className={`w-full text-left rounded-xl border-2 px-4 py-3 transition ${
               ativo
-                ? 'border-[#3cbfb3] bg-[#e8f8f7]'
-                : 'border-gray-200 hover:border-[#3cbfb3]/40 bg-white'
+                ? 'border-sx-accent bg-sx-tint'
+                : 'border-gray-200 hover:border-sx-accent/40 bg-white'
             }`}
           >
             <div className="flex items-start justify-between gap-2">
@@ -87,7 +87,7 @@ export default function EnderecosSalvos({
                     {e.complemento ? ` — ${e.complemento}` : ''}
                   </p>
                   {e.principal && (
-                    <span className="text-[10px] uppercase font-bold bg-[#3cbfb3] text-white px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] uppercase font-bold bg-sx-accent text-sx-ink px-1.5 py-0.5 rounded">
                       Padrão
                     </span>
                   )}
@@ -97,9 +97,9 @@ export default function EnderecosSalvos({
                 </p>
               </div>
               <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 ${
-                ativo ? 'border-[#3cbfb3]' : 'border-gray-300'
+                ativo ? 'border-sx-accent' : 'border-gray-300'
               }`}>
-                {ativo && <div className="w-2 h-2 rounded-full bg-[#3cbfb3]" />}
+                {ativo && <div className="w-2 h-2 rounded-full bg-sx-accent" />}
               </div>
             </div>
           </button>
@@ -111,8 +111,8 @@ export default function EnderecosSalvos({
         onClick={onNovoEndereco}
         className={`w-full flex items-center justify-center gap-2 text-sm font-semibold rounded-xl border-2 border-dashed py-3 transition ${
           mostrandoFormulario
-            ? 'border-[#3cbfb3] text-[#3cbfb3] bg-[#e8f8f7]'
-            : 'border-gray-200 text-gray-500 hover:border-[#3cbfb3]/50 hover:text-[#3cbfb3]'
+            ? 'border-sx-accent text-sx-accent-text bg-sx-tint'
+            : 'border-gray-200 text-gray-500 hover:border-sx-accent/50 hover:text-sx-accent-text'
         }`}
       >
         <Plus size={14} /> Adicionar novo endereço

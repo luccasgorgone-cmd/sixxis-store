@@ -54,12 +54,12 @@ function NivelCard() {
       <div className="flex items-center gap-2.5 mb-3">
         <IconeNivel nivel={nivel.atual} size={36} />
         <div>
-          <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Seu Nível</p>
+          <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Seu Nível</p>
         </div>
       </div>
 
       <div className="mb-2">
-        <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+        <div className="flex justify-between text-[10px] text-gray-500 mb-1">
           <span>R$ {totalGasto.toLocaleString('pt-BR')}</span>
           {nivel.proximoNivel && (
             <span>R$ {(totalGasto + (nivel.faltam || 0)).toLocaleString('pt-BR')}</span>
@@ -77,7 +77,7 @@ function NivelCard() {
           <span className="font-black">{nivel.proximoNivel}</span>
         </p>
       ) : (
-        <p className="text-[10px] font-bold" style={{ color: nivel.cor }}>
+        <p className="text-[10px] font-bold" style={{ color: `color-mix(in srgb, ${nivel.cor} 62%, #11201c)` }}>
           Nível máximo atingido! ⭐
         </p>
       )}
@@ -128,7 +128,7 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
                 href={item.href}
                 className={`flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
                   ativo
-                    ? 'bg-[#3cbfb3] text-white'
+                    ? 'bg-sx-accent text-sx-ink'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -168,8 +168,8 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
                       <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center"
                         style={{
-                          backgroundColor: `${cfgNivel.cor}30`,
-                          border: `1.5px solid ${cfgNivel.cor}55`,
+                          backgroundColor: `color-mix(in srgb, ${cfgNivel.cor} 19%, transparent)`,
+                          border: `1.5px solid color-mix(in srgb, ${cfgNivel.cor} 33%, transparent)`,
                         }}
                         dangerouslySetInnerHTML={{ __html: getNivelSVGString(nivelNorm, 20) }}
                       />
@@ -194,7 +194,7 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
                 <p className="font-black text-gray-900 text-sm leading-tight mt-2">
                   {session?.user?.name || 'Cliente'}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5 truncate">
+                <p className="text-xs text-gray-500 mt-0.5 truncate">
                   {session?.user?.email}
                 </p>
               </div>
@@ -210,14 +210,14 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
                     className={[
                       'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group',
                       ativo
-                        ? 'bg-[#3cbfb3]/10 text-[#3cbfb3]'
+                        ? 'bg-sx-accent/10 text-sx-accent-text'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
                     ].join(' ')}>
                     <div className={[
                       'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all',
                       ativo
-                        ? 'bg-[#3cbfb3] text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200',
+                        ? 'bg-sx-accent text-sx-ink shadow-sm'
+                        : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200',
                     ].join(' ')}>
                       <Icon size={15} strokeWidth={ativo ? 2.5 : 2} />
                     </div>
@@ -225,7 +225,7 @@ export default function LayoutConta({ children }: { children: React.ReactNode })
                       {item.label}
                     </span>
                     {ativo && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#3cbfb3] shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-sx-accent shrink-0" />
                     )}
                   </Link>
                 )

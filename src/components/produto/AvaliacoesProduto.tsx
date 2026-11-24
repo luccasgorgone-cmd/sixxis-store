@@ -118,12 +118,12 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
   if (!data) {
     return (
       <div className="mt-2 animate-pulse" aria-busy="true" aria-live="polite">
-        <div className="h-6 w-56 bg-[#192221] rounded-lg mb-6" />
+        <div className="h-6 w-56 bg-sx-raised rounded-lg mb-6" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="h-40 bg-[#192221] rounded-2xl" />
+          <div className="h-40 bg-sx-raised rounded-2xl" />
           <div className="lg:col-span-2 flex flex-col justify-center gap-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-3 bg-[#192221] rounded-full" />
+              <div key={i} className="h-3 bg-sx-raised rounded-full" />
             ))}
           </div>
         </div>
@@ -141,11 +141,11 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
 
   return (
     <div className="mt-2">
-      <h3 className="text-xl font-extrabold text-[#F4F7F6] mb-6">Avaliações dos Clientes</h3>
+      <h3 className="text-xl font-extrabold text-sx-text mb-6">Avaliações dos Clientes</h3>
 
       {/* ── Resumo ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="relative overflow-hidden flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2e2b] to-[#1a4f4a] rounded-2xl p-8 text-white">
+        <div className="sx-escuro relative overflow-hidden flex flex-col items-center justify-center bg-gradient-to-br from-[#0f2e2b] to-[#1a4f4a] rounded-2xl p-8 text-white">
           {/* Fundo premium da marca + scrim p/ legibilidade da nota */}
           <div
             aria-hidden
@@ -171,13 +171,13 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
             return (
               <div key={nota} className="flex items-center gap-3">
                 <div className="flex items-center gap-1 w-12 shrink-0">
-                  <span className="text-sm font-bold text-[#D7E0DD]">{nota}</span>
+                  <span className="text-sm font-bold text-sx-text-2">{nota}</span>
                   <Star size={13} className="text-[#f59e0b] fill-[#f59e0b]" />
                 </div>
-                <div className="flex-1 bg-[#192221] rounded-full h-2.5 overflow-hidden">
+                <div className="flex-1 bg-sx-raised rounded-full h-2.5 overflow-hidden">
                   <div className="h-full bg-[#f59e0b] rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-sm text-[#B0BFBC] w-8 text-right shrink-0">{count}</span>
+                <span className="text-sm text-sx-muted w-8 text-right shrink-0">{count}</span>
               </div>
             )
           })}
@@ -189,8 +189,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
         <div className="flex justify-center mb-8">
           <button
             onClick={() => setFormAberto(true)}
-            className="flex items-center gap-2 text-white font-bold px-8 py-3.5 rounded-2xl transition shadow-lg hover:opacity-90 hover:-translate-y-0.5"
-            style={{ backgroundColor: '#65E5D4' }}
+            className="flex items-center gap-2 rounded-xl bg-sx-accent px-8 py-3.5 font-bold text-sx-ink transition-colors hover:bg-sx-accent-hover"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none">
               <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
@@ -202,17 +201,17 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
 
       {/* ── Formulário ── */}
       {formAberto && !enviado && (
-        <div className="bg-[#192221] border border-[#2A3937] rounded-2xl p-6 mb-8">
+        <div className="bg-sx-raised border border-sx-line rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between mb-5">
-            <h4 className="text-lg font-extrabold text-[#F4F7F6]">Sua Avaliação</h4>
-            <button onClick={() => setFormAberto(false)} className="text-[#8a9794] hover:text-[#B0BFBC] p-1 rounded-lg transition">
+            <h4 className="text-lg font-extrabold text-sx-text">Sua Avaliação</h4>
+            <button onClick={() => setFormAberto(false)} className="text-sx-subtle hover:text-sx-muted p-1 rounded-lg transition">
               <X size={18} />
             </button>
           </div>
 
           {/* Estrelas */}
           <div className="mb-5">
-            <p className="text-sm font-bold text-[#D7E0DD] mb-2">Sua nota *</p>
+            <p className="text-sm font-bold text-sx-text-2 mb-2">Sua nota *</p>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} type="button" onClick={() => setForm((f) => ({ ...f, nota: n }))} className="transition-transform hover:scale-110">
@@ -220,44 +219,44 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
                 </button>
               ))}
             </div>
-            {form.nota > 0 && <p className="text-sm text-[#00cfb5] font-semibold mt-1">{LABELS[form.nota]}</p>}
+            {form.nota > 0 && <p className="text-sm text-sx-accent-text font-semibold mt-1">{LABELS[form.nota]}</p>}
           </div>
 
           {/* Nome + Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="text-sm font-bold text-[#D7E0DD] block mb-1.5">Nome *</label>
+              <label className="text-sm font-bold text-sx-text-2 block mb-1.5">Nome *</label>
               <input type="text" value={form.nomeAutor} onChange={(e) => setForm((f) => ({ ...f, nomeAutor: e.target.value }))}
-                placeholder="Seu nome" className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#00cfb5] outline-none bg-[#111717]" />
+                placeholder="Seu nome" className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-sx-accent outline-none bg-sx-surface" />
             </div>
             <div>
-              <label className="text-sm font-bold text-[#D7E0DD] block mb-1.5">E-mail</label>
+              <label className="text-sm font-bold text-sx-text-2 block mb-1.5">E-mail</label>
               <input type="email" value={form.emailAutor} onChange={(e) => setForm((f) => ({ ...f, emailAutor: e.target.value }))}
-                placeholder="seu@email.com (não exibido)" className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#00cfb5] outline-none bg-[#111717]" />
+                placeholder="seu@email.com (não exibido)" className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-sx-accent outline-none bg-sx-surface" />
             </div>
           </div>
 
           {/* Título */}
           <div className="mb-4">
-            <label className="text-sm font-bold text-[#D7E0DD] block mb-1.5">Título</label>
+            <label className="text-sm font-bold text-sx-text-2 block mb-1.5">Título</label>
             <input type="text" value={form.titulo} onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))}
-              placeholder="Ex: Produto excelente!" className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#00cfb5] outline-none bg-[#111717]" />
+              placeholder="Ex: Produto excelente!" className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-sx-accent outline-none bg-sx-surface" />
           </div>
 
           {/* Comentário */}
           <div className="mb-4">
-            <label className="text-sm font-bold text-[#D7E0DD] block mb-1.5">Comentário *</label>
+            <label className="text-sm font-bold text-sx-text-2 block mb-1.5">Comentário *</label>
             <textarea value={form.comentario} onChange={(e) => setForm((f) => ({ ...f, comentario: e.target.value }))}
               rows={4} placeholder="Conte sua experiência..."
-              className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#00cfb5] outline-none bg-[#111717] resize-none" />
+              className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-sx-accent outline-none bg-sx-surface resize-none" />
           </div>
 
           {/* Fotos */}
           <div className="mb-5">
-            <label className="text-sm font-bold text-[#D7E0DD] block mb-2">Fotos (opcional)</label>
+            <label className="text-sm font-bold text-sx-text-2 block mb-2">Fotos (opcional)</label>
             <div className="flex flex-wrap gap-2">
               {fotosPreview.map((url, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#2A3937]">
+                <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-sx-line">
                   <Image src={url} alt="" fill className="object-cover" />
                   <button onClick={() => removerFoto(i)}
                     className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
@@ -266,39 +265,39 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
                 </div>
               ))}
               {fotosPreview.length < 5 && (
-                <label className="w-16 h-16 rounded-xl border-2 border-dashed border-[#2A3937] hover:border-[#00cfb5] flex flex-col items-center justify-center cursor-pointer transition bg-[#192221] hover:bg-[#00cfb5]/10">
-                  <Camera size={16} className="text-[#8a9794]" />
-                  <span className="text-[9px] text-[#8a9794] mt-0.5">Foto</span>
+                <label className="w-16 h-16 rounded-xl border-2 border-dashed border-sx-line hover:border-sx-accent flex flex-col items-center justify-center cursor-pointer transition bg-sx-raised hover:bg-sx-accent/10">
+                  <Camera size={16} className="text-sx-subtle" />
+                  <span className="text-[9px] text-sx-subtle mt-0.5">Foto</span>
                   <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFotos} />
                 </label>
               )}
             </div>
-            <p className="text-xs text-[#8a9794] mt-1">Máximo 5 fotos • JPG, PNG, WebP</p>
+            <p className="text-xs text-sx-subtle mt-1">Máximo 5 fotos • JPG, PNG, WebP</p>
           </div>
 
           {erroForm && <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-xl px-4 py-2 mb-4">{erroForm}</p>}
 
           <div className="flex gap-3">
             <button onClick={handleEnviar} disabled={enviando}
-              className="bg-[#00cfb5] hover:bg-[#65E5D4] disabled:opacity-50 text-white font-bold px-6 py-3 rounded-2xl transition flex items-center gap-2">
+              className="bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-50 text-sx-ink font-bold px-6 py-3 rounded-2xl transition flex items-center gap-2">
               {enviando
                 ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Enviando...</>
                 : <><Star size={16} fill="white" />Enviar Avaliação</>
               }
             </button>
-            <button onClick={() => setFormAberto(false)} className="border border-[#2A3937] text-[#B0BFBC] font-semibold px-5 py-3 rounded-2xl hover:bg-[#192221] transition">
+            <button onClick={() => setFormAberto(false)} className="border border-sx-line text-sx-muted font-semibold px-5 py-3 rounded-2xl hover:bg-sx-raised transition">
               Cancelar
             </button>
           </div>
-          <p className="text-xs text-[#8a9794] mt-3">Sua avaliação será publicada após revisão da equipe Sixxis.</p>
+          <p className="text-xs text-sx-subtle mt-3">Sua avaliação será publicada após revisão da equipe Sixxis.</p>
         </div>
       )}
 
       {/* ── Sucesso ── */}
       {enviado && (
-        <div className="bg-[#00cfb5]/10 border border-[#00cfb5]/30 rounded-2xl p-5 text-center mb-8">
-          <p className="text-[#00cfb5] font-bold text-lg">⭐ Avaliação enviada!</p>
-          <p className="text-sm text-[#B0BFBC] mt-1">Será publicada após análise da nossa equipe. Obrigado!</p>
+        <div className="bg-sx-accent/10 border border-sx-accent/30 rounded-2xl p-5 text-center mb-8">
+          <p className="text-sx-accent-text font-bold text-lg">⭐ Avaliação enviada!</p>
+          <p className="text-sm text-sx-muted mt-1">Será publicada após análise da nossa equipe. Obrigado!</p>
         </div>
       )}
 
@@ -313,7 +312,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
             const temConta = !!(av.clienteId)
             return (
               <div key={av.id}
-                className={`bg-[#111717] rounded-2xl border p-5${av.destaque ? ' border-[#00cfb5]/40 shadow-sm shadow-[#00cfb5]/10' : ' border-[#2A3937]'}`}>
+                className={`bg-sx-surface rounded-2xl border p-5${av.destaque ? ' border-sx-accent/40 shadow-sm shadow-sx-accent/10' : ' border-sx-line'}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <AvatarComArco
@@ -326,7 +325,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
                     />
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-bold text-[#F4F7F6] text-sm">{nomeExibido}</p>
+                        <p className="font-bold text-sx-text text-sm">{nomeExibido}</p>
                         {temConta && gasto > 0 && (
                           <span
                             className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full"
@@ -339,40 +338,40 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#8a9794]">
+                      <p className="text-xs text-sx-subtle">
                         {new Date(av.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
                     {av.destaque && (
-                      <span className="bg-[#00cfb5]/10 text-[#65E5D4] text-[10px] font-black px-2 py-0.5 rounded-full border border-[#00cfb5]/20">
+                      <span className="bg-sx-accent/10 text-sx-accent-text text-[10px] font-black px-2 py-0.5 rounded-full border border-sx-accent/20">
                         DESTAQUE
                       </span>
                     )}
                     <EstrelasNota nota={av.nota} size={13} />
                   </div>
                 </div>
-                {av.titulo && <p className="font-bold text-[#F4F7F6] text-sm mb-1">{av.titulo}</p>}
-                {av.comentario && <p className="text-[#B0BFBC] text-sm leading-relaxed mb-3">{av.comentario}</p>}
+                {av.titulo && <p className="font-bold text-sx-text text-sm mb-1">{av.titulo}</p>}
+                {av.comentario && <p className="text-sx-muted text-sm leading-relaxed mb-3">{av.comentario}</p>}
                 {av.fotos?.length > 0 && (
                   <div className="flex gap-2 flex-wrap mb-3">
                     {av.fotos.map((foto) => (
-                      <div key={foto.id} className="relative w-20 h-20 rounded-xl overflow-hidden border border-[#2A3937]">
+                      <div key={foto.id} className="relative w-20 h-20 rounded-xl overflow-hidden border border-sx-line">
                         <Image src={foto.url} alt={`Foto enviada por ${nomeExibido} na avaliação`} fill className="object-cover" unoptimized />
                       </div>
                     ))}
                   </div>
                 )}
                 {av.resposta && (
-                  <div className="bg-[#00cfb5]/10 border border-[#00cfb5]/20 rounded-xl p-4 mt-3">
+                  <div className="bg-sx-accent/10 border border-sx-accent/20 rounded-xl p-4 mt-3">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <div className="w-6 h-6 rounded-full bg-[#00cfb5] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-sx-accent flex items-center justify-center">
                         <MessageSquare size={12} className="text-white" />
                       </div>
-                      <p className="text-xs font-bold text-[#65E5D4]">Resposta da Sixxis</p>
+                      <p className="text-xs font-bold text-sx-accent-text">Resposta da Sixxis</p>
                     </div>
-                    <p className="text-[#65E5D4] text-sm leading-relaxed">{av.resposta}</p>
+                    <p className="text-sx-accent-text text-sm leading-relaxed">{av.resposta}</p>
                   </div>
                 )}
               </div>
@@ -385,7 +384,7 @@ export default function AvaliacoesProduto({ produtoId }: Props) {
       {temMais && (
         <button
           onClick={() => setExpandida(!expandida)}
-          className="w-full py-3 text-sm font-bold text-[#00cfb5] hover:bg-[#00cfb5]/10 transition rounded-2xl border border-[#00cfb5]/20 flex items-center justify-center gap-2 mt-4"
+          className="w-full py-3 text-sm font-bold text-sx-accent-text hover:bg-sx-accent/10 transition rounded-2xl border border-sx-accent/20 flex items-center justify-center gap-2 mt-4"
         >
           {expandida ? (
             <><span>Mostrar menos</span><span>↑</span></>

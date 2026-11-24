@@ -32,17 +32,17 @@ function Reveal({ children, delay = 0, className = '' }: {
 
 export default function GarantiaPage() {
   return (
-    <div className="min-h-screen bg-[#111717]">
+    <div className="min-h-screen bg-sx-surface">
       <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Garantia' }]} />
 
       {/* ─── Hero ─── */}
-      <section className="py-16 relative overflow-hidden"
+      <section className="sx-escuro py-16 relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
         <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(#00cfb5 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+          style={{ backgroundImage: 'radial-gradient(var(--sx-accent) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
-          <div className="w-16 h-16 bg-[#00cfb5]/15 border border-[#00cfb5]/30 rounded-3xl flex items-center justify-center mx-auto mb-5">
-            <Shield size={28} className="text-[#00cfb5]" />
+          <div className="w-16 h-16 bg-sx-accent/15 border border-sx-accent/30 rounded-3xl flex items-center justify-center mx-auto mb-5">
+            <Shield size={28} className="text-sx-accent-text" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
             Termo de Garantia Sixxis
@@ -59,24 +59,24 @@ export default function GarantiaPage() {
       <section className="py-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <Reveal className="text-center mb-10">
-            <span className="text-[#00cfb5] text-xs font-extrabold uppercase tracking-widest">Processo</span>
-            <h2 className="text-2xl font-extrabold text-[#F4F7F6] mt-2">Como acionar a garantia</h2>
+            <span className="text-sx-accent-text text-xs font-extrabold uppercase tracking-widest">Processo</span>
+            <h2 className="text-2xl font-extrabold text-sx-text mt-2">Como acionar a garantia</h2>
           </Reveal>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             {[
-              { n: '01', titulo: 'Entre em contato', texto: 'Envie e-mail com nº do pedido, descrição do problema e fotos/vídeo do defeito.', cor: '#00cfb5' },
-              { n: '02', titulo: 'Análise técnica',   texto: 'Nossa equipe avalia o chamado em até 2 dias úteis e confirma se está coberto.',    cor: '#8b5cf6' },
-              { n: '03', titulo: 'Logística reversa', texto: 'Aprovada a garantia, enviamos etiqueta de devolução gratuita para você.',           cor: '#f59e0b' },
-              { n: '04', titulo: 'Reparo ou troca',   texto: 'Produto reparado ou substituído em até 30 dias. Você será notificado em cada etapa.', cor: '#16a34a' },
+              { n: '01', titulo: 'Entre em contato', texto: 'Envie e-mail com nº do pedido, descrição do problema e fotos/vídeo do defeito.', cor: 'var(--sx-accent-text)' },
+              { n: '02', titulo: 'Análise técnica',   texto: 'Nossa equipe avalia o chamado em até 2 dias úteis e confirma se está coberto.',    cor: '#6d28d9' },
+              { n: '03', titulo: 'Logística reversa', texto: 'Aprovada a garantia, enviamos etiqueta de devolução gratuita para você.',           cor: '#b45309' },
+              { n: '04', titulo: 'Reparo ou troca',   texto: 'Produto reparado ou substituído em até 30 dias. Você será notificado em cada etapa.', cor: '#15803d' },
             ].map((step, i) => (
               <Reveal key={step.n} delay={i * 80}
-                className="bg-[#111717] rounded-2xl border border-[#2A3937] p-5 text-center hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                className="bg-sx-surface rounded-2xl border border-sx-line p-5 text-center hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-extrabold text-sm"
                   style={{ backgroundColor: step.cor }}>
                   {step.n}
                 </div>
-                <h3 className="text-sm font-extrabold text-[#F4F7F6] mb-2">{step.titulo}</h3>
-                <p className="text-xs text-[#B0BFBC] leading-relaxed">{step.texto}</p>
+                <h3 className="text-sm font-extrabold text-sx-text mb-2">{step.titulo}</h3>
+                <p className="text-xs text-sx-muted leading-relaxed">{step.texto}</p>
               </Reveal>
             ))}
           </div>
@@ -94,12 +94,12 @@ export default function GarantiaPage() {
       </section>
 
       {/* ─── O que está incluso ─── */}
-      <section className="py-14 border-t border-[#2A3937]">
+      <section className="py-14 border-t border-sx-line">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <Reveal className="text-center mb-10">
-            <span className="text-[#00cfb5] text-xs font-extrabold uppercase tracking-widest">O que está incluso</span>
-            <h2 className="text-2xl font-extrabold text-[#F4F7F6] mt-2">Sua garantia Sixxis cobre</h2>
-            <p className="text-sm text-[#B0BFBC] mt-2 max-w-xl mx-auto">
+            <span className="text-sx-accent-text text-xs font-extrabold uppercase tracking-widest">O que está incluso</span>
+            <h2 className="text-2xl font-extrabold text-sx-text mt-2">Sua garantia Sixxis cobre</h2>
+            <p className="text-sm text-sx-muted mt-2 max-w-xl mx-auto">
               Proteção integral por 12 meses, sem letras miúdas. Veja o que entra na cobertura padrão de toda a linha:
             </p>
           </Reveal>
@@ -113,16 +113,16 @@ export default function GarantiaPage() {
                 'Logística reversa (envio + retorno) gratuita',
               ].map(item => (
                 <div key={item}
-                  className="flex items-start gap-2.5 bg-[#111717] rounded-xl px-4 py-3 border border-[#00cfb5]/20">
-                  <CheckCircle size={14} className="text-[#00cfb5] shrink-0 mt-0.5" />
-                  <span className="text-sm text-[#D7E0DD] font-medium leading-snug">{item}</span>
+                  className="flex items-start gap-2.5 bg-sx-surface rounded-xl px-4 py-3 border border-sx-accent/20">
+                  <CheckCircle size={14} className="text-sx-accent-text shrink-0 mt-0.5" />
+                  <span className="text-sm text-sx-text-2 font-medium leading-snug">{item}</span>
                 </div>
               ))}
             </div>
           </Reveal>
           <Reveal className="mt-5">
-            <div className="bg-[#e8f8f7] border border-[#00cfb5]/25 rounded-2xl px-5 py-3.5 text-center">
-              <p className="text-xs text-[#F4F7F6] font-semibold">
+            <div className="bg-sx-tint border border-sx-accent/25 rounded-2xl px-5 py-3.5 text-center">
+              <p className="text-xs text-sx-text font-semibold">
                 A garantia legal do CDC (90 dias para produtos duráveis) é
                 <strong> adicional</strong> à garantia contratual Sixxis.
               </p>
@@ -132,10 +132,10 @@ export default function GarantiaPage() {
       </section>
 
       {/* ─── Não coberto ─── */}
-      <section className="py-12 bg-[#192221]/40 border-y border-[#2A3937]">
+      <section className="py-12 bg-sx-raised/40 border-y border-sx-line">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <Reveal className="text-center mb-6">
-            <h2 className="text-xl font-extrabold text-[#F4F7F6]">Situações não cobertas</h2>
+            <h2 className="text-xl font-extrabold text-sx-text">Situações não cobertas</h2>
           </Reveal>
           <Reveal>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -149,9 +149,9 @@ export default function GarantiaPage() {
                 'Produtos fora do prazo de garantia',
                 'Reparos em assistências não autorizadas',
               ].map(item => (
-                <div key={item} className="flex items-center gap-2.5 bg-[#111717] rounded-xl px-3.5 py-2.5 border border-[#2A3937]">
-                  <X size={13} className="text-red-400 shrink-0" />
-                  <span className="text-xs text-[#B0BFBC]">{item}</span>
+                <div key={item} className="flex items-center gap-2.5 bg-sx-surface rounded-xl px-3.5 py-2.5 border border-sx-line">
+                  <X size={13} className="text-red-600 shrink-0" />
+                  <span className="text-xs text-sx-muted">{item}</span>
                 </div>
               ))}
             </div>
@@ -162,10 +162,10 @@ export default function GarantiaPage() {
       {/* ─── CTA contato ─── */}
       <section className="py-14">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="rounded-3xl p-8 text-center"
+          <div className="sx-escuro rounded-3xl p-8 text-center"
             style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
-            <div className="w-12 h-12 bg-[#00cfb5]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Phone size={20} className="text-[#00cfb5]" />
+            <div className="w-12 h-12 bg-sx-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Phone size={20} className="text-sx-accent-text" />
             </div>
             <h3 className="text-xl font-extrabold text-white mb-2">Precisa acionar a garantia?</h3>
             <p className="text-white/55 text-sm mb-6">
@@ -174,7 +174,7 @@ export default function GarantiaPage() {
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <a href="mailto:sac@sixxis.com.br"
-                className="inline-flex items-center gap-2 bg-[#00cfb5] text-white font-bold px-5 py-3 rounded-xl transition hover:bg-[#65E5D4] text-sm">
+                className="inline-flex items-center gap-2 bg-sx-accent text-sx-ink font-bold px-5 py-3 rounded-xl transition hover:bg-sx-accent-hover text-sm">
                 <Mail size={14} /> sac@sixxis.com.br
               </a>
               <Link href="/pedidos"

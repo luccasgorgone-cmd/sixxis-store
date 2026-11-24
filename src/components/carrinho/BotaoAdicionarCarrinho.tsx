@@ -67,8 +67,8 @@ export default function BotaoAdicionarCarrinho({ produto }: Props) {
         onClick={handleAdicionar}
         className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
           adicionado
-            ? 'bg-green-500 text-white scale-95'
-            : 'bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white hover:shadow-lg hover:-translate-y-0.5'
+            ? 'bg-green-500 text-sx-ink scale-95'
+            : 'bg-sx-accent hover:bg-sx-accent-hover text-sx-ink hover:shadow-lg hover:-translate-y-0.5'
         }`}
       >
         {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}

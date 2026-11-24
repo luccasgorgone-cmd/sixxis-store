@@ -104,7 +104,7 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
     >
       <div
         className="rounded-[20px] overflow-hidden"
-        style={{ backgroundColor: '#111717', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 18px 50px -24px rgba(255,255,255,0.45)' }}
+        style={{ backgroundColor: 'var(--sx-surface)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 18px 50px -24px rgba(255,255,255,0.45)' }}
       >
         {/* ── HERO escuro: título + destaque da economia ──────────────── */}
         <div
@@ -119,14 +119,14 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
           />
           <div className="relative flex items-start justify-between gap-3">
             <div className="flex items-start gap-2 min-w-0">
-              <TrendingDown size={18} strokeWidth={2.25} color="#00cfb5" className="mt-0.5 shrink-0 sm:w-5 sm:h-5" />
+              <TrendingDown size={18} strokeWidth={2.25} color="var(--sx-accent-text)" className="mt-0.5 shrink-0 sm:w-5 sm:h-5" />
               <h3 className="font-bold text-sm sm:text-[15px] leading-snug text-white">
                 Quanto você deixa de pagar por mês
               </h3>
             </div>
             <span
               className="self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold shrink-0"
-              style={{ backgroundColor: 'rgba(60,191,179,0.14)', color: '#00cfb5', border: '1px solid rgba(60,191,179,0.35)' }}
+              style={{ backgroundColor: 'rgba(60,191,179,0.14)', color: 'var(--sx-accent-text)', border: '1px solid rgba(60,191,179,0.35)' }}
             >
               <BadgeCheck size={13} strokeWidth={2.5} />
               Comprovado
@@ -134,7 +134,7 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
           </div>
 
           <div className="relative mt-4 sm:mt-5 text-center">
-            <p className="font-black leading-none text-[44px] sm:text-[60px] tracking-tight" style={{ color: '#00cfb5' }}>
+            <p className="font-black leading-none text-[44px] sm:text-[60px] tracking-tight" style={{ color: 'var(--sx-accent-text)' }}>
               R$ {fmt(economiaMes)}
             </p>
             <p className="text-sm font-semibold mt-1.5 text-white/90">
@@ -144,7 +144,7 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
 
           {/* pills de reforço */}
           <div className="relative mt-4 flex items-center justify-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black" style={{ backgroundColor: '#00cfb5', color: '#F4F7F6' }}>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black" style={{ backgroundColor: 'var(--sx-accent)', color: 'var(--sx-text)' }}>
               {percentual}% menos energia
             </span>
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold text-white/85" style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
@@ -155,19 +155,19 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
 
         {/* ── Comparação visual: barras proporcionais de custo/mês ────── */}
         <div className="px-5 sm:px-7 pt-5 pb-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wide mb-3" style={{ color: '#F4F7F6', opacity: 0.55 }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--sx-text)', opacity: 0.55 }}>
             Custo de energia por mês
           </p>
 
           {/* Linha AC */}
           <div className="mb-3.5">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold" style={{ color: '#F4F7F6' }}>
-                <AirVent size={16} strokeWidth={2} color="#F4F7F6" />
+              <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold" style={{ color: 'var(--sx-text)' }}>
+                <AirVent size={16} strokeWidth={2} color="var(--sx-text)" />
                 Ar-condicionado
                 <span className="hidden sm:inline text-[11px] font-normal" style={{ opacity: 0.55 }}>· {ac.descricaoAC}</span>
               </span>
-              <span className="text-sm font-bold tabular-nums" style={{ color: '#F4F7F6' }}>R$ {fmt(custoAC)}</span>
+              <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--sx-text)' }}>R$ {fmt(custoAC)}</span>
             </div>
             <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
               <div
@@ -180,16 +180,16 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
           {/* Linha Climatizador Sixxis (destaque) */}
           <div className="mb-2">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold" style={{ color: '#F4F7F6' }}>
-                <Wind size={16} strokeWidth={2} color="#F4F7F6" />
+              <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold" style={{ color: 'var(--sx-text)' }}>
+                <Wind size={16} strokeWidth={2} color="var(--sx-text)" />
                 Climatizador Sixxis
               </span>
-              <span className="text-sm font-bold tabular-nums" style={{ color: '#00cfb5' }}>R$ {fmt(custoProduto)}</span>
+              <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--sx-accent-text)' }}>R$ {fmt(custoProduto)}</span>
             </div>
             <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
               <div
                 className="h-full rounded-full transition-all duration-700 delay-150"
-                style={{ width: visivel ? `${pctBarraProduto}%` : '0%', background: 'linear-gradient(90deg, #00cfb5 0%, #2aa89c 100%)' }}
+                style={{ width: visivel ? `${pctBarraProduto}%` : '0%', background: 'linear-gradient(90deg, var(--sx-accent) 0%, #2aa89c 100%)' }}
               />
             </div>
           </div>
@@ -200,22 +200,22 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
           <div className="grid grid-cols-2 gap-2.5">
             {/* AC */}
             <div className="rounded-xl p-3" style={{ border: '1px solid rgba(255,255,255,0.12)', backgroundColor: 'rgba(255,255,255,0.025)' }}>
-              <p className="text-[11px] font-bold mb-2 flex items-center gap-1.5" style={{ color: '#F4F7F6' }}>
-                <AirVent size={14} strokeWidth={2} color="#F4F7F6" /> Ar-condicionado
+              <p className="text-[11px] font-bold mb-2 flex items-center gap-1.5" style={{ color: 'var(--sx-text)' }}>
+                <AirVent size={14} strokeWidth={2} color="var(--sx-text)" /> Ar-condicionado
               </p>
               <dl className="space-y-1 text-[11px] sm:text-xs">
-                <div className="flex justify-between"><dt style={{ color: '#F4F7F6', opacity: 0.6 }}>Consumo</dt><dd className="font-semibold tabular-nums" style={{ color: '#F4F7F6' }}>{ac.wattsAC} W</dd></div>
-                <div className="flex justify-between"><dt style={{ color: '#F4F7F6', opacity: 0.6 }}>Por ano</dt><dd className="font-semibold tabular-nums" style={{ color: '#F4F7F6' }}>R$ {fmt(custoAC * 12)}</dd></div>
+                <div className="flex justify-between"><dt style={{ color: 'var(--sx-text)', opacity: 0.6 }}>Consumo</dt><dd className="font-semibold tabular-nums" style={{ color: 'var(--sx-text)' }}>{ac.wattsAC} W</dd></div>
+                <div className="flex justify-between"><dt style={{ color: 'var(--sx-text)', opacity: 0.6 }}>Por ano</dt><dd className="font-semibold tabular-nums" style={{ color: 'var(--sx-text)' }}>R$ {fmt(custoAC * 12)}</dd></div>
               </dl>
             </div>
             {/* Climatizador */}
             <div className="rounded-xl p-3" style={{ border: '1px solid rgba(60,191,179,0.45)', backgroundColor: 'rgba(60,191,179,0.06)' }}>
-              <p className="text-[11px] font-bold mb-2 flex items-center gap-1.5" style={{ color: '#F4F7F6' }}>
-                <Wind size={14} strokeWidth={2} color="#F4F7F6" /> Climatizador Sixxis
+              <p className="text-[11px] font-bold mb-2 flex items-center gap-1.5" style={{ color: 'var(--sx-text)' }}>
+                <Wind size={14} strokeWidth={2} color="var(--sx-text)" /> Climatizador Sixxis
               </p>
               <dl className="space-y-1 text-[11px] sm:text-xs">
-                <div className="flex justify-between"><dt style={{ color: '#F4F7F6', opacity: 0.6 }}>Consumo</dt><dd className="font-bold tabular-nums" style={{ color: '#00cfb5' }}>{consumoW} W</dd></div>
-                <div className="flex justify-between"><dt style={{ color: '#F4F7F6', opacity: 0.6 }}>Por ano</dt><dd className="font-bold tabular-nums" style={{ color: '#00cfb5' }}>R$ {fmt(custoProduto * 12)}</dd></div>
+                <div className="flex justify-between"><dt style={{ color: 'var(--sx-text)', opacity: 0.6 }}>Consumo</dt><dd className="font-bold tabular-nums" style={{ color: 'var(--sx-accent-text)' }}>{consumoW} W</dd></div>
+                <div className="flex justify-between"><dt style={{ color: 'var(--sx-text)', opacity: 0.6 }}>Por ano</dt><dd className="font-bold tabular-nums" style={{ color: 'var(--sx-accent-text)' }}>R$ {fmt(custoProduto * 12)}</dd></div>
               </dl>
             </div>
           </div>
@@ -224,25 +224,25 @@ export function EconomiaBloco({ slug, consumoW, preco, coberturaM2 }: Props) {
         {/* ── Métricas em 3 colunas ───────────────────────────────────── */}
         <div className="grid grid-cols-3 items-stretch" style={{ borderTop: '1px solid rgba(255,255,255,0.10)' }}>
           <div className="p-3 text-center flex flex-col justify-between min-h-[78px]" style={{ borderRight: '1px solid rgba(255,255,255,0.10)' }}>
-            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#F4F7F6', opacity: 0.6 }}>Economia/mês</p>
-            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: '#00cfb5' }}>R$ {fmt(economiaMes)}</p>
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: 'var(--sx-text)', opacity: 0.6 }}>Economia/mês</p>
+            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: 'var(--sx-accent-text)' }}>R$ {fmt(economiaMes)}</p>
           </div>
           <div className="p-3 text-center flex flex-col justify-between min-h-[78px]" style={{ borderRight: '1px solid rgba(255,255,255,0.10)' }}>
-            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#F4F7F6', opacity: 0.6 }}>Economia/ano</p>
-            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: '#00cfb5' }}>
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: 'var(--sx-text)', opacity: 0.6 }}>Economia/ano</p>
+            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: 'var(--sx-accent-text)' }}>
               R$ {(economiaAno / 1000).toFixed(1)}k
             </p>
           </div>
           <div className="p-3 text-center flex flex-col justify-between min-h-[78px]">
-            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: '#F4F7F6', opacity: 0.6 }}>Produto se<br />paga em</p>
-            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: '#F4F7F6' }}>{retornoAnos} anos</p>
+            <p className="text-[10px] sm:text-[11px] leading-tight" style={{ color: 'var(--sx-text)', opacity: 0.6 }}>Produto se<br />paga em</p>
+            <p className="text-base sm:text-lg font-bold mt-1 tabular-nums" style={{ color: 'var(--sx-text)' }}>{retornoAnos} anos</p>
           </div>
         </div>
 
         {/* ── Rodapé de disclaimer ────────────────────────────────────── */}
         <div className="px-4 sm:px-5 py-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.10)', backgroundColor: 'rgba(255,255,255,0.03)' }}>
-          <p className="text-[10px] leading-relaxed flex items-start gap-1.5" style={{ color: '#F4F7F6', opacity: 0.65 }}>
-            <Zap strokeWidth={2} color="#F4F7F6" style={{ width: 12, height: 12, flexShrink: 0, marginTop: 2 }} />
+          <p className="text-[10px] leading-relaxed flex items-start gap-1.5" style={{ color: 'var(--sx-text)', opacity: 0.65 }}>
+            <Zap strokeWidth={2} color="var(--sx-text)" style={{ width: 12, height: 12, flexShrink: 0, marginTop: 2 }} />
             <span>
               Equivale a {ac.setup} para climatizar {ac.area} m². Base: {HORAS_DIA}h/dia × {DIAS_MES} dias × R$ {TARIFA.toFixed(2)}/kWh (tarifa ANEEL 2024). Consumo real pode variar conforme uso.
             </span>

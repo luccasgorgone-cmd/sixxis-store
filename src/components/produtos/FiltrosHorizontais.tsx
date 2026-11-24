@@ -39,6 +39,7 @@ function FiltroDropdown({
   const btnRef = useRef<HTMLButtonElement>(null)
   const temSelecionado = valoresSelecionados.length > 0
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- portal só pode montar no cliente
   useEffect(() => { setMounted(true) }, [])
 
   const calcPos = useCallback(() => {
@@ -101,7 +102,7 @@ function FiltroDropdown({
             ? 'bg-[#0f2e2b] border-[#0f2e2b] text-white'
             : aberto
               ? 'bg-gray-50 border-gray-300 text-gray-900'
-              : 'bg-white border-gray-200 text-gray-700 hover:border-[#3cbfb3] hover:text-[#3cbfb3]',
+              : 'bg-white border-gray-200 text-gray-700 hover:border-sx-accent hover:text-sx-accent-text',
         ].join(' ')}
       >
         {grupo.label}
@@ -146,13 +147,13 @@ function FiltroDropdown({
                     className={`
                       w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-left transition-colors
                       ${selecionado
-                        ? 'bg-[#3cbfb3]/10 text-[#3cbfb3] font-semibold'
+                        ? 'bg-sx-accent/10 text-sx-accent-text font-semibold'
                         : 'text-gray-700 hover:bg-gray-50'
                       }
                     `}
                   >
                     {selecionado
-                      ? <Check size={13} className="shrink-0 text-[#3cbfb3]" />
+                      ? <Check size={13} className="shrink-0 text-sx-accent-text" />
                       : <span className="w-[13px] shrink-0" />
                     }
                     {op.label}
@@ -252,8 +253,8 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <div className="flex items-center gap-1.5 shrink-0 mr-1">
-            <SlidersHorizontal size={15} strokeWidth={2} className="text-gray-400" />
-            <span className="text-xs font-semibold text-gray-400">Filtros</span>
+            <SlidersHorizontal size={15} strokeWidth={2} className="text-gray-500" />
+            <span className="text-xs font-semibold text-gray-500">Filtros</span>
           </div>
 
           {grupos.map(grupo => (
@@ -273,7 +274,7 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
               setOrdem(e.target.value)
               aplicar(filtros, e.target.value)
             }}
-            className="shrink-0 border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 outline-none bg-white hover:border-[#3cbfb3] transition cursor-pointer"
+            className="shrink-0 border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 outline-none bg-white hover:border-sx-accent transition cursor-pointer"
           >
             <option value="">Ordenar por</option>
             <option value="popularidade">Popularidade</option>
@@ -292,7 +293,7 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
             </button>
           )}
 
-          <span className="text-xs text-gray-400 ml-auto shrink-0 whitespace-nowrap">
+          <span className="text-xs text-gray-500 ml-auto shrink-0 whitespace-nowrap">
             {total} produto{total !== 1 ? 's' : ''}
           </span>
         </div>
@@ -301,12 +302,12 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
         <div className="flex md:hidden items-center gap-2">
           <button
             onClick={() => setDrawerAberto(true)}
-            className="flex items-center gap-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl px-3 py-2 shrink-0 hover:border-[#3cbfb3] transition"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl px-3 py-2 shrink-0 hover:border-sx-accent transition"
           >
             <SlidersHorizontal size={15} />
             Filtros
             {totalAtivos > 0 && (
-              <span className="bg-[#3cbfb3] text-[#0f2e2b] text-[10px] font-black rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+              <span className="bg-sx-accent text-[#0f2e2b] text-[10px] font-black rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
                 {totalAtivos}
               </span>
             )}
@@ -325,7 +326,7 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
             <option value="preco_asc">Menor preço</option>
             <option value="preco_desc">Maior preço</option>
           </select>
-          <span className="text-[11px] text-gray-400 shrink-0 whitespace-nowrap">
+          <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">
             {total} produto{total !== 1 ? 's' : ''}
           </span>
         </div>
@@ -342,10 +343,10 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
           <div className="md:hidden fixed inset-y-0 right-0 z-50 w-[86%] max-w-sm bg-white flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal size={18} className="text-[#3cbfb3]" />
+                <SlidersHorizontal size={18} className="text-sx-accent-text" />
                 <h3 className="text-base font-bold text-gray-900">Filtros</h3>
                 {totalAtivos > 0 && (
-                  <span className="bg-[#3cbfb3] text-[#0f2e2b] text-[10px] font-black rounded-full px-2 py-0.5">
+                  <span className="bg-sx-accent text-[#0f2e2b] text-[10px] font-black rounded-full px-2 py-0.5">
                     {totalAtivos}
                   </span>
                 )}
@@ -383,12 +384,12 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
                           }}
                           className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-sm transition ${
                             sel
-                              ? 'bg-[#e8f8f7] border-[#3cbfb3] text-[#0f2e2b] font-semibold'
+                              ? 'bg-sx-tint border-sx-accent text-[#0f2e2b] font-semibold'
                               : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                           }`}
                         >
                           <span>{op.label}</span>
-                          {sel && <Check size={14} className="text-[#3cbfb3]" />}
+                          {sel && <Check size={14} className="text-sx-accent-text" />}
                         </button>
                       )
                     })}
@@ -408,7 +409,7 @@ export default function FiltrosHorizontais({ grupos, total }: Props) {
               )}
               <button
                 onClick={() => setDrawerAberto(false)}
-                className="flex-1 py-3 rounded-xl bg-[#3cbfb3] text-white text-sm font-bold hover:bg-[#2a9d8f] transition"
+                className="flex-1 py-3 rounded-xl bg-sx-accent text-sx-ink text-sm font-bold hover:bg-sx-accent-hover transition"
               >
                 Ver {total} produto{total !== 1 ? 's' : ''}
               </button>

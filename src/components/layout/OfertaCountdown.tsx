@@ -33,7 +33,7 @@ export default function OfertaCountdown({ targetDate }: { targetDate: string }) 
           <span className="bg-[#1a4f4a] text-white text-xs font-bold px-2 py-1 rounded tabular-nums min-w-[32px] text-center">
             {pad(v)}{l}
           </span>
-          {i < 2 && <span className="text-gray-400 font-bold text-xs">:</span>}
+          {i < 2 && <span className="text-gray-500 font-bold text-xs">:</span>}
         </span>
       ))}
     </div>

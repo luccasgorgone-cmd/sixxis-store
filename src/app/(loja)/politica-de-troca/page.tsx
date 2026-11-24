@@ -13,16 +13,16 @@ export const metadata: Metadata = {
 
 export default function PoliticaDeTrocaPage() {
   return (
-    <main className="bg-[#111717]">
+    <main className="bg-sx-surface">
       <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Trocas e Devoluções' }]} />
 
       {/* Hero */}
       <section
-        className="py-16 md:py-20"
+        className="sx-escuro py-16 md:py-20"
         style={{ background: 'linear-gradient(135deg, #0f2e2b 0%, #1a4f4a 100%)' }}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-[#00cfb5] text-sm font-semibold uppercase tracking-widest mb-3">Seus direitos garantidos</p>
+          <p className="text-sx-accent-text text-sm font-semibold uppercase tracking-widest mb-3">Seus direitos garantidos</p>
           <h1 className="text-4xl font-extrabold text-white tracking-tight">Política de Troca e Devolução</h1>
           <p className="mt-4 text-white/70 max-w-xl mx-auto">
             Transparência e respeito ao consumidor em cada etapa da sua experiência com a Sixxis.
@@ -31,7 +31,7 @@ export default function PoliticaDeTrocaPage() {
       </section>
 
       {/* Cards resumo */}
-      <section className="bg-[#192221] py-10">
+      <section className="bg-sx-raised py-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
@@ -40,12 +40,12 @@ export default function PoliticaDeTrocaPage() {
               { icon: RotateCcw,   title: 'Processo simples',     text: 'Solicite via WhatsApp ou e-mail' },
               { icon: Phone,       title: 'Suporte dedicado',     text: 'Equipe pronta para te orientar' },
             ].map(({ icon: Icon, title, text }) => (
-              <div key={title} className="bg-[#111717] rounded-xl p-5 border border-[#2A3937] text-center">
-                <div className="w-10 h-10 rounded-full bg-[#e8f8f7] flex items-center justify-center mx-auto mb-3">
-                  <Icon size={18} className="text-[#00cfb5]" />
+              <div key={title} className="bg-sx-surface rounded-xl p-5 border border-sx-line text-center">
+                <div className="w-10 h-10 rounded-full bg-sx-tint flex items-center justify-center mx-auto mb-3">
+                  <Icon size={18} className="text-sx-accent-text" />
                 </div>
                 <p className="font-bold text-[#0a0a0a] text-sm mb-1">{title}</p>
-                <p className="text-xs text-[#B0BFBC]">{text}</p>
+                <p className="text-xs text-sx-muted">{text}</p>
               </div>
             ))}
           </div>
@@ -60,7 +60,7 @@ export default function PoliticaDeTrocaPage() {
           {/* Prazo */}
           <div>
             <h2 className="section-title text-xl mb-5">1. Prazo para Troca e Devolução</h2>
-            <div className="space-y-3 text-[#B0BFBC] text-sm leading-relaxed">
+            <div className="space-y-3 text-sx-muted text-sm leading-relaxed">
               <p>
                 Conforme o <strong>artigo 49 do Código de Defesa do Consumidor</strong>, o cliente tem até <strong>7 (sete) dias corridos</strong> após o recebimento do produto para solicitar a devolução por arrependimento, sem necessidade de justificativa.
               </p>
@@ -76,7 +76,7 @@ export default function PoliticaDeTrocaPage() {
           {/* Condições */}
           <div>
             <h2 className="section-title text-xl mb-5">2. Condições para Troca ou Devolução</h2>
-            <div className="text-[#B0BFBC] text-sm leading-relaxed">
+            <div className="text-sx-muted text-sm leading-relaxed">
               <p className="mb-3">Para que a solicitação seja aceita, o produto deve estar:</p>
               <ul className="space-y-2 ml-4">
                 {[
@@ -86,7 +86,7 @@ export default function PoliticaDeTrocaPage() {
                   'Sem avarias causadas pelo cliente durante o transporte de retorno',
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2">
-                    <span className="text-[#00cfb5] font-bold mt-0.5">✓</span>
+                    <span className="text-sx-accent-text font-bold mt-0.5">✓</span>
                     {item}
                   </li>
                 ))}
@@ -103,7 +103,7 @@ export default function PoliticaDeTrocaPage() {
                   'Solicitações fora do prazo estabelecido',
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2">
-                    <span className="text-red-400 font-bold mt-0.5">✗</span>
+                    <span className="text-red-600 font-bold mt-0.5">✗</span>
                     {item}
                   </li>
                 ))}
@@ -137,11 +137,11 @@ export default function PoliticaDeTrocaPage() {
                   text:  'Após o recebimento e análise do produto (até 5 dias úteis), realizaremos a troca, o reembolso ou o reparo conforme acordado.',
                 },
               ].map(({ step, title, text }) => (
-                <div key={step} className="flex gap-4 bg-[#192221] rounded-xl p-5">
-                  <span className="text-2xl font-extrabold text-[#00cfb5] shrink-0">{step}</span>
+                <div key={step} className="flex gap-4 bg-sx-raised rounded-xl p-5">
+                  <span className="text-2xl font-extrabold text-sx-accent-text shrink-0">{step}</span>
                   <div>
                     <p className="font-bold text-[#0a0a0a] mb-1">{title}</p>
-                    <p className="text-sm text-[#B0BFBC]">{text}</p>
+                    <p className="text-sm text-sx-muted">{text}</p>
                   </div>
                 </div>
               ))}
@@ -151,7 +151,7 @@ export default function PoliticaDeTrocaPage() {
           {/* Reembolso */}
           <div>
             <h2 className="section-title text-xl mb-5">4. Reembolso</h2>
-            <div className="space-y-3 text-[#B0BFBC] text-sm leading-relaxed">
+            <div className="space-y-3 text-sx-muted text-sm leading-relaxed">
               <p>O reembolso será processado após a confirmação do recebimento e análise do produto devolvido:</p>
               <ul className="space-y-2 ml-4">
                 {[
@@ -160,7 +160,7 @@ export default function PoliticaDeTrocaPage() {
                   'Cartão de débito: estorno em até 7 dias úteis, conforme operadora',
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2">
-                    <span className="text-[#00cfb5] font-bold mt-0.5">•</span>
+                    <span className="text-sx-accent-text font-bold mt-0.5">•</span>
                     {item}
                   </li>
                 ))}
@@ -169,9 +169,9 @@ export default function PoliticaDeTrocaPage() {
           </div>
 
           {/* Contato */}
-          <div className="bg-[#192221] rounded-2xl p-8">
+          <div className="bg-sx-raised rounded-2xl p-8">
             <h2 className="text-xl font-bold text-[#0a0a0a] mb-3">5. Contato para Trocas e Devoluções</h2>
-            <p className="text-sm text-[#B0BFBC] mb-5">
+            <p className="text-sm text-sx-muted mb-5">
               Para qualquer dúvida ou para iniciar o processo de troca, entre em contato com nossa equipe:
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -188,16 +188,16 @@ export default function PoliticaDeTrocaPage() {
       </section>
 
       {/* Links relacionados */}
-      <section className="border-t border-[#2A3937] py-8">
+      <section className="border-t border-sx-line py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-sm text-[#B0BFBC] mb-4">Veja também:</p>
+          <p className="text-sm text-sx-muted mb-4">Veja também:</p>
           <div className="flex flex-wrap justify-center gap-3">
             {[
               ['/faq', 'Perguntas Frequentes'],
               ['/garantia', 'Termo de Garantia'],
               ['/contato', 'Fale Conosco'],
             ].map(([href, label]) => (
-              <Link key={href} href={href} className="text-sm text-[#00cfb5] hover:underline font-medium">
+              <Link key={href} href={href} className="text-sm text-sx-accent-text hover:underline font-medium">
                 {label}
               </Link>
             ))}

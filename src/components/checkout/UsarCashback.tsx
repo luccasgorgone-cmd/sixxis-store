@@ -53,7 +53,7 @@ export default function UsarCashback({ subtotalProdutos, onValor, compact }: Pro
     return (
       <div className="flex items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
         <Coins size={15} className="text-gray-300 shrink-0" />
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-500">
           Você ainda não tem cashback disponível para usar.
         </p>
       </div>
@@ -61,16 +61,16 @@ export default function UsarCashback({ subtotalProdutos, onValor, compact }: Pro
   }
 
   return (
-    <div className="rounded-2xl border border-[#3cbfb3]/30 bg-[#f0fffe] px-4 py-3">
+    <div className="rounded-2xl border border-sx-accent/30 bg-[#f0fffe] px-4 py-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#3cbfb3]/10 flex items-center justify-center shrink-0">
-            <Coins size={16} className="text-[#3cbfb3]" />
+          <div className="w-8 h-8 rounded-lg bg-sx-accent/10 flex items-center justify-center shrink-0">
+            <Coins size={16} className="text-sx-accent-text" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-gray-800 leading-tight">Usar meu cashback</p>
             <p className="text-xs text-gray-500 mt-0.5">
-              Disponível: <span className="font-bold text-[#0f9488]">R$ {fmt(saldo ?? 0)}</span>
+              Disponível: <span className="font-bold text-sx-accent-text">R$ {fmt(saldo ?? 0)}</span>
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function UsarCashback({ subtotalProdutos, onValor, compact }: Pro
           aria-label="Usar meu cashback"
           onClick={() => setAtivo(!ativo)}
           className={`relative w-11 h-6 rounded-full shrink-0 transition-colors duration-200 ${
-            ativo ? 'bg-[#3cbfb3]' : 'bg-gray-200'
+            ativo ? 'bg-sx-accent' : 'bg-gray-200'
           }`}
         >
           <span
@@ -95,16 +95,16 @@ export default function UsarCashback({ subtotalProdutos, onValor, compact }: Pro
       </div>
 
       {ativo && (
-        <div className="mt-2.5 pt-2.5 border-t border-[#3cbfb3]/20">
+        <div className="mt-2.5 pt-2.5 border-t border-sx-accent/20">
           {aplicavel > 0 ? (
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-500">
                 Aplicado nesta compra{!compact && ' (até 10% dos produtos)'}
               </span>
-              <span className="font-bold text-[#0f9488]">− R$ {fmt(aplicavel)}</span>
+              <span className="font-bold text-sx-accent-text">− R$ {fmt(aplicavel)}</span>
             </div>
           ) : (
-            <p className="text-xs text-gray-400">Sem valor aplicável para este subtotal.</p>
+            <p className="text-xs text-gray-500">Sem valor aplicável para este subtotal.</p>
           )}
         </div>
       )}

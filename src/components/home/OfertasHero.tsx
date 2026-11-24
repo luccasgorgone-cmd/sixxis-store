@@ -8,7 +8,7 @@ function TimerBloco({ valor, label }: { valor: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
       <div
-        className="w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center relative overflow-hidden"
+        className="sx-escuro w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center relative overflow-hidden"
         style={{
           background: 'linear-gradient(145deg, #1a3d38, #0f2e2b)',
           border: '1px solid rgba(60,191,179,0.2)',
@@ -59,7 +59,7 @@ export default function OfertasHero({
 
   return (
     <section
-      className="relative rounded-2xl overflow-hidden mb-10 text-center py-10 md:py-14 px-4 md:px-6"
+      className="sx-escuro relative rounded-2xl overflow-hidden mb-10 text-center py-10 md:py-14 px-4 md:px-6"
       style={{ background: 'linear-gradient(135deg, #0b1f1d 0%, #0f2e2b 40%, #111 100%)' }}
     >
       {/* Decorações de fundo */}
@@ -82,7 +82,7 @@ export default function OfertasHero({
       <div className="relative z-10">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-red-500/20 border border-red-500/30
-                        text-red-400 text-xs font-black uppercase tracking-widest px-3 py-1.5
+                        text-red-600 text-xs font-black uppercase tracking-widest px-3 py-1.5
                         rounded-full mb-5">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
           {bf ? 'Black Friday' : 'Oferta por tempo limitado'}
@@ -90,13 +90,13 @@ export default function OfertasHero({
 
         {/* Título */}
         <div className="flex items-center justify-center gap-2 md:gap-3 mb-2">
-          <Zap size={22} className="text-[#3cbfb3] md:hidden" strokeWidth={2.5} />
-          <Zap size={28} className="text-[#3cbfb3] hidden md:block" strokeWidth={2.5} />
+          <Zap size={22} className="text-sx-accent-text md:hidden" strokeWidth={2.5} />
+          <Zap size={28} className="text-sx-accent-text hidden md:block" strokeWidth={2.5} />
           <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">
             {bf ? 'Black Friday' : 'Oferta Relâmpago'}
           </h1>
-          <Zap size={22} className="text-[#3cbfb3] md:hidden" strokeWidth={2.5} />
-          <Zap size={28} className="text-[#3cbfb3] hidden md:block" strokeWidth={2.5} />
+          <Zap size={22} className="text-sx-accent-text md:hidden" strokeWidth={2.5} />
+          <Zap size={28} className="text-sx-accent-text hidden md:block" strokeWidth={2.5} />
         </div>
         <p className="text-sm md:text-base text-white/50 mb-6">
           {bf ? '2ª unidade com 50% OFF no site inteiro — ofertas até 30/11' : 'Preços imperdíveis por tempo limitado'}
@@ -109,13 +109,13 @@ export default function OfertasHero({
             {mostrarDias && (
               <>
                 <TimerBloco valor={dias} label="DIAS" />
-                <span className="text-2xl font-black text-[#3cbfb3] animate-pulse mb-3">:</span>
+                <span className="text-2xl font-black text-sx-accent-text animate-pulse mb-3">:</span>
               </>
             )}
             <TimerBloco valor={horas} label="H" />
-            <span className="text-2xl font-black text-[#3cbfb3] animate-pulse mb-3">:</span>
+            <span className="text-2xl font-black text-sx-accent-text animate-pulse mb-3">:</span>
             <TimerBloco valor={minutos} label="MIN" />
-            <span className="text-2xl font-black text-[#3cbfb3] animate-pulse mb-3">:</span>
+            <span className="text-2xl font-black text-sx-accent-text animate-pulse mb-3">:</span>
             <TimerBloco valor={segundos} label="SEG" />
           </div>
         </div>

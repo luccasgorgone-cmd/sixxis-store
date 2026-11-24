@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import Breadcrumb from '@/components/ui/Breadcrumb'
+import { capaVitrine } from '@/lib/capa-vitrine'
 
 export const dynamic = 'force-dynamic'
 
@@ -100,23 +101,23 @@ export default async function CompararPage({
           Comparar produtos
         </h1>
 
-        <div className="bg-[#111717] rounded-2xl shadow-sm border border-[#2A3937] overflow-hidden">
+        <div className="bg-sx-surface rounded-2xl shadow-sm border border-sx-line overflow-hidden">
           {/* Cabeçalho — 1 coluna para labels + 1 por produto */}
           <div
-            className="grid border-b border-[#2A3937]"
+            className="grid border-b border-sx-line"
             style={{ gridTemplateColumns: `160px repeat(${produtos.length}, minmax(0, 1fr))` }}
           >
-            <div className="p-4 bg-[#0E1413]" />
+            <div className="p-4 bg-sx-raised" />
             {produtos.map((p) => {
-              const imagens = Array.isArray(p.imagens) ? (p.imagens as string[]) : []
+              const capa = capaVitrine(p.slug, p.imagens)
               const preco = Number(p.precoPromocional ?? p.preco)
               return (
-                <div key={p.id} className="p-4 text-center border-l border-[#2A3937]">
+                <div key={p.id} className="p-4 text-center border-l border-sx-line">
                   <Link href={`/produtos/${p.slug}`} className="block">
-                    <div className="relative w-full aspect-square max-w-[160px] mx-auto mb-3 bg-[#f4f5f2] rounded-xl overflow-hidden">
-                      {imagens[0] ? (
+                    <div className="relative w-full aspect-square max-w-[160px] mx-auto mb-3 bg-sx-stage rounded-xl overflow-hidden">
+                      {capa ? (
                         <Image
-                          src={imagens[0]}
+                          src={capa}
                           alt={p.nome}
                           fill
                           className="object-contain p-2"
@@ -125,14 +126,14 @@ export default async function CompararPage({
                         />
                       ) : null}
                     </div>
-                    <p className="text-sm font-bold text-[#F4F7F6] line-clamp-2 leading-snug min-h-[2.5rem]">
+                    <p className="text-sm font-bold text-sx-text line-clamp-2 leading-snug min-h-[2.5rem]">
                       {p.nome}
                     </p>
-                    <p className="text-lg font-black text-[#F4F7F6] mt-2">R$ {fmt(preco)}</p>
+                    <p className="text-lg font-black text-sx-text mt-2">R$ {fmt(preco)}</p>
                   </Link>
                   <Link
                     href={`/produtos/${p.slug}`}
-                    className="mt-3 inline-block bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors w-full"
+                    className="mt-3 inline-block bg-sx-accent hover:bg-sx-accent-hover text-sx-ink text-sm font-bold px-4 py-2 rounded-lg transition-colors w-full"
                   >
                     Comprar agora
                   </Link>
@@ -145,10 +146,10 @@ export default async function CompararPage({
           {linhas.map((linha, i) => (
             <div
               key={linha.label}
-              className={`grid ${i % 2 === 0 ? 'bg-[#111717]' : 'bg-[#0E1413]'}`}
+              className={`grid ${i % 2 === 0 ? 'bg-sx-surface' : 'bg-sx-raised'}`}
               style={{ gridTemplateColumns: `160px repeat(${produtos.length}, minmax(0, 1fr))` }}
             >
-              <div className="p-4 text-xs font-bold text-[#B0BFBC] uppercase tracking-wide bg-[#0E1413] border-r border-[#2A3937]">
+              <div className="p-4 text-xs font-bold text-sx-muted uppercase tracking-wide bg-sx-raised border-r border-sx-line">
                 {linha.label}
               </div>
               {linha.valores.map((valor, j) => {
@@ -157,8 +158,8 @@ export default async function CompararPage({
                 return (
                   <div
                     key={j}
-                    className={`p-4 text-sm border-l border-[#2A3937] ${
-                      isMelhorPreco ? 'text-[#3cbfb3] font-extrabold' : 'text-[#B0BFBC]'
+                    className={`p-4 text-sm border-l border-sx-line ${
+                      isMelhorPreco ? 'text-sx-accent-text font-extrabold' : 'text-sx-muted'
                     }`}
                   >
                     {valor}

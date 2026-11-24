@@ -138,9 +138,9 @@ function Campo({
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-[#B0BFBC] uppercase tracking-wider mb-1.5">
+      <label className="block text-xs font-semibold text-sx-muted uppercase tracking-wider mb-1.5">
         {label}
-        {required && <span className="text-[#00cfb5] ml-0.5">*</span>}
+        {required && <span className="text-sx-accent-text ml-0.5">*</span>}
       </label>
       <input
         type={type ?? 'text'}
@@ -149,7 +149,7 @@ function Campo({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/40 focus:border-[#00cfb5] disabled:bg-[#192221] disabled:text-[#8a9794] transition placeholder:text-[#6b7a77]"
+        className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sx-accent/40 focus:border-sx-accent disabled:bg-sx-raised disabled:text-sx-subtle transition placeholder:text-sx-subtle"
       />
     </div>
   )
@@ -176,18 +176,18 @@ function StepIndicator({
           <div key={e.n} className="flex items-center">
             <div className={`flex items-center gap-2 transition-all ${current ? 'opacity-100' : done ? 'opacity-70' : 'opacity-30'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                done    ? 'bg-[#00cfb5] text-white' :
-                current ? 'bg-[#00cfb5] text-white ring-4 ring-[#00cfb5]/20' :
-                          'bg-[#192221] text-[#8a9794]'
+                done    ? 'bg-sx-accent text-sx-ink' :
+                current ? 'bg-sx-accent text-sx-ink ring-4 ring-sx-accent/20' :
+                          'bg-sx-raised text-sx-subtle'
               }`}>
                 {done ? <Check size={14} strokeWidth={2.5} /> : <IconC size={14} />}
               </div>
-              <span className={`text-sm font-semibold hidden sm:block ${current ? 'text-[#F4F7F6]' : done ? 'text-[#B0BFBC]' : 'text-[#6b7a77]'}`}>
+              <span className={`text-sm font-semibold hidden sm:block ${current ? 'text-sx-text' : done ? 'text-sx-muted' : 'text-sx-subtle'}`}>
                 {e.label}
               </span>
             </div>
             {idx < ETAPAS.length - 1 && (
-              <div className={`w-8 sm:w-12 h-0.5 mx-2 sm:mx-3 rounded-full transition-all ${done ? 'bg-[#00cfb5]' : 'bg-[#2A3937]'}`} />
+              <div className={`w-8 sm:w-12 h-0.5 mx-2 sm:mx-3 rounded-full transition-all ${done ? 'bg-sx-accent' : 'bg-sx-line'}`} />
             )}
           </div>
         )
@@ -197,7 +197,7 @@ function StepIndicator({
         <button
           type="button"
           onClick={onBack}
-          className="ml-auto text-xs text-[#8a9794] hover:text-[#B0BFBC] flex items-center gap-1 transition"
+          className="ml-auto text-xs text-sx-subtle hover:text-sx-muted flex items-center gap-1 transition"
         >
           ← Voltar
         </button>
@@ -224,46 +224,46 @@ interface ResumoProps {
 
 function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, promo, totalFinal, cashback = 0 }: ResumoProps) {
   return (
-    <div className="bg-[#111717] border border-[#2A3937] rounded-2xl shadow-md overflow-hidden border-l-4 border-l-[#00cfb5]">
-      <div className="px-5 py-4 border-b border-[#2A3937] flex items-center justify-between">
+    <div className="bg-sx-surface border border-sx-line rounded-2xl shadow-md overflow-hidden border-l-4 border-l-sx-accent">
+      <div className="px-5 py-4 border-b border-sx-line flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black text-[#B0BFBC] uppercase tracking-widest">Resumo do pedido</p>
-          <p className="text-xs text-[#8a9794] mt-0.5">{itens.length} {itens.length === 1 ? 'item' : 'itens'}</p>
+          <p className="text-[10px] font-black text-sx-muted uppercase tracking-widest">Resumo do pedido</p>
+          <p className="text-xs text-sx-subtle mt-0.5">{itens.length} {itens.length === 1 ? 'item' : 'itens'}</p>
         </div>
-        <Package size={18} className="text-[#6b7a77]" />
+        <Package size={18} className="text-sx-subtle" />
       </div>
 
       <div className="p-4 space-y-1 max-h-72 overflow-y-auto">
         {itens.map(item => (
-          <div key={item.produtoId + (item.variacaoId ?? '')} className="flex items-start gap-3 py-3 border-b border-[#2A3937] last:border-0">
+          <div key={item.produtoId + (item.variacaoId ?? '')} className="flex items-start gap-3 py-3 border-b border-sx-line last:border-0">
             {item.imagem ? (
-              <div className="w-[72px] h-[72px] rounded-lg border border-[#2A3937] bg-[#192221] overflow-hidden shrink-0">
+              <div className="w-[72px] h-[72px] rounded-lg border border-sx-line bg-sx-raised overflow-hidden shrink-0">
                 <Image src={item.imagem} alt={item.nome} width={72} height={72} className="object-contain w-full h-full" />
               </div>
             ) : (
-              <div className="w-[72px] h-[72px] rounded-lg border border-[#2A3937] bg-[#192221] flex items-center justify-center shrink-0">
-                <ShoppingBag size={20} className="text-[#6b7a77]" />
+              <div className="w-[72px] h-[72px] rounded-lg border border-sx-line bg-sx-raised flex items-center justify-center shrink-0">
+                <ShoppingBag size={20} className="text-sx-subtle" />
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[#F4F7F6] leading-snug line-clamp-2">{item.nome}</p>
-              {item.variacaoNome && <p className="text-[11px] text-[#8a9794] mt-0.5">{item.variacaoNome}</p>}
-              <p className="text-[11px] text-[#8a9794]">Qtd: {item.quantidade}</p>
+              <p className="text-sm font-semibold text-sx-text leading-snug line-clamp-2">{item.nome}</p>
+              {item.variacaoNome && <p className="text-[11px] text-sx-subtle mt-0.5">{item.variacaoNome}</p>}
+              <p className="text-[11px] text-sx-subtle">Qtd: {item.quantidade}</p>
             </div>
-            <p className="text-sm font-bold text-[#F4F7F6] shrink-0 pt-0.5">
+            <p className="text-sm font-bold text-sx-text shrink-0 pt-0.5">
               R$ {moeda(item.preco * item.quantidade)}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="px-5 pb-3 pt-3 space-y-2 border-t border-[#2A3937]">
-        <div className="flex justify-between text-sm text-[#B0BFBC]">
+      <div className="px-5 pb-3 pt-3 space-y-2 border-t border-sx-line">
+        <div className="flex justify-between text-sm text-sx-muted">
           <span>Subtotal</span>
           <span className="font-semibold">R$ {moeda(total)}</span>
         </div>
         {freteStatus === 'ok' && (
-          <div className="flex justify-between text-sm text-[#B0BFBC]">
+          <div className="flex justify-between text-sm text-sx-muted">
             <span>Frete</span>
             <span className={frete === 0 ? 'text-green-600 font-bold' : 'font-semibold'}>
               {frete === 0 ? FRETE_COPY.gratis : `R$ ${moeda(frete)}`}
@@ -271,7 +271,7 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, prom
           </div>
         )}
         {freteStatus === 'a_combinar' && (
-          <div className="flex justify-between text-sm text-[#B0BFBC]">
+          <div className="flex justify-between text-sm text-sx-muted">
             <span>Frete</span>
             <span className="font-semibold text-amber-600">{FRETE_COPY.aCombinar}</span>
           </div>
@@ -296,21 +296,21 @@ function ResumoSidebar({ itens, total, freteStatus, frete, desconto, cupom, prom
       </div>
 
       <div className="px-5 pb-5">
-        <div className="rounded-xl bg-[#00cfb5]/5 border border-[#00cfb5]/20 px-4 py-3 flex justify-between items-baseline">
-          <span className="font-extrabold text-[#F4F7F6]">Total</span>
-          <span className="text-xl font-black text-[#F4F7F6]">R$ {moeda(totalFinal)}</span>
+        <div className="rounded-xl bg-sx-accent/5 border border-sx-accent/20 px-4 py-3 flex justify-between items-baseline">
+          <span className="font-extrabold text-sx-text">Total</span>
+          <span className="text-xl font-black text-sx-text">R$ {moeda(totalFinal)}</span>
         </div>
         {totalFinal > 0 && (
-          <p className="mt-2 text-xs font-semibold text-right text-[#00cfb5]">
+          <p className="mt-2 text-xs font-semibold text-right text-sx-accent-text">
             R$ {moeda(precoPix(totalFinal))} no PIX ({DESCONTO_PIX_PCT}% OFF)
           </p>
         )}
       </div>
 
       <div className="px-5 pb-4 flex items-center justify-between">
-        <span className="flex items-center gap-1 text-[#8a9794] text-[10px]"><Lock size={9} /> SSL 256-bit</span>
-        <span className="flex items-center gap-1 text-[#8a9794] text-[10px]"><Shield size={9} /> Compra segura</span>
-        <span className="flex items-center gap-1 text-[#8a9794] text-[10px]"><Award size={9} /> Qualidade comprovada</span>
+        <span className="flex items-center gap-1 text-sx-subtle text-[10px]"><Lock size={9} /> SSL 256-bit</span>
+        <span className="flex items-center gap-1 text-sx-subtle text-[10px]"><Shield size={9} /> Compra segura</span>
+        <span className="flex items-center gap-1 text-sx-subtle text-[10px]"><Award size={9} /> Qualidade comprovada</span>
       </div>
     </div>
   )
@@ -333,17 +333,17 @@ function CupomField({
 }) {
   if (cupom) {
     return (
-      <div className="flex items-center justify-between bg-[#e8f8f7] border border-[#00cfb5]/30 rounded-xl px-4 py-3">
+      <div className="flex items-center justify-between bg-sx-tint border border-sx-accent/30 rounded-xl px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <Check size={15} className="text-[#00cfb5] shrink-0" />
+          <Check size={15} className="text-sx-accent-text shrink-0" />
           <div>
-            <p className="text-xs font-semibold text-[#D7E0DD]">Cupom aplicado</p>
-            <p className="text-sm font-mono font-bold text-[#00cfb5]">{cupom.codigo}</p>
+            <p className="text-xs font-semibold text-sx-text-2">Cupom aplicado</p>
+            <p className="text-sm font-mono font-bold text-sx-accent-text">{cupom.codigo}</p>
           </div>
         </div>
         <div className="text-right">
           <p className="text-sm font-bold text-green-600">-R$ {moeda(cupom.desconto)}</p>
-          <button type="button" onClick={remover} className="text-[10px] text-[#8a9794] hover:text-[#B0BFBC] flex items-center gap-0.5 ml-auto mt-0.5 transition">
+          <button type="button" onClick={remover} className="text-[10px] text-sx-subtle hover:text-sx-muted flex items-center gap-0.5 ml-auto mt-0.5 transition">
             <X size={10} /> Remover
           </button>
         </div>
@@ -359,20 +359,20 @@ function CupomField({
       )}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Tag size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7a77]" />
+          <Tag size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-sx-subtle" />
           <input
             value={cupomInput}
             onChange={e => setCupomInput(e.target.value.toUpperCase())}
             onKeyDown={e => e.key === 'Enter' && aplicarCupom()}
             placeholder="CÓDIGO DO CUPOM"
-            className="w-full border border-[#2A3937] rounded-xl pl-9 pr-4 py-3 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/40 focus:border-[#00cfb5] transition placeholder:text-[#6b7a77]"
+            className="w-full border border-sx-line rounded-xl pl-9 pr-4 py-3 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-sx-accent/40 focus:border-sx-accent transition placeholder:text-sx-subtle"
           />
         </div>
         <button
           type="button"
           onClick={aplicarCupom}
           disabled={cupomLoading}
-          className="bg-[#00cfb5] hover:bg-[#65E5D4] disabled:opacity-50 text-[#032E28] font-semibold rounded-xl px-5 py-2.5 text-sm transition shrink-0 flex items-center gap-1.5"
+          className="bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-50 text-[#032E28] font-semibold rounded-xl px-5 py-2.5 text-sm transition shrink-0 flex items-center gap-1.5"
         >
           {cupomLoading ? <Loader2 size={13} className="animate-spin" /> : 'Aplicar'}
         </button>
@@ -1002,8 +1002,8 @@ function CheckoutContent() {
   // tratamento de carregando do /carrinho. Não afeta o fluxo compra_direta.
   if (!hasHydrated && !compraDireta) {
     return (
-      <div style={{ backgroundColor: '#080B0B' }} className="min-h-[70vh] flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full animate-spin" style={{ border: '3px solid #e5e7eb', borderTopColor: '#00cfb5' }} />
+      <div style={{ backgroundColor: 'var(--sx-bg)' }} className="min-h-[70vh] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full animate-spin" style={{ border: '3px solid #e5e7eb', borderTopColor: 'var(--sx-accent)' }} />
       </div>
     )
   }
@@ -1012,13 +1012,13 @@ function CheckoutContent() {
   if (itens.length === 0 && fase === 'checkout' && !compraDireta) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 py-20">
-        <div className="w-24 h-24 rounded-full bg-[#192221] border border-[#2A3937] flex items-center justify-center mb-6">
-          <ShoppingBag size={34} className="text-[#2A3937]" />
+        <div className="w-24 h-24 rounded-full bg-sx-raised border border-sx-line flex items-center justify-center mb-6">
+          <ShoppingBag size={34} className="text-sx-subtle" />
         </div>
-        <h2 className="text-xl font-extrabold text-[#F4F7F6] mb-2">Seu carrinho está vazio</h2>
-        <p className="text-[#8a9794] text-sm mb-8 max-w-xs">Adicione produtos incríveis antes de finalizar a compra.</p>
+        <h2 className="text-xl font-extrabold text-sx-text mb-2">Seu carrinho está vazio</h2>
+        <p className="text-sx-subtle text-sm mb-8 max-w-xs">Adicione produtos incríveis antes de finalizar a compra.</p>
         <Link href="/produtos"
-          className="bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold px-8 py-3.5 rounded-xl transition-colors text-sm shadow-lg shadow-[#00cfb5]/20">
+          className="bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-bold px-8 py-3.5 rounded-xl transition-colors text-sm shadow-lg shadow-sx-accent/20">
           Ver Produtos
         </Link>
       </div>
@@ -1029,21 +1029,21 @@ function CheckoutContent() {
   if (fase === 'orcamento') {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 py-20">
-        <div className="w-24 h-24 rounded-full bg-[#e8f8f7] flex items-center justify-center mb-6">
-          <CheckCircle size={40} className="text-[#00cfb5]" />
+        <div className="w-24 h-24 rounded-full bg-sx-tint flex items-center justify-center mb-6">
+          <CheckCircle size={40} className="text-sx-accent-text" />
         </div>
-        <h2 className="text-2xl font-extrabold text-[#F4F7F6] mb-2">Pedido registrado!</h2>
-        <p className="text-[#B0BFBC] text-sm mb-2 max-w-sm">
+        <h2 className="text-2xl font-extrabold text-sx-text mb-2">Pedido registrado!</h2>
+        <p className="text-sx-muted text-sm mb-2 max-w-sm">
           O frete da sua região é <strong>a combinar</strong>. Vamos cotar o frete e entrar em
           contato para finalizar o pagamento.
         </p>
         {pedidoId && (
-          <p className="text-xs text-[#8a9794] mb-8">
+          <p className="text-xs text-sx-subtle mb-8">
             Nº do orçamento: <span className="font-mono font-semibold">#{pedidoId.slice(-8).toUpperCase()}</span>
           </p>
         )}
         <Link href="/produtos"
-          className="bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold px-8 py-3.5 rounded-xl transition-colors text-sm">
+          className="bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-bold px-8 py-3.5 rounded-xl transition-colors text-sm">
           Continuar comprando
         </Link>
       </div>
@@ -1055,13 +1055,13 @@ function CheckoutContent() {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 py-20">
         <div className="relative w-24 h-24 mb-6">
-          <div className="absolute inset-0 rounded-full bg-[#00cfb5]/10 animate-ping" />
-          <div className="relative w-24 h-24 rounded-full bg-[#e8f8f7] flex items-center justify-center">
-            <CheckCircle size={40} className="text-[#00cfb5]" />
+          <div className="absolute inset-0 rounded-full bg-sx-accent/10 animate-ping" />
+          <div className="relative w-24 h-24 rounded-full bg-sx-tint flex items-center justify-center">
+            <CheckCircle size={40} className="text-sx-accent-text" />
           </div>
         </div>
-        <h2 className="text-2xl font-extrabold text-[#F4F7F6] mb-2">Pagamento aprovado!</h2>
-        <p className="text-[#B0BFBC] text-sm mb-8">Redirecionando...</p>
+        <h2 className="text-2xl font-extrabold text-sx-text mb-2">Pagamento aprovado!</h2>
+        <p className="text-sx-muted text-sm mb-8">Redirecionando...</p>
       </div>
     )
   }
@@ -1083,9 +1083,9 @@ function CheckoutContent() {
       />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-20">
       <div className="flex items-center gap-3 mb-8">
-        <h1 className="text-2xl font-black text-[#F4F7F6]">Finalizar compra</h1>
+        <h1 className="text-2xl font-black text-sx-text">Finalizar compra</h1>
         {compraDireta && (
-          <span className="inline-flex items-center gap-1.5 bg-[#e8f8f7] text-[#00cfb5] text-[10px] font-bold px-3 py-1 rounded-full border border-[#00cfb5]/30">
+          <span className="inline-flex items-center gap-1.5 bg-sx-tint text-sx-accent-text text-[10px] font-bold px-3 py-1 rounded-full border border-sx-accent/30">
             <Zap size={10} /> Compra Rápida
           </span>
         )}
@@ -1096,13 +1096,13 @@ function CheckoutContent() {
           {fase === 'bricks' ? (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-semibold text-[#D7E0DD] flex items-center gap-2">
-                  <Lock size={14} className="text-[#00cfb5]" /> Pagamento seguro · Mercado Pago
+                <p className="text-sm font-semibold text-sx-text-2 flex items-center gap-2">
+                  <Lock size={14} className="text-sx-accent-text" /> Pagamento seguro · Mercado Pago
                 </p>
                 <button
                   type="button"
                   onClick={() => setFase('checkout')}
-                  className="text-xs text-[#8a9794] hover:text-[#B0BFBC]"
+                  className="text-xs text-sx-subtle hover:text-sx-muted"
                 >
                   ← Voltar
                 </button>
@@ -1141,7 +1141,7 @@ function CheckoutContent() {
                     <button
                       type="button"
                       onClick={() => setModoPagamento('multi')}
-                      className="w-full text-center text-xs text-[#8a9794] hover:text-[#00cfb5] mt-3"
+                      className="w-full text-center text-xs text-sx-subtle hover:text-sx-accent-text mt-3"
                     >
                       Prefere dividir o pagamento em 2 métodos?
                     </button>
@@ -1187,15 +1187,15 @@ function CheckoutContent() {
               />
 
               {etapa === 1 && (
-                <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-6 shadow-sm space-y-5">
+                <div className="bg-sx-surface border border-sx-line rounded-2xl p-6 shadow-sm space-y-5">
                   <div>
-                    <h2 className="font-extrabold text-[#F4F7F6] mb-0.5">Seus dados</h2>
-                    <p className="text-xs text-[#8a9794]">Utilizados para identificação e envio do pedido.</p>
+                    <h2 className="font-extrabold text-sx-text mb-0.5">Seus dados</h2>
+                    <p className="text-xs text-sx-subtle">Utilizados para identificação e envio do pedido.</p>
                   </div>
 
                   {sessionStatus === 'authenticated' && session?.user?.name && (
-                    <div className="px-4 py-3 rounded-xl bg-[#e8f8f7] border border-[#00cfb5]/30">
-                      <p className="text-sm text-[#F4F7F6]">
+                    <div className="px-4 py-3 rounded-xl bg-sx-tint border border-sx-accent/30">
+                      <p className="text-sm text-sx-text">
                         Olá, <strong>{session.user.name.split(' ')[0]}</strong>! Confirme seus dados abaixo:
                       </p>
                     </div>
@@ -1210,7 +1210,7 @@ function CheckoutContent() {
 
                     {/* Pessoa física × jurídica — PJ sempre consumidor final. */}
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-[#B0BFBC] uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-sx-muted uppercase tracking-wider mb-1.5">
                         Tipo de cadastro
                       </label>
                       <div className="flex gap-2">
@@ -1221,8 +1221,8 @@ function CheckoutContent() {
                             onClick={() => setIdent(d => d.tipoPessoa === val ? d : { ...d, tipoPessoa: val, cpf: '' })}
                             className={`flex-1 rounded-xl px-4 py-3 text-sm font-bold border transition ${
                               ident.tipoPessoa === val
-                                ? 'bg-[#00cfb5] text-white border-[#00cfb5]'
-                                : 'bg-[#111717] text-[#B0BFBC] border-[#2A3937] hover:border-[#00cfb5]/40'
+                                ? 'bg-sx-accent text-sx-ink border-sx-accent'
+                                : 'bg-sx-surface text-sx-muted border-sx-line hover:border-sx-accent/40'
                             }`}
                           >
                             {lbl}
@@ -1257,7 +1257,7 @@ function CheckoutContent() {
                           placeholder={ident.isentoIE ? 'Isento' : 'Somente números'}
                           disabled={ident.isentoIE} inputMode="numeric" />
                         <div className="flex items-end pb-3">
-                          <label className="flex items-center gap-2 text-sm text-[#B0BFBC] cursor-pointer select-none">
+                          <label className="flex items-center gap-2 text-sm text-sx-muted cursor-pointer select-none">
                             <input
                               type="checkbox"
                               checked={ident.isentoIE}
@@ -1266,7 +1266,7 @@ function CheckoutContent() {
                                 isentoIE: e.target.checked,
                                 inscricaoEstadual: e.target.checked ? '' : d.inscricaoEstadual,
                               }))}
-                              className="w-4 h-4 rounded border-[#2A3937] accent-[#00cfb5] focus:ring-[#00cfb5]/40"
+                              className="w-4 h-4 rounded border-sx-line accent-sx-accent focus:ring-sx-accent/40"
                             />
                             Isento de Inscrição Estadual
                           </label>
@@ -1286,7 +1286,7 @@ function CheckoutContent() {
                   <button
                     type="button"
                     onClick={proximaEtapa}
-                    className="w-full bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-[#00cfb5]/20 flex items-center justify-center gap-2"
+                    className="w-full bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-sx-accent/20 flex items-center justify-center gap-2"
                   >
                     Continuar para Entrega <ChevronRight size={15} />
                   </button>
@@ -1294,10 +1294,10 @@ function CheckoutContent() {
               )}
 
               {etapa === 2 && (
-                <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-6 shadow-sm space-y-5">
+                <div className="bg-sx-surface border border-sx-line rounded-2xl p-6 shadow-sm space-y-5">
                   <div>
-                    <h2 className="font-extrabold text-[#F4F7F6] mb-0.5">Endereço de entrega</h2>
-                    <p className="text-xs text-[#8a9794]">Selecione um endereço salvo ou digite o CEP para preenchimento automático.</p>
+                    <h2 className="font-extrabold text-sx-text mb-0.5">Endereço de entrega</h2>
+                    <p className="text-xs text-sx-subtle">Selecione um endereço salvo ou digite o CEP para preenchimento automático.</p>
                   </div>
 
                   <EnderecosSalvos
@@ -1313,8 +1313,8 @@ function CheckoutContent() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-[#B0BFBC] uppercase tracking-wider mb-1.5">
-                        CEP <span className="text-[#00cfb5]">*</span>
+                      <label className="block text-xs font-semibold text-sx-muted uppercase tracking-wider mb-1.5">
+                        CEP <span className="text-sx-accent-text">*</span>
                       </label>
                       <div className="relative">
                         <input
@@ -1328,9 +1328,9 @@ function CheckoutContent() {
                           }}
                           placeholder="00000-000"
                           maxLength={9}
-                          className="w-full border border-[#2A3937] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/40 focus:border-[#00cfb5] transition pr-10 placeholder:text-[#6b7a77]"
+                          className="w-full border border-sx-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sx-accent/40 focus:border-sx-accent transition pr-10 placeholder:text-sx-subtle"
                         />
-                        {viaCep.loading && <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00cfb5] animate-spin" />}
+                        {viaCep.loading && <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-sx-accent-text animate-spin" />}
                       </div>
                       {viaCep.error && (
                         <p className="text-[11px] text-amber-600 mt-1.5">{viaCep.error}</p>
@@ -1354,13 +1354,13 @@ function CheckoutContent() {
                   </div>
 
                   {carregandoFrete && (
-                    <div className="flex items-center gap-2 text-xs text-[#00cfb5]">
+                    <div className="flex items-center gap-2 text-xs text-sx-accent-text">
                       <Loader2 size={12} className="animate-spin" /> {FRETE_COPY.calculando}
                     </div>
                   )}
                   {!carregandoFrete && freteStatus === 'ok' && opcoesFrete.length > 0 && (
                     <div>
-                      <p className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <p className="text-xs font-semibold text-sx-muted uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                         <Truck size={11} /> Opção de Frete
                       </p>
                       <div className="space-y-2">
@@ -1371,20 +1371,20 @@ function CheckoutContent() {
                             onClick={() => setFreteTipoSel(op.id)}
                             className={`w-full flex items-center gap-3 border rounded-xl px-4 py-3 text-left transition ${
                               freteTipoSel === op.id
-                                ? 'border-[#00cfb5] bg-[#e8f8f7]'
-                                : 'border-[#2A3937] hover:border-[#00cfb5]/40 hover:bg-[#192221]'
+                                ? 'border-sx-accent bg-sx-tint'
+                                : 'border-sx-line hover:border-sx-accent/40 hover:bg-sx-raised'
                             }`}
                           >
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                              freteTipoSel === op.id ? 'border-[#00cfb5]' : 'border-[#2A3937]'
+                              freteTipoSel === op.id ? 'border-sx-accent' : 'border-sx-line'
                             }`}>
-                              {freteTipoSel === op.id && <div className="w-2 h-2 rounded-full bg-[#00cfb5]" />}
+                              {freteTipoSel === op.id && <div className="w-2 h-2 rounded-full bg-sx-accent" />}
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm font-semibold text-[#F4F7F6]">{op.nome}</p>
-                              {op.prazo && <p className="text-xs text-[#8a9794]">{op.prazo}</p>}
+                              <p className="text-sm font-semibold text-sx-text">{op.nome}</p>
+                              {op.prazo && <p className="text-xs text-sx-subtle">{op.prazo}</p>}
                             </div>
-                            <p className={`text-sm font-bold ${op.preco === 0 ? 'text-green-600' : 'text-[#F4F7F6]'}`}>
+                            <p className={`text-sm font-bold ${op.preco === 0 ? 'text-green-600' : 'text-sx-text'}`}>
                               {op.preco === 0 ? FRETE_COPY.gratisPreco : `R$ ${moeda(op.preco)}`}
                             </p>
                           </button>
@@ -1422,7 +1422,7 @@ function CheckoutContent() {
                   <button
                     type="button"
                     onClick={proximaEtapa}
-                    className="w-full bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-[#00cfb5]/20 flex items-center justify-center gap-2"
+                    className="w-full bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-extrabold py-3.5 rounded-xl text-sm transition-all active:scale-[0.97] shadow-lg shadow-sx-accent/20 flex items-center justify-center gap-2"
                   >
                     Continuar para Pagamento <ChevronRight size={15} />
                   </button>
@@ -1433,13 +1433,13 @@ function CheckoutContent() {
                 <div className="space-y-4">
                   {/* Card único: Cupom + Forma de Pagamento. Antes eram 2 cards
                       separados — cliente percebia como 2 ações sem conexão. */}
-                  <div className="bg-[#111717] border border-[#2A3937] rounded-2xl p-5 shadow-sm space-y-5">
+                  <div className="bg-sx-surface border border-sx-line rounded-2xl p-5 shadow-sm space-y-5">
                     <div>
-                      <p className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <p className="text-xs font-semibold text-sx-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">
                         <Tag size={11} /> Cupom de Desconto
                       </p>
                       {cupomBloqueado ? (
-                        <p className="text-xs text-[#B0BFBC] bg-[#192221] border border-[#2A3937] rounded-xl px-3 py-2.5">
+                        <p className="text-xs text-sx-muted bg-sx-raised border border-sx-line rounded-xl px-3 py-2.5">
                           {promo.descricao ?? 'Promo'} aplicada — não acumula com cupom.
                         </p>
                       ) : (
@@ -1455,21 +1455,21 @@ function CheckoutContent() {
                       <UsarCashback subtotalProdutos={total} onValor={setCashbackUsar} />
                     )}
 
-                    <div className="border-t border-[#2A3937] pt-4 flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-[#8a9794] uppercase tracking-widest">ou pague com</span>
+                    <div className="border-t border-sx-line pt-4 flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-sx-subtle uppercase tracking-widest">ou pague com</span>
                     </div>
 
                     <div className="space-y-3">
-                      <p className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wider flex items-center gap-1.5">
+                      <p className="text-xs font-semibold text-sx-muted uppercase tracking-wider flex items-center gap-1.5">
                         <CreditCard size={11} /> Forma de Pagamento
                       </p>
-                      <p className="text-sm text-[#B0BFBC] leading-relaxed">
-                        Você poderá escolher entre <strong className="text-[#F4F7F6]">PIX</strong>,{' '}
-                        <strong className="text-[#F4F7F6]">cartão de crédito</strong> ou{' '}
-                        <strong className="text-[#F4F7F6]">cartão de débito</strong> na próxima etapa, com checkout
+                      <p className="text-sm text-sx-muted leading-relaxed">
+                        Você poderá escolher entre <strong className="text-sx-text">PIX</strong>,{' '}
+                        <strong className="text-sx-text">cartão de crédito</strong> ou{' '}
+                        <strong className="text-sx-text">cartão de débito</strong> na próxima etapa, com checkout
                         transparente e seguro do Mercado Pago.
                       </p>
-                      <div className="flex items-center gap-3 text-[11px] text-[#8a9794]">
+                      <div className="flex items-center gap-3 text-[11px] text-sx-subtle">
                         <span className="flex items-center gap-1"><Lock size={10} /> SSL 256-bit</span>
                         <span className="flex items-center gap-1"><Shield size={10} /> Antifraude MP</span>
                       </div>
@@ -1486,7 +1486,7 @@ function CheckoutContent() {
                     type="button"
                     onClick={irParaPagamento}
                     disabled={carregando}
-                    className="w-full bg-[#00cfb5] hover:bg-[#65E5D4] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed text-[#032E28] font-extrabold py-4 rounded-2xl text-sm transition-all shadow-lg shadow-[#00cfb5]/25 flex items-center justify-center gap-2"
+                    className="w-full bg-sx-accent hover:bg-sx-accent-hover active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed text-[#032E28] font-extrabold py-4 rounded-2xl text-sm transition-all shadow-lg shadow-sx-accent/25 flex items-center justify-center gap-2"
                   >
                     {carregando ? (
                       <><Loader2 size={16} className="animate-spin" /> Criando pedido...</>
@@ -1498,9 +1498,9 @@ function CheckoutContent() {
                   </button>
 
                   <div className="flex items-center justify-center gap-6 pt-1">
-                    <span className="flex items-center gap-1.5 text-[#6b7a77] text-[10px]"><Lock size={9} /> SSL 256-bit</span>
-                    <span className="flex items-center gap-1.5 text-[#6b7a77] text-[10px]"><Shield size={9} /> Compra segura</span>
-                    <span className="flex items-center gap-1.5 text-[#6b7a77] text-[10px]"><Star size={9} /> Qualidade comprovada</span>
+                    <span className="flex items-center gap-1.5 text-sx-subtle text-[10px]"><Lock size={9} /> SSL 256-bit</span>
+                    <span className="flex items-center gap-1.5 text-sx-subtle text-[10px]"><Shield size={9} /> Compra segura</span>
+                    <span className="flex items-center gap-1.5 text-sx-subtle text-[10px]"><Star size={9} /> Qualidade comprovada</span>
                   </div>
                 </div>
               )}
@@ -1529,7 +1529,7 @@ function MobileResumo(props: ResumoProps) {
   const [open, setOpen] = useState(false)
   return (
     <div
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#111717] border-t border-[#2A3937] shadow-[0_-4px_24px_rgba(0,0,0,.06)]"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-sx-surface border-t border-sx-line shadow-[0_-4px_24px_rgba(0,0,0,.06)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <button
@@ -1537,14 +1537,14 @@ function MobileResumo(props: ResumoProps) {
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-5 py-3"
       >
-        <span className="text-xs font-semibold text-[#B0BFBC]">Ver resumo do pedido</span>
+        <span className="text-xs font-semibold text-sx-muted">Ver resumo do pedido</span>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-extrabold text-[#00cfb5]">R$ {moeda(props.totalFinal)}</span>
-          <ChevronDown size={14} className={`text-[#8a9794] transition-transform ${open ? 'rotate-180' : ''}`} />
+          <span className="text-sm font-extrabold text-sx-accent-text">R$ {moeda(props.totalFinal)}</span>
+          <ChevronDown size={14} className={`text-sx-subtle transition-transform ${open ? 'rotate-180' : ''}`} />
         </div>
       </button>
       {open && (
-        <div className="border-t border-[#2A3937] max-h-80 overflow-y-auto">
+        <div className="border-t border-sx-line max-h-80 overflow-y-auto">
           <ResumoSidebar {...props} />
         </div>
       )}
@@ -1554,15 +1554,15 @@ function MobileResumo(props: ResumoProps) {
 
 export default function CheckoutPage() {
   return (
-    <div className="min-h-screen bg-[#080B0B]">
+    <div className="min-h-screen bg-sx-bg">
       <Suspense fallback={
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-7 bg-[#192221] rounded-xl w-40" />
-            <div className="h-10 bg-[#192221] rounded-xl w-full" />
+            <div className="h-7 bg-sx-raised rounded-xl w-40" />
+            <div className="h-10 bg-sx-raised rounded-xl w-full" />
             <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px] gap-6 mt-4">
-              <div className="h-80 bg-[#192221] rounded-2xl" />
-              <div className="h-72 bg-[#192221] rounded-2xl" />
+              <div className="h-80 bg-sx-raised rounded-2xl" />
+              <div className="h-72 bg-sx-raised rounded-2xl" />
             </div>
           </div>
         </div>

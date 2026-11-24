@@ -723,7 +723,7 @@ export default function LunaWidget({ onOcultar, discreto = false }: LunaWidgetPr
           <span className={`absolute -top-1 -left-1 z-10 w-3 h-3 rounded-full border-2 border-white ${atendimentoEncerrado ? 'bg-gray-400' : 'bg-emerald-500'}`} />
           <button
             onClick={() => { setAberto(true); setMostrarBolha(false); setNaoLidas(0) }}
-            className="relative w-12 h-12 md:w-16 md:h-16 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none overflow-hidden"
+            className="sx-escuro relative w-12 h-12 md:w-16 md:h-16 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none overflow-hidden"
             style={{
               background: 'linear-gradient(145deg, #0f2e2b, #1a4f4a)',
               boxShadow: '0 8px 32px rgba(60,191,179,0.35), 0 4px 16px rgba(0,0,0,0.4)',

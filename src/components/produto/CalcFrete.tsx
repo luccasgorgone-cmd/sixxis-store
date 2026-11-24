@@ -103,18 +103,18 @@ export default function CalcFrete({ produtoId }: Props) {
     : cep
 
   return (
-    <div className="bg-[#192221] rounded-2xl p-4 border border-[#2A3937] mb-4">
+    <div className="bg-sx-raised rounded-2xl p-4 border border-sx-line mb-4">
 
       {/* Label */}
-      <p className="text-sm font-bold text-[#D7E0DD] mb-3 flex items-center gap-1.5">
-        <Truck size={15} className="text-[#00cfb5]" />
+      <p className="text-sm font-bold text-sx-text-2 mb-3 flex items-center gap-1.5">
+        <Truck size={15} className="text-sx-accent-text" />
         Calcular frete e prazo de entrega
       </p>
 
       {/* Input + Botão */}
       <div className="flex gap-2 mb-1">
         <div className="relative flex-1">
-          <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a9794]" />
+          <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sx-subtle" />
           <input
             type="text"
             inputMode="numeric"
@@ -128,13 +128,13 @@ export default function CalcFrete({ produtoId }: Props) {
             onKeyDown={e => e.key === 'Enter' && handleConsultar()}
             placeholder="00000-000"
             maxLength={9}
-            className="w-full pl-8 pr-3 py-2.5 border border-[#2A3937] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00cfb5] focus:border-transparent bg-[#111717] transition"
+            className="w-full pl-8 pr-3 py-2.5 border border-sx-line rounded-xl text-sm outline-none focus:ring-2 focus:ring-sx-accent focus:border-transparent bg-sx-surface transition"
           />
         </div>
         <button
           onClick={handleConsultar}
           disabled={loading || cep.length < 8}
-          className="flex items-center gap-1.5 bg-[#00cfb5] hover:bg-[#65E5D4] disabled:opacity-50 disabled:cursor-not-allowed text-[#032E28] font-bold px-4 py-2.5 rounded-xl text-sm transition active:scale-95"
+          className="flex items-center gap-1.5 bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-[#032E28] font-bold px-4 py-2.5 rounded-xl text-sm transition active:scale-95"
         >
           {loading ? (
             <Loader2 size={14} className="animate-spin" />
@@ -149,7 +149,7 @@ export default function CalcFrete({ produtoId }: Props) {
         href="https://buscacepinter.correios.com.br/app/endereco/index.php"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-[11px] text-[#00cfb5] hover:text-[#65E5D4] transition underline"
+        className="text-[11px] text-sx-accent-text hover:text-sx-accent-text transition underline"
       >
         {FRETE_COPY.naoSeiCep}
       </a>
@@ -165,9 +165,9 @@ export default function CalcFrete({ produtoId }: Props) {
       {/* Loading skeleton */}
       {loading && (
         <div className="mt-3 space-y-2 animate-pulse">
-          <div className="h-3 bg-[#2A3937] rounded-full w-2/3" />
-          <div className="h-12 bg-[#192221] rounded-xl" />
-          <div className="h-12 bg-[#192221] rounded-xl" />
+          <div className="h-3 bg-sx-line rounded-full w-2/3" />
+          <div className="h-12 bg-sx-raised rounded-xl" />
+          <div className="h-12 bg-sx-raised rounded-xl" />
         </div>
       )}
 
@@ -175,9 +175,9 @@ export default function CalcFrete({ produtoId }: Props) {
       {resultado && !loading && (
         <div className="mt-3">
           <div className="flex items-center gap-1.5 mb-3">
-            <CheckCircle size={13} className="text-[#00cfb5]" />
-            <p className="text-xs text-[#B0BFBC]">
-              Entrega para: <strong className="text-[#F4F7F6]">{resultado.localidade}</strong>
+            <CheckCircle size={13} className="text-sx-accent-text" />
+            <p className="text-xs text-sx-muted">
+              Entrega para: <strong className="text-sx-text">{resultado.localidade}</strong>
               {resultado.bairro && ` — ${resultado.bairro}`}
             </p>
           </div>
@@ -186,28 +186,28 @@ export default function CalcFrete({ produtoId }: Props) {
             <div className="space-y-2">
               {resultado.opcoes.map((op) => (
                 <div key={op.id}
-                  className="flex items-center justify-between bg-[#111717] border border-[#2A3937] rounded-xl px-3.5 py-3 hover:border-[#00cfb5]/30 transition">
+                  className="flex items-center justify-between bg-sx-surface border border-sx-line rounded-xl px-3.5 py-3 hover:border-sx-accent/30 transition">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-[#192221] rounded-lg flex items-center justify-center">
-                      <Truck size={14} className="text-[#00cfb5]" />
+                    <div className="w-8 h-8 bg-sx-raised rounded-lg flex items-center justify-center">
+                      <Truck size={14} className="text-sx-accent-text" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-[#F4F7F6]">{op.nome}</p>
-                      {op.prazo && <p className="text-[10px] text-[#B0BFBC]">{op.prazo}</p>}
+                      <p className="text-xs font-bold text-sx-text">{op.nome}</p>
+                      {op.prazo && <p className="text-[10px] text-sx-muted">{op.prazo}</p>}
                     </div>
                   </div>
                   <div className="text-right">
                     {op.preco === 0 ? (
                       <p className="text-sm font-extrabold text-green-600">{FRETE_COPY.gratisPreco}</p>
                     ) : (
-                      <p className="text-sm font-extrabold text-[#F4F7F6]">
+                      <p className="text-sm font-extrabold text-sx-text">
                         R$ {op.preco.toFixed(2).replace('.', ',')}
                       </p>
                     )}
                   </div>
                 </div>
               ))}
-              <p className="text-[10px] text-[#8a9794] mt-2 text-center">
+              <p className="text-[10px] text-sx-subtle mt-2 text-center">
                 Frete e prazo conforme a região de entrega
               </p>
             </div>

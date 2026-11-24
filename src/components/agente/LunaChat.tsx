@@ -345,13 +345,13 @@ export default function LunaChat({
         >
           {/* ── Header ─────────────────────────────────────────────────────── */}
           <div
-            className="shrink-0 flex items-center justify-between px-4 py-4"
+            className="sx-escuro shrink-0 flex items-center justify-between px-4 py-4"
             style={{ background: 'linear-gradient(135deg, #0b2220 0%, #0f2e2b 50%, #1a4f4a 100%)' }}
           >
             <div className="flex items-center gap-3">
               {/* Avatar no header */}
               <div className="relative">
-                <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/20 flex items-center justify-center"
+                <div className="sx-escuro w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/20 flex items-center justify-center"
                   style={{ background: 'linear-gradient(145deg, #1a4f4a, #3cbfb3)' }}>
                   <LunaFace size={24} />
                 </div>
@@ -421,7 +421,7 @@ export default function LunaChat({
                 {/* Avatar da Luna nas mensagens */}
                 {msg.role === 'assistant' && (
                   <div
-                    className="w-7 h-7 rounded-full shrink-0 overflow-hidden mt-auto mb-1 flex items-center justify-center"
+                    className="sx-escuro w-7 h-7 rounded-full shrink-0 overflow-hidden mt-auto mb-1 flex items-center justify-center"
                     style={{ background: 'linear-gradient(145deg, #0f2e2b, #3cbfb3)' }}
                   >
                     <LunaFaceSmall />
@@ -484,7 +484,7 @@ export default function LunaChat({
             {enviando && (
               <div className="flex gap-2.5">
                 <div
-                  className="w-7 h-7 rounded-full shrink-0 overflow-hidden flex items-center justify-center"
+                  className="sx-escuro w-7 h-7 rounded-full shrink-0 overflow-hidden flex items-center justify-center"
                   style={{ background: 'linear-gradient(145deg, #0f2e2b, #3cbfb3)' }}
                 >
                   <LunaFaceSmall />
@@ -595,7 +595,7 @@ export default function LunaChat({
 
           <div className="flex items-start gap-2.5">
             <div
-              className="w-6 h-6 rounded-full shrink-0 overflow-hidden mt-0.5 flex items-center justify-center"
+              className="sx-escuro w-6 h-6 rounded-full shrink-0 overflow-hidden mt-0.5 flex items-center justify-center"
               style={{ background: 'linear-gradient(145deg, #0f2e2b, #3cbfb3)' }}
             >
               <LunaFaceSmall />
@@ -625,7 +625,7 @@ export default function LunaChat({
 
           <button
             onClick={() => { setAberto(true); setMostrarBolha(false) }}
-            className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-2xl overflow-hidden
+            className="sx-escuro relative w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-2xl overflow-hidden
                        transition-all duration-300 hover:scale-110 active:scale-95
                        ring-2 ring-white/30 hover:ring-[#3cbfb3]/60"
             style={{

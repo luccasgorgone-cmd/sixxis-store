@@ -16,8 +16,10 @@ import ContadorAnimado from '@/components/ui/ContadorAnimado'
 import ViewItemTracker from '@/components/analytics/ViewItemTracker'
 import { feedId } from '@/lib/feed-id'
 import { encontrarVariacaoPorSku, estoqueDisponivel, VARIANTE_QUERY_PARAM, urlProdutoComVariacao } from '@/lib/produto-variacao'
-import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
 import AvisoMontagem from '@/components/produto/AvisoMontagem'
+import { galeriaVitrine } from '@/lib/capa-vitrine'
+import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
+import { CombinacaoProduto, ComparativoProduto, FichaTecnica, NavSecoesProduto, type ProdutoComparavel } from '@/components/bf/BlocosProduto'
 
 export const dynamic = 'force-dynamic'
 
@@ -184,7 +186,7 @@ export default async function ProdutoPage({
   const imagens = produto.imagens as string[]
   const videoUrl = (produto as unknown as { videoUrl?: string | null }).videoUrl ?? ''
   const itens: GaleriaItemCB[] = [
-    ...imagens.map(url => ({ tipo: 'imagem' as const, url })),
+    ...galeriaVitrine(produto.slug, imagens).map(url => ({ tipo: 'imagem' as const, url })),
     ...(videoUrl ? [{ tipo: 'video' as const, url: videoUrl }] : []),
   ]
 
@@ -257,6 +259,34 @@ export default async function ProdutoPage({
     imagem: imagens[0] ?? undefined,
     categoria: produto.categoria,
   }
+
+  const normalizarSpecs = (raw: unknown): EspecificacaoRow[] => {
+    try {
+      const lista: unknown[] = Array.isArray(raw) ? raw : raw ? JSON.parse(String(raw)) : []
+      return lista.map((item) => {
+        if (Array.isArray(item)) return { label: String(item[0] ?? ''), valor: String(item[1] ?? '') }
+        const o = item as Record<string, unknown>
+        return { label: String(o.label ?? ''), valor: String(o.valor ?? '') }
+      }) as EspecificacaoRow[]
+    } catch { return [] }
+  }
+  const produtoComparavel: ProdutoComparavel = {
+    id: produto.id, nome: produto.nome, slug: produto.slug, sku: produto.sku,
+    preco: promocional ?? preco, imagens: produto.imagens, especificacoes,
+  }
+  const candidatosComparacao = produto.categoria
+    ? await prisma.produto.findMany({
+        where: { ativo: true, categoria: produto.categoria, id: { not: produto.id } },
+        select: { id: true, nome: true, slug: true, sku: true, preco: true, precoPromocional: true, imagens: true, especificacoes: true },
+      }).catch(() => [])
+    : []
+  const comparaveis: ProdutoComparavel[] = candidatosComparacao
+    .map((p) => ({
+      id: p.id, nome: p.nome, slug: p.slug, sku: p.sku,
+      preco: Number(p.precoPromocional ?? p.preco), imagens: p.imagens, especificacoes: normalizarSpecs(p.especificacoes),
+    }))
+    .sort((a, b) => Math.abs(a.preco - produtoComparavel.preco) - Math.abs(b.preco - produtoComparavel.preco))
+    .slice(0, 2)
 
   const precoSchema = variacaoDeepLink?.preco ?? promocional ?? preco
   const urlSchema = variacaoDeepLink
@@ -363,78 +393,71 @@ export default async function ProdutoPage({
             itensIniciais={itens}
             imagensPorVariacao={imagensPorVariacao}
             cuponsProduto={cuponsProduto}
-            especificacoes={especificacoes.length > 0 ? especificacoes : undefined}
           />
         </div>
 
         <AvisoMontagem categoria={produto.categoria} />
 
-        {/* Specs — somente mobile/tablet, pois em lg+ ja aparece na coluna
-            esquerda dentro de ProdutoGaleriaInfo. Posicao apos
-            InfoProdutoCB (Compartilhar/Salvar) e antes de "Voce tambem pode
-            gostar", conforme reorganizacao mobile UX. */}
-        {especificacoes.length > 0 && (
-          <div className="lg:hidden mb-10">
-            <SpecsExpandiveis especificacoes={especificacoes} />
-          </div>
-        )}
-
-        {/* ★ Você também pode gostar */}
-        <ProdutosSimilares
-          slugAtual={produto.slug}
-          categoriaAtual={produto.categoria ?? ''}
+        <NavSecoesProduto
+          temComparacao={Boolean(comparaveis.length && ['climatizadores', 'spinning'].includes(produto.categoria ?? ''))}
+          temDupla={Boolean(promoVigentePorFeedId(produto.sku ?? produto.slug))}
+          temFicha={especificacoes.length > 0}
         />
 
-        {/* Descrição */}
-        <DescricaoRica descricao={produto.descricao} />
+        <div id="detalhes" className="scroll-mt-24">
+          <DescricaoRica descricao={produto.descricao} />
+        </div>
 
-        {/* Bloco de economia (Faça as contas) */}
         <EconomiaBloco slug={produto.slug} consumoW={consumoW} preco={preco} coberturaM2={coberturaM2} />
+
+        <ComparativoProduto atual={produtoComparavel} opcoes={comparaveis} categoria={produto.categoria ?? ''} />
+        <CombinacaoProduto produto={produtoComparavel} />
+        <FichaTecnica especificacoes={especificacoes} nome={produto.nome} />
 
         {/* Stats — contadores +1M / 12 meses / 100% */}
         <section className="mt-12 mb-10">
           {/* Mobile: stack vertical com numero+label horizontais (cabe '+1.000.000') */}
           <div className="md:hidden flex flex-col gap-2 reveal">
-            <div className="flex items-center justify-between bg-[#111717] rounded-2xl border border-[#00cfb5]/20 px-5 py-3">
-              <p className="text-2xl font-black text-[#00cfb5] whitespace-nowrap">
+            <div className="flex items-center justify-between bg-sx-surface rounded-2xl border border-sx-accent/20 px-5 py-3">
+              <p className="text-2xl font-black text-sx-accent-text whitespace-nowrap">
                 +<ContadorAnimado alvo={1000000} sufixo="" />
               </p>
-              <p className="text-sm text-[#B0BFBC] font-medium">Produtos Vendidos</p>
+              <p className="text-sm text-sx-muted font-medium">Produtos Vendidos</p>
             </div>
-            <div className="flex items-center justify-between bg-[#111717] rounded-2xl border border-[#00cfb5]/20 px-5 py-3">
-              <p className="text-2xl font-black text-[#00cfb5] whitespace-nowrap">
+            <div className="flex items-center justify-between bg-sx-surface rounded-2xl border border-sx-accent/20 px-5 py-3">
+              <p className="text-2xl font-black text-sx-accent-text whitespace-nowrap">
                 <ContadorAnimado alvo={12} sufixo=" meses" />
               </p>
-              <p className="text-sm text-[#B0BFBC] font-medium">Garantia Sixxis</p>
+              <p className="text-sm text-sx-muted font-medium">Garantia Sixxis</p>
             </div>
-            <div className="flex items-center justify-between bg-[#111717] rounded-2xl border border-[#00cfb5]/20 px-5 py-3">
-              <p className="text-2xl font-black text-[#00cfb5] whitespace-nowrap">
+            <div className="flex items-center justify-between bg-sx-surface rounded-2xl border border-sx-accent/20 px-5 py-3">
+              <p className="text-2xl font-black text-sx-accent-text whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
-              <p className="text-sm text-[#B0BFBC] font-medium">Qualidade</p>
+              <p className="text-sm text-sx-muted font-medium">Qualidade</p>
             </div>
           </div>
 
           {/* Tablet + Desktop: grid 3 colunas centralizada (max-w-3xl em tablet pra
               não esticar; lg+ pode usar todo o container para acompanhar o resto). */}
           <div className="hidden md:grid grid-cols-3 gap-3 lg:gap-4 max-w-3xl lg:max-w-none mx-auto reveal">
-            <div className="text-center py-4 lg:py-5 px-3 bg-[#111717] rounded-2xl border border-[#00cfb5]/20">
-              <p className="text-xl lg:text-2xl font-black text-[#00cfb5] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-sx-surface rounded-2xl border border-sx-accent/20">
+              <p className="text-xl lg:text-2xl font-black text-sx-accent-text whitespace-nowrap">
                 +<ContadorAnimado alvo={1000000} sufixo="" />
               </p>
-              <p className="text-[11px] lg:text-xs text-[#B0BFBC] font-medium mt-1">Produtos Vendidos</p>
+              <p className="text-[11px] lg:text-xs text-sx-muted font-medium mt-1">Produtos Vendidos</p>
             </div>
-            <div className="text-center py-4 lg:py-5 px-3 bg-[#111717] rounded-2xl border border-[#00cfb5]/20">
-              <p className="text-xl lg:text-2xl font-black text-[#00cfb5] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-sx-surface rounded-2xl border border-sx-accent/20">
+              <p className="text-xl lg:text-2xl font-black text-sx-accent-text whitespace-nowrap">
                 <ContadorAnimado alvo={12} sufixo=" meses" />
               </p>
-              <p className="text-[11px] lg:text-xs text-[#B0BFBC] font-medium mt-1">Garantia Sixxis</p>
+              <p className="text-[11px] lg:text-xs text-sx-muted font-medium mt-1">Garantia Sixxis</p>
             </div>
-            <div className="text-center py-4 lg:py-5 px-3 bg-[#111717] rounded-2xl border border-[#00cfb5]/20">
-              <p className="text-xl lg:text-2xl font-black text-[#00cfb5] whitespace-nowrap">
+            <div className="text-center py-4 lg:py-5 px-3 bg-sx-surface rounded-2xl border border-sx-accent/20">
+              <p className="text-xl lg:text-2xl font-black text-sx-accent-text whitespace-nowrap">
                 <ContadorAnimado alvo={100} sufixo="%" />
               </p>
-              <p className="text-[11px] lg:text-xs text-[#B0BFBC] font-medium mt-1">Qualidade</p>
+              <p className="text-[11px] lg:text-xs text-sx-muted font-medium mt-1">Qualidade</p>
             </div>
           </div>
         </section>
@@ -449,6 +472,11 @@ export default async function ProdutoPage({
             hideDescricao
           />
         </div>
+
+        <ProdutosSimilares
+          slugAtual={produto.slug}
+          categoriaAtual={produto.categoria ?? ''}
+        />
 
         {/* Por que comprar na Sixxis (ultimo, fechando o pitch) */}
         <PorQueComprarSixxis />

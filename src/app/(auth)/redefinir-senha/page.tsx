@@ -49,7 +49,7 @@ function RedefinirSenhaContent() {
         <p className="text-sm text-gray-500 mb-6">
           Este link de redefinição é inválido ou está incompleto. Solicite um novo.
         </p>
-        <Link href="/esqueci-senha" className="inline-flex items-center justify-center gap-2 font-bold text-[#3cbfb3] hover:text-[#2a9d8f] text-sm transition">
+        <Link href="/esqueci-senha" className="inline-flex items-center justify-center gap-2 font-bold text-sx-accent-text hover:text-sx-accent-text text-sm transition">
           <ArrowLeft size={15} /> Pedir novo link
         </Link>
       </div>
@@ -59,14 +59,14 @@ function RedefinirSenhaContent() {
   if (ok) {
     return (
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto rounded-full bg-[#e8f8f7] flex items-center justify-center mb-5">
-          <CheckCircle size={32} className="text-[#3cbfb3]" />
+        <div className="w-16 h-16 mx-auto rounded-full bg-sx-tint flex items-center justify-center mb-5">
+          <CheckCircle size={32} className="text-sx-accent-text" />
         </div>
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Senha redefinida!</h1>
         <p className="text-sm text-gray-500 mb-6">
           Sua nova senha foi salva. Redirecionando para o login…
         </p>
-        <Link href="/login" className="inline-flex items-center justify-center gap-2 font-bold text-[#3cbfb3] hover:text-[#2a9d8f] text-sm transition">
+        <Link href="/login" className="inline-flex items-center justify-center gap-2 font-bold text-sx-accent-text hover:text-sx-accent-text text-sm transition">
           <ArrowLeft size={15} /> Ir para o login agora
         </Link>
       </div>
@@ -84,18 +84,18 @@ function RedefinirSenhaContent() {
         <div>
           <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1.5">Nova senha</label>
           <div className="relative">
-            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type={mostrar ? 'text' : 'password'}
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-11 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
+              className="w-full pl-10 pr-11 py-3 border-2 border-gray-200 focus:border-sx-accent rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
             />
             <button
               type="button"
               onClick={() => setMostrar(!mostrar)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 transition"
             >
               {mostrar ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -105,13 +105,13 @@ function RedefinirSenhaContent() {
         <div>
           <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1.5">Confirmar senha</label>
           <div className="relative">
-            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type={mostrar ? 'text' : 'password'}
               value={confirma}
               onChange={(e) => setConfirma(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
+              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 focus:border-sx-accent rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
             />
           </div>
         </div>
@@ -125,7 +125,7 @@ function RedefinirSenhaContent() {
         <button
           type="submit"
           disabled={salvando}
-          className="w-full flex items-center justify-center gap-2 font-extrabold text-white py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
+          className="w-full flex items-center justify-center gap-2 font-extrabold text-sx-ink py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
           style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}
         >
           {salvando ? (
@@ -154,7 +154,7 @@ export default function RedefinirSenhaPage() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl p-8">
-          <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#3cbfb3]/30 border-t-[#3cbfb3] rounded-full animate-spin" /></div>}>
+          <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-6 h-6 border-2 border-sx-accent/30 border-t-sx-accent rounded-full animate-spin" /></div>}>
             <RedefinirSenhaContent />
           </Suspense>
         </div>

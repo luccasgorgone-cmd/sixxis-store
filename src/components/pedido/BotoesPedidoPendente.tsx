@@ -56,7 +56,7 @@ export default function BotoesPedidoPendente({ pedidoId, podeCancelar }: Props) 
       <div className="flex flex-wrap gap-2">
         <a
           href={`/checkout/retomar/${pedidoId}`}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[#3cbfb3] hover:bg-[#2a9d8f] transition shadow-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-sx-ink bg-sx-accent hover:bg-sx-accent-hover transition shadow-sm"
         >
           <CreditCard size={14} /> Pagar agora
         </a>

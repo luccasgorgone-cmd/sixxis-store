@@ -29,9 +29,9 @@ function validate(form: FormState): Errors {
 
 function inputClass(touched: boolean, error?: string) {
   const base = 'w-full border rounded-lg px-4 py-2.5 text-base sm:text-sm focus:outline-none focus:ring-2 transition'
-  if (!touched)  return `${base} border-gray-300 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]`
+  if (!touched)  return `${base} border-gray-300 focus:ring-sx-accent focus:border-sx-accent`
   if (error)     return `${base} border-red-400 bg-red-50/30 focus:ring-red-300 focus:border-red-400`
-  return `${base} border-[#3cbfb3] bg-[#f9fffe] focus:ring-[#3cbfb3] focus:border-[#3cbfb3]`
+  return `${base} border-sx-accent bg-[#f9fffe] focus:ring-sx-accent focus:border-sx-accent`
 }
 
 export default function FormContato() {
@@ -98,15 +98,15 @@ export default function FormContato() {
 
   if (enviado) {
     return (
-      <div className="bg-[#e8f8f7] border border-[#3cbfb3] rounded-xl p-8 text-center">
-        <div className="w-14 h-14 rounded-full bg-[#3cbfb3] flex items-center justify-center mx-auto mb-4">
+      <div className="bg-sx-tint border border-sx-accent rounded-xl p-8 text-center">
+        <div className="w-14 h-14 rounded-full bg-sx-accent flex items-center justify-center mx-auto mb-4">
           <CheckCircle size={26} className="text-white" />
         </div>
         <h3 className="text-xl font-bold text-[#0a0a0a] mb-2">Mensagem enviada!</h3>
         <p className="text-gray-600 text-sm">Obrigado pelo contato. Responderemos em até 1 dia útil.</p>
         <button
           onClick={() => { setEnviado(false); setForm(initial); setTouched({}); setErrors({}) }}
-          className="mt-6 border border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#3cbfb3] hover:text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition"
+          className="mt-6 border border-sx-accent text-sx-accent-text hover:bg-sx-accent hover:text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition"
         >
           Enviar outra mensagem
         </button>
@@ -120,7 +120,7 @@ export default function FormContato() {
         {/* Nome */}
         <div>
           <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Nome completo <span className="text-red-500">*</span>
+            Nome completo <span className="text-red-600">*</span>
           </label>
           <input
             id="nome" name="nome" type="text"
@@ -134,7 +134,7 @@ export default function FormContato() {
             </p>
           )}
           {touched.nome && !errors.nome && form.nome && (
-            <p className="flex items-center gap-1 mt-1 text-xs text-[#3cbfb3]">
+            <p className="flex items-center gap-1 mt-1 text-xs text-sx-accent-text">
               <CheckCircle size={12} /> Ótimo!
             </p>
           )}
@@ -143,7 +143,7 @@ export default function FormContato() {
         {/* E-mail */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-            E-mail <span className="text-red-500">*</span>
+            E-mail <span className="text-red-600">*</span>
           </label>
           <input
             id="email" name="email" type="email"
@@ -157,7 +157,7 @@ export default function FormContato() {
             </p>
           )}
           {touched.email && !errors.email && form.email && (
-            <p className="flex items-center gap-1 mt-1 text-xs text-[#3cbfb3]">
+            <p className="flex items-center gap-1 mt-1 text-xs text-sx-accent-text">
               <CheckCircle size={12} /> Ótimo!
             </p>
           )}
@@ -181,7 +181,7 @@ export default function FormContato() {
         {/* Assunto */}
         <div>
           <label htmlFor="assunto" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Assunto <span className="text-red-500">*</span>
+            Assunto <span className="text-red-600">*</span>
           </label>
           <select
             id="assunto" name="assunto"
@@ -206,7 +206,7 @@ export default function FormContato() {
       {/* Mensagem */}
       <div>
         <label htmlFor="mensagem" className="block text-sm font-medium text-gray-700 mb-1.5">
-          Mensagem <span className="text-red-500">*</span>
+          Mensagem <span className="text-red-600">*</span>
         </label>
         <textarea
           id="mensagem" name="mensagem" rows={5}
@@ -219,7 +219,7 @@ export default function FormContato() {
             <AlertCircle size={12} /> {errors.mensagem}
           </p>
         )}
-        <p className="text-xs text-gray-400 mt-1 text-right">{form.mensagem.length} caracteres</p>
+        <p className="text-xs text-gray-500 mt-1 text-right">{form.mensagem.length} caracteres</p>
       </div>
 
       {erroGlobal && (
@@ -234,7 +234,7 @@ export default function FormContato() {
       <button
         type="submit"
         disabled={enviando || (TURNSTILE_ENABLED && !tsToken)}
-        className="flex items-center gap-2 bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm px-8 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg w-full sm:w-auto"
+        className="flex items-center gap-2 bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-60 disabled:cursor-not-allowed text-sx-ink font-bold text-sm px-8 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg w-full sm:w-auto"
       >
         <Send size={16} />
         {enviando ? 'Enviando...' : 'Enviar Mensagem'}

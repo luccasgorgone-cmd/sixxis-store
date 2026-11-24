@@ -27,9 +27,9 @@ export default function ResumoPedido({ itens, total, frete, desconto = 0, cupomC
             <span className="text-gray-700">
               {item.nome}
               {item.variacaoNome && (
-                <span className="text-[#3cbfb3] font-semibold"> ({item.variacaoNome})</span>
+                <span className="text-sx-accent-text font-semibold"> ({item.variacaoNome})</span>
               )}{' '}
-              <span className="text-gray-400 text-xs">x{item.quantidade}</span>
+              <span className="text-gray-500 text-xs">x{item.quantidade}</span>
             </span>
             <span className="font-medium">R$ {(item.preco * item.quantidade).toFixed(2)}</span>
           </li>
@@ -55,7 +55,7 @@ export default function ResumoPedido({ itens, total, frete, desconto = 0, cupomC
         )}
         <div className="flex justify-between font-bold text-base border-t border-gray-200 pt-3 mt-1">
           <span>Total</span>
-          <span className="text-[#3cbfb3]">R$ {total.toFixed(2)}</span>
+          <span className="text-sx-accent-text">R$ {total.toFixed(2)}</span>
         </div>
       </div>
     </div>

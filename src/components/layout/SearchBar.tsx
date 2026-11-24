@@ -87,7 +87,7 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
         <Search
           size={16}
           className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-            dark ? 'text-gray-400' : 'text-gray-400'
+            dark ? 'text-gray-500' : 'text-gray-500'
           }`}
         />
         <input
@@ -97,19 +97,19 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
           onFocus={() => sugestoes.length > 0 && setAberto(true)}
           placeholder="Buscar produtos..."
           autoComplete="off"
-          className={`w-full pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] transition ${
+          className={`w-full pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sx-accent transition ${
             dark || isMobile ? 'rounded-xl' : 'rounded-full'
           } ${
             dark
-              ? 'border border-white/30 bg-white text-gray-800 placeholder-gray-500 focus:bg-white focus:border-[#3cbfb3]'
-              : 'border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#3cbfb3]'
+              ? 'border border-white/30 bg-white text-gray-800 placeholder-gray-500 focus:bg-white focus:border-sx-accent'
+              : 'border border-gray-200 bg-gray-50 focus:bg-white focus:border-sx-accent'
           }`}
         />
         {query && (
           <button
             type="button"
             onClick={limpar}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 transition"
             aria-label="Limpar busca"
           >
             <X size={14} />
@@ -139,10 +139,10 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
                 <div className="w-9 h-9 rounded-lg bg-gray-100 shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#3cbfb3] transition-colors">
+                <p className="text-sm font-medium text-gray-800 truncate group-hover:text-sx-accent-text transition-colors">
                   {s.nome}
                 </p>
-                <p className="text-xs text-[#3cbfb3] font-semibold">
+                <p className="text-xs text-sx-accent-text font-semibold">
                   R$ {Number(s.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
@@ -151,7 +151,7 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
           <Link
             href={`/produtos?q=${encodeURIComponent(query)}`}
             onClick={() => { setAberto(false); setQuery('') }}
-            className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-xs text-[#3cbfb3] font-semibold hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-xs text-sx-accent-text font-semibold hover:bg-gray-100 transition-colors"
           >
             <Search size={12} />
             Ver todos os resultados para &ldquo;{query}&rdquo;
@@ -162,7 +162,7 @@ export default function SearchBar({ dark = false, variant = 'default' }: Props) 
       {/* Loading indicator */}
       {carregando && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 px-4 py-3 z-50">
-          <p className="text-xs text-gray-400 text-center">Buscando...</p>
+          <p className="text-xs text-gray-500 text-center">Buscando...</p>
         </div>
       )}
     </div>

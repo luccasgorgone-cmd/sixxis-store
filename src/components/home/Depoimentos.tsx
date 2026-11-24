@@ -33,18 +33,15 @@ const depoimentos = [
 
 export default function Depoimentos() {
   return (
-    <section className="border-b border-[#2A3937] py-10 min-h-[260px] md:min-h-[340px]">
+    <section className="min-h-[260px] py-10 md:min-h-[340px] md:py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-extrabold text-[#F4F7F6]">O que nossos clientes dizem</h2>
-          <div className="w-12 h-0.5 bg-[#00cfb5] mt-1 rounded-full" />
-        </div>
+        <h2 className="mb-7 text-[26px] font-extrabold leading-[1.12] text-sx-text sm:text-[32px]">O que nossos clientes dizem</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {depoimentos.map((d, i) => (
             <div
               key={i}
-              className="border border-white/10 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-              style={{ backgroundColor: '#111717' }}
+              className="border border-sx-line rounded-2xl p-5 flex flex-col gap-3 transition-shadow duration-200 hover:shadow-[0_10px_26px_rgba(17,32,28,0.07)]"
+              style={{ backgroundColor: 'var(--sx-surface)' }}
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: d.nota }).map((_, s) => (
@@ -53,10 +50,10 @@ export default function Depoimentos() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-white/80 leading-relaxed flex-1">&ldquo;{d.texto}&rdquo;</p>
-              <div className="pt-2 border-t border-white/10">
-                <p className="text-xs font-bold text-white">{d.nome}</p>
-                <p className="text-xs text-white/50">{d.cidade} · {d.produto}</p>
+              <p className="text-sm text-sx-muted leading-relaxed flex-1">&ldquo;{d.texto}&rdquo;</p>
+              <div className="pt-2 border-t border-sx-line">
+                <p className="text-xs font-bold text-sx-text">{d.nome}</p>
+                <p className="text-xs text-sx-muted">{d.cidade} · {d.produto}</p>
               </div>
             </div>
           ))}

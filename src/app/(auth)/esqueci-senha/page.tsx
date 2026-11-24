@@ -51,8 +51,8 @@ export default function EsqueciSenhaPage() {
         <div className="bg-white rounded-3xl shadow-2xl p-8">
           {enviado ? (
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto rounded-full bg-[#e8f8f7] flex items-center justify-center mb-5">
-                <CheckCircle size={32} className="text-[#3cbfb3]" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-sx-tint flex items-center justify-center mb-5">
+                <CheckCircle size={32} className="text-sx-accent-text" />
               </div>
               <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Verifique seu e-mail</h1>
               <p className="text-sm text-gray-500 mb-6">
@@ -61,7 +61,7 @@ export default function EsqueciSenhaPage() {
               </p>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 font-bold text-[#3cbfb3] hover:text-[#2a9d8f] text-sm transition"
+                className="inline-flex items-center justify-center gap-2 font-bold text-sx-accent-text hover:text-sx-accent-text text-sm transition"
               >
                 <ArrowLeft size={15} /> Voltar para o login
               </Link>
@@ -79,13 +79,13 @@ export default function EsqueciSenhaPage() {
                 <div>
                   <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1.5">E-mail</label>
                   <div className="relative">
-                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu@email.com"
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 focus:border-sx-accent rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
                     />
                   </div>
                 </div>
@@ -101,7 +101,7 @@ export default function EsqueciSenhaPage() {
                 <button
                   type="submit"
                   disabled={enviando || (TURNSTILE_ENABLED && !tsToken)}
-                  className="w-full flex items-center justify-center gap-2 font-extrabold text-white py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
+                  className="w-full flex items-center justify-center gap-2 font-extrabold text-sx-ink py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
                   style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}
                 >
                   {enviando ? (
@@ -113,7 +113,7 @@ export default function EsqueciSenhaPage() {
               </form>
 
               <p className="text-center text-sm text-gray-500 mt-5">
-                <Link href="/login" className="text-[#3cbfb3] font-bold hover:text-[#2a9d8f] transition inline-flex items-center gap-1">
+                <Link href="/login" className="text-sx-accent-text font-bold hover:text-sx-accent-text transition inline-flex items-center gap-1">
                   <ArrowLeft size={14} /> Voltar para o login
                 </Link>
               </p>

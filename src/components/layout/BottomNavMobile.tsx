@@ -43,7 +43,7 @@ export default function BottomNavMobile() {
           const Icon = item.icon
           const ativo = item.match(pathname)
           const colorClasses = ativo
-            ? 'text-[#3cbfb3]'
+            ? 'text-sx-accent-text'
             : 'text-gray-600 active:bg-gray-50'
 
           // O "Carrinho" abre o drawer em vez de navegar (mais fluido em mobile).
@@ -59,7 +59,7 @@ export default function BottomNavMobile() {
                 >
                   <Icon className="w-5 h-5" strokeWidth={ativo ? 2.5 : 2} />
                   {totalItens > 0 && (
-                    <span className="absolute top-1 right-[calc(50%-22px)] bg-[#3cbfb3] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none">
+                    <span className="absolute top-1 right-[calc(50%-22px)] bg-sx-accent text-sx-ink text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none">
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}

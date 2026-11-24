@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ROTAS_FUNDO_BRANCO: string[] = []
-// Home ('/') agora é escura (redesign Essencial Black) — o fundo base #080B0B
+// Home ('/') agora é escura (redesign Essencial Black) — o fundo base var(--sx-bg)
 // vem do .sxbf/wallpaper; não força mais branco aqui.
 const ROTAS_FUNDO_BRANCO_PURO: string[] = []
 

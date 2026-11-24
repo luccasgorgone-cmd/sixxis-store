@@ -116,7 +116,7 @@ export default function CheckoutBricks({
   if (!publicKey) {
     return (
       <div className="bg-white border border-gray-100 rounded-2xl p-8 flex items-center justify-center gap-2 text-sm text-gray-500">
-        <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+        <Loader2 size={14} className="animate-spin text-sx-accent-text" />
         Carregando formas de pagamento...
       </div>
     )
@@ -135,7 +135,7 @@ export default function CheckoutBricks({
         {carregando && (
           <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-sm flex items-center justify-center rounded-2xl">
             <div className="flex items-center gap-2 text-sm font-semibold text-[#0f2e2b]">
-              <Loader2 size={16} className="animate-spin text-[#3cbfb3]" />
+              <Loader2 size={16} className="animate-spin text-sx-accent-text" />
               Processando pagamento...
             </div>
           </div>

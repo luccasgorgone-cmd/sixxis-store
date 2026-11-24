@@ -36,7 +36,7 @@ function FiltroSecao({ titulo, children }: { titulo: string; children: React.Rea
     <div className="border-b border-white/10 pb-4 mb-4 last:border-0 last:mb-0 last:pb-0">
       <button
         onClick={() => setAberto(a => !a)}
-        className="w-full flex items-center justify-between text-white font-bold text-sm mb-3 hover:text-[#3cbfb3] transition-colors"
+        className="w-full flex items-center justify-between text-white font-bold text-sm mb-3 hover:text-sx-accent-text transition-colors"
       >
         {titulo}
         <ChevronDown
@@ -67,7 +67,7 @@ function FiltroOpcao({
       onClick={onClick}
       className={`w-full flex items-center justify-between text-left px-3 py-2 rounded-xl text-sm transition-all ${
         ativo
-          ? 'bg-[#3cbfb3] text-white font-semibold'
+          ? 'bg-sx-accent text-sx-ink font-semibold'
           : 'text-white/70 hover:text-white hover:bg-white/10'
       }`}
     >
@@ -78,7 +78,7 @@ function FiltroOpcao({
           }`}
         >
           {ativo && (
-            <svg className="w-2.5 h-2.5 text-[#3cbfb3]" fill="none" viewBox="0 0 10 10">
+            <svg className="w-2.5 h-2.5 text-sx-accent-text" fill="none" viewBox="0 0 10 10">
               <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}

@@ -29,14 +29,14 @@ function ProductSkeleton() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="border border-[#2A3937] rounded-2xl overflow-hidden animate-pulse bg-[#111717]">
-          <div className="bg-[#192221] w-full" style={{ aspectRatio: '1/1' }} />
+        <div key={i} className="border border-sx-line rounded-2xl overflow-hidden animate-pulse bg-sx-surface">
+          <div className="bg-sx-raised w-full" style={{ aspectRatio: '1/1' }} />
           <div className="p-3 space-y-2">
-            <div className="h-3 bg-[#192221] rounded w-4/5" />
-            <div className="h-3 bg-[#192221] rounded w-3/5" />
-            <div className="h-5 bg-[#192221] rounded w-2/3 mt-2" />
-            <div className="h-9 bg-[#192221] rounded-xl mt-3" />
-            <div className="h-8 bg-[#192221] rounded-xl border border-[#2A3937]" />
+            <div className="h-3 bg-sx-raised rounded w-4/5" />
+            <div className="h-3 bg-sx-raised rounded w-3/5" />
+            <div className="h-5 bg-sx-raised rounded w-2/3 mt-2" />
+            <div className="h-9 bg-sx-raised rounded-xl mt-3" />
+            <div className="h-8 bg-sx-raised rounded-xl border border-sx-line" />
           </div>
         </div>
       ))}
@@ -60,22 +60,22 @@ function Paginacao({ pagina, total, limit, onChange }: {
       <button
         onClick={() => onChange(Math.max(1, pagina - 1))}
         disabled={pagina === 1}
-        className="w-9 h-9 rounded-xl border border-[#2A3937] flex items-center justify-center hover:border-[#00cfb5] disabled:opacity-40 disabled:cursor-not-allowed transition"
+        className="w-9 h-9 rounded-xl border border-sx-line flex items-center justify-center hover:border-sx-accent disabled:opacity-40 disabled:cursor-not-allowed transition"
       >
-        <ChevronLeft size={16} className="text-[#B0BFBC]" />
+        <ChevronLeft size={16} className="text-sx-muted" />
       </button>
 
       {pages.map((p, idx, arr) => (
         <span key={p} className="flex items-center gap-1.5">
           {idx > 0 && arr[idx - 1] !== p - 1 && (
-            <span className="text-[#8a9794] text-sm px-1">...</span>
+            <span className="text-sx-subtle text-sm px-1">...</span>
           )}
           <button
             onClick={() => onChange(p)}
             className={`w-9 h-9 rounded-xl text-sm font-bold border transition ${
               p === pagina
-                ? 'bg-[#00cfb5] text-[#032E28] border-[#00cfb5]'
-                : 'border-[#2A3937] text-[#B0BFBC] hover:border-[#00cfb5] hover:text-[#00cfb5]'
+                ? 'bg-sx-accent text-[#032E28] border-sx-accent'
+                : 'border-sx-line text-sx-muted hover:border-sx-accent hover:text-sx-accent-text'
             }`}
           >
             {p}
@@ -86,12 +86,12 @@ function Paginacao({ pagina, total, limit, onChange }: {
       <button
         onClick={() => onChange(Math.min(totalPaginas, pagina + 1))}
         disabled={pagina === totalPaginas}
-        className="w-9 h-9 rounded-xl border border-[#2A3937] flex items-center justify-center hover:border-[#00cfb5] disabled:opacity-40 disabled:cursor-not-allowed transition"
+        className="w-9 h-9 rounded-xl border border-sx-line flex items-center justify-center hover:border-sx-accent disabled:opacity-40 disabled:cursor-not-allowed transition"
       >
-        <ChevronRight size={16} className="text-[#B0BFBC]" />
+        <ChevronRight size={16} className="text-sx-muted" />
       </button>
 
-      <span className="text-sm text-[#B0BFBC] ml-2">
+      <span className="text-sm text-sx-muted ml-2">
         Página <strong>{pagina}</strong> de <strong>{totalPaginas}</strong>
       </span>
     </div>
@@ -173,7 +173,7 @@ export default function ProdutosClient() {
   const searchPillHref = `/produtos?${semQ.toString()}`
 
   return (
-    <div className="min-h-screen bg-[#111717]">
+    <div className="min-h-screen bg-sx-surface">
       <Breadcrumb items={breadcrumbItems} />
       <FiltrosHorizontais grupos={grupos} total={total} />
 
@@ -182,10 +182,10 @@ export default function ProdutosClient() {
         {/* Título + pill de busca */}
         <div className="flex items-start justify-between gap-3 mb-5 flex-wrap">
           <div>
-            <h1 className="text-xl font-extrabold text-[#F4F7F6]">{titulo}</h1>
+            <h1 className="text-xl font-extrabold text-sx-text">{titulo}</h1>
             {!loading && (
-              <p className="text-[#B0BFBC] text-sm mt-0.5">
-                <span className="font-bold text-[#F4F7F6]">{total}</span>{' '}
+              <p className="text-sx-muted text-sm mt-0.5">
+                <span className="font-bold text-sx-text">{total}</span>{' '}
                 produto{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
               </p>
             )}
@@ -193,7 +193,7 @@ export default function ProdutosClient() {
           {busca && (
             <Link
               href={searchPillHref}
-              className="flex items-center gap-1.5 bg-[#00cfb5]/10 border border-[#00cfb5]/30 text-[#00cfb5] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#00cfb5]/20 transition"
+              className="flex items-center gap-1.5 bg-sx-accent/10 border border-sx-accent/30 text-sx-accent-text text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-sx-accent/20 transition"
             >
               &quot;{busca}&quot; <X size={11} />
             </Link>
@@ -204,15 +204,15 @@ export default function ProdutosClient() {
         {loading ? (
           <ProductSkeleton />
         ) : produtos.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-[#2A3937] rounded-2xl">
-            <div className="w-16 h-16 rounded-full bg-[#192221] flex items-center justify-center mx-auto mb-4">
-              <Search size={28} className="text-[#6b7a77]" />
+          <div className="text-center py-20 border border-dashed border-sx-line rounded-2xl">
+            <div className="w-16 h-16 rounded-full bg-sx-raised flex items-center justify-center mx-auto mb-4">
+              <Search size={28} className="text-sx-subtle" />
             </div>
-            <p className="text-[#B0BFBC] font-semibold text-lg mb-1">Nenhum produto encontrado</p>
-            <p className="text-sm text-[#8a9794] mb-6">Tente ajustar os filtros ou fazer outra busca.</p>
+            <p className="text-sx-muted font-semibold text-lg mb-1">Nenhum produto encontrado</p>
+            <p className="text-sm text-sx-subtle mb-6">Tente ajustar os filtros ou fazer outra busca.</p>
             <Link
               href="/produtos"
-              className="inline-flex items-center gap-2 text-sm text-[#00cfb5] hover:text-[#65E5D4] font-semibold border border-[#00cfb5]/40 rounded-xl px-5 py-2.5 hover:bg-[#00cfb5]/5 transition"
+              className="inline-flex items-center gap-2 text-sm text-sx-accent-text hover:text-sx-accent-text font-semibold border border-sx-accent/40 rounded-xl px-5 py-2.5 hover:bg-sx-accent/5 transition"
             >
               Ver todos os produtos →
             </Link>

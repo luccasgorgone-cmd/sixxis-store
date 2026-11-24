@@ -21,7 +21,7 @@ function FiltroGrupo({ titulo, children }: { titulo: string; children: React.Rea
         className="flex items-center justify-between w-full mb-2"
       >
         <span className="text-sm font-bold text-gray-800">{titulo}</span>
-        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
+        <ChevronDown size={14} className={`text-gray-500 transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
       </button>
       {aberto && <div className="space-y-0.5">{children}</div>}
     </div>
@@ -32,7 +32,7 @@ function FiltroLink({ label, href, ativo }: { label: string; href: string; ativo
   return (
     <Link href={href}
       className={`block text-sm py-1.5 px-2 rounded-lg transition ${
-        ativo ? 'text-[#3cbfb3] font-bold bg-[#e8f8f7]' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+        ativo ? 'text-sx-accent-text font-bold bg-sx-tint' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
       }`}>
       {label}
     </Link>
@@ -42,7 +42,7 @@ function FiltroLink({ label, href, ativo }: { label: string; href: string; ativo
 function FiltroSubLink({ label, href }: { label: string; href: string }) {
   return (
     <Link href={href}
-      className="block text-xs py-1 px-2 ml-3 text-gray-500 hover:text-[#3cbfb3] rounded-lg transition">
+      className="block text-xs py-1 px-2 ml-3 text-gray-500 hover:text-sx-accent-text rounded-lg transition">
       {label}
     </Link>
   )
@@ -53,11 +53,11 @@ function FiltroCheckbox({ label, ativo, onClick }: { label: string; ativo: boole
     <button onClick={onClick}
       className="flex items-center gap-2 w-full py-1.5 px-1 text-sm text-left rounded-lg hover:bg-gray-50 transition group">
       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-        ativo ? 'bg-[#3cbfb3] border-[#3cbfb3]' : 'border-gray-300 group-hover:border-[#3cbfb3]'
+        ativo ? 'bg-sx-accent border-sx-accent' : 'border-gray-300 group-hover:border-sx-accent'
       }`}>
         {ativo && <Check size={10} className="text-white" strokeWidth={3} />}
       </div>
-      <span className={ativo ? 'text-[#3cbfb3] font-semibold' : 'text-gray-600'}>{label}</span>
+      <span className={ativo ? 'text-sx-accent-text font-semibold' : 'text-gray-600'}>{label}</span>
     </button>
   )
 }
@@ -130,7 +130,7 @@ export default function SidebarFiltrosCB({ categoria, precoMin, precoMax, onFaix
           <button key={nota}
             onClick={() => setNotaMin(notaMin === nota ? null : nota)}
             className={`flex items-center gap-1.5 w-full py-1.5 px-1 rounded-lg text-sm transition ${
-              notaMin === nota ? 'text-[#3cbfb3] font-bold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              notaMin === nota ? 'text-sx-accent-text font-bold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}>
             <div className="flex gap-0.5">
               {[1,2,3,4,5].map(s => (

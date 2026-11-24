@@ -1,4 +1,3 @@
-import '@/styles/essencial-bf.css'
 import type { Metadata } from 'next'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -22,7 +21,7 @@ export default async function ContaLayout({ children }: { children: React.ReactN
   if (cfg.logo_url) logoUrl = cfg.logo_url
 
   return (
-    <div className="sxbf relative min-h-screen flex flex-col" style={{ backgroundColor: '#080B0B' }}>
+    <div className="sxbf relative min-h-screen flex flex-col" style={{ backgroundColor: 'var(--sx-bg)' }}>
       <Header logoUrl={logoUrl} />
       <div aria-hidden="true" style={{ height: 'var(--sixxis-header-h, 140px)' }} />
       <div className="flex-1">{children}</div>

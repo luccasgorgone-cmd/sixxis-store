@@ -26,7 +26,7 @@ const fmtData = (s: string) =>
 const STATUS_CORES: Record<string, string> = {
   ativa: 'bg-emerald-50 border-emerald-200 text-emerald-700',
   acionada: 'bg-amber-50 border-amber-200 text-amber-800',
-  expirada: 'bg-[#192221] border-[#2A3937] text-[#B0BFBC]',
+  expirada: 'bg-sx-raised border-sx-line text-sx-muted',
   cancelada: 'bg-red-50 border-red-200 text-red-700',
 }
 
@@ -47,7 +47,7 @@ export default function MinhaContaGarantiasPage() {
       <LayoutConta>
         <div className="space-y-4">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="bg-[#111717] rounded-2xl h-40 animate-pulse border border-[#2A3937]" />
+            <div key={i} className="bg-sx-surface rounded-2xl h-40 animate-pulse border border-sx-line" />
           ))}
         </div>
       </LayoutConta>
@@ -57,17 +57,17 @@ export default function MinhaContaGarantiasPage() {
   if (garantias.length === 0) {
     return (
       <LayoutConta>
-        <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#192221] flex items-center justify-center mx-auto mb-4">
-            <ShieldOff size={28} className="text-[#6b7a77]" />
+        <div className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm p-12 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-sx-raised flex items-center justify-center mx-auto mb-4">
+            <ShieldOff size={28} className="text-sx-subtle" />
           </div>
-          <h2 className="text-lg font-black text-[#F4F7F6] mb-2">Você ainda não tem garantias estendidas</h2>
-          <p className="text-sm text-[#B0BFBC] max-w-md mx-auto">
+          <h2 className="text-lg font-black text-sx-text mb-2">Você ainda não tem garantias estendidas</h2>
+          <p className="text-sm text-sx-muted max-w-md mx-auto">
             Adicione no próximo pedido pra ter proteção extra além da garantia de fábrica.
           </p>
           <Link
             href="/produtos"
-            className="inline-flex items-center mt-5 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold text-sm px-5 py-2.5 rounded-xl transition"
+            className="inline-flex items-center mt-5 bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-bold text-sm px-5 py-2.5 rounded-xl transition"
           >
             Explorar produtos
           </Link>
@@ -80,10 +80,10 @@ export default function MinhaContaGarantiasPage() {
     <LayoutConta>
       <div className="space-y-5">
         <div>
-          <h1 className="text-2xl font-black text-[#F4F7F6] flex items-center gap-2">
-            <ShieldCheck size={22} className="text-[#00cfb5]" /> Minhas garantias estendidas
+          <h1 className="text-2xl font-black text-sx-text flex items-center gap-2">
+            <ShieldCheck size={22} className="text-sx-accent-text" /> Minhas garantias estendidas
           </h1>
-          <p className="text-sm text-[#B0BFBC] mt-1">
+          <p className="text-sm text-sx-muted mt-1">
             Proteção contratada para os produtos comprados na Sixxis. A garantia estendida começa após o vencimento da garantia de fábrica.
           </p>
         </div>
@@ -98,30 +98,30 @@ export default function MinhaContaGarantiasPage() {
             const imagem = Array.isArray(g.produto?.imagens) ? (g.produto?.imagens as unknown as string[])[0] : null
 
             return (
-              <li key={g.id} className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm p-5">
+              <li key={g.id} className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm p-5">
                 <div className="flex gap-4">
-                  <div className="w-20 h-20 shrink-0 rounded-xl bg-[#192221] border border-[#2A3937] overflow-hidden flex items-center justify-center">
+                  <div className="w-20 h-20 shrink-0 rounded-xl bg-sx-raised border border-sx-line overflow-hidden flex items-center justify-center">
                     {imagem ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={imagem} alt={g.produto?.nome ?? ''} className="w-full h-full object-contain p-1" />
                     ) : (
-                      <Package size={26} className="text-[#6b7a77]" />
+                      <Package size={26} className="text-sx-subtle" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-bold text-[#F4F7F6] line-clamp-2">{g.produto?.nome ?? '—'}</p>
+                      <p className="text-sm font-bold text-sx-text line-clamp-2">{g.produto?.nome ?? '—'}</p>
                       <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${cor}`}>
                         {g.statusAtual}
                       </span>
-                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#e8f8f7] text-[#B0BFBC]">
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-sx-tint text-sx-muted">
                         +{g.mesesAdicionais} meses
                       </span>
                     </div>
-                    <p className="text-xs text-[#B0BFBC] mt-1">
+                    <p className="text-xs text-sx-muted mt-1">
                       Vigência: <strong>{fmtData(g.inicioVigencia)}</strong> a <strong>{fmtData(g.fimVigencia)}</strong>
                     </p>
-                    <p className="text-xs text-[#8a9794] mt-0.5">
+                    <p className="text-xs text-sx-subtle mt-0.5">
                       Pedido #{g.pedido?.id.slice(-8).toUpperCase() ?? '—'} • Pago {fmtBRL(Number(g.valorPago))}
                     </p>
 
@@ -145,7 +145,7 @@ export default function MinhaContaGarantiasPage() {
                       {g.produto && (
                         <Link
                           href={`/produtos/${g.produto.slug}`}
-                          className="inline-flex items-center text-xs font-bold text-[#B0BFBC] hover:text-[#00cfb5] px-3 py-1.5 border border-[#2A3937] rounded-xl transition"
+                          className="inline-flex items-center text-xs font-bold text-sx-muted hover:text-sx-accent-text px-3 py-1.5 border border-sx-line rounded-xl transition"
                         >
                           Ver produto
                         </Link>
@@ -158,9 +158,9 @@ export default function MinhaContaGarantiasPage() {
           })}
         </ul>
 
-        <div className="bg-[#111717] border border-[#00cfb5]/30 rounded-2xl p-5 text-sm text-[#D7E0DD]">
-          <h3 className="font-bold text-[#F4F7F6] mb-2">Como funciona</h3>
-          <ul className="space-y-1.5 list-disc list-inside text-[#B0BFBC]">
+        <div className="bg-sx-surface border border-sx-accent/30 rounded-2xl p-5 text-sm text-sx-text-2">
+          <h3 className="font-bold text-sx-text mb-2">Como funciona</h3>
+          <ul className="space-y-1.5 list-disc list-inside text-sx-muted">
             <li>A garantia estendida começa após o vencimento da garantia de fábrica.</li>
             <li>Cobre defeitos de fabricação, peças e mão de obra.</li>
             <li>Você aciona pelo WhatsApp (botão acima) ou pelo e-mail suporte@sixxis.com.br.</li>

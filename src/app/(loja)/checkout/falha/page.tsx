@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 
 export default function CheckoutFalhaPage() {
   return (
-    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-[#080B0B]">
-      <div className="w-full max-w-md bg-[#111717] rounded-2xl shadow-sm border border-[#2A3937] p-8 sm:p-10 text-center">
+    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-sx-bg">
+      <div className="w-full max-w-md bg-sx-surface rounded-2xl shadow-sm border border-sx-line p-8 sm:p-10 text-center">
         <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-6">
           <XCircle size={40} className="text-red-500" />
         </div>
@@ -18,10 +18,10 @@ export default function CheckoutFalhaPage() {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0a0a0a] mb-3 tracking-tight">
           Pagamento não aprovado
         </h1>
-        <p className="text-[#B0BFBC] text-sm mb-2 leading-relaxed">
+        <p className="text-sx-muted text-sm mb-2 leading-relaxed">
           Houve um problema ao processar seu pagamento.
         </p>
-        <p className="text-[#8a9794] text-xs mb-8">
+        <p className="text-sx-subtle text-xs mb-8">
           Verifique os dados do cartão e tente novamente, ou escolha outra forma de pagamento.
         </p>
 
@@ -38,7 +38,7 @@ export default function CheckoutFalhaPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/carrinho"
-            className="flex-1 flex items-center justify-center gap-2 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            className="flex-1 flex items-center justify-center gap-2 bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >
             <ArrowLeft size={16} />
             Voltar ao carrinho
@@ -47,7 +47,7 @@ export default function CheckoutFalhaPage() {
             href="https://wa.me/5518997474701"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 border border-[#2A3937] hover:border-[#00cfb5] text-[#B0BFBC] hover:text-[#00cfb5] font-medium px-6 py-3 rounded-xl transition-all"
+            className="flex-1 flex items-center justify-center gap-2 border border-sx-line hover:border-sx-accent text-sx-muted hover:text-sx-accent-text font-medium px-6 py-3 rounded-xl transition-all"
           >
             <MessageCircle size={16} />
             Falar no WhatsApp

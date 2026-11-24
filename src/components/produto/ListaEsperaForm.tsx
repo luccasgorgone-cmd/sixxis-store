@@ -34,9 +34,9 @@ export default function ListaEsperaForm({ produtoId }: Props) {
 
   if (ok) {
     return (
-      <div className="bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl p-4 text-center">
-        <Bell className="w-6 h-6 text-[#3cbfb3] mx-auto mb-2" />
-        <p className="font-semibold text-[#3cbfb3] text-sm">Você será avisado!</p>
+      <div className="bg-sx-tint border border-sx-accent/30 rounded-xl p-4 text-center">
+        <Bell className="w-6 h-6 text-sx-accent-text mx-auto mb-2" />
+        <p className="font-semibold text-sx-accent-text text-sm">Você será avisado!</p>
         <p className="text-xs text-gray-500 mt-1">Enviaremos um e-mail quando o produto estiver disponível.</p>
       </div>
     )
@@ -45,7 +45,7 @@ export default function ListaEsperaForm({ produtoId }: Props) {
   return (
     <div className="bg-[#f8f9fa] border border-gray-200 rounded-xl p-5">
       <div className="flex items-center gap-2 mb-3">
-        <Bell className="w-5 h-5 text-[#3cbfb3]" />
+        <Bell className="w-5 h-5 text-sx-accent-text" />
         <p className="font-semibold text-[#0a0a0a] text-sm">Avise-me quando disponível</p>
       </div>
       <p className="text-xs text-gray-500 mb-4">Cadastre seu e-mail e avisaremos quando o produto voltar ao estoque.</p>
@@ -56,12 +56,12 @@ export default function ListaEsperaForm({ produtoId }: Props) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="seu@email.com"
-          className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+          className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sx-accent focus:border-sx-accent"
         />
         <button
           type="submit"
           disabled={enviando}
-          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-xl px-4 py-2 text-sm transition"
+          className="bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-50 text-sx-ink font-semibold rounded-xl px-4 py-2 text-sm transition"
         >
           {enviando ? '...' : 'Avisar'}
         </button>

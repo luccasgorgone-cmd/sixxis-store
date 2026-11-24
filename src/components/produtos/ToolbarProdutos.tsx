@@ -61,7 +61,7 @@ export default function ToolbarProdutos({
             <SlidersHorizontal size={16} />
             Filtros
             {activeFilters.length > 0 && (
-              <span className="bg-[#3cbfb3] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="bg-sx-accent text-sx-ink text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
                 {activeFilters.length}
               </span>
             )}
@@ -72,7 +72,7 @@ export default function ToolbarProdutos({
             <select
               value={ordem}
               onChange={e => onOrdem(e.target.value)}
-              className="appearance-none bg-white/10 border border-white/20 text-white text-sm font-semibold pl-3 pr-8 py-2 rounded-xl focus:outline-none focus:border-[#3cbfb3] cursor-pointer transition hover:bg-white/15"
+              className="appearance-none bg-white/10 border border-white/20 text-white text-sm font-semibold pl-3 pr-8 py-2 rounded-xl focus:outline-none focus:border-sx-accent cursor-pointer transition hover:bg-white/15"
             >
               {ORDENS.map(o => (
                 <option key={o.val} value={o.val} className="bg-[#0f2e2b] text-white">
@@ -88,7 +88,7 @@ export default function ToolbarProdutos({
             <button
               onClick={() => onViewMode('grid')}
               className={`p-2 rounded-lg transition ${
-                viewMode === 'grid' ? 'bg-[#3cbfb3] text-white' : 'text-white/50 hover:text-white'
+                viewMode === 'grid' ? 'bg-sx-accent text-sx-ink' : 'text-white/50 hover:text-white'
               }`}
               aria-label="Grade"
             >
@@ -97,7 +97,7 @@ export default function ToolbarProdutos({
             <button
               onClick={() => onViewMode('list')}
               className={`p-2 rounded-lg transition ${
-                viewMode === 'list' ? 'bg-[#3cbfb3] text-white' : 'text-white/50 hover:text-white'
+                viewMode === 'list' ? 'bg-sx-accent text-sx-ink' : 'text-white/50 hover:text-white'
               }`}
               aria-label="Lista"
             >
@@ -130,7 +130,7 @@ export default function ToolbarProdutos({
             <button
               key={f.label}
               onClick={f.clear}
-              className="flex items-center gap-1.5 bg-[#3cbfb3]/20 border border-[#3cbfb3]/40 text-[#3cbfb3] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#3cbfb3]/30 transition"
+              className="flex items-center gap-1.5 bg-sx-accent/20 border border-sx-accent/40 text-sx-accent-text text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-sx-accent/30 transition"
             >
               {f.label}
               <X size={11} />

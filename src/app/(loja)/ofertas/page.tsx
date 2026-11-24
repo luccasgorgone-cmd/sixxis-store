@@ -52,14 +52,14 @@ export default async function OfertasPage() {
 
   return (
     <main>
-      {/* Breadcrumb: text-[#B0BFBC] com último item #0f2e2b bold */}
+      {/* Breadcrumb: text-sx-muted com último item #0f2e2b bold */}
       <nav className="w-full py-3 px-4" aria-label="Breadcrumb">
         <ol className="max-w-7xl mx-auto flex items-center text-[11px] leading-none">
           <li>
-            <Link href="/" className="text-[#B0BFBC] hover:text-[#00cfb5] transition">Início</Link>
+            <Link href="/" className="text-sx-muted hover:text-sx-accent-text transition">Início</Link>
           </li>
-          <li className="mx-1.5 text-[#8a9794]" aria-hidden="true">/</li>
-          <li className="font-bold text-[#F4F7F6]" aria-current="page">
+          <li className="mx-1.5 text-sx-subtle" aria-hidden="true">/</li>
+          <li className="font-bold text-sx-text" aria-current="page">
             {bfAtiva ? 'Black Friday' : 'Ofertas Relâmpago'}
           </li>
         </ol>
@@ -71,13 +71,13 @@ export default async function OfertasPage() {
 
         {/* Produtos */}
         {ofertas.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-[#0f2e2b]/25 rounded-2xl bg-[#111717]">
-            <p className="text-[#F4F7F6]">Nenhuma oferta disponível no momento.</p>
-            <p className="text-sm mt-1 text-[#F4F7F6]/60">Volte em breve para novas promoções!</p>
+          <div className="text-center py-20 border border-dashed border-[#0f2e2b]/25 rounded-2xl bg-sx-surface">
+            <p className="text-sx-text">Nenhuma oferta disponível no momento.</p>
+            <p className="text-sm mt-1 text-sx-text/60">Volte em breve para novas promoções!</p>
           </div>
         ) : (
           <>
-            <p className="text-sm mb-6 font-semibold text-[#F4F7F6]">
+            <p className="text-sm mb-6 font-semibold text-sx-text">
               {ofertas.length} produto{ofertas.length !== 1 ? 's' : ''} em oferta
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">

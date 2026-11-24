@@ -13,6 +13,7 @@ import Depoimentos from '@/components/home/Depoimentos'
 import MaisVendidosCarrossel from '@/components/home/MaisVendidosCarrossel'
 import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
+import { DuvidasBlackFriday, OfertaDupla, SuporteSixxis } from '@/components/bf/BlocosHome'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -93,11 +94,11 @@ export default async function HomePage() {
       {bannersComBF.length > 0 ? (
         <BannerCarousel banners={bannersComBF} />
       ) : (
-        <section className="relative bg-gradient-to-br from-[#0f2e2b] via-[#1a4f4a] to-[#0f2e2b] min-h-[400px] flex items-center">
+        <section className="sx-escuro relative bg-gradient-to-br from-[#0f2e2b] via-[#1a4f4a] to-[#0f2e2b] min-h-[400px] flex items-center">
           <div className="max-w-7xl mx-auto px-6 py-16">
             <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4">
               Climatizadores, Aspiradores<br />
-              <span className="text-[#3cbfb3]">e Bikes Spinning</span>
+              <span className="text-sx-accent-text">e Bikes Spinning</span>
             </h1>
             <p className="text-white/70 text-lg mb-8 max-w-xl">
               Produtos originais Sixxis com garantia e entrega rápida para todo o Brasil.
@@ -105,7 +106,7 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/produtos"
-                className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-8 py-4 rounded-xl transition text-lg"
+                className="bg-sx-accent hover:bg-sx-accent-hover text-sx-ink font-bold px-8 py-4 rounded-xl transition text-lg"
               >
                 Explorar Produtos →
               </Link>
@@ -136,25 +137,22 @@ export default async function HomePage() {
             </div>
             {/* Tablet/Desktop: 3 selos lado a lado */}
             <div className="hidden md:block">
-              <TrustBar fundoVerde items={trustItems} />
+              <TrustBar items={trustItems} />
             </div>
           </>
         )
       })()}
 
       {/* ── 3. Mais Vendidos ─────────────────────────────────────── */}
-      <section className="border-b border-[#2A3937] py-8 min-h-[280px] md:min-h-[420px]">
+      <section className="min-h-[280px] py-10 md:min-h-[420px] md:py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header da seção */}
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-xl font-extrabold text-[#F4F7F6]">Mais Vendidos</h2>
-              <div className="w-12 h-0.5 bg-[#00cfb5] mt-1 rounded-full" />
-            </div>
+          <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
+            <h2 className="text-[26px] font-extrabold leading-[1.12] text-sx-text sm:text-[32px]">Mais Vendidos</h2>
             <Link
               href="/produtos"
-              className="text-sm text-[#00cfb5] hover:text-[#65E5D4] font-semibold flex items-center gap-1 transition"
+              className="text-sm text-sx-accent-text hover:text-sx-accent-text font-semibold flex items-center gap-1 transition"
             >
               Ver todos <ArrowRight size={14} />
             </Link>
@@ -163,24 +161,24 @@ export default async function HomePage() {
           {produtosMostrar.length > 0 ? (
             <MaisVendidosCarrossel produtos={produtosMostrar} />
           ) : (
-            <div className="text-center py-16 rounded-2xl border border-[#2A3937]" style={{ backgroundColor: '#111717' }}>
-              <ShoppingCart size={48} className="text-[#2A3937] mx-auto mb-4" />
-              <p className="text-[#B0BFBC] font-medium">Nenhum produto disponível</p>
-              <p className="text-[#B0BFBC]/70 text-sm mt-1">Cadastre produtos no admin para exibi-los aqui</p>
+            <div className="text-center py-16 rounded-2xl border border-sx-line" style={{ backgroundColor: 'var(--sx-surface)' }}>
+              <ShoppingCart size={48} className="text-sx-subtle mx-auto mb-4" />
+              <p className="text-sx-muted font-medium">Nenhum produto disponível</p>
+              <p className="text-sx-subtle text-sm mt-1">Cadastre produtos no admin para exibi-los aqui</p>
             </div>
           )}
         </div>
       </section>
 
       {/* ── 4. Banners duplos ─────────────────────────────────────── */}
-      <section className="border-b border-[#2A3937] pb-8 pt-8">
+      <section className="pb-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             {/* Banner Climatizadores */}
             <Link
               href="/produtos?categoria=climatizadores"
-              className="group relative overflow-hidden rounded-xl flex items-end p-5 sm:p-7 aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
+              className="sx-escuro group relative flex aspect-[2/1] items-end overflow-hidden rounded-xl p-5 sm:p-7"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-climatizadores-1791346860.jpg"
@@ -207,7 +205,7 @@ export default async function HomePage() {
             {/* Banner Spinning */}
             <Link
               href="/produtos?categoria=spinning"
-              className="group relative overflow-hidden rounded-xl flex items-end p-5 sm:p-7 aspect-[2/1] hover:scale-[1.02] transition-transform duration-300"
+              className="sx-escuro group relative flex aspect-[2/1] items-end overflow-hidden rounded-xl p-5 sm:p-7"
             >
               <Image
                 src="https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/banners/banner-spinning-1791346860.jpg"
@@ -218,13 +216,13 @@ export default async function HomePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent" />
               <div className="relative z-10 flex-1">
-                <span className="inline-block bg-[#3cbfb3]/25 text-[#3cbfb3] text-xs font-bold px-3 py-1 rounded-full mb-2 sm:mb-3 uppercase tracking-wide border border-[#3cbfb3]/40">
+                <span className="inline-block bg-sx-accent/25 text-sx-accent-text text-xs font-bold px-3 py-1 rounded-full mb-2 sm:mb-3 uppercase tracking-wide border border-sx-accent/40">
                   Spinning &amp; Fitness
                 </span>
                 <h3 className="text-white text-xl sm:text-2xl font-extrabold leading-tight mb-3 sm:mb-4 drop-shadow">
                   Equipamentos<br />Fitness
                 </h3>
-                <span className="inline-flex items-center gap-2 bg-[#3cbfb3]/25 hover:bg-[#3cbfb3]/40 text-white text-sm font-bold px-4 py-2 rounded-xl transition border border-[#3cbfb3]/40 backdrop-blur-sm">
+                <span className="inline-flex items-center gap-2 bg-sx-accent/25 hover:bg-sx-accent/40 text-white text-sm font-bold px-4 py-2 rounded-xl transition border border-sx-accent/40 backdrop-blur-sm">
                   Ver linha <ArrowRight size={14} />
                 </span>
               </div>
@@ -233,12 +231,13 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <OfertaDupla />
+
       {/* ── 7. Por que Sixxis? ────────────────────────────────────── */}
-      <section className="border-b border-[#2A3937] py-10">
+      <section className="py-10 md:py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="mb-6">
-            <h2 className="text-xl font-extrabold text-[#F4F7F6]">Por que Sixxis?</h2>
-            <div className="w-12 h-0.5 bg-[#00cfb5] mt-1 rounded-full" />
+          <div className="mb-7">
+            <h2 className="text-[26px] font-extrabold leading-[1.12] text-sx-text sm:text-[32px]">Por que Sixxis?</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {PQ_SIXXIS_NUMS.filter((n) => n !== 1).map((n) => {
@@ -256,8 +255,8 @@ export default async function HomePage() {
               return (
                 <div
                   key={n}
-                  className="relative overflow-hidden border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                  style={{ backgroundColor: '#111717', borderTop: '4px solid #00cfb5' }}
+                  className="sx-escuro relative overflow-hidden rounded-xl p-4 text-center sm:p-6 lg:p-8"
+                  style={{ backgroundColor: 'var(--sx-surface)', borderTop: '4px solid var(--sx-accent)' }}
                 >
                   {/* Imagem de fundo nítida + scrim leve (mais forte só na base,
                       onde fica o texto) e sombra no texto p/ legibilidade. */}
@@ -273,7 +272,7 @@ export default async function HomePage() {
                   />
                   <div className="relative z-10" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.55)' }}>
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black/30 ring-1 ring-white/20 backdrop-blur-sm flex items-center justify-center mb-3 sm:mb-5 mx-auto">
-                      <Icon size={20} className="text-[#00cfb5] sm:w-[22px] sm:h-[22px]" />
+                      <Icon size={20} className="text-sx-accent-text sm:w-[22px] sm:h-[22px]" />
                     </div>
                     <h3 className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">{titulo}</h3>
                     <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{texto}</p>
@@ -288,18 +287,24 @@ export default async function HomePage() {
       {/* ── 6. Depoimentos (O que nossos clientes dizem) ──────────── */}
       <Depoimentos />
 
+      <SuporteSixxis
+        whatsappVendas={cfg.social_whatsapp || '5518997474701'}
+        whatsappSuporte={cfg.social_whatsapp_suporte || '5511934102621'}
+      />
+      <DuvidasBlackFriday />
+
       {/* ── 7. Newsletter ─────────────────────────────────────────── */}
       {cfg.newsletter_ativo !== 'false' && (
-        <section className="border-b border-[#2A3937] py-10">
+        <section className="border-b border-sx-line py-10">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-2xl font-extrabold text-[#F4F7F6] mb-1">
+            <h2 className="text-2xl font-extrabold text-sx-text mb-1">
               {cfg.newsletter_titulo || 'Receba novidades e promoções exclusivas'}
             </h2>
-            <p className="text-[#B0BFBC] text-sm mb-6">
+            <p className="text-sx-muted text-sm mb-6">
               {cfg.newsletter_subtitulo || 'Cadastre-se e ganhe 5% OFF na próxima compra + ofertas exclusivas em primeira mão.'}
             </p>
             <NewsletterForm />
-            <p className="text-xs text-[#B0BFBC]/70 mt-2">Sem spam. Cancele quando quiser.</p>
+            <p className="text-xs text-sx-subtle mt-2">Sem spam. Cancele quando quiser.</p>
           </div>
         </section>
       )}

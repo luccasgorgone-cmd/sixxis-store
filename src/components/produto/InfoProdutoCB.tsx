@@ -316,19 +316,19 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
     <div>
       {/* Vendido por */}
       <div className="flex flex-wrap gap-2 mb-3">
-        <span className="text-xs text-[#B0BFBC] bg-[#192221] border border-[#2A3937] px-2 py-1 rounded-lg">
+        <span className="text-xs text-sx-muted bg-sx-raised border border-sx-line px-2 py-1 rounded-lg">
           Vendido e entregue por <strong>Sixxis</strong>
         </span>
       </div>
 
       {/* Título */}
-      <h1 className="text-xl sm:text-2xl font-black text-[#F4F7F6] leading-tight mb-2">
+      <h1 className="text-xl sm:text-2xl font-black text-sx-text leading-tight mb-2">
         {produto.nome}
       </h1>
 
       {/* SKU */}
       {produto.sku && (
-        <p className="text-xs text-[#8a9794] mb-3">(Cód. Item {produto.sku})</p>
+        <p className="text-xs text-sx-subtle mb-3">(Cód. Item {produto.sku})</p>
       )}
 
       {/* Avaliações */}
@@ -344,15 +344,15 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
             </a>
           </>
         ) : (
-          <span style={{ fontSize: 12, color: '#9ca3af', lineHeight: 1, minHeight: 0 }}>Seja o primeiro a avaliar</span>
+          <span style={{ fontSize: 12, color: 'var(--sx-subtle)', lineHeight: 1, minHeight: 0 }}>Seja o primeiro a avaliar</span>
         )}
-        <span style={{ color: '#D1D5DB', fontSize: 12, lineHeight: 1, minHeight: 0 }}>|</span>
+        <span aria-hidden="true" style={{ color: '#D1D5DB', fontSize: 12, lineHeight: 1, minHeight: 0 }}>|</span>
         <WhatsAppTrackedLink
           telefone="5518997474701"
           texto={`Olá! Tenho uma dúvida sobre ${produto.nome}`}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontSize: 12, color: '#00cfb5', lineHeight: 1, minHeight: 0, height: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}
+          style={{ fontSize: 12, color: 'var(--sx-accent-text)', lineHeight: 1, minHeight: 0, height: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}
         >
           <MessageCircle size={12} style={{ flexShrink: 0 }} />
           Tire sua dúvida
@@ -370,19 +370,19 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
 
       {/* Promo "2ª unidade" — bloco informativo; desconto automático por quantidade no carrinho */}
       {promoBadge && (
-        <div className="mb-3 rounded-xl border border-[#00cfb5]/30 bg-[#111717] p-3">
+        <div className="mb-3 rounded-xl border border-sx-accent/30 bg-sx-surface p-3">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 bg-[#00cfb5] text-[#07201d] text-xs font-black px-2.5 py-1 rounded-lg">
+            <span className="inline-flex items-center gap-1.5 bg-sx-accent text-[#07201d] text-xs font-black px-2.5 py-1 rounded-lg">
               <Flame size={14} strokeWidth={2.25} color="#ea580c" fill="#fb923c" className="shrink-0" />
               {promoBadge.descricao}
             </span>
           </div>
-          <p className="text-sm text-[#B0BFBC] leading-snug">
-            Leve <strong className="text-[#F4F7F6]">2 produtos</strong> e a <strong className="text-[#F4F7F6]">2ª unidade sai com {promoBadge.percentual}% OFF</strong> — válido em
-            <strong className="text-[#F4F7F6]"> todo o site</strong>. Levando produtos diferentes, o desconto cai na unidade de
-            <strong className="text-[#F4F7F6]"> menor valor</strong>, <strong className="text-[#F4F7F6]">automaticamente no carrinho</strong>.
+          <p className="text-sm text-sx-muted leading-snug">
+            Leve <strong className="text-sx-text">2 produtos</strong> e a <strong className="text-sx-text">2ª unidade sai com {promoBadge.percentual}% OFF</strong> — válido em
+            <strong className="text-sx-text"> todo o site</strong>. Levando produtos diferentes, o desconto cai na unidade de
+            <strong className="text-sx-text"> menor valor</strong>, <strong className="text-sx-text">automaticamente no carrinho</strong>.
           </p>
-          <p className="text-xs text-[#B0BFBC]/70 mt-1">
+          <p className="text-xs text-sx-subtle mt-1">
             {promoBadge.fim
               ? `Válido até ${promoBadge.fim.slice(8, 10)}/${promoBadge.fim.slice(5, 7)}`
               : 'Por tempo limitado'} · não acumula com cupom
@@ -395,26 +395,26 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
       {cuponsProduto && cuponsProduto.length > 0 && (
         <div className="mb-3 space-y-2">
           {cuponsProduto.map((c) => (
-            <div key={c.codigo} className="rounded-xl border border-dashed border-[#00cfb5]/60 bg-[#111717] p-3">
+            <div key={c.codigo} className="rounded-xl border border-dashed border-sx-accent/60 bg-sx-surface p-3">
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="inline-flex items-center gap-1.5 bg-[#00cfb5] text-[#032E28] text-xs font-black px-2.5 py-1 rounded-lg">
+                <span className="inline-flex items-center gap-1.5 bg-sx-accent text-[#032E28] text-xs font-black px-2.5 py-1 rounded-lg">
                   <Ticket size={14} strokeWidth={2.25} className="shrink-0" />
                   Cupom deste produto
                 </span>
               </div>
-              <p className="text-sm text-[#B0BFBC] leading-snug">
-                Use o cupom <strong className="text-[#F4F7F6]">{c.codigo}</strong> e ganhe{' '}
-                <strong className="text-[#F4F7F6]">{beneficioCupomTexto(c)}</strong> neste produto.
-                {c.descricao ? <span className="block text-xs text-[#B0BFBC]/70 mt-0.5">{c.descricao}</span> : null}
+              <p className="text-sm text-sx-muted leading-snug">
+                Use o cupom <strong className="text-sx-text">{c.codigo}</strong> e ganhe{' '}
+                <strong className="text-sx-text">{beneficioCupomTexto(c)}</strong> neste produto.
+                {c.descricao ? <span className="block text-xs text-sx-subtle mt-0.5">{c.descricao}</span> : null}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <code className="text-sm font-black tracking-wide text-[#F4F7F6] bg-[#111717] border border-[#00cfb5]/40 rounded-lg px-2.5 py-1">
+                <code className="text-sm font-black tracking-wide text-sx-text bg-sx-surface border border-sx-accent/40 rounded-lg px-2.5 py-1">
                   {c.codigo}
                 </code>
                 <button
                   type="button"
                   onClick={() => copiarCupom(c.codigo)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F4F7F6] hover:text-[#00cfb5] transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-sx-text hover:text-sx-accent-text transition-colors"
                   aria-label={`Copiar cupom ${c.codigo}`}
                 >
                   {cupomCopiado === c.codigo
@@ -422,7 +422,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
                     : (<>Copiar código</>)}
                 </button>
               </div>
-              <p className="text-xs text-[#B0BFBC]/70 mt-1.5">Aplique no checkout. 1 cupom por pedido.</p>
+              <p className="text-xs text-sx-subtle mt-1.5">Aplique no checkout. 1 cupom por pedido.</p>
             </div>
           ))}
         </div>
@@ -431,29 +431,29 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
       {/* Bloco de preços */}
       <div className="mb-5">
         {precoOriginal > precoAtual && (
-          <p className="text-sm text-[#8a9794] line-through mb-0.5">
+          <p className="text-sm text-sx-subtle line-through mb-0.5">
             de R$ {fmt(precoOriginal)}
           </p>
         )}
 
         <div className="mb-2">
-          <span className="text-[#B0BFBC] text-sm">por </span>
-          <span className="text-2xl md:text-3xl font-bold md:font-black text-[#F4F7F6]">R$ {fmt(precoAtual)}</span>
-          <span className="text-sm text-[#B0BFBC] ml-2">
+          <span className="text-sx-muted text-sm">por </span>
+          <span className="text-2xl md:text-3xl font-bold md:font-black text-sx-text">R$ {fmt(precoAtual)}</span>
+          <span className="text-sm text-sx-muted ml-2">
             em até <strong>{MAX_PARCELAS_SEM_JUROS}x</strong> de{' '}
             <strong>R$ {fmt(precoAtual / MAX_PARCELAS_SEM_JUROS)}</strong> sem juros no cartão
           </span>
         </div>
 
         {/* PIX */}
-        <div className="flex items-center gap-2 mb-4 p-3 bg-[#111717] border border-[#00cfb5]/20 rounded-xl">
-          <div className="w-8 h-8 bg-[#00cfb5] rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-white font-black text-[9px]">PIX</span>
+        <div className="flex items-center gap-2 mb-4 p-3 bg-sx-surface border border-sx-accent/20 rounded-xl">
+          <div className="w-8 h-8 bg-sx-accent rounded-lg flex items-center justify-center shrink-0">
+            <span className="text-sx-ink font-black text-[9px]">PIX</span>
           </div>
           <div>
-            <span className="text-[#B0BFBC] text-sm">por </span>
-            <span className="text-base md:text-lg font-bold md:font-black text-[#F4F7F6]">R$ {fmt(precoAtVista)}</span>
-            <span className="text-[#00cfb5] text-sm font-semibold ml-1">com {DESCONTO_PIX_PCT}% de desconto</span>
+            <span className="text-sx-muted text-sm">por </span>
+            <span className="text-base md:text-lg font-bold md:font-black text-sx-text">R$ {fmt(precoAtVista)}</span>
+            <span className="text-sx-accent-text text-sm font-semibold ml-1">com {DESCONTO_PIX_PCT}% de desconto</span>
           </div>
         </div>
 
@@ -467,7 +467,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
         </button>
 
         {parcelasAberto && (
-          <div className="bg-[#192221] rounded-2xl border border-[#2A3937] p-4 mb-4">
+          <div className="bg-sx-raised rounded-2xl border border-sx-line p-4 mb-4">
             <p className="text-[10px] font-extrabold text-green-700 uppercase tracking-wide mb-2 text-center">
               Sem juros
             </p>
@@ -481,16 +481,16 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
             >
               {parcelasSemJuros.map(n => (
                 <div key={n} className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs ${
-                  n === MAX_PARCELAS_SEM_JUROS ? 'bg-[#00cfb5]/10 border border-[#00cfb5]/30' : 'bg-[#111717] border border-[#2A3937]'
+                  n === MAX_PARCELAS_SEM_JUROS ? 'bg-sx-accent/10 border border-sx-accent/30' : 'bg-sx-surface border border-sx-line'
                 }`}>
-                  <span className="font-bold text-[#D7E0DD] w-6">{n}x</span>
-                  <span className={`font-bold ${n === MAX_PARCELAS_SEM_JUROS ? 'text-[#00cfb5]' : 'text-[#D7E0DD]'}`}>
+                  <span className="font-bold text-sx-text-2 w-6">{n}x</span>
+                  <span className={`font-bold ${n === MAX_PARCELAS_SEM_JUROS ? 'text-sx-accent-text' : 'text-sx-text-2'}`}>
                     R$ {fmt(precoAtual / n)}
                   </span>
                 </div>
               ))}
             </div>
-            <p className="text-[10px] text-[#8a9794] text-center mt-3">
+            <p className="text-[10px] text-sx-subtle text-center mt-3">
               Parcelas sem juros no cartão de crédito. Confira as condições no checkout.
             </p>
           </div>
@@ -500,10 +500,10 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
       {/* Variações */}
       {variacoesAtivas.length > 0 && (
         <div className="mb-5">
-          <p className="text-sm font-bold text-[#D7E0DD] mb-2">
+          <p className="text-sm font-bold text-sx-text-2 mb-2">
             {tipoVariacao}
             {variacaoSelecionada && (
-              <span className="text-[#00cfb5] font-normal ml-1">— {variacaoSelecionada.nome}</span>
+              <span className="text-sx-accent-text font-normal ml-1">— {variacaoSelecionada.nome}</span>
             )}
             :
           </p>
@@ -523,7 +523,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
                     title={v.nome}
                     className={`relative w-10 h-10 rounded-full transition-all duration-150 focus:outline-none ${
                       !estoqueDisponivel(v.estoque) ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'
-                    } ${isSelected ? 'ring-2 ring-offset-2 ring-[#00cfb5] scale-110' : 'ring-1 ring-gray-200'}`}
+                    } ${isSelected ? 'ring-2 ring-offset-2 ring-sx-accent scale-110' : 'ring-1 ring-gray-200'}`}
                     style={{ backgroundColor: hex, border: isBranco ? '1px solid #e5e7eb' : 'none' }}
                     aria-label={v.nome}
                   >
@@ -557,10 +557,10 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
                   disabled={!estoqueDisponivel(v.estoque)}
                   className={`px-5 py-2.5 rounded-2xl text-sm font-bold border-2 transition-all ${
                     variacaoSelecionada?.id === v.id
-                      ? 'border-[#00cfb5] bg-[#00cfb5]/10 text-[#B0BFBC]'
+                      ? 'border-sx-accent bg-sx-accent/10 text-sx-muted'
                       : !estoqueDisponivel(v.estoque)
-                        ? 'border-[#2A3937] text-[#6b7a77] line-through cursor-not-allowed'
-                        : 'border-[#2A3937] text-[#B0BFBC] hover:border-[#00cfb5]/50'
+                        ? 'border-sx-line text-sx-subtle line-through cursor-not-allowed'
+                        : 'border-sx-line text-sx-muted hover:border-sx-accent/50'
                   }`}
                 >
                   {v.nome}
@@ -570,7 +570,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
           )}
 
           {exigeVariacao && !variacaoSelecionada && (
-            <p className="text-amber-600 text-xs font-medium mt-2">
+            <p className="text-amber-700 text-xs font-medium mt-2">
               Selecione a {tipoVariacao === 'Variação' ? 'opção' : tipoVariacao.toLowerCase()} para continuar
             </p>
           )}
@@ -589,19 +589,19 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
       {/* Seletor de quantidade */}
       {!esgotado && (
         <div className="flex items-center gap-3 mb-5">
-          <span className="text-sm font-bold text-[#D7E0DD]">Quantidade:</span>
-          <div className="flex items-center border border-[#2A3937] rounded-xl overflow-hidden">
+          <span className="text-sm font-bold text-sx-text-2">Quantidade:</span>
+          <div className="flex items-center border border-sx-line rounded-xl overflow-hidden">
             <button
               onClick={() => setQuantidade(q => Math.max(1, q - 1))}
-              className="w-9 h-9 flex items-center justify-center text-[#B0BFBC] hover:bg-[#192221] transition"
+              className="w-9 h-9 flex items-center justify-center text-sx-muted hover:bg-sx-raised transition"
               aria-label="Diminuir quantidade"
             >
               <Minus size={14} />
             </button>
-            <span className="w-10 text-center text-base font-bold text-[#F4F7F6]">{quantidade}</span>
+            <span className="w-10 text-center text-base font-bold text-sx-text">{quantidade}</span>
             <button
               onClick={() => setQuantidade(q => q + 1)}
-              className="w-9 h-9 flex items-center justify-center text-[#B0BFBC] hover:bg-[#192221] transition"
+              className="w-9 h-9 flex items-center justify-center text-sx-muted hover:bg-sx-raised transition"
               aria-label="Aumentar quantidade"
             >
               <Plus size={14} />
@@ -616,15 +616,15 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
         <button
           onClick={handleComprar}
           disabled={esgotado}
-          className="w-full text-white font-extrabold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
+          className="w-full text-sx-ink font-extrabold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
           style={{
-            backgroundColor: '#00cfb5',
+            backgroundColor: 'var(--sx-accent)',
             boxShadow: '0 6px 20px rgba(60,191,179,0.40)',
             opacity: 1,
           }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
             <line x1="3" y1="6" x2="21" y2="6"/>
             <path d="M16 10a4 4 0 01-8 0"/>
@@ -636,7 +636,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
         <button
           onClick={handleAddToCart}
           disabled={esgotado}
-          className="w-full font-bold text-base py-3.5 rounded-2xl border-2 border-[#00cfb5] text-[#00cfb5] hover:bg-[#00cfb5]/10 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5"
+          className="w-full font-bold text-base py-3.5 rounded-2xl border-2 border-sx-accent text-sx-accent-text hover:bg-sx-accent/10 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5"
         >
           {adicionado ? <Check size={18} /> : <ShoppingCart size={18} />}
           {adicionado ? 'Adicionado ao Carrinho!' : 'Adicionar ao Carrinho'}
@@ -644,7 +644,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
       </div>
 
       {/* Frete — antes dos selos pra reduzir fricção pós-CTA (mobile/tablet/desktop) */}
-      <div className="mt-4 border-t border-[#2A3937] pt-4">
+      <div className="mt-4 border-t border-sx-line pt-4">
         <CalcFrete produtoId={produto.id} />
       </div>
 
@@ -654,7 +654,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
           href={`https://wa.me/?text=${encodeURIComponent(`Olha esse produto na Sixxis: ${produto.nome} — ${typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sixxis.com.br')}/produtos/${produto.slug}`)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs text-[#B0BFBC] hover:text-[#25D366] border border-[#2A3937] hover:border-[#25D366] rounded-lg px-3 py-2 transition-colors"
+          className="inline-flex items-center gap-2 text-xs text-sx-muted hover:text-[#25D366] border border-sx-line hover:border-[#25D366] rounded-lg px-3 py-2 transition-colors"
         >
           <Share2 size={13} />
           Compartilhar via WhatsApp
@@ -664,7 +664,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
           className={`inline-flex items-center gap-2 text-xs border rounded-lg px-3 py-2 transition-colors ${
             isFav
               ? 'text-red-500 border-red-300'
-              : 'text-[#B0BFBC] hover:text-red-500 border-[#2A3937] hover:border-red-300'
+              : 'text-sx-muted hover:text-red-500 border-sx-line hover:border-red-300'
           }`}
         >
           <Heart size={13} className={isFav ? 'fill-red-500' : ''} />
@@ -674,13 +674,13 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
 
       {/* Barra fixa de compra — somente mobile */}
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#111717] border-t border-[#2A3937] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-3 py-2.5 flex gap-2"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-sx-surface border-t border-sx-line shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-3 py-2.5 flex gap-2"
         style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <button
           onClick={handleAddToCart}
           disabled={esgotado}
-          className="flex-1 border-2 border-[#00cfb5] text-[#00cfb5] text-sm font-bold rounded-xl py-3 flex items-center justify-center gap-1.5 disabled:opacity-40 transition active:scale-[0.98]"
+          className="flex-1 border-2 border-sx-accent text-sx-accent-text text-sm font-bold rounded-xl py-3 flex items-center justify-center gap-1.5 disabled:opacity-40 transition active:scale-[0.98]"
         >
           <ShoppingCart size={16} />
           Carrinho
@@ -688,7 +688,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
         <button
           onClick={handleComprar}
           disabled={esgotado}
-          className="flex-[1.3] bg-[#00cfb5] text-white text-sm font-bold rounded-xl py-3 disabled:opacity-40 transition active:scale-[0.98]"
+          className="flex-[1.3] bg-sx-accent text-sx-ink text-sm font-bold rounded-xl py-3 disabled:opacity-40 transition active:scale-[0.98]"
           style={{ boxShadow: '0 4px 12px rgba(60,191,179,0.35)' }}
         >
           {esgotado ? 'Esgotado' : 'Comprar Agora'}

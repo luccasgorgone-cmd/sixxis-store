@@ -29,23 +29,23 @@ export default function SegurancaPage() {
 
   return (
     <LayoutConta>
-      <div className="bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#2A3937]">
-          <h1 className="font-extrabold text-[#F4F7F6] flex items-center gap-2"><Lock size={18} className="text-[#00cfb5]" /> Segurança</h1>
+      <div className="bg-sx-surface rounded-2xl border border-sx-line shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-sx-line">
+          <h1 className="font-extrabold text-sx-text flex items-center gap-2"><Lock size={18} className="text-sx-accent-text" /> Segurança</h1>
         </div>
         <form onSubmit={salvar} className="px-5 py-5 space-y-4">
           {fields.map(({ label, key, showKey }) => (
             <div key={key}>
-              <label className="text-xs font-semibold text-[#B0BFBC] uppercase tracking-wide">{label}</label>
+              <label className="text-xs font-semibold text-sx-muted uppercase tracking-wide">{label}</label>
               <div className="relative mt-1.5">
                 <input
                   type={show[showKey] ? 'text' : 'password'}
                   value={form[key]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                   required
-                  className="w-full text-sm border border-[#2A3937] rounded-xl px-3 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-[#00cfb5]/30 focus:border-[#00cfb5]"
+                  className="w-full text-sm border border-sx-line rounded-xl px-3 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-sx-accent/30 focus:border-sx-accent"
                 />
-                <button type="button" onClick={() => setShow(s => ({ ...s, [showKey]: !s[showKey] }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a9794] hover:text-[#B0BFBC] transition">
+                <button type="button" onClick={() => setShow(s => ({ ...s, [showKey]: !s[showKey] }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-sx-subtle hover:text-sx-muted transition">
                   {show[showKey] ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
@@ -56,7 +56,7 @@ export default function SegurancaPage() {
               {msg.includes('sucesso') && <ShieldCheck size={14} />} {msg}
             </div>
           )}
-          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-[#00cfb5] hover:bg-[#65E5D4] text-[#032E28] font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-60">
+          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-sx-accent hover:bg-sx-accent-hover text-[#032E28] font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-60">
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />} Alterar senha
           </button>
         </form>

@@ -44,9 +44,9 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false, f
           ? 'border-t border-b border-white/10'
           : transparent
           ? 'bg-transparent border-t border-b border-white/15'
-          : 'bg-white border-t border-b border-gray-100'
+          : 'bg-sx-surface border-t border-b border-sx-line'
       }`}
-      style={fundoVerde ? { backgroundColor: '#111717' } : undefined}
+      style={fundoVerde ? { backgroundColor: 'var(--sx-surface)' } : undefined}
     >
       {/* Grid responsivo por quantidade: empilha no mobile se ímpar, 2x2 se par;
           uma coluna por item no desktop (divisores verticais). */}
@@ -57,23 +57,23 @@ export default function TrustBar({ items = DEFAULT_ITEMS, transparent = false, f
             return (
               <div
                 key={titulo}
-                className={`flex flex-col items-center text-center justify-center gap-1.5 lg:flex-row lg:items-center lg:text-left lg:gap-3 py-2 px-1.5 md:px-3 hover:bg-white/5 transition-colors min-w-0 ${
-                  i > 0 ? (escuro ? 'lg:border-l lg:border-white/15' : 'lg:border-l lg:border-gray-200') : ''
+                className={`flex flex-col items-center text-center justify-center gap-1.5 lg:flex-row lg:items-center lg:text-left lg:gap-3 py-2 px-1.5 md:px-3 min-w-0 ${
+                  i > 0 ? (escuro ? 'lg:border-l lg:border-white/15' : 'lg:border-l lg:border-sx-line') : ''
                 }`}
               >
                 <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shrink-0 ${
-                  escuro ? 'bg-white/10' : 'bg-[#e8f8f7]'
+                  escuro ? 'bg-white/10' : 'bg-sx-tint'
                 }`}>
-                  <Icon className="w-4 h-4 md:w-[18px] md:h-[18px] text-[#00cfb5]" strokeWidth={2} />
+                  <Icon className="w-4 h-4 md:w-[18px] md:h-[18px] text-sx-accent-text" strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
                   <p className={`text-[10px] sm:text-[11px] md:text-xs lg:text-sm font-bold leading-tight ${
-                    escuro ? 'text-white' : 'text-gray-900'
+                    escuro ? 'text-white' : 'text-sx-text'
                   }`}>
                     {titulo}
                   </p>
                   <p className={`hidden sm:block text-[11px] leading-tight truncate mt-0.5 ${
-                    escuro ? 'text-white/65' : 'text-gray-500'
+                    escuro ? 'text-white/65' : 'text-sx-muted'
                   }`}>
                     {sub}
                   </p>

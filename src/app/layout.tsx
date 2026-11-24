@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
+import '@/styles/essencial-bf.css'
 import Script from 'next/script'
 import { prisma } from '@/lib/prisma'
 import Providers from '@/components/Providers'
@@ -198,13 +199,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const allFontVars = [inter.variable, poppins.variable, barlow.variable].join(' ')
 
   const cssVars = {
-    '--tiffany':             cfg.cor_principal      || '#3cbfb3',
+    '--tiffany':             cfg.cor_principal      || 'var(--sx-accent)',
     '--tiffany-dark':        cfg.cor_principal_dark || '#2a9d8f',
     '--tiffany-medium':      '#1a4f4a',
     '--tiffany-deep':        '#0f2e2b',
     '--tiffany-light':       '#e8f8f7',
     '--tiffany-soft':        '#d0f0ed',
-    '--color-tiffany':       cfg.cor_principal      || '#3cbfb3',
+    '--color-tiffany':       cfg.cor_principal      || 'var(--sx-accent)',
     '--color-destaque':      cfg.cor_destaque       || '#f59e0b',
     '--color-header':        cfg.cor_header         || '#1a4f4a',
     '--color-header-texto':  cfg.cor_header_texto   || '#ffffff',
@@ -212,10 +213,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--color-anuncio-texto': cfg.cor_anuncio_texto  || '#ffffff',
     '--color-fundo':         cfg.cor_fundo          || '#ffffff',
     '--color-fundo-alt':     cfg.cor_fundo_alt      || '#f9fafb',
-    '--color-stats':         cfg.cor_stats_fundo    || '#3cbfb3',
+    '--color-stats':         cfg.cor_stats_fundo    || 'var(--sx-accent)',
     '--color-wa':            cfg.cor_wa_fundo       || '#111827',
     '--color-footer':        cfg.cor_footer_fundo   || '#111827',
-    '--color-botoes':        cfg.cor_botoes         || '#3cbfb3',
+    '--color-botoes':        cfg.cor_botoes         || 'var(--sx-accent)',
     '--color-botoes-texto':  cfg.cor_botoes_texto   || '#ffffff',
     '--color-botoes-hover':  cfg.cor_botoes_hover   || '#2a9d8f',
     '--color-textos':           cfg.cor_textos           || '#1f2937',
@@ -224,16 +225,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--color-titulos-secao':    cfg.cor_titulos_secao    || '#0a0a0a',
     '--color-descricao':        cfg.cor_descricao        || '#4b5563',
     '--color-precos':           cfg.cor_precos           || '#1f2937',
-    '--color-precos-promo':     cfg.cor_precos_promo     || '#3cbfb3',
-    '--color-links':            cfg.cor_links            || '#3cbfb3',
+    '--color-precos-promo':     cfg.cor_precos_promo     || 'var(--sx-accent)',
+    '--color-links':            cfg.cor_links            || 'var(--sx-accent)',
     '--color-links-hover':      cfg.cor_links_hover      || '#2a9d8f',
     '--color-card-fundo':       cfg.cor_card_fundo       || '#ffffff',
     '--color-card-borda':       cfg.cor_card_borda       || '#e5e7eb',
     '--color-card-hover':       cfg.cor_card_hover       || '#f0fffe',
     '--color-trustbar-fundo':   cfg.cor_trustbar_fundo   || '#ffffff',
-    '--color-trustbar-icones':  cfg.cor_trustbar_icones  || '#3cbfb3',
+    '--color-trustbar-icones':  cfg.cor_trustbar_icones  || 'var(--sx-accent)',
     '--color-badge-oferta':     cfg.cor_badge_oferta     || '#f59e0b',
-    '--color-badge-novo':       cfg.cor_badge_novo       || '#3cbfb3',
+    '--color-badge-novo':       cfg.cor_badge_novo       || 'var(--sx-accent)',
     '--color-badge-esgotado':   cfg.cor_badge_esgotado   || '#9ca3af',
     '--font-active':            `var(${fontObj.variable})`,
     // Novas variáveis de personalização visual
@@ -244,7 +245,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '--bg-footer':      cfg.bg_footer_cor      || '#111827',
     '--bg-footer-txt':  cfg.bg_footer_texto    || '#9ca3af',
     '--bg-footer-h':    cfg.bg_footer_titulo   || '#ffffff',
-    '--bg-footer-hov':  cfg.bg_footer_hover    || '#3cbfb3',
+    '--bg-footer-hov':  cfg.bg_footer_hover    || 'var(--sx-accent)',
   } as React.CSSProperties
 
   // Body: plain background color only — wallpaper is applied per-page (home page)

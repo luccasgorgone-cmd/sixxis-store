@@ -47,8 +47,8 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
 
       {/* Drawer — slides from LEFT, dark bg */}
       <div
-        className={`fixed top-0 left-0 z-50 h-full flex flex-col shadow-2xl transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`sx-escuro fixed top-0 left-0 z-50 h-full flex flex-col transition-transform duration-300 ${
+          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
         style={{ width: '85%', maxWidth: '320px', backgroundColor: '#0f2e2b' }}
       >
@@ -82,11 +82,11 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
               onClick={onClose}
               className={`flex items-center gap-4 py-4 px-6 text-base font-semibold transition-colors ${
                 destaque
-                  ? 'text-[#3cbfb3]'
+                  ? 'text-sx-accent-text'
                   : 'text-white/90 hover:text-white hover:bg-white/10'
               }`}
             >
-              <Icon size={20} className={destaque ? 'text-[#3cbfb3]' : 'text-white/60'} />
+              <Icon size={20} className={destaque ? 'text-sx-accent-text' : 'text-white/60'} />
               {label}
               {destaque && (
                 <span className="ml-auto text-[10px] bg-red-500 text-white font-bold px-1.5 py-0.5 rounded-full">
@@ -129,9 +129,9 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
               <Link
                 href="/cadastro"
                 onClick={onClose}
-                className="flex items-center gap-4 py-4 px-6 text-base font-semibold text-[#3cbfb3] hover:text-[#3cbfb3] hover:bg-white/10 transition-colors"
+                className="flex items-center gap-4 py-4 px-6 text-base font-semibold text-sx-accent-text hover:text-sx-accent-text hover:bg-white/10 transition-colors"
               >
-                <UserPlus size={20} className="text-[#3cbfb3]" />
+                <UserPlus size={20} className="text-sx-accent-text" />
                 Criar Conta
               </Link>
             </>
@@ -166,7 +166,7 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
               href="https://instagram.com/sixxisoficial"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs text-white/60 hover:text-[#3cbfb3] transition"
+              className="flex items-center gap-2 text-xs text-white/60 hover:text-sx-accent-text transition"
               aria-label="Instagram Sixxis"
             >
               {/* Instagram icon */}
@@ -181,7 +181,7 @@ export default function MobileMenu({ isOpen, onClose, logoUrl = '/logo-sixxis.pn
               href="https://www.facebook.com/profile.php?id=100090936724453"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center w-11 h-11 rounded-full border border-white/20 hover:border-[#3cbfb3] text-white/60 hover:text-[#3cbfb3] transition"
+              className="flex items-center justify-center w-11 h-11 rounded-full border border-white/20 hover:border-sx-accent text-white/60 hover:text-sx-accent-text transition"
               aria-label="Facebook Sixxis"
             >
               {/* Facebook icon */}

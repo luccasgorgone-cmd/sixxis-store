@@ -21,8 +21,8 @@ export default function FormAvaliacao({ produtoId, comprouProduto }: Props) {
 
   if (enviado) {
     return (
-      <div className="bg-[#e8f8f7] border border-[#3cbfb3]/30 rounded-xl p-5 text-center mt-6">
-        <p className="text-[#3cbfb3] font-bold text-lg">⭐ Avaliação enviada!</p>
+      <div className="bg-sx-tint border border-sx-accent/30 rounded-xl p-5 text-center mt-6">
+        <p className="text-sx-accent-text font-bold text-lg">⭐ Avaliação enviada!</p>
         <p className="text-sm text-gray-600 mt-1">Será publicada após análise da nossa equipe.</p>
       </div>
     )
@@ -88,7 +88,7 @@ export default function FormAvaliacao({ produtoId, comprouProduto }: Props) {
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Resumo da sua avaliação"
             maxLength={100}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3]"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sx-accent focus:border-sx-accent"
           />
         </div>
 
@@ -100,7 +100,7 @@ export default function FormAvaliacao({ produtoId, comprouProduto }: Props) {
             rows={4}
             placeholder="Conte como foi sua experiência com o produto..."
             maxLength={1000}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3cbfb3] focus:border-[#3cbfb3] resize-none"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sx-accent focus:border-sx-accent resize-none"
           />
         </div>
 
@@ -111,7 +111,7 @@ export default function FormAvaliacao({ produtoId, comprouProduto }: Props) {
         <button
           type="submit"
           disabled={enviando || nota === 0}
-          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 text-white font-semibold rounded-xl px-6 py-2.5 text-sm transition"
+          className="bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-50 text-sx-ink font-semibold rounded-xl px-6 py-2.5 text-sm transition"
         >
           {enviando ? 'Enviando...' : 'Enviar avaliação'}
         </button>

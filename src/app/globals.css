@@ -19,6 +19,24 @@
   --color-brand-muted:  #4b5563;
 }
 
+/* Tokens da loja: `inline` mantém o var() no utilitário, para .sx-escuro funcionar. */
+@theme inline {
+  --color-sx-bg: var(--sx-bg);
+  --color-sx-surface: var(--sx-surface);
+  --color-sx-raised: var(--sx-raised);
+  --color-sx-tint: var(--sx-tint);
+  --color-sx-line: var(--sx-line);
+  --color-sx-text: var(--sx-text);
+  --color-sx-text-2: var(--sx-text-2);
+  --color-sx-muted: var(--sx-muted);
+  --color-sx-subtle: var(--sx-subtle);
+  --color-sx-accent: var(--sx-accent);
+  --color-sx-accent-hover: var(--sx-accent-hover);
+  --color-sx-accent-text: var(--sx-accent-text);
+  --color-sx-ink: var(--sx-ink);
+  --color-sx-stage: var(--sx-stage);
+}
+
 /* ── Variáveis CSS (para uso em calc, var(), etc.) ────────────────────────── */
 :root {
   /* Verde Tiffany — paleta completa */

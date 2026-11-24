@@ -1,4 +1,3 @@
-import '@/styles/essencial-bf.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import FloatingButtons from '@/components/layout/FloatingButtons'
@@ -56,8 +55,8 @@ export default async function LojaLayout({ children }: { children: React.ReactNo
     backgroundAttachment: bgAttachment,
     backgroundRepeat:     bgRepeat,
     backgroundPosition:   bgPosition,
-    backgroundColor:      '#080B0B',
-  } : { backgroundColor: '#080B0B' }
+    backgroundColor:      'var(--sx-bg)',
+  } : { backgroundColor: 'var(--sx-bg)' }
 
   return (
     <LojaWallpaper wallpaperStyle={wallpaperStyle} bgAtivo={bgAtivo} bgOverlay={bgOverlay}>

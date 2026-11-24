@@ -96,7 +96,7 @@ export default function CheckoutMultiMetodo({
   if (!publicKey) {
     return (
       <div className="bg-white border border-gray-100 rounded-2xl p-8 flex items-center justify-center gap-2 text-sm text-gray-500">
-        <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+        <Loader2 size={14} className="animate-spin text-sx-accent-text" />
         Carregando formas de pagamento...
       </div>
     )
@@ -109,7 +109,7 @@ export default function CheckoutMultiMetodo({
       <button
         type="button"
         onClick={modo === 'escolha' ? onVoltar : voltarEscolha}
-        className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"
+        className="text-xs text-gray-500 hover:text-gray-600 flex items-center gap-1"
       >
         <ArrowLeft size={12} />
         {modo === 'escolha' ? 'Voltar pro pagamento normal' : 'Escolher outra divisão'}
@@ -124,9 +124,9 @@ export default function CheckoutMultiMetodo({
               onMetodoSelecionado?.('multi_dois_cartoes')
               setModo('dois_cartoes')
             }}
-            className="w-full flex items-center gap-3 border border-gray-200 hover:border-[#3cbfb3] rounded-xl px-4 py-3 text-left transition"
+            className="w-full flex items-center gap-3 border border-gray-200 hover:border-sx-accent rounded-xl px-4 py-3 text-left transition"
           >
-            <CreditCard size={18} className="text-[#3cbfb3] shrink-0" />
+            <CreditCard size={18} className="text-sx-accent-text shrink-0" />
             <span>
               <span className="block text-sm font-semibold text-[#0f2e2b]">2 cartões</span>
               <span className="block text-xs text-gray-500">Divida o total entre 2 cartões de crédito ou débito</span>
@@ -138,9 +138,9 @@ export default function CheckoutMultiMetodo({
               onMetodoSelecionado?.('multi_pix_cartao')
               setModo('pix_cartao')
             }}
-            className="w-full flex items-center gap-3 border border-gray-200 hover:border-[#3cbfb3] rounded-xl px-4 py-3 text-left transition"
+            className="w-full flex items-center gap-3 border border-gray-200 hover:border-sx-accent rounded-xl px-4 py-3 text-left transition"
           >
-            <QrCode size={18} className="text-[#3cbfb3] shrink-0" />
+            <QrCode size={18} className="text-sx-accent-text shrink-0" />
             <span>
               <span className="block text-sm font-semibold text-[#0f2e2b]">Pix + cartão</span>
               <span className="block text-xs text-gray-500">Pague parte no Pix e o restante no cartão</span>
@@ -287,7 +287,7 @@ function FluxoDoisCartoes({
           type="button"
           disabled={!splitValido}
           onClick={() => setSubEtapa('cartaoA')}
-          className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition"
+          className="w-full bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-sx-ink font-bold py-3 rounded-xl text-sm transition"
         >
           Continuar
         </button>
@@ -330,12 +330,12 @@ function FluxoDoisCartoes({
       )}
       {subEtapa === 'enviando' ? (
         <div className="bg-white border border-gray-100 rounded-2xl p-8 flex items-center justify-center gap-2 text-sm text-gray-500">
-          <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+          <Loader2 size={14} className="animate-spin text-sx-accent-text" />
           Processando os 2 cartões...
         </div>
       ) : subEtapa === 'aguardando_confirmacao' ? (
         <div className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 text-sm text-gray-500 text-center">
-          <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+          <Loader2 size={14} className="animate-spin text-sx-accent-text" />
           <span>Confirmando seu pagamento — isso pode levar alguns minutos, não feche esta página.</span>
         </div>
       ) : (
@@ -501,7 +501,7 @@ function FluxoPixMaisCartao({
           type="button"
           disabled={!splitValido || subEtapa === 'iniciando'}
           onClick={iniciarPix}
-          className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2"
+          className="w-full bg-sx-accent hover:bg-sx-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-sx-ink font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2"
         >
           {subEtapa === 'iniciando' && <Loader2 size={14} className="animate-spin" />}
           Gerar Pix
@@ -531,7 +531,7 @@ function FluxoPixMaisCartao({
 
   return (
     <div className="space-y-3">
-      <div className="bg-[#e8f8f7] border border-[#3cbfb3]/20 rounded-xl px-4 py-3 text-xs text-gray-600">
+      <div className="bg-sx-tint border border-sx-accent/20 rounded-xl px-4 py-3 text-xs text-gray-600">
         Pix confirmado! Falta cobrar <strong className="text-[#0f2e2b]">R$ {moeda(valorRestanteCentavos / 100)}</strong> no cartão.
       </div>
       {erro && (
@@ -542,12 +542,12 @@ function FluxoPixMaisCartao({
       )}
       {subEtapa === 'enviando' ? (
         <div className="bg-white border border-gray-100 rounded-2xl p-8 flex items-center justify-center gap-2 text-sm text-gray-500">
-          <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+          <Loader2 size={14} className="animate-spin text-sx-accent-text" />
           Cobrando o cartão...
         </div>
       ) : subEtapa === 'aguardando_confirmacao' ? (
         <div className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 text-sm text-gray-500 text-center">
-          <Loader2 size={14} className="animate-spin text-[#3cbfb3]" />
+          <Loader2 size={14} className="animate-spin text-sx-accent-text" />
           <span>Confirmando seu pagamento — isso pode levar alguns minutos, não feche esta página.</span>
         </div>
       ) : (

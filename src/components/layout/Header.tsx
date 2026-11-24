@@ -88,7 +88,7 @@ function SearchBar({ className = '' }: { className?: string }) {
         />
         <button
           type="submit"
-          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] px-3 md:px-5 flex items-center justify-center transition shrink-0"
+          className="bg-sx-accent hover:bg-sx-accent-hover px-3 md:px-5 flex items-center justify-center transition shrink-0"
           aria-label="Buscar"
         >
           {carregando
@@ -113,8 +113,8 @@ function SearchBar({ className = '' }: { className?: string }) {
                 : <div className="w-9 h-9 rounded-lg bg-gray-100 shrink-0" />
               }
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#3cbfb3] transition-colors">{s.nome}</p>
-                <p className="text-xs text-[#3cbfb3] font-semibold">
+                <p className="text-sm font-medium text-gray-800 truncate group-hover:text-sx-accent-text transition-colors">{s.nome}</p>
+                <p className="text-xs text-sx-accent-text font-semibold">
                   R$ {Number(s.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
@@ -123,7 +123,7 @@ function SearchBar({ className = '' }: { className?: string }) {
           <Link
             href={`/produtos?q=${encodeURIComponent(query)}`}
             onClick={() => { setAberto(false); setQuery('') }}
-            className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-xs text-[#3cbfb3] font-semibold hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-xs text-sx-accent-text font-semibold hover:bg-gray-100 transition-colors"
           >
             <Search size={12} /> Ver todos para &ldquo;{query}&rdquo;
           </Link>
@@ -164,7 +164,7 @@ function AccountMenu({ logado, nome }: { logado: boolean; nome: string }) {
   }, [open])
 
   const triggerClasses =
-    'flex flex-col items-center gap-0.5 px-3 py-2 text-gray-700 hover:text-[#2a9d8f] hover:bg-gray-100 rounded-xl transition min-w-[60px]'
+    'flex flex-col items-center gap-0.5 px-3 py-2 text-sx-text hover:text-sx-accent-text hover:bg-white/10 rounded-xl transition min-w-[60px]'
 
   if (!logado) {
     return (
@@ -207,7 +207,7 @@ function AccountMenu({ logado, nome }: { logado: boolean; nome: string }) {
             onClick={() => setOpen(false)}
             className={itemClasses}
           >
-            <User size={16} className="text-gray-400" /> Minha conta
+            <User size={16} className="text-gray-500" /> Minha conta
           </Link>
           <Link
             role="menuitem"
@@ -215,7 +215,7 @@ function AccountMenu({ logado, nome }: { logado: boolean; nome: string }) {
             onClick={() => setOpen(false)}
             className={itemClasses}
           >
-            <ShoppingBag size={16} className="text-gray-400" /> Meus pedidos
+            <ShoppingBag size={16} className="text-gray-500" /> Meus pedidos
           </Link>
           <div className="my-1 border-t border-gray-100" />
           <button
@@ -414,7 +414,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+        className={`sx-escuro fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
           isHidden ? '-translate-y-full' : 'translate-y-0'
         } ${isCompact ? 'shadow-xl shadow-black/30' : 'shadow-md'}`}
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
@@ -429,7 +429,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
           <div className="w-full h-px bg-gray-200" />
 
           <div
-            className={`bg-[#3cbfb3] w-full overflow-hidden transition-all duration-500 ease-in-out ${
+            className={`bg-sx-accent w-full overflow-hidden transition-all duration-500 ease-in-out ${
               isTop ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
             }`}
             aria-hidden={!isTop}
@@ -470,9 +470,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
       {/* ═══════════════════════════════════════════════════════
           CAMADA 2 — HEADER PRINCIPAL
       ═══════════════════════════════════════════════════════ */}
-      <div style={{ backgroundColor: '#111717' }}>
+      <div style={{ backgroundColor: 'var(--sx-surface)' }}>
 
-        <div style={{ backgroundColor: '#111717' }}>
+        <div style={{ backgroundColor: 'var(--sx-surface)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
             {/* ── Desktop ────────────────────────────────────── */}
@@ -488,7 +488,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                 className="lg:hidden shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/10 transition"
                 aria-label="Abrir menu"
               >
-                <Menu size={22} className="text-[#F4F7F6]" />
+                <Menu size={22} className="text-sx-text" />
               </button>
 
               {/* Logo — width/height explícitos previnem CLS */}
@@ -521,7 +521,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                 {/* CEP */}
                 <button
                   onClick={() => { setCepResultado(null); setCepErro(''); setCepModalOpen(true) }}
-                  className="hidden lg:flex flex-col items-center gap-0.5 px-3 py-2 text-[#F4F7F6] hover:text-[#00cfb5] hover:bg-white/10 rounded-xl transition min-w-[70px]"
+                  className="hidden lg:flex flex-col items-center gap-0.5 px-3 py-2 text-sx-text hover:text-sx-accent-text hover:bg-white/10 rounded-xl transition min-w-[70px]"
                 >
                   <MapPin size={21} strokeWidth={1.5} />
                   <span className="text-[11px] font-medium leading-none whitespace-nowrap">
@@ -529,23 +529,23 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                   </span>
                 </button>
 
-                <div className="w-px h-8 bg-[#2A3937] hidden lg:block mx-1" />
+                <div className="w-px h-8 bg-sx-line hidden lg:block mx-1" />
 
                 {/* Entrar / Conta — logado vira dropdown com Sair (acessível) */}
                 <AccountMenu logado={logado} nome={session?.user?.name?.split(' ')[0] || ''} />
 
-                <div className="w-px h-8 bg-[#2A3937] mx-1" />
+                <div className="w-px h-8 bg-sx-line mx-1" />
 
                 {/* Carrinho */}
                 <button
                   onClick={() => setDrawerAberto(true)}
-                  className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-[#F4F7F6] hover:text-[#00cfb5] hover:bg-white/10 rounded-xl transition min-w-[60px]"
+                  className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-sx-text hover:text-sx-accent-text hover:bg-white/10 rounded-xl transition min-w-[60px]"
                   aria-label="Abrir carrinho"
                 >
                   <ShoppingCart size={21} strokeWidth={1.5} />
                   <span className="text-[11px] font-medium leading-none">Carrinho</span>
                   {totalItens > 0 && (
-                    <span className="absolute top-1.5 right-2 bg-[#f59e0b] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                    <span className="absolute top-1.5 right-2 bg-[#f59e0b] text-sx-ink text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">
                       {totalItens > 9 ? '9+' : totalItens}
                     </span>
                   )}
@@ -562,7 +562,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                 className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/10 transition"
                 aria-label="Abrir menu"
               >
-                <Menu size={22} className="text-[#F4F7F6]" />
+                <Menu size={22} className="text-sx-text" />
               </button>
 
               <Link href="/" className="absolute left-1/2 -translate-x-1/2">
@@ -572,7 +572,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
               {/* Conta — empurra os 2 icones (Conta + Carrinho) pra direita */}
               <Link
                 href={logado ? '/minha-conta' : '/login'}
-                className="ml-auto w-11 h-11 flex items-center justify-center text-[#F4F7F6]"
+                className="ml-auto w-11 h-11 flex items-center justify-center text-sx-text"
                 aria-label="Minha conta"
               >
                 <User size={22} />
@@ -580,12 +580,12 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
 
               <button
                 onClick={() => setDrawerAberto(true)}
-                className="relative w-11 h-11 flex items-center justify-center text-[#F4F7F6]"
+                className="relative w-11 h-11 flex items-center justify-center text-sx-text"
                 aria-label="Abrir carrinho"
               >
                 <ShoppingCart size={22} />
                 {totalItens > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-[#f59e0b] text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none px-0.5">
+                  <span className="absolute top-0.5 right-0.5 bg-[#f59e0b] text-sx-ink text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none px-0.5">
                     {totalItens > 9 ? '9+' : totalItens}
                   </span>
                 )}
@@ -609,10 +609,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
         </div>
 
         {/* ── Separador ───────────────────────────────────────── */}
-        <div className="w-full border-t border-[#2A3937]" />
+        <div className="w-full border-t border-sx-line" />
 
         {/* ── NAV CATEGORIAS ──────────────────────────────────── */}
-        <nav className="hidden lg:block" style={{ backgroundColor: '#111717' }}>
+        <nav className="hidden lg:block" style={{ backgroundColor: 'var(--sx-surface)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className={`flex items-center justify-center gap-0 transition-all duration-300 ${
               isCompact ? 'py-1' : 'py-2'
@@ -620,11 +620,11 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
               {NAV_LINKS.map((link, i) => (
                 <div key={link.href} className="flex items-center">
                   {i > 0 && (
-                    <span className="text-white/25 mx-1 select-none text-sm">|</span>
+                    <span aria-hidden="true" className="text-white/25 mx-1 select-none text-sm">|</span>
                   )}
                   <Link
                     href={link.href}
-                    className="flex items-center gap-1 px-4 py-1.5 text-[13px] font-bold text-white hover:text-[#00cfb5] tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
+                    className="flex items-center gap-1 px-4 py-1.5 text-[13px] font-bold text-white hover:text-sx-accent-text tracking-wide transition whitespace-nowrap rounded-lg hover:bg-white/10"
                   >
                     {link.label}
                   </Link>
@@ -653,7 +653,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
               <h3 className="font-bold text-gray-900 text-lg">Informe seu CEP</h3>
               <button
                 onClick={() => setCepModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition"
+                className="text-gray-500 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition"
               >
                 <X size={20} />
               </button>
@@ -661,10 +661,10 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
 
             <button
               onClick={usarLocalizacaoAtual}
-              className="w-full flex items-center gap-3 p-3 border border-[#3cbfb3] rounded-xl mb-4 hover:bg-[#e8f8f7] transition text-left"
+              className="w-full flex items-center gap-3 p-3 border border-sx-accent rounded-xl mb-4 hover:bg-sx-tint transition text-left"
             >
-              <div className="w-10 h-10 bg-[#e8f8f7] rounded-full flex items-center justify-center shrink-0">
-                <Navigation size={18} className="text-[#3cbfb3]" />
+              <div className="w-10 h-10 bg-sx-tint rounded-full flex items-center justify-center shrink-0">
+                <Navigation size={18} className="text-sx-accent-text" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900">Usar minha localização atual</p>
@@ -674,7 +674,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
 
             <div className="flex items-center gap-3 mb-3">
               <div className="flex-1 border-t border-gray-100" />
-              <span className="text-xs text-gray-400">ou digite o CEP</span>
+              <span className="text-xs text-gray-500">ou digite o CEP</span>
               <div className="flex-1 border-t border-gray-100" />
             </div>
 
@@ -692,20 +692,20 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                 onKeyDown={e => e.key === 'Enter' && handleBuscarCep()}
                 placeholder="00000-000"
                 maxLength={9}
-                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-[#3cbfb3] focus:ring-2 focus:ring-[#3cbfb3]/20 outline-none"
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-sx-accent focus:ring-2 focus:ring-sx-accent/20 outline-none"
                 autoFocus
               />
               <button
                 onClick={() => handleBuscarCep()}
                 disabled={cepLoading}
-                className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold px-5 py-3 rounded-xl transition disabled:opacity-60"
+                className="bg-sx-accent hover:bg-sx-accent-hover text-sx-ink font-bold px-5 py-3 rounded-xl transition disabled:opacity-60"
               >
                 {cepLoading ? '...' : 'OK'}
               </button>
             </div>
 
             {cepResultado && (
-              <div className="mt-3 p-3 bg-[#e8f8f7] rounded-xl">
+              <div className="mt-3 p-3 bg-sx-tint rounded-xl">
                 <p className="text-sm font-semibold text-[#1a4f4a]">✓ {cepResultado.mensagem}</p>
               </div>
             )}
@@ -733,7 +733,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
       />
 
       <div
-        className="fixed top-0 left-0 z-50 h-full flex flex-col shadow-2xl transition-transform duration-300 lg:hidden"
+        className={`sx-escuro fixed top-0 left-0 z-50 h-full flex flex-col transition-transform duration-300 lg:hidden ${drawerOpen ? 'shadow-2xl' : ''}`}
         style={{
           width: '85%',
           maxWidth: '320px',
@@ -742,7 +742,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
         }}
       >
         {/* Header drawer */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0" style={{ backgroundColor: '#0f2e2b' }}>
+        <div className="sx-escuro flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0" style={{ backgroundColor: '#0f2e2b' }}>
           <Link href="/" onClick={() => setDrawerOpen(false)}>
             <Image src={logoFinal} alt="Sixxis" width={100} height={34} className="object-contain brightness-0 invert" unoptimized onError={() => setLogoErro(true)} />
           </Link>
@@ -757,7 +757,7 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
             onClick={() => { setDrawerOpen(false); setCepModalOpen(true) }}
             className="w-full flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-xl px-4 py-3 transition text-left"
           >
-            <MapPin size={18} className="text-[#3cbfb3] shrink-0" />
+            <MapPin size={18} className="text-sx-accent-text shrink-0" />
             <p className="text-sm font-semibold text-white">
               {cepSalvo ? cepSalvo : 'Informe seu CEP'}
             </p>
@@ -814,8 +814,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                 <User size={20} className="text-white/50" />
                 Entrar
               </Link>
-              <Link href="/cadastro" onClick={() => setDrawerOpen(false)} className="flex items-center gap-4 px-6 py-4 text-base font-semibold text-[#3cbfb3] hover:bg-white/10 transition-colors border-b border-white/5">
-                <UserPlus size={20} className="text-[#3cbfb3]" />
+              <Link href="/cadastro" onClick={() => setDrawerOpen(false)} className="flex items-center gap-4 px-6 py-4 text-base font-semibold text-sx-accent-text hover:bg-white/10 transition-colors border-b border-white/5">
+                <UserPlus size={20} className="text-sx-accent-text" />
                 Criar Conta Grátis
               </Link>
             </>

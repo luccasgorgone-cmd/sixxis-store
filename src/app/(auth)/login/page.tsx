@@ -107,21 +107,22 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium">ou entre com email</span>
+            <span className="text-xs text-gray-500 font-medium">ou entre com email</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
+          {/* eslint-disable-next-line react-hooks/refs -- handleSubmit só lê o ref no envio */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
             <div>
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1.5">E-mail</label>
               <div className="relative">
-                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
                   type="email"
                   {...register('email')}
                   placeholder="seu@email.com"
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 focus:border-sx-accent rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
                 />
               </div>
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -130,22 +131,22 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">Senha</label>
-                <Link href="/esqueci-senha" className="text-xs text-[#3cbfb3] hover:text-[#2a9d8f] font-semibold transition">
+                <Link href="/esqueci-senha" className="text-xs text-sx-accent-text hover:text-sx-accent-text font-semibold transition">
                   Esqueci minha senha
                 </Link>
               </div>
               <div className="relative">
-                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
                   type={mostrarSenha ? 'text' : 'password'}
                   {...register('senha')}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-3 border-2 border-gray-200 focus:border-[#3cbfb3] rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
+                  className="w-full pl-10 pr-11 py-3 border-2 border-gray-200 focus:border-sx-accent rounded-2xl text-sm outline-none transition bg-gray-50 focus:bg-white"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarSenha(!mostrarSenha)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 transition"
                 >
                   {mostrarSenha ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
@@ -164,7 +165,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting || (TURNSTILE_ENABLED && !tsToken)}
-              className="w-full flex items-center justify-center gap-2 font-extrabold text-white py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
+              className="w-full flex items-center justify-center gap-2 font-extrabold text-sx-ink py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-60 text-base mt-2"
               style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}
             >
               {isSubmitting ? (
@@ -181,7 +182,7 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-500 mt-5">
             Não tem conta?{' '}
-            <Link href="/cadastro" className="text-[#3cbfb3] font-bold hover:text-[#2a9d8f] transition">
+            <Link href="/cadastro" className="text-sx-accent-text font-bold hover:text-sx-accent-text transition">
               Cadastre-se gratuitamente
             </Link>
           </p>

@@ -18,6 +18,7 @@ export default function ComparadorBar() {
   const [produtos, setProdutos] = useState<ProdutoInfo[]>([])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- limpa a barra quando a seleção esvazia
     if (ids.length < 2) { setProdutos([]); return }
     fetch(`/api/produtos/por-ids?ids=${ids.join(',')}`)
       .then((r) => r.json())
@@ -31,7 +32,7 @@ export default function ComparadorBar() {
     <div className="hidden md:block fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 shrink-0">
-          <GitCompare size={16} className="text-[#3cbfb3]" />
+          <GitCompare size={16} className="text-sx-accent-text" />
           Comparando {ids.length} {ids.length === 1 ? 'produto' : 'produtos'}
         </div>
         <div className="flex gap-2 flex-1 min-w-0 overflow-x-auto">
@@ -49,7 +50,7 @@ export default function ComparadorBar() {
                 <span className="text-xs text-gray-700 truncate">{p.nome}</span>
                 <button
                   onClick={() => remover(p.id)}
-                  className="text-gray-400 hover:text-gray-600 shrink-0"
+                  className="text-gray-500 hover:text-gray-600 shrink-0"
                   aria-label={`Remover ${p.nome} da comparação`}
                 >
                   <X size={13} />
@@ -60,7 +61,7 @@ export default function ComparadorBar() {
         </div>
         <Link
           href={`/comparar?ids=${ids.join(',')}`}
-          className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors shrink-0"
+          className="bg-sx-accent hover:bg-sx-accent-hover text-sx-ink text-sm font-bold px-4 py-2 rounded-lg transition-colors shrink-0"
         >
           Comparar agora
         </Link>

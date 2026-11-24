@@ -61,10 +61,10 @@ export default async function Footer() {
   } catch {}
 
   return (
-    <footer style={{ backgroundColor: '#080B0B' }} className="text-white/60">
+    <footer style={{ backgroundColor: 'var(--sx-bg)' }} className="sx-escuro text-white/60">
 
       {/* ── Linha tiffany topo ─────────────────────────────────────────────── */}
-      <div className="h-1 bg-[#00cfb5]" />
+      <div className="h-1 bg-sx-accent" />
 
       {/* ── Bloco principal ────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -95,7 +95,7 @@ export default async function Footer() {
                   texto="Olá! Vim pelo site Sixxis e gostaria de mais informações."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm text-white hover:opacity-90 transition"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm text-[#06351f] hover:opacity-90 transition"
                   style={{ backgroundColor: '#25D366' }}
                 >
                   <WaSVG />
@@ -114,7 +114,7 @@ export default async function Footer() {
                 </WhatsAppTrackedLink>
                 <Link
                   href="/contato"
-                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm text-white/55 hover:text-white/85 hover:border-white/30 transition"
+                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:border-white/30 transition"
                   style={{ border: '1.5px solid rgba(255,255,255,0.12)' }}
                 >
                   Entre em Contato
@@ -239,7 +239,7 @@ export default async function Footer() {
                 {[
                   { label: 'Google Safe Browsing', cor: '#34a853' },
                   { label: 'Mercado Pago',          cor: '#009ee3' },
-                  { label: 'Loja Verificada',        cor: '#3cbfb3' },
+                  { label: 'Loja Verificada',        cor: 'var(--sx-accent-text)' },
                 ].map(cert => (
                   <div
                     key={cert.label}
@@ -257,11 +257,11 @@ export default async function Footer() {
       </div>
 
       {/* ── Formas de pagamento (faixa branca) ─────────────────────────────── */}
-      <div style={{ backgroundColor: '#111717' }} className="border-t border-[#2A3937]">
+      <div style={{ backgroundColor: 'var(--sx-surface)' }} className="border-t border-sx-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
-              <span className="text-[#B0BFBC] text-xs font-semibold uppercase tracking-wide shrink-0">
+              <span className="text-sx-muted text-xs font-semibold uppercase tracking-wide shrink-0">
                 Formas de Pagamento:
               </span>
               <div className="flex flex-wrap items-center justify-center gap-2.5">
@@ -277,13 +277,13 @@ export default async function Footer() {
                     />
                   ))
                 ) : (
-                  <span className="text-[#B0BFBC] text-xs">
+                  <span className="text-sx-muted text-xs">
                     PIX • Cartão de Crédito
                   </span>
                 )}
               </div>
             </div>
-            <span className="text-[#B0BFBC] text-xs font-semibold shrink-0">
+            <span className="text-sx-muted text-xs font-semibold shrink-0">
               Parcele em até <strong className="text-white">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
             </span>
           </div>
@@ -291,7 +291,7 @@ export default async function Footer() {
       </div>
 
       {/* ── Copyright ─────────────────────────────────────────────────────── */}
-      <div className="border-t border-white/10" style={{ backgroundColor: '#080B0B' }}>
+      <div className="border-t border-white/10" style={{ backgroundColor: 'var(--sx-bg)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
             <div className="space-y-0.5">

@@ -91,11 +91,11 @@ export default function SelectVariacaoModal({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-gray-900 line-clamp-2 leading-snug">{produto.nome}</p>
-            <p className="text-base font-black text-[#3cbfb3] mt-0.5">R$ {fmt(precoExibido)}</p>
+            <p className="text-base font-black text-sx-accent-text mt-0.5">R$ {fmt(precoExibido)}</p>
           </div>
           <button
             onClick={fecharModal}
-            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition shrink-0"
+            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition shrink-0"
             aria-label="Fechar"
           >
             <X size={18} />
@@ -107,7 +107,7 @@ export default function SelectVariacaoModal({
           <p className="text-sm font-bold text-gray-700 mb-3">
             Escolha {tipoVariacao === 'Variação' ? 'a opção' : `a ${tipoVariacao.toLowerCase()}`}
             {variacaoSelecionada && (
-              <span className="text-[#3cbfb3] font-normal ml-1">— {variacaoSelecionada.nome}</span>
+              <span className="text-sx-accent-text font-normal ml-1">— {variacaoSelecionada.nome}</span>
             )}
           </p>
 
@@ -122,10 +122,10 @@ export default function SelectVariacaoModal({
                   disabled={sem}
                   className={`px-5 py-2.5 rounded-2xl text-sm font-bold border-2 transition-all ${
                     sel
-                      ? 'border-[#3cbfb3] bg-[#e8f8f7] text-[#1a4f4a]'
+                      ? 'border-sx-accent bg-sx-tint text-[#1a4f4a]'
                       : sem
                         ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
-                        : 'border-gray-200 text-gray-600 hover:border-[#3cbfb3]/50'
+                        : 'border-gray-200 text-gray-600 hover:border-sx-accent/50'
                   }`}
                 >
                   {v.nome}
@@ -167,7 +167,7 @@ export default function SelectVariacaoModal({
           <button
             onClick={() => podeContinuar && variacaoSelecionada && onConfirmarCheckout(variacaoSelecionada, quantidade)}
             disabled={!podeContinuar}
-            className="w-full text-white font-extrabold text-base py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full text-sx-ink font-extrabold text-base py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{
               backgroundColor: '#3cbfb3',
               boxShadow: '0 6px 20px rgba(60,191,179,0.40)',
@@ -179,7 +179,7 @@ export default function SelectVariacaoModal({
           <button
             onClick={() => podeContinuar && variacaoSelecionada && onConfirmarCarrinho(variacaoSelecionada, quantidade)}
             disabled={!podeContinuar}
-            className="w-full font-bold text-sm py-3 rounded-2xl border-2 border-[#3cbfb3] text-[#3cbfb3] hover:bg-[#e8f8f7] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            className="w-full font-bold text-sm py-3 rounded-2xl border-2 border-sx-accent text-sx-accent-text hover:bg-sx-tint disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
           >
             <ShoppingCart size={15} />
             Adicionar ao Carrinho

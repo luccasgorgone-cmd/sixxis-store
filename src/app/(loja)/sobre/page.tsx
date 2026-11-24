@@ -41,13 +41,13 @@ function AnimSection({ children, delay = 0, className = '', style }: {
 }
 
 const TIMELINE = [
-  { ano: '1993', titulo: 'O começo de tudo', texto: 'A Sixxis nasce em Araçatuba, SP, como uma pequena importadora com um grande sonho: levar produtos de qualidade e bem-estar para as famílias brasileiras.', cor: '#3cbfb3', icon: Heart },
+  { ano: '1993', titulo: 'O começo de tudo', texto: 'A Sixxis nasce em Araçatuba, SP, como uma pequena importadora com um grande sonho: levar produtos de qualidade e bem-estar para as famílias brasileiras.', cor: 'var(--sx-accent-text)', icon: Heart },
   { ano: '1998', titulo: 'Primeira linha de climatizadores', texto: 'Após 5 anos consolidando o negócio, lançamos nossa primeira linha de climatizadores residenciais. A aceitação do mercado superou todas as expectativas.', cor: '#0f2e2b', icon: Wind },
   { ano: '2004', titulo: 'Expansão pelo interior', texto: 'Estruturamos nossa rede de revendedores no interior de SP, chegando a mais de 50 cidades parceiras e consolidando a presença regional da marca.', cor: '#8b5cf6', icon: MapPin },
   { ano: '2010', titulo: 'Linha comercial', texto: 'Lançamento da linha comercial de alta capacidade para empresas, clínicas e estabelecimentos comerciais. A Sixxis chega ao segmento B2B.', cor: '#f59e0b', icon: TrendingUp },
   { ano: '2015', titulo: '200 parceiros no Brasil', texto: 'Marco histórico: 200 revendedores parceiros em todas as regiões do Brasil. A Sixxis torna-se referência nacional no segmento de climatização.', cor: '#16a34a', icon: Users },
   { ano: '2018', titulo: 'Linha fitness e aspiradores', texto: 'Diversificamos o portfólio com bikes spinning profissionais e aspiradores de alta potência, atendendo o mercado fitness e de limpeza doméstica.', cor: '#2563eb', icon: Bike },
-  { ano: '2022', titulo: 'Loja digital própria', texto: 'Inauguramos nossa plataforma de e-commerce, aproximando a Sixxis dos clientes finais com experiência de compra simplificada e atendimento direto.', cor: '#3cbfb3', icon: Star },
+  { ano: '2022', titulo: 'Loja digital própria', texto: 'Inauguramos nossa plataforma de e-commerce, aproximando a Sixxis dos clientes finais com experiência de compra simplificada e atendimento direto.', cor: 'var(--sx-accent-text)', icon: Star },
   { ano: '2024', titulo: '1 Milhão de clientes', texto: 'Ultrapassamos a marca histórica de 1 MILHÃO de clientes atendidos. 30 anos de dedicação, qualidade e compromisso com o bem-estar das famílias brasileiras.', cor: '#ef4444', icon: Award },
 ]
 
@@ -57,28 +57,28 @@ export default function SobrePage() {
       <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Sobre Nós' }]} />
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden min-h-[75vh] flex flex-col justify-center"
+      <section className="sx-escuro relative overflow-hidden min-h-[75vh] flex flex-col justify-center"
         style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 50%, #1a4f4a 100%)' }}>
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute inset-0 opacity-[0.06]"
-            style={{ backgroundImage: 'linear-gradient(#3cbfb3 1px, transparent 1px), linear-gradient(90deg, #3cbfb3 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+            style={{ backgroundImage: 'linear-gradient(var(--sx-accent) 1px, transparent 1px), linear-gradient(90deg, var(--sx-accent) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
           <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-10"
-            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)', transform: 'translate(30%, -30%)' }} />
+            style={{ background: 'radial-gradient(circle, var(--sx-accent), transparent)', transform: 'translate(30%, -30%)' }} />
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-5"
-            style={{ background: 'radial-gradient(circle, #3cbfb3, transparent)', transform: 'translate(-30%, 30%)' }} />
+            style={{ background: 'radial-gradient(circle, var(--sx-accent), transparent)', transform: 'translate(-30%, 30%)' }} />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 w-full">
           <AnimSection className="text-center">
             <div className="inline-flex items-center gap-2 mb-6 rounded-full px-4 py-2 border"
               style={{ backgroundColor: 'rgba(60,191,179,0.1)', borderColor: 'rgba(60,191,179,0.25)' }}>
-              <Building2 size={12} className="text-[#3cbfb3]" />
-              <span className="text-[#3cbfb3] text-xs font-bold uppercase tracking-widest">
+              <Building2 size={12} className="text-sx-accent-text" />
+              <span className="text-sx-accent-text text-xs font-bold uppercase tracking-widest">
                 Fundada em 1993 — Araçatuba, SP
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5 max-w-4xl mx-auto">
               30 anos levando{' '}
-              <span style={{ color: '#3cbfb3' }}>qualidade e conforto</span>
+              <span style={{ color: 'var(--sx-accent-text)' }}>qualidade e conforto</span>
               {' '}para o Brasil
             </h1>
             <p className="text-white/65 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
@@ -88,7 +88,7 @@ export default function SobrePage() {
             <div className="flex flex-wrap gap-3 justify-center mb-14">
               <Link href="/produtos"
                 className="inline-flex items-center gap-2 font-extrabold text-[#0f2e2b] px-6 py-3.5 rounded-2xl transition hover:-translate-y-0.5 text-sm"
-                style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 20px rgba(60,191,179,0.4)' }}>
+                style={{ backgroundColor: 'var(--sx-accent)', boxShadow: '0 4px 20px rgba(60,191,179,0.4)' }}>
                 Ver nossos produtos <ArrowRight size={15} />
               </Link>
               <Link href="/contato"
@@ -107,7 +107,7 @@ export default function SobrePage() {
                 return (
                   <div key={s.label} className="text-center rounded-2xl p-4"
                     style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Icon size={16} className="text-[#3cbfb3] mx-auto mb-2" />
+                    <Icon size={16} className="text-sx-accent-text mx-auto mb-2" />
                     <p className="text-2xl font-black text-white leading-none mb-1">{s.val}</p>
                     <p className="text-[10px] text-white/50 font-medium leading-tight">{s.label}</p>
                   </div>
@@ -123,10 +123,10 @@ export default function SobrePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
             <SectionKicker texto="Nossa trajetória" dark />
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F4F7F6] mt-2 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-sx-text mt-2 mb-4">
               30 anos de história e crescimento
             </h2>
-            <p className="text-[#B0BFBC] text-base max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sx-muted text-base max-w-2xl mx-auto leading-relaxed">
               Cada marco desta linha do tempo representa anos de trabalho, inovação
               e o compromisso inabalável de entregar o melhor para os nossos clientes e parceiros.
               Uma trajetória construída com dedicação, superando desafios e conquistando mercados.
@@ -139,16 +139,16 @@ export default function SobrePage() {
               const Icon = item.icon
               return (
                 <AnimSection key={item.ano} delay={i * 50}>
-                  <div className="h-full bg-[#111717] border border-[#2A3937] rounded-2xl p-3 shadow-sm">
+                  <div className="h-full bg-sx-surface border border-sx-line rounded-2xl p-3 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: item.cor + '15' }}>
+                        style={{ backgroundColor: `color-mix(in srgb, ${item.cor} 8%, transparent)` }}>
                         <Icon size={13} style={{ color: item.cor }} />
                       </div>
-                      <span className="text-sm font-black text-[#3cbfb3]">{item.ano}</span>
+                      <span className="text-sm font-black text-sx-accent-text">{item.ano}</span>
                     </div>
-                    <h3 className="text-[12px] font-extrabold text-[#F4F7F6] mb-1 leading-snug">{item.titulo}</h3>
-                    <p className="text-[11px] text-[#B0BFBC] leading-snug line-clamp-4">{item.texto}</p>
+                    <h3 className="text-[12px] font-extrabold text-sx-text mb-1 leading-snug">{item.titulo}</h3>
+                    <p className="text-[11px] text-sx-muted leading-snug line-clamp-4">{item.texto}</p>
                   </div>
                 </AnimSection>
               )
@@ -157,8 +157,8 @@ export default function SobrePage() {
 
           {/* sm+: layout zig-zag original */}
           <div className="relative max-w-4xl mx-auto hidden sm:block">
-            <div className="absolute left-1/2 top-0 bottom-0 w-px"
-              style={{ backgroundImage: 'linear-gradient(to bottom, #3cbfb3, #0f2e2b)', transform: 'translateX(-50%)' }} />
+            <div className="sx-escuro absolute left-1/2 top-0 bottom-0 w-px"
+              style={{ backgroundImage: 'linear-gradient(to bottom, var(--sx-accent), #0f2e2b)', transform: 'translateX(-50%)' }} />
 
             <div className="space-y-8">
               {TIMELINE.map((item, i) => {
@@ -168,16 +168,16 @@ export default function SobrePage() {
                   <AnimSection key={item.ano} delay={i * 60}>
                     <div className={`flex gap-4 sm:gap-8 ${esq ? 'sm:flex-row' : 'sm:flex-row-reverse'}`}>
                       <div className="flex-1">
-                        <div className={`bg-[#111717] border border-[#2A3937] rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${esq ? 'sm:text-right' : 'sm:text-left'}`}>
+                        <div className={`bg-sx-surface border border-sx-line rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${esq ? 'sm:text-right' : 'sm:text-left'}`}>
                           <div className={`flex items-center gap-3 mb-3 ${esq ? 'sm:flex-row-reverse' : ''}`}>
                             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                              style={{ backgroundColor: item.cor + '15' }}>
+                              style={{ backgroundColor: `color-mix(in srgb, ${item.cor} 8%, transparent)` }}>
                               <Icon size={17} style={{ color: item.cor }} />
                             </div>
-                            <span className="text-lg font-black text-[#3cbfb3]">{item.ano}</span>
+                            <span className="text-lg font-black text-sx-accent-text">{item.ano}</span>
                           </div>
-                          <h3 className="text-sm font-extrabold text-[#F4F7F6] mb-2">{item.titulo}</h3>
-                          <p className="text-xs text-[#B0BFBC] leading-relaxed">{item.texto}</p>
+                          <h3 className="text-sm font-extrabold text-sx-text mb-2">{item.titulo}</h3>
+                          <p className="text-xs text-sx-muted leading-relaxed">{item.texto}</p>
                         </div>
                       </div>
                       <div className="flex w-10 h-10 rounded-full border-4 border-white shadow-lg items-center justify-center shrink-0 z-10 self-start mt-4"
@@ -195,7 +195,7 @@ export default function SobrePage() {
       </section>
 
       {/* ─── PROPÓSITO ─── */}
-      <section className="py-20" style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 60%, #1a4f4a 100%)' }}>
+      <section className="sx-escuro py-20" style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 60%, #1a4f4a 100%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-12">
             <SectionKicker texto="Propósito" dark />
@@ -207,7 +207,7 @@ export default function SobrePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
             {[
               {
-                icon: Zap, titulo: 'Missão', cor: '#3cbfb3',
+                icon: Zap, titulo: 'Missão', cor: 'var(--sx-accent-text)',
                 texto: 'Proporcionar qualidade de vida e bem-estar às pessoas por meio de produtos inovadores, confiáveis e acessíveis. Entregamos excelência em cada etapa — desde a fabricação até o suporte pós-venda — porque acreditamos que toda família merece o melhor.',
               },
               {
@@ -248,8 +248,8 @@ export default function SobrePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection className="text-center mb-14">
             <SectionKicker texto="Por que Sixxis" dark />
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F4F7F6] mt-2 mb-3">O que nos diferencia no mercado</h2>
-            <p className="text-[#B0BFBC] text-sm max-w-xl mx-auto leading-relaxed">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-sx-text mt-2 mb-3">O que nos diferencia no mercado</h2>
+            <p className="text-sx-muted text-sm max-w-xl mx-auto leading-relaxed">
               Mais de 30 anos construindo relacionamentos baseados em confiança, qualidade e resultados reais para os nossos clientes.
             </p>
           </AnimSection>
@@ -261,7 +261,7 @@ export default function SobrePage() {
                 subtitulo: 'Proteção total, sem letras miúdas',
                 texto: 'Garantia integral de 12 meses contra defeitos de fabricação em todos os produtos Sixxis. Mais de 50 pontos de assistência técnica no Brasil, logística reversa gratuita e resolução em até 7 dias úteis.',
                 destaque: '12 meses',
-                corIcone: '#3cbfb3',
+                corIcone: 'var(--sx-accent-text)',
               },
               {
                 icone: PackageCheck,
@@ -277,7 +277,7 @@ export default function SobrePage() {
                 subtitulo: 'Todos os 5.570 municípios',
                 texto: 'Entregamos em todo o território nacional com transportadoras parceiras rastreadas. Prazo médio de 3 a 5 dias úteis. Embalagem reforçada e seguro de transporte inclusos.',
                 destaque: '5.570 cidades',
-                corIcone: '#3cbfb3',
+                corIcone: 'var(--sx-accent-text)',
               },
               {
                 icone: HeartHandshake,
@@ -293,7 +293,7 @@ export default function SobrePage() {
                 subtitulo: 'P&D contínuo em climatização',
                 texto: 'Investimos continuamente em pesquisa e desenvolvimento. Nossa linha é atualizada anualmente com melhorias reais baseadas no feedback de clientes e parceiros.',
                 destaque: 'Atualização anual',
-                corIcone: '#3cbfb3',
+                corIcone: 'var(--sx-accent-text)',
               },
               {
                 icone: Building2,
@@ -307,7 +307,7 @@ export default function SobrePage() {
               const Icon = item.icone
               return (
                 <AnimSection key={i} delay={i * 80}>
-                  <div className="group bg-[#111717] rounded-2xl border border-[#2A3937] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-4 sm:p-5 lg:p-8 h-full flex flex-col relative overflow-hidden">
+                  <div className="group bg-sx-surface rounded-2xl border border-sx-line shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-4 sm:p-5 lg:p-8 h-full flex flex-col relative overflow-hidden">
                     {/* Decoração de fundo */}
                     <div
                       className="absolute top-0 right-0 w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-bl-full opacity-5 transition-opacity group-hover:opacity-10"
@@ -316,19 +316,19 @@ export default function SobrePage() {
                     {/* Ícone */}
                     <div
                       className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 lg:mb-5 shrink-0 group-hover:scale-110 transition-transform duration-300"
-                      style={{ backgroundColor: `${item.corIcone}15` }}
+                      style={{ backgroundColor: `color-mix(in srgb, ${item.corIcone} 8%, transparent)` }}
                     >
                       <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-[30px] lg:h-[30px]" style={{ color: item.corIcone }} strokeWidth={1.8} />
                     </div>
                     {/* Badge destaque */}
                     <span
                       className="self-start text-[9px] sm:text-[10px] lg:text-[11px] font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full mb-2 lg:mb-3 uppercase tracking-wide"
-                      style={{ backgroundColor: `${item.corIcone}15`, color: item.corIcone }}
+                      style={{ backgroundColor: `color-mix(in srgb, ${item.corIcone} 8%, transparent)`, color: item.corIcone }}
                     >
                       {item.destaque}
                     </span>
                     {/* Título */}
-                    <h3 className="text-sm sm:text-base lg:text-lg font-extrabold text-[#F4F7F6] mb-1 leading-snug">
+                    <h3 className="text-sm sm:text-base lg:text-lg font-extrabold text-sx-text mb-1 leading-snug">
                       {item.titulo}
                     </h3>
                     {/* Subtítulo */}
@@ -338,7 +338,7 @@ export default function SobrePage() {
                     {/* Linha divisória */}
                     <div className="w-6 sm:w-8 h-0.5 rounded-full mb-3 lg:mb-4" style={{ backgroundColor: item.corIcone }} />
                     {/* Descrição */}
-                    <p className="text-[11px] sm:text-xs lg:text-sm text-[#B0BFBC] leading-relaxed flex-1">
+                    <p className="text-[11px] sm:text-xs lg:text-sm text-sx-muted leading-relaxed flex-1">
                       {item.texto}
                     </p>
                   </div>
@@ -350,7 +350,7 @@ export default function SobrePage() {
       </section>
 
       {/* ─── DADOS DA EMPRESA + CONTATO ─── */}
-      <section className="py-20"
+      <section className="sx-escuro py-20"
         style={{ background: 'linear-gradient(135deg, #0f2e2b, #1a4f4a)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -387,7 +387,7 @@ export default function SobrePage() {
                 <div className="space-y-3 mb-6">
                   {[
                     { icon: Phone, label: 'Vendas',              val: '(18) 99747-4701',         href: 'https://wa.me/5518997474701',    cor: '#25D366' },
-                    { icon: Phone, label: 'Assistência Técnica', val: '(11) 93410-2621',          href: 'https://wa.me/5511934102621',    cor: '#3cbfb3' },
+                    { icon: Phone, label: 'Assistência Técnica', val: '(11) 93410-2621',          href: 'https://wa.me/5511934102621',    cor: 'var(--sx-accent-text)' },
                     { icon: Mail,  label: 'E-mail',              val: 'sac@sixxis.com.br',  href: 'mailto:sac@sixxis.com.br', cor: '#8b5cf6' },
                   ].map(c => {
                     const Icon = c.icon
@@ -396,7 +396,7 @@ export default function SobrePage() {
                         className="flex items-center gap-3 rounded-2xl px-4 py-3 transition group border"
                         style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)' }}>
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: c.cor + '20' }}>
+                          style={{ backgroundColor: `color-mix(in srgb, ${c.cor} 13%, transparent)` }}>
                           <Icon size={15} style={{ color: c.cor }} />
                         </div>
                         <div>
@@ -418,12 +418,12 @@ export default function SobrePage() {
       </section>
 
       {/* ─── MAPA ─── */}
-      <section className="py-12 border-t border-[#2A3937]">
+      <section className="py-12 border-t border-sx-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimSection>
-            <h2 className="text-lg font-extrabold text-[#F4F7F6] mb-1">Nossa localização</h2>
-            <p className="text-sm text-[#B0BFBC] mb-5">R. Anhanguera, 1711 — Icaray, Araçatuba - SP, 16020-355</p>
-            <div className="rounded-2xl overflow-hidden shadow-lg border border-[#2A3937]">
+            <h2 className="text-lg font-extrabold text-sx-text mb-1">Nossa localização</h2>
+            <p className="text-sm text-sx-muted mb-5">R. Anhanguera, 1711 — Icaray, Araçatuba - SP, 16020-355</p>
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-sx-line">
               <iframe
                 src="https://maps.google.com/maps?q=R.+Anhanguera+1711+Ara%C3%A7atuba+SP&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
@@ -440,7 +440,7 @@ export default function SobrePage() {
       </section>
 
       {/* ─── CTA FINAL ─── */}
-      <section className="py-14" style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 100%)' }}>
+      <section className="sx-escuro py-14" style={{ background: 'linear-gradient(135deg, #0a1f1d 0%, #0f2e2b 100%)' }}>
         <AnimSection className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl font-extrabold text-white mb-3">
             Faça parte da história Sixxis
@@ -451,7 +451,7 @@ export default function SobrePage() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/produtos"
-              className="inline-flex items-center gap-2 bg-[#3cbfb3] text-white font-extrabold px-6 py-3.5 rounded-2xl hover:bg-[#2a9d8f] hover:-translate-y-0.5 transition text-sm"
+              className="inline-flex items-center gap-2 bg-sx-accent text-sx-ink font-extrabold px-6 py-3.5 rounded-2xl hover:bg-sx-accent-hover hover:-translate-y-0.5 transition text-sm"
               style={{ boxShadow: '0 4px 14px rgba(60,191,179,0.35)' }}>
               Ver catálogo <ArrowRight size={15} />
             </Link>

@@ -39,7 +39,7 @@ export default function SubcategoriasCarrossel({ subcategorias }: Props) {
                   'shrink-0 px-4 py-2 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all duration-150',
                   isAtivo
                     ? 'bg-[#0f2e2b] border-[#0f2e2b] text-white shadow-sm'
-                    : 'bg-white border-gray-200 text-gray-600 hover:border-[#3cbfb3] hover:text-[#3cbfb3]',
+                    : 'bg-white border-gray-200 text-gray-600 hover:border-sx-accent hover:text-sx-accent-text',
                 ].join(' ')}
               >
                 {sub.label}

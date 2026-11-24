@@ -45,16 +45,16 @@ const infos = [
 
 export default function ContatoPage() {
   return (
-    <main className="bg-[#111717]">
+    <main className="bg-sx-surface">
       <Breadcrumb items={[{ label: 'Início', href: '/' }, { label: 'Contato' }]} />
 
       {/* Hero */}
       <section
-        className="py-16 md:py-20"
+        className="sx-escuro py-16 md:py-20"
         style={{ backgroundColor: '#1a4f4a' }}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-[#00cfb5] text-sm font-semibold uppercase tracking-widest mb-3">
+          <p className="text-sx-accent-text text-sm font-semibold uppercase tracking-widest mb-3">
             Fale com a gente
           </p>
           <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Contato</h1>
@@ -81,8 +81,8 @@ export default function ContatoPage() {
             <div className="space-y-6">
               {infos.map(({ icon: Icon, title, lines, href }) => (
                 <div key={title} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#e8f8f7] flex items-center justify-center shrink-0">
-                    <Icon size={18} className="text-[#00cfb5]" />
+                  <div className="w-10 h-10 rounded-full bg-sx-tint flex items-center justify-center shrink-0">
+                    <Icon size={18} className="text-sx-accent-text" />
                   </div>
                   <div>
                     <p className="font-semibold text-[#0a0a0a] text-sm mb-0.5">{title}</p>
@@ -91,12 +91,12 @@ export default function ContatoPage() {
                         <a
                           key={l}
                           href={href}
-                          className="block text-sm text-[#B0BFBC] hover:text-[#00cfb5] transition"
+                          className="block text-sm text-sx-muted hover:text-sx-accent-text transition"
                         >
                           {l}
                         </a>
                       ) : (
-                        <p key={l} className="text-sm text-[#B0BFBC]">{l}</p>
+                        <p key={l} className="text-sm text-sx-muted">{l}</p>
                       ),
                     )}
                   </div>
@@ -105,7 +105,7 @@ export default function ContatoPage() {
             </div>
 
             {/* Mapa Google Maps — R. Anhanguera, 1711, Araçatuba-SP */}
-            <div className="mt-8 rounded-2xl overflow-hidden border border-[#2A3937] shadow-sm">
+            <div className="mt-8 rounded-2xl overflow-hidden border border-sx-line shadow-sm">
               <iframe
                 src="https://maps.google.com/maps?q=R.+Anhanguera,+1711,+Icaray,+Araçatuba,+SP,+16020-355&output=embed&z=16"
                 width="100%"
@@ -120,7 +120,7 @@ export default function ContatoPage() {
               href="https://maps.google.com/maps?q=R.+Anhanguera,+1711,+Icaray,+Araçatuba,+SP,+16020-355"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-2 text-xs text-[#00cfb5] hover:underline"
+              className="inline-flex items-center gap-1 mt-2 text-xs text-sx-accent-text hover:underline"
             >
               <MapPin size={11} /> Abrir no Google Maps
             </a>

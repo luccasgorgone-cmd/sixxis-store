@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { valorParcela } from '@/lib/parcelamento'
 import { precoPix } from '@/lib/preco-pix'
+import { capaVitrine } from '@/lib/capa-vitrine'
 
 export const dynamic = 'force-dynamic'
 
@@ -113,7 +114,7 @@ export async function GET(
       const getPSpec = (t: string) =>
         pSpecs?.find(s => s.label.toLowerCase().includes(t.toLowerCase()))?.valor || ''
 
-      let especsDestaque: { label: string; valor: string }[] = []
+      const especsDestaque: { label: string; valor: string }[] = []
 
       if (p.categoria === 'climatizadores') {
         const tanque   = getPSpec('tanque') || getPSpec('capacidade') || getPSpec('reservatório')
@@ -154,7 +155,7 @@ export async function GET(
         parcelaValor:     valorParcela(precoFinal).toFixed(2),
         desconto:         desconto > 0 ? desconto : null,
         linha:            p.slug?.toLowerCase().includes('prime') ? 'Prime' : null,
-        imagem:           (p.imagens as string[])?.[0] ?? null,
+        imagem:           capaVitrine(p.slug, p.imagens),
         voltagens:        p.variacoes.map(v => v.nome).filter(n => n.includes('V')),
         especsDestaque,
         mediaAvaliacoes:  p.mediaAvaliacoes,

@@ -183,7 +183,7 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
             <div className="flex flex-col items-center gap-1">
               {oculto.luna && (
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center"
+                  className="sx-escuro w-6 h-6 rounded-full flex items-center justify-center"
                   style={{ background: 'linear-gradient(145deg, #0f2e2b, #3cbfb3)' }}
                 >
                   <svg width="12" height="12" viewBox="0 0 40 40" fill="none">
@@ -201,7 +201,7 @@ export default function FloatingButtons({ agenteAtivo }: Props) {
               )}
             </div>
             <p
-              className="text-[9px] font-bold text-[#3cbfb3] leading-none tracking-wide"
+              className="text-[9px] font-bold text-sx-accent-text leading-none tracking-wide"
               style={{ writingMode: 'vertical-lr', transform: 'rotate(180deg)' }}
             >
               Atendimento

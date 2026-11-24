@@ -91,7 +91,7 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
           </div>
           <Link
             href={`/produtos?categoria=${CAT_LABEL[categoriaAtual] ?? categoriaAtual}`}
-            className="hidden sm:flex items-center gap-1 text-sm text-[#3cbfb3] hover:text-[#2a9d8f] font-medium transition-colors"
+            className="hidden sm:flex items-center gap-1 text-sm text-sx-accent-text hover:text-sx-accent-text font-medium transition-colors"
           >
             Ver todos <ChevronRight size={14} />
           </Link>
@@ -119,7 +119,7 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
                       </span>
                     )}
                     {p.linha === 'Prime' && (
-                      <span className="bg-[#0f2e2b] text-[#3cbfb3] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      <span className="bg-[#0f2e2b] text-[#5fe0cf] text-[10px] font-bold px-2 py-0.5 rounded-full">
                         PRIME
                       </span>
                     )}
@@ -143,24 +143,24 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
 
                 {/* Conteúdo */}
                 <div className="flex flex-col flex-1 p-3 sm:p-4">
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-[#3cbfb3] transition-colors">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-sx-accent-text transition-colors">
                     {p.nome}
                   </h3>
 
                   {/* Preço */}
                   <div className="mt-auto pt-2 border-t border-gray-50">
                     {temOferta && (
-                      <p className="text-[10px] text-gray-400 line-through leading-none mb-0.5">
+                      <p className="text-[10px] text-gray-500 line-through leading-none mb-0.5">
                         R$ {fmt(precoBase)}
                       </p>
                     )}
                     <p className="text-base sm:text-lg font-black text-gray-900 leading-none">
                       R$ {fmt(precoFinal)}
                     </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">
+                    <p className="text-[10px] text-gray-500 mt-0.5">
                       {MAX_PARCELAS_SEM_JUROS}x de R$ {fmt(p.parcelaValor)} sem juros
                     </p>
-                    <p className="text-[10px] text-[#3cbfb3] font-medium mt-0.5">
+                    <p className="text-[10px] text-sx-accent-text font-medium mt-0.5">
                       R$ {fmt(p.pixPreco)} no PIX
                     </p>
                   </div>
@@ -170,7 +170,7 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
                     href={`/produtos/${p.slug}?acao=comprar`}
                     onClick={e => { e.preventDefault(); window.location.href = `/produtos/${p.slug}?acao=comprar` }}
                     className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
-                    style={{ backgroundColor: '#3cbfb3', color: '#fff' }}
+                    style={{ backgroundColor: '#3cbfb3', color: 'var(--sx-ink)' }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="hidden md:block">
                       <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
@@ -209,8 +209,8 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
                         window.location.href = `/produtos/${p.slug}`
                       }
                     }}
-                    className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-all border hover:bg-[#3cbfb3]/5"
-                    style={{ borderColor: '#3cbfb3', color: '#3cbfb3', backgroundColor: 'transparent' }}
+                    className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-all border hover:bg-sx-accent/5"
+                    style={{ borderColor: 'var(--sx-accent-text)', color: 'var(--sx-accent-text)', backgroundColor: 'transparent' }}
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="hidden md:block">
                       <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
@@ -228,7 +228,7 @@ export default function ProdutosSimilares({ slugAtual, categoriaAtual }: Props) 
         <div className="mt-4 sm:hidden text-center">
           <Link
             href={`/produtos?categoria=${CAT_LABEL[categoriaAtual] ?? categoriaAtual}`}
-            className="inline-flex items-center gap-1 text-sm text-[#3cbfb3] font-medium"
+            className="inline-flex items-center gap-1 text-sm text-sx-accent-text font-medium"
           >
             Ver todos os produtos <ChevronRight size={14} />
           </Link>

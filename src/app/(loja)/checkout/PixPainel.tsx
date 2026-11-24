@@ -100,7 +100,7 @@ export default function PixPainel({
     <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-5">
       <div>
         <h2 className="font-extrabold text-gray-900 mb-0.5">Pague com PIX</h2>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-500">
           Escaneie o QR Code com o app do seu banco ou copie o código.
         </p>
       </div>
@@ -134,7 +134,7 @@ export default function PixPainel({
                 setCopiado(true)
                 setTimeout(() => setCopiado(false), 2000)
               }}
-              className="bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-semibold rounded-xl px-4 py-2.5 text-xs flex items-center gap-1.5 transition shrink-0"
+              className="bg-sx-accent hover:bg-sx-accent-hover text-sx-ink font-semibold rounded-xl px-4 py-2.5 text-xs flex items-center gap-1.5 transition shrink-0"
             >
               {copiado ? <Check size={13} /> : <Copy size={13} />}
               {copiado ? 'Copiado' : 'Copiar'}
@@ -153,7 +153,7 @@ export default function PixPainel({
             : `Expira em ${min}:${seg}`}
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-[#3cbfb3]">
+        <div className="flex items-center gap-2 text-xs text-sx-accent-text">
           {!expirou && !naoConcluido && <Loader2 size={12} className="animate-spin" />}
           {statusInfo}
         </div>
@@ -162,14 +162,14 @@ export default function PixPainel({
           <button
             type="button"
             onClick={onExpirar}
-            className="w-full bg-[#3cbfb3] hover:bg-[#2a9d8f] text-white font-bold py-3 rounded-xl text-sm transition"
+            className="w-full bg-sx-accent hover:bg-sx-accent-hover text-sx-ink font-bold py-3 rounded-xl text-sm transition"
           >
             Gerar novo Pix ou trocar de método
           </button>
         )}
       </div>
 
-      <div className="bg-[#e8f8f7] border border-[#3cbfb3]/20 rounded-xl px-4 py-3 text-xs text-gray-600 leading-relaxed">
+      <div className="bg-sx-tint border border-sx-accent/20 rounded-xl px-4 py-3 text-xs text-gray-600 leading-relaxed">
         Após o pagamento, esta tela atualiza automaticamente. Você também
         receberá um e-mail de confirmação.
       </div>

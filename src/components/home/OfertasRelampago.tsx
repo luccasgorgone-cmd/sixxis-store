@@ -7,6 +7,7 @@ import { useCarrinho } from '@/hooks/useCarrinho'
 import { feedIdProduto } from '@/lib/feed-id'
 import { MAX_PARCELAS_SEM_JUROS, valorParcela } from '@/lib/parcelamento'
 import type { Produto } from '@/types'
+import { capaVitrine } from '@/lib/capa-vitrine'
 
 // ── Tipo local para compatibilidade ──────────────────────────────────────────
 type ProdutoOferta = Produto
@@ -18,7 +19,7 @@ function TimerBloco({ valor, label }: { valor: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
       <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center relative overflow-hidden"
+        className="sx-escuro w-16 h-16 rounded-2xl flex items-center justify-center relative overflow-hidden"
         style={{
           background: 'linear-gradient(145deg, #1a3d38, #0f2e2b)',
           border: '1px solid rgba(60,191,179,0.2)',
@@ -46,7 +47,7 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
   const promocional = produto.precoPromocional ? Number(produto.precoPromocional) : null
   const precoFinal = promocional ?? preco
   const descPct = promocional ? Math.round((1 - promocional / preco) * 100) : 0
-  const imagem = Array.isArray(produto.imagens) ? produto.imagens[0] : null
+  const imagem = capaVitrine(produto.slug, produto.imagens)
 
   // Produto com variação (voltagem/cor) não tem seletor aqui: comprar direto
   // criaria pedido sem a opção escolhida. Encaminha p/ a página do produto.
@@ -70,8 +71,8 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
 
   return (
     <div className="group relative bg-white rounded-2xl overflow-hidden border border-white/10
-                    hover:border-[#3cbfb3]/40 transition-all duration-300 hover:-translate-y-1
-                    hover:shadow-2xl hover:shadow-[#3cbfb3]/20">
+                    hover:border-sx-accent/40 transition-all duration-300 hover:-translate-y-1
+                    hover:shadow-2xl hover:shadow-sx-accent/20">
       {descPct > 0 && (
         <div className="absolute top-3 left-3 z-10">
           <div className="bg-red-500 text-white text-xs font-black px-2.5 py-1.5 rounded-xl
@@ -103,7 +104,7 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
 
       <div className="p-4">
         <Link href={`/produtos/${produto.slug}`}>
-          <h3 className="text-sm font-bold text-gray-900 mb-2 leading-snug line-clamp-2 hover:text-[#3cbfb3] transition-colors">
+          <h3 className="text-sm font-bold text-gray-900 mb-2 leading-snug line-clamp-2 hover:text-sx-accent-text transition-colors">
             {produto.nome}
           </h3>
         </Link>
@@ -111,7 +112,7 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
         <div className="mb-3">
           {promocional ? (
             <>
-              <p className="text-xs text-gray-400 line-through leading-none">
+              <p className="text-xs text-gray-500 line-through leading-none">
                 R$ {preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
               <p className="text-xl font-black text-gray-900 leading-tight mt-0.5">
@@ -123,7 +124,7 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
               R$ {precoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           )}
-          <p className="text-[11px] text-gray-400 mt-0.5">
+          <p className="text-[11px] text-gray-500 mt-0.5">
             {MAX_PARCELAS_SEM_JUROS}x de R$ {valorParcela(precoFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} s/ juros
           </p>
         </div>
@@ -132,7 +133,7 @@ function CardOfertaRelampago({ produto }: { produto: ProdutoOferta }) {
           <div className="mb-3">
             <div className="flex justify-between text-[10px] mb-1">
               <span className="text-orange-500 font-bold">Últimas unidades!</span>
-              <span className="text-gray-400">{produto.estoque} restantes</span>
+              <span className="text-gray-500">{produto.estoque} restantes</span>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div className="h-full rounded-full"
@@ -204,7 +205,7 @@ export default function OfertasRelampago({ produtos }: Props) {
           {/* ── COLUNA ESQUERDA ── */}
           <div className="flex-shrink-0 text-center lg:text-left lg:w-72">
             <div className="inline-flex items-center gap-2 bg-red-500/20 border border-red-500/30
-                            text-red-400 text-xs font-black uppercase tracking-widest px-3 py-1.5
+                            text-red-600 text-xs font-black uppercase tracking-widest px-3 py-1.5
                             rounded-full mb-4">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               Oferta por tempo limitado
@@ -217,16 +218,16 @@ export default function OfertasRelampago({ produtos }: Props) {
               <p className="text-white/50 text-sm">Aproveite antes que o estoque acabe!</p>
             </div>
 
-            <div className="w-12 h-1 bg-[#3cbfb3] rounded-full mb-6 mx-auto lg:mx-0" />
+            <div className="w-12 h-1 bg-sx-accent rounded-full mb-6 mx-auto lg:mx-0" />
 
             {/* Timer */}
             <div className="mb-6">
               <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-3">Termina em</p>
               <div className="flex items-center gap-2 justify-center lg:justify-start">
                 <TimerBloco valor={horas} label="H" />
-                <span className="text-2xl font-black text-[#3cbfb3] animate-pulse mb-3">:</span>
+                <span className="text-2xl font-black text-sx-accent-text animate-pulse mb-3">:</span>
                 <TimerBloco valor={minutos} label="MIN" />
-                <span className="text-2xl font-black text-[#3cbfb3] animate-pulse mb-3">:</span>
+                <span className="text-2xl font-black text-sx-accent-text animate-pulse mb-3">:</span>
                 <TimerBloco valor={segundos} label="SEG" />
               </div>
             </div>

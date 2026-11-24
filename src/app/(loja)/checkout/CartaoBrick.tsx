@@ -69,7 +69,7 @@ export default function CartaoBrick({ publicKey, valor, payerEmail, payerCpf, la
         {carregando && (
           <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-sm flex items-center justify-center rounded-2xl">
             <div className="flex items-center gap-2 text-sm font-semibold text-[#0f2e2b]">
-              <Loader2 size={16} className="animate-spin text-[#3cbfb3]" />
+              <Loader2 size={16} className="animate-spin text-sx-accent-text" />
               Validando cartão...
             </div>
           </div>

@@ -46,7 +46,7 @@ export default function PagamentosBar() {
         </span>
 
         {/* Parcelas */}
-        <span className="text-xs text-gray-400 font-medium ml-1 hidden sm:inline">
+        <span className="text-xs text-gray-500 font-medium ml-1 hidden sm:inline">
           Parcele em até <strong className="text-gray-600">{MAX_PARCELAS_SEM_JUROS}x sem juros</strong>
         </span>
       </div>

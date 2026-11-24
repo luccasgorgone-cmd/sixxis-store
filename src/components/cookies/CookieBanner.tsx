@@ -216,7 +216,7 @@ export default function CookieBanner() {
           <div className="px-6 pb-5 flex flex-col sm:flex-row gap-2">
             <button
               onClick={aceitarTodos}
-              className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90 active:scale-[0.98]"
+              className="flex-1 py-2.5 rounded-xl text-sm font-bold text-sx-ink transition-opacity hover:opacity-90 active:scale-[0.98]"
               style={{ backgroundColor: '#3cbfb3', boxShadow: '0 4px 14px rgba(60,191,179,0.30)' }}
             >
               Aceitar todos

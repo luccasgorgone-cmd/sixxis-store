@@ -16,7 +16,7 @@ function Item({ q, a }: FaqItem) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className={`border rounded-xl overflow-hidden transition-colors duration-200 ${open ? 'border-[#3cbfb3]/40 shadow-sm' : 'border-gray-100 hover:border-gray-200'}`}>
+    <div className={`border rounded-xl overflow-hidden transition-colors duration-200 ${open ? 'border-sx-accent/40 shadow-sm' : 'border-gray-100 hover:border-gray-200'}`}>
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-[#f8f9fa] transition-colors duration-200"
@@ -25,7 +25,7 @@ function Item({ q, a }: FaqItem) {
         <span className="font-semibold text-[#0a0a0a] text-sm sm:text-base leading-snug">{q}</span>
         <ChevronDown
           size={18}
-          className={`shrink-0 text-[#3cbfb3] transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
+          className={`shrink-0 text-sx-accent-text transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {/* Animação suave via max-height */}

@@ -17,8 +17,8 @@ export default function SelosConfianca({ className = '' }: { className?: string 
     <div className={`grid grid-cols-2 gap-2 ${className}`}>
       {SELOS.map(({ icon: Icon, titulo, sub }) => (
         <div key={titulo} className="flex items-start gap-2.5 p-2.5 rounded-xl border border-gray-100 bg-white">
-          <div className="shrink-0 w-8 h-8 rounded-lg bg-[#3cbfb3]/10 flex items-center justify-center">
-            <Icon size={15} className="text-[#3cbfb3]" />
+          <div className="shrink-0 w-8 h-8 rounded-lg bg-sx-accent/10 flex items-center justify-center">
+            <Icon size={15} className="text-sx-accent-text" />
           </div>
           <div className="min-w-0">
             <p className="text-[12px] font-semibold text-gray-800 leading-tight">{titulo}</p>
