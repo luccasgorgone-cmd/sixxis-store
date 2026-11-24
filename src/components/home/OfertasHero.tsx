@@ -26,7 +26,16 @@ function TimerBloco({ valor, label }: { valor: number; label: string }) {
   )
 }
 
-export default function OfertasHero({ targetDate }: { targetDate: string }) {
+export default function OfertasHero({
+  targetDate,
+  modo = 'relampago',
+}: {
+  targetDate: string
+  /** 'bf' = branding Black Friday + contador multi-dia (até a data alvo); 'relampago' = branding diário padrão. */
+  modo?: 'bf' | 'relampago'
+}) {
+  const bf = modo === 'bf'
+  const [dias,     setDias]     = useState(0)
   const [horas,    setHoras]    = useState(0)
   const [minutos,  setMinutos]  = useState(0)
   const [segundos, setSegundos] = useState(0)
@@ -34,7 +43,8 @@ export default function OfertasHero({ targetDate }: { targetDate: string }) {
   useEffect(() => {
     const calcular = () => {
       const diff = Math.max(0, new Date(targetDate).getTime() - Date.now())
-      setHoras(Math.floor(diff / 3600000))
+      setDias(Math.floor(diff / 86400000))
+      setHoras(Math.floor((diff % 86400000) / 3600000))
       setMinutos(Math.floor((diff % 3600000) / 60000))
       setSegundos(Math.floor((diff % 60000) / 1000))
     }
@@ -42,6 +52,10 @@ export default function OfertasHero({ targetDate }: { targetDate: string }) {
     const t = setInterval(calcular, 1000)
     return () => clearInterval(t)
   }, [targetDate])
+
+  // Mostra o bloco DIAS quando faz sentido (modo BF ou qualquer alvo multi-dia).
+  // No modo relâmpago padrão (próxima meia-noite) dias=0 e o bloco some → layout idêntico ao anterior.
+  const mostrarDias = bf || dias > 0
 
   return (
     <section
@@ -71,23 +85,33 @@ export default function OfertasHero({ targetDate }: { targetDate: string }) {
                         text-red-400 text-xs font-black uppercase tracking-widest px-3 py-1.5
                         rounded-full mb-5">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          Oferta por tempo limitado
+          {bf ? 'Black Friday' : 'Oferta por tempo limitado'}
         </div>
 
         {/* Título */}
         <div className="flex items-center justify-center gap-2 md:gap-3 mb-2">
           <Zap size={22} className="text-[#3cbfb3] md:hidden" strokeWidth={2.5} />
           <Zap size={28} className="text-[#3cbfb3] hidden md:block" strokeWidth={2.5} />
-          <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">Oferta Relâmpago</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">
+            {bf ? 'Black Friday' : 'Oferta Relâmpago'}
+          </h1>
           <Zap size={22} className="text-[#3cbfb3] md:hidden" strokeWidth={2.5} />
           <Zap size={28} className="text-[#3cbfb3] hidden md:block" strokeWidth={2.5} />
         </div>
-        <p className="text-sm md:text-base text-white/50 mb-6">Preços imperdíveis por tempo limitado</p>
+        <p className="text-sm md:text-base text-white/50 mb-6">
+          {bf ? '2ª unidade com 50% OFF no site inteiro — ofertas até 30/11' : 'Preços imperdíveis por tempo limitado'}
+        </p>
 
         {/* Timer */}
         <div>
           <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-3">Termina em</p>
           <div className="flex items-center gap-2 justify-center">
+            {mostrarDias && (
+              <>
+                <TimerBloco valor={dias} label="DIAS" />
+                <span className="text-2xl font-black text-[#3cbfb3] animate-pulse mb-3">:</span>
+              </>
+            )}
             <TimerBloco valor={horas} label="H" />
             <span className="text-2xl font-black text-[#3cbfb3] animate-pulse mb-3">:</span>
             <TimerBloco valor={minutos} label="MIN" />

@@ -2,13 +2,26 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import OfertasHero from '@/components/home/OfertasHero'
+import { PROMO_BF, promoAtiva } from '@/lib/promo-segunda-unidade'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = {
-  title: 'Ofertas Relâmpago',
-  description: 'Ofertas relâmpago Sixxis: climatizadores, aspiradores e spinning com descontos por tempo limitado. Aproveite enquanto durarem os estoques.',
-  alternates: { canonical: '/ofertas' },
+export async function generateMetadata() {
+  const bf = promoAtiva(new Date())
+  if (bf) {
+    return {
+      title: 'Black Friday Sixxis',
+      description:
+        'Black Friday Sixxis: 2ª unidade com 50% OFF no site inteiro — climatizadores, aspiradores e spinning. Ofertas até 30/11, enquanto durarem os estoques.',
+      alternates: { canonical: '/ofertas' },
+    }
+  }
+  return {
+    title: 'Ofertas Relâmpago',
+    description:
+      'Ofertas relâmpago Sixxis: climatizadores, aspiradores e spinning com descontos por tempo limitado. Aproveite enquanto durarem os estoques.',
+    alternates: { canonical: '/ofertas' },
+  }
 }
 
 export default async function OfertasPage() {
@@ -23,10 +36,19 @@ export default async function OfertasPage() {
     orderBy: { createdAt: 'desc' },
   })
 
-  // Fim das ofertas = próxima meia-noite
+  // Durante a janela Black Friday (promoAtiva): contador alinhado ao fim da BF (30/11),
+  // branding "Black Friday" e mensagem de 2ª unidade — casando com os anúncios "BF até 30/11".
+  // Fora da janela: volta ao comportamento relâmpago (próxima meia-noite). Auto-reverte, sem deploy de limpeza.
   const agora = new Date()
-  const fimOfertas = new Date(agora)
-  fimOfertas.setHours(23, 59, 59, 0)
+  const bfAtiva = promoAtiva(agora)
+
+  let fimOfertas: Date
+  if (bfAtiva && PROMO_BF.fim) {
+    fimOfertas = new Date(PROMO_BF.fim)
+  } else {
+    fimOfertas = new Date(agora)
+    fimOfertas.setHours(23, 59, 59, 0)
+  }
 
   return (
     <main>
@@ -37,13 +59,15 @@ export default async function OfertasPage() {
             <Link href="/" className="text-[#B0BFBC] hover:text-[#00cfb5] transition">Início</Link>
           </li>
           <li className="mx-1.5 text-[#8a9794]" aria-hidden="true">/</li>
-          <li className="font-bold text-[#F4F7F6]" aria-current="page">Ofertas Relâmpago</li>
+          <li className="font-bold text-[#F4F7F6]" aria-current="page">
+            {bfAtiva ? 'Black Friday' : 'Ofertas Relâmpago'}
+          </li>
         </ol>
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         {/* Hero com fundo escuro próprio */}
-        <OfertasHero targetDate={fimOfertas.toISOString()} />
+        <OfertasHero targetDate={fimOfertas.toISOString()} modo={bfAtiva ? 'bf' : 'relampago'} />
 
         {/* Produtos */}
         {ofertas.length === 0 ? (
