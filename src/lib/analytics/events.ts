@@ -1,6 +1,6 @@
 'use client'
 
-import { analyticsConsentido } from '@/lib/consent'
+import { analyticsConsentido, CONSENT_EVENT, lerConsentClient } from '@/lib/consent'
 import { lerLandingPageSessao, obterSidClient } from '@/lib/tracking'
 import { trackMeta } from '@/lib/analytics/meta-pixel'
 
@@ -73,27 +73,71 @@ function enviarInterno(
   }).catch(() => {})
 }
 
-export function trackViewItem(produto: ProdutoTracking) {
-  push('view_item', {
-    currency: 'BRL',
-    value: produto.price,
-    items: [paraGA4(produto)],
-  })
-  // Meta: ViewContent (gate de marketing dentro do trackMeta). content_ids =
-  // g:id do feed → catálogo corresponde (dedupe/matching).
-  trackMeta('ViewContent', {
-    content_type: 'product',
-    content_ids: [produto.item_id],
-    content_name: produto.item_name,
-    value: produto.price,
-    currency: 'BRL',
-  })
-  enviarInterno('view_item', {
-    produtoId: produto.produto_id,
-    produtoSlug: produto.item_slug,
-    valor: produto.price,
-    dados: { item_name: produto.item_name, item_category: produto.item_category, variant: produto.variant },
-  })
+type CanaisViewItem = { analytics: boolean; marketing: boolean }
+
+export function trackViewItem(
+  produto: ProdutoTracking,
+  canais: CanaisViewItem = { analytics: true, marketing: true },
+) {
+  if (canais.analytics) {
+    push('view_item', {
+      currency: 'BRL',
+      value: produto.price,
+      items: [paraGA4(produto)],
+    })
+  }
+  if (canais.marketing) {
+    // Meta: ViewContent (gate de marketing dentro do trackMeta). content_ids =
+    // g:id do feed → catálogo corresponde (dedupe/matching).
+    trackMeta('ViewContent', {
+      content_type: 'product',
+      content_ids: [produto.item_id],
+      content_name: produto.item_name,
+      value: produto.price,
+      currency: 'BRL',
+    })
+  }
+  if (canais.analytics) {
+    enviarInterno('view_item', {
+      produtoId: produto.produto_id,
+      produtoSlug: produto.item_slug,
+      valor: produto.price,
+      dados: { item_name: produto.item_name, item_category: produto.item_category, variant: produto.variant },
+    })
+  }
+}
+
+// Dispara a visualização do produto e completa cada canal quando o consentimento
+// chega depois do load: o visitante de anúncio cai na PDP sem cookie e só aceita
+// o banner em seguida. O disparo pós-aceite é adiado um tick para rodar depois do
+// fbq('consent','grant') do MetaPixelRouter. Retorna a limpeza do efeito.
+export function acompanharViewItem(produto: ProdutoTracking): () => void {
+  const enviados: CanaisViewItem = { analytics: false, marketing: false }
+
+  const disparar = () => {
+    const consent = lerConsentClient()
+    const canais: CanaisViewItem = {
+      analytics: consent.analytics && !enviados.analytics,
+      marketing: consent.marketing && !enviados.marketing,
+    }
+    if (!canais.analytics && !canais.marketing) return
+    enviados.analytics ||= canais.analytics
+    enviados.marketing ||= canais.marketing
+    trackViewItem(produto, canais)
+  }
+
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const aoMudarConsentimento = () => {
+    clearTimeout(timer)
+    timer = setTimeout(disparar, 0)
+  }
+
+  disparar()
+  window.addEventListener(CONSENT_EVENT, aoMudarConsentimento)
+  return () => {
+    clearTimeout(timer)
+    window.removeEventListener(CONSENT_EVENT, aoMudarConsentimento)
+  }
 }
 
 export function trackAddToCart(produto: ProdutoTracking) {
