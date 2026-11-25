@@ -2,6 +2,7 @@
 // climatizadores na mesma direção. Não altera a ordem salva nem o feed.
 const CAPA_LATERAL_POR_SLUG: Record<string, string> = {
   'sx100-trend': 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/produtos/1785262376861-8vi6jj4.jpg',
+  'sx120-prime': 'https://pub-543c49f4581a424aa738beacf3a89e96.r2.dev/catalog/sx120-card-cover-2026-11-25/sx120-prime/4b3c4e95be63322c-sx120-prime-branco-3q-card-1600.jpg',
 }
 
 export function capaVitrine(slug: string, imagens: unknown): string | null {
