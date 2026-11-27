@@ -453,8 +453,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                           {CAMPANHA_CUPOM_BF.codigo}
                         </code>
                       </span>
-                      <span className="hidden sm:inline"> · em 1 produto elegível · não acumula com 50% na 2ª unidade</span>
-                      <span className="mt-1 block whitespace-nowrap text-[9px] sm:hidden">
+                      <span className="hidden sm:inline"> · {CAMPANHA_CUPOM_BF.detalhesHeader}</span>
+                      <span className="mt-1 block whitespace-nowrap text-[10px] sm:hidden">
                         {CAMPANHA_CUPOM_BF.textoHeaderMobile}
                       </span>
                     </p>
