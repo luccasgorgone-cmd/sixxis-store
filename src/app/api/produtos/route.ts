@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { anexarSaldosLoteBF, buscarQuantidadesPagasLoteBF } from '@/lib/estoque-promocional-bf.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -164,6 +165,8 @@ export async function GET(request: NextRequest) {
   const limit    = Number(searchParams.get('limit') ?? '20')
   const precoMin = searchParams.get('precoMin')
   const precoMax = searchParams.get('precoMax')
+  // Inicia em paralelo: não depende dos filtros nem da página consultada.
+  const quantidadesPagasPromise = buscarQuantidadesPagasLoteBF()
 
   // Spec-based filters from URL (sent by FiltrosHorizontais)
   const SPEC_FILTER_KEYS = ['voltagem', 'capacidade', 'cobertura', 'vazao', 'velocidades', 'resistencia', 'peso_max', 'tipo']
@@ -237,15 +240,19 @@ export async function GET(request: NextRequest) {
 
   if (hasSpecFilters) {
     // Fetch all products matching base criteria, then filter in-memory by specs
-    const todosProdutos = await prisma.produto.findMany({
-      where,
-      orderBy,
-      include: {
-        variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
-      },
-    })
+    const [todosProdutos, quantidadesPagas] = await Promise.all([
+      prisma.produto.findMany({
+        where,
+        orderBy,
+        include: {
+          variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
+        },
+      }),
+      quantidadesPagasPromise,
+    ])
+    const produtosComLote = anexarSaldosLoteBF(todosProdutos, quantidadesPagas)
 
-    const filtrados = todosProdutos.filter(p => {
+    const filtrados = produtosComLote.filter(p => {
       try {
         const raw = (p as unknown as { especificacoes?: unknown }).especificacoes
         if (!raw) return false
@@ -259,7 +266,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ produtos, total, page, limit })
   }
 
-  const [produtos, total] = await Promise.all([
+  const [produtos, total, quantidadesPagas] = await Promise.all([
     prisma.produto.findMany({
       where,
       skip: (page - 1) * limit,
@@ -273,7 +280,8 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.produto.count({ where }),
+    quantidadesPagasPromise,
   ])
 
-  return Response.json({ produtos, total, page, limit })
+  return Response.json({ produtos: anexarSaldosLoteBF(produtos, quantidadesPagas), total, page, limit })
 }

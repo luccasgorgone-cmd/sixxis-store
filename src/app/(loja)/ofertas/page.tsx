@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import CardProduto from '@/components/produto/CardProduto'
 import OfertasHero from '@/components/home/OfertasHero'
 import { PROMO_BF, promoAtiva } from '@/lib/promo-segunda-unidade'
+import { anexarSaldosLoteBF, buscarQuantidadesPagasLoteBF } from '@/lib/estoque-promocional-bf.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,16 +26,20 @@ export async function generateMetadata() {
 }
 
 export default async function OfertasPage() {
-  const ofertas = await prisma.produto.findMany({
-    where: {
-      ativo: true,
-      precoPromocional: { not: null },
-    },
-    include: {
-      variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  const [ofertasBase, quantidadesPagas] = await Promise.all([
+    prisma.produto.findMany({
+      where: {
+        ativo: true,
+        precoPromocional: { not: null },
+      },
+      include: {
+        variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    buscarQuantidadesPagasLoteBF(),
+  ])
+  const ofertas = anexarSaldosLoteBF(ofertasBase, quantidadesPagas)
 
   // Durante a janela Black Friday (promoAtiva): contador alinhado ao fim da BF (30/11),
   // branding "Black Friday" e mensagem de 2ª unidade — casando com os anúncios "BF até 30/11".

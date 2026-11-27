@@ -19,6 +19,8 @@ import { encontrarVariacaoPorSku, estoqueDisponivel, VARIANTE_QUERY_PARAM, urlPr
 import AvisoMontagem from '@/components/produto/AvisoMontagem'
 import { galeriaVitrine } from '@/lib/capa-vitrine'
 import { promoVigentePorFeedId } from '@/lib/promo-segunda-unidade'
+import { anexarSaldosLoteBF, buscarQuantidadesPagasLoteBF } from '@/lib/estoque-promocional-bf.server'
+import { avisoEntregaProduto } from '@/lib/produto-disponibilidade'
 import { CombinacaoProduto, ComparativoProduto, FichaTecnica, NavSecoesProduto, type ProdutoComparavel } from '@/components/bf/BlocosProduto'
 
 export const dynamic = 'force-dynamic'
@@ -149,7 +151,7 @@ export default async function ProdutoPage({
 }) {
   const [{ slug }, query] = await Promise.all([params, searchParams])
 
-  const [produto, taxaConfig, avaliacoesAgg, cuponsAtivos] = await Promise.all([
+  const [produtoBase, taxaConfig, avaliacoesAgg, cuponsAtivos, quantidadesPagas] = await Promise.all([
     getProdutoPorSlug(slug),
     prisma.configuracao.findUnique({ where: { chave: 'juros_cartao_taxa_mensal' } }),
     // Agregação no banco em vez de carregar todas as linhas de avaliacoes só
@@ -172,9 +174,11 @@ export default async function ProdutoPage({
       },
       select: { codigo: true, tipo: true, valor: true, descricao: true, produtoIds: true, usoMaximo: true, totalUsos: true },
     }),
+    buscarQuantidadesPagasLoteBF(),
   ])
 
-  if (!produto || !produto.ativo) notFound()
+  if (!produtoBase || !produtoBase.ativo) notFound()
+  const [produto] = anexarSaldosLoteBF([produtoBase], quantidadesPagas)
 
   // Casa os cupons escopados com ESTE produto (membership exata no CSV, esgotado
   // descartado). Só callout informativo — a autoridade do desconto continua no
@@ -213,6 +217,7 @@ export default async function ProdutoPage({
     preco: v.preco != null ? Number(v.preco) : null,
     estoque: v.estoque,
     ativo: v.ativo,
+    estoquePromocional: v.estoquePromocional,
   }))
   const variacaoDeepLink = encontrarVariacaoPorSku(variacoes, query[VARIANTE_QUERY_PARAM])
 
@@ -258,6 +263,8 @@ export default async function ProdutoPage({
     temVariacoes: produto.temVariacoes,
     imagem: imagens[0] ?? undefined,
     categoria: produto.categoria,
+    estoquePromocional: produto.estoquePromocional,
+    avisoEntrega: avisoEntregaProduto(produto.slug),
   }
 
   const normalizarSpecs = (raw: unknown): EspecificacaoRow[] => {

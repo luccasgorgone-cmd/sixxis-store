@@ -14,6 +14,7 @@ import { PQ_SIXXIS_CARDS, PQ_SIXXIS_NUMS } from '@/lib/porque-sixxis-defaults'
 import { getPqSixxisIcon } from '@/lib/porque-sixxis-icons'
 import { DuvidasBlackFriday, OfertaDupla, SuporteSixxis } from '@/components/bf/BlocosHome'
 import { PROMO_BF } from '@/lib/promo-segunda-unidade'
+import { anexarSaldosLoteBF, buscarQuantidadesPagasLoteBF } from '@/lib/estoque-promocional-bf.server'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -33,14 +34,23 @@ export default async function HomePage() {
   let trust: Record<string, string> = {}
 
   try {
-    const [bannersDb, destaques, produtosGerais, configRows, trustRows] = await Promise.all([
+    const [bannersDb, destaques, produtosGerais, configRows, trustRows, quantidadesPagas] = await Promise.all([
       prisma.banner.findMany({ where: { ativo: true }, orderBy: { ordem: 'asc' } }),
       prisma.produtoDestaque.findMany({
         where: { secao: 'mais-vendidos' },
-        include: { produto: true },
+        include: {
+          produto: {
+            include: { variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } } },
+          },
+        },
         orderBy: { ordem: 'asc' },
       }),
-      prisma.produto.findMany({ where: { ativo: true }, take: 12, orderBy: { createdAt: 'desc' } }),
+      prisma.produto.findMany({
+        where: { ativo: true },
+        take: 12,
+        orderBy: { createdAt: 'desc' },
+        include: { variacoes: { where: { ativo: true }, orderBy: { createdAt: 'asc' } } },
+      }),
       prisma.configuracao.findMany(),
       prisma.configuracao.findMany({
         where: {
@@ -52,14 +62,16 @@ export default async function HomePage() {
           },
         },
       }),
+      buscarQuantidadesPagasLoteBF(),
     ])
 
     banners = bannersDb
     cfg     = Object.fromEntries(configRows.map((c) => [c.chave, c.valor]))
     trust   = Object.fromEntries(trustRows.map((r)  => [r.chave, r.valor]))
-    produtosMostrar = destaques.length > 0
+    const produtosBase = destaques.length > 0
       ? destaques.map((d) => d.produto)
       : produtosGerais
+    produtosMostrar = anexarSaldosLoteBF(produtosBase, quantidadesPagas)
   } catch (error) {
     console.error('[HOME DB ERROR]', error)
   }

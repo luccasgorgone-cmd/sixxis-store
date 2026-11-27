@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- Prisma Decimal/Json shapes are intentionally runtime-normalized at consumers. */
+import type { EstoquePromocionalBF, SaldoLoteBF } from '@/lib/estoque-promocional-bf'
+
 // ─── Enums / Unions ──────────────────────────────────────────────────────────
 
 export type StatusPedido = 'pendente' | 'pago' | 'enviado' | 'entregue' | 'cancelado'
@@ -23,6 +26,7 @@ export interface VariacaoProduto {
   estoque:   number
   ativo:     boolean
   createdAt: Date
+  estoquePromocional?: SaldoLoteBF
 }
 
 export interface Produto {
@@ -45,6 +49,7 @@ export interface Produto {
   temVariacoes:     boolean
   createdAt:        Date
   variacoes?:       VariacaoProduto[]
+  estoquePromocional?: EstoquePromocionalBF
 }
 
 /** Shape mínima usada em cards e listas (sem campos pesados como descricao) */
