@@ -5,7 +5,7 @@ export const LOTES_PROMOCIONAIS_BF = {
   'sx180-trend': { total: 28 },
   'sx100-trend': { total: 12 },
   sx040: { total: 20 },
-  'spinning-sixxis-cardio': { total: 20 },
+  'bicicleta-spinning-sixxis-cardio': { total: 20 },
   'm45-trend': { total: 26 },
   'sx070-trend': { total: 8 },
   'sx060-prime': { total: 6 },
