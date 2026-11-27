@@ -21,7 +21,7 @@ export async function buscarQuantidadesPagasLoteBF(): Promise<Map<string, number
       produto: { slug: { in: SLUGS_LOTES_PROMOCIONAIS_BF } },
       pedido: {
         status: { in: STATUS_PAGO_TODOS },
-        createdAt: { gte: INICIO_LOTES_PROMOCIONAIS_BF },
+        pagoEm: { gte: INICIO_LOTES_PROMOCIONAIS_BF },
       },
     },
     _sum: { quantidade: true },

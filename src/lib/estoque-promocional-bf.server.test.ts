@@ -24,7 +24,7 @@ describe('consulta de unidades pagas do lote BF', () => {
         produto: { slug: { in: expect.arrayContaining(['sx100-trend', 'spinning-sixxis-life']) } },
         pedido: {
           status: { in: ['pago', 'enviado', 'entregue'] },
-          createdAt: { gte: new Date('2026-11-23T00:00:00-03:00') },
+          pagoEm: { gte: new Date('2026-11-23T00:00:00-03:00') },
         },
       }),
       _sum: { quantidade: true },
