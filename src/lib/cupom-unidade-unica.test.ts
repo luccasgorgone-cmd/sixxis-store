@@ -31,6 +31,15 @@ function cupom(over: Partial<Cupom> = {}): Cupom {
   } as Cupom
 }
 
+type CupomComExclusoes = Cupom & { produtoIdsExcluidos: string | null }
+
+function cupomComExclusoes(
+  produtoIdsExcluidos: string | null,
+  over: Partial<Cupom> = {},
+): CupomComExclusoes {
+  return { ...cupom(over), produtoIdsExcluidos }
+}
+
 describe('cupom unidadeUnica (BLACKFRIDAY10 — só com 1 produto)', () => {
   it('válido com EXATAMENTE 1 unidade → 10% de desconto', async () => {
     const r = await avaliarCupom(cupom(), 1000, null, undefined, 1)
@@ -59,5 +68,29 @@ describe('cupom unidadeUnica (BLACKFRIDAY10 — só com 1 produto)', () => {
   it('sem totalUnidades informado (chamador legado) → regra omitida, cupom passa', async () => {
     const r = await avaliarCupom(cupom(), 1000, null, undefined, undefined)
     expect(r.valido).toBe(true)
+  })
+
+  it('REJEITA o SX200 Trend mesmo com exatamente 1 unidade', async () => {
+    const r = await avaliarCupom(
+      cupomComExclusoes('p-sx200-trend'),
+      5750,
+      null,
+      [{ produtoId: 'p-sx200-trend', subtotal: 5750 }],
+      1,
+    )
+    expect(r.valido).toBe(false)
+    expect(r.motivo).toBe('PRODUTO_NAO_ELEGIVEL')
+  })
+
+  it('mantém o BLACKFRIDAY10 válido para uma unidade de produto elegível', async () => {
+    const r = await avaliarCupom(
+      cupomComExclusoes('p-sx200-trend'),
+      3990,
+      null,
+      [{ produtoId: 'p-sx100', subtotal: 3990 }],
+      1,
+    )
+    expect(r.valido).toBe(true)
+    expect(r.desconto).toBe(399)
   })
 })

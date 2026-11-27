@@ -530,6 +530,9 @@ model Cupom {
   // no carrinho inteiro. Quando preenchido, o cupom só vale se o carrinho tiver
   // algum produto elegível e o desconto incide SÓ sobre o subtotal desses itens.
   produtoIds     String?
+  // Restrição opcional inversa: CSV de Produto.id que NÃO recebem o cupom.
+  // Usada pelo BLACKFRIDAY10 para manter o SX200 Trend fora dos 10%.
+  produtoIdsExcluidos String? @db.Text
   usos           CupomUso[]
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt

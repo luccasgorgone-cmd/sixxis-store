@@ -65,12 +65,14 @@ export const PROMO_BF: ConfigPromoBF = {
   inicio:             '2026-11-23T00:00:00-03:00', // começa hoje (GO do Luccas 23/11)
   fim:                '2026-11-30T23:59:59-03:00',  // Cyber Monday (default — confirmar fim com Luccas)
   descricao:          '2ª unidade com 50% OFF — Black Friday',
-  ressalva:           'exceto SX200 Prime',
-  // 23/11/2026 (pedido do Luccas): SX200 Prime fora da promo da 2ª unidade
-  // (único produto excluído). Lista sku E slug para cobrir desconto E badge
-  // (feedId = sku ?? slug). As variações CLIM-SX200-PRIME-Branco/-Preto (que é o
-  // que o carrinho guarda) caem pela regra do SKU-base — ver `excluido()`.
-  excluir:            ['CLIM-SX200-PRIME', 'sx200-prime'],
+  ressalva:           'exceto SX200 Prime e SX200 Trend',
+  // SX200 Prime e SX200 Trend ficam fora da promo da 2ª unidade. Lista sku E
+  // slug para cobrir desconto E badge (feedId = sku ?? slug). As variações caem
+  // pela regra do SKU-base — ver `excluido()`.
+  excluir:            [
+    'CLIM-SX200-PRIME', 'sx200-prime',
+    'CLIM-SX200-TREND', 'sx200-trend',
+  ],
   pisoItemDescontado: 0,
 }
 

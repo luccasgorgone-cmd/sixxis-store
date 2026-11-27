@@ -37,7 +37,7 @@ const SX200_PRIME: Prod = {
   ],
 }
 const SX200_TREND: Prod = {
-  id: 'p-sx200-trend', erp: 'ERP-200T', sku: 'CLIM-SX200-TREND', slug: 'sx200-trend', preco: 5175,
+  id: 'p-sx200-trend', erp: 'ERP-200T', sku: 'CLIM-SX200-TREND', slug: 'sx200-trend', preco: 5750,
   variacoes: [{ id: 'v-t220', sku: 'CLIM-SX200-TREND-220V', preco: null }],
 }
 const SX100: Prod = {
@@ -111,9 +111,14 @@ describe('SX200 Prime fora da promo — item com SKU da variação', () => {
     expect(idExcluidoDaPromo('CLIM-SX200-PRIME-Branco')).toBe(true)
     expect(idExcluidoDaPromo(null)).toBe(false)
   })
-  it('nome parecido não é variação: SX200 Trend continua na promo', () => {
-    const r = calcularPromoCliente([{ feedId: 'CLIM-SX200-TREND-220V', preco: 5175, quantidade: 2 }], DENTRO)
-    expect(r.desconto).toBeCloseTo(2587.5, 2)
+  it('SX200 Trend e sua variação ficam fora da promoção e sem selo', () => {
+    const r = calcularPromoCliente([{ feedId: 'CLIM-SX200-TREND-220V', preco: 5750, quantidade: 2 }], DENTRO)
+    expect(r.ativo).toBe(false)
+    expect(r.desconto).toBe(0)
+    expect(idExcluidoDaPromo('CLIM-SX200-TREND')).toBe(true)
+    expect(idExcluidoDaPromo('CLIM-SX200-TREND-220V')).toBe(true)
+    expect(promoVigentePorFeedId('CLIM-SX200-TREND', DENTRO)).toBeNull()
+    expect(promoVigentePorFeedId('CLIM-SX200-TREND-220V', DENTRO)).toBeNull()
   })
 })
 
@@ -155,7 +160,7 @@ describe('paridade cliente == servidor (matriz de carrinhos)', () => {
       ],
       desconto: 1995,
     },
-    { nome: '2× SX200 Trend (COM desconto)', linhas: [{ p: SX200_TREND, variacaoId: 'v-t220', quantidade: 2 }], desconto: 2587.5 },
+    { nome: '2× SX200 Trend (SEM desconto)', linhas: [{ p: SX200_TREND, variacaoId: 'v-t220', quantidade: 2 }], desconto: 0 },
     {
       nome: 'SX100 + aspirador (desconto no mais barato)',
       linhas: [
@@ -180,6 +185,7 @@ describe('ressalva visível da promo', () => {
   it('com produto excluído, a ressalva existe e cita o produto (promessa em destaque não pode omitir a exceção)', () => {
     expect(PROMO_BF.excluir.length).toBeGreaterThan(0)
     expect(PROMO_BF.ressalva).toMatch(/SX200 Prime/)
+    expect(PROMO_BF.ressalva).toMatch(/SX200 Trend/)
   })
   it('o selo de PDP/vitrine carrega a ressalva', () => {
     expect(promoVigentePorFeedId('CLIM-SX100-TREND', DENTRO)?.ressalva).toBe(PROMO_BF.ressalva)

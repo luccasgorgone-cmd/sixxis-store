@@ -113,22 +113,21 @@ export async function avaliarCupom(
   }
 
   // ── Escopo por produto (modelo) ───────────────────────────────────────────
-  // produtoIds vazio/null = cupom global (comportamento legado). Preenchido =
-  // só vale se o carrinho tiver produto elegível, e o desconto incide APENAS
-  // sobre o subtotal desses itens — não sobre o carrinho inteiro, pra não dar
-  // 10% em tudo só por ter o modelo no carrinho.
-  const escopo = (cupom.produtoIds ?? '').split(',').map((s) => s.trim()).filter(Boolean)
+  // produtoIds = inclusão opcional; produtoIdsExcluidos = exclusão opcional.
+  // Com qualquer escopo, a base vem dos itens elegíveis. Assim o servidor nunca
+  // dá desconto num produto excluído só porque o cupom é global.
+  const inclusoes = new Set((cupom.produtoIds ?? '').split(',').map((s) => s.trim()).filter(Boolean))
+  const exclusoes = new Set((cupom.produtoIdsExcluidos ?? '').split(',').map((s) => s.trim()).filter(Boolean))
   let baseDesconto = total
-  if (escopo.length > 0) {
-    const elegiveis = new Set(escopo)
+  if (inclusoes.size > 0 || exclusoes.size > 0) {
     baseDesconto = (itens ?? [])
-      .filter((i) => elegiveis.has(i.produtoId))
+      .filter((i) => (inclusoes.size === 0 || inclusoes.has(i.produtoId)) && !exclusoes.has(i.produtoId))
       .reduce((acc, i) => acc + i.subtotal, 0)
     if (baseDesconto <= 0) {
       return {
         valido: false,
         motivo: 'PRODUTO_NAO_ELEGIVEL',
-        erro:   'Este cupom vale apenas para um produto específico. Adicione o produto elegível ao carrinho.',
+        erro:   'Este cupom não é válido para os produtos do carrinho.',
       }
     }
   }
