@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { cupomVitrinePorFeedId, CUPONS_VITRINE } from './cupom-vitrine'
 
 describe('cupom-vitrine — badge (só exibição)', () => {
-  it('sem cupons de vitrine configurados (10OFFTREND virou desconto direto)', () => {
+  it('sem cupons de vitrine por produto após remover o desconto do SX200 Trend', () => {
     expect(CUPONS_VITRINE).toHaveLength(0)
   })
 

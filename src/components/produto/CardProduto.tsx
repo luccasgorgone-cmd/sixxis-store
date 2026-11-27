@@ -18,6 +18,9 @@ import { cupomVitrinePorFeedId } from '@/lib/cupom-vitrine'
 import { capaVitrine } from '@/lib/capa-vitrine'
 import SelectVariacaoModal, { type VariacaoSelecionavel } from '@/components/produto/SelectVariacaoModal'
 import type { Produto } from '@/types'
+import AvisoUltimasUnidades from '@/components/produto/AvisoUltimasUnidades'
+import AvisoPrazoEntrega from '@/components/produto/AvisoPrazoEntrega'
+import { avisoEntregaProduto } from '@/lib/produto-disponibilidade'
 
 interface Props {
   produto: Produto
@@ -52,6 +55,7 @@ export default function CardProduto({ produto, priority = false }: Props) {
     : 0
   const precoPix = aplicarDescontoPix(precoFinal)
   const esgotado = (produto.estoque ?? 1) <= 0
+  const avisoEntrega = avisoEntregaProduto(produto.slug)
   const isNovo = !desconto
 
   // Badge da promo "2ª unidade" — dirigido pela MESMA config da PDP
@@ -348,6 +352,14 @@ export default function CardProduto({ produto, priority = false }: Props) {
             </p>
           </div>
 
+          <AvisoPrazoEntrega aviso={avisoEntrega} modo="card" className="mt-3" />
+          <AvisoUltimasUnidades
+            saldo={produto.estoquePromocional}
+            variacoes={variacoesAtivas}
+            modo="card"
+            className="mt-3"
+          />
+
           {/* Comprar Agora primeiro. Com variação, o clique abre o modal de escolha. */}
           <div className="mt-auto space-y-2 pt-3">
             {!esgotado && (
@@ -393,7 +405,13 @@ export default function CardProduto({ produto, priority = false }: Props) {
       <SelectVariacaoModal
         aberto={modalVariacaoAberto}
         fechar={() => setModalVariacaoAberto(false)}
-        produto={{ id: produto.id, nome: produto.nome, imagem: imagemCapa || undefined }}
+        produto={{
+          id: produto.id,
+          nome: produto.nome,
+          imagem: imagemCapa || undefined,
+          estoquePromocional: produto.estoquePromocional,
+          avisoEntrega,
+        }}
         variacoes={variacoesAtivas}
         precoBase={precoFinal}
         tipoVariacao={tipoVariacao}

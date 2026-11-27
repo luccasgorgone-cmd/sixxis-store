@@ -6,6 +6,8 @@ import type { GaleriaItemCB } from '@/components/produto/GaleriaCB'
 import InfoProdutoCB from '@/components/produto/InfoProdutoCB'
 import type { CupomProduto } from '@/lib/cupom-pdp'
 import SpecsExpandiveis from '@/components/produto/SpecsExpandiveis'
+import type { EstoquePromocionalBF, SaldoLoteBF } from '@/lib/estoque-promocional-bf'
+import type { AvisoEntregaProduto } from '@/lib/produto-disponibilidade'
 
 interface Variacao {
   id: string
@@ -14,6 +16,7 @@ interface Variacao {
   preco: number | null
   estoque: number
   ativo: boolean
+  estoquePromocional?: SaldoLoteBF
 }
 
 interface Props {
@@ -28,6 +31,8 @@ interface Props {
     temVariacoes: boolean
     imagem?: string
     categoria?: string | null
+    estoquePromocional?: EstoquePromocionalBF
+    avisoEntrega?: AvisoEntregaProduto | null
   }
   variacoes: Variacao[]
   initialVariacaoId?: string

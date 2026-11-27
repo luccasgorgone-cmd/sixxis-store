@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { X, Minus, Plus, ShoppingCart, ShoppingBag, Package } from 'lucide-react'
 import { estoqueDisponivel } from '@/lib/produto-variacao'
+import AvisoUltimasUnidades from '@/components/produto/AvisoUltimasUnidades'
+import AvisoPrazoEntrega from '@/components/produto/AvisoPrazoEntrega'
+import type { EstoquePromocionalBF, SaldoLoteBF } from '@/lib/estoque-promocional-bf'
+import type { AvisoEntregaProduto } from '@/lib/produto-disponibilidade'
 
 export interface VariacaoSelecionavel {
   id: string
@@ -10,6 +14,7 @@ export interface VariacaoSelecionavel {
   preco: number | null
   estoque: number
   ativo: boolean
+  estoquePromocional?: SaldoLoteBF
 }
 
 interface Props {
@@ -19,6 +24,8 @@ interface Props {
     id: string
     nome: string
     imagem?: string
+    estoquePromocional?: EstoquePromocionalBF
+    avisoEntrega?: AvisoEntregaProduto | null
   }
   variacoes: VariacaoSelecionavel[]
   precoBase: number
@@ -62,6 +69,7 @@ export default function SelectVariacaoModal({
 
   const variacoesAtivas = variacoes.filter(v => v.ativo)
   const precoExibido = variacaoSelecionada?.preco ?? precoBase
+  const estoquePromocionalAtual = variacaoSelecionada?.estoquePromocional ?? produto.estoquePromocional
   const podeContinuar = variacaoSelecionada !== null && variacaoSelecionada.estoque > 0
 
   return (
@@ -133,6 +141,13 @@ export default function SelectVariacaoModal({
               )
             })}
           </div>
+
+          <AvisoPrazoEntrega aviso={produto.avisoEntrega} className="mt-4" />
+          <AvisoUltimasUnidades
+            saldo={estoquePromocionalAtual}
+            variacoes={variacoesAtivas}
+            className="mt-4"
+          />
 
           {/* Quantidade */}
           <div className="flex items-center gap-3 mt-5">

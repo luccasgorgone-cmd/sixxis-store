@@ -19,6 +19,10 @@ import { inferirTipoVariacao } from '@/lib/variacao'
 import { estoqueDisponivel } from '@/lib/produto-variacao'
 import { beneficioCupomTexto, type CupomProduto } from '@/lib/cupom-pdp'
 import WhatsAppTrackedLink from '@/components/analytics/WhatsAppTrackedLink'
+import AvisoUltimasUnidades from '@/components/produto/AvisoUltimasUnidades'
+import AvisoPrazoEntrega from '@/components/produto/AvisoPrazoEntrega'
+import type { EstoquePromocionalBF, SaldoLoteBF } from '@/lib/estoque-promocional-bf'
+import type { AvisoEntregaProduto } from '@/lib/produto-disponibilidade'
 
 interface Variacao {
   id: string
@@ -27,6 +31,7 @@ interface Variacao {
   preco: number | null
   estoque: number
   ativo: boolean
+  estoquePromocional?: SaldoLoteBF
 }
 
 // Color map for known color names
@@ -84,6 +89,8 @@ interface Props {
     temVariacoes: boolean
     imagem?: string
     categoria?: string | null
+    estoquePromocional?: EstoquePromocionalBF
+    avisoEntrega?: AvisoEntregaProduto | null
   }
   variacoes: Variacao[]
   initialVariacaoId?: string
@@ -168,6 +175,7 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
   // Lista de parcelas sem juros derivada da fonte única (1..MAX).
   const parcelasSemJuros = Array.from({ length: MAX_PARCELAS_SEM_JUROS }, (_, i) => i + 1)
   const estoqueAtual = variacaoSelecionada ? variacaoSelecionada.estoque : produto.estoque
+  const estoquePromocionalAtual = variacaoSelecionada?.estoquePromocional ?? produto.estoquePromocional
   const esgotado = !estoqueDisponivel(estoqueAtual)
 
   function selecionarVariacao(v: Variacao | null) {
@@ -427,6 +435,13 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
           ))}
         </div>
       )}
+
+      <AvisoPrazoEntrega aviso={produto.avisoEntrega} className="mb-3" />
+      <AvisoUltimasUnidades
+        saldo={estoquePromocionalAtual}
+        variacoes={variacoesAtivas}
+        className="mb-3"
+      />
 
       {/* Bloco de preços */}
       <div className="mb-5">
@@ -699,7 +714,13 @@ export default function InfoProdutoCB({ produto, variacoes, initialVariacaoId, m
       <SelectVariacaoModal
         aberto={modalVariacaoAberto}
         fechar={() => setModalVariacaoAberto(false)}
-        produto={{ id: produto.id, nome: produto.nome, imagem: produto.imagem }}
+        produto={{
+          id: produto.id,
+          nome: produto.nome,
+          imagem: produto.imagem,
+          estoquePromocional: produto.estoquePromocional,
+          avisoEntrega: produto.avisoEntrega,
+        }}
         variacoes={variacoesAtivas}
         precoBase={precoBase}
         tipoVariacao={tipoVariacao}

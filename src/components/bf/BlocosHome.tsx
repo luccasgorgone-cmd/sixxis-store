@@ -28,7 +28,7 @@ const DUVIDAS = [
   },
   {
     pergunta: 'Todos os produtos participam?',
-    resposta: 'Todos participam, exceto o Climatizador SX200 Prime.',
+    resposta: 'Todos participam, exceto os Climatizadores SX200 Prime e SX200 Trend.',
   },
   {
     pergunta: 'Posso usar cupom junto com a promoção?',

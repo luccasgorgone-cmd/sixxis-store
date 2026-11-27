@@ -18,6 +18,7 @@ import { useCarrinho, useTotalItens } from '@/hooks/useCarrinho'
 import { useScrollHeader } from '@/hooks/useScrollHeader'
 import { MAX_PARCELAS_SEM_JUROS } from '@/lib/parcelamento'
 import { DESCONTO_PIX_PCT } from '@/lib/preco-pix'
+import { CAMPANHA_CUPOM_BF, campanhaCupomAtiva } from '@/lib/campanha-bf'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Sugestao {
@@ -268,6 +269,8 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
   const isTop     = headerState === 'top'
   const isHidden  = headerState === 'hidden'
   const isCompact = !isTop
+  const cupomBfAtivo = campanhaCupomAtiva()
+  const mostrarAnuncio = anuncioAtivo || cupomBfAtivo
 
   // Ref for measuring header height → CSS var for the layout spacer
   const headerRef = useRef<HTMLElement>(null)
@@ -421,9 +424,9 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
       >
       {/* ═══════════════════════════════════════════════════════
           CAMADA 1 — ANNOUNCEMENT BAR (some ao scrollar)
-          Visível só quando ativada no editor visual (config anuncio_ativo).
+          O cupom BF tem prioridade; fora da campanha, respeita o editor visual.
       ═══════════════════════════════════════════════════════ */}
-      {anuncioAtivo && (
+      {mostrarAnuncio && (
         <>
           {/* Linha cinza ACIMA do announcement */}
           <div className="w-full h-px bg-gray-200" />
@@ -435,30 +438,42 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
             aria-hidden={!isTop}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <div className="flex items-center justify-center h-8 md:h-11">
-
-                {/* Ticker rotativo com fade — mesmo comportamento em mobile e desktop */}
-                <div className="relative flex items-center justify-center w-full h-full overflow-hidden">
-                  {TICKER_ITEMS.map((item, i) => {
-                    const Icon = item.icon
-                    const ativo = tickerIdx === i
-                    return (
-                      <div
-                        key={i}
-                        className="absolute inset-0 flex items-center justify-center gap-2 transition-opacity duration-500 ease-in-out"
-                        style={{
-                          opacity: ativo ? 1 : 0,
-                          pointerEvents: ativo ? 'auto' : 'none',
-                        }}
-                        aria-hidden={!ativo}
-                      >
-                        <Icon size={13} className="text-[#0f2e2b]/70 shrink-0" strokeWidth={2} />
-                        <span className="text-[#0f2e2b] text-[11px] md:text-sm font-bold md:font-extrabold truncate">{item.text}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-
+              <div className="flex h-10 items-center justify-center md:h-11">
+                {cupomBfAtivo ? (
+                  <div className="flex w-full items-center justify-center gap-2 overflow-hidden text-[#0f2e2b]">
+                    <Tag size={14} className="shrink-0" strokeWidth={2.4} aria-hidden="true" />
+                    <p className="min-w-0 truncate text-[10px] font-bold leading-none sm:text-xs md:text-sm">
+                      <strong className="font-black">{CAMPANHA_CUPOM_BF.percentual}% OFF</strong>
+                      {' · use '}
+                      <code className="rounded bg-[#0f2e2b] px-1.5 py-0.5 font-black tracking-wide text-white">
+                        {CAMPANHA_CUPOM_BF.codigo}
+                      </code>
+                      <span className="hidden sm:inline"> · em 1 produto elegível · não acumula com 50% na 2ª unidade</span>
+                      <span className="sm:hidden"> · 1 item · não acumula</span>
+                    </p>
+                  </div>
+                ) : (
+                  <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+                    {TICKER_ITEMS.map((item, i) => {
+                      const Icon = item.icon
+                      const ativo = tickerIdx === i
+                      return (
+                        <div
+                          key={i}
+                          className="absolute inset-0 flex items-center justify-center gap-2 transition-opacity duration-500 ease-in-out"
+                          style={{
+                            opacity: ativo ? 1 : 0,
+                            pointerEvents: ativo ? 'auto' : 'none',
+                          }}
+                          aria-hidden={!ativo}
+                        >
+                          <Icon size={13} className="shrink-0 text-[#0f2e2b]/70" strokeWidth={2} />
+                          <span className="truncate text-[11px] font-bold text-[#0f2e2b] md:text-sm md:font-extrabold">{item.text}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>

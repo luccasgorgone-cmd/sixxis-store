@@ -29,11 +29,9 @@ export interface CupomVitrine {
 }
 
 // Config — adicionar um selo é só mais um item aqui, espelhando um Cupom
-// escopado ativo no banco. VAZIO de propósito: o 10OFFTREND do SX200 Trend foi
-// REMOVIDO (cupom desativado no banco) e substituído por DESCONTO DIRETO
-// (precoPromocional), que já pinta o badge "Baixou 10%" + preço "de/por" no card
-// e na PDP. Não recrie o selo do SX200 aqui — senão o card anuncia um cupom que
-// o checkout recusa.
+// escopado ativo no banco. VAZIO de propósito: o 10OFFTREND e o desconto direto
+// do SX200 Trend foram removidos. O BLACKFRIDAY10 é comunicado no header e
+// validado no servidor; não ganha selo por produto aqui.
 export const CUPONS_VITRINE: readonly CupomVitrine[] = []
 
 function vigente(c: CupomVitrine, agora: Date): boolean {
