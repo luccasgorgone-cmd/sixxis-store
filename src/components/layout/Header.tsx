@@ -442,14 +442,21 @@ export default function Header({ logoUrl = '/logo-sixxis.png', anuncioAtivo = fa
                 {cupomBfAtivo ? (
                   <div className="flex w-full items-center justify-center gap-2 overflow-hidden text-[#0f2e2b]">
                     <Tag size={14} className="shrink-0" strokeWidth={2.4} aria-hidden="true" />
-                    <p className="min-w-0 truncate text-[10px] font-bold leading-none sm:text-xs md:text-sm">
-                      <strong className="font-black">{CAMPANHA_CUPOM_BF.percentual}% OFF</strong>
-                      {' · use '}
-                      <code className="rounded bg-[#0f2e2b] px-1.5 py-0.5 font-black tracking-wide text-white">
-                        {CAMPANHA_CUPOM_BF.codigo}
-                      </code>
+                    <p className="min-w-0 text-center text-[10px] font-bold leading-none sm:text-xs md:text-sm">
+                      <span className="whitespace-nowrap">
+                        <strong className="font-black">{CAMPANHA_CUPOM_BF.percentual}% OFF</strong>
+                        {' · use '}
+                        <code
+                          translate="no"
+                          className="rounded bg-[#0f2e2b] px-1.5 py-0.5 font-black tracking-wide text-white"
+                        >
+                          {CAMPANHA_CUPOM_BF.codigo}
+                        </code>
+                      </span>
                       <span className="hidden sm:inline"> · em 1 produto elegível · não acumula com 50% na 2ª unidade</span>
-                      <span className="sm:hidden"> · 1 item · não acumula</span>
+                      <span className="mt-1 block whitespace-nowrap text-[9px] sm:hidden">
+                        {CAMPANHA_CUPOM_BF.textoHeaderMobile}
+                      </span>
                     </p>
                   </div>
                 ) : (

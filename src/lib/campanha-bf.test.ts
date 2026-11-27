@@ -7,6 +7,8 @@ describe('comunicação do cupom Black Friday', () => {
     expect(CAMPANHA_CUPOM_BF.percentual).toBe(10)
     expect(CAMPANHA_CUPOM_BF.textoHeader).toMatch(/1 produto elegível/i)
     expect(CAMPANHA_CUPOM_BF.textoHeader).toMatch(/não acumula com 50% na 2ª unidade/i)
+    expect(CAMPANHA_CUPOM_BF.textoHeaderMobile).toMatch(/1 item elegível/i)
+    expect(CAMPANHA_CUPOM_BF.textoHeaderMobile).toMatch(/não acumula c\/ 50% da 2ª un\./i)
   })
 
   it('segue exatamente a janela da campanha Black Friday', () => {
